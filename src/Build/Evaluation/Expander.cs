@@ -2552,7 +2552,7 @@ namespace Microsoft.Build.Evaluation
                         // the caller to possibly do correlation.
 
                         // We pass in the existing item so we can copy over its metadata
-                        if (include != null && include.Length > 0)
+                        if (!string.IsNullOrEmpty(include))
                         {
                             yield return new Pair<string, S>(include, item.Value);
                         }
@@ -2651,7 +2651,7 @@ namespace Microsoft.Build.Evaluation
 
                         // GetMetadataValueEscaped returns empty string for missing metadata,
                         // but IItem specifies it should return null
-                        if (metadataValue != null && metadataValue.Length > 0)
+                        if (!string.IsNullOrEmpty(metadataValue))
                         {
                             // return a result through the enumerator
                             yield return new Pair<string, S>(item.Key, item.Value);

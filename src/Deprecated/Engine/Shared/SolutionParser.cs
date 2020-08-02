@@ -312,7 +312,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <owner>RGoel</owner>
         internal void ParseSolutionFile()
         {
-            error.VerifyThrow((solutionFile != null) && (solutionFile.Length != 0), "ParseSolutionFile() got a null solution file!");
+            error.VerifyThrow(!string.IsNullOrEmpty(solutionFile), "ParseSolutionFile() got a null solution file!");
 
             FileStream fileStream = null;
             reader = null;
@@ -531,7 +531,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <owner>RGoel</owner>
         private void ParseProject(string firstLine)
         {
-            error.VerifyThrow((firstLine != null) && (firstLine.Length != 0), "ParseProject() got a null firstLine!");
+            error.VerifyThrow(!string.IsNullOrEmpty(firstLine), "ParseProject() got a null firstLine!");
             error.VerifyThrow(reader != null, "ParseProject() got a null reader!");
 
             ProjectInSolution proj = new ProjectInSolution(this);
@@ -984,7 +984,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             )
         {
             // If the incoming string starts and ends with a double-quote, strip the double-quotes.
-            if ((property != null) && (property.Length > 0) && (property[0] == '"') && (property[property.Length - 1] == '"'))
+            if (!string.IsNullOrEmpty(property) && (property[0] == '"') && (property[property.Length - 1] == '"'))
             {
                 return property.Substring(1, property.Length - 2);
             }

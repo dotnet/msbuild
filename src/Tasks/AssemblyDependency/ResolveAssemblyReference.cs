@@ -1426,7 +1426,7 @@ namespace Microsoft.Build.Tasks
         private void LogAttribute(ITaskItem item, string metadataName)
         {
             string metadataValue = item.GetMetadata(metadataName);
-            if (metadataValue != null && metadataValue.Length > 0)
+            if (!string.IsNullOrEmpty(metadataValue))
             {
                 Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.EightSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.LogAttributeFormat", metadataName, metadataValue));
             }

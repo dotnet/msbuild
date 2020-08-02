@@ -239,7 +239,7 @@ namespace Microsoft.Build.BuildEngine
             )
         {
             ErrorUtilities.VerifyThrow(xmlElementNumberToSearchFor != 0, "No element to search for!");
-            ErrorUtilities.VerifyThrow((projectFile != null) && (projectFile.Length != 0), "No project file!");
+            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(projectFile), "No project file!");
 
             // Initialize output parameters.
             foundLineNumber = 0;

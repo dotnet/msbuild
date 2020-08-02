@@ -69,7 +69,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             string file = defaultFile;
 
             // NOTE: the XML node may not have a filename if it's purely an in-memory node
-            if ((node.OwnerDocument.BaseURI != null) && (node.OwnerDocument.BaseURI.Length > 0))
+            if (!string.IsNullOrEmpty(node.OwnerDocument.BaseURI))
             {
                 file = new Uri(node.OwnerDocument.BaseURI).LocalPath;
             }

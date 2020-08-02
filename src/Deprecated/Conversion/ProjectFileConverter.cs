@@ -372,9 +372,9 @@ namespace Microsoft.Build.Conversion
         {
             // Make sure we were passed in non-empty source and destination project
             // file names.
-            error.VerifyThrowArgument((this.oldProjectFile != null) && (this.oldProjectFile.Length > 0),
+            error.VerifyThrowArgument(!string.IsNullOrEmpty(this.oldProjectFile),
                 "MissingOldProjectFile");
-            error.VerifyThrowArgument((this.newProjectFile != null) && (this.newProjectFile.Length > 0),
+            error.VerifyThrowArgument(!string.IsNullOrEmpty(this.newProjectFile),
                 "MissingNewProjectFile");
 
             ConvertInMemoryToMSBuildProject();
@@ -425,7 +425,7 @@ namespace Microsoft.Build.Conversion
         {
             // Make sure we were passed in non-empty source and destination project
             // file names.
-            error.VerifyThrowArgument((this.oldProjectFile != null) && (this.oldProjectFile.Length > 0),
+            error.VerifyThrowArgument(!string.IsNullOrEmpty(this.oldProjectFile),
                 "MissingOldProjectFile");
 
             // Make sure the source project file exists.
@@ -1444,7 +1444,7 @@ namespace Microsoft.Build.Conversion
             // to convert a VC++ or some other type of project, and give a more friendly
             // error message.
             string projectType = visualStudioProjectElement.GetAttribute(VSProjectAttributes.projectType);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((projectType == null) || (projectType.Length == 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(string.IsNullOrEmpty(projectType),
                 visualStudioProjectElement.Location, "ProjectTypeCannotBeConverted", projectType);
 
             // Make sure the <VisualStudioProject> tag doesn't have any attributes.
@@ -1524,7 +1524,7 @@ namespace Microsoft.Build.Conversion
             // Get the project type for this project file.  We only support "Local".  We do not
             // convert web projects -- that's Venus's job.
             string projectType = languageElement.GetAttribute(VSProjectAttributes.projectType);
-            ProjectErrorUtilities.VerifyThrowInvalidProject(projectType == null || projectType.Length == 0 ||
+            ProjectErrorUtilities.VerifyThrowInvalidProject(string.IsNullOrEmpty(projectType) ||
                 (String.Compare(projectType, VSProjectAttributes.local, StringComparison.OrdinalIgnoreCase) == 0),
                 languageElement.Location, "ProjectTypeCannotBeConverted", projectType);
 
@@ -1563,7 +1563,7 @@ namespace Microsoft.Build.Conversion
             // -----------------------------------------------------------------------
 
             string originalMyType = languageElement.GetAttribute(XMakeProjectStrings.myType);
-            if ((originalMyType != null) && (originalMyType.Length != 0))
+            if (!string.IsNullOrEmpty(originalMyType))
             {
                 // Flag the fact that the Everett project already had a MyType property in there,
                 // so we don't try to override it later.
@@ -1717,7 +1717,7 @@ namespace Microsoft.Build.Conversion
                     !isTriumphProject        // Doesn't apply to Triumph->Trinity conversions.
                 )
                 {
-                    if (this.outputType != null && this.outputType.Length > 0)
+                    if (!string.IsNullOrEmpty(this.outputType))
                     {
                         if (String.Compare(this.outputType, XMakeProjectStrings.winExe, StringComparison.OrdinalIgnoreCase) == 0)
                         {
@@ -2077,7 +2077,7 @@ namespace Microsoft.Build.Conversion
 
             // Get the "Name" attribute of the <Config> element.
             string configName = configElement.GetAttribute(VSProjectAttributes.name);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((configName != null) && (configName.Length > 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(configName),
                 configElement.Location, "MissingAttribute", VSProjectElements.config, VSProjectAttributes.name);
 
             // In the case of VSD projects, the "Name" attribute will have a pipe in it,
@@ -2115,7 +2115,7 @@ namespace Microsoft.Build.Conversion
 
             // Process OutputPath attribute separately to ensure it contains trailing backslash
             string outputPath = configElement.GetAttribute(VSProjectAttributes.outputPath);
-            if (outputPath != null && outputPath.Length > 0)
+            if (!string.IsNullOrEmpty(outputPath))
             {
                 if (outputPath[outputPath.Length-1] != Path.DirectorySeparatorChar)
                     outputPath += Path.DirectorySeparatorChar;
@@ -2140,7 +2140,7 @@ namespace Microsoft.Build.Conversion
 
             // Get rid of the "IncrementalBuild" attribute
             string incrementalBuild = configElement.GetAttribute ( VSProjectAttributes.incrementalBuild );
-            if (incrementalBuild != null && incrementalBuild.Length > 0)
+            if (!string.IsNullOrEmpty(incrementalBuild))
             {
                 configElement.RemoveAttribute ( VSProjectAttributes.incrementalBuild );
             }
@@ -2285,7 +2285,7 @@ namespace Microsoft.Build.Conversion
 
                 // Get the "Name" attribute of the <Platform> element.
                 platformForVSD = platformElement.GetAttribute(VSProjectAttributes.name);
-                ProjectErrorUtilities.VerifyThrowInvalidProject((platformForVSD != null) && (platformForVSD.Length > 0),
+                ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(platformForVSD),
                     platformElement.Location, "MissingAttribute", VSProjectElements.platform, VSProjectAttributes.name);
 
                 // Create a new property group, and add all of the XML attributes as XMake
@@ -2509,7 +2509,7 @@ namespace Microsoft.Build.Conversion
             //   "-Designer", we need to disregard this reference entirely.
 
             string platform = referenceElement.GetAttribute(VSProjectAttributes.platform);
-            if ((platform != null) && (platform.Length > 0))
+            if (!string.IsNullOrEmpty(platform))
             {
                 if (platform.IndexOf("-Designer", 0, platform.Length, StringComparison.Ordinal) != -1)
                 {
@@ -2524,7 +2524,7 @@ namespace Microsoft.Build.Conversion
             // Get the "Name" attribute.  This is a required attribute in the VS7/
             // Everett format.
             string referenceName = referenceElement.GetAttribute(VSProjectAttributes.name);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((referenceName != null) && (referenceName.Length > 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(referenceName),
                 referenceElement.Location, "MissingAttribute", VSProjectAttributes.name, VSProjectElements.reference);
 
             // Before we go any further, we must special-case some assemblies for VSD projects.
@@ -2566,12 +2566,12 @@ namespace Microsoft.Build.Conversion
             // reference.
             string referencedProjectGuid = referenceElement.GetAttribute(VSProjectAttributes.project);
 
-            if ((comReferenceGuid != null) && (comReferenceGuid.Length > 0) &&
+            if (!string.IsNullOrEmpty(comReferenceGuid) &&
                 (comReferenceGuid != "{00000000-0000-0000-0000-000000000000}"))
             {
                 newReferenceItem = ConvertClassicComReference(referenceElement, referencesItemGroup, referenceName);
             }
-            else if ((referencedProjectGuid != null) && (referencedProjectGuid.Length > 0))
+            else if (!string.IsNullOrEmpty(referencedProjectGuid))
             {
                 newReferenceItem = ConvertProjectToProjectReference(referenceElement, referencesItemGroup, referenceName, ref referencedProjectGuid);
             }
@@ -2745,7 +2745,7 @@ namespace Microsoft.Build.Conversion
             // Get the "AssemblyName" attribute.  If not found, just use the value from the
             // "Name" attribute.  This is what the project loading code does in VS.
             string assemblyName = referenceElement.GetAttribute(VSProjectAttributes.assemblyName);
-            if ((assemblyName == null) || (assemblyName.Length == 0))
+            if (string.IsNullOrEmpty(assemblyName))
             {
                 assemblyName = referenceName;
             }
@@ -3030,7 +3030,7 @@ namespace Microsoft.Build.Conversion
 
             // Get the required "Namespace" attribute.
             string importNamespace = importElement.GetAttribute(VSProjectAttributes.importNamespace);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((importNamespace != null) && (importNamespace.Length > 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(importNamespace),
                 importElement.Location, "MissingAttribute", VSProjectAttributes.importNamespace, VSProjectElements.import);
             // Remove the "Namespace" attribute, so it doesn't show up in our loop later.
             importElement.RemoveAttribute(VSProjectAttributes.importNamespace);
@@ -3220,7 +3220,7 @@ namespace Microsoft.Build.Conversion
 
             // Get the required "RelPath" attribute.
             string relPath = fileElement.GetAttribute(VSProjectAttributes.relPath);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((relPath != null) && (relPath.Length > 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(relPath),
                 fileElement.Location, "MissingAttribute", VSProjectAttributes.relPath, VSProjectElements.file);
             // Remove the "RelPath" attribute, so we don't end up adding it twice.
             fileElement.RemoveAttribute(VSProjectAttributes.relPath);
@@ -3234,7 +3234,7 @@ namespace Microsoft.Build.Conversion
             // what the build action is based on the file extension.  This is
             // what the project loading code does in VS.
             string buildAction = fileElement.GetAttribute(VSProjectAttributes.buildAction);
-            if ((buildAction == null) || (buildAction.Length == 0))
+            if (string.IsNullOrEmpty(buildAction))
             {
                 buildAction = VSProjectAttributes.buildActionNone;
             }
@@ -3252,7 +3252,7 @@ namespace Microsoft.Build.Conversion
             {
 
                 // Add the new item to XMake.
-                if ((linkPath == null) || (linkPath.Length == 0))
+                if (string.IsNullOrEmpty(linkPath))
                 {
                     // Normal item.
 
@@ -3347,7 +3347,7 @@ namespace Microsoft.Build.Conversion
             // relpath is the filename
             // linkPath, if it exists, is the relative path from the project, or the absolute full path
             string path;
-            if (linkPath == null || linkPath.Length == 0)
+            if (string.IsNullOrEmpty(linkPath))
             {
                 path = Path.Combine(Path.GetDirectoryName(oldProjectFile), relPath);
             }
@@ -3410,7 +3410,7 @@ namespace Microsoft.Build.Conversion
 
             // Get the required "RelPath" attribute.
             string relPath = folderElement.GetAttribute(VSProjectAttributes.relPath);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((relPath != null) && (relPath.Length > 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(relPath),
                 folderElement.Location, "MissingAttribute", VSProjectAttributes.relPath, VSProjectElements.folder);
             // Remove the "RelPath" attribute, so we don't end up adding it twice.
             folderElement.RemoveAttribute(VSProjectAttributes.relPath);
@@ -3454,7 +3454,7 @@ namespace Microsoft.Build.Conversion
                 newFolderItem = filesItemGroup.AddItem(XMakeProjectStrings.webReferences,
                     ProjectCollection.Escape(relPath));
             }
-            else if ((webReferenceUrl != null) && (webReferenceUrl.Length > 0))
+            else if (!string.IsNullOrEmpty(webReferenceUrl))
             {
                 // This is an actual web reference URL.
 
@@ -3624,7 +3624,7 @@ namespace Microsoft.Build.Conversion
 
             // Get the required "ID" attribute.
             string id = serviceElement.GetAttribute(VSProjectAttributes.id);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((id != null) && (id.Length > 0), serviceElement.Location,
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(id), serviceElement.Location,
                 "MissingAttribute", VSProjectAttributes.id, VSProjectElements.service);
             // Remove the "ID" attribute, so it doesn't show up in our loop later.
             serviceElement.RemoveAttribute(VSProjectAttributes.id);
@@ -3823,7 +3823,7 @@ namespace Microsoft.Build.Conversion
                 if (officeDocumentPathAttribute != null)
                 {
                     string officeDocumentPath = officeDocumentPathAttribute.Value;
-                    if ((officeDocumentPath != null) && (officeDocumentPath.Length > 0))
+                    if (!string.IsNullOrEmpty(officeDocumentPath))
                     {
                         string projectFileDirectory = Path.GetDirectoryName(Path.GetFullPath(this.oldProjectFile));
                         string officeDocumentFullPath = Path.GetFullPath(Path.Combine(projectFileDirectory, officeDocumentPath));

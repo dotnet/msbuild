@@ -4081,7 +4081,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 string importedFilename = EscapingUtilities.UnescapeAll(importedFilenames[i]);
                          
-                ProjectErrorUtilities.VerifyThrowInvalidProject((importedFilename != null) && (importedFilename.Length != 0),
+                ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(importedFilename),
                     importElement, "MissingRequiredAttribute",
                     XMakeAttributes.project, XMakeElements.import);
 

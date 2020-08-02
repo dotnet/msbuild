@@ -185,7 +185,7 @@ namespace Microsoft.Build.BuildEngine
 
                 string destinationValue = destinationItem.GetMetadata(key);
 
-                if ((destinationValue == null) || (destinationValue.Length == 0))
+                if (string.IsNullOrEmpty(destinationValue))
                 {
                     destinationItem.SetMetadata(key, EscapingUtilities.UnescapeAll((string)entry.Value));
                 }
@@ -195,7 +195,7 @@ namespace Microsoft.Build.BuildEngine
             // between items, and need to know the source item where the metadata came from
             string originalItemSpec = destinationItem.GetMetadata("OriginalItemSpec");
 
-            if ((originalItemSpec == null) || (originalItemSpec.Length == 0))
+            if (string.IsNullOrEmpty(originalItemSpec))
             {
                 destinationItem.SetMetadata("OriginalItemSpec", ItemSpec);
             }

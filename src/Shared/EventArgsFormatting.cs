@@ -227,7 +227,7 @@ namespace Microsoft.Build.Shared
             }
             */
 
-            if ((file == null) || (file.Length == 0))
+            if (string.IsNullOrEmpty(file))
             {
                 format.Append("MSBUILD : ");    // Should not be localized.
             }
@@ -280,7 +280,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            if ((subcategory != null) && (subcategory.Length != 0))
+            if (!string.IsNullOrEmpty(subcategory))
             {
                 format.Append("{9} ");
             }
