@@ -62,7 +62,7 @@ namespace Microsoft.Build.Execution
     /// and call it several times to build it.
     /// </summary>
     /// <comments>
-    /// Neither this class nor none of its constituents are allowed to have 
+    /// Neither this class nor none of its constituents are allowed to have
     /// references to any of the Construction or Evaluation objects.
     /// This class is immutable except for adding instance items and setting instance properties.
     /// It only exposes items and properties: targets, host services, and the task registry are not exposed as they are only the concern of build.
@@ -100,7 +100,7 @@ namespace Microsoft.Build.Execution
         private PropertyDictionary<ProjectPropertyInstance> _globalProperties;
 
         /// <summary>
-        /// List of names of the properties that, while global, are still treated as overridable 
+        /// List of names of the properties that, while global, are still treated as overridable
         /// </summary>
         private ISet<string> _globalPropertiesToTreatAsLocal;
 
@@ -134,7 +134,7 @@ namespace Microsoft.Build.Execution
         /// The project's root directory, for evaluation of relative paths and
         /// setting the current directory during build.
         /// Is never null.
-        /// If the project has not been loaded from disk and has not been given a path, returns the current directory from 
+        /// If the project has not been loaded from disk and has not been given a path, returns the current directory from
         /// the time the project was loaded - this is the same behavior as Whidbey/Orcas.
         /// If the project has not been loaded from disk but has been given a path, this path may not exist.
         /// </summary>
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Execution
         private HostServices _hostServices;
 
         /// <summary>
-        /// Whether when we read a ToolsVersion that is not equivalent to the current one on the Project tag, we 
+        /// Whether when we read a ToolsVersion that is not equivalent to the current one on the Project tag, we
         /// treat it as the current one.
         /// </summary>
         private bool _usingDifferentToolsVersionFromProjectFile;
@@ -398,8 +398,8 @@ namespace Microsoft.Build.Execution
         /// This is ideal if the project is simply going to be built, and not displayed or edited.
         /// Global properties may be null.
         /// Tools version may be null.
-        /// Used by SolutionProjectGenerator so that it can explicitly pass the vsVersionFromSolution in for use in 
-        /// determining the sub-toolset version. 
+        /// Used by SolutionProjectGenerator so that it can explicitly pass the vsVersionFromSolution in for use in
+        /// determining the sub-toolset version.
         /// </summary>
         /// <param name="xml">The project root element</param>
         /// <param name="globalProperties">The global properties to use.</param>
@@ -457,7 +457,7 @@ namespace Microsoft.Build.Execution
             _directory = directory;
             _projectFileLocation = ElementLocation.Create(fullPath);
             _hostServices = hostServices;
-            
+
             EvaluationId = data.EvaluationId;
 
             var immutable = (settings & ProjectInstanceSettings.Immutable) == ProjectInstanceSettings.Immutable;
@@ -789,7 +789,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Serialize the entire project instance state.
-        /// 
+        ///
         /// When false, only a part of the project instance state is serialized (properties and items).
         /// In this case out of proc nodes re-evaluate the project instance from disk to obtain the un-serialized state.
         /// This partial state recombination may lead to build issues when the project instance state differs from what is on disk.
@@ -817,7 +817,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// The ID of the evaluation that produced this ProjectInstance.
-        /// 
+        ///
         /// See <see cref="Project.LastEvaluationId"/>.
         /// </summary>
         public int EvaluationId
@@ -919,7 +919,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Task classes and locations known to this project. 
+        /// Task classes and locations known to this project.
         /// This is the project-specific task registry, which is consulted before
         /// the toolset's task registry.
         /// Only set during evaluation, so does not check for immutability.
@@ -944,7 +944,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// The sub-toolset version we should use during the build, used to determine which set of sub-toolset
-        /// properties we should merge into this toolset. 
+        /// properties we should merge into this toolset.
         /// </summary>
         string IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SubToolsetVersion
         {
@@ -983,7 +983,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// List of names of the properties that, while global, are still treated as overridable 
+        /// List of names of the properties that, while global, are still treated as overridable
         /// </summary>
         ISet<string> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.GlobalPropertiesToTreatAsLocal
         {
@@ -1166,7 +1166,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// The sub-toolset version we should use during the build, used to determine which set of sub-toolset
-        /// properties we should merge into this toolset. 
+        /// properties we should merge into this toolset.
         /// </summary>
         internal string SubToolsetVersion
         {
@@ -1199,7 +1199,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Task classes and locations known to this project. 
+        /// Task classes and locations known to this project.
         /// This is the project-specific task registry, which is consulted before
         /// the toolset's task registry.
         /// </summary>
@@ -1213,7 +1213,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Number of targets in the project. 
+        /// Number of targets in the project.
         /// </summary>
         internal int TargetsCount
         {
@@ -1253,7 +1253,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Gets the escaped value of the provided metadatum. 
+        /// Gets the escaped value of the provided metadatum.
         /// </summary>
         public static string GetMetadataValueEscaped(ProjectMetadataInstance metadatum)
         {
@@ -1263,7 +1263,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Gets the escaped value of the metadatum with the provided name on the provided item. 
+        /// Gets the escaped value of the metadatum with the provided name on the provided item.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "IItem is an internal interface; this is less confusing to outside customers. ")]
         public static string GetMetadataValueEscaped(ProjectItemInstance item, string name)
@@ -1274,7 +1274,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Gets the escaped value of the metadatum with the provided name on the provided item definition. 
+        /// Gets the escaped value of the metadatum with the provided name on the provided item definition.
         /// </summary>
         public static string GetMetadataValueEscaped(ProjectItemDefinitionInstance item, string name)
         {
@@ -1362,7 +1362,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Properties encountered during evaluation. These are read during the first evaluation pass.
         /// Unlike those returned by the Properties property, these are ordered, and include any properties that
-        /// were subsequently overridden by others with the same name. It does not include any 
+        /// were subsequently overridden by others with the same name. It does not include any
         /// properties whose conditions did not evaluate to true.
         /// </summary>
         /// <remarks>
@@ -1376,7 +1376,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Item definition metadata encountered during evaluation. These are read during the second evaluation pass.
         /// Unlike those returned by the ItemDefinitions property, these are ordered, and include any metadata that
-        /// were subsequently overridden by others with the same name and item type. It does not include any 
+        /// were subsequently overridden by others with the same name and item type. It does not include any
         /// elements whose conditions did not evaluate to true.
         /// </summary>
         /// <remarks>
@@ -1504,7 +1504,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Get the value of a property in this project, or 
+        /// Get the value of a property in this project, or
         /// an empty string if it does not exist.
         /// </summary>
         /// <remarks>
@@ -1512,7 +1512,7 @@ namespace Microsoft.Build.Execution
         /// at all are not distinguished between by this method.
         /// This is because the build does not distinguish between the two.
         /// The reason this method exists when users can simply do GetProperty(..).EvaluatedValue,
-        /// is that the caller would have to check for null every time. For properties, empty and undefined are 
+        /// is that the caller would have to check for null every time. For properties, empty and undefined are
         /// not distinguished, so it much more useful to also have a method that returns empty string in
         /// either case.
         /// This function returns the unescaped value.
@@ -1551,9 +1551,9 @@ namespace Microsoft.Build.Execution
         /// in use by another ProjectInstance.
         /// </remarks>
         /// <comments>
-        /// For purposes of declaring the project that defined this item (for use with e.g. the 
-        /// DeclaringProject* metadata), the entrypoint project is used for synthesized items 
-        /// like those added by this API. 
+        /// For purposes of declaring the project that defined this item (for use with e.g. the
+        /// DeclaringProject* metadata), the entrypoint project is used for synthesized items
+        /// like those added by this API.
         /// </comments>
         public ProjectItemInstance AddItem(string itemType, string evaluatedInclude)
         {
@@ -1574,9 +1574,9 @@ namespace Microsoft.Build.Execution
         /// in use by another ProjectInstance.
         /// </remarks>
         /// <comments>
-        /// For purposes of declaring the project that defined this item (for use with e.g. the 
-        /// DeclaringProject* metadata), the entrypoint project is used for synthesized items 
-        /// like those added by this API. 
+        /// For purposes of declaring the project that defined this item (for use with e.g. the
+        /// DeclaringProject* metadata), the entrypoint project is used for synthesized items
+        /// like those added by this API.
         /// </comments>
         public ProjectItemInstance AddItem(string itemType, string evaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata)
         {
@@ -2437,8 +2437,8 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Spawn the old engine to generate a solution wrapper project, so that our build ordering is somewhat more correct 
-        /// when solutions with toolsVersions &lt; 4.0 are passed to us. 
+        /// Spawn the old engine to generate a solution wrapper project, so that our build ordering is somewhat more correct
+        /// when solutions with toolsVersions &lt; 4.0 are passed to us.
         /// </summary>
         /// <comment>
         /// #############################################################################################

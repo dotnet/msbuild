@@ -585,7 +585,7 @@ namespace Microsoft.Build.Conversion
                 {
                     if ((!nextItem.ItemType.Equals("Reference", StringComparison.OrdinalIgnoreCase)) &&
                         (nextItem.Include.Trim().EndsWith(".xaml", StringComparison.OrdinalIgnoreCase)))
-                        
+
                     {
                         if (!nextItem.Metadata.Any(m => String.Equals(m.Name, "Generator", StringComparison.OrdinalIgnoreCase)))
                         {
@@ -634,15 +634,15 @@ namespace Microsoft.Build.Conversion
 
                 // Fix up TargetFrameworkSubset
                 changedProject = FixTargetFrameworkSubset() || changedProject;
-                
+
                 var hasFSharpSpecificConversions = FSharpSpecificConversions(true);
-                
+
                 changedProject = hasFSharpSpecificConversions || changedProject;
                 changedProject = VBSpecificConversions() || changedProject;
 
                 // Do asset compat repair for any project that was previously a TV < 12.0
                 if (
-                        String.IsNullOrEmpty(oldToolsVersion) || 
+                        String.IsNullOrEmpty(oldToolsVersion) ||
                         String.Equals(oldToolsVersion, "3.5", StringComparison.OrdinalIgnoreCase) ||
                         String.Equals(oldToolsVersion, "4.0", StringComparison.OrdinalIgnoreCase)
                     )
@@ -710,7 +710,7 @@ namespace Microsoft.Build.Conversion
             var toRepairImports = RequiresRepairForAssetCompat();
 
             if (toRepairImports == null || toRepairImports.Count() == 0)
-            { 
+            {
                 // no need to repair
                 return false;
             }
@@ -719,7 +719,7 @@ namespace Microsoft.Build.Conversion
             {
                 RepairImportForAssetCompat(toRepairImport);
             }
-            
+
             //
             // Add PropertyGroup with Conditions right before where the Imports occur
             //   <PropertyGroup>
@@ -754,7 +754,7 @@ namespace Microsoft.Build.Conversion
 
         /// <summary>
         /// Repairs the given import element
-        /// Change Import to use $(VSToolsPath), with Condition using $(VSToolsPath) 
+        /// Change Import to use $(VSToolsPath), with Condition using $(VSToolsPath)
         /// e.g. From: Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets"
         ///        To: Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false"
         ///            Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets"
@@ -816,14 +816,13 @@ namespace Microsoft.Build.Conversion
         /// </summary>
         /// <returns>bool</returns>
         private IEnumerable<ProjectImportElement> RequiresRepairForAssetCompat()
-        { 
+        {
             // check if the project has the to-repair pattern in the Imports
             // pattern: $(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\
             var toRepairImports =  from import in xmakeProject.Imports
                                    where HasRepairPattern(import)
                                    select import;
 
-            
             return toRepairImports;
         }
 
@@ -896,7 +895,7 @@ namespace Microsoft.Build.Conversion
                         parentGroup.SetProperty(XMakeProjectStrings.TargetFrameworkProfile, XMakeProjectStrings.ClientProfile);
                         changedProject = true;
                     }
-            
+
                     // In all cases, <TargetFrameworkSubset/> is no longer supported.  If it comes from the project
                     // that we're converting, then we forcibly remove it.  If it comes from some import... the user is
                     // on their own.  
@@ -915,13 +914,13 @@ namespace Microsoft.Build.Conversion
 
         /// <summary>
         /// Performs conversions specific to F# projects (VS2008 CTP -> VS2012) and (VS2010 -> VS2012).
-        /// This involves: changing the location of FSharp targets, 
+        /// This involves: changing the location of FSharp targets,
         /// and for 2008CTP, adding explicit mscorlib and FSharp.Core references.
         /// </summary>
         /// <param name="actuallyMakeChanges">if true, make the changes, otherwise, don't actually make any changes, but do report the return boolean as to whether you would make changes</param>
         /// <returns>true if anything was (would be) changed, false otherwise</returns>
         public bool FSharpSpecificConversions(bool actuallyMakeChanges)
-        {           
+        {
             // For FSharp projects, should import different location of FSharp targets
             const string fsharpFS10TargetsPath = @"$(MSBuildExtensionsPath)\FSharp\1.0\Microsoft.FSharp.Targets";
             const string fsharpFS10TargetsPath32 = @"$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets";
@@ -953,10 +952,10 @@ namespace Microsoft.Build.Conversion
 
             // local function: string equality check using OrdinalIgnoreCase comparison
             Func<string, string, bool> equals = (s1, s2) => String.Equals(s1, s2, StringComparison.OrdinalIgnoreCase);
-            
+
             // local function: wraps specified string value into Exists('value')
             Func<string, string> exists = s => string.Format(CultureInfo.InvariantCulture, "Exists('{0}')", s);
-            
+
             // local function: 
             // Creates property group element containing one property fsharpDev12PlusProperty with value 'path'. 
             // If addCondition is true, property group will have Exists(path) condition
@@ -967,7 +966,7 @@ namespace Microsoft.Build.Conversion
                     parent.AppendChild(propGroup);
                     var prop = xmakeProject.CreatePropertyElement(fsharpDev12PlusProperty);
                     prop.Value = path;
-                    propGroup.AppendChild(prop);                    
+                    propGroup.AppendChild(prop);
                 };
 
             foreach (ProjectImportElement importElement in xmakeProject.Imports)
@@ -1014,11 +1013,11 @@ namespace Microsoft.Build.Conversion
                 return false;
 
             if (!actuallyMakeChanges)
-                return true;            
+                return true;
 
             // both branches adds this elements to the project
             var chooseElement = xmakeProject.CreateChooseElement(); // (1)
-            
+
             if (fsharpTargetsDev11PortableImport != null)
             {
                 // Dev11 portable library
@@ -1041,7 +1040,7 @@ namespace Microsoft.Build.Conversion
                 // portable libraries are supported since Dev11
                 var whenVsVersionIsDev11 = xmakeProject.CreateWhenElement("'$(VisualStudioVersion)' == '11.0'"); // (2)
                 chooseElement.AppendChild(whenVsVersionIsDev11);
-                
+
                 appendPropertyGroupForDev12PlusTargetsPath(fsharpPortableDev11TargetsPath, whenVsVersionIsDev11);
 
                 var otherwiseIfVsVersionIsDev12Plus = xmakeProject.CreateOtherwiseElement(); // (3)
@@ -1132,7 +1131,7 @@ namespace Microsoft.Build.Conversion
                 {
                     referencesItemGroup.AddItem(ReferenceItemType, "mscorlib");
                 }
-            }            
+            }
 
             // try to find reference to FSharp.Core 
             ProjectItemElement fsharpCoreItem = null;
@@ -1195,10 +1194,9 @@ namespace Microsoft.Build.Conversion
                 newFSharpCoreItem.AddMetadata("Private", "True");
             }
 
-            
             const string MinimumVisualStudioVersionProperty = "MinimumVisualStudioVersion";
             var hasMinimumVSVersion = xmakeProject.Properties.Any(prop => prop.Name == MinimumVisualStudioVersionProperty);
-            
+
             foreach(var group in xmakeProject.PropertyGroups)
             {
                 // find first non-conditional property group to add TargetFSharpCoreVersion property

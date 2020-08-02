@@ -16,7 +16,7 @@ using Microsoft.Build.Collections;
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
-    /// Creates a view of an evaluated project's XML as if it had all been loaded from 
+    /// Creates a view of an evaluated project's XML as if it had all been loaded from
     /// a single file, instead of being assembled by pulling in imported files as it actually was.
     /// </summary>
     /// <remarks>
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Returns an XmlDocument representing the evaluated project's XML as if it all had 
+        /// Returns an XmlDocument representing the evaluated project's XML as if it all had
         /// been loaded from a single file, instead of being assembled by pulling in imported files.
         /// </summary>
         internal static XmlDocument GetPreprocessedDocument(Project project)
@@ -193,7 +193,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         documentElement.InsertBefore(xmlElement, documentElement.FirstChild);
                     }
-                    
+
                     lastImplicitImportAdded = xmlElement;
                 }
                 else

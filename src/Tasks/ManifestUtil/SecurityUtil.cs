@@ -561,7 +561,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="cert">The certificate to be used to sign the file.</param>
         /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
         /// <param name="path">Path of the file to sign with the certificate.</param>
-        /// <remarks>This function can only sign a PE file if the X509Certificate2 parameter represents a certificate in the 
+        /// <remarks>This function can only sign a PE file if the X509Certificate2 parameter represents a certificate in the
         /// current user's personal certificate store.</remarks>
         public static void SignFile(X509Certificate2 cert, Uri timestampUrl, string path)
         {
@@ -599,7 +599,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             else
             {
                 using(RSA rsa = CngLightup.GetRSAPrivateKey(cert))
-                {                    
+                {
                     if (rsa == null)
                         throw new ApplicationException(resources.GetString("SecurityUtil.OnlyRSACertsAreAllowed"));
                     try
@@ -659,8 +659,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-        private static void SignPEFileInternal(X509Certificate2 cert, Uri timestampUrl, 
-                                               string path, System.Resources.ResourceManager resources, 
+        private static void SignPEFileInternal(X509Certificate2 cert, Uri timestampUrl,
+                                               string path, System.Resources.ResourceManager resources,
                                                bool useSha256, bool useRFC3161Timestamp)
         {
             var startInfo = new ProcessStartInfo(
@@ -721,9 +721,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             if (timestampUrl != null)
             {
-                commandLine.Append(String.Format(CultureInfo.InvariantCulture, 
-                                                "{0} {1} ", 
-                                                useRFC3161Timestamp ? "/tr" : "/t", 
+                commandLine.Append(String.Format(CultureInfo.InvariantCulture,
+                                                "{0} {1} ",
+                                                useRFC3161Timestamp ? "/tr" : "/t",
                                                 timestampUrl.ToString()));
             }
             commandLine.Append(string.Format(CultureInfo.InvariantCulture, "\"{0}\"", path));

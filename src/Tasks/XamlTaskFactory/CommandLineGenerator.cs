@@ -327,8 +327,8 @@ namespace Microsoft.Build.Tasks.Xaml
         }
 
         /// <summary>
-        /// Returns true if the property exists (regardless of whether it is 
-        /// set or not) and false otherwise. 
+        /// Returns true if the property exists (regardless of whether it is
+        /// set or not) and false otherwise.
         /// </summary>
         internal bool PropertyExists(string propertyName)
         {

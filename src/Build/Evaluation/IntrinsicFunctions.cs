@@ -224,7 +224,7 @@ namespace Microsoft.Build.Evaluation
 
                         // See if this asks for a specific SDK
                         var m = RegistrySdkRegex.Value.Match(keyName);
-                        
+
                         if (m.Success && m.Groups.Count >= 1 && valueName.Equals("InstallRoot", StringComparison.OrdinalIgnoreCase))
                         {
                             return Path.Combine(NativeMethodsShared.FrameworkBasePath, m.Groups[0].Value) + Path.DirectorySeparatorChar;

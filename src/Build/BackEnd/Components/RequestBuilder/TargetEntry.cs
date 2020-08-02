@@ -32,7 +32,7 @@ namespace Microsoft.Build.BackEnd
     {
         /// <summary>
         /// The target's dependencies need to be evaluated and pushed onto the target stack.
-        /// 
+        ///
         /// Transitions:
         /// Execution, ErrorExecution
         /// </summary>
@@ -40,7 +40,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// The target is ready to execute its tasks, batched as needed.
-        /// 
+        ///
         /// Transitions:
         /// ErrorExecution, Completed
         /// </summary>
@@ -48,7 +48,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// The target is ready to provide error tasks.
-        /// 
+        ///
         /// Transitions:
         /// None
         /// </summary>
@@ -56,7 +56,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// The target has finished building.  All of the results are in the Lookup.
-        /// 
+        ///
         /// Transitions:
         /// None
         /// </summary>
@@ -243,7 +243,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Retrieves the Lookup this target was initialized with, including any modifications which have 
+        /// Retrieves the Lookup this target was initialized with, including any modifications which have
         /// been made to it while running.
         /// </summary>
         internal Lookup Lookup
@@ -859,7 +859,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Gets the task execution mode based 
+        /// Gets the task execution mode based
         /// </summary>
         /// <param name="analysis">The result of the up-to-date check.</param>
         /// <returns>The mode to be used to execute tasks.</returns>
@@ -898,7 +898,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Gets the list of parameters which are batchable for a target
-        /// PERF: (Refactor) This used to be a method on the target, and it would 
+        /// PERF: (Refactor) This used to be a method on the target, and it would
         /// cache its values so this would only be computed once for each
         /// target.  We should consider doing something similar for perf reasons.
         /// </summary>

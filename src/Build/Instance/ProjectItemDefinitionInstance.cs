@@ -127,7 +127,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Implementation of IKeyed exposing the item type, so these 
+        /// Implementation of IKeyed exposing the item type, so these
         /// can be put in a dictionary conveniently.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]

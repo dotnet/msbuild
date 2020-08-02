@@ -30,7 +30,7 @@ namespace Microsoft.Build.BuildEngine
     internal enum TaskExecutionMode
     {
         /// <summary>
-        /// This entry is necessary to use the enum with binary math. It is never used outside 
+        /// This entry is necessary to use the enum with binary math. It is never used outside
         /// intermediate calculations.
         /// </summary>
         Invalid = 0,
@@ -159,7 +159,7 @@ namespace Microsoft.Build.BuildEngine
         /// 2) checks the global task declarations (in *.TASKS in MSbuild bin dir), searching by exact name
         /// 3) checks the tasks declared by the project, searching by fuzzy match (missing namespace, etc.)
         /// 4) checks the global task declarations (in *.TASKS in MSbuild bin dir), searching by fuzzy match (missing namespace, etc.)
-        /// 
+        ///
         /// The search ordering is meant to reduce the number of assemblies we scan, because loading assemblies can be expensive.
         /// The tasks and assemblies declared by the project are scanned first, on the assumption that if the project declared
         /// them, they are likely used.
@@ -254,7 +254,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it. 
+        /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it.
         /// </summary>
         /// <returns>true, if successful</returns>
         internal bool ExecuteTask(TaskExecutionMode howToExecuteTask, Lookup lookup)
@@ -278,7 +278,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     lookupHash = Utilities.CreateTableIfNecessary((Hashtable)null);
                 }
-		
+
 		// Loop through each of the batch buckets and execute them one at a time
                 for (int i=0; i < buckets.Count; i++)
                 {
@@ -1125,7 +1125,7 @@ namespace Microsoft.Build.BuildEngine
                     break;
                 }
             }
- 
+
             if (taskParameterAttribute != null)
             {
                 if (taskOutputSpecification.IsItemVector)
@@ -1590,8 +1590,8 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// This function correctly computes the line/column number of the task node 
-        /// in the project file (or .TARGETS file) that called it. The XmlNode available 
+        /// This function correctly computes the line/column number of the task node
+        /// in the project file (or .TARGETS file) that called it. The XmlNode available
         /// to the task engine lacks this information so we call back into the build engine
         /// to obtain it.
         /// </summary>

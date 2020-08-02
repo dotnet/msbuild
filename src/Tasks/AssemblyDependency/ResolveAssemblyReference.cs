@@ -29,12 +29,12 @@ namespace Microsoft.Build.Tasks
     public class ResolveAssemblyReference : TaskExtension
     {
         /// <summary>
-        /// key assembly used to trigger inclusion of facade references. 
+        /// key assembly used to trigger inclusion of facade references.
         /// </summary>
         private const string SystemRuntimeAssemblyName = "System.Runtime";
 
         /// <summary>
-        /// additional key assembly used to trigger inclusion of facade references. 
+        /// additional key assembly used to trigger inclusion of facade references.
         /// </summary>
         private const string NETStandardAssemblyName = "netstandard";
 
@@ -127,11 +127,11 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// If there is a mismatch between the targetprocessor architecture and the architecture of a primary reference.
-        /// 
-        /// When this is error,  an error will be logged. 
-        /// 
+        ///
+        /// When this is error,  an error will be logged.
+        ///
         /// When this is warn, if there is a mismatch between the targetprocessor architecture and the architecture of a primary reference a warning will be logged.
-        /// 
+        ///
         /// When this is none, no error or warning will be logged.
         /// </summary>
         public string WarnOrErrorOnTargetArchitectureMismatch
@@ -154,12 +154,12 @@ namespace Microsoft.Build.Tasks
         ///
         /// Optional attributes are:
         ///     bool Private [default=true] -- means 'CopyLocal'
-        ///     string FusionName -- the simple or strong fusion name for this item. If this 
+        ///     string FusionName -- the simple or strong fusion name for this item. If this
         ///         attribute is present it can save time since the assembly file won't need
         ///         to be opened to get the fusion name.
         ///     bool ExternallyResolved [default=false] -- indicates that the reference and its
         ///        dependencies are resolved by an external system (commonly from nuget assets) and
-        ///        so several steps can be skipped as an optimization: finding dependencies, 
+        ///        so several steps can be skipped as an optimization: finding dependencies,
         ///        satellite assemblies, etc.
         /// </summary>
         public ITaskItem[] AssemblyFiles
@@ -169,9 +169,9 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The list of directories which contain the redist lists for the most current 
+        /// The list of directories which contain the redist lists for the most current
         /// framework which can be targeted on the machine. If this is not set
-        /// Then we will looks for the highest framework installed on the machine 
+        /// Then we will looks for the highest framework installed on the machine
         /// for a given target framework identifier and use that.
         /// </summary>
         public string[] LatestTargetFrameworkDirectories
@@ -239,26 +239,26 @@ namespace Microsoft.Build.Tasks
         ///
         /// Optional attributes are:
         ///     bool Private [default=true] -- means 'CopyLocal'
-        ///     string HintPath [default=''] -- location of file name to consider as a reference, 
+        ///     string HintPath [default=''] -- location of file name to consider as a reference,
         ///         used when {HintPathFromItem} is one of the paths in SearchPaths.
-        ///     bool SpecificVersion [default=absent] -- 
-        ///         when true, the exact fusionname in the Include must be matched. 
+        ///     bool SpecificVersion [default=absent] --
+        ///         when true, the exact fusionname in the Include must be matched.
         ///         when false, any assembly with the same simple name will be a match.
-        ///         when absent, then look at the value in Include. 
+        ///         when absent, then look at the value in Include.
         ///           If its a simple name then behave as if specific version=false.
         ///           If its a strong name name then behave as if specific version=true.
-        ///     string ExecutableExtension [default=absent] -- 
+        ///     string ExecutableExtension [default=absent] --
         ///         when present, the resolved assembly must have this extension.
         ///         when absent, .dll is considered and then .exe for each directory looked at.
-        ///     string SubType -- only items with empty SubTypes will be considered. Items 
+        ///     string SubType -- only items with empty SubTypes will be considered. Items
         ///         with non-empty subtypes will be ignored.
-        ///     string AssemblyFolderKey [default=absent] -- supported for legacy AssemblyFolder 
+        ///     string AssemblyFolderKey [default=absent] -- supported for legacy AssemblyFolder
         ///         resolution. This key can have a value like 'hklm\vendor folder'. When set, only
         ///         this particular assembly folder key will be used.
         ///            This is to support the scenario in VSWhidey#357946 in which there are multiple
         ///            side-by-side libraries installed and the user wants to pick an exact version.
-        ///     bool EmbedInteropTyeps [default=absent] -- 
-        ///         when true, we should treat this assembly as if it has no dependencies and should 
+        ///     bool EmbedInteropTyeps [default=absent] --
+        ///         when true, we should treat this assembly as if it has no dependencies and should
         ///         be completely embedded into the target assembly.
         /// </summary>
         public ITaskItem[] Assemblies
@@ -291,9 +291,9 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Path to the target frameworks directory. Required to figure out CopyLocal status 
+        /// Path to the target frameworks directory. Required to figure out CopyLocal status
         /// for resulting items.
-        /// If not present, then no resulting items will be deemed CopyLocal='true' unless they explicity 
+        /// If not present, then no resulting items will be deemed CopyLocal='true' unless they explicity
         /// have a Private='true' attribute on their source item.
         /// </summary>
         public string[] TargetFrameworkDirectories
@@ -304,14 +304,14 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// A list of XML files that contain assemblies that are expected to be installed on the target machine.
-        /// 
+        ///
         /// Format of the file is like:
-        /// 
+        ///
         ///     <FileList Redist="Microsoft-Windows-CLRCoreComp" >
         ///         <File AssemblyName="System" Version="2.0.0.0" PublicKeyToken="b77a5c561934e089" Culture="neutral" ProcessorArchitecture="MSIL" FileVersion="2.0.40824.0" InGAC="true" />
         ///         etc.
         ///     </FileList>
-        /// 
+        ///
         /// When present, assemblies from this list will be candidates to automatically "unify" from prior versions up to
         /// the version listed in the XML. Also, assemblies with InGAC='true' will be considered prerequisites and will be CopyLocal='false'
         /// unless explicitly overridden.
@@ -330,16 +330,16 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// A list of XML files that contain assemblies that are expected to be in the target subset
-        /// 
+        ///
         /// Format of the file is like:
-        /// 
+        ///
         ///     <FileList Redist="ClientSubset" >
         ///         <File AssemblyName="System" Version="2.0.0.0" PublicKeyToken="b77a5c561934e089" Culture="neutral" ProcessorArchitecture="MSIL" FileVersion="2.0.40824.0" InGAC="true" />
         ///         etc.
         ///     </FileList>
-        /// 
+        ///
         /// Items in this list may optionally specify the "FrameworkDirectory" metadata to associate an InstalledAssemblySubsetTable
-        /// with a particular framework directory. 
+        /// with a particular framework directory.
         /// If there is only a single TargetFrameworkDirectories element, then any items in this list missing the
         /// "FrameworkDirectory" metadata will be treated as though this metadata is set to the lone (unique) value passed
         /// to TargetFrameworkDirectories.
@@ -356,19 +356,19 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// A list of XML files that contain the full framework for the profile.
-        /// 
-        /// Normally nothing is passed in here, this is for the cases where the location of the xml file for the full framework 
+        ///
+        /// Normally nothing is passed in here, this is for the cases where the location of the xml file for the full framework
         /// is not under a RedistList folder.
-        /// 
+        ///
         /// Format of the file is like:
-        /// 
+        ///
         ///     <FileList Redist="MatchingRedistListName" >
         ///         <File AssemblyName="System" Version="2.0.0.0" PublicKeyToken="b77a5c561934e089" Culture="neutral" ProcessorArchitecture="MSIL" FileVersion="2.0.40824.0" InGAC="true" />
         ///         etc.
         ///     </FileList>
-        /// 
+        ///
         /// Items in this list must specify the "FrameworkDirectory" metadata to associate an redist list
-        /// with a particular framework directory. If the association is not made an error will be logged. The reason is, 
+        /// with a particular framework directory. If the association is not made an error will be logged. The reason is,
         /// The logic in rar assumes if a FrameworkDirectory is not set it will use the target framework directory.
         /// </summary>
         public ITaskItem[] FullFrameworkAssemblyTables
@@ -383,7 +383,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// [default=false]
-        /// Boolean property to control whether or not the task should look for and use additional installed 
+        /// Boolean property to control whether or not the task should look for and use additional installed
         /// assembly tables (a.k.a Redist Lists) found in the RedistList directory underneath the provided
         /// TargetFrameworkDirectories.
         /// </summary>
@@ -395,7 +395,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// [default=false]
-        /// Boolean property to control whether or not the task should look for and use additional installed 
+        /// Boolean property to control whether or not the task should look for and use additional installed
         /// assembly subset tables (a.k.a Subset Lists) found in the SubsetList directory underneath the provided
         /// TargetFrameworkDirectories.
         /// </summary>
@@ -415,14 +415,14 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The preferred target processor architecture. Used for resolving {GAC} references. 
+        /// The preferred target processor architecture. Used for resolving {GAC} references.
         /// Should be like x86, IA64 or AMD64.
-        /// 
+        ///
         /// This is the order of preference:
         /// (1) Assemblies in the GAC that match the supplied ProcessorArchitecture.
         /// (2) Assemblies in the GAC that have ProcessorArchitecture=MSIL
         /// (3) Assemblies in the GAC that have no ProcessorArchitecture.
-        /// 
+        ///
         /// If absent, then only consider assemblies in the GAC that have ProcessorArchitecture==MSIL or
         /// no ProcessorArchitecture (these are pre-Whidbey assemblies).
         /// </summary>
@@ -565,21 +565,21 @@ namespace Microsoft.Build.Tasks
 
 
         /// <summary>
-        ///  When determining if a dependency should be copied locally one of the checks done is to see if the 
-        ///  parent reference in the project file has the Private metadata set or not. If that metadata is set then 
-        ///  We will use that for the dependency as well. 
-        ///  
-        /// However, if the metadata is not set then the dependency will go through the same checks as the parent reference. 
+        ///  When determining if a dependency should be copied locally one of the checks done is to see if the
+        ///  parent reference in the project file has the Private metadata set or not. If that metadata is set then
+        ///  We will use that for the dependency as well.
+        ///
+        /// However, if the metadata is not set then the dependency will go through the same checks as the parent reference.
         /// One of these checks is to see if the reference is in the GAC. If a reference is in the GAC then we will not copy it locally
         /// as it is assumed it will be in the gac on the target machine as well. However this only applies to that specific reference and not its dependencies.
-        /// 
+        ///
         /// This means a reference in the project file may be copy local false due to it being in the GAC but the dependencies may still be copied locally because they are not in the GAC.
         /// This is the default behavior for RAR and causes the default value for this property to be true.
-        /// 
-        /// When this property is false we will still check project file references to see if they are in the GAC and set their copy local state as appropriate. 
-        /// However for dependencies we will not only check to see if they are in the GAC but we will also check to see if the parent reference from the project file is in the GAC. 
+        ///
+        /// When this property is false we will still check project file references to see if they are in the GAC and set their copy local state as appropriate.
+        /// However for dependencies we will not only check to see if they are in the GAC but we will also check to see if the parent reference from the project file is in the GAC.
         /// If the parent reference from the project file is in the GAC then we will not copy the dependency locally.
-        /// 
+        ///
         /// NOTE: If there are multiple parent reference and ANY of them does not come from the GAC then we will set copy local to true.
         /// </summary>
         public bool CopyLocalDependenciesWhenParentReferenceInGac
@@ -705,9 +705,9 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Provide a set of names which if seen in the TargetFrameworkSubset list will cause the ignoring 
+        /// Provide a set of names which if seen in the TargetFrameworkSubset list will cause the ignoring
         /// of TargetFrameworkSubsets.
-        /// 
+        ///
         /// Full, Complete
         /// </summary>
         public string[] FullTargetFrameworkSubsetNames
@@ -744,7 +744,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Set of folders which containd a RedistList directory which represent the full framework for a given client profile.
-        /// An example would be 
+        /// An example would be
         /// %programfiles%\reference assemblies\microsoft\framework\v4.0
         /// </summary>
         public string[] FullFrameworkFolders
@@ -785,9 +785,9 @@ namespace Microsoft.Build.Tasks
         ///     string FusionName - the fusion name for this dependency.
         ///     string ResolvedFrom - the literal search path that this file was resolved from.
         ///     bool IsRedistRoot - Whether or not this assembly is the representative for an entire redist.
-        ///         'true' means the assembly is representative of an entire redist and should be indicated as 
+        ///         'true' means the assembly is representative of an entire redist and should be indicated as
         ///         an application dependency in an application manifest.
-        ///         'false' means the assembly is internal to a redist and should not be part of the 
+        ///         'false' means the assembly is internal to a redist and should not be part of the
         ///         application manifest.
         ///     string Redist - The name (if any) of the redist that contains this assembly.
         /// Does not include first order primary references--this list is in ResolvedFiles.
@@ -811,10 +811,10 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Any satellite files found. These will be CopyLocal=true iff the reference or dependency 
+        /// Any satellite files found. These will be CopyLocal=true iff the reference or dependency
         /// that caused this item to exist is CopyLocal=true.
         ///     bool CopyLocal - whether the given reference should be copied to the output directory.
-        ///     string DestinationSubDirectory - the relative destination directory that this file 
+        ///     string DestinationSubDirectory - the relative destination directory that this file
         ///       should be copied to. This is mainly for satellites.
         /// </summary>
         [Output]
@@ -824,7 +824,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Any XML serialization assemblies found. These will be CopyLocal=true iff the reference or dependency 
+        /// Any XML serialization assemblies found. These will be CopyLocal=true iff the reference or dependency
         /// that caused this item to exist is CopyLocal=true.
         ///     bool CopyLocal - whether the given reference should be copied to the output directory.
         /// </summary>
@@ -856,9 +856,9 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Regardless of the value of AutoUnify, returns one item for every distinct conflicting assembly 
-        /// identity--including culture and PKT--that was found that did not have a suitable bindingRedirect 
-        /// entry in the ApplicationConfigurationFile. 
+        /// Regardless of the value of AutoUnify, returns one item for every distinct conflicting assembly
+        /// identity--including culture and PKT--that was found that did not have a suitable bindingRedirect
+        /// entry in the ApplicationConfigurationFile.
         ///
         /// Each returned ITaskItem will have the following values:
         ///  ItemSpec - the full fusion name of the assembly family with empty version=0.0.0.0
@@ -2294,7 +2294,7 @@ namespace Microsoft.Build.Tasks
                             {
                                 // if we're finding dependencies and a given reference was not marked as ExternallyResolved
                                 // then its use of System.Runtime/.netstandard would already have been identified above.
-                                continue; 
+                                continue;
                             }
 
                             var rawDependencies = GetDependencies(resolvedReference, fileExists, getAssemblyMetadata, assemblyMetadataCache);
@@ -2675,9 +2675,9 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Determine if a black list should be used or not
-        /// 
+        ///
         /// The black list should only be used if there are TargetFrameworkSubsets to use or TargetFrameworkProfiles.
-        /// 
+        ///
         /// 1) If we find a Full or equivalent marker in the list of subsets passed in we do not want to generate a black list even if installedAssemblySubsets are passed in
         /// 2) If we are ignoring the default installed subset tables and we have not passed in any additional subset tables, we do not want to generate a black list
         /// 3) If no targetframework subsets were passed in and no additional subset tables were passed in, we do not want to generate a blacklist

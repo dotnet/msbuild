@@ -110,7 +110,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Extensions which should be considered reference files, we will look for 
+        /// Extensions which should be considered reference files, we will look for
         /// the files in the order they are specified in the array.
         /// </summary>
         public string[] ReferenceExtensions
@@ -1078,7 +1078,7 @@ namespace Microsoft.Build.Tasks
             }
 
             /// <summary>
-            /// Is the assembly list cache file up to date. 
+            /// Is the assembly list cache file up to date.
             /// This is done by comparing the last write time of the cache file to the last write time of the code.
             /// If our code is newer than the last write time of the cache file then there may be some different serialization used so we should say it is out of date and just regenerate it.
             /// </summary>

@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Should get a read error when the manifest location is valid but doesn't have a 
+        /// Should get a read error when the manifest location is valid but doesn't have a
         /// file named Platform.xml
         /// </summary>
         [Fact]
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Should get a read error when trying to read an invalid manifest file. 
+        /// Should get a read error when trying to read an invalid manifest file.
         /// </summary>
         [Fact]
         public void InvalidManifest()
@@ -94,7 +94,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify that a simple PlatformManifest can be successfully constructed. 
+        /// Verify that a simple PlatformManifest can be successfully constructed.
         /// </summary>
         [Fact]
         public void SimpleValidManifest()
@@ -114,8 +114,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify that a simple PlatformManifest can be successfully constructed, even if it's missing 
-        /// some fields. 
+        /// Verify that a simple PlatformManifest can be successfully constructed, even if it's missing
+        /// some fields.
         /// </summary>
         [Fact]
         public void SimpleValidManifestWithMissingFriendlyName()
@@ -135,8 +135,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Platform manifest with a dependent platform missing some information. 
-        /// NOTE: probably ought to be an error. 
+        /// Platform manifest with a dependent platform missing some information.
+        /// NOTE: probably ought to be an error.
         /// </summary>
         [Fact]
         public void DependentPlatformMissingName()
@@ -188,8 +188,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Platform manifest with a contract missing some information. 
-        /// NOTE: technically probably ought to be an error. 
+        /// Platform manifest with a contract missing some information.
+        /// NOTE: technically probably ought to be an error.
         /// </summary>
         [Fact]
         public void ContractMissingVersion()
@@ -218,7 +218,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify a platform manifest with API contracts. 
+        /// Verify a platform manifest with API contracts.
         /// </summary>
         [Fact]
         public void MultipleContracts()
@@ -301,8 +301,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Wrapper around PlatformManifest that creates one with the specified content in 
-        /// the temporary directory and deletes it on disposal. 
+        /// Wrapper around PlatformManifest that creates one with the specified content in
+        /// the temporary directory and deletes it on disposal.
         /// </summary>
         private sealed class TemporaryPlatformManifest : IDisposable
         {

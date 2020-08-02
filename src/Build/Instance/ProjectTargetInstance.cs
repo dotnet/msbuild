@@ -28,7 +28,7 @@ namespace Microsoft.Build.Execution
         private string _name;
 
         /// <summary>
-        /// Condition on the target. 
+        /// Condition on the target.
         /// Evaluated during the build.
         /// </summary>
         private string _condition;
@@ -44,7 +44,7 @@ namespace Microsoft.Build.Execution
         private string _outputs;
 
         /// <summary>
-        /// Return values on the target. 
+        /// Return values on the target.
         /// </summary>
         private string _returns;
 
@@ -76,8 +76,8 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Whether the project file that this target lives in has at least one target
         /// with a Returns attribute on it.  If so, the default behaviour for all targets
-        /// in the file without Returns attributes changes from returning the Outputs, to 
-        /// returning nothing. 
+        /// in the file without Returns attributes changes from returning the Outputs, to
+        /// returning nothing.
         /// </summary>
         private bool _parentProjectSupportsReturnsAttribute;
 
@@ -338,7 +338,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Full path to the file from which this target originated.
-        /// If it originated in a project that was not loaded and has never been 
+        /// If it originated in a project that was not loaded and has never been
         /// given a path, returns an empty string.
         /// </summary>
         public string FullPath
@@ -450,8 +450,8 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Whether the project file that this target lives in has at least one target
         /// with a Returns attribute on it.  If so, the default behaviour for all targets
-        /// in the file without Returns attributes changes from returning the Outputs, to 
-        /// returning nothing. 
+        /// in the file without Returns attributes changes from returning the Outputs, to
+        /// returning nothing.
         /// </summary>
         internal bool ParentProjectSupportsReturnsAttribute
         {
