@@ -28,7 +28,7 @@ namespace Microsoft.Build.BuildEngine
         static LocalNode()
         {
             AppDomain currentDomain = AppDomain.CurrentDomain;
-            currentDomain.UnhandledException += new UnhandledExceptionEventHandler(UnhandledExceptionHandler);
+            currentDomain.UnhandledException += UnhandledExceptionHandler;
         }
         #endregion
 

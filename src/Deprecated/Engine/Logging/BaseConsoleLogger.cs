@@ -868,31 +868,31 @@ namespace Microsoft.Build.BuildEngine
             if (eventSource != null)
             {
                 eventSource.BuildStarted +=
-                        new BuildStartedEventHandler(BuildStartedHandler);
+                         BuildStartedHandler;
                 eventSource.BuildFinished +=
-                        new BuildFinishedEventHandler(BuildFinishedHandler);
+                         BuildFinishedHandler;
                 eventSource.ProjectStarted +=
-                        new ProjectStartedEventHandler(ProjectStartedHandler);
+                         ProjectStartedHandler;
                 eventSource.ProjectFinished +=
-                        new ProjectFinishedEventHandler(ProjectFinishedHandler);
+                         ProjectFinishedHandler;
                 eventSource.TargetStarted +=
-                        new TargetStartedEventHandler(TargetStartedHandler);
+                         TargetStartedHandler;
                 eventSource.TargetFinished +=
-                        new TargetFinishedEventHandler(TargetFinishedHandler);
+                         TargetFinishedHandler;
                 eventSource.TaskStarted +=
-                        new TaskStartedEventHandler(TaskStartedHandler);
+                         TaskStartedHandler;
                 eventSource.TaskFinished +=
-                        new TaskFinishedEventHandler(TaskFinishedHandler);
+                         TaskFinishedHandler;
 
                 eventSource.ErrorRaised +=
-                        new BuildErrorEventHandler(ErrorHandler);
+                         ErrorHandler;
                 eventSource.WarningRaised +=
-                        new BuildWarningEventHandler(WarningHandler);
+                         WarningHandler;
                 eventSource.MessageRaised +=
-                        new BuildMessageEventHandler(MessageHandler);
+                         MessageHandler;
 
                 eventSource.CustomEventRaised +=
-                        new CustomBuildEventHandler(CustomEventHandler);
+                         CustomEventHandler;
             }
         }
 

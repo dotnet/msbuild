@@ -1134,11 +1134,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public void Initialize(IEventSource eventSource)
             {
-                eventSource.ErrorRaised += new BuildErrorEventHandler(MyCustomErrorHandler);
-                eventSource.WarningRaised += new BuildWarningEventHandler(MyCustomWarningHandler);
-                eventSource.MessageRaised += new BuildMessageEventHandler(MyCustomMessageHandler);
-                eventSource.CustomEventRaised += new CustomBuildEventHandler(MyCustomBuildHandler);
-                eventSource.AnyEventRaised += new AnyEventHandler(EventSource_AnyEventRaised);
+                eventSource.ErrorRaised += MyCustomErrorHandler;
+                eventSource.WarningRaised += MyCustomWarningHandler;
+                eventSource.MessageRaised += MyCustomMessageHandler;
+                eventSource.CustomEventRaised += MyCustomBuildHandler;
+                eventSource.AnyEventRaised += EventSource_AnyEventRaised;
             }
 
             /// <summary>
