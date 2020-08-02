@@ -95,7 +95,7 @@ namespace Microsoft.Build.BackEnd
 
             Type wrappedParameterType = wrappedParameter.GetType();
 
-            if ((wrappedParameter as Exception) != null)
+            if (wrappedParameter is Exception)
             {
                 _parameterType = TaskParameterType.Invalid;
                 _wrappedParameter = wrappedParameter;
