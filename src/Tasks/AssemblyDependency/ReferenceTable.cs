@@ -1924,7 +1924,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// If a reference is a higher version than what exists in the redist list of the target framework then 
-        /// this reference needs to be marked as excluded so that it is not not allowed to be referenced. 
+        /// this reference needs to be marked as excluded so that it is not allowed to be referenced. 
         /// 
         /// If the user needs this reference then they need to set specific version to true.
         /// </summary>

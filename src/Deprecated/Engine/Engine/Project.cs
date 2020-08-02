@@ -1450,7 +1450,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Determines whether a project file can be considered equivalent to this Project, taking into account
-        /// the set of global properties and the tools version (if any) that that project file 
+        /// the set of global properties and the tools version (if any) that project file 
         /// is going to be built with.
         /// </summary>
         /// <param name="projectFullPath"></param>

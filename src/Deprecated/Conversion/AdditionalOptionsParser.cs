@@ -85,7 +85,7 @@ namespace Microsoft.Build.Conversion
         internal object SwitchValue;
 
         /// <summary>
-        /// This is the the name of property in the project file in which the
+        /// This is the name of property in the project file in which the
         /// value of this switch is stored
         /// </summary>
         internal string SwitchProjectPropertyName;

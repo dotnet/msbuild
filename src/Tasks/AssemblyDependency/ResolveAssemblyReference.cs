@@ -246,7 +246,7 @@ namespace Microsoft.Build.Tasks
         ///         when false, any assembly with the same simple name will be a match.
         ///         when absent, then look at the value in Include. 
         ///           If its a simple name then behave as if specific version=false.
-        ///           If its a strong name name then behave as if specific version=true.
+        ///           If its a strong name then behave as if specific version=true.
         ///     string ExecutableExtension [default=absent] -- 
         ///         when present, the resolved assembly must have this extension.
         ///         when absent, .dll is considered and then .exe for each directory looked at.
@@ -2725,7 +2725,7 @@ namespace Microsoft.Build.Tasks
         /// Populates the suggested redirects output parameter.
         /// </summary>
         /// <param name="idealAssemblyRemappings">The list of ideal remappings.</param>
-        /// <param name="idealAssemblyRemappedReferences">The list of of references to ideal assembly remappings.</param>
+        /// <param name="idealAssemblyRemappedReferences">The list of references to ideal assembly remappings.</param>
         private void PopulateSuggestedRedirects(List<DependentAssembly> idealAssemblyRemappings, List<AssemblyNameReference> idealAssemblyRemappedReferences)
         {
             var holdSuggestedRedirects = new List<ITaskItem>();
