@@ -1662,7 +1662,7 @@ namespace Microsoft.Build.BuildEngine
 
             if (modifiedItemSpec.Length == 0)
             {
-                if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(modifier, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase))
                 {
                     modifiedItemSpec = ExtractRecursivePortionOfFinalItemSpecDirectory();
 

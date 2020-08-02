@@ -35,7 +35,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal override bool BoolEvaluate(ConditionEvaluationState state)
         {
-            if (String.Compare(functionName, "exists", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(functionName, "exists", StringComparison.OrdinalIgnoreCase))
             {
                 // Check we only have one argument
                 VerifyArgumentCount(1, state);
@@ -69,7 +69,7 @@ namespace Microsoft.Build.BuildEngine
                 // Both Exists functions return false if the value is null or empty
                 return File.Exists(expandedValue) || Directory.Exists(expandedValue);
             }
-            else if (String.Compare(functionName, "HasTrailingSlash", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(functionName, "HasTrailingSlash", StringComparison.OrdinalIgnoreCase))
             {
                 // Check we only have one argument
                 VerifyArgumentCount(1, state);

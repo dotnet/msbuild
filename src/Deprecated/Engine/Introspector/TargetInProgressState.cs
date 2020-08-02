@@ -201,7 +201,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 // The build context must have formed due to IBuildEngine call
                 ErrorUtilities.VerifyThrow(
-                    String.Compare(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), target.Name, StringComparison.OrdinalIgnoreCase) == 0,
+                    String.Equals(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), target.Name, StringComparison.OrdinalIgnoreCase),
                     "The target should be the in progress target for the context");
                 // This target is called due to IBuildEngine or host request
                 return FindParentTargetForBuildRequest(engineCallback, buildContext.BuildRequest, out parentRequest);
@@ -582,7 +582,7 @@ namespace Microsoft.Build.BuildEngine
                 if (other != null)
                 {
                     if (other.projectId == projectId && other.nodeId == nodeId &&
-                        (String.Compare(other.name, name, StringComparison.OrdinalIgnoreCase) == 0))
+                        (String.Equals(other.name, name, StringComparison.OrdinalIgnoreCase)))
                     {
                         return true;
                     }

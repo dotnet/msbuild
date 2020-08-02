@@ -601,7 +601,7 @@ namespace Microsoft.Build.BuildEngine
                          buildContext.NameOfBlockingTarget == null))
                     {
                         error.VerifyThrow(
-                            String.Compare(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), this.Name, StringComparison.OrdinalIgnoreCase) == 0,
+                            String.Equals(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), this.Name, StringComparison.OrdinalIgnoreCase),
                             "The name of the target in progress is inconsistent with the target being built");
 
                         error.VerifyThrow(targetOutputItems != null,

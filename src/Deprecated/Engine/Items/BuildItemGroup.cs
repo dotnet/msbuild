@@ -392,7 +392,7 @@ namespace Microsoft.Build.BuildEngine
                 int insertionIndex = items.Count;
                 for (int i = 0; i < items.Count; i++)
                 {
-                    if ( 0 == String.Compare(itemToAdd.Name, items[i].Name, StringComparison.OrdinalIgnoreCase))
+                    if ( String.Equals(itemToAdd.Name, items[i].Name, StringComparison.OrdinalIgnoreCase))
                     {
                         insertionIndex = i + 1;
 

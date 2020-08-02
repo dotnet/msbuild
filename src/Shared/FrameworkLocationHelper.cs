@@ -686,7 +686,7 @@ namespace Microsoft.Build.Shared
                 if (NativeMethodsShared.IsWindows)
                 {
                     // If the registry entry is 1 then the framework is installed. Go ahead and find the directory. If it is not 1 then the framework is not installed, return null.
-                    return String.Compare("1", FindRegistryValueUnderKey(registryEntryToCheckInstall, registryValueToCheckInstall), StringComparison.OrdinalIgnoreCase) == 0;
+                    return String.Equals("1", FindRegistryValueUnderKey(registryEntryToCheckInstall, registryValueToCheckInstall), StringComparison.OrdinalIgnoreCase);
                 }
                 // False for non-windows since there is nothing in the registry
                 else
@@ -900,7 +900,7 @@ namespace Microsoft.Build.Shared
         /// null otherwise</returns>
         internal static string GeneratePathToBuildToolsForToolsVersion(string toolsVersion, DotNetFrameworkArchitecture architecture)
         {
-            if (string.Compare(toolsVersion, MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal) == 0)
+            if (string.Equals(toolsVersion, MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal))
             {
                 return GetPathToBuildToolsFromEnvironment(architecture);
             }

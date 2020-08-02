@@ -532,7 +532,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void LoadCommonTargets()
         {
             ProjectCollection projectCollection = new ProjectCollection();
-            string toolsPath = projectCollection.Toolsets.Where(toolset => (string.Compare(toolset.ToolsVersion, ObjectModelHelpers.MSBuildDefaultToolsVersion, StringComparison.OrdinalIgnoreCase) == 0)).First().ToolsPath;
+            string toolsPath = projectCollection.Toolsets.Where(toolset => (string.Equals(toolset.ToolsVersion, ObjectModelHelpers.MSBuildDefaultToolsVersion, StringComparison.OrdinalIgnoreCase))).First().ToolsPath;
 
             string[] targets =
             {

@@ -476,7 +476,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Process the primary items.
             foreach (ITaskItem item in t.ResolvedFiles)
             {
-                if (String.Compare(item.ItemSpec, Path.Combine(s_myVersion20Path, "System.XML.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(item.ItemSpec, Path.Combine(s_myVersion20Path, "System.XML.dll"), StringComparison.OrdinalIgnoreCase))
                 {
                     systemXmlFound = true;
                     item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
@@ -535,13 +535,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     item.GetMetadata("CopyLocal").ShouldBe("true", StringCompareShould.IgnoreCase);
                     item.GetMetadata("FusionName").ShouldBe("MyMissingAssembly", StringCompareShould.IgnoreCase);
                 }
-                else if (String.Compare(item.ItemSpec, Path.Combine(s_myProjectPath, "System.Xml.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+                else if (String.Equals(item.ItemSpec, Path.Combine(s_myProjectPath, "System.Xml.dll"), StringComparison.OrdinalIgnoreCase))
                 {
                     // The version of System.Xml.dll in C:\MyProject is an older version.
                     // This version is not a match. When want the current version which should have been in a different directory.
                     Assert.True(false, "Wrong version of System.Xml.dll matched--version was wrong");
                 }
-                else if (String.Compare(item.ItemSpec, Path.Combine(s_myProjectPath, "System.Data.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+                else if (String.Equals(item.ItemSpec, Path.Combine(s_myProjectPath, "System.Data.dll"), StringComparison.OrdinalIgnoreCase))
                 {
                     // The version of System.Data.dll in C:\MyProject has an incorrect PKT
                     // This version is not a match.
@@ -592,14 +592,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Process the satellites.
             foreach (ITaskItem item in t.SatelliteFiles)
             {
-                if (String.Compare(item.ItemSpec, Path.Combine(s_myVersion20Path, "en", "System.XML.resources.pdb"), StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(item.ItemSpec, Path.Combine(s_myVersion20Path, "en", "System.XML.resources.pdb"), StringComparison.OrdinalIgnoreCase))
                 {
                     enSatellitePdbFound = true;
                     Assert.Empty(item.GetMetadata(ItemMetadataNames.imageRuntime));
                     Assert.Empty(item.GetMetadata(ItemMetadataNames.winMDFile));
                     Assert.Empty(item.GetMetadata(ItemMetadataNames.winmdImplmentationFile));
                 }
-                else if (String.Compare(item.ItemSpec, Path.Combine(s_myVersion20Path, "en-GB", "System.XML.resources.pdb"), StringComparison.OrdinalIgnoreCase) == 0)
+                else if (String.Equals(item.ItemSpec, Path.Combine(s_myVersion20Path, "en-GB", "System.XML.resources.pdb"), StringComparison.OrdinalIgnoreCase))
                 {
                     engbSatellitePdbFound = true;
                     Assert.Empty(item.GetMetadata(ItemMetadataNames.imageRuntime));
@@ -4359,7 +4359,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             foreach (ITaskItem item in t.ResolvedDependencyFiles)
             {
-                if (0 == String.Compare(item.ItemSpec, s_myLibraries_V1_E_EDllPath, StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(item.ItemSpec, s_myLibraries_V1_E_EDllPath, StringComparison.OrdinalIgnoreCase))
                 {
                     Assert.Equal("false", item.GetMetadata("CopyLocal"));
                 }
@@ -4422,12 +4422,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             foreach (ITaskItem item in t.ResolvedDependencyFiles)
             {
-                if (0 == String.Compare(item.ItemSpec, s_myLibraries_V1_DDllPath, StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(item.ItemSpec, s_myLibraries_V1_DDllPath, StringComparison.OrdinalIgnoreCase))
                 {
                     Assert.Equal("false", item.GetMetadata("CopyLocal"));
                 }
 
-                if (0 == String.Compare(item.ItemSpec, s_myLibraries_V1_E_EDllPath, StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(item.ItemSpec, s_myLibraries_V1_E_EDllPath, StringComparison.OrdinalIgnoreCase))
                 {
                     Assert.Equal("true", item.GetMetadata("CopyLocal"));
                 }

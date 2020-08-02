@@ -566,7 +566,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 return false;
             }
-           return  eventComparer.Equals(entryPointContext, key.EntryPointContext) && (String.Compare(targetName, key.TargetName, StringComparison.OrdinalIgnoreCase) == 0);
+           return  eventComparer.Equals(entryPointContext, key.EntryPointContext) && (String.Equals(targetName, key.TargetName, StringComparison.OrdinalIgnoreCase));
         }
 
         public override int GetHashCode()

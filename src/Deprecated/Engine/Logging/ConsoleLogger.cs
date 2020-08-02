@@ -122,11 +122,11 @@ namespace Microsoft.Build.BuildEngine
                     {
                         if (parameterComponents[param].Length > 0)
                         {
-                            if (0 == String.Compare(parameterComponents[param], "ENABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
+                            if (String.Equals(parameterComponents[param], "ENABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
                             {
                                 useMPLogger = true;
                             }
-                            if (0 == String.Compare(parameterComponents[param], "DISABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
+                            if (String.Equals(parameterComponents[param], "DISABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
                             {
                                 useMPLogger = false;
                             }

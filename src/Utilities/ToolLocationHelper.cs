@@ -3812,8 +3812,8 @@ namespace Microsoft.Build.Utilities
                 {
                     if (programFilesReferenceAssemblyLocationFound &&
                         (
-                            string.Compare(folder.Name, FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV30, StringComparison.OrdinalIgnoreCase) == 0
-                            || string.Compare(folder.Name, FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV35, StringComparison.OrdinalIgnoreCase) == 0
+                            string.Equals(folder.Name, FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV30, StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(folder.Name, FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV35, StringComparison.OrdinalIgnoreCase)
                         )
                        )
                     {
@@ -3821,7 +3821,7 @@ namespace Microsoft.Build.Utilities
                         continue;
                     }
 
-                    if (string.Compare(folder.Name, FrameworkLocationHelper.dotNetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Equals(folder.Name, FrameworkLocationHelper.dotNetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
                     {
                         bFoundDotNetFrameworkIdentifier = true;
                     }
@@ -3878,7 +3878,7 @@ namespace Microsoft.Build.Utilities
             //backward compatibility with orcas
             //In case of orcas .NETFramework v3.0, v3.5 - the version folders are directly under the frameworkReferenceRoot
             //first check here
-            if (string.Compare(frameworkIdentifier, FrameworkLocationHelper.dotNetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(frameworkIdentifier, FrameworkLocationHelper.dotNetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
             {
                 IList<string> versions = GetFx35AndEarlierVersions(frameworkReferenceRoot);
                 if (versions.Count > 0)

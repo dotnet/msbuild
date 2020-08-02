@@ -1459,7 +1459,7 @@ namespace Microsoft.Build.BuildEngine
         /// <returns></returns>
         internal bool IsEquivalentToProject(string projectFullPath, BuildPropertyGroup projectGlobalProperties, string projectToolsVersion)
         {
-            if (String.Compare(projectFullPath, this.FullFileName, StringComparison.OrdinalIgnoreCase) != 0)
+            if (!String.Equals(projectFullPath, this.FullFileName, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
@@ -1473,7 +1473,7 @@ namespace Microsoft.Build.BuildEngine
                 projectToolsVersion = this.DefaultToolsVersion;
             }
 
-            return (String.Compare(ToolsVersion, projectToolsVersion, StringComparison.OrdinalIgnoreCase) == 0
+            return (String.Equals(ToolsVersion, projectToolsVersion, StringComparison.OrdinalIgnoreCase)
                 && this.GlobalProperties.IsEquivalent(projectGlobalProperties));
         }
 
@@ -2086,7 +2086,7 @@ namespace Microsoft.Build.BuildEngine
                 ProjectErrorUtilities.VerifyThrowInvalidProject(this.mainProjectElement.LocalName == XMakeElements.project,
                     this.mainProjectElement, "UnrecognizedElement", this.mainProjectElement.Name);
 
-                ProjectErrorUtilities.VerifyThrowInvalidProject((mainProjectElement.Prefix.Length == 0) && (String.Compare(mainProjectElement.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase) == 0),
+                ProjectErrorUtilities.VerifyThrowInvalidProject((mainProjectElement.Prefix.Length == 0) && (String.Equals(mainProjectElement.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase)),
                     mainProjectElement, "ProjectMustBeInMSBuildXmlNamespace", XMakeAttributes.defaultXmlNamespace);
 
                 MarkProjectAsDirtyForReprocessXml();
@@ -2153,7 +2153,7 @@ namespace Microsoft.Build.BuildEngine
 
                 // Update the project filename/path if it has changed.
                 string newFullProjectFilePath = Path.GetFullPath(projectFileName);
-                if (0 != String.Compare(newFullProjectFilePath, this.FullFileName, StringComparison.OrdinalIgnoreCase))
+                if (!String.Equals(newFullProjectFilePath, this.FullFileName, StringComparison.OrdinalIgnoreCase))
                 {
                     this.FullFileName = newFullProjectFilePath;
                 }
@@ -2565,8 +2565,8 @@ namespace Microsoft.Build.BuildEngine
                 }
 
                 if (propertyGroup.IsImported == importedPropertyGroup &&
-                    (0 == String.Compare(propertyGroup.Condition.Trim(), condition.Trim(), StringComparison.OrdinalIgnoreCase)) &&
-                    (!importedPropertyGroup || (importedPropertyGroup && (0 == String.Compare(propertyGroup.ImportedFromFilename, importedFilename, StringComparison.OrdinalIgnoreCase)))))
+                    (String.Equals(propertyGroup.Condition.Trim(), condition.Trim(), StringComparison.OrdinalIgnoreCase)) &&
+                    (!importedPropertyGroup || (importedPropertyGroup && (String.Equals(propertyGroup.ImportedFromFilename, importedFilename, StringComparison.OrdinalIgnoreCase)))))
                 {
                     if (matchingPropertyGroup == null)
                     {
@@ -2581,7 +2581,7 @@ namespace Microsoft.Build.BuildEngine
                     // property.
                     foreach (BuildProperty property in propertyGroup)
                     {
-                        if (0 == String.Compare(property.Name, propertyName, StringComparison.OrdinalIgnoreCase))
+                        if (String.Equals(property.Name, propertyName, StringComparison.OrdinalIgnoreCase))
                         {
                             matchingProperty = property;
                         }
@@ -2814,7 +2814,7 @@ namespace Microsoft.Build.BuildEngine
                     // the same type as the new item being added.
                     foreach (BuildItem originalItem in itemGroup)
                     {
-                        if ( 0 == String.Compare( originalItem.Name, itemName, StringComparison.OrdinalIgnoreCase))
+                        if ( String.Equals( originalItem.Name, itemName, StringComparison.OrdinalIgnoreCase))
                         {
                             // If the new item that the user is trying to add is already covered by 
                             // a wildcard in an existing item of the project, then there's really
@@ -4132,7 +4132,7 @@ namespace Microsoft.Build.BuildEngine
                             ProjectErrorUtilities.VerifyThrowInvalidProject(importedChildNode.LocalName == XMakeElements.project,
                                 importedChildNode, "UnrecognizedElement", importedChildNode.Name);
 
-                            ProjectErrorUtilities.VerifyThrowInvalidProject((importedChildNode.Prefix.Length == 0) && (String.Compare(importedChildNode.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase) == 0),
+                            ProjectErrorUtilities.VerifyThrowInvalidProject((importedChildNode.Prefix.Length == 0) && (String.Equals(importedChildNode.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase)),
                                 importedChildNode, "ProjectMustBeInMSBuildXmlNamespace", XMakeAttributes.defaultXmlNamespace);
 
 
@@ -4175,7 +4175,7 @@ namespace Microsoft.Build.BuildEngine
             // also prevents the same file from being imported twice, even it it's not a
             // circular dependency, but that's fine -- no good reason to do that anyway.
             if ((this.imports[import.EvaluatedProjectPath] != null) ||
-                (string.Compare(this.FullFileName, import.EvaluatedProjectPath, StringComparison.OrdinalIgnoreCase) == 0))
+                (string.Equals(this.FullFileName, import.EvaluatedProjectPath, StringComparison.OrdinalIgnoreCase)))
             {
                 ParentEngine.LoggingServices.LogWarning(projectBuildEventContext, Utilities.CreateBuildEventFileInfo(import.ProjectPathAttribute, FullFileName),
                     "DuplicateImport", import.EvaluatedProjectPath);
@@ -4267,7 +4267,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     // ... then check the filename of the PropertyGroup to see if it
                     // matches the *old* file name.
-                    if (0 == String.Compare(pg.ImportedFromFilename, oldFileName, StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals(pg.ImportedFromFilename, oldFileName, StringComparison.OrdinalIgnoreCase))
                     {
                         // Okay, we found a PropertyGroup that appears to have originated from
                         // the imported file that just got renamed.  We should update the PropertyGroup
@@ -4508,7 +4508,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>jomof</owner>
         internal static bool IsSolutionFilename(string filename)
         {
-            return (string.Compare(Path.GetExtension(filename), ".sln", StringComparison.OrdinalIgnoreCase) == 0);
+            return (string.Equals(Path.GetExtension(filename), ".sln", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -4517,7 +4517,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>LukaszG</owner>
         internal static bool IsVCProjFilename(string filename)
         {
-            return (string.Compare(Path.GetExtension(filename), ".vcproj", StringComparison.OrdinalIgnoreCase) == 0);
+            return (string.Equals(Path.GetExtension(filename), ".vcproj", StringComparison.OrdinalIgnoreCase));
         }
     }
 }

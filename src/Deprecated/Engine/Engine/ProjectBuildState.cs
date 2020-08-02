@@ -209,7 +209,7 @@ namespace Microsoft.Build.BuildEngine
             if (!containsCycle && requiredTargets != null && requiredTargets.Count > 0)
             {
                 containsCycle = 
-                    (String.Compare(name, (string)targetNamesToBuild[indexOfTargetInProgress], StringComparison.OrdinalIgnoreCase) == 0);
+                    (String.Equals(name, (string)targetNamesToBuild[indexOfTargetInProgress], StringComparison.OrdinalIgnoreCase));
             }
             return containsCycle;
         }

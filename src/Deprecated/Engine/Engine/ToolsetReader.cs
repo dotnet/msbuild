@@ -319,7 +319,7 @@ namespace Microsoft.Build.BuildEngine
 
             foreach (PropertyDefinition property in rawProperties)
             {
-                if (0 == String.Compare(property.Name, ReservedPropertyNames.toolsPath, StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(property.Name, ReservedPropertyNames.toolsPath, StringComparison.OrdinalIgnoreCase))
                 {
                     toolsPath = ExpandProperty(property, expander);
                     toolsPath = ExpandRelativePathsRelativeToExeLocation(toolsPath);
@@ -334,7 +334,7 @@ namespace Microsoft.Build.BuildEngine
                         );
                     }
                 }
-                else if (0 == String.Compare(property.Name, ReservedPropertyNames.binPath, StringComparison.OrdinalIgnoreCase))
+                else if (String.Equals(property.Name, ReservedPropertyNames.binPath, StringComparison.OrdinalIgnoreCase))
                 {
                     binPath = ExpandProperty(property, expander);
                     binPath = ExpandRelativePathsRelativeToExeLocation(binPath);

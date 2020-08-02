@@ -1212,7 +1212,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             compactOutputs.SaveTlog(delegate (string fullTrackedPath)
             {
                 // We need to answer the question "should fullTrackedPath be included in the TLog?"
-                return (string.Compare(fullTrackedPath, missing, StringComparison.OrdinalIgnoreCase) != 0);
+                return (!string.Equals(fullTrackedPath, missing, StringComparison.OrdinalIgnoreCase));
             });
 
             // Read the Tlogs back in..
@@ -1282,7 +1282,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             d.SaveTlog(delegate (string fullTrackedPath)
             {
                 // We need to answer the question "should fullTrackedPath be included in the TLog?"
-                return (string.Compare(fullTrackedPath, missing, StringComparison.OrdinalIgnoreCase) != 0);
+                return (!string.Equals(fullTrackedPath, missing, StringComparison.OrdinalIgnoreCase));
             });
 
             // read the tlog back in again

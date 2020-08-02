@@ -1165,7 +1165,7 @@ namespace Microsoft.Build.Tasks
 
             for (int i = 0; i < ResolvedAssemblyReferences.GetLength(0); i++)
             {
-                if (String.Compare(Path.GetFileName(ResolvedAssemblyReferences[i].ItemSpec), assemblyName, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(Path.GetFileName(ResolvedAssemblyReferences[i].ItemSpec), assemblyName, StringComparison.OrdinalIgnoreCase))
                 {
                     assemblyPath = ResolvedAssemblyReferences[i].ItemSpec;
                     return true;
@@ -1333,7 +1333,7 @@ namespace Microsoft.Build.Tasks
                     {
                         // conflicting typelib names for different typelibs? generate a temporary wrapper
                         if (!ComReference.AreTypeLibAttrEqual(referenceInfo.attr, projectRefInfo.attr) &&
-                            String.Compare(referenceInfo.typeLibName, projectRefInfo.typeLibName, StringComparison.OrdinalIgnoreCase) == 0)
+                            String.Equals(referenceInfo.typeLibName, projectRefInfo.typeLibName, StringComparison.OrdinalIgnoreCase))
                         {
                             isTemporary = true;
                         }
@@ -1619,7 +1619,7 @@ namespace Microsoft.Build.Tasks
                 if (_projectTargetFramework != null && (_projectTargetFramework >= s_targetFrameworkVersion_40))
                 {
                     if ((embedInteropTypesMetadata != null) &&
-                        (String.Compare(embedInteropTypesMetadata, "true", StringComparison.OrdinalIgnoreCase) == 0))
+                        (String.Equals(embedInteropTypesMetadata, "true", StringComparison.OrdinalIgnoreCase)))
                     {
                         // Embed Interop Types forces CopyLocal to false
                         taskItem.SetMetadata(ItemMetadataNames.copyLocal, "false");

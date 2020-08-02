@@ -1764,8 +1764,8 @@ namespace Microsoft.Build.Construction
                         condition.Append(")");
                     }
                 }
-                else if (String.Compare(solutionConfiguration.ConfigurationName, "Release", StringComparison.OrdinalIgnoreCase) == 0 ||
-                         String.Compare(solutionConfiguration.ConfigurationName, "Debug", StringComparison.OrdinalIgnoreCase) == 0)
+                else if (String.Equals(solutionConfiguration.ConfigurationName, "Release", StringComparison.OrdinalIgnoreCase) ||
+                         String.Equals(solutionConfiguration.ConfigurationName, "Debug", StringComparison.OrdinalIgnoreCase))
                 {
                     // we don't have a project configuration that matches the solution configuration but
                     // the solution configuration is called "Release" or "Debug" which are standard AspNetConfigurations
@@ -2323,7 +2323,7 @@ namespace Microsoft.Build.Construction
                 bool solutionHasReleaseConfiguration = false;
                 foreach (SolutionConfigurationInSolution solutionConfiguration in _solutionFile.SolutionConfigurations)
                 {
-                    if (string.Compare(solutionConfiguration.ConfigurationName, "Release", StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Equals(solutionConfiguration.ConfigurationName, "Release", StringComparison.OrdinalIgnoreCase))
                     {
                         solutionHasReleaseConfiguration = true;
                         break;

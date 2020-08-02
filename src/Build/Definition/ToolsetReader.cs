@@ -626,7 +626,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="expander">The expander used to expand the value of the properties.  Ref because if we are accumulating the properties, we need to re-create the expander to account for the new property value.</param>
         private void EvaluateAndSetProperty(ToolsetPropertyDefinition property, PropertyDictionary<ProjectPropertyInstance> properties, PropertyDictionary<ProjectPropertyInstance> globalProperties, PropertyDictionary<ProjectPropertyInstance> initialProperties, bool accumulateProperties, ref string toolsPath, ref string binPath, ref Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
-            if (0 == String.Compare(property.Name, ReservedPropertyNames.toolsPath, StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(property.Name, ReservedPropertyNames.toolsPath, StringComparison.OrdinalIgnoreCase))
             {
                 toolsPath = ExpandPropertyUnescaped(property, expander);
                 toolsPath = ExpandRelativePathsRelativeToExeLocation(toolsPath);
@@ -641,7 +641,7 @@ namespace Microsoft.Build.Evaluation
                     );
                 }
             }
-            else if (0 == String.Compare(property.Name, ReservedPropertyNames.binPath, StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(property.Name, ReservedPropertyNames.binPath, StringComparison.OrdinalIgnoreCase))
             {
                 binPath = ExpandPropertyUnescaped(property, expander);
                 binPath = ExpandRelativePathsRelativeToExeLocation(binPath);

@@ -942,7 +942,7 @@ namespace Microsoft.Build.UnitTests.Definition
             matches.RemoveAll(
                 delegate (string candidate)
                 {
-                    bool sameFolder = (0 == String.Compare(Path.GetDirectoryName(candidate),
+                    bool sameFolder = (String.Equals(Path.GetDirectoryName(candidate),
                                                            pathWithoutTrailingSlash,
                                                            StringComparison.OrdinalIgnoreCase));
                     return !sameFolder || !Regex.IsMatch(Path.GetFileName(candidate), finalPattern);

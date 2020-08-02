@@ -79,7 +79,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             foreach (FileReference f in _list)
             {
-                if (String.Compare(targetPath, f.TargetPath, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(targetPath, f.TargetPath, StringComparison.OrdinalIgnoreCase))
                 {
                     return f;
                 }

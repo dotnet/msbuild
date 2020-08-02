@@ -92,10 +92,10 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal static bool IsBadlyCasedSpecialTaskAttribute(string attribute)
         {
             return (!IsSpecialTaskAttribute(attribute) &&
-                ((String.Compare(attribute, condition, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(attribute, continueOnError, StringComparison.OrdinalIgnoreCase) == 0) || 
-                (String.Compare(attribute, msbuildRuntime, StringComparison.OrdinalIgnoreCase) == 0) || 
-                (String.Compare(attribute, msbuildArchitecture, StringComparison.OrdinalIgnoreCase) == 0)));
+                ((String.Equals(attribute, condition, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(attribute, continueOnError, StringComparison.OrdinalIgnoreCase)) || 
+                (String.Equals(attribute, msbuildRuntime, StringComparison.OrdinalIgnoreCase)) || 
+                (String.Equals(attribute, msbuildArchitecture, StringComparison.OrdinalIgnoreCase))));
         }
 
         /// <summary>
