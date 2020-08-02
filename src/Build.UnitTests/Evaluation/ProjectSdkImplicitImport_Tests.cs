@@ -693,74 +693,71 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     yield return SdkReferencePropertyExpansionMode.ExpandLeaveEscaped;
                 }
 
-                static IEnumerable<SdkPropertiesAreExpandedDataTemplate> Templates()
+                static IEnumerable<(SdkPropertiesAreExpandedDataTemplate, bool, bool)> Templates()
                 {
-                    yield return new SdkPropertiesAreExpandedDataTemplate(
-                        ProjectTemplateSdkAsAttributeWithVersion, true
-                    );
-                    yield return new SdkPropertiesAreExpandedDataTemplate(
-                        ProjectTemplateSdkAsElementWithVersion, false
-                    );
-                    yield return new SdkPropertiesAreExpandedDataTemplate(
-                        ProjectTemplateSdkAsExplicitImportWithVersion, false
-                    );
-                }
+                    var templates = new[]
+                    {
+                        new SdkPropertiesAreExpandedDataTemplate(
+                            ProjectTemplateSdkAsAttributeWithVersion, true
+                        ),
+                        new SdkPropertiesAreExpandedDataTemplate(
+                            ProjectTemplateSdkAsElementWithVersion, false
+                        ),
+                        new SdkPropertiesAreExpandedDataTemplate(
+                            ProjectTemplateSdkAsExplicitImportWithVersion, false
+                        )
+                    };
 
-                static IEnumerable<(bool SetName, bool SetVersion)> FalseTrue()
-                {
-                    yield return (false, false);
-                    yield return (false, true);
-                    yield return (true, false);
-                    yield return (true, true);
+                    foreach (var template in templates)
+                    {
+                        yield return (template, false, false);
+                        yield return (template, false, true);
+                        yield return (template, true, false);
+                        yield return (template, true, true);
+                    }
                 }
 
                 foreach (var mode in Modes())
                 {
                     var shouldExpand = mode != SdkReferencePropertyExpansionMode.NoExpansion;
 
-                    foreach (var template in Templates())
+                    foreach (var (template, setName, setVersion) in Templates())
                     {
-                        foreach (var (setName, setVersion) in FalseTrue())
+                        yield return new object[]
                         {
-                            yield return new object[]
-                            {
-                                new SdkPropertiesAreExpandedCase(mode, template, setName, setVersion, true)
-                            };
+                            new SdkPropertiesAreExpandedCase(mode, template, setName, setVersion, true)
+                        };
 
-                            yield return new object[]
+                        yield return new object[]
+                        {
+                            new SdkPropertiesAreExpandedCase(
+                                mode, template, setName, setVersion, shouldExpand && setName
+                            )
                             {
-                                new SdkPropertiesAreExpandedCase(
-                                    mode, template, setName, setVersion,
-                                    shouldExpand && setName
-                                )
-                                {
-                                    TemplateName = SdkNameProperty
-                                }
-                            };
+                                TemplateName = SdkNameProperty
+                            }
+                        };
 
-                            yield return new object[]
+                        yield return new object[]
+                        {
+                            new SdkPropertiesAreExpandedCase(
+                                mode, template, setName, setVersion, shouldExpand && setVersion
+                            )
                             {
-                                new SdkPropertiesAreExpandedCase(
-                                    mode, template, setName, setVersion,
-                                    shouldExpand && setVersion
-                                )
-                                {
-                                    TemplateVersion = SdkVersionProperty
-                                }
-                            };
+                                TemplateVersion = SdkVersionProperty
+                            }
+                        };
 
-                            yield return new object[]
+                        yield return new object[]
+                        {
+                            new SdkPropertiesAreExpandedCase(
+                                mode, template, setName, setVersion, shouldExpand && setName && setVersion
+                            )
                             {
-                                new SdkPropertiesAreExpandedCase(
-                                    mode, template, setName, setVersion,
-                                    shouldExpand && setName && setVersion
-                                )
-                                {
-                                    TemplateName = SdkNameProperty,
-                                    TemplateVersion = SdkVersionProperty
-                                }
-                            };
-                        }
+                                TemplateName = SdkNameProperty,
+                                TemplateVersion = SdkVersionProperty
+                            }
+                        };
                     }
                 }
             }
