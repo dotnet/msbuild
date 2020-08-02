@@ -438,14 +438,14 @@ namespace Microsoft.Build.BuildEngine.Shared
                 .LocalMachine
                 .OpenSubKey(registryBaseKeyName);
 
-            if (null == baseKey)
+            if (baseKey == null)
             {
                 return null;
             }
 
             object keyValue = baseKey.GetValue(registryKeyName);
 
-            if (null == keyValue)
+            if (keyValue == null)
             {
                 return null;
             }

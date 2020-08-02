@@ -297,8 +297,8 @@ namespace Microsoft.Build.BackEnd
         private void EnqueuePacket(INodePacket packet)
         {
             ErrorUtilities.VerifyThrowArgumentNull(packet, "packet");
-            ErrorUtilities.VerifyThrow(null != _packetQueue, "packetQueue is null");
-            ErrorUtilities.VerifyThrow(null != _packetAvailable, "packetAvailable is null");
+            ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue is null");
+            ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable is null");
 
             _packetQueue.Enqueue(packet);
             _packetAvailable.Set();

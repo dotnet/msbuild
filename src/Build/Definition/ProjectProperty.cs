@@ -218,7 +218,7 @@ namespace Microsoft.Build.Evaluation
                 return true;
             }
 
-            if (null == other)
+            if (other == null)
             {
                 return false;
             }

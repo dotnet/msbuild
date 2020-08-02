@@ -267,13 +267,13 @@ namespace Microsoft.Build.BuildEngine
 
             if (Verbosity == LoggerVerbosity.Diagnostic && showItemAndPropertyList)
             {
-                if (null != e.Properties)
+                if (e.Properties != null)
                 {
                     ArrayList propertyList = ExtractPropertyList(e.Properties);
                     WriteProperties(propertyList);
                 }
 
-                if (null != e.Items)
+                if (e.Items != null)
                 {
                     SortedList itemList = ExtractItemList(e.Items);
                     WriteItems(itemList);

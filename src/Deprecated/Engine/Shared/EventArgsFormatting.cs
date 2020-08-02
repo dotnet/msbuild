@@ -207,7 +207,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
 
             // A null message is allowed and is to be treated as a blank line.
-            if (null == message)
+            if (message == null)
             {
                 message = String.Empty;
             }

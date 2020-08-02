@@ -679,7 +679,7 @@ namespace Microsoft.Build.BackEnd
             public string GetEscapedValueIfPresent(string specifiedItemType, string name)
             {
                 string value = null;
-                if (null == specifiedItemType || specifiedItemType == _itemType)
+                if (specifiedItemType == null || specifiedItemType == _itemType)
                 {
                     // Look in the addTable
                     if (_addTable.TryGetValue(name, out value))
@@ -689,17 +689,17 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Look in the bucket table
-                if (null != _bucketTable)
+                if (_bucketTable != null)
                 {
                     value = _bucketTable.GetEscapedValueIfPresent(specifiedItemType, name);
-                    if (null != value)
+                    if (value != null)
                     {
                         return value;
                     }
                 }
 
                 // Look in the item definition table
-                if (null != _itemDefinitionTable)
+                if (_itemDefinitionTable != null)
                 {
                     value = _itemDefinitionTable.GetEscapedValueIfPresent(specifiedItemType, name);
                 }

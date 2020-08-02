@@ -210,7 +210,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (null != file) File.Delete(file);
+                if (file != null) File.Delete(file);
             }
         }
 

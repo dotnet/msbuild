@@ -183,7 +183,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "loggingContext");
             ErrorUtilities.VerifyThrowArgumentNull(entry, "entry");
-            ErrorUtilities.VerifyThrow(null != _componentHost, "Host not set.");
+            ErrorUtilities.VerifyThrow(_componentHost != null, "Host not set.");
             ErrorUtilities.VerifyThrow(_targetBuilder == null, "targetBuilder not null");
             ErrorUtilities.VerifyThrow(_nodeLoggingContext == null, "nodeLoggingContext not null");
             ErrorUtilities.VerifyThrow(_requestEntry == null, "requestEntry not null");
@@ -726,7 +726,7 @@ namespace Microsoft.Build.BackEnd
             }
             catch (InvalidProjectFileException ex)
             {
-                if (null != _projectLoggingContext)
+                if (_projectLoggingContext != null)
                 {
                     _projectLoggingContext.LogInvalidProjectFileError(ex);
                 }
@@ -764,7 +764,7 @@ namespace Microsoft.Build.BackEnd
             {
                 _blockType = BlockType.Unblocked;
 
-                if (null != thrownException)
+                if (thrownException != null)
                 {
                     ErrorUtilities.VerifyThrow(result == null, "Result already set when exception was thrown.");
                     result = new BuildResult(_requestEntry.Request, thrownException);
@@ -781,7 +781,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void ReportResultAndCleanUp(BuildResult result)
         {
-            if (null != _projectLoggingContext)
+            if (_projectLoggingContext != null)
             {
                 try
                 {

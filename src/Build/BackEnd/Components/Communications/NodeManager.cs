@@ -157,12 +157,12 @@ namespace Microsoft.Build.BackEnd
 
             _nodesShutdown = true;
 
-            if (null != _inProcNodeProvider)
+            if (_inProcNodeProvider != null)
             {
                 _inProcNodeProvider.ShutdownConnectedNodes(enableReuse);
             }
 
-            if (null != _outOfProcNodeProvider)
+            if (_outOfProcNodeProvider != null)
             {
                 _outOfProcNodeProvider.ShutdownConnectedNodes(enableReuse);
             }
@@ -174,7 +174,7 @@ namespace Microsoft.Build.BackEnd
         public void ShutdownAllNodes()
         {
             // don't worry about inProc
-            if (null != _outOfProcNodeProvider)
+            if (_outOfProcNodeProvider != null)
             {
                 _outOfProcNodeProvider.ShutdownAllNodes();
             }
@@ -325,7 +325,7 @@ namespace Microsoft.Build.BackEnd
         private int AttemptCreateNode(INodeProvider nodeProvider, NodeConfiguration nodeConfiguration)
         {
             // If no provider was passed in, we obviously can't create a node.
-            if (null == nodeProvider)
+            if (nodeProvider == null)
             {
                 ErrorUtilities.ThrowInternalError("No node provider provided.");
                 return InvalidNodeId;

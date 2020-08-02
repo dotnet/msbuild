@@ -103,7 +103,7 @@ namespace Microsoft.Build.BackEnd
             long hostHandShake = NodeProviderOutOfProc.GetHostHandshake(ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority);
             NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, hostHandShake, NodeProviderOutOfProc.GetClientHandshake(ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority), NodeContextTerminated);
 
-            if (null != context)
+            if (context != null)
             {
                 _nodeContexts[nodeId] = context;
 

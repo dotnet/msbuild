@@ -344,7 +344,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // Finally any direct metadata win.
-                if (null != _directMetadata)
+                if (_directMetadata != null)
                 {
                     foreach (ProjectMetadata metadatum in _directMetadata)
                     {
@@ -452,7 +452,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             ProjectMetadata metadatum = GetItemDefinitionMetadata(name);
-            if (null != metadatum)
+            if (metadatum != null)
             {
                 return true;
             }
@@ -488,13 +488,13 @@ namespace Microsoft.Build.Evaluation
             {
                 ProjectMetadata metadatum = GetItemDefinitionMetadata(name);
 
-                if (null != metadatum && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
+                if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
                 {
                     Expander<ProjectProperty, ProjectItem> expander = new Expander<ProjectProperty, ProjectItem>(null, null, new BuiltInMetadataTable(this), FileSystems.Default);
 
                     value = expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, metadatum.Location);
                 }
-                else if (null != metadatum)
+                else if (metadatum != null)
                 {
                     return metadatum.EvaluatedValueEscaped;
                 }

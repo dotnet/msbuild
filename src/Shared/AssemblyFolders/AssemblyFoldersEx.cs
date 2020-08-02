@@ -261,7 +261,7 @@ namespace Microsoft.Build.Shared
 
                     string directoryName = getRegistrySubKeyDefaultValue(baseKey, directoryKey.RegistryKey);
 
-                    if (null != directoryName)
+                    if (directoryName != null)
                     {
                         _uniqueDirectoryPaths.Add(directoryName);
                         _directoryNames.Add(new AssemblyFoldersExInfo(hive, view, directoryKey.RegistryKey, directoryName, directoryKey.TargetFrameworkVersion));

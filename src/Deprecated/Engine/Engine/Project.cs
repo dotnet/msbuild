@@ -427,7 +427,7 @@ namespace Microsoft.Build.BuildEngine
                 // If the toolsVersion is null, we will use the value specified in
                 // the Project element's ToolsVersion attribute, or else the default if that
                 // attribute is not present.
-                if (null != toolsVersion)
+                if (toolsVersion != null)
                 {
                     this.ToolsVersion = toolsVersion;
                 }
@@ -3987,7 +3987,7 @@ namespace Microsoft.Build.BuildEngine
                         case XMakeElements.projectExtensions:
                             if (!importedProject)
                             {
-                                ProjectErrorUtilities.VerifyThrowInvalidProject(null == this.projectExtensionsNode, childElement,
+                                ProjectErrorUtilities.VerifyThrowInvalidProject(this.projectExtensionsNode == null, childElement,
                                     "DuplicateProjectExtensions");
                                 this.projectExtensionsNode = childElement;
 

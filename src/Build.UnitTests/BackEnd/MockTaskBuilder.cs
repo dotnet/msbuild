@@ -92,7 +92,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             ProjectOnErrorInstance errorTask = task as ProjectOnErrorInstance;
-            if (null != errorTask)
+            if (errorTask != null)
             {
                 ErrorTasks.Add(errorTask);
             }

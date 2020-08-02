@@ -203,7 +203,7 @@ namespace Microsoft.Build.BuildEngine
             // here. Instead, NDP will try to Load (not LoadFrom!) the task assembly into our AppDomain, and since
             // we originally used LoadFrom, it will fail miserably not knowing where to find it.
             // We need to temporarily subscribe to the AppDomain.AssemblyResolve event to fix it.
-            if (null == resolver)
+            if (resolver == null)
             {
                 resolver = new TaskEngineAssemblyResolver();
                 resolver.Initialize(TaskClass.Assembly.AssemblyFile);

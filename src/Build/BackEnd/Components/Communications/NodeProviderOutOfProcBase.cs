@@ -92,7 +92,7 @@ namespace Microsoft.Build.BackEnd
 
             foreach (NodeContext nodeContext in contextsToShutDown)
             {
-                if (null != nodeContext)
+                if (nodeContext != null)
                 {
                     nodeContext.SendData(new NodeBuildComplete(enableReuse));
                 }
@@ -128,13 +128,13 @@ namespace Microsoft.Build.BackEnd
                 // Attempt to connect to the process with the handshake without low priority.
                 Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHostHandshake(nodeReuse, false), NodeProviderOutOfProc.GetClientHandshake(nodeReuse, false));
 
-                if (null == nodeStream)
+                if (nodeStream == null)
                 {
                     // If we couldn't connect attempt to connect to the process with the handshake including low priority.
                     nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHostHandshake(nodeReuse, true), NodeProviderOutOfProc.GetClientHandshake(nodeReuse, true));
                 }
 
-                if (null != nodeStream)
+                if (nodeStream != null)
                 {
                     // If we're able to connect to such a process, send a packet requesting its termination
                     CommunicationsUtilities.Trace("Shutting down node with pid = {0}", nodeProcess.Id);

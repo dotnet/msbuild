@@ -177,7 +177,7 @@ namespace Microsoft.Build.BuildEngine
         private GenericExpressionNode BooleanTerm(string expression)
         {
             GenericExpressionNode node = RelationalExpr(expression);
-            if (null == node)
+            if (node == null)
             {
                 errorPosition = lexer.GetErrorPosition();
                 ProjectErrorUtilities.VerifyThrowInvalidProject(false, this.conditionAttribute, "UnexpectedTokenInCondition", expression, lexer.IsNextString(), errorPosition);
@@ -199,7 +199,7 @@ namespace Microsoft.Build.BuildEngine
             else if (Same(expression, Token.TokenType.And))
             {
                 GenericExpressionNode rhs = RelationalExpr(expression);
-                if (null == rhs)
+                if (rhs == null)
                 {
                     errorPosition = lexer.GetErrorPosition();
                     ProjectErrorUtilities.VerifyThrowInvalidProject(false, this.conditionAttribute, "UnexpectedTokenInCondition", expression, lexer.IsNextString(), errorPosition);
@@ -221,7 +221,7 @@ namespace Microsoft.Build.BuildEngine
         {
          {
                 GenericExpressionNode lhs = Factor(expression);
-                if (null == lhs)
+                if (lhs == null)
                 {
                     errorPosition = lexer.GetErrorPosition();
                     ProjectErrorUtilities.VerifyThrowInvalidProject(false, this.conditionAttribute, "UnexpectedTokenInCondition", expression, lexer.IsNextString(), errorPosition);
@@ -384,7 +384,7 @@ namespace Microsoft.Build.BuildEngine
                 if (!lexer.Advance())
                 {
                     errorPosition = lexer.GetErrorPosition();
-                    if (null != lexer.UnexpectedlyFound)
+                    if (lexer.UnexpectedlyFound != null)
                     {
                         ProjectErrorUtilities.VerifyThrowInvalidProject(false, this.conditionAttribute, lexer.GetErrorResource(), expression, errorPosition, lexer.UnexpectedlyFound);
                     }

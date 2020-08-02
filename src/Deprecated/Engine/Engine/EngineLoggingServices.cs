@@ -744,7 +744,7 @@ namespace Microsoft.Build.BuildEngine
                 ProjectStartedEventArgs e;
 
                
-                if (null != targetNames && targetNames.Length > 0)
+                if (targetNames != null && targetNames.Length > 0)
                 {
                     e = new ProjectStartedEventArgs
                         (

@@ -490,7 +490,7 @@ namespace Microsoft.Build.Tasks
             {
                 _tlbimpPath = GetPathToSDKFileWithCurrentlyTargetedArchitecture("TlbImp.exe", TargetDotNetFrameworkVersion.Version35, VisualStudioVersion.VersionLatest);
 
-                if (null == _tlbimpPath && ExecuteAsTool)
+                if (_tlbimpPath == null && ExecuteAsTool)
                 {
                     Log.LogErrorWithCodeFromResources("General.PlatformSDKFileNotFound", "TlbImp.exe",
                         ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version35, VisualStudioVersion.VersionLatest),
@@ -502,7 +502,7 @@ namespace Microsoft.Build.Tasks
                 _tlbimpPath = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, TargetProcessorArchitecture, SdkToolsPath, "TlbImp.exe", Log, ExecuteAsTool);
             }
 
-            if (null == _tlbimpPath && !ExecuteAsTool)
+            if (_tlbimpPath == null && !ExecuteAsTool)
             {
                 // if TlbImp.exe is not installed, just use the filename
                 _tlbimpPath = "TlbImp.exe";
@@ -539,7 +539,7 @@ namespace Microsoft.Build.Tasks
                 // We want to use the copy of AxImp corresponding to our targeted architecture if possible.  
                 _aximpPath = GetPathToSDKFileWithCurrentlyTargetedArchitecture("AxImp.exe", targetAxImpVersion, VisualStudioVersion.VersionLatest);
 
-                if (null == _aximpPath)
+                if (_aximpPath == null)
                 {
                     Log.LogErrorWithCodeFromResources("General.PlatformSDKFileNotFound", "AxImp.exe",
                         ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(targetAxImpVersion, VisualStudioVersion.VersionLatest),

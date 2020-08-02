@@ -253,7 +253,7 @@ namespace Microsoft.Build.Evaluation
             : this(toolsVersion, toolsPath, null, projectCollection.EnvironmentProperties, projectCollection.GlobalPropertiesCollection, subToolsets, msbuildOverrideTasksPath, defaultOverrideToolsVersion: null)
         {
             _properties = new PropertyDictionary<ProjectPropertyInstance>();
-            if (null != buildProperties)
+            if (buildProperties != null)
             {
                 foreach (KeyValuePair<string, string> keyValuePair in buildProperties)
                 {
@@ -702,7 +702,7 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                if (null != getFiles)
+                if (getFiles != null)
                 {
                     defaultTasksFiles = getFiles(searchPath, taskPattern);
                 }
@@ -1002,7 +1002,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (Path.IsPathRooted(_overrideTasksPath))
                             {
-                                if (null != _directoryExists)
+                                if (_directoryExists != null)
                                 {
                                     overrideDirectoryExists = _directoryExists(_overrideTasksPath);
                                 }
@@ -1068,7 +1068,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         ProjectUsingTaskElement usingTask = elementXml as ProjectUsingTaskElement;
 
-                        if (null == usingTask)
+                        if (usingTask == null)
                         {
                             ProjectErrorUtilities.ThrowInvalidProject
                                 (

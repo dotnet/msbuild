@@ -131,7 +131,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                if (null == configurationSection && !configurationReadAttempted)
+                if (configurationSection == null && !configurationReadAttempted)
                 {
                     try
                     {
@@ -148,7 +148,7 @@ namespace Microsoft.Build.BuildEngine
                         // If section definition is not present and section is also not present, this value is null
                         // If the section definition is not present and section is present, then this value is null
 
-                        if (null != configuration)
+                        if (configuration != null)
                         {
                             configurationSection = configuration.GetSection("msbuildToolsets") as ToolsetConfigurationSection;
                         }

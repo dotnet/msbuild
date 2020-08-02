@@ -1463,7 +1463,7 @@ namespace Microsoft.Build.BackEnd.Logging
             try
             {
                 INodeLogger nodeLogger = logger as INodeLogger;
-                if (null != nodeLogger)
+                if (nodeLogger != null)
                 {
                     nodeLogger.Initialize(sourceForLogger, _maxCPUCount);
                 }

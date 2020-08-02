@@ -396,11 +396,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (null != firstResx) File.Delete(firstResx);
-                if (null != secondResx) File.Delete(secondResx);
-                if (null != cache) File.Delete(cache);
-                if (null != firstResx) File.Delete(Path.ChangeExtension(firstResx, ".resources"));
-                if (null != secondResx) File.Delete(Path.ChangeExtension(secondResx, ".resources"));
+                if (firstResx != null) File.Delete(firstResx);
+                if (secondResx != null) File.Delete(secondResx);
+                if (cache != null) File.Delete(cache);
+                if (firstResx != null) File.Delete(Path.ChangeExtension(firstResx, ".resources"));
+                if (secondResx != null) File.Delete(Path.ChangeExtension(secondResx, ".resources"));
             }
         }
 
@@ -1274,10 +1274,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (null != resxFile1) File.Delete(resxFile1);
-                if (null != resxFile2) File.Delete(resxFile2);
-                if (null != resourcesFile1) File.Delete(resourcesFile1);
-                if (null != resourcesFile2) File.Delete(resourcesFile2);
+                if (resxFile1 != null) File.Delete(resxFile1);
+                if (resxFile2 != null) File.Delete(resxFile2);
+                if (resourcesFile1 != null) File.Delete(resourcesFile1);
+                if (resourcesFile2 != null) File.Delete(resourcesFile2);
             }
         }
 
@@ -1334,10 +1334,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (null != resxFile1) File.Delete(resxFile1);
-                if (null != resxFile2) File.Delete(resxFile2);
-                if (null != resourcesFile1) File.Delete(resourcesFile1);
-                if (null != resourcesFile2) File.Delete(resourcesFile2);
+                if (resxFile1 != null) File.Delete(resxFile1);
+                if (resxFile2 != null) File.Delete(resxFile2);
+                if (resourcesFile1 != null) File.Delete(resourcesFile1);
+                if (resourcesFile2 != null) File.Delete(resourcesFile2);
             }
         }
 
@@ -1419,8 +1419,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (null != resxFile) File.Delete(resxFile);
-                if (null != resourcesFile) File.Delete(resourcesFile);
+                if (resxFile != null) File.Delete(resxFile);
+                if (resourcesFile != null) File.Delete(resourcesFile);
             }
         }
 
@@ -2121,10 +2121,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (null != resxFile) File.Delete(resxFile);
-                if (null != resxFile2) File.Delete(resxFile2);
-                if (null != resxFile) File.Delete(Path.ChangeExtension(resxFile, ".resources"));
-                if (null != resxFile2) File.Delete(Path.ChangeExtension(resxFile2, ".resources"));
+                if (resxFile != null) File.Delete(resxFile);
+                if (resxFile2 != null) File.Delete(resxFile2);
+                if (resxFile != null) File.Delete(Path.ChangeExtension(resxFile, ".resources"));
+                if (resxFile2 != null) File.Delete(Path.ChangeExtension(resxFile2, ".resources"));
             }
         }
 
@@ -2269,7 +2269,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             finally
             {
-                if (null != txtFile) File.Delete(txtFile);
+                if (txtFile != null) File.Delete(txtFile);
             }
         }
 

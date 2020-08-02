@@ -547,12 +547,12 @@ namespace Microsoft.Build.BackEnd
                         // the log is confusing.
                         targetLoggingContext.LogInvalidProjectFileError(e);
 
-                        if (null != entryForInference)
+                        if (entryForInference != null)
                         {
                             entryForInference.LeaveScope();
                         }
 
-                        if (null != entryForExecution)
+                        if (entryForExecution != null)
                         {
                             entryForExecution.LeaveScope();
                         }
@@ -724,7 +724,7 @@ namespace Microsoft.Build.BackEnd
 
             // If this target never executed (for instance, because one of its dependencies errored) then we need to
             // create a result for this target to report when it gets to the Completed state.
-            if (null == _targetResult)
+            if (_targetResult == null)
             {
                 _targetResult = new TargetResult(Array.Empty<TaskItem>(), new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
             }
@@ -753,7 +753,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="lookup">The lookup to enter with.</param>
         internal void EnterLegacyCallTargetScope(Lookup lookup)
         {
-            if (null == _legacyCallTargetScopes)
+            if (_legacyCallTargetScopes == null)
             {
                 _legacyCallTargetScopes = new Stack<Lookup.Scope>();
             }
@@ -789,7 +789,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void LeaveLegacyCallTargetScopes()
         {
-            if (null != _legacyCallTargetScopes)
+            if (_legacyCallTargetScopes != null)
             {
                 while (_legacyCallTargetScopes.Count != 0)
                 {

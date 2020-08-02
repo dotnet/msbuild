@@ -1191,7 +1191,7 @@ namespace Microsoft.Build.BackEnd
         {
             string taskParameterAttribute = _taskNode.GetParameter(taskParameterName);
 
-            if (null != taskParameterAttribute)
+            if (taskParameterAttribute != null)
             {
                 ProjectTaskOutputItemInstance taskItemInstance = taskOutputSpecification as ProjectTaskOutputItemInstance;
                 if (taskItemInstance != null)
