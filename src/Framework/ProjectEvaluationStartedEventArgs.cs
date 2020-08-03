@@ -16,7 +16,6 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public ProjectEvaluationStartedEventArgs()
         {
-
         }
 
         /// <summary>

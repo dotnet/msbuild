@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
-
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -80,7 +79,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public MyTestCollectionGroup StdGroup { get; }
         public LinkedSpecialCasesScenarios(MyTestCollectionGroup group)
         {
-
             this.StdGroup = group;
             group.ResetBeforeTests();
         }

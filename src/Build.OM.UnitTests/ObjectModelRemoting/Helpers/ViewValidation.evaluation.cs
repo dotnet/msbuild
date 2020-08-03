@@ -245,7 +245,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Assert.Equal(real.Name, view.Name);
             Assert.Equal(real.Version, view.Version);
             Assert.Equal(real.MinimumVersion, view.MinimumVersion);
-
         }
 
         private static void Verify(SdkResult view, SdkResult real, ValidationContext context = null)

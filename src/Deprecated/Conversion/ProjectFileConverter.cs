@@ -532,7 +532,6 @@ namespace Microsoft.Build.Conversion
                         listOfWFImportsToBeDeleted.Add(nextImport);
                         workflowImportsToAdd.Add(nextImport.Project.Replace(workflowOldOrcasTargetsPath, workflowNewTargetsPath));
                     }
-
                 }
 
                 // Now delete any matching imports
@@ -563,7 +562,6 @@ namespace Microsoft.Build.Conversion
                     xmakeProject.AddProperty(XMakeProjectStrings.TargetFrameworkVersion, "v3.0");
                     changedProject = true;
                 }
-
 
                 // Re-add the workflow imports with the v4.0 targets.
                 foreach (string workflowImportToAdd in workflowImportsToAdd)
@@ -1072,7 +1070,6 @@ namespace Microsoft.Build.Conversion
                 //</Choose>
                 //<Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />           
 
-
                 var whenVsVersionIsDev11 = xmakeProject.CreateWhenElement("'$(VisualStudioVersion)' == '11.0'");
                 chooseElement.AppendChild(whenVsVersionIsDev11);
                 {
@@ -1224,7 +1221,6 @@ namespace Microsoft.Build.Conversion
             {
                 fsharpCoreItem.Parent.RemoveChild(fsharpCoreItem);
             }
-
 
             return true;
         }
@@ -1518,7 +1514,7 @@ namespace Microsoft.Build.Conversion
             // Get the project instance GUID for this project file.  It is required for
             // the main project file, but not for the .USER file.
             this.projectGuid = languageElement.GetAttribute(VSProjectAttributes.projectGuid);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((this.projectGuid != null) || (this.isUserFile == true),
+            ProjectErrorUtilities.VerifyThrowInvalidProject((this.projectGuid != null) || (this.isUserFile),
                 languageElement.Location, "MissingAttribute", languageElement.Name, VSProjectAttributes.projectGuid);
 
             // Get the project type for this project file.  We only support "Local".  We do not
@@ -1629,7 +1625,6 @@ namespace Microsoft.Build.Conversion
                     SetProjectExtensionsString(XMakeProjectStrings.visualStudio, visualStudioProjectExtensions);
                 }
             }
-
 
             // Loop through all the direct child elements of the language element.
             foreach(XmlNode languageChildNode in languageElement)
@@ -3004,7 +2999,6 @@ namespace Microsoft.Build.Conversion
                 {
                     ProjectXmlUtilities.ThrowProjectInvalidChildElement(importsChildNode.Name, importsElement.Name, importsElement.Location);
                 }
-
             }
         }
 
@@ -3250,7 +3244,6 @@ namespace Microsoft.Build.Conversion
                  && IsFilePresentButEmpty(relPath, linkPath))
                )
             {
-
                 // Add the new item to XMake.
                 if ((linkPath == null) || (linkPath.Length == 0))
                 {

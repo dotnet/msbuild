@@ -271,7 +271,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test which ensures that setting a host object for a project with an out-of-proc affinity throws.
         /// </summary>
-
         [Fact]
         public void TestContraditcoryHostObjectCausesException_OutOfProc()
         {

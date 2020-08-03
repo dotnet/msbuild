@@ -2197,7 +2197,6 @@ namespace Microsoft.Build.Evaluation
                                     _evaluationLoggingContext.LogBuildEvent(eventArgs);
                                 }
 
-
                                 continue;
                             }
 

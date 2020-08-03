@@ -314,7 +314,6 @@ namespace Microsoft.Build.Utilities
 
             AssemblyFoldersEx assemblyFoldersEx = new AssemblyFoldersEx(registryRoot, targetFrameworkVersion, registryKeySuffix, osVersion, platform, new GetRegistrySubKeyNames(RegistryHelper.GetSubKeyNames), new GetRegistrySubKeyDefaultValue(RegistryHelper.GetDefaultValue), targetProcessorArchitecture, new OpenBaseKey(RegistryHelper.OpenBaseKey));
 
-
             var assemblyFolders = new List<AssemblyFoldersExInfo>();
             assemblyFolders.AddRange(assemblyFoldersEx);
             return assemblyFolders;
@@ -939,7 +938,6 @@ namespace Microsoft.Build.Utilities
                 string targetPlatformVersion
             )
         {
-
             lock (s_locker)
             {
                 if (s_cachedExtensionSdkReferences == null)
@@ -1803,7 +1801,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetFrameworkProfile">Profile being targeted</param>
         /// <param name="platformTarget">What is the targeted platform, this is used to determine where we should look for the standard libraries. Note, this parameter is only used for .net frameworks less than 4.0</param>
         /// <param name="targetFrameworkRootPath">Root directory where the target framework will be looked for. Uses default path if this is null</param>
-        /// <param name="targetFrameworkFallbackSearchPaths">';' separated list of paths that are looked up if the the framework cannot be found in @targetFrameworkRootPath</param>
+        /// <param name="targetFrameworkFallbackSearchPaths">';' separated list of paths that are looked up if the framework cannot be found in @targetFrameworkRootPath</param>
         /// <exception cref="ArgumentNullException">When the frameworkName is null</exception>
         /// <returns>Collection of reference assembly locations.</returns>
         public static string GetPathToStandardLibraries(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile, string platformTarget, string targetFrameworkRootPath, string targetFrameworkFallbackSearchPaths)
@@ -1903,7 +1901,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetFrameworkVersion">Version being targeted</param>
         /// <param name="targetFrameworkProfile">Profile being targeted</param>
         /// <param name="targetFrameworkRootPath">Root directory which will be used to calculate the reference assembly path. The references assemblies will be
-        /// <param name="targetFrameworkFallbackSearchPaths">';' separated list of paths that are looked up if the the framework cannot be found in @targetFrameworkRootPath</param>
+        /// <param name="targetFrameworkFallbackSearchPaths">';' separated list of paths that are looked up if the framework cannot be found in @targetFrameworkRootPath</param>
         /// generated in the following way TargetFrameworkRootPath\TargetFrameworkIdentifier\TargetFrameworkVersion\SubType\TargetFrameworkSubType.
         /// Uses the default path if this is null.
         /// </param>
@@ -1920,7 +1918,6 @@ namespace Microsoft.Build.Utilities
 
             return GetPathToReferenceAssemblies(targetFrameworkRootPath, targetFrameworkFallbackSearchPaths, targetFrameworkName);
         }
-
 
         /// <summary>
         /// Returns the paths to the reference assemblies location for the given target framework.
@@ -2164,7 +2161,6 @@ namespace Microsoft.Build.Utilities
             return referencePaths;
         }
 
-
         /// <summary>
         /// Returns the paths to the reference assemblies location for the given framework version relative to a given targetFrameworkRoot.
         /// The method will not check to see if the path exists or not.
@@ -2172,7 +2168,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetFrameworkRootPath">Root directory which will be used to calculate the reference assembly path. The references assemblies will be
         /// generated in the following way TargetFrameworkRootPath\TargetFrameworkIdentifier\TargetFrameworkVersion\SubType\TargetFrameworkSubType.
         /// </param>
-        /// <param name="targetFrameworkFallbackSearchPaths">';' separated list of paths that are looked up if the the framework cannot be found in @targetFrameworkRootPath</param>
+        /// <param name="targetFrameworkFallbackSearchPaths">';' separated list of paths that are looked up if the framework cannot be found in @targetFrameworkRootPath</param>
         /// <param name="frameworkName">A frameworkName class which represents a TargetFrameworkMoniker. This cannot be null.</param>
         /// <returns>Collection of reference assembly locations.</returns>
         public static IList<string> GetPathToReferenceAssemblies(string targetFrameworkRootPath, string targetFrameworkFallbackSearchPaths, FrameworkNameVersioning frameworkName)
@@ -3020,7 +3016,6 @@ namespace Microsoft.Build.Utilities
                 ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerRegistryRoots", "MSBUILDDISABLEREGISTRYFORSDKLOOKUP is set registry sdk lookup is disabled");
             }
 
-
             return registryRoot;
         }
 
@@ -3690,7 +3685,6 @@ namespace Microsoft.Build.Utilities
             return s_targetFrameworkMonikers;
         }
 
-
         /// <summary>
         /// This method will return the highest version of a target framework moniker based on the identifier. This method will only 
         /// find full frameworks, this means no profiles will be returned.
@@ -3830,7 +3824,6 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-
             if (programFilesReferenceAssemblyLocationFound && bFoundDotNetFrameworkIdentifier == false)
             {
                 if (bAddDotNetFrameworkIdentifier == false)
@@ -3853,10 +3846,8 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-
             return frameworkIdentifiers;
         }
-
 
         /// <summary>
         /// Gets the installed versions for a given framework
@@ -3964,7 +3955,6 @@ namespace Microsoft.Build.Utilities
 
             return frameworkProfiles;
         }
-
 
         /// <summary>
         /// returns the .NETFramework versions lessthanOrEqualTo 3.5 installed in the machine

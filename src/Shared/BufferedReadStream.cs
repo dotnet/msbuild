@@ -144,7 +144,6 @@ namespace Microsoft.Build.BackEnd
 
             base.Dispose(disposing);
         }
-
         
     }
 }

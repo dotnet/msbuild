@@ -474,7 +474,6 @@ namespace Microsoft.Build.Tasks.Xaml
                             }
                         }
                     }
-
                     else if (String.Equals(child.Name, includedPlatformType, StringComparison.OrdinalIgnoreCase))
                     {
                         foreach (XmlAttribute attrib in child.Attributes)

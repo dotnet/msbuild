@@ -255,7 +255,6 @@ namespace Microsoft.Build.BuildEngine
                 this.readStream = new MemoryStream(this.readBuffer);
                 this.binaryReader = new BinaryReader(this.readStream);
                 readLock = new object();
-
             }
             else if (streamType == SharedMemoryType.WriteOnly)
             {
@@ -267,7 +266,6 @@ namespace Microsoft.Build.BuildEngine
             {
                 ErrorUtilities.VerifyThrow(false, "Unknown shared memory type.");
             }
-
         }
 
         /// <summary>
@@ -328,12 +326,10 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-
         public void Dispose()
         {
             Dispose(true);
         }
-
 
         ~SharedMemory()
         {
@@ -450,10 +446,10 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// This function write out a set of objects into the the shared buffer.
+        /// This function write out a set of objects into the shared buffer.
         /// In normal operation all the objects in the queue are serialized into
         /// the buffer followed by an end marker class. If the buffer is not big
-        /// enough to contain a single object the object is broken into into 
+        /// enough to contain a single object the object is broken into 
         /// multiple buffers as follows - first a frame marker is sent containing
         /// the size of the serialized object + size of end marker. The reader makes
         /// sure upon receiving the frame marker that its buffer is large enough 

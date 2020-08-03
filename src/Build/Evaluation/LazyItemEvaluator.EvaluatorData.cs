@@ -311,6 +311,5 @@ namespace Microsoft.Build.Evaluation
             }
         }
     }
-
     
 }

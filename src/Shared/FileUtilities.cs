@@ -31,7 +31,6 @@ namespace Microsoft.Build.Shared
         // A list of possible test runners. If the program running has one of these substrings in the name, we assume
         // this is a test harness.
 
-
         // This flag, when set, indicates that we are running tests. Initially assume it's true. It also implies that
         // the currentExecutableOverride is set to a path (that is non-null). Assume this is not initialized when we
         // have the impossible combination of runningTests = false and currentExecutableOverride = null.
@@ -83,7 +82,6 @@ namespace Microsoft.Build.Shared
         /// Copied from https://github.com/dotnet/corefx/blob/056715ff70e14712419d82d51c8c50c54b9ea795/src/Common/src/System/IO/PathInternal.Windows.cs#L61
         /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/Microsoft/msbuild/issues/781#issuecomment-243942514
         /// </summary>
-
         internal static readonly char[] InvalidPathChars = new char[]
         {
             '|', '\0',
@@ -350,7 +348,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string NormalizePath(string path)
         {
-
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
             string fullPath = GetFullPath(path);
             return FixFilePath(fullPath);
@@ -665,7 +662,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string ExecutingAssemblyPath => Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(typeof(FileUtilities).GetTypeInfo().Assembly));
 
-
         /// <summary>
         /// Determines the full path for the given file-spec.
         /// ASSUMES INPUT IS STILL ESCAPED
@@ -768,7 +764,6 @@ namespace Microsoft.Build.Shared
 
             return path.IndexOfAny(InvalidFileNameChars, lastDirectorySeparator >= 0 ? lastDirectorySeparator + 1 : 0) >= 0;
         }
-
 
         /// <summary>
         /// A variation on File.Delete that will throw ExceptionHandling.NotExpectedException exceptions
@@ -919,7 +914,6 @@ namespace Microsoft.Build.Shared
                 return Traits.Instance.CacheFileExistence
                     ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.DirectoryExists)
                     : fileSystem.DirectoryExists(fullPath);
-
             }
             catch
             {
@@ -944,7 +938,6 @@ namespace Microsoft.Build.Shared
                 return Traits.Instance.CacheFileExistence
                     ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.FileExists)
                     : fileSystem.FileExists(fullPath);
-
             }
             catch
             {

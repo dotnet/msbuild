@@ -2226,7 +2226,6 @@ class X
             {
                 FileUtilities.DeleteDirectoryNoThrow(testDir, true);
             }
-
         }
 
         [Fact(Skip = "Needs investigation")]

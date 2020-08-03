@@ -2092,7 +2092,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     }
 
                     // If the public key in the file doesn't match the public key on disk, issue a build warning
-                    if (publicKey == null || !publicKey.ToLowerInvariant().Equals(publicKeyAttribute.Value.ToLowerInvariant()))
+                    if (publicKey == null || !publicKey.Equals(publicKeyAttribute.Value, StringComparison.OrdinalIgnoreCase))
                     {
                         results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.DifferingPublicKeys", PUBLICKEY_ATTRIBUTE, builder.Name, fileSource));
                     }
@@ -2105,7 +2105,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     ReplaceAttribute(packageFileNode, HASH_ATTRIBUTE, fileHash);
 
                     // If the public key in the file doesn't match the public key on disk, issue a build warning
-                    if (!fileHash.ToLowerInvariant().Equals(hashAttribute.Value.ToLowerInvariant()))
+                    if (!fileHash.Equals(hashAttribute.Value, StringComparison.OrdinalIgnoreCase))
                     {
                         results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.DifferingPublicKeys", "Hash", builder.Name, fileSource));
                     }

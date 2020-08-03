@@ -555,7 +555,6 @@ namespace Microsoft.Build.Utilities
                 ErrorUtilities.ThrowInvalidOperation("LoggingBeforeTaskInitialization", e.Message);
             }
 
-
             BuildEngine.LogMessageEvent(e);
         }
 

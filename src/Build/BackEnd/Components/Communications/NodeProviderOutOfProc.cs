@@ -63,19 +63,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="enableNodeReuse">Is reuse of build nodes allowed?</param>
         /// <param name="enableLowPriority">Is the build running at low priority?</param>
-        internal static long GetHostHandshake(bool enableNodeReuse, bool enableLowPriority)
+        internal static Handshake GetHandshake(bool enableNodeReuse, bool enableLowPriority)
         {
             CommunicationsUtilities.Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", enableNodeReuse={2}, enableLowPriority={3}", Traits.MSBuildNodeHandshakeSalt, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, enableNodeReuse, enableLowPriority);
-            return CommunicationsUtilities.GetHostHandshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, nodeReuse: enableNodeReuse, lowPriority: enableLowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess));
-        }
-
-        /// <summary>
-        /// Magic number sent by the client to the host during the handshake.
-        /// Munged version of the host handshake.
-        /// </summary>
-        internal static long GetClientHandshake(bool enableNodeReuse, bool enableLowPriority)
-        {
-            return CommunicationsUtilities.GetClientHandshake(CommunicationsUtilities.GetHandshakeOptions(false, nodeReuse: enableNodeReuse, lowPriority: enableLowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess));
+            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, nodeReuse: enableNodeReuse, lowPriority: enableLowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess));
         }
 
         /// <summary>
@@ -100,8 +91,8 @@ namespace Microsoft.Build.BackEnd
             // Make it here.
             CommunicationsUtilities.Trace("Starting to acquire a new or existing node to establish node ID {0}...", nodeId);
 
-            long hostHandShake = NodeProviderOutOfProc.GetHostHandshake(ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority);
-            NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, hostHandShake, NodeProviderOutOfProc.GetClientHandshake(ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority), NodeContextTerminated);
+            Handshake hostHandshake = new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, nodeReuse: ComponentHost.BuildParameters.EnableNodeReuse, lowPriority: ComponentHost.BuildParameters.LowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess));
+            NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, hostHandshake, NodeContextTerminated);
 
             if (null != context)
             {

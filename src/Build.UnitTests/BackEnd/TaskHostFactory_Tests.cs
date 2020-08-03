@@ -49,6 +49,5 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 }
             }
         }
-
     }
 }
