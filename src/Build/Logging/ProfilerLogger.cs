@@ -143,7 +143,6 @@ namespace Microsoft.Build.Logging
                 foreach (var pair in profiledResult.ProfiledLocations.OrderBy(p => p.Key.Id))
                 {
                     MergeItem(originalLocations, mergeMap, _aggregatedLocations, pair);
-
                 }
             }
 

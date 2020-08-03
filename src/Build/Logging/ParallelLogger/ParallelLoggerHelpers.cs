@@ -648,7 +648,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Output the projectKey or the projectKey and the entrypointKey depending on the verbosity level of the logger
         /// </summary>
-
         public string ToString(LoggerVerbosity verbosity)
         {
             string fullProjectKey;

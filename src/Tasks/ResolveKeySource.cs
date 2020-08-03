@@ -84,7 +84,6 @@ namespace Microsoft.Build.Tasks
             return result;
         }
 
-
         private bool ResolveAssemblyKey()
         {
             bool pfxSuccess = true;

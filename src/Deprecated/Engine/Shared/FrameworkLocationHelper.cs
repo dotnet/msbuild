@@ -64,7 +64,6 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal const string fullDotNetFrameworkSdkRegistryKeyV40 = "HKEY_LOCAL_MACHINE\\" + dotNetFrameworkSdkRegistryPathV40;
         internal const string dotNetFrameworkSdkInstallKeyValueV40 = "InstallationFolder";
 
-
         private const string dotNetFrameworkAssemblyFoldersRegistryKeyV40 = dotNetFrameworkAssemblyFoldersRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV40;
         private const string secondaryDotNetFrameworkSdkRegistryPathV40 = "SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows";
         internal const string secondaryDotNetFrameworkSdkInstallKeyValueV40 = "CurrentInstallFolder";
@@ -85,7 +84,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                     }
                     else
                     {
-
                         FrameworkLocationHelper.pathToDotNetFrameworkV11 =
                             FindDotNetFrameworkPath(
                                 Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
@@ -113,7 +111,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                     }
                     else
                     {
-
                         FrameworkLocationHelper.pathToDotNetFrameworkV20 =
                             FindDotNetFrameworkPath(
                                 Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
@@ -141,7 +138,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                     }
                     else
                     {
-
                         FrameworkLocationHelper.pathToDotNetFrameworkV30 =
                             FindDotNetFrameworkPath(
                                 Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
@@ -269,7 +265,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                             secondaryDotNetFrameworkSdkRegistryPathV35,
                             secondaryDotNetFrameworkSdkInstallKeyValueV35);
                     }
-
                 }
 
                 return FrameworkLocationHelper.pathToDotNetFrameworkSdkV35;
@@ -302,7 +297,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                             secondaryDotNetFrameworkSdkRegistryPathV40,
                             secondaryDotNetFrameworkSdkInstallKeyValueV40);
                     }
-
                 }
 
                 return FrameworkLocationHelper.pathToDotNetFrameworkSdkV40;
@@ -347,7 +341,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                     {
                         FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV35 = GenerateReferenceAssemblyDirectory(dotNetFrameworkVersionFolderPrefixV35);
                     }
-
                 }
 
                 return FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV35;

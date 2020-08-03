@@ -269,7 +269,6 @@ namespace Microsoft.Build.BuildEngine
                             resolver = null;
                         }
                     }
-                
             }
         }
         #endregion

@@ -123,7 +123,6 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
         }
 
-
         /// <summary>
         /// The assembly's version number.
         /// </summary>
@@ -226,7 +225,6 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns></returns>
         internal int CompareTo(AssemblyNameExtension that)
         {
-
             // Are they identical?
             if (this.Equals(that))
             {

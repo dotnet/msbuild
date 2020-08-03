@@ -112,7 +112,6 @@ namespace Microsoft.Build.BuildEngine
             }
             catch (ArgumentException e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
-
                 if(nodeFileLogger != null)
                 {
                     nodeFileLogger.Shutdown();

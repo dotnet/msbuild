@@ -113,14 +113,12 @@ namespace Microsoft.Build.Tasks
                     {
                         writeOutput = false;
                     }
-
                 }
                 catch(System.Xml.XmlException)
                 {
                     writeOutput = true;
                 }
             }
-
 
             if (AppConfigFile != null)
             {

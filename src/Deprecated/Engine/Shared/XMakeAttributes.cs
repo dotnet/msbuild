@@ -80,7 +80,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                     (attribute == msbuildRuntime) ||
                     (attribute == msbuildArchitecture) ||
                     (attribute == xmlns));
-
         }
 
         /// <summary>

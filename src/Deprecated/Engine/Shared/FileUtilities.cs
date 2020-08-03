@@ -12,7 +12,6 @@ using System.Text;
 using System.Threading;
 using System.Runtime.InteropServices;
 
-
 namespace Microsoft.Build.BuildEngine.Shared
 {
     /// <summary>
@@ -96,7 +95,6 @@ namespace Microsoft.Build.BuildEngine.Shared
             {
                 return false;
             }
-
 
             /* 
              * What follows requires some explanation.

@@ -954,7 +954,6 @@ namespace Microsoft.Build.BuildEngine
         #region Constructors
         internal LocalCallDescriptorForRequestStatus()
         {
-
         }
 
         internal LocalCallDescriptorForRequestStatus(int requestId)

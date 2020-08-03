@@ -756,7 +756,6 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal struct MSBuildExtensionsPathReferenceKind
     {
-
         /// <summary>
         /// MSBuildExtensionsPathReferenceKind instance for property named "MSBuildExtensionsPath"
         /// </summary>

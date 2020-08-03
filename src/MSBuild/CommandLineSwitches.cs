@@ -197,7 +197,6 @@ namespace Microsoft.Build.CommandLine
             internal bool emptyParametersAllowed;
         }
 
-
         // map switches that do not take parameters to their identifiers (taken from ParameterlessSwitch enum)
         // WARNING: keep this map in the same order as the ParameterlessSwitch enumeration
         private static readonly ParameterlessSwitchInfo[] s_parameterlessSwitchesMap =
@@ -498,7 +497,6 @@ namespace Microsoft.Build.CommandLine
                     // check if they were all stored successfully i.e. they were all non-empty (after removing quoting, if requested)
                     parametersStored = (emptyParameters == 0);
                 }
-
             }
             else
             {

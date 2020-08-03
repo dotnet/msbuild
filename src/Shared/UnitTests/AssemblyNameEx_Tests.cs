@@ -712,7 +712,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VerifyAssemblyNameExSerializationWithRemappedFrom()
         {
-            
             AssemblyNameExtension assemblyNameOriginal = new AssemblyNameExtension("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension assemblyRemappedFrom = new AssemblyNameExtension("System.Xml, Version=9.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
             assemblyRemappedFrom.MarkImmutable();

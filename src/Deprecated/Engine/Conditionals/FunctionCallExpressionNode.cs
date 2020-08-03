@@ -63,7 +63,6 @@ namespace Microsoft.Build.BuildEngine
 
                         return false;
                     }
-
                 }
 
                 // Both Exists functions return false if the value is null or empty

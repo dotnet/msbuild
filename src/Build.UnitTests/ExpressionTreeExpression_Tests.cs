@@ -413,7 +413,6 @@ namespace Microsoft.Build.UnitTests
             {
                 if (File.Exists(file)) File.Delete(file);
             }
-
         }
 
         /// <summary>

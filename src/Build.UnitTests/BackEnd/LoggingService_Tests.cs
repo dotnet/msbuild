@@ -1070,7 +1070,7 @@ namespace Microsoft.Build.UnitTests.Logging
         {
             string eventsToForward = "CustomEvent";
 
-            if (forwardAllEvents == true)
+            if (forwardAllEvents)
             {
                 eventsToForward = "BuildStartedEvent;BuildFinishedEvent;ProjectStartedEvent;ProjectFinishedEvent;TargetStartedEvent;TargetFinishedEvent;TaskStartedEvent;TaskFinishedEvent;ErrorEvent;WarningEvent;HighMessageEvent;NormalMessageEvent;LowMessageEvent;CustomEvent;CommandLine";
             }

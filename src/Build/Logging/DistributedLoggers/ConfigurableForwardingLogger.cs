@@ -262,7 +262,6 @@ namespace Microsoft.Build.Logging
             }
         }
 
-
         /// <summary>
         /// Reset the states of per-build member variables.
         /// Used when a build is finished, but the logger might be needed for the next build.

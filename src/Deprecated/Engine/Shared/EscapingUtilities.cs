@@ -101,7 +101,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// Adds instances of %XX in the input string where the char char to be escaped appears
+        /// Adds instances of %XX in the input string where the char to be escaped appears
         /// XX is the hex value of the ASCII code for the char.
         /// </summary>
         /// <param name="unescapedString"></param>

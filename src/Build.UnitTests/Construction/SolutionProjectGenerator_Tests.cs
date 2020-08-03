@@ -417,7 +417,6 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal("ABC", instances[0].GetPropertyValue("VisualStudioVersion"));
         }
 
-
         /// <summary>
         /// Test to make sure that even if the solution version corresponds to an existing sub-toolset version
         /// </summary>
@@ -500,7 +499,6 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndGlobalSection
                     EndGlobal
                 ";
-
 
             string solutionFileContentsDev11 = solutionFilePreambleV11 + solutionBodySingleProjectContents;
             string solutionFileContentsDev12 = solutionFilePreambleV12 + solutionBodySingleProjectContents;
@@ -620,7 +618,6 @@ namespace Microsoft.Build.UnitTests.Construction
                 List<ILogger> loggers = new List<ILogger>(1);
                 loggers.Add(logger);
 
-
                 instances[0].Build(loggers);
                 logger.AssertLogContains(String.Format(".[{0}].", ObjectModelHelpers.MSBuildDefaultToolsVersion));
             }
@@ -629,7 +626,6 @@ namespace Microsoft.Build.UnitTests.Construction
                 ObjectModelHelpers.DeleteTempProjectDirectory();
             }
         }
-
 
         /// <summary>
         /// Verify that we throw the appropriate error if the solution declares a dependency 
@@ -1155,8 +1151,6 @@ EndGlobal
                 }
             }
         }
-
-
 
         /// <summary>
         /// Test that the in memory project created from a solution file exposes an MSBuild property which,
@@ -1707,7 +1701,6 @@ EndGlobal
             Assert.Null(SolutionProjectGenerator.PredictActiveSolutionConfigurationName(solution, globalProperties));
         }
 
-
         /// <summary>
         /// Verifies that the SolutionProjectGenerator will correctly escape project file paths
         /// </summary>
@@ -1972,7 +1965,6 @@ EndGlobal
                 parameters.ShutdownInProcNodeOnBuildFinish = true;
                 buildManager = new BuildManager();
 
-
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties["Configuration"] = "Release";
 
@@ -2063,7 +2055,6 @@ EndGlobal
                 parameters.EnableNodeReuse = false;
                 parameters.ShutdownInProcNodeOnBuildFinish = true;
                 buildManager = new BuildManager();
-
 
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties["Configuration"] = "Release";
@@ -2281,7 +2272,6 @@ EndGlobal
 
                 Assert.Equal(12, instances[0].TargetsCount);
             }
-
 
             instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), new[] { "Foo" });
 

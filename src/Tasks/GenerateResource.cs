@@ -50,7 +50,6 @@ namespace Microsoft.Build.Tasks
     public sealed partial class GenerateResource : TaskExtension
     {
 
-
 #region Fields
 
         // This cache helps us track the linked resource files listed inside of a resx resource file
@@ -692,7 +691,6 @@ namespace Microsoft.Build.Tasks
                     Sources = newSources.ToArray();
                 }
 
-
                 // If there are no sources to process, just return (with success) and report the condition.
                 if ((Sources == null) || (Sources.Length == 0))
                 {
@@ -1135,7 +1133,6 @@ namespace Microsoft.Build.Tasks
             return false;
 #endif
         }
-
 
 #if FEATURE_RESGEN
         /// <summary>
@@ -3321,7 +3318,6 @@ namespace Microsoft.Build.Tasks
 #endif
                     break;
 
-
                 case Format.Assembly:
                     _logger.LogErrorFromResources("GenerateResource.CannotWriteAssembly", filename);
                     break;
@@ -3718,7 +3714,6 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-
         /// <summary>
         /// Write resources to an XML or binary format resources file.
         /// </summary>
@@ -3819,7 +3814,6 @@ namespace Microsoft.Build.Tasks
             reader.resources.Add(entry);
             reader.resourcesHashTable.Add(entry.Name, entry);
         }
-
 
         /// <summary>
         /// Add a resource from an XML or binary format file to the internal data structures
