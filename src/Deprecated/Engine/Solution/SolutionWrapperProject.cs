@@ -2277,7 +2277,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Add virtual references for reference chains containing VC static library projects. 
-        /// Since static libraries have no link step, any references they have have to be passed
+        /// Since static libraries have no link step, any references they have to be passed
         /// to their parent project, if any. So for example, in a chain like
         /// native dll -> native static lib1 -> native static lib2
         /// we need to add a virtual reference between the native dll and the static lib2 
