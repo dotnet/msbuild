@@ -37,7 +37,16 @@ namespace Microsoft.Build.Tasks
             {
                 if (!string.IsNullOrEmpty(stateFile))
                 {
-                    File.WriteAllText(stateFile, JsonSerializer.Serialize(this));
+                    if (FileSystems.Default.FileExists(stateFile))
+                    {
+                        File.Delete(stateFile);
+                    }
+
+                    using (var s = new FileStream(stateFile, FileMode.CreateNew))
+                    {
+                        var formatter = new BinaryFormatter();
+                        formatter.Serialize(s, this);
+                    }
                 }
             }
             catch (Exception e)
@@ -59,6 +68,7 @@ namespace Microsoft.Build.Tasks
         internal static StateFileBase DeserializeCache(string stateFile, TaskLoggingHelper log, Type requiredReturnType, bool logWarnings = true)
         {
             StateFileBase retVal = null;
+            object deserializedObject = null;
 
             // First, we read the cache from disk if one exists, or if one does not exist
             // then we create one.  
@@ -66,8 +76,12 @@ namespace Microsoft.Build.Tasks
             {
                 if (!string.IsNullOrEmpty(stateFile) && FileSystems.Default.FileExists(stateFile))
                 {
-                    object deserializedObject = JsonSerializer.Deserialize(File.ReadAllText(stateFile), requiredReturnType);
-                    retVal = deserializedObject as StateFileBase;
+                    using (FileStream s = new FileStream(stateFile, FileMode.Open))
+                    {
+                        var formatter = new BinaryFormatter();
+                        deserializedObject = formatter.Deserialize(s);
+                        retVal = deserializedObject as StateFileBase;
+                    }
                     // If the deserialized object is null then there would be no cast error but retVal would still be null
                     // only log the message if there would have been a cast error
                     if (retVal == null && deserializedObject != null)

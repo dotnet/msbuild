@@ -577,17 +577,20 @@ namespace Microsoft.Build.Tasks
                         FileState fileState = (FileState)sfBase.instanceLocalFileStateCache[relativePath];
                         // Verify that the assembly is correct
                         Guid mvid;
-                        using (var reader = new PEReader(File.OpenRead(relativePath)))
+                        string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stateFile), relativePath));
+                        if (File.Exists(fullPath))
                         {
-                            var metadataReader = reader.GetMetadataReader();
-                            mvid = metadataReader.GetGuid(metadataReader.GetModuleDefinition().Mvid);
-                        }
-                        if (File.Exists(relativePath) && mvid.Equals(fileState.ModuleVersionID))
-                        {
-                            // Correct file path and timestamp
-                            string fullPath = Path.GetFullPath(Path.Combine(stateFile, relativePath));
-                            fileState.LastModified = retVal.getLastWriteTime(fullPath);
-                            retVal.instanceLocalFileStateCache[fullPath] = fileState;
+                            using (var reader = new PEReader(File.OpenRead(fullPath)))
+                            {
+                                var metadataReader = reader.GetMetadataReader();
+                                mvid = metadataReader.GetGuid(metadataReader.GetModuleDefinition().Mvid);
+                            }
+                            if (mvid.Equals(fileState.ModuleVersionID))
+                            {
+                                // Correct file path and timestamp
+                                fileState.LastModified = retVal.getLastWriteTime(fullPath);
+                                retVal.instanceLocalFileStateCache[fullPath] = fileState;
+                            }
                         }
                     }
                 }
@@ -601,6 +604,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log)
         {
+            Hashtable newInstanceLocalFileStateCache = new Hashtable();
             foreach (string path in instanceLocalFileStateCache.Keys)
             {
                 // Add MVID to allow us to verify that we are using the same assembly later
@@ -611,10 +615,10 @@ namespace Microsoft.Build.Tasks
                     fileState.ModuleVersionID = metadataReader.GetGuid(metadataReader.GetModuleDefinition().Mvid);
                 }
 
-                instanceLocalFileStateCache.Remove(path);
-                string relativePath = new Uri(Path.GetDirectoryName(stateFile)).MakeRelativeUri(new Uri(path)).ToString();
-                instanceLocalFileStateCache[relativePath] = fileState;
+                string relativePath = FileUtilities.MakeRelative(Path.GetDirectoryName(stateFile), path);
+                newInstanceLocalFileStateCache[relativePath] = fileState;
             }
+            instanceLocalFileStateCache = newInstanceLocalFileStateCache;
 
             SerializeCache(stateFile, log);
         }
