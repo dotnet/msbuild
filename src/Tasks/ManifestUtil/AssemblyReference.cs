@@ -102,7 +102,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             set { _referenceType = value; }
         }
 
-
         /// <summary>
         /// True if the reference is specified in the project file, false if it is added to the manifest as a result
         /// of computing the closure of all project references.

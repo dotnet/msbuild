@@ -916,7 +916,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Take the parts of the Target framework moniker and formulate the reference assembly path based on the the following pattern:
+        /// Take the parts of the Target framework moniker and formulate the reference assembly path based on the following pattern:
         /// For a framework and version:
         ///     $(TargetFrameworkRootPath)\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)
         /// For a subtype:

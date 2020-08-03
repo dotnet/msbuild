@@ -12,7 +12,6 @@ using System.Globalization;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 
-
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
@@ -87,7 +86,7 @@ namespace Microsoft.Build.BuildEngine
             buildRequest.NodeIndex = executionContext.NodeIndex;
 
             ErrorUtilities.VerifyThrow(buildRequest.ParentBuildEventContext != null, "Should not have a null parentBuildEventContext");
-            ErrorUtilities.VerifyThrow(buildRequest.IsGeneratedRequest == true, "Should not be sending a non generated request from the child node to the parent node");
+            ErrorUtilities.VerifyThrow(buildRequest.IsGeneratedRequest, "Should not be sending a non generated request from the child node to the parent node");
 
             // For buildRequests originating from the TEM  - additional initialization is necessary
             TaskExecutionContext taskExecutionContext = executionContext as TaskExecutionContext;
@@ -135,8 +134,6 @@ namespace Microsoft.Build.BuildEngine
                         // This means the caller (the MSBuild task) wants us to use the same project as the calling 
                         // project.  This allows people to avoid passing in the Projects parameter on the MSBuild task.
                         Project projectToBuild = parentProject;
-
-
 
                         // If the parent project (the calling project) already has the same set of global properties
                         // as what is being requested, just re-use it.  Otherwise, we need to instantiate a new

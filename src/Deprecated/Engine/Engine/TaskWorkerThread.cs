@@ -313,7 +313,6 @@ namespace Microsoft.Build.BuildEngine
             BuildResult [] buildResults
         )
         {
-
             // Create an array of event to the node thread responds
             WaitHandle[] waitHandles = GetHandlesArray(executionMode);
 

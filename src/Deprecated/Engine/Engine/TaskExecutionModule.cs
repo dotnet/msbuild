@@ -226,7 +226,7 @@ namespace Microsoft.Build.BuildEngine
 
                 buildRequests[i] = new BuildRequest(handleId, fullProjectName, targetNames, globalPropertiesPerProject[i],
                                                     toolsVersions[i], i, useResultsCache, unloadProjectsOnCompletion);
-                ErrorUtilities.VerifyThrow(buildRequests[i].IsGeneratedRequest == true, "Should not be sending non generated requests from TEM to engine");
+                ErrorUtilities.VerifyThrow(buildRequests[i].IsGeneratedRequest, "Should not be sending non generated requests from TEM to engine");
                 buildRequests[i].ParentBuildEventContext = taskContext;
             }
 
@@ -310,7 +310,7 @@ namespace Microsoft.Build.BuildEngine
         {
             // If the traversal strategy is breadth first and the number of requests is less than the batchRequestSize
             // or if there is only 1 build request then send ALL build requests to the parent engine and wait on the results.
-            if ((breadthFirstTraversal == true && buildRequests.Length < batchRequestSize) || buildRequests.Length == 1)
+            if ((breadthFirstTraversal && buildRequests.Length < batchRequestSize) || buildRequests.Length == 1)
             {
                 engineCallback.PostBuildRequestsToHost(buildRequests);
                 workerThread.WaitForResults(handleId, buildResultsLocal, buildRequests);
@@ -332,7 +332,7 @@ namespace Microsoft.Build.BuildEngine
                 while (currentRequestIndex < buildRequests.Length)
                 {
                     // If there is a breadth first traversal and there are more than batchRequestSize build requests, send the first batchRequestSize, then do the rest depth first
-                    if (breadthFirstTraversal == true)
+                    if (breadthFirstTraversal)
                     {
                         // Figure out how many requests to send, either the full batch size or only part of a batch
                         numberOfRequestsToSend = (buildRequests.Length - currentRequestIndex) <batchRequestSize ? (buildRequests.Length - currentRequestIndex) : batchRequestSize;

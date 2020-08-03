@@ -6,7 +6,6 @@ using System.Threading;
 
 namespace Microsoft.Build.Eventing
 {
-
     /// <summary>
     /// This captures information of how various key methods of building with MSBuild ran.
     /// </summary>
@@ -281,7 +280,6 @@ namespace Microsoft.Build.Eventing
         [Event(33)]
         public void ParseStart(string projectFileName)
         {
-
             WriteEvent(33, projectFileName);
         }
 

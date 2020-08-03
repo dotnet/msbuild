@@ -92,8 +92,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
         }
 
-
-
         /// <summary>
         /// Let us have the following dependency structure
         ///
@@ -141,8 +139,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
             t.ResolvedFiles[0].GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
         }
-
-
 
         [Fact]
         public void ValidateFrameworkNameError()
@@ -445,7 +441,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             assemblyNames[0].SetMetadata(ItemMetadataNames.winMDFile, "NOPE");
             assemblyNames[0].SetMetadata(ItemMetadataNames.winmdImplmentationFile, "IMPL");
 
-
             assemblyNames[1].SetMetadata("Private", "true");
             assemblyNames[2].SetMetadata("Private", "false");
             assemblyNames[4].SetMetadata("Private", "false");
@@ -729,7 +724,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 { "false", "false", "false", "false" }     // MyDontCopyLocalAssembly
             };
 
-
             int assembliesCount = (int)EmbedInteropTypes_Indices.EndMarker;
 
             // now let's verify our data structures are all set up correctly
@@ -806,7 +800,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.True(succeeded); // "Expected success."
         }
-
 
         /// <summary>
         /// If no related file extensions are input to RAR, .pdb and .xml should be used
@@ -1021,7 +1014,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             SimulateCreateProjectAgainstWhidbeyInternal(ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version45) + @"\");
         }
 
-
         /// <summary>
         /// Invalid candidate assembly files should not crash
         /// </summary>
@@ -1167,7 +1159,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Single(t.ResolvedFiles);
             Assert.Equal(0, String.Compare(ToolLocationHelper.GetPathToDotNetFrameworkFile("System.Xml.dll", TargetDotNetFrameworkVersion.Version45), t.ResolvedFiles[0].ItemSpec, StringComparison.OrdinalIgnoreCase));
         }
-
 
         /// <summary>
         /// Consider this situation.
@@ -2206,7 +2197,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal("v00001.0", ((string)returnedVersions[14].RegistryKey));
         }
 
-
         [Fact]
         public void GatherVersions40255DotNet()
         {
@@ -2371,7 +2361,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
-
         /// <summary>
         /// CandidateAssemblyFiles are extra files passed in through the CandidateAssemblyFiles
         /// that should be considered for matching when search paths contains {CandidateAssemblyFiles}
@@ -2392,7 +2381,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Single(t.ResolvedFiles);
             Assert.Equal(Path.Combine(s_myVersion20Path, "System.Xml.dll"), t.ResolvedFiles[0].ItemSpec);
         }
-
 
         /// <summary>
         /// Make sure three part version numbers put on the required target framework do not cause a problem.
@@ -2861,7 +2849,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Assert.Empty(errorFileNames); // "Expected no Error file names"
                 Assert.Single(remap);
 
-
                 AssemblyRemapping pair = remap.First<AssemblyRemapping>();
                 Assert.Equal("Remapped", pair.To.Name);
                 Assert.False(pair.To.Retargetable);
@@ -2974,7 +2961,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
-
         /// <summary>
         /// If a relative file name is passed in through the Assemblies parameter and the search paths contains {RawFileName}
         /// then try to resolve directly to that file name and make it a full path.
@@ -3011,7 +2997,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
             }
         }
-
 
         /// <summary>
         /// If a relative searchPath is passed in through the search path parameter
@@ -3197,7 +3182,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 String.Format(AssemblyResources.GetString("General.MalformedAssemblyName"), "c:\\DoesntExist\\System.Xml.dll")
             );
         }
-
 
         /// <summary>
         /// If a file name is passed in through the Assemblies parameter and the search paths contains {RawFileName}
@@ -3698,7 +3682,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
         }
 
-
         /// <summary>
         /// Consider this dependency chain:
         ///
@@ -3786,7 +3769,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath));
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V2_GDllPath));
         }
-
 
         /// <summary>
         /// Consider this dependency chain:
@@ -4002,7 +3984,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Empty(t.ResolvedFiles);
         }
 
-
         /// <summary>
         /// Unresolved primary references should result in warnings.
         /// </summary>
@@ -4028,7 +4009,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // framework.
             Assert.Equal(1, m.Warnings);
         }
-
 
         /// <summary>
         /// In this case,
@@ -4267,7 +4247,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(ContainsItem(t.ResolvedFiles, @"c:\MyStronglyNamed\A.dll")); // "Expected to find assembly, but didn't."
         }
 
-
         /// <summary>
         /// Consider this situation:
         ///
@@ -4302,7 +4281,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, s_myLibraries_V1_DDllPath)); // "Expected to find assembly, but didn't."
         }
-
 
         /// <summary>
         /// Regress EVERETT QFE 626
@@ -4520,12 +4498,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.True(ContainsItem(t.ScatterFiles, @"C:\Regress275161\m1.netmodule")); //                 "Expected to find scatter file m1."
 
-
             Assert.True(ContainsItem(t.ScatterFiles, @"C:\Regress275161\m2.netmodule")); //                 "Expected to find scatter file m2."
 
-
             Assert.True(ContainsItem(t.CopyLocalFiles, @"C:\Regress275161\m1.netmodule")); //                 "Expected to find scatter file m1 in CopyLocalFiles."
-
 
             Assert.True(ContainsItem(t.CopyLocalFiles, @"C:\Regress275161\m2.netmodule")); //                 "Expected to find scatter file m2 in CopyLocalFiles."
         }
@@ -4669,7 +4644,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Single(t.ResolvedFiles);
         }
 
-
         /// <summary>
         /// If a directory path is passed into AssemblyFiles, then we should warn and continue on.
         /// </summary>
@@ -4748,7 +4722,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
-
         /// <summary>
         /// Behave gracefully if a referenced assembly is inaccessible to the user.
         /// </summary>
@@ -4803,7 +4776,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Single(t.ResolvedFiles);
         }
 
-
         /// <summary>
         /// Behave gracefully if a referenced assembly is inaccessible to the user.
         /// </summary>
@@ -4821,15 +4793,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
             t.SearchPaths = new string[] { "{RawFileName}" };
 
-
             Execute(t);
 
             Assert.Equal(1, e.Warnings); // "One warning expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
             Assert.Empty(t.ResolvedFiles);
         }
-
-
 
         /// <summary>
         /// If there's a SearhPath like {Registry:,,} then still behave nicely.
@@ -4903,7 +4872,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-
             Assert.Equal(0, e.Warnings); // "One warning expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
             Assert.Single(t.ResolvedFiles);
@@ -4945,12 +4913,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-
             Assert.Equal(1, e.Warnings); // "One warning expected in this scenario." // Couldn't find dependencies for {HintPathFromItem}-resolved item.
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
             Assert.Empty(t.ResolvedFiles);  // This test used to have 1 here. But that was because the mock GetAssemblyName was not accurately throwing an exception for non-existent files.
         }
-
 
         /// <summary>
         /// Need to be robust in the face of assembly names with special characters.
@@ -4974,7 +4940,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.Assemblies[1].SetMetadata("HintPath", @"c:\MyEscapedName\__'ASP'dw0024ry.dll");
             t.TargetFrameworkDirectories = new string[] { Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName) };
 
-
             t.SearchPaths = new string[]
             {
                 @"{TargetFrameworkDirectory}",
@@ -4983,7 +4948,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             Execute(t);
-
 
             Assert.Equal(0, e.Warnings); // "One warning expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
@@ -5022,7 +4986,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             Execute(t);
-
 
             Assert.Equal(0, e.Warnings); // "No warning expected in this scenario."
             Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
@@ -5147,7 +5110,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.Assemblies[0].SetMetadata("HintPath", @"C:\Regress354669\");
 
-
             t.SearchPaths = new string[]
             {
                 "{RawFileName}",
@@ -5240,7 +5202,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
         }
 
-
         /// <summary>
         /// There was a bug in which any file mentioned in the InstalledAssemblyTables was automatically
         /// considered to be a file present in the framework directory. This assumption was originally true,
@@ -5312,7 +5273,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("SomeAssembly")
             };
 
-
             t.TargetFrameworkDirectories = new string[] { @"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx" };
             t.InstalledAssemblyTables = new TaskItem[] { new TaskItem("asdfasdfasjr390rjfiogatg~~!@@##$%$%%^&**()") };
 
@@ -5348,7 +5308,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             t.Assemblies[0].SetMetadata("HintPath", @"C:\Regress435487\microsoft.build.engine.dll");
-
 
             t.SearchPaths = new string[]
             {
@@ -5414,7 +5373,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyNameExtension Av1 = new AssemblyNameExtension(v1);
                 AssemblyNameExtension Av2 = new AssemblyNameExtension(v2);
                 AssemblyNameExtension Av3 = new AssemblyNameExtension(v3);
-
 
                 AssemblyTableInfo assemblyTableInfo = new AssemblyTableInfo(redistFile, "MyFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { assemblyTableInfo });
@@ -5611,7 +5569,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             return tempFile;
         }
 
-
         [Fact]
         public void GetRedistListPathsFromDisk_ThrowsArgumentNullException()
         {
@@ -5660,7 +5617,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
                 Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[0], whiteListErrors, whiteListErrorFileNames);
-
 
                 // Since there were no white list expect the black list to return null
                 Assert.Empty(blackList); // "Expected to have no assemblies in the black list"
@@ -5768,8 +5724,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                    "</FileList >";
                 File.WriteAllText(subsetFile, subsetListContents);
 
-
-
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(subsetFile, "TargetFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
@@ -5867,8 +5821,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         "<File AssemblyName='Microsoft.Build.Engine' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
                    "</FileList >";
                 File.WriteAllText(subsetFile, subsetListContents);
-
-
 
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(subsetFile, "TargetFrameworkDirectory");
@@ -5987,7 +5939,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RedistListGenerateBlackListGoodListsSubsetIsSubsetOfRedist()
         {
-            string redistFile = CreateGenericRedistList(); ;
+            string redistFile = CreateGenericRedistList(); 
             string goodSubsetFile = FileUtilities.GetTemporaryFile();
             try
             {
@@ -6239,7 +6191,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string[] returnArray = finder.GetSubsetListPathsFromDisk("FrameworkDirectory");
             Assert.Empty(returnArray); // "Expected the array returned to be 0 length"
         }
-
 
         /// <summary>
         /// Verify that the method will not crash if there are empty string array elements
@@ -6554,7 +6505,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             installedSubSetTable = null;
             Assert.True(String.IsNullOrEmpty(ResolveAssemblyReference.GenerateSubSetName(null, installedSubSetTable)));
 
-
             targetFrameworks = new string[] { "Client", "Framework" };
             installedSubSetTable = new ITaskItem[] { new TaskItem("c:\\foo\\Mouse.xml"), new TaskItem("D:\\foo\\bar\\Man.xml") };
             Assert.Equal("Client, Framework, Mouse, Man", ResolveAssemblyReference.GenerateSubSetName(targetFrameworks, installedSubSetTable));
@@ -6638,7 +6588,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             VerifyReferenceTable(referenceTable, mockEngine, engineAssemblyName, dataAssemblyName, sqlclientAssemblyName, xmlAssemblyName, new string[] { warningMessage });
         }
 
-
         /// <summary>
         /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference
         /// and enginePrimary->sqlDependencyReference: sqlDependencyReference is in black list
@@ -6709,7 +6658,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             xmlPrimaryReference.AddSourceItems(enginePrimaryReference.GetSourceItems());
             xmlPrimaryReference.AddDependee(enginePrimaryReference);
 
-
             InitializeMockEngine(out referenceTable, out mockEngine, out rar);
             AddReferencesToReferenceTable(referenceTable, engineAssemblyName, null, null, xmlAssemblyName, enginePrimaryReference, null, null, xmlPrimaryReference);
 
@@ -6753,7 +6701,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             xmlPrimaryReference.AddSourceItems(enginePrimaryReference.GetSourceItems());
             xmlPrimaryReference.AddDependee(enginePrimaryReference);
 
-
             dataDependencyReference.FullPath = "FullPath";
             dataDependencyReference.MakeDependentAssemblyReference(xmlPrimaryReference);
 
@@ -6761,7 +6708,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             AddReferencesToReferenceTable(referenceTable, engineAssemblyName, dataAssemblyName, null, xmlAssemblyName, enginePrimaryReference, dataDependencyReference, null, xmlPrimaryReference);
 
             InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { dataAssemblyName }, out blackList);
-
 
             string subsetName = ResolveAssemblyReference.GenerateSubSetName(new string[] { "Client" }, null);
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", taskItem.ItemSpec, dataAssemblyName.FullName, subsetName);
@@ -6820,7 +6766,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string warningMessage2 = rar.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", taskItem2.ItemSpec, sqlclientAssemblyName.FullName, subsetName);
             VerifyReferenceTable(referenceTable, mockEngine, engineAssemblyName, dataAssemblyName, sqlclientAssemblyName, xmlAssemblyName, new string[] { warningMessage, warningMessage2 });
         }
-
 
         /// <summary>
         /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference
@@ -6914,7 +6859,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { sqlclientAssemblyName, dataAssemblyName }, out blackList);
 
-
             string subsetName = ResolveAssemblyReference.GenerateSubSetName(new string[] { "Client" }, null);
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", taskItem.ItemSpec, sqlclientAssemblyName.FullName, subsetName);
             string warningMessage2 = rar.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", taskItem.ItemSpec, dataAssemblyName.FullName, subsetName);
@@ -6935,7 +6879,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
             table.Clear();
         }
-
 
         /// <summary>
         /// Testing case
@@ -7190,7 +7133,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             referenceTable = MakeEmptyReferenceTable(rar.Log);
         }
-
 
         /// <summary>
         ///Initialize the black list and use it to remove references from the reference table
@@ -7477,7 +7419,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
-
         /// <summary>
         /// This test will verify when the full client name is passed in and it appears in the TargetFrameworkSubsetList, that the
         /// black list is not used.
@@ -7512,7 +7453,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 File.Delete(redistListPath);
             }
         }
-
 
         /// <summary>
         /// This test will verify when the full client name is passed in and it appears in the TargetFrameworkSubsetList, that the
@@ -7753,7 +7693,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.Assemblies[0].SetMetadata("HintPath", @"||invalidpath||");
 
-
             t.SearchPaths = new string[]
             {
                 @"{HintPathFromItem}"
@@ -7815,7 +7754,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("A")
             };
 
-
             t.SearchPaths = new string[]
             {
                 @"C:\Regress393931"
@@ -7847,7 +7785,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 new TaskItem("A")
             };
-
 
             t.SearchPaths = new string[]
             {
@@ -7898,7 +7835,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(ContainsItem(t.SerializationAssemblyFiles, @"c:\SGenDependeicies\mycomponent.XmlSerializers.dll")); // "Expected to find serialization assembly, but didn't."
             Assert.True(ContainsItem(t.SerializationAssemblyFiles, @"c:\SGenDependeicies\mycomponent2.XmlSerializers.dll")); // "Expected to find serialization assembly, but didn't."
         }
-
 
         /// <summary>
         /// Consider this dependency chain:
@@ -8282,7 +8218,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 File.Delete(redistFile);
             }
         }
-
 
         /// <summary>
         /// Verify when we ask if an assembly is in the redist list we get the right answer.

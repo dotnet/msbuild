@@ -387,7 +387,6 @@ namespace Microsoft.Build.BuildEngine
                 localEngine.LoggingServices.OnlyLogCriticalEvents = this.logOnlyCriticalEvents;
                 localEngine.PostEngineCommand( new ChangeTraversalTypeCommand( useBreadthFirstTraversal, true ));
             }
-
         }
 
         /// <summary>
@@ -436,7 +435,6 @@ namespace Microsoft.Build.BuildEngine
             {
                 try
                 {
-
                     PostStatusThrow(nodeStatus, true /* wait for the message to be sent before returning */);
                 }
                 catch (Exception ex)

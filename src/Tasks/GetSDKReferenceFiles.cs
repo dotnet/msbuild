@@ -606,7 +606,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Gather the redist files from from the redist directory.
+        /// Gather the redist files from the redist directory.
         /// </summary>
         private void GatherRedistFiles(HashSet<ResolvedRedistFile> resolvedRedistFiles, ITaskItem sdkReference, string redistFilePath, SDKInfo info)
         {

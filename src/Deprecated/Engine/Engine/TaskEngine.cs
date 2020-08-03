@@ -665,7 +665,6 @@ namespace Microsoft.Build.BuildEngine
             return taskInitialized;
         }
 
-
         /// <summary>
         /// Finds all the task properties that are required.
         /// Returns them as keys in a dictionary.
@@ -985,7 +984,6 @@ namespace Microsoft.Build.BuildEngine
             return gatheredGeneratedOutputsSuccessfully;
         }
 
-
         private void GatherArrayStringAndValueOutputs(Lookup lookup, TaskOutput taskOutputSpecification, string itemName, string propertyName, PropertyInfo parameter, object outputs)
         {
             // if the task has generated outputs (if it didn't, don't do anything)
@@ -1223,7 +1221,6 @@ namespace Microsoft.Build.BuildEngine
 
             return taskOutputSpecifications;
         }
-
 
         /// <summary>
         /// Given an instantiated task, this helper method sets the specified parameter based on its type.
