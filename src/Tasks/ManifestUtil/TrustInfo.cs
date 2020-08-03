@@ -22,7 +22,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     public sealed class TrustInfo
     {
 #if !RUNTIME_TYPE_NETCORE
-        // Partial trust and permission sets are not supported on .NET Core.
+        // Partial trust and permission sets are not supported by .NET Core.
+        // SameSite evaluation is conditioned on .NET FX but always done in .NET Core code.
         private PermissionSet _inputPermissionSet;
         private PermissionSet _outputPermissionSet;
         private bool _sameSiteChanged;
@@ -400,10 +401,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 #endif
             }
 #if !RUNTIME_TYPE_NETCORE
-            set
-            {
-                _isFullTrust = value;
-            }
+            set => _isFullTrust = value;
 #endif
         }
 
@@ -583,6 +581,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 // If permission set was not altered, just write out what was read in...
                 MemoryStream m = new MemoryStream();
 #if RUNTIME_TYPE_NETCORE
+                // Simpler code on .NET Core - due to no support for custom permission sets.
                 XmlElement permissionSetElement = outputDocument.DocumentElement;
                 FixupPermissionSetElement(permissionSetElement);
 

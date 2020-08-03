@@ -33,7 +33,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     public static class SecurityUtilities
     {
 #if RUNTIME_TYPE_NETCORE
-        // Partial trust and permission sets are not supported on .NET Core
+        // Partial trust and permission sets are not supported by .NET Core.
 #else
         private const string PermissionSetsFolder = "PermissionSets";
         private const string LocalIntranet = "LocalIntranet";

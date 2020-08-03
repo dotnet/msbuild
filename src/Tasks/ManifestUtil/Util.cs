@@ -115,8 +115,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             Version v = Environment.Version;
 #if RUNTIME_TYPE_NETCORE
-            // This is a version of ClickOnce .NET FX target runtime, which cannot be obtained in .NET (Core) process
-            // Set default to .NET FX v4 runtime
+            // This is a version of ClickOnce .NET FX target runtime, which cannot be obtained in .NET (Core) process.
+            // Set to .NET FX v4 runtime as the ony one supported for manifest generation in .NET (Core) process.
             v = new Version(s_clrVersion4[0], s_clrVersion4[1], s_clrVersion4[2], s_clrVersion4[3]);
 #else
             v = new Version(v.Major, v.Minor, v.Build, 0);
@@ -136,8 +136,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             Version clrVersion;
 #if RUNTIME_TYPE_NETCORE
-            // This is a version of ClickOnce .NET FX target runtime, which cannot be obtained in .NET (Core) process
-            // Set default to .NET FX v4 runtime
+            // This is a version of ClickOnce .NET FX target runtime, which cannot be obtained in .NET (Core) process.
+            // Set to .NET FX v4 runtime as the ony one supported for manifest generation in .NET (Core) process.
             Version currentVersion = new Version(s_clrVersion4[0], s_clrVersion4[1], s_clrVersion4[2], s_clrVersion4[3]);
 #else
             Version currentVersion = Environment.Version;
@@ -152,7 +152,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             else
             {
 #if RUNTIME_TYPE_NETCORE
-                clrVersion = new Version(s_clrVersion2[0], s_clrVersion2[1], s_clrVersion2[2], s_clrVersion2[3]);
+                // Set to .NET FX v4 runtime as the ony one supported for manifest generation in .NET (Core) process.
+                clrVersion = new Version(s_clrVersion4[0], s_clrVersion4[1], s_clrVersion4[2], s_clrVersion4[3]);
 #else
                 clrVersion = new Version(s_clrVersion2[0], s_clrVersion2[1], s_clrVersion2[2], s_clrVersion2[3]);
 #endif
@@ -502,7 +503,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return path;
         }
 
-        #region ItemComparer
+        #region ItemComparer 
         private static readonly ItemComparer s_itemComparer = new ItemComparer();
         private class ItemComparer : IComparer
         {

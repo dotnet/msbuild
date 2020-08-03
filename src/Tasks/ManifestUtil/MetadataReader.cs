@@ -179,6 +179,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             string processorArchitecture = "unknown";
 
+            if (_peReader.PEHeaders == null ||
+                _peReader.PEHeaders.CoffHeader == null)
+            {
+                return processorArchitecture;
+            }
+
             Machine machine = _peReader.PEHeaders.CoffHeader.Machine;
             CorHeader corHeader = _peReader.PEHeaders.CorHeader;
             if (corHeader != null)
@@ -237,6 +243,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 _assemblyStream.Close();
             }
 
+            _attributes = null;
             _reader = null;
             _peReader = null;
             _assemblyStream = null;
