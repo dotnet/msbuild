@@ -1287,8 +1287,7 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            int limit = 0;
-            limit = _componentHost.BuildParameters.MaxNodeCount switch
+            int limit = _componentHost.BuildParameters.MaxNodeCount switch
             {
                 1 => 1,
                 2 => _componentHost.BuildParameters.MaxNodeCount + 1 + _nodeLimitOffset,

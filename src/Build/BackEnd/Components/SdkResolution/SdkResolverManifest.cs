@@ -31,15 +31,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             {
                 while (reader.Read())
                 {
-                    return reader.NodeType switch
+                    if (reader.NodeType == XmlNodeType.Element && reader.Name == "SdkResolver")
                     {
-                        XmlNodeType.Element => reader.Name switch
-                        {
-                            "SdkResolver" => ParseSdkResolverElement(reader),
-                            _ => throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name)),
-                        },
-                        _ => throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name)),
-                    };
+                        return ParseSdkResolverElement(reader);
+                    }
+                    else
+                    {
+                        throw new XmlException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedElement", reader.Name));
+                    }
                 }
             }
 
