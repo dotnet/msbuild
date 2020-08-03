@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
@@ -50,17 +51,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the host handshake for this node endpoint
         /// </summary>
-        protected override long GetHostHandshake()
+        protected override Handshake GetHandshake()
         {
-            return NodeProviderOutOfProc.GetHostHandshake(_enableReuse, _lowPriority);
-        }
-
-        /// <summary>
-        /// Returns the client handshake for this node endpoint
-        /// </summary>
-        protected override long GetClientHandshake()
-        {
-            return NodeProviderOutOfProc.GetClientHandshake(_enableReuse, _lowPriority);
+            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, is64Bit: EnvironmentUtilities.Is64BitProcess, nodeReuse: _enableReuse, lowPriority: _lowPriority));
         }
 
         #region Structs

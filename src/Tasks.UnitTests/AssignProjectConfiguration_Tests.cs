@@ -49,7 +49,7 @@ namespace Microsoft.Build.UnitTests
                 (resolvedProjectWithConfiguration == null) ? string.Empty : resolvedProjectWithConfiguration.GetMetadata("FullConfiguration"));
 
             Assert.Equal(expectedResult, result);
-            if (result == true)
+            if (result)
             {
                 Assert.Equal(expectedFullConfiguration, resolvedProjectWithConfiguration.GetMetadata("FullConfiguration"));
                 Assert.Equal(expectedConfiguration, resolvedProjectWithConfiguration.GetMetadata("Configuration"));

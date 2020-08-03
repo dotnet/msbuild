@@ -104,7 +104,6 @@ namespace Microsoft.Build.BuildEngine
 
             // Write a new cache file, hopefully we can use it next time
             UpdateCache(parentEngine, msbuildProject, solutionProjectCache, projectBuildEventContext);
-
         }
 
         /// <summary>
@@ -743,7 +742,6 @@ namespace Microsoft.Build.BuildEngine
 
                         referenceGuids.Append(projectReferenceGuid);
                         addCreateItem = true;
-
                     }
                     else if (referencedProject.ProjectType == SolutionProjectType.VCProject)
                     {
@@ -866,7 +864,6 @@ namespace Microsoft.Build.BuildEngine
                     "SolutionParseInvalidProjectFileName",
                     proj.RelativePath, e.Message);
             }
-
 
             // Create the temporary VC project
             BuildTask createVCProjectTask = target.AddNewTask("CreateTemporaryVCProject");
@@ -2277,7 +2274,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Add virtual references for reference chains containing VC static library projects. 
-        /// Since static libraries have no link step, any references they have have to be passed
+        /// Since static libraries have no link step, any references they have to be passed
         /// to their parent project, if any. So for example, in a chain like
         /// native dll -> native static lib1 -> native static lib2
         /// we need to add a virtual reference between the native dll and the static lib2 

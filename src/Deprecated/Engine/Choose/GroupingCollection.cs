@@ -9,7 +9,6 @@ using System.Globalization;
 
 using Microsoft.Build.BuildEngine.Shared;
 
-
 using error = Microsoft.Build.BuildEngine.Shared.ErrorUtilities;
 
 namespace Microsoft.Build.BuildEngine
@@ -426,7 +425,6 @@ namespace Microsoft.Build.BuildEngine
 
             ChangeItemGroupCount(-1);
             error.VerifyThrow(this.itemGroupCount >= 0, "Too many calls to RemoveItemGroup().");
-
         }
 
         /// <summary>

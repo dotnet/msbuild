@@ -85,7 +85,6 @@ namespace Microsoft.Build.Shared
                 // Try to CoCreate the class object.
                 return new SetupConfiguration();
             }
-
             catch (COMException ex) when (ex.ErrorCode == REGDB_E_CLASSNOTREG)
             {
                 // Try to get the class object using app-local call.

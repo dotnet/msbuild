@@ -617,7 +617,6 @@ namespace Microsoft.Build.Tasks
 
                 commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
             }
-            
         }
 
         #endregion

@@ -971,7 +971,6 @@ namespace Microsoft.Build.Logging
                 if (hasParent)
                 {
                     parentId = ReadInt64();
-
                 }
                 return new EvaluationLocation(id, parentId, evaluationPass, evaluationDescription, file, line, elementName, description, kind);
             }

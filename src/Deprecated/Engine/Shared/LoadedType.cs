@@ -205,6 +205,5 @@ namespace Microsoft.Build.BuildEngine.Shared
 
         // whether the loadinseparateappdomain attribute is applied to this type
         private bool? hasLoadInSeparateAppDomainAttribute;
-
     }
 }

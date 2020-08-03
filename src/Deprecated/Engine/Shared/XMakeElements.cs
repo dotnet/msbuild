@@ -97,5 +97,4 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
         }
     }
-
 }

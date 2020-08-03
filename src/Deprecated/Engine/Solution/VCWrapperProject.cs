@@ -228,7 +228,6 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// constants for VS9 Pro and above SKUs
         /// </summary>
-
         // root registry key for VS9
         private const string vs9RegKey = @"SOFTWARE\Microsoft\VisualStudio\9.0";
         // the name of the value containing disk install directory for the IDE components 
@@ -242,7 +241,6 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// constants for the VC9 Express SKU
         /// </summary>
-
         // root registry key for VC9
         private const string vc9RegKey = @"SOFTWARE\Microsoft\VCExpress\9.0";
         // the name of the value containing disk install directory for the IDE components 

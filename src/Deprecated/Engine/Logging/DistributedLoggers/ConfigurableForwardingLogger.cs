@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 
-
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
@@ -191,7 +190,6 @@ namespace Microsoft.Build.BuildEngine
 
         private void SetForwardingBasedOnVerbosity()
         {
-
             forwardingTable[BuildStartedEventDescription] = 0;
             forwardingTable[BuildFinishedEventDescription] = 0;
 
@@ -253,7 +251,6 @@ namespace Microsoft.Build.BuildEngine
                 forwardingTable[CommandLineDescription] = 1;
             }
         }
-
 
         /// <summary>
         /// Reset the states of per-build member variables.

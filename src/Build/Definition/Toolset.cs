@@ -284,7 +284,6 @@ namespace Microsoft.Build.Evaluation
             _environmentProperties = environmentProperties;
             _overrideTasksPath = msbuildOverrideTasksPath;
             _defaultOverrideToolsVersion = defaultOverrideToolsVersion;
-            
         }
 
         /// <summary>
