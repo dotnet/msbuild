@@ -685,7 +685,6 @@ namespace Microsoft.Build.Shared
             }
         }
 
-
         /// <summary>
         /// Checks if the char is a DirectorySeparatorChar or a AltDirectorySeparatorChar
         /// </summary>
@@ -1144,7 +1143,6 @@ namespace Microsoft.Build.Shared
             }
         }
 
-
         /// <summary>
         /// Determine if the filespec is legal according to the following conditions:
         /// 
@@ -1188,7 +1186,6 @@ namespace Microsoft.Build.Shared
             }
             return false;
         }
-
 
         /// <summary>
         /// Append the regex equivalents for character sequences in the fixed directory part of a filespec:
@@ -1867,7 +1864,6 @@ namespace Microsoft.Build.Shared
             List<string> excludeSpecsUnescaped = null
             )
         {
-
             // For performance. Short-circuit iff there is no wildcard.
             if (!HasWildcards(filespecUnescaped))
             {
@@ -2189,7 +2185,6 @@ namespace Microsoft.Build.Shared
             {
                 foreach (string excludeSpec in excludeSpecsUnescaped)
                 {
-
                     // Try a path equality check first to:
                     // - avoid the expensive regex
                     // - maintain legacy behaviour where an illegal filespec is treated as a normal string

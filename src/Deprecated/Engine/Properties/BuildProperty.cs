@@ -239,7 +239,6 @@ namespace Microsoft.Build.BuildEngine
             this.propertyValue = propertyValue;
             this.finalValueEscaped = propertyValue;
             this.type = propertyType;
-
         }
 
         /// <summary>
@@ -306,7 +305,6 @@ namespace Microsoft.Build.BuildEngine
 
             // Assign the property type.
             this.type = propertyType;
-
         }
 
         /// <summary>

@@ -200,7 +200,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             //      <requestedExecutionLevel level="asInvoker" />
             //  </requestedPrivileges>
 
-
             // we always create a requestedPrivilege node to put into the generated TrustInfo document
             //
             XmlElement requestedPrivilegeElement = document.CreateElement(XmlUtil.TrimPrefix(XPaths.requestedPrivilegeElement), XmlNamespaces.asmv3);

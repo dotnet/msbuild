@@ -80,7 +80,6 @@ namespace Microsoft.Build.Shared
                 _cachedString = ((ReuseableStringBuilder)this).ToString();
             }
             return _cachedString;
-
         }
 
         /// <summary>

@@ -900,7 +900,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var testFiles = env.CreateTestProjectWithFiles(projectContents, files,relativePathFromRootToProject);
                 ObjectModelHelpers.AssertItems(expectedInclude, new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection).Items.ToList());
             }
-
         }
 
         [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1576")]
@@ -921,7 +920,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var testFiles = env.CreateTestProjectWithFiles(projectContents, files, relativePathFromRootToProject);
                 ObjectModelHelpers.AssertItems(expectedInclude, new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection).Items.ToList());
             }
-
         }
 
         /// <summary>
@@ -2557,7 +2555,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedInitial, itemsIgnoringCondition[2]);
             ObjectModelHelpers.AssertItemHasMetadata(expectedUpdateFromUnconditionedElement, itemsIgnoringCondition[3]);
         }
-
 
         [Fact]
         public void LastUpdateWins()

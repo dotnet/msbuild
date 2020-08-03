@@ -609,7 +609,6 @@ namespace Microsoft.Build.Construction
                     new BuildEventFileInfo(FullPath),
                     "SolutionParseDuplicateProject",
                     uniqueName);
-
             }
         } // ParseSolutionFile()
 

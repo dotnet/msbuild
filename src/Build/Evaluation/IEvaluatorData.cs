@@ -27,7 +27,6 @@ namespace Microsoft.Build.Evaluation
         where M : class, IMetadatum
         where D : class, IItemDefinition<M>
     {
-
         /// <summary>
         /// The ID of this evaluation
         /// </summary>

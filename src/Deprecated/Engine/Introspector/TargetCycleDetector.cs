@@ -9,7 +9,6 @@ using System.Diagnostics;       // for debugger display attribute
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 
-
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>

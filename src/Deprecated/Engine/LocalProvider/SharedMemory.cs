@@ -255,7 +255,6 @@ namespace Microsoft.Build.BuildEngine
                 this.readStream = new MemoryStream(this.readBuffer);
                 this.binaryReader = new BinaryReader(this.readStream);
                 readLock = new object();
-
             }
             else if (streamType == SharedMemoryType.WriteOnly)
             {
@@ -267,7 +266,6 @@ namespace Microsoft.Build.BuildEngine
             {
                 ErrorUtilities.VerifyThrow(false, "Unknown shared memory type.");
             }
-
         }
 
         /// <summary>
@@ -328,12 +326,10 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-
         public void Dispose()
         {
             Dispose(true);
         }
-
 
         ~SharedMemory()
         {

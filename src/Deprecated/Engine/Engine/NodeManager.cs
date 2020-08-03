@@ -153,7 +153,6 @@ namespace Microsoft.Build.BuildEngine
             return statusForNodes;
         }
 
-
         internal void PostNodeStatus(int nodeId, NodeStatus nodeStatus)
         {
             ErrorUtilities.VerifyThrow( nodeStatus.RequestId != NodeStatus.UnrequestedStatus,
@@ -173,7 +172,6 @@ namespace Microsoft.Build.BuildEngine
             statusReplyCount++;
             statusMessageReceived.Set();
         }
-
 
         internal void PostCycleNotification
         (

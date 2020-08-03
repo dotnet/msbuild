@@ -468,7 +468,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             _logger.ErrorCount.ShouldBe(0);
             _logger.WarningCount.ShouldBe(0);
-
         }
 
         public void Dispose()

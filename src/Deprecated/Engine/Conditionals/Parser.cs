@@ -125,7 +125,6 @@ namespace Microsoft.Build.BuildEngine
                 node = ExprPrime(expression, node);
             }
 
-
             #region REMOVE_COMPAT_WARNING
             // Check for potential change in behavior
             if (LoggingServices != null && !warnedForExpression &&
@@ -238,7 +237,6 @@ namespace Microsoft.Build.BuildEngine
                 return node;
             }
         }
-
 
         private OperatorExpressionNode RelationalOperation(string expression)
         {
@@ -398,6 +396,5 @@ namespace Microsoft.Build.BuildEngine
             else
                 return false;
         }
-
     }
 }

@@ -322,7 +322,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
             }
 
-
             uniqueFileExists = null;
             uniqueGetAssemblyName = null;
         }
@@ -343,7 +342,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     Assert.True(false, message);
                 }
             }
-
 
             // Check for zero IO in GetAssemblyName.
             foreach (var entry in uniqueGetAssemblyName)
@@ -842,7 +840,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 uniqueFileExists[lowerPath] = uniqueFileExists[lowerPath] + 1;
             }
 
-
             // First, MyMissingAssembly doesn't exist anywhere.
             if (path.IndexOf("MyMissingAssembly") != -1)
             {
@@ -854,7 +851,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 path = Path.GetFullPath(path);
             }
 
-
             foreach (string file in s_existentFiles)
             {
                 if (0 == String.Compare(path, file, StringComparison.OrdinalIgnoreCase))
@@ -862,7 +858,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     return true;
                 }
             }
-
 
             // Everything else doesn't exist.
             return false;
@@ -980,7 +975,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 return "WindowsRuntime 1.0, Other V2.0.50727";
             }
-
             else if (String.Compare(path, @"C:\DirectoryContainsOnlyDll\a.dll", StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return "V2.0.50727";
@@ -1282,7 +1276,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("E, Version=0.0.0.0, Culture=neutral, PUBlicKeyToken=null");
             }
 
-
             if (String.Compare(path, s_unifyMeDll_V05Path, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 throw new FileNotFoundException();
@@ -1302,7 +1295,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 return new AssemblyNameExtension("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=" + AssemblyRef.EcmaPublicKey);
             }
-
 
             if (String.Compare(path, Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll"), StringComparison.OrdinalIgnoreCase) == 0)
             {
@@ -1783,7 +1775,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             return new AssemblyNameExtension(defaultName);
         }
 
-
         /// <summary>
         /// Cached implementation. Given an assembly name, crack it open and retrieve the list of dependent
         /// assemblies and  the list of scatter files.
@@ -2174,7 +2165,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     new AssemblyNameExtension("mscorlib, VeRsIon=2.0.0.0, Culture=neuTRal, PublicKeyToken=b77a5c561934e089")
                 };
             }
-
 
             if (String.Compare(path, s_myLibraries_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
             {

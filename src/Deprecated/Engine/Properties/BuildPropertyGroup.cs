@@ -1128,7 +1128,6 @@ namespace Microsoft.Build.BuildEngine
                 // Make sure this property doesn't override a reserved property
                 ProjectErrorUtilities.VerifyThrowInvalidProject(this.ParentProject.ReservedProperties[property.Name] == null,
                     property.PropertyElement, "CannotModifyReservedProperty", property.Name);
-
             }
         }
 

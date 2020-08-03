@@ -856,6 +856,5 @@ namespace Microsoft.Build.UnitTests
                 return $"echo łoł > {OutputPath}";
             }
         }
-
     }
 }

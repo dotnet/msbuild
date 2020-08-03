@@ -1163,7 +1163,6 @@ namespace Microsoft.Build.UnitTests.Logging
                 Properties = properties == null ? new Dictionary<string, string>() : new Dictionary<string, string>(properties),
             };
 
-
             TelemetryEventArgs actualEventArgs = (TelemetryEventArgs)service.ProcessedBuildEvent;
 
             Assert.Equal(expectedEventArgs.EventName, actualEventArgs.EventName);

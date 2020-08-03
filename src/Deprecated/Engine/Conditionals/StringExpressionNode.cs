@@ -83,5 +83,4 @@ namespace Microsoft.Build.BuildEngine
             cachedExpandedValue = null;
         }
     }
-
 }

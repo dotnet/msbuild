@@ -853,7 +853,6 @@ namespace Microsoft.Build.Construction
             ProjectImportElement importAfter = traversalProject.CreateImportElement(@"$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportAfter\*");
             importAfter.Condition = @"'$(ImportByWildcardBeforeSolution)' != 'false' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportAfter')"; // Avoids wildcard perf problem
 
-
             /* The code below adds the following XML:
 
             - TOP -

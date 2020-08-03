@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
-
     using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
@@ -22,7 +21,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public TestCollectionGroup StdGroup { get; }
         public LinkedProjectCollection_Tests(MyTestCollectionGroup group)
         {
-
             this.StdGroup = group;
             group.Clear();
         }

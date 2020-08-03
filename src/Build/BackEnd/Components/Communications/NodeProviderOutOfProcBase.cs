@@ -348,7 +348,6 @@ namespace Microsoft.Build.BackEnd
                     // remote node could set the owner to something else would also let it change owners on other objects, so
                     // this would be a security flaw upstream of us.
                     ValidateRemotePipeSecurityOnWindows(nodeStream);
-
                 }
 #endif
 
@@ -460,7 +459,6 @@ namespace Microsoft.Build.BackEnd
 
             if (!NativeMethodsShared.IsWindows)
             {
-
                 ProcessStartInfo processStartInfo = new ProcessStartInfo();
                 processStartInfo.FileName = exeName;
                 processStartInfo.Arguments = commandLineArgs;

@@ -644,7 +644,6 @@ namespace Microsoft.Build.CommandLine
                     // leave priority where it was.
                     catch (Win32Exception) { }
 
-
                     DateTime t1 = DateTime.Now;
 
                     // If the primary file passed to MSBuild is a .binlog file, play it back into passed loggers
@@ -2586,7 +2585,6 @@ namespace Microsoft.Build.CommandLine
                     ex.Message);
             }
 
-
             var logger = new ProfilerLogger(profilerFile);
             loggers.Add(logger);
 
@@ -2652,7 +2650,6 @@ namespace Microsoft.Build.CommandLine
                     {
                         CommandLineSwitchException.Throw("InvalidNodeNumberValue", nodeModeNumber.ToString());
                     }
-
 
                     if (shutdownReason == NodeEngineShutdownReason.Error)
                     {
@@ -2783,7 +2780,6 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
                 }
-
 
                 if (potentialSolutionFiles != null)
                 {
@@ -3628,7 +3624,6 @@ namespace Microsoft.Build.CommandLine
                     logger.Parameters = loggerDescription.LoggerSwitchParameters;
                 }
             }
-
             catch (LoggerException)
             {
                 // Logger failed politely during parameter/verbosity setting
