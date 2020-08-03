@@ -21,10 +21,9 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             public string GlobalJsonPath;
 
             /// <summary>
-            /// True if either (A) there was no applicable global.json or (B) existing global.json was used in resolution. 
-            /// False if a global.json was found but there was no compatible SDK, so it was ignored. 
+            /// True if a global.json was found but there was no compatible SDK, so it was ignored. 
             /// </summary>
-            public bool GlobalJsonHonored;
+            public bool FailedToResolveSpecifiedInGlobalJson;
 
             public void Initialize(Interop.hostfxr_resolve_sdk2_result_key_t key, string value)
             {

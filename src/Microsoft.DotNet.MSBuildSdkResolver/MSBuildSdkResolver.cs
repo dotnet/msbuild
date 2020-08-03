@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                         minimumVSDefinedSDKVersion);
                 }
 
-                if (!resolverResult.GlobalJsonHonored)
+                if (resolverResult.FailedToResolveSpecifiedInGlobalJson)
                 {
                     warnings.Add(Strings.GlobalJsonResolutionFailed);
                     propertiesToAdd.Add("SdkResolverHonoredGlobalJson", "false");
@@ -308,14 +308,13 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         {
             string globalJsonStartDir = Path.GetDirectoryName(context.SolutionFilePath ?? context.ProjectFilePath);
             var result = NETCoreSdkResolver.ResolveSdk(dotnetExeDir, globalJsonStartDir, _vsSettings.DisallowPrerelease());
-            result.GlobalJsonHonored = true;
 
             string mostCompatible = result.ResolvedSdkDirectory;
             if (result.ResolvedSdkDirectory == null 
                 && result.GlobalJsonPath != null
-                && context.IsRunningInVisualStudio) // TODO this works when opening VS but once building in VS this is false and we get the old SDK resolution error.
+                && context.IsRunningInVisualStudio)
             {
-                result.GlobalJsonHonored = false;
+                result.FailedToResolveSpecifiedInGlobalJson = true;
                 mostCompatible = GetMostCompatibleSdk(dotnetExeDir, context.MSBuildVersion, 5);
             }
             else if (result.ResolvedSdkDirectory != null
