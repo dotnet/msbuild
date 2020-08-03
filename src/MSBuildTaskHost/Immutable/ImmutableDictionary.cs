@@ -93,6 +93,7 @@ namespace System.Collections.Immutable
 
         void ICollection<KeyValuePair<K, V>>.CopyTo(KeyValuePair<K, V>[] array, int arrayIndex)
         {
+            CheckCopyToArguments(array, arrayIndex);
             foreach (var item in this)
             {
                 array[arrayIndex++] = item;
@@ -101,9 +102,26 @@ namespace System.Collections.Immutable
 
         void ICollection.CopyTo(Array array, int arrayIndex)
         {
+            CheckCopyToArguments(array, arrayIndex);
             foreach (var item in this)
             {
                 array.SetValue(new DictionaryEntry(item.Key, item.Value), arrayIndex++);
+            }
+        }
+
+        private void CheckCopyToArguments(Array array, int arrayIndex)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException(nameof(array));
+            }
+            if (arrayIndex < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex));
+            }
+            if (arrayIndex + Count > array.Length)
+            {
+                throw new ArgumentException(nameof(arrayIndex));
             }
         }
 
