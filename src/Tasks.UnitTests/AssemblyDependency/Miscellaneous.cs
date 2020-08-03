@@ -5939,7 +5939,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RedistListGenerateBlackListGoodListsSubsetIsSubsetOfRedist()
         {
-            string redistFile = CreateGenericRedistList(); ;
+            string redistFile = CreateGenericRedistList(); 
             string goodSubsetFile = FileUtilities.GetTemporaryFile();
             try
             {

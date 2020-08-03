@@ -631,7 +631,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 ErrorUtilities.VerifyThrow(this.ParentPersistedPropertyGroup.ParentProject != null, "Persisted BuildPropertyGroup doesn't have parent project.");
                 this.ParentPersistedPropertyGroup.MarkPropertyGroupAsDirty();
-            };
+            }
         }
 
         /// <summary>

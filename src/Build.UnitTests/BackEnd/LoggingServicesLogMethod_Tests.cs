@@ -1128,7 +1128,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 service.LogTelemetry(
                     buildEventContext: null,
                     eventName: null,
-                    properties: new Dictionary<string, string>());;
+                    properties: new Dictionary<string, string>());
             });
 
             Assert.Contains("eventName is null", exception.Message);

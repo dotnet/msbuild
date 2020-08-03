@@ -1276,7 +1276,7 @@ namespace Microsoft.Build.BuildEngine
                     // example, if a global property changes....
                     this.ParentProject.MarkProjectAsDirtyForReevaluation();
                 }
-            };
+            }
         }
 
         /// <summary>
