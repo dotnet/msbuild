@@ -234,7 +234,7 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void It_copies_content_transitively()
         {
             var targetFramework = "net5.0";

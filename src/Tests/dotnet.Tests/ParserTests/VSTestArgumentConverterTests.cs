@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             // Act
             var convertedArgs = new VSTestArgumentConverter().Convert(args, out var ignoredArgs);
 
-            convertedArgs.Should().BeEquivalentTo(convertedArgs);
+            convertedArgs.Should().BeEquivalentTo(expectedArgs);
             ignoredArgs.Should().BeEmpty();
         }
 
@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             // Act
             var convertedArgs = new VSTestArgumentConverter().Convert(args, out var ignoredArgs);
 
-            convertedArgs.Should().BeEquivalentTo(convertedArgs);
+            convertedArgs.Should().BeEquivalentTo(expectedArgs);
             ignoredArgs.Should().BeEmpty();
         }
 
@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             // Act
             var convertedArgs = new VSTestArgumentConverter().Convert(args, out var ignoredArgs);
 
-            convertedArgs.Should().BeEquivalentTo(convertedArgs);
+            convertedArgs.Should().BeEquivalentTo(expectedArgs);
             Assert.Equal(expIgnoredArgs, ignoredArgs);
         }
 
@@ -69,20 +69,36 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             public static IEnumerable<object[]> ArgTestCases { get; } = new List<object[]>
             {
-                new object[] { "-h", "--help" },
-                new object[] { "sometest.dll -s test.settings", "sometest.dll --settings:test.settings" },
-                new object[] { "sometest.dll -t", "sometest.dll --listtests" },
-                new object[] { "sometest.dll --list-tests", "sometest.dll --listtests" },
-                new object[] { "sometest.dll --filter", "sometest.dll --testcasefilter" },
-                new object[] { "sometest.dll -l trx", "sometest.dll --logger:trx" },
-                new object[] { "sometest.dll -a c:\adapterpath\temp", "sometest.dll --testadapterpath:c:\adapterpath\temp" },
-                new object[] { "sometest.dll --test-adapter-path c:\adapterpath\temp", "sometest.dll --testadapterpath:c:\adapterpath\temp" },
-                new object[] { "sometest.dll -f net451", "sometest.dll --framework:net451" },
+                new object[] { @"-h", "--help" },
+                new object[] { @"sometest.dll -s test.settings", @"sometest.dll --settings:test.settings" },
+                new object[] { @"sometest.dll -t", @"sometest.dll --listtests" },
+                new object[] { @"sometest.dll --list-tests", @"sometest.dll --listtests" },
+                new object[] { @"sometest.dll --filter", @"sometest.dll --testcasefilter" },
+                new object[] { @"sometest.dll -l trx", @"sometest.dll --logger:trx" },
+                new object[] { @"sometest.dll -a c:\adapterpath\temp", @"sometest.dll --testadapterpath:c:\adapterpath\temp" },
+                new object[] { @"sometest.dll --test-adapter-path c:\adapterpath\temp", @"sometest.dll --testadapterpath:c:\adapterpath\temp" },
+                new object[] { @"sometest.dll -f net451", @"sometest.dll --framework:net451" },
                 new object[] { @"sometest.dll -d c:\temp\log.txt", @"sometest.dll --diag:c:\temp\log.txt" },
                 new object[] { @"sometest.dll --results-directory c:\temp\", @"sometest.dll --resultsdirectory:c:\temp\" },
                 new object[] { @"sometest.dll -s testsettings -t -a c:\path -f net451 -d log.txt --results-directory c:\temp\", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
                 new object[] { @"sometest.dll -s:testsettings -t -a:c:\path -f:net451 -d:log.txt --results-directory:c:\temp\", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
-                new object[] { @"sometest.dll --settings testsettings -t --test-adapter-path c:\path --framework net451 --diag log.txt --results-directory c:\temp\", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" }
+                new object[] { @"sometest.dll --settings testsettings -t --test-adapter-path c:\path --framework net451 --diag log.txt --results-directory c:\temp\", @"sometest.dll --settings:testsettings --listtests --testadapterpath:c:\path --framework:net451 --diag:log.txt --resultsdirectory:c:\temp\" },
+                new object[] { @"sometest.dll --blame", @"sometest.dll --blame" },
+                new object[] { @"sometest.dll --blame-crash", @"sometest.dll --blame:""CollectDump""" },                
+                new object[] { @"sometest.dll --blame-crash-dump-type full", @"sometest.dll --blame:""CollectDump;DumpType=full""" },
+                new object[] { @"sometest.dll --blame-crash-collect-always", @"sometest.dll --blame:""CollectDump;CollectAlways=true""" },
+                new object[] { @"sometest.dll --blame --blame-crash-dump-type full --blame-crash-collect-always", @"sometest.dll --blame:""CollectDump;CollectAlways=true;DumpType=full""" },
+                new object[] { @"sometest.dll --blame-hang", @"sometest.dll --blame:""CollectHangDump""" },
+                new object[] { @"sometest.dll --blame-hang-dump-type full", @"sometest.dll --blame:""CollectHangDump;DumpType=full""" },
+                new object[] { @"sometest.dll --blame-hang-timeout 10min", @"sometest.dll --blame:""CollectHangDump;TestTimeout=10min""" },
+                new object[] { @"sometest.dll --blame --blame-hang-dump-type full --blame-hang-timeout 10min", @"sometest.dll --blame:""CollectHangDump;DumpType=full;TestTimeout=10min""" },
+                new object[] { @"sometest.dll --blame --blame-hang-dump-type full --blame-hang-timeout 10min --blame-crash-dump-type mini --blame-crash-collect-always", @"sometest.dll --blame:""CollectDump;CollectAlways=true;DumpType=mini;CollectHangDump;DumpType=full;TestTimeout=10min""" },
+                // using the legacy --blame syntax when we provide the parameter that are already in vstest.console format still works
+                new object[] { @"sometest.dll --blame ""CollectDump;DumpType=full""", @"sometest.dll --blame:""CollectDump;DumpType=full""" },
+                new object[] { @"sometest.dll --blame:""CollectDump;DumpType=full""", @"sometest.dll --blame:""CollectDump;DumpType=full""" },
+
+
+
             };
 
             public static IEnumerable<object[]> VerbosityTestCases { get; } = new List<object[]>

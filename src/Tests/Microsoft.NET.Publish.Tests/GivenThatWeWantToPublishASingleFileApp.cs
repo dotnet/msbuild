@@ -178,7 +178,7 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining(Strings.PublishSingleFileRequiresVersion30);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void It_generates_a_single_file_for_framework_dependent_apps()
         {
             var publishCommand = GetPublishCommand();
@@ -193,7 +193,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        [Fact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_generates_a_single_file_for_self_contained_apps()
         {
             var publishCommand = GetPublishCommand();
@@ -212,7 +212,7 @@ namespace Microsoft.NET.Publish.Tests
                 .NotHaveFiles(unexpectedFiles);
         }
 
-        [Fact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_generates_a_single_file_with_native_binaries_for_framework_dependent_apps()
         {
             var publishCommand = GetPublishCommand();
@@ -227,7 +227,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        [Fact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_generates_a_single_file_with_native_binaries_for_self_contained_apps()
         {
             var publishCommand = GetPublishCommand();
@@ -242,7 +242,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        [Fact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_generates_a_single_file_with_all_content_for_framework_dependent_apps()
         {
             var publishCommand = GetPublishCommand();
@@ -257,7 +257,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        [Fact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_generates_a_single_file_with_all_content_for_self_contained_apps()
         {
             var publishCommand = GetPublishCommand();
@@ -272,7 +272,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        [Fact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_generates_a_single_file_including_pdbs()
         {
             var publishCommand = GetPublishCommand();
@@ -287,7 +287,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_excludes_ni_pdbs_from_single_file()
         {
             var publishCommand = GetPublishCommand();
@@ -302,7 +302,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_can_include_ni_pdbs_in_single_file()
         {
             var publishCommand = GetPublishCommand();
@@ -317,7 +317,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData(ExcludeNewest, NewestContent)]
         [InlineData(ExcludeAlways, AlwaysContent)]
         public void It_generates_a_single_file_excluding_content(string exclusion, string content)
@@ -334,7 +334,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        [Fact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_generates_a_single_file_for_R2R_compiled_Apps()
         {
             var publishCommand = GetPublishCommand();
@@ -349,7 +349,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        [Fact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_does_not_rewrite_the_single_file_unnecessarily()
         {
             var publishCommand = GetPublishCommand();
@@ -372,7 +372,7 @@ namespace Microsoft.NET.Publish.Tests
             fileWriteTimeAfterSecondRun.Should().Be(fileWriteTimeAfterFirstRun);
         }
 
-        [Fact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_rewrites_the_apphost_for_single_file_publish()
         {
             var publishCommand = GetPublishCommand();
@@ -396,7 +396,7 @@ namespace Microsoft.NET.Publish.Tests
             singleFileSize.Should().BeGreaterThan(appHostSize);
         }
 
-        [Fact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_rewrites_the_apphost_for_non_single_file_publish()
         {
             var publishCommand = GetPublishCommand();
@@ -420,7 +420,7 @@ namespace Microsoft.NET.Publish.Tests
             appHostSize.Should().BeLessThan(singleFileSize);
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("netcoreapp3.0", false, IncludeDefault)]
         [InlineData("netcoreapp3.0", true, IncludeDefault)]
         [InlineData("netcoreapp3.1", false, IncludeDefault)]

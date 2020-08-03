@@ -369,9 +369,14 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             if (!string.IsNullOrEmpty(kfr.TargetFramework.Platform)
-                && !string.IsNullOrEmpty(kfr.TargetFramework.PlatformVersion))
+                && kfr.TargetFramework.PlatformVersion != null)
             {
-                if (!kfr.TargetFramework.PlatformVersion.Equals(TargetPlatformVersion, StringComparison.OrdinalIgnoreCase)
+                if (!Version.TryParse(TargetPlatformVersion, out var targetPlatformVersionParsed))
+                {
+                    return false;
+                }
+
+                if (NormalizeVersion(targetPlatformVersionParsed) != NormalizeVersion(kfr.TargetFramework.PlatformVersion)
                     || NormalizeVersion(kfr.TargetFramework.Version) != _normalizedTargetFrameworkVersion)
                 {
                     return false;
@@ -693,7 +698,7 @@ namespace Microsoft.NET.Build.Tasks
             public KnownFrameworkReference(ITaskItem item)
             {
                 _item = item;
-                TargetFramework = new NuGetFrameworkTemp(item.GetMetadata("TargetFramework"));
+                TargetFramework = NuGetFramework.Parse(item.GetMetadata("TargetFramework"));
             }
 
             //  The name / itemspec of the FrameworkReference used in the project
@@ -717,47 +722,11 @@ namespace Microsoft.NET.Build.Tasks
 
             public string Profile => _item.GetMetadata("Profile");
 
-            public NuGetFrameworkTemp TargetFramework { get; }
+            public NuGetFramework TargetFramework { get; }
 
             public KnownRuntimePack ToKnownRuntimePack()
             {
                 return new KnownRuntimePack(_item);
-            }
-        }
-
-        // TODO replace with the proper impl from nuget
-        internal class NuGetFrameworkTemp
-        {
-            public NuGetFrameworkTemp(string targetFramework)
-            {
-                Match match = Regex.Match(targetFramework, "([^-]+)");
-                var beforeDash = match.Value;
-
-                var nuGetFramework = NuGetFramework.Parse(beforeDash);
-                Framework = nuGetFramework.Framework;
-                Version = nuGetFramework.Version;
-                ShortFolderName = nuGetFramework.GetShortFolderName();
-
-                if (beforeDash != targetFramework)
-                {
-                    var afterDash = targetFramework.Substring(match.Length + 1);
-                    Match matchPlatform = Regex.Match(afterDash, "^[A-Za-z]+");
-                    Platform = matchPlatform.Value;
-                    PlatformVersion = afterDash.Substring(matchPlatform.Length);
-                }
-            }
-
-            public string Framework { get; }
-            public Version Version { get; }
-            public string Platform { get; }
-
-            public string PlatformVersion { get; }
-
-            private string ShortFolderName { get; }
-
-            public string GetShortFolderName()
-            {
-                return ShortFolderName;
             }
         }
 
