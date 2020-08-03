@@ -797,7 +797,6 @@ namespace Microsoft.Build.Utilities
                                                 break;
                                             }
 
-
                                             tlogEntry = tlog.ReadLine();
                                         }
                                     }

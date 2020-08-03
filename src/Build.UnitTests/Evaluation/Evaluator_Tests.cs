@@ -4538,7 +4538,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         .AllBuildEvents
                         .OfType<PropertyInitialValueSetEventArgs>()
                         .ShouldBeEmpty();
-
                 });
         }
 
@@ -4568,7 +4567,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         .AllBuildEvents
                         .OfType<PropertyInitialValueSetEventArgs>()
                         .ShouldBeEmpty();
-
                 });
         }
 

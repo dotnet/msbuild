@@ -609,7 +609,6 @@ namespace Microsoft.Build.BuildEngine
 
                             for (int i = 0; i < inputItemsAssumedToBeUpToDate.Length; i++)
                             {
-
                                 // if we haven't already determined that this input item has changed
                                 if (inputItemsAssumedToBeUpToDate[i] != null)
                                 {
@@ -719,7 +718,6 @@ namespace Microsoft.Build.BuildEngine
                     // There were no inputs specified, so build completely
                     loggingService.LogComment(buildEventContext, "BuildTargetCompletely", this.targetToAnalyze.Name);
                     loggingService.LogComment(buildEventContext, "BuildTargetCompletelyNoInputsSpecified");
-
 
                     // otherwise, do a full build
                     result = DependencyAnalysisResult.FullBuild;

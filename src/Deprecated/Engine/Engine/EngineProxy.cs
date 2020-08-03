@@ -144,7 +144,7 @@ namespace Microsoft.Build.BuildEngine
         public void LogErrorEvent(BuildErrorEventArgs e)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
-            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
             if (parentModule.IsRunningMultipleNodes && !e.GetType().IsSerializable)
             {
@@ -213,7 +213,7 @@ namespace Microsoft.Build.BuildEngine
         public void LogWarningEvent(BuildWarningEventArgs e)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
-            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
             if (parentModule.IsRunningMultipleNodes && !e.GetType().IsSerializable)
             {
@@ -290,7 +290,7 @@ namespace Microsoft.Build.BuildEngine
         public void LogMessageEvent(BuildMessageEventArgs e)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
-            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
             if (parentModule.IsRunningMultipleNodes && !e.GetType().IsSerializable)
             {
@@ -307,7 +307,7 @@ namespace Microsoft.Build.BuildEngine
         public void LogCustomEvent(CustomBuildEventArgs e)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e, "e");
-            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
             if (parentModule.IsRunningMultipleNodes && !e.GetType().IsSerializable)
             {
@@ -327,7 +327,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
                 return this.continueOnError;
             }
@@ -351,7 +351,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
                 ComputeProjectFileLocationOfTaskNode();
                 return this.lineNumber;
@@ -367,7 +367,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
                 ComputeProjectFileLocationOfTaskNode();
                 return this.columnNumber;
@@ -381,7 +381,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
                 return projectFileOfTaskNode;
             }
@@ -439,7 +439,7 @@ namespace Microsoft.Build.BuildEngine
         {
             lock (callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
                 // Wrap the project name into an array
                 string[] projectFileNames = new string[1];
@@ -527,7 +527,7 @@ namespace Microsoft.Build.BuildEngine
         {
             lock (callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
                 ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, "projectFileNames");
                 ErrorUtilities.VerifyThrowArgumentNull(globalProperties, "globalPropertiesPerProject");
@@ -604,7 +604,6 @@ namespace Microsoft.Build.BuildEngine
 
             return lease;
         }
-
 
         /// <summary>
         /// Indicates to the EngineProxy that it is no longer needed.

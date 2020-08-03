@@ -142,7 +142,6 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private string _dirtyParameter = String.Empty;
 
-
         internal ProjectRootElementLink RootLink => (ProjectRootElementLink)Link;
 
         /// <summary>
@@ -747,7 +746,6 @@ namespace Microsoft.Build.Construction
 
             return Create(projectCollection.ProjectRootElementCache, projectFileOptions);
         }
-
 
         /// <summary>
         /// Initialize an in-memory, empty ProjectRootElement instance that can be saved later.

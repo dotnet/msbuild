@@ -1196,7 +1196,6 @@ namespace Microsoft.Build.BuildEngine
 
                         // Add this metadata to the running table we're using, so that one piece of metadata can refer to another one above
                         expander.SetMetadataInMetadataTable(name, metadataElement.Name, evaluatedMetadataValue);
-
                     }
                 }
             }

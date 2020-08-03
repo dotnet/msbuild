@@ -72,6 +72,5 @@ namespace Microsoft.Build.UnitTests
 
             result.OverallResult.ShouldBe(BuildResultCode.Success);
         }
-
     }
 }

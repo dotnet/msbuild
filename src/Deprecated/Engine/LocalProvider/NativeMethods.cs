@@ -92,7 +92,6 @@ namespace Microsoft.Build.BuildEngine
             }
 
             return bRet;
-            
         }
 
         [DllImport("advapi32.dll", SetLastError = true)]

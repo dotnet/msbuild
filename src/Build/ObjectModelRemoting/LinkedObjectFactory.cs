@@ -8,7 +8,6 @@ using System.Collections.Generic;
 
 namespace Microsoft.Build.ObjectModelRemoting
 {
-
     /// <summary>
     /// implemented by MSBuild objects that support remote linking;
     /// </summary>
@@ -270,7 +269,6 @@ namespace Microsoft.Build.ObjectModelRemoting
 
             internal override ProjectMetadataLink Link { get; }
             object ILinkableObject.Link => Link;
-
         }
 
         private class LinkedProjectProperty : ProjectProperty, ILinkableObject
@@ -314,6 +312,5 @@ namespace Microsoft.Build.ObjectModelRemoting
         }
         #endregion
     }
-
 
 }

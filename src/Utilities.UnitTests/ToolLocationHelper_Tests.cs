@@ -18,8 +18,6 @@ using Shouldly;
 using Microsoft.Win32;
 #endif
 
-
-
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
@@ -748,7 +746,6 @@ namespace Microsoft.Build.UnitTests
             ToolLocationHelper.GetPathToDotNetFrameworkFile("msbuild.exe", TargetDotNetFrameworkVersion.Version40, UtilitiesDotNetFrameworkArchitecture.Bitness32).ShouldBe(
                     ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", "4.0", UtilitiesDotNetFrameworkArchitecture.Bitness32));
 
-
             var toolsPath32 = ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion).Properties["MSBuildToolsPath32"];
             string tv12path = Path.Combine(Path.GetFullPath(toolsPath32.EvaluatedValue), "msbuild.exe");
 
@@ -827,7 +824,6 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version110) );
             Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version120) );
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version46, VisualStudioVersion.Version140).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK46);
-
 
             // v4.6.1
             Should.Throw<ArgumentException>( () => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version461, VisualStudioVersion.Version100) );
@@ -1722,7 +1718,6 @@ namespace Microsoft.Build.UnitTests
             string framework39redistDirectory = Path.Combine(framework39Directory, "RedistList");
             string framework39RedistList = Path.Combine(framework39redistDirectory, "FrameworkList.xml");
 
-
             try
             {
                 Directory.CreateDirectory(framework41redistDirectory);
@@ -1732,7 +1727,6 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllText(framework39RedistList, redistString39);
                 File.WriteAllText(framework40RedistList, redistString40);
                 File.WriteAllText(framework41RedistList, redistString41);
-
 
                 FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("MyFramework", new Version("4.1"));
                 IList<string> directories = ToolLocationHelper.GetPathToReferenceAssemblies(tempDirectory, frameworkName);
@@ -1817,7 +1811,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-
         /// <summary>
         /// Make sure we do not crash if there is a circular reference in the redist lists, we should only have a path in our reference assembly list once.
         ///
@@ -1852,7 +1845,6 @@ namespace Microsoft.Build.UnitTests
 
                 File.WriteAllText(framework40RedistList, redistString40);
                 File.WriteAllText(framework41RedistList, redistString41);
-
 
                 FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("MyFramework", new Version("4.1"));
                 IList<string> directories = ToolLocationHelper.GetPathToReferenceAssemblies(tempDirectory, frameworkName);
@@ -2126,7 +2118,6 @@ namespace Microsoft.Build.UnitTests
             list[1].ShouldBe(LegacyFrameworkTestHelper.DotNet30FrameworkPath, StringCompareShould.IgnoreCase);
         }
 
-
         /// <summary>
         /// Verify when 35 is simulated to be installed that the method returns the 3.5 directory
         /// </summary>
@@ -2163,7 +2154,6 @@ namespace Microsoft.Build.UnitTests
             IList<string> list = ToolLocationHelper.HandleLegacyDotNetFrameworkReferenceAssemblyPaths(legacyHelper.GetDotNetVersionToPathDelegate, legacyHelper.GetDotNetReferenceAssemblyDelegate, frameworkName);
             list.Count.ShouldBe(0);
         }
-
 
         /// <summary>
         /// Verify when 35 reference assembly are simulated to not be installed that the method returns an empty list
@@ -3376,7 +3366,6 @@ namespace Microsoft.Build.UnitTests
 
                 string manifestFile = Path.Combine(manifestPath, "SDKManifest.xml");
 
-
                 string manifestPlatformSDK = @"
                 <FileList
                     DisplayName = ""Windows""
@@ -3443,7 +3432,6 @@ namespace Microsoft.Build.UnitTests
                         <ToolboxItems VSCategory = ""Toolbox.Default"" />
                     </File>
                 </FileList>";
-
 
                 File.WriteAllText(manifestFile, manifestExtensionSDK);
                 sdkManifest = new SDKManifest(manifestPath);
@@ -3823,7 +3811,6 @@ namespace Microsoft.Build.UnitTests
                     folderKey = baseKey.CreateSubKey(registryKey + @"\MyPlatform\v8.0");
                     folderKey.SetValue("", Path.Combine(testDirectoryRoot, platformDirectory));
                 }
-
 
                 if (Directory.Exists(testDirectoryRoot))
                 {
@@ -4230,7 +4217,6 @@ namespace Microsoft.Build.UnitTests
             ToolLocationHelper.FindRootFolderWhereAllFilesExist(roots, @"file1.txt;subdir\file3.txt").ShouldBe(String.Empty);
             ToolLocationHelper.FindRootFolderWhereAllFilesExist(@"c:<>;" + roots, "file1.txt").ShouldBe(rootDirectories[0]); // should ignore invalid dir
         }
-
 
 #if FEATURE_REGISTRY_SDKS
         /// <summary>

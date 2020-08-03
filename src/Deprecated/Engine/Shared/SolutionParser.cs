@@ -406,7 +406,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                 // Update the hash table with this unique name
                 projectsByUniqueName[uniqueName] = proj;
             }
-
         } // ParseSolutionFile()
 
         /// <summary>
@@ -494,7 +493,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                 new BuildEventFileInfo(SolutionFile, this.currentLineNumber, 0), 
                 "SolutionParseVersionMismatchError", 
                 slnFileMinUpgradableVersion, slnFileMaxVersion);
-
 
             // If the solution file version is greater than the maximum one we will create a comment rather than warn
             // as users such as blend opening a dev10 project cannot do anything about it.
@@ -1331,5 +1329,4 @@ namespace Microsoft.Build.BuildEngine.Shared
 
         #endregion
     } // class SolutionParser
-
 } // namespace Microsoft.Build.BuildEngine

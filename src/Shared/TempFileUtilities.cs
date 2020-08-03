@@ -147,6 +147,5 @@ namespace Microsoft.Build.Shared
                 Directory.Delete(Path, true);
             }
         }
-
     }
 }

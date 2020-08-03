@@ -169,7 +169,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// If there was a remapping entry in the redist list list then remap the passed in assemblynameextension 
+        /// If there was a remapping entry in the redist list then remap the passed in assemblynameextension 
         /// if not just return the original one. 
         /// </summary>
         public AssemblyNameExtension RemapAssembly(AssemblyNameExtension extensionToRemap)
@@ -959,7 +959,7 @@ namespace Microsoft.Build.Tasks
         /// files exist.
         /// </summary>
         /// <param name="subsetToSearchFor">String array of subset names, ie  Client, Net, MySubset. This may be null or empty if no subsets were requested to be 
-        /// found in the target framework directories. This can happen if the the subsets are instead passed in as InstalledDefaultSubsetTables</param>
+        /// found in the target framework directories. This can happen if the subsets are instead passed in as InstalledDefaultSubsetTables</param>
         internal SubsetListFinder(string[] subsetToSearchFor)
         {
             ErrorUtilities.VerifyThrowArgumentNull(subsetToSearchFor, nameof(subsetToSearchFor));

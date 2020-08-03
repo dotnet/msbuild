@@ -381,7 +381,6 @@ namespace Microsoft.Build.BuildEngine
                 this.mainProjectElement = mainProjectEntireContents.CreateElement(XMakeElements.project, XMakeAttributes.defaultXmlNamespace);
                 this.mainProjectEntireContents.AppendChild(mainProjectElement);
 
-
                 // initialize all case-insensitive hash-tables
                 this.conditionedPropertiesTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
                 this.evaluatedItemsByName = new Hashtable(StringComparer.OrdinalIgnoreCase);
@@ -726,7 +725,6 @@ namespace Microsoft.Build.BuildEngine
                 isValidated = value;
             }
         }
-
 
         /// <summary>
         /// Is this project in the process of building?
@@ -1711,7 +1709,6 @@ namespace Microsoft.Build.BuildEngine
 
                 this.ReservedProperties.SetProperty(new BuildProperty(ReservedPropertyNames.projectDirectoryNoRoot,
                     EscapingUtilities.Escape(projectDirectoryNoRoot), PropertyType.ReservedProperty));
-                
             }
 
             this.projectDirectory = this.ReservedProperties[ReservedPropertyNames.projectDirectory].FinalValue;
@@ -1824,7 +1821,6 @@ namespace Microsoft.Build.BuildEngine
                         // on <MSBuild> task tags, and what MSBuildToolsPath to use when scanning child projects
                         // for dependency information.
                         SolutionWrapperProject.Generate(sp, this, toolsVersion, buildEventContext);
-
                     }
                     else if (IsVCProjFilename(projectFileName))
                     {
@@ -1848,7 +1844,6 @@ namespace Microsoft.Build.BuildEngine
                     {
                         InternalLoadFromXmlDocument(projectDocument, projectLoadSettings);
                     }
-
 
                     // This project just came off the disk, so it is certainly not dirty yet.
                     this.dirtyNeedToSaveProjectFile = false;
@@ -2016,7 +2011,6 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-
         /// <summary>
         /// Reads in the contents of this project from an in-memory XmlDocument handed to us.
         /// </summary>
@@ -2100,7 +2094,6 @@ namespace Microsoft.Build.BuildEngine
                 }
                 throw;
             }
-
         }
 
         /// <summary>
@@ -2510,7 +2503,6 @@ namespace Microsoft.Build.BuildEngine
                         matchingPropertyGroup = this.AddNewPropertyGroup(afterImportPosition);
                         matchingPropertyGroup.Condition = condition;
                     }
-
                 }
 
                 if (importedProperty)
@@ -3369,7 +3361,6 @@ namespace Microsoft.Build.BuildEngine
                             }
                         }
 
-
                         buildContext.CurrentBuildContextState = ProjectBuildState.BuildContextState.BuildComplete;
                     }
 
@@ -4032,7 +4023,6 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-
         /// <summary>
         /// Process the &lt;Import&gt; element by loading the child project file, and processing its &lt;Project&gt; element. In a
         /// given main project, the same file cannot be imported twice -- this is to prevent circular imports.
@@ -4129,7 +4119,6 @@ namespace Microsoft.Build.BuildEngine
 
                             ProjectErrorUtilities.VerifyThrowInvalidProject((importedChildNode.Prefix.Length == 0) && (String.Compare(importedChildNode.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase) == 0),
                                 importedChildNode, "ProjectMustBeInMSBuildXmlNamespace", XMakeAttributes.defaultXmlNamespace);
-
 
                             // We have the <Project> element, so process it.
                             this.ProcessProjectAttributes((XmlElement)importedChildNode,
@@ -4304,7 +4293,6 @@ namespace Microsoft.Build.BuildEngine
                     // Make the correct project directory available. During load, we need "exists" (with relative paths)
                     // on conditions to work correctly, and for wildcards to evaluate relative to the project directory.
                     Project.PerThreadProjectDirectory = this.ProjectDirectory;
-
 
                     // In case we've just loaded the project file, we don't want to repeat all
                     // of the work done during ProcessProjectChildren(...) to evaluate the

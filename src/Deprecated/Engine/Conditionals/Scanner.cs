@@ -437,7 +437,6 @@ namespace Microsoft.Build.BuildEngine
             }
             if (parsePoint >= expression.Length)
             {
-                
                 errorPosition = start + 1;
                 if (fInReplacement)
                 {

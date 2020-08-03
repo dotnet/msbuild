@@ -668,7 +668,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             List<ExpressionShredder.ItemExpressionCapture> expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
-
             expression = "@(Foo, ';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
             capture = expressions[0];
@@ -685,7 +684,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string expression;
             List<ExpressionShredder.ItemExpressionCapture> expressions;
             ExpressionShredder.ItemExpressionCapture capture;
-
 
             expression = "@(Foo->'%(Fullpath)')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
@@ -722,7 +720,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string expression;
             List<ExpressionShredder.ItemExpressionCapture> expressions;
             ExpressionShredder.ItemExpressionCapture capture;
-
 
             expression = "@(Foo->Bar(a,b))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
@@ -1091,7 +1088,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal("Substring", capture.Captures[1].FunctionName);
             Assert.Equal("\"()\", $(Boo), `)(\"`", capture.Captures[1].FunctionArguments);
         }
-
 
         [Fact]
         public void ExtractItemVectorExpressionsMultipleExpression5()

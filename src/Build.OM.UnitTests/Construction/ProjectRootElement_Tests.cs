@@ -905,7 +905,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         public void SolutionCanNotBeOpened()
         {
-            
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string solutionFile = null;
@@ -1028,7 +1027,6 @@ Project(""{";
         [PlatformSpecific(TestPlatforms.Windows)]  //This test is platform specific for Windows
         public void ConcurrentProjectOpenAndCloseThroughProject()
         {
-
             int iterations = 500;
             string[] paths = ObjectModelHelpers.GetTempFiles(iterations);
 
@@ -1737,7 +1735,6 @@ true, true, true)]
             bool reloadProjectFromMemory,
             Action<string, string, string> projectFileAssert)
         {
-
             using (var env = TestEnvironment.Create())
             {
                 var projectCollection = env.CreateProjectCollection().Collection;
@@ -1893,7 +1890,6 @@ true, true, true)]
             {
                 Assert.Equal(childrenCount, projectElement.AllChildren.Count());
             }
-
 
             if (xmlChanged)
             {

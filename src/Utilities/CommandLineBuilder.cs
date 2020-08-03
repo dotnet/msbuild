@@ -109,7 +109,6 @@ namespace Microsoft.Build.Utilities
         /// <returns></returns>
         public override string ToString() => CommandLine.ToString();
 
-
         // Use if escaping of hyphens is supposed to take place
         private static readonly string s_allowedUnquotedRegexNoHyphen =
                          "^"                             // Beginning of line

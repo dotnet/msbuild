@@ -492,7 +492,6 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-
         internal TargetExecutionWrapper ExecutionState
         {
             get

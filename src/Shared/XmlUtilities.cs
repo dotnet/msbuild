@@ -58,7 +58,6 @@ namespace Microsoft.Build.Shared
             return newElement;
         }
 
-
         /// <summary>
         /// Verifies that a name is valid for the name of an item, property, or piece of metadata.
         /// If it isn't, throws an ArgumentException indicating the invalid character.

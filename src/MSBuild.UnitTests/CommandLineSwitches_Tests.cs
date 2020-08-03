@@ -1265,7 +1265,6 @@ namespace Microsoft.Build.UnitTests
                         // Ignore empty lines
                         if (!String.IsNullOrWhiteSpace(helpMessageLines[i]))
                         {
-
                             if (item.Key.Contains("Examples"))
                             {
                                 // Examples require a certain number of leading spaces

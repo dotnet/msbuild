@@ -364,7 +364,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             Utilities.AssertLogContainsResource(t2, "GenerateResource.ResourceNotFound", t2.Sources[0].ItemSpec);
         }
 
-
         /// <summary>
         ///  Force out-of-date with ShouldRebuildResgenOutputFile on the linked file
         /// </summary>
@@ -802,7 +801,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Utilities.ExecuteTask(incrementalUpToDate);
 
                 File.GetLastWriteTime(incrementalUpToDate.OutputResources[0].ItemSpec).ShouldBe(firstWriteTime);
-
 
                 _output.WriteLine("** Touch the reference, and repeat, it should now rebuild");
                 DateTime newTime = DateTime.Now + new TimeSpan(0, 1, 0);
@@ -1455,7 +1453,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 generatedSource.ShouldNotContain("object MyString", "Strongly-typed resource accessor is returning type `object` instead of `string`");
                 generatedSource.ShouldContain("static string MyString");
                 generatedSource.ShouldMatch("//.*Looks up a localized string similar to MyValue", "Couldn't find a comment in the usual format for a string resource.");
-
             }
             finally
             {
@@ -1470,7 +1467,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 }
             }
         }
-
 
         /// <summary>
         ///  STR with resource namespace yields proper output, message (CS)
@@ -3315,7 +3311,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-
                 File.Delete(t.Sources[0].ItemSpec);
                 foreach (ITaskItem item in t.FilesWritten)
                 {
@@ -3373,7 +3368,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Utilities.FileUpdated(resourcesFile, initialWriteTime).ShouldBeFalse();
             }
         }
-
     }
 }
 
@@ -3889,7 +3883,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 {
                     Assert.Contains("namespace " + classNamespace.ToLower(), Utilities.ReadFileContent(STRFile).ToLower());
                 }
-
 
                 // Verify log is as expected
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", textFile, resourcesFile);

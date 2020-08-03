@@ -232,7 +232,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return installableFramework;
         }
 
-
         private static CompatibleFramework GetSubsetCompatFramework(FrameworkNameVersioning frameworkName)
         {
             CompatibleFramework compat = GetFullCompatFramework(frameworkName);

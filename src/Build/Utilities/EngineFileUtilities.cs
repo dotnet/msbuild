@@ -42,7 +42,6 @@ namespace Microsoft.Build.Internal
             _fileMatcher = fileMatcher;
         }
 
-
         /// <summary>
         /// Used for the purposes of evaluating an item specification. Given a filespec that may include wildcard characters * and
         /// ?, we translate it into an actual list of files. If the input filespec doesn't contain any wildcard characters, and it

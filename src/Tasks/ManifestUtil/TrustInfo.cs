@@ -200,7 +200,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             //      <requestedExecutionLevel level="asInvoker" />
             //  </requestedPrivileges>
 
-
             // we always create a requestedPrivilege node to put into the generated TrustInfo document
             //
             XmlElement requestedPrivilegeElement = document.CreateElement(XmlUtil.TrimPrefix(XPaths.requestedPrivilegeElement), XmlNamespaces.asmv3);
@@ -232,7 +231,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 //  here so we can allow the passed-in node to override it if there is a comment present
                 //
                 System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
-                commentString = resources.GetString("TrustInfo.RequestedExecutionLevelComment"); ;
+                commentString = resources.GetString("TrustInfo.RequestedExecutionLevelComment"); 
             }
             else
             {

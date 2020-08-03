@@ -334,7 +334,6 @@ namespace Microsoft.Build.UnitTests
 </Project>", logger);
 
             sc.ToString().ShouldContain("\"a\\b\\%(Filename).c\"");
-
         }
 
         /// <summary>

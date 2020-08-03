@@ -251,7 +251,6 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private static readonly char[] fileLoggerParameterValueSplitCharacter = { '=' };
 
-
         #endregion
     }
 }

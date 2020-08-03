@@ -139,6 +139,5 @@ namespace Microsoft.Build.Tasks.UnitTests.ResourceHandling
 
         private const string FinalBoilerplate = @"</root>
 ";
-
     }
 }

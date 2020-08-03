@@ -5,7 +5,6 @@ using System.Collections.Generic;
 
 namespace Microsoft.Build.Engine.UnitTests.Globbing
 {
-    
     public static class GlobbingTestData
     {
         public static IEnumerable<object[]> IncludesAndExcludesWithWildcardsTestData

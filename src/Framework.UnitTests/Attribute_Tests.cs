@@ -18,7 +18,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void RequiredRuntimeAttribute()
         {
-
             RequiredRuntimeAttribute attribute =
                 typeof(X).GetTypeInfo().GetCustomAttribute<RequiredRuntimeAttribute>();
 

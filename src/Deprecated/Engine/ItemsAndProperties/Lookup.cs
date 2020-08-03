@@ -61,7 +61,6 @@ namespace Microsoft.Build.BuildEngine
     /// </remarks>
     internal class Lookup
     {
-
         #region Fields
 
         /// <summary>

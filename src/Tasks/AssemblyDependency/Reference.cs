@@ -240,7 +240,6 @@ namespace Microsoft.Build.Tasks
             _dependencies.Remove(dependencyToRemove);
         }
 
-
         /// <summary>
         /// Get the dependee references for this reference.
         ///  This is collection of References.
@@ -564,7 +563,6 @@ namespace Microsoft.Build.Tasks
                 return _fullPathWithoutExtension;
             }
         }
-
 
         /// <summary>
         /// This is the HintPath from the source item. This is used to resolve the assembly.

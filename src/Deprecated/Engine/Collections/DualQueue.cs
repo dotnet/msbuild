@@ -79,7 +79,6 @@ namespace Microsoft.Build.BuildEngine
         /// <returns></returns>
         internal int Count
         {
-
             get
             {
                 // Sum both as the number of items is the sum of items in both queues

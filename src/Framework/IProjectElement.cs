@@ -8,7 +8,6 @@ namespace Microsoft.Build.Framework
     /// </summary>
     public interface IProjectElement
     {
-
         /// <summary>
         /// Gets the name of the associated element. 
         /// Useful for display in some circumstances.

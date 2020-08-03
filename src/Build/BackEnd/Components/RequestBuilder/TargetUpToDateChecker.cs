@@ -460,7 +460,6 @@ namespace Microsoft.Build.BackEnd
                 _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "BuildTargetCompletely", _targetToAnalyze.Name);
                 _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "BuildTargetCompletelyNoInputsSpecified");
 
-
                 // otherwise, do a full build
                 result = DependencyAnalysisResult.FullBuild;
             }
@@ -1073,7 +1072,6 @@ namespace Microsoft.Build.BackEnd
             dependencyAnalysisDetailEntry = null;
             return false;
         }
-
 
         /// <summary>
         /// Record the unique input and output files so that the "up to date" message

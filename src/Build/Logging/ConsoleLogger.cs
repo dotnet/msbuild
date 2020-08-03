@@ -58,7 +58,6 @@ namespace Microsoft.Build.Logging
         private bool _skipProjectStartedText = false;
         private bool? _showSummary;
 
-
         #region Constructors
 
         /// <summary>
