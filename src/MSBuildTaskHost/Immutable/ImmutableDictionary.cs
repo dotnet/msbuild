@@ -114,7 +114,7 @@ namespace System.Collections.Immutable
         internal ImmutableDictionary<K, V> SetItem(K key, V value)
         {
             var clone = new ImmutableDictionary<K, V>(_backing);
-            clone._backing.Add(key, value);
+            clone._backing[key] = value;
 
             return clone;
         }
@@ -169,7 +169,7 @@ namespace System.Collections.Immutable
             return _backing.ToArray();
         }
 
-        internal ImmutableDictionary<K,V> AddRange(KeyValuePair<K, V>[] v)
+        internal ImmutableDictionary<K, V> AddRange(KeyValuePair<K, V>[] v)
         {
             var n = new Dictionary<K, V>(_backing, _backing.Comparer);
 
