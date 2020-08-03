@@ -78,7 +78,7 @@ namespace Microsoft.Build.Tasks
                 for (int i = 0; i < Assemblies.Length; i++)
                 {
                     // if the type lib path is not supplied, generate default one
-                    if (TypeLibFiles != null && TypeLibFiles[i]?.ItemSpec.Length > 0)
+                    if (TypeLibFiles?[i]?.ItemSpec.Length > 0)
                     {
                         cacheFile.AddEntry(Assemblies[i].ItemSpec, TypeLibFiles[i].ItemSpec);
                     }
