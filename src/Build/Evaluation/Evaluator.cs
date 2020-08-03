@@ -966,7 +966,7 @@ namespace Microsoft.Build.Evaluation
                         string target = EscapingUtilities.UnescapeAll(temp[i].Trim());
                         if (target.Length > 0)
                         {
-                            _data.DefaultTargets = _data.DefaultTargets ?? new List<string>(temp.Count);
+                            _data.DefaultTargets ??= new List<string>(temp.Count);
                             _data.DefaultTargets.Add(target);
                         }
                     }

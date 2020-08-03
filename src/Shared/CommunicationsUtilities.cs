@@ -307,7 +307,7 @@ namespace Microsoft.Build.Internal
             {
                 unchecked
                 {
-                    baseHandshake = baseHandshake ^ 0x5c5c5c5c5c5c5c5c + Process.GetCurrentProcess().SessionId;
+                    baseHandshake ^= 0x5c5c5c5c5c5c5c5c + Process.GetCurrentProcess().SessionId;
                 }
             }
 #endif

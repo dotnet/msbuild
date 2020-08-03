@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 var projectFile = env.CreateFile().Path;
                 File.WriteAllText(projectFile, projectContents);
 
-                firstEvaluationLogger = firstEvaluationLogger ?? new MockLogger();
+                firstEvaluationLogger ??= new MockLogger();
                 collection.RegisterLogger(firstEvaluationLogger);
 
                 var project = new Project(projectFile, null, null, collection);

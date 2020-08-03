@@ -527,7 +527,7 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
-                xslCompiledPath.ItemSpec = xslCompiledPath.ItemSpec + ";xslt";
+                xslCompiledPath.ItemSpec += ";xslt";
                 t.XslCompiledDllPath = xslCompiledPath;
                 Assert.Equal(xslCompiledPath.ItemSpec, t.XslCompiledDllPath.ItemSpec);
                 Assert.True(t.Execute()); // "XsltComiledDll1 execution should've passed"
@@ -648,7 +648,7 @@ namespace Microsoft.Build.UnitTests
                 XslTransformation t = new XslTransformation();
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
-                xmlPaths[0].ItemSpec = xmlPaths[0].ItemSpec + "bad";
+                xmlPaths[0].ItemSpec += "bad";
                 t.XmlInputPaths = xmlPaths;
                 t.XslInputPath = xslPath;
                 Console.WriteLine(engine.Log);
@@ -678,7 +678,7 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlInputPaths = xmlPaths;
-                xslPath.ItemSpec = xslPath.ItemSpec + "bad";
+                xslPath.ItemSpec += "bad";
                 t.XslInputPath = xslPath;
                 Assert.False(t.Execute()); // "This test should've failed (bad xslt)."
                 Console.WriteLine(engine.Log);
@@ -707,7 +707,7 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
-                xslCompiledPath.ItemSpec = xslCompiledPath.ItemSpec + "bad;xslt";
+                xslCompiledPath.ItemSpec += "bad;xslt";
                 t.XslCompiledDllPath = xslCompiledPath;
                 Assert.False(t.Execute()); // "XsltComiledDllBad execution should've failed"
                 Console.WriteLine(engine.Log);

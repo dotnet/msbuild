@@ -1350,7 +1350,7 @@ namespace Microsoft.Build.BackEnd.Logging
                             // Calculate how many chars will fit on the console buffer
                             int amountToCopy = (messageLength - index) < (bufferWidthMinusNewLine - adjustedPrefixWidth) ? (messageLength - index) : (bufferWidthMinusNewLine - adjustedPrefixWidth);
                             WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), (prefixAlreadyWritten && index == 0 && i == 0), adjustedPrefixWidth);
-                            index = index + amountToCopy;
+                            index += amountToCopy;
                         }
                     }
                     else

@@ -1408,7 +1408,7 @@ class X
                 startInfo.hStdInput = BackEndNativeMethods.InvalidHandle;
                 startInfo.hStdOutput = BackEndNativeMethods.InvalidHandle;
                 startInfo.dwFlags = BackEndNativeMethods.STARTFUSESTDHANDLES;
-                dwCreationFlags = dwCreationFlags | BackEndNativeMethods.CREATENOWINDOW;
+                dwCreationFlags |= BackEndNativeMethods.CREATENOWINDOW;
 
                 BackEndNativeMethods.SECURITY_ATTRIBUTES pSec = new BackEndNativeMethods.SECURITY_ATTRIBUTES();
                 BackEndNativeMethods.SECURITY_ATTRIBUTES tSec = new BackEndNativeMethods.SECURITY_ATTRIBUTES();
@@ -2393,7 +2393,7 @@ namespace ConsoleApplication4
                 startInfo.hStdInput = BackEndNativeMethods.InvalidHandle;
                 startInfo.hStdOutput = BackEndNativeMethods.InvalidHandle;
                 startInfo.dwFlags = BackEndNativeMethods.STARTFUSESTDHANDLES;
-                dwCreationFlags = dwCreationFlags | BackEndNativeMethods.CREATENOWINDOW;
+                dwCreationFlags |= BackEndNativeMethods.CREATENOWINDOW;
 
                 BackEndNativeMethods.SECURITY_ATTRIBUTES pSec = new BackEndNativeMethods.SECURITY_ATTRIBUTES();
                 BackEndNativeMethods.SECURITY_ATTRIBUTES tSec = new BackEndNativeMethods.SECURITY_ATTRIBUTES();

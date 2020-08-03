@@ -597,7 +597,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         int nStartIndex = packagePath.Length;
                         if ((strSubDirectory.ToCharArray())[nStartIndex] == System.IO.Path.DirectorySeparatorChar)
                         {
-                            nStartIndex = nStartIndex + 1;
+                            nStartIndex += 1;
                         }
 
                         ExploreDirectory(strSubDirectory.Substring(nStartIndex), rootElement, packagePath);
@@ -1612,7 +1612,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             FileAttributes attribs = File.GetAttributes(strFileName);
             if ((attribs & FileAttributes.ReadOnly) != 0)
             {
-                attribs = attribs & (~FileAttributes.ReadOnly);
+                attribs &= (~FileAttributes.ReadOnly);
                 File.SetAttributes(strFileName, attribs);
             }
         }

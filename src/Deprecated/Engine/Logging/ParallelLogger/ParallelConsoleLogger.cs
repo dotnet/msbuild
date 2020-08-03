@@ -1176,7 +1176,7 @@ namespace Microsoft.Build.BuildEngine
                             // Calculate how many chars will fit on the console buffer
                             amountToCopy = (messageLength - index) < (bufferWidthMinusNewLine - adjustedPrefixWidth) ? (messageLength - index) : (bufferWidthMinusNewLine - adjustedPrefixWidth);
                             WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), (prefixAlreadyWritten && index == 0 && i == 0), adjustedPrefixWidth);
-                            index = index + amountToCopy;
+                            index += amountToCopy;
                         }
                     }
                     else

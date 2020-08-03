@@ -3612,7 +3612,7 @@ namespace Microsoft.Build.Tasks
                     // sign.  Deal with it.
                     if (name[name.Length - 1] == ' ')
                     {
-                        name.Length = name.Length - 1;
+                        name.Length -= 1;
                     }
                     ch = sr.Read(); // move past =
                     // If it exists, move past the first space after the equals sign.

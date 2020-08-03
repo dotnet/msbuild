@@ -291,7 +291,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             if (pair == null) return;
             var real = pair.Real;
             var view = pair.View;
-            context = context ?? new ValidationContext();
+            context ??= new ValidationContext();
             context.Pair = pair;
 
 

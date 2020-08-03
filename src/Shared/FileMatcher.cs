@@ -867,7 +867,7 @@ namespace Microsoft.Build.Shared
                         continue;
                     }
                 }
-                files = files ?? new List<string>();
+                files ??= new List<string>();
                 files.Add(file);
             }
             // Add all matched files at once to reduce thread contention

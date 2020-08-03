@@ -552,12 +552,12 @@ namespace Microsoft.Build.Execution
             // Cache the result, even if it is null.  We should never again do the work we just did, for this task name.
             if (exactMatchRequired)
             {
-                _cachedTaskRecordsWithExactMatch = _cachedTaskRecordsWithExactMatch ?? new Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                _cachedTaskRecordsWithExactMatch ??= new Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
                 _cachedTaskRecordsWithExactMatch[taskIdentity] = taskRecord;
             }
             else
             {
-                _cachedTaskRecordsWithFuzzyMatch = _cachedTaskRecordsWithFuzzyMatch ?? new Dictionary<string, Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>>(StringComparer.OrdinalIgnoreCase);
+                _cachedTaskRecordsWithFuzzyMatch ??= new Dictionary<string, Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>>(StringComparer.OrdinalIgnoreCase);
 
                 // Since this is a fuzzy match, we could conceivably have several sets of task identity parameters that match
                 // each other ... but might be mutually exclusive themselves.  E.g. CLR4|x86 and CLR2|x64 both match *|*.  
@@ -1607,7 +1607,7 @@ namespace Microsoft.Build.Execution
                     where P : class, IProperty
                     where I : class, IItem
                 {
-                    _usingTaskParameters = _usingTaskParameters ?? new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase);
+                    _usingTaskParameters ??= new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase);
 
                     // Go through each of the parameters and create new ParameterInfo objects from them
                     foreach (ProjectUsingTaskParameterElement parameter in usingTaskParameterGroup.Parameters)

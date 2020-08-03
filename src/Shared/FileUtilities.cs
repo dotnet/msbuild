@@ -303,7 +303,7 @@ namespace Microsoft.Build.Shared
                     }
                     else
                     {
-                        i = i + 2;
+                        i += 2;
                         continue;
                     }
                 }
@@ -914,7 +914,7 @@ namespace Microsoft.Build.Shared
 
             try
             {
-                fileSystem = fileSystem ?? DefaultFileSystem;
+                fileSystem ??= DefaultFileSystem;
 
                 return Traits.Instance.CacheFileExistence
                     ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.DirectoryExists)
@@ -939,7 +939,7 @@ namespace Microsoft.Build.Shared
 
             try
             {
-                fileSystem = fileSystem ?? DefaultFileSystem;
+                fileSystem ??= DefaultFileSystem;
 
                 return Traits.Instance.CacheFileExistence
                     ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.FileExists)
@@ -964,7 +964,7 @@ namespace Microsoft.Build.Shared
 
             try
             {
-                fileSystem = fileSystem ?? DefaultFileSystem;
+                fileSystem ??= DefaultFileSystem;
 
                 return Traits.Instance.CacheFileExistence
                     ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.DirectoryEntryExists)
@@ -1328,7 +1328,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName, IFileSystem fileSystem = null)
         {
-            fileSystem = fileSystem ?? DefaultFileSystem;
+            fileSystem ??= DefaultFileSystem;
 
             // Canonicalize our starting location
             string lookInDirectory = GetFullPath(startingDirectory);
