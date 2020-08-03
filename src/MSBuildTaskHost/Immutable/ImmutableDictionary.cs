@@ -163,7 +163,6 @@ namespace System.Collections.Immutable
         }
 
         public IEqualityComparer<K> KeyComparer { get => _backing.Comparer; internal set => throw new NotSupportedException(); }
-        public IEqualityComparer<K> ValueComparer { get => _backing.Comparer; internal set => throw new NotSupportedException(); }
 
         internal KeyValuePair<K, V>[] ToArray()
         {
@@ -182,7 +181,7 @@ namespace System.Collections.Immutable
             return new ImmutableDictionary<K, V>(n);
         }
 
-        internal ImmutableDictionary<K, V> WithComparers(IEqualityComparer<K> keyComparer, object valueComparer)
+        internal ImmutableDictionary<K, V> WithComparers(IEqualityComparer<K> keyComparer)
         {
             var n = new Dictionary<K, V>(_backing, keyComparer);
             return new ImmutableDictionary<K, V>(n);

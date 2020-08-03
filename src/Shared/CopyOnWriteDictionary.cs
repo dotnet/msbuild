@@ -159,7 +159,7 @@ namespace Microsoft.Build.Collections
         internal IEqualityComparer<K> Comparer
         {
             get => _backing.KeyComparer;
-            private set => _backing = _backing.WithComparers(keyComparer: value, valueComparer: _backing.ValueComparer);
+            private set => _backing = _backing.WithComparers(keyComparer: value);
         }
 
         /// <summary>
