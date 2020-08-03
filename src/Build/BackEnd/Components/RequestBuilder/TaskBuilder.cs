@@ -545,7 +545,6 @@ namespace Microsoft.Build.BackEnd
             return taskIdentityParameters;
         }
 
-
 #if FEATURE_APARTMENT_STATE
         /// <summary>
         /// Executes the task using an STA thread.

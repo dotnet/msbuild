@@ -33,7 +33,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private Hashtable instanceLocalFileStateCache = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
-
         /// <summary>
         /// LastModified information is purely instance-local. It doesn't make sense to
         /// cache this for long periods of time since there's no way (without actually 
@@ -47,7 +46,6 @@ namespace Microsoft.Build.Tasks
         /// calling Directory.Exists) to tell whether the cache is out-of-date.
         /// </summary>
         private Dictionary<string, bool> instanceLocalDirectoryExists = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-
 
         /// <summary>
         /// GetDirectories information is also purely instance-local. This information
@@ -371,7 +369,6 @@ namespace Microsoft.Build.Tasks
             upToDateLocalFileStateCache.TryGetValue(path, out FileState state);
             if (state == null)
             {   // We haven't seen this file this ResolveAssemblyReference session
-
                 state = ComputeFileStateFromCachesAndDisk(path);
                 upToDateLocalFileStateCache[path] = state;
             }

@@ -131,8 +131,6 @@ namespace Microsoft.Build.Evaluation
             LoadProjectsReadOnly = loadProjectsReadOnly;
         }
 
-
-
         /// <summary>
         /// Returns an existing ProjectRootElement for the specified file path, if any.
         /// If none exists, calls the provided delegate to load one, and adds that to the cache.

@@ -200,16 +200,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
-            bool nodeReuse = ComponentHost.BuildParameters.EnableNodeReuse;
-
-            // To avoid issues with mismatched priorities not shutting
-            // down all the nodes on exit, we will attempt to shutdown
-            // all matching notes with and without the priroity bit set.
-            // So precompute both versions of the handshake now.
-            long hostHandshake = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: false);
-            long hostHandshakeWithLow = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: true);
-
-            ShutdownAllNodes(nodeReuse, NodeContextTerminated);
+            ShutdownAllNodes(ComponentHost.BuildParameters.EnableNodeReuse, NodeContextTerminated);
         }
         #endregion
 
@@ -535,8 +526,7 @@ namespace Microsoft.Build.BackEnd
                                         commandLineArgs,
                                         (int)hostContext,
                                         this,
-                                        CommunicationsUtilities.GetHostHandshake(hostContext),
-                                        CommunicationsUtilities.GetClientHandshake(hostContext),
+                                        new Handshake(hostContext),
                                         NodeContextTerminated
                                     );
 

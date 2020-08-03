@@ -12,7 +12,6 @@ using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.BuildEngine
 {
-
     /// <summary>
     /// This class wraps a project item, and provides a "view" on the item's BuildItem class that is suitable to expose to tasks.
     /// </summary>
@@ -97,7 +96,6 @@ namespace Microsoft.Build.BuildEngine
                 return item.MetadataCount;
             }
         }
-
 
         /// <summary>
         /// Gets the names of custom metadata on the item
@@ -200,7 +198,6 @@ namespace Microsoft.Build.BuildEngine
                 destinationItem.SetMetadata("OriginalItemSpec", ItemSpec);
             }
         }
-
 
         /// <summary>
         /// Get the collection of metadata. This does not include built-in metadata.

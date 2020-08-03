@@ -331,7 +331,6 @@ namespace Microsoft.Build.BuildEngine
                             "InvalidAttributeValueWithException", assemblyFile,
                             XMakeAttributes.assemblyFile, XMakeElements.usingTask, ex.Message);
                     }
-
                 }
 
                 AssemblyLoadInfo taskAssembly = new AssemblyLoadInfo(assemblyName, assemblyFile);

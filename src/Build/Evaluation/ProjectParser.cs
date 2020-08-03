@@ -54,7 +54,7 @@ namespace Microsoft.Build.Construction
         private static readonly HashSet<string> ValidAttributesOnTarget = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.name, XMakeAttributes.inputs, XMakeAttributes.outputs, XMakeAttributes.keepDuplicateOutputs, XMakeAttributes.dependsOnTargets, XMakeAttributes.beforeTargets, XMakeAttributes.afterTargets, XMakeAttributes.returns };
 
         /// <summary>
-        /// Valid attributes on on error element
+        /// Valid attributes on error element
         /// </summary>
         private static readonly HashSet<string> ValidAttributesOnOnError = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.executeTargets };
 
@@ -228,7 +228,6 @@ namespace Microsoft.Build.Construction
 
             return propertyGroup;
         }
-
 
         /// <summary>
         /// Parse a ProjectItemGroupElement

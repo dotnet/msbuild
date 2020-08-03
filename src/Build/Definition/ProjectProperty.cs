@@ -629,7 +629,6 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-
         /// <summary>
         /// External projects support
         /// </summary>

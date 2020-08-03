@@ -159,7 +159,6 @@ namespace Microsoft.Build.BuildEngine
             return this.targetTable.Values.GetEnumerator();
         }
 
-
         /// <summary>
         /// Adds a new Target to our collection.  This method does nothing
         /// to manipulate the project's XML content.

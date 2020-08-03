@@ -392,7 +392,6 @@ namespace Microsoft.Build.Construction
             }
             else
             {
-
                 // Copy over the attributes from the template element.
                 foreach (XmlAttribute attribute in element.XmlElement.Attributes)
                 {

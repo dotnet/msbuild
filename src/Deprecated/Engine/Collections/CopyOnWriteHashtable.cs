@@ -11,7 +11,6 @@ using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.BuildEngine
 {
-
     /// <summary>
     /// A hashtable wrapper that defers copying until the data is written.
     /// </summary>
@@ -89,7 +88,6 @@ namespace Microsoft.Build.BuildEngine
                     // this means a bug in the engine code somewhere.
                     throw new InternalErrorException("Bug: Changing the case-sensitiveness of a copied hash-table.");
                 }
-
             }
 
             // Can't defer this because we don't control what gets written to the dictionary exogenously.
@@ -193,7 +191,6 @@ namespace Microsoft.Build.BuildEngine
                         }
                     }
                 }
-
             }
         }
 #endregion

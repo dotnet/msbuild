@@ -46,7 +46,6 @@ namespace Microsoft.Build.CommandLine
             this.commandLineArg = commandLineArg;
         }
 
-
         /// <summary>
         /// Serialization constructor
         /// </summary>

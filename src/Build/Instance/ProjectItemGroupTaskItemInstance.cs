@@ -196,7 +196,6 @@ namespace Microsoft.Build.Execution
 
         private ProjectItemGroupTaskItemInstance()
         {
-            
         }
 
         /// <summary>

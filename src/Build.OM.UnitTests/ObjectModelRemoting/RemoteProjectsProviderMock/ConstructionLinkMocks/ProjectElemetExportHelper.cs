@@ -131,6 +131,5 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             return factory(exporter, xml);
         }
-
     }
 }

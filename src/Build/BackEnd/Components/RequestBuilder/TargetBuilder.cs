@@ -201,7 +201,6 @@ namespace Microsoft.Build.BackEnd
             return resultsToReport;
         }
 
-
         #region IBuildComponent Members
 
         /// <summary>

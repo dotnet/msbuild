@@ -143,7 +143,6 @@ namespace Microsoft.Build.Evaluation
 
                 if (_evaluatedValueEscaped != null)
                 {
-
                     // Clear out the current value of this metadata, so the new value can't refer to the old one.
                     // The expansion call below otherwise passes in the parent item's metadata - including this one's
                     // current value.

@@ -180,7 +180,6 @@ namespace Microsoft.Build.UnitTests
             t.MetadataCount.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length + 1);
         }
 
-
         [Fact]
         public void NonexistentRequestFullPath()
         {

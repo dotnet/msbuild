@@ -293,7 +293,6 @@ namespace Microsoft.Build.BackEnd
             set => _requestedProjectState = value;
         }
 
-
         /// <summary>
         /// The route for host-aware tasks back to the host
         /// </summary>

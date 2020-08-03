@@ -18,7 +18,6 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal class TypeLoader
     {
-
         /// <summary>
         /// Cache to keep track of the assemblyLoadInfos based on a given typeFilter.
         /// </summary>

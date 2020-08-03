@@ -1727,7 +1727,6 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowInvalidOperation(ReferenceEquals(Xml, otherXml), "OM_CannotModifyEvaluatedObjectInImportedFile", otherXml.Location.File);
         }
 
-
         /// <summary>
         /// Internal project evaluation implementation
         /// </summary>
@@ -2385,7 +2384,6 @@ namespace Microsoft.Build.Evaluation
             /// The logging service used for evaluation errors
             /// </summary>
             internal ILoggingService LoggingService => ProjectCollection.LoggingService;
-
 
             /// <summary>
             /// See <see cref="ProjectLink.GetAllGlobs(EvaluationContext)"/>
@@ -3194,7 +3192,6 @@ namespace Microsoft.Build.Evaluation
 
                 return result;
             }
-
 
             /// <summary>
             /// See <see cref="ProjectLink.CreateProjectInstance(ProjectInstanceSettings, EvaluationContext)"/>

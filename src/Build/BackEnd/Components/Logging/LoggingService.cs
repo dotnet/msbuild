@@ -137,7 +137,7 @@ namespace Microsoft.Build.BackEnd.Logging
         private List<LoggerDescription> _loggerDescriptions;
 
         /// <summary>
-        /// The event source to which filters will listen to to get the build events which are logged to the logging service through the 
+        /// The event source to which filters will listen to get the build events which are logged to the logging service through the 
         /// logging helper methods. Ie LogMessage and LogMessageEvent
         /// </summary>
         private EventSourceSink _filterEventSource;

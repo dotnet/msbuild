@@ -17,7 +17,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="name">Name of the parameter</param>
         /// <param name="typeOfParameter">The actual type of the parameter</param>
-        /// <param name="output">True if the parameter is both an output and and input parameter. False if the parameter is only an input parameter</param>
+        /// <param name="output">True if the parameter is both an output and input parameter. False if the parameter is only an input parameter</param>
         /// <param name="required">True if the parameter must be supplied to each invocation of the task.</param>
         public TaskPropertyInfo(string name, Type typeOfParameter, bool output, bool required)
         {
