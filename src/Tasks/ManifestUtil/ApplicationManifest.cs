@@ -194,7 +194,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             set => _isClickOnceManifest = value;
         }
 
-
         /// <summary>
         /// Specifies the maximum allowable length of a file path in a ClickOnce application deployment.
         /// If this value is specified, then the length of each file path in the application is checked against this limit.
@@ -414,7 +413,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 if (assembly.ReferenceType == AssemblyReferenceType.NativeAssembly && !assembly.IsPrerequisite && !String.IsNullOrEmpty(assembly.ResolvedPath))
                 {
-                    ComInfo[] comInfoArray = ManifestReader.GetComInfo(assembly.ResolvedPath); ;
+                    ComInfo[] comInfoArray = ManifestReader.GetComInfo(assembly.ResolvedPath); 
                     if (comInfoArray != null)
                     {
                         foreach (ComInfo comInfo in comInfoArray)

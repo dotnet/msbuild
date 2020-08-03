@@ -100,7 +100,6 @@ namespace Microsoft.Build.BuildEngine
                 // If we have not chosen an node yet, this can happen if the node was loaded previously on a child node
                 if (nodeUsed == EngineCallback.invalidNode)
                 {
-                    
                     if (useLoadBalancing)
                     {
                         #region UseLoadBalancing
@@ -283,7 +282,6 @@ namespace Microsoft.Build.BuildEngine
                 // Dump some interesting information to the console if profile build is turned on by an environment variable
                 if (parentEngine.ProfileBuild && scheduleRecord != null && buildResult.TaskTime != 0 )
                 {
-
                     Console.WriteLine("N " + scheduleRecord.EvaluationNode + " Name " + scheduleRecord.ProjectName + ":" +
                                       scheduleRecord.ParentKey.HandleId + ":" + scheduleRecord.ParentKey.RequestId + 
                                       " Total " + buildResult.TotalTime + " Engine " + buildResult.EngineTime + " Task " + buildResult.TaskTime);
@@ -302,7 +300,7 @@ namespace Microsoft.Build.BuildEngine
             if (totalRequestsPerNode != null)
             {
                 // Check if it makes sense to switch from one traversal strategy to the other
-                if (parentEngine.NodeManager.TaskExecutionModule.UseBreadthFirstTraversal == true)
+                if (parentEngine.NodeManager.TaskExecutionModule.UseBreadthFirstTraversal)
                 {
                     // Check if a switch to depth first traversal is in order
                     bool useBreadthFirstTraversal = false;

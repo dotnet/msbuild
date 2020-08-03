@@ -232,7 +232,6 @@ namespace Microsoft.Build.BuildEngine
                         nodeReserveHandle = null;
                         currentNodeNumber++;
                     }
-
                 }
             }
         }

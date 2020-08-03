@@ -207,7 +207,6 @@ namespace Microsoft.Build.Shared
             }
 
             return null;
-
         }
 
         private static BuildEnvironment TryFromMSBuildAssemblyUnderVisualStudio(string msbuildAssembly, string msbuildExe, bool allowLegacyToolsVersion = false)
@@ -448,7 +447,6 @@ namespace Microsoft.Build.Shared
         private static Func<IEnumerable<VisualStudioInstance>> s_getVisualStudioInstances = VisualStudioLocationHelper.GetInstances;
         private static Func<string, string> s_getEnvironmentVariable = GetEnvironmentVariable;
         private static Func<bool> s_runningTests = CheckIfRunningTests;
-
 
         private static class BuildEnvironmentHelperSingleton
         {

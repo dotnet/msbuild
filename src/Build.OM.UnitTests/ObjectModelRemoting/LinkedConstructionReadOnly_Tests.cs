@@ -3,7 +3,6 @@
 
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
-
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -109,7 +108,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Assert.Equal(realXml["b"], viewXml["b"]);
             Assert.Equal("x", viewXml["a"]);
             Assert.Equal("y", viewXml["b"]);
-
         }
 
         [Fact]
@@ -285,7 +283,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectUsingTaskElementReadOnly()
         {
-
             var preReal = this.StdGroup.RealXml;
             var preView = this.StdGroup.ViewXml;
 

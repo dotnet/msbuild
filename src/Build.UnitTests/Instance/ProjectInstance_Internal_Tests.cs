@@ -285,7 +285,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 );
 
             projectInstance.UsingDifferentToolsVersionFromProjectFile.ShouldBeFalse();
-
         }
 
         /// <summary>

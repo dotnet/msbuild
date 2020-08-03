@@ -46,7 +46,6 @@ namespace Microsoft.Build.BuildEngine
                 // Go through each of the parameter name value pairs and split them appart
                 for (int param = 0; param < parameters.Length; param++)
                 {
-
                     if (parameters[param].Length > 0)
                     {
                         string[] parameterComponents = parameters[param].Split(valueDelimiters);
@@ -130,7 +129,6 @@ namespace Microsoft.Build.BuildEngine
                  try
                 {
                     this.cpuCount = Convert.ToInt32(parameterValue, CultureInfo.InvariantCulture);
-
                 }
                 catch (FormatException)
                 {
@@ -169,7 +167,6 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
         }
-
 
         public INodeDescription[] QueryNodeDescriptions()
         {
@@ -383,7 +380,6 @@ namespace Microsoft.Build.BuildEngine
                     UpdateSettings(i);
                 }
             }
-
         }
 
         private void UpdateSettings(int nodeIndex)
@@ -393,7 +389,6 @@ namespace Microsoft.Build.BuildEngine
                   new LocalCallDescriptorForUpdateNodeSettings(onlyLogCriticalEvents, centralizedLogging, useBreadthFirstTraversal);
             nodeData[nodeIndex].NodeCommandQueue.Enqueue(callDescriptor);
         }
-
 
         public void PostIntrospectorCommand(int nodeIndex, TargetInProgessState child, TargetInProgessState parent)
         {
@@ -457,7 +452,6 @@ namespace Microsoft.Build.BuildEngine
         {
             try
             {
-
                 if (!Process.GetProcessById(processId).HasExited)
                 {
                     Process.GetProcessById(processId).Kill();
@@ -480,14 +474,13 @@ namespace Microsoft.Build.BuildEngine
         private bool IsNodeProcessAliveOrUninitialized(int nodeId)
         {
             // If it's alive but not being communicated with anymore, that counts as not alive
-            if (nodeData[nodeId].CommunicationFailed == true)
+            if (nodeData[nodeId].CommunicationFailed)
             {
                 return false;
             }
             
             try
             {
- 
 
                 bool isUninitialized = nodeData[nodeId].ProcessId == LocalNodeInfo.unInitializedProcessId;
 
@@ -502,7 +495,6 @@ namespace Microsoft.Build.BuildEngine
                 {
                     return true;
                 }
-
            }
             catch (ArgumentException)
             {
@@ -812,7 +804,6 @@ namespace Microsoft.Build.BuildEngine
                 {
                     exitedDueToError = false;
                 }
-
             }
             finally
             {
@@ -1002,7 +993,6 @@ namespace Microsoft.Build.BuildEngine
         private ManualResetEvent responseCountChangeEvent;
         private int activeNodeCount;
         private int responseCount;
-
 
         private int cpuCount;
 

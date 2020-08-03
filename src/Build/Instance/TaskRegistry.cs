@@ -663,7 +663,6 @@ namespace Microsoft.Build.Execution
 
         private static Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> CreateRegisteredTaskDictionary(int? capacity = null)
         {
-
             return capacity != null
                 ? new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(capacity.Value, RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact)
                 : new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
@@ -1007,7 +1006,6 @@ namespace Microsoft.Build.Execution
             /// </summary>
             internal const string XamlTaskFactory = "XamlTaskFactory";
 
-
             /// <summary>
             /// Lock for the taskFactoryTypeLoader
             /// </summary>
@@ -1290,7 +1288,6 @@ namespace Microsoft.Build.Execution
                     ITaskFactory factory = null;
                     LoadedType loadedType = null;
 
-
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
 
@@ -1474,7 +1471,6 @@ namespace Microsoft.Build.Execution
                             }
                         }
                     }
-
 
                     _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters);
                 }
