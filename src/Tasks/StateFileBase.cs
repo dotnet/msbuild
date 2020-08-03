@@ -7,6 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using System.Text.Json;
 
 namespace Microsoft.Build.Tasks
 {
@@ -36,16 +37,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (!string.IsNullOrEmpty(stateFile))
                 {
-                    if (FileSystems.Default.FileExists(stateFile))
-                    {
-                        File.Delete(stateFile);
-                    }
-
-                    using (var s = new FileStream(stateFile, FileMode.CreateNew))
-                    {
-                        var formatter = new BinaryFormatter();
-                        formatter.Serialize(s, this);
-                    }
+                    File.WriteAllText(stateFile, JsonSerializer.Serialize(this));
                 }
             }
             catch (Exception e)
@@ -74,39 +66,34 @@ namespace Microsoft.Build.Tasks
             {
                 if (!string.IsNullOrEmpty(stateFile) && FileSystems.Default.FileExists(stateFile))
                 {
-                    using (FileStream s = new FileStream(stateFile, FileMode.Open))
+                    object deserializedObject = JsonSerializer.Deserialize(File.ReadAllText(stateFile), requiredReturnType);
+                    retVal = deserializedObject as StateFileBase;
+                    // If the deserialized object is null then there would be no cast error but retVal would still be null
+                    // only log the message if there would have been a cast error
+                    if (retVal == null && deserializedObject != null)
                     {
-                        var formatter = new BinaryFormatter();
-                        object deserializedObject = formatter.Deserialize(s);
-                        retVal = deserializedObject as StateFileBase;
-
-                        // If the deserialized object is null then there would be no cast error but retVal would still be null
-                        // only log the message if there would have been a cast error
-                        if (retVal == null && deserializedObject != null)
+                        // When upgrading to Visual Studio 2008 and running the build for the first time the resource cache files are replaced which causes a cast error due
+                        // to a new version number on the tasks class. "Unable to cast object of type 'Microsoft.Build.Tasks.SystemState' to type 'Microsoft.Build.Tasks.StateFileBase".
+                        // If there is an invalid cast, a message rather than a warning should be emitted.
+                        log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
+                    }
+                    else if (retVal != null && (!requiredReturnType.IsInstanceOfType(retVal)))
+                    {
+                        if (logWarnings)
                         {
-                            // When upgrading to Visual Studio 2008 and running the build for the first time the resource cache files are replaced which causes a cast error due
-                            // to a new version number on the tasks class. "Unable to cast object of type 'Microsoft.Build.Tasks.SystemState' to type 'Microsoft.Build.Tasks.StateFileBase".
-                            // If there is an invalid cast, a message rather than a warning should be emitted.
-                            log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
+                            log.LogWarningWithCodeFromResources("General.CouldNotReadStateFile", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
                         }
-                        else if (retVal != null && (!requiredReturnType.IsInstanceOfType(retVal)))
+                        else
                         {
-                            if (logWarnings)
-                            {
-                                log.LogWarningWithCodeFromResources("General.CouldNotReadStateFile", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
-                            }
-                            else
-                            {
-                                log.LogMessageFromResources("General.CouldNotReadStateFile", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
-                            }
-                            retVal = null;
+                            log.LogMessageFromResources("General.CouldNotReadStateFile", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
                         }
-                        // If we get back a valid object and internals were changed, things are likely to be null. Check the version before we use it.
-                        else if (retVal != null && retVal._serializedVersion != CurrentSerializationVersion)
-                        {
-                            log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
-                            retVal = null;
-                        }
+                        retVal = null;
+                    }
+                    // If we get back a valid object and internals were changed, things are likely to be null. Check the version before we use it.
+                    else if (retVal != null && retVal._serializedVersion != CurrentSerializationVersion)
+                    {
+                        log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
+                        retVal = null;
                     }
                 }
             }

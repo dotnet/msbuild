@@ -201,7 +201,7 @@ namespace Microsoft.Build.Tasks
             /// Gets the last modified date.
             /// </summary>
             /// <value></value>
-            internal DateTime LastModified
+            public DateTime LastModified
             {
                 get { return lastModified; }
                 set { lastModified = value; }
@@ -211,7 +211,7 @@ namespace Microsoft.Build.Tasks
             /// Get or set the assemblyName.
             /// </summary>
             /// <value></value>
-            internal AssemblyNameExtension Assembly
+            public AssemblyNameExtension Assembly
             {
                 get { return assemblyName; }
                 set { assemblyName = value; }
@@ -221,7 +221,7 @@ namespace Microsoft.Build.Tasks
             /// Get or set the runtimeVersion
             /// </summary>
             /// <value></value>
-            internal string RuntimeVersion
+            public string RuntimeVersion
             {
                 get { return runtimeVersion; }
                 set { runtimeVersion = value; }
@@ -231,7 +231,7 @@ namespace Microsoft.Build.Tasks
             /// Get or set the framework name the file was built against
             /// </summary>
             [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Could be used in other assemblies")]
-            internal FrameworkName FrameworkNameAttribute
+            public FrameworkName FrameworkNameAttribute
             {
                 get { return frameworkName; }
                 set { frameworkName = value; }
@@ -240,13 +240,13 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Get or set the ID of this assembly. Used to verify it is the same version.
             /// </summary>
-            internal Guid ModuleVersionID { get; set; }
+            public Guid ModuleVersionID { get; set; }
         }
 
         /// <summary>
         /// Construct.
         /// </summary>
-        internal SystemState()
+        public SystemState()
         {
         }
 

@@ -986,6 +986,7 @@
   <ItemGroup>
     <!-- Reference this package to get binaries at runtime even when Arcade is not adding compiler references -->
     <PackageReference Include="Microsoft.Net.Compilers.Toolset" ExcludeAssets="all" Condition="'$(UsingToolMicrosoftNetCompilers)' == 'false'" />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
