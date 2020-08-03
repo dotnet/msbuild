@@ -744,7 +744,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void MustHaveThisParentElement(BuildItem item)
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(item?.ItemElement != null && item.ItemElement.ParentNode == xml.Element, "ItemDoesNotBelongToItemGroup");
+            ErrorUtilities.VerifyThrowInvalidOperation(item?.ItemElement?.ParentNode == xml.Element, "ItemDoesNotBelongToItemGroup");
         }
 
         /// <summary>
