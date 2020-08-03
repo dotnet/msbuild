@@ -300,7 +300,7 @@ namespace Microsoft.Build.BuildEngine
             if (totalRequestsPerNode != null)
             {
                 // Check if it makes sense to switch from one traversal strategy to the other
-                if (parentEngine.NodeManager.TaskExecutionModule.UseBreadthFirstTraversal == true)
+                if (parentEngine.NodeManager.TaskExecutionModule.UseBreadthFirstTraversal)
                 {
                     // Check if a switch to depth first traversal is in order
                     bool useBreadthFirstTraversal = false;

@@ -278,7 +278,7 @@ namespace Microsoft.Build.BuildEngine
                     waitHandlesActive[2] = notInUseEvent;
 
                     eventType = WaitHandle.WaitTimeout;
-                    while (eventType == WaitHandle.WaitTimeout && continueRunning == true)
+                    while (eventType == WaitHandle.WaitTimeout && continueRunning)
                     {
                         eventType = WaitHandle.WaitAny(waitHandlesActive, parentCheckInterval, false);
 

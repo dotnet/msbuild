@@ -474,7 +474,7 @@ namespace Microsoft.Build.BuildEngine
         private bool IsNodeProcessAliveOrUninitialized(int nodeId)
         {
             // If it's alive but not being communicated with anymore, that counts as not alive
-            if (nodeData[nodeId].CommunicationFailed == true)
+            if (nodeData[nodeId].CommunicationFailed)
             {
                 return false;
             }
