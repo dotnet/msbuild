@@ -327,7 +327,7 @@ namespace Microsoft.Build.Tasks
 
             _timestampCache = (ResolveComReferenceCache)StateFileBase.DeserializeCache(StateFile, Log, typeof(ResolveComReferenceCache));
 
-            if (_timestampCache?.ToolPathsMatchCachePaths(_tlbimpPath, _aximpPath) != true))
+            if (_timestampCache?.ToolPathsMatchCachePaths(_tlbimpPath, _aximpPath) != true)
             {
                 if (!Silent)
                 {
