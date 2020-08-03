@@ -156,7 +156,7 @@ namespace Xunit.NetCore.Extensions
                 return mi;
 
             PropertyInfo pi = ti.GetDeclaredProperty(name);
-            if (pi != null && pi.PropertyType == typeof(bool) && pi.GetMethod?.IsStatic == true && pi.GetMethod.GetParameters().Length == 0)
+            if (pi?.PropertyType == typeof(bool) && pi.GetMethod?.IsStatic == true && pi.GetMethod.GetParameters().Length == 0)
                 return pi.GetMethod;
 
             return LookupConditionalMethod(ti.BaseType, name);
