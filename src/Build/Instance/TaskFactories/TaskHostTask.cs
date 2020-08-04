@@ -206,7 +206,7 @@ namespace Microsoft.Build.BackEnd
 
                 // If we returned an exception, then we want to throw it when we 
                 // do the get.  
-                if (value != null && value is Exception)
+                if (value is Exception)
                 {
                     throw (Exception)value;
                 }
