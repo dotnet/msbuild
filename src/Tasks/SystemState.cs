@@ -172,6 +172,7 @@ namespace Microsoft.Build.Tasks
                     var frameworkProfile = info.GetString("fmProf");
                     frameworkName = new FrameworkName(frameworkIdentifier, frameworkNameVersion, frameworkProfile);
                 }
+                ModuleVersionID = (Guid)info.GetValue("mvid", typeof(Guid));
             }
 
             /// <summary>
@@ -195,6 +196,7 @@ namespace Microsoft.Build.Tasks
                     info.AddValue("fnId", frameworkName.Identifier);
                     info.AddValue("fmProf", frameworkName.Profile);
                 }
+                info.AddValue("mvid", ModuleVersionID);
             }
 
             /// <summary>
