@@ -86,7 +86,7 @@ namespace Microsoft.Build.Shared
 
             try
             {
-                directory = directory ?? Path.GetTempPath();
+                directory ??= Path.GetTempPath();
 
                 Directory.CreateDirectory(directory);
 

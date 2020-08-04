@@ -206,7 +206,7 @@ namespace Microsoft.Build.Collections
 
                 if (!entry.Value.TryGetTarget(out _))
                 {
-                    remove = remove ?? new List<K>();
+                    remove ??= new List<K>();
                     remove.Add(entry.Key);
                 }
             }

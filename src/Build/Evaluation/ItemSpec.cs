@@ -317,6 +317,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="item">The item to attempt to find a match for based on matching metadata</param>
         /// <param name="metadata">Names of metadata to look for matches for</param>
+        /// <param name="options">metadata option matching</param>
         /// <returns></returns>
         public bool MatchesItemOnMetadata(IItem item, IEnumerable<string> metadata, MatchOnMetadataOptions options)
         {

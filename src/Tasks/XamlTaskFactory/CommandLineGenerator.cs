@@ -526,10 +526,10 @@ namespace Microsoft.Build.Tasks.Xaml
                     {
                         if (!String.IsNullOrEmpty(retVal))
                         {
-                            retVal = retVal + separator;
+                            retVal += separator;
                         }
 
-                        retVal = retVal + argSwitch.Value;
+                        retVal += argSwitch.Value;
                     }
                     else
                     {

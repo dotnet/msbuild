@@ -18,7 +18,7 @@ namespace Microsoft.Build.Tasks
     /// non-MSBuild ones and return the list of MSBuild projects as UnresolvedProjectReferences.
     /// Then we can use more powerful MSBuild mechanisms to manipulate just the MSBuild project
     /// references (i.e. calling into specific targets of references to get the manifest file name)
-    /// which would not be possible with a mixed list of MSBuild & non-MSBuild references.
+    /// which would not be possible with a mixed list of MSBuild and non-MSBuild references.
     /// </remarks>
     public class ResolveNonMSBuildProjectOutput : ResolveProjectBase
     {
@@ -158,6 +158,7 @@ namespace Microsoft.Build.Tasks
         /// Given a project reference task item and an XML document containing pre-resolved output paths,
         /// find the output path for that task item.
         /// </summary>
+        /// <param name="projectRef">project reference to resolve</param>
         /// <param name="resolvedPath">resulting ITaskItem containing the resolved path</param>
         /// <returns>true if resolved successfully</returns>
         internal bool ResolveProject(ITaskItem projectRef, out ITaskItem resolvedPath)

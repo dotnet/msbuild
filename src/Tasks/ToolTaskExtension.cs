@@ -91,7 +91,6 @@ namespace Microsoft.Build.Tasks
         /// Will only be called if the task returned a non empty string from GetResponseFileCommands
         /// Called after ValidateParameters, SkipTaskExecution and GetResponseFileCommands
         /// </summary>
-        /// <param name="responseFilePath">full path to the temporarily created response file</param>
         /// <returns></returns>
         protected override string GenerateResponseFileCommands()
         {

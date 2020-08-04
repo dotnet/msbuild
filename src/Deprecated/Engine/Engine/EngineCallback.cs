@@ -501,7 +501,7 @@ namespace Microsoft.Build.BuildEngine
         )
         {
             int handleId = nextContextId;
-            nextContextId = nextContextId + 1;
+            nextContextId += 1;
 
             TaskExecutionContext executionContext =
                 new TaskExecutionContext(parentProject, parentTarget, taskNode, buildContext, handleId, nodeIndex, taskContext);
@@ -527,7 +527,7 @@ namespace Microsoft.Build.BuildEngine
         )
         {
             int handleId = nextContextId;
-            nextContextId = nextContextId + 1;
+            nextContextId += 1;
 
             RequestRoutingContext executionContext =
                 new RequestRoutingContext(handleId, nodeIndex, parentHandleId, parentNodeIndex, parentRequestId,

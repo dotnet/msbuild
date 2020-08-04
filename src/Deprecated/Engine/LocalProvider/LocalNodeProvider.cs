@@ -718,7 +718,7 @@ namespace Microsoft.Build.BuildEngine
             finally
             {
                 // Make sure to decrement the active node count if the communication has failed
-                if (nodeConnected != true)
+                if (!nodeConnected)
                 {
                     DecreaseActiveNodeCount(nodeData[nodeIndex].NodeId);
                     nodeData[nodeIndex].CommunicationFailed = true;
@@ -777,7 +777,7 @@ namespace Microsoft.Build.BuildEngine
                     startInfo.hStdInput = NativeMethods.InvalidHandle;
                     startInfo.hStdOutput = NativeMethods.InvalidHandle;
                     startInfo.dwFlags = NativeMethods.STARTF_USESTDHANDLES;
-                    dwCreationFlags = dwCreationFlags | NativeMethods.CREATE_NO_WINDOW;
+                    dwCreationFlags |= NativeMethods.CREATE_NO_WINDOW;
                 }
 
                 NativeMethods.SECURITY_ATTRIBUTES pSec = new NativeMethods.SECURITY_ATTRIBUTES();

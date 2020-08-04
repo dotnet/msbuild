@@ -2463,7 +2463,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             if (!string.IsNullOrEmpty(expected))
             {
-                expected = expected + @"\MSBuild";
+                expected += @"\MSBuild";
             }
 
             Project project = new Project();

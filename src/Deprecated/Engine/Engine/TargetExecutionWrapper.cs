@@ -713,7 +713,7 @@ namespace Microsoft.Build.BuildEngine
             if ((howToBuild == DependencyAnalysisResult.FullBuild) ||
                 (howToBuild == DependencyAnalysisResult.IncrementalBuild))
             {
-                executionMode = executionMode | TaskExecutionMode.ExecuteTaskAndGatherOutputs;
+                executionMode |= TaskExecutionMode.ExecuteTaskAndGatherOutputs;
             }
             return executionMode;
         }

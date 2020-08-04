@@ -3099,8 +3099,8 @@ namespace Microsoft.Build.Utilities
             lock (s_locker)
             {
                 // Cache the results of the chain search so that we do not have to do an expensive read more than once per process per redist list.
-                s_chainedReferenceAssemblyPath = s_chainedReferenceAssemblyPath ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                s_cachedTargetFrameworkDisplayNames = s_cachedTargetFrameworkDisplayNames ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                s_chainedReferenceAssemblyPath ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                s_cachedTargetFrameworkDisplayNames ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 if (s_chainedReferenceAssemblyPath.TryGetValue(path, out string cachedPath))
                 {
@@ -3824,9 +3824,9 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            if (programFilesReferenceAssemblyLocationFound && bFoundDotNetFrameworkIdentifier == false)
+            if (programFilesReferenceAssemblyLocationFound && !bFoundDotNetFrameworkIdentifier)
             {
-                if (bAddDotNetFrameworkIdentifier == false)
+                if (!bAddDotNetFrameworkIdentifier)
                 {
                     // special case for .NETFramework v2.0 - check also in the framework path because v20 does not have reference
                     // assembly folders

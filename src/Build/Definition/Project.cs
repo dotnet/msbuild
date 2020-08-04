@@ -907,6 +907,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// See <see cref="GetAllGlobs(string)"/>
         /// </summary>
+        /// <param name="itemType">type of the item</param>
         /// <param name="evaluationContext">
         ///     The evaluation context to use in case reevaluation is required.
         ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -968,6 +969,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// See <see cref="GetItemProvenance(string)"/>
         /// </summary>
+        /// <param name="itemToMatch">The string to perform matching against</param>
         /// <param name="evaluationContext">
         ///     The evaluation context to use in case reevaluation is required.
         ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -990,6 +992,8 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// See <see cref="GetItemProvenance(string, string)"/>
         /// </summary>
+        /// <param name="itemToMatch">The string to perform matching against</param>
+        /// <param name="itemType">The type of the item to perform matching against</param>
         /// <param name="evaluationContext">
         ///     The evaluation context to use in case reevaluation is required.
         ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -1015,6 +1019,11 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// See <see cref="GetItemProvenance(ProjectItem)"/>
         /// </summary>
+        /// <param name="item">
+        /// The ProjectItem object that indicates: the itemspec to match and the item type to constrain the search in.
+        /// The search is also constrained on item elements appearing before the item element that produced this <paramref name="item"/>.
+        /// The element that produced this <paramref name="item"/> is included in the results.
+        /// </param>
         /// <param name="evaluationContext">
         ///     The evaluation context to use in case reevaluation is required.
         ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -1309,6 +1318,7 @@ namespace Microsoft.Build.Evaluation
         /// This instance can be used to build independently.
         /// Before creating the instance, this will reevaluate the project if necessary, so it will not be dirty.
         /// </summary>
+        /// <returns>the created project instance</returns>
         public ProjectInstance CreateProjectInstance()
         {
             return CreateProjectInstance(ProjectInstanceSettings.None, null);
@@ -1321,6 +1331,8 @@ namespace Microsoft.Build.Evaluation
         /// The instance is immutable; none of the objects that form it can be modified. This makes it safe to
         /// access concurrently from multiple threads.
         /// </summary>
+        /// <param name="settings">The project instance creation settings</param>
+        /// <returns>the created project instance</returns>
         public ProjectInstance CreateProjectInstance(ProjectInstanceSettings settings)
         {
             return CreateProjectInstance(settings, null);
@@ -1329,8 +1341,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// See <see cref="CreateProjectInstance(ProjectInstanceSettings)"/>
         /// </summary>
+        /// <param name="settings">The project instance creation settings</param>
         /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
-        /// <returns></returns>
+        /// <returns>the created project instance</returns>
         public ProjectInstance CreateProjectInstance(ProjectInstanceSettings settings, EvaluationContext evaluationContext)
         {
             return implementation.CreateProjectInstance(settings, evaluationContext);
@@ -1551,6 +1564,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// See <see cref="Build(string[], IEnumerable&lt;ILogger&gt;, IEnumerable&lt;ForwardingLoggerRecord&gt;)"/>
         /// </summary>
+        /// <param name="targets"></param>
+        /// <param name="loggers"></param>
+        /// <param name="remoteLoggers"></param>
         /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
         public bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, EvaluationContext evaluationContext)
         {
@@ -1730,7 +1746,6 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Internal project evaluation implementation
         /// </summary>
-        /// <remarks>
         private class ProjectImpl : ProjectLink, IProjectLinkInternal
         {
             /// <summary>
@@ -1789,7 +1804,6 @@ namespace Microsoft.Build.Evaluation
             /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
             /// <param name="toolsVersion">Tools version to evaluate with. May be null</param>
             /// <param name="subToolsetVersion">Sub-toolset version to explicitly evaluate the toolset with.  May be null.</param>
-            /// <param name="projectCollection">The <see cref="ProjectCollection"/> the project is added to.</param>
             /// <param name="loadSettings">The <see cref="ProjectLoadSettings"/> to use for evaluation.</param>
             /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
             public ProjectImpl(Project owner, ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
@@ -1814,7 +1828,6 @@ namespace Microsoft.Build.Evaluation
             /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
             /// <param name="toolsVersion">Tools version to evaluate with. May be null</param>
             /// <param name="subToolsetVersion">Sub-toolset version to explicitly evaluate the toolset with.  May be null.</param>
-            /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
             /// <param name="loadSettings">The load settings for this project.</param>
             /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
             public ProjectImpl(Project owner, XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
@@ -1850,7 +1863,6 @@ namespace Microsoft.Build.Evaluation
             /// <param name="globalProperties">The global properties. May be null.</param>
             /// <param name="toolsVersion">The tools version. May be null.</param>
             /// <param name="subToolsetVersion">Sub-toolset version to explicitly evaluate the toolset with.  May be null.</param>
-            /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
             /// <param name="loadSettings">The load settings for this project.</param>
             /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
             public ProjectImpl(Project owner, string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
@@ -2400,6 +2412,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// See <see cref="ProjectLink.GetAllGlobs(string, EvaluationContext)"/>
             /// </summary>
+            /// <param name="itemType">The type of items to return.</param>
             /// <param name="evaluationContext">
             ///     The evaluation context to use in case reevaluation is required.
             ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -2580,6 +2593,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// See <see cref="ProjectLink.GetItemProvenance(string, EvaluationContext)"/>
             /// </summary>
+            /// <param name="itemToMatch">The string to perform matching against</param>
             /// <param name="evaluationContext">
             ///     The evaluation context to use in case reevaluation is required.
             ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -2592,6 +2606,8 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// See <see cref="ProjectLink.GetItemProvenance(string, string, EvaluationContext)"/>
             /// </summary>
+            /// <param name="itemToMatch">The string to perform matching against</param>
+            /// <param name="itemType">The type of items to return.</param>
             /// <param name="evaluationContext">
             ///     The evaluation context to use in case reevaluation is required.
             ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -2604,6 +2620,11 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// See <see cref="ProjectLink.GetItemProvenance(ProjectItem, EvaluationContext)"/>
             /// </summary>
+            /// /// <param name="item"> 
+            /// The ProjectItem object that indicates: the itemspec to match and the item type to constrain the search in.
+            /// The search is also constrained on item elements appearing before the item element that produced this <paramref name="item"/>.
+            /// The element that produced this <paramref name="item"/> is included in the results.
+            /// </param>
             /// <param name="evaluationContext">
             ///     The evaluation context to use in case reevaluation is required.
             ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -2632,7 +2653,7 @@ namespace Microsoft.Build.Evaluation
             {
                 if (!_loadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements))
                 {
-                    _loadSettings = _loadSettings | ProjectLoadSettings.RecordEvaluatedItemElements;
+                    _loadSettings |= ProjectLoadSettings.RecordEvaluatedItemElements;
                     Reevaluate(LoggingService, _loadSettings, evaluationContext);
                 }
 
@@ -3196,6 +3217,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// See <see cref="ProjectLink.CreateProjectInstance(ProjectInstanceSettings, EvaluationContext)"/>
             /// </summary>
+            /// <param name="settings">Project instance creation settings</param>
             /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
             /// <returns></returns>
             public override ProjectInstance CreateProjectInstance(ProjectInstanceSettings settings, EvaluationContext evaluationContext)
@@ -3250,6 +3272,9 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// See <see cref="ProjectLink.Build"/>
             /// </summary>
+            /// <param name="targets">targets to build</param>
+            /// <param name="loggers">List of loggers</param>
+            /// <param name="remoteLoggers">remote loggers for multi proc logging</param>
             /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
             public override bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, EvaluationContext evaluationContext)
             {
