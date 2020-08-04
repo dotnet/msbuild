@@ -13,86 +13,93 @@ namespace Microsoft.Build.UnGAC
     {
         static void Main(string[] args)
         {
-            char c = ' ';
-            List<string> allInstancesOfGACUtil = new List<string>();
-            StreamReader output;
-            StreamWriter input;
-
-            Process proc = new Process
+            try
             {
-                StartInfo = new ProcessStartInfo
+                List<string> allInstancesOfGACUtil = new List<string>();
+                StreamReader output;
+                StreamWriter input;
+
+                Process proc = new Process
                 {
-                    FileName = "C:\\Windows\\System32\\cmd.exe",
-                    Arguments = "/k",
-                    RedirectStandardOutput = true,
-                    RedirectStandardInput = true,
-                    UseShellExecute = false
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "C:\\Windows\\System32\\cmd.exe",
+                        Arguments = "/k", // keep cmd open until we're done
+                        RedirectStandardOutput = true,
+                        RedirectStandardInput = true,
+                        UseShellExecute = false
+                    }
+                };
+                proc.Start();
+
+                // hook into standard input/output of the process
+                output = proc.StandardOutput;
+                input = proc.StandardInput;
+
+                // use where.exe to find gacutil.exe
+                if (input.BaseStream.CanWrite)
+                {
+                    input.WriteLine("where /F /R \"C:\\Program Files (x86)\\Microsoft SDKs\\Windows\" gacutil.exe");
                 }
-            };
-            proc.Start();
 
-            // hook into standard input/output of the process
-            output = proc.StandardOutput;
-            input = proc.StandardInput;
+                //throw away the first line - it's the command we just used
+                output.ReadLine();
+                string s = output.ReadLine();
 
-            // use where.exe to find gacutil.exe
-            if (input.BaseStream.CanWrite)
-            {
-                input.WriteLine("where /F /R \"C:\\Program Files (x86)\\Microsoft SDKs\\Windows\" gacutil.exe");
-            }
+                // store all instances of gacutil.exe
+                // doing this for now "just in case"
+                while (!String.IsNullOrEmpty(s))
+                {
+                    allInstancesOfGACUtil.Add(s);
+                    s = output.ReadLine();
+                }
 
-            //throw away the first line - it's the command we just used
-            output.ReadLine();
-            string s = output.ReadLine();
+                if (allInstancesOfGACUtil.Count <= 0)
+                {
+                    proc.Close();
+                    Console.WriteLine("Could not find instances of gacutil, exiting...");
+                    return;
+                }
 
-            // store all instances of gacutil.exe
-            // doing this for now "just in case"
-            while (!String.IsNullOrEmpty(s))
-            {
-                allInstancesOfGACUtil.Add(s);
-                s = output.ReadLine();
-            }
+                // we've found gacutil, now let's use it.
+                string gacUtilExe = allInstancesOfGACUtil[0];
 
-            if (allInstancesOfGACUtil.Count <= 0)
-            {
+                if (input.BaseStream.CanWrite)
+                {
+                    input.WriteLine($"{gacUtilExe} /nologo /u \"MSBuild, Version=15.1.0.0\"\n" +
+                                    $"{gacUtilExe} /nologo /u \"Microsoft.Build.Conversion.Core, Version=15.1.0.0\"\n" +
+                                    $"{gacUtilExe} /nologo /u \"Microsoft.Build, Version=15.1.0.0\"\n" +
+                                    $"{gacUtilExe} /nologo /u \"Microsoft.Build.Engine, Version=15.1.0.0\"\n" +
+                                    $"{gacUtilExe} /nologo /u \"Microsoft.Build.Tasks.Core, Version=15.1.0.0\"\n" +
+                                    $"{gacUtilExe} /nologo /u \"Microsoft.Build.Utilities.Core, Version=15.1.0.0\"\n" +
+                                    $"{gacUtilExe} /nologo /u \"Microsoft.Build.Framework, Version=15.1.0.0\"\n");
+                }
+
+                //hacky temporary workaround
+                int i = 0;
+
+                // Peek is a strange beast. It returns a -1 if "no character can be read or if the stream does not support seeking."
+                // Yet there are cases where you can peek a -1 and read() returns a valid character.
+                // I've tested breakpoints where output.Peek() == -1 && output.BaseStream.CanSeek == true, but it never gets hit.
+                while (!(i > 2000 && output.Peek() == -1))
+                {
+                    // We're read()ing because if you attempt a ReadLine() at the end of the stream, it will lock up.
+                    // With reading we can at least preemptively catch it before it locks (hence the hacky temporary workaround).
+                    Console.Write((char)output.Read());
+                    i++;
+                }
+
                 proc.Close();
-                Console.WriteLine("Could not find instances of gacutil, exiting...");
-                return;
+                proc.Dispose();
+                Console.ReadKey();
             }
-
-            // we've found gacutil, now let's use it.
-            string gacUtilExe = allInstancesOfGACUtil[0];
-
-            if (proc.StandardInput.BaseStream.CanWrite)
+            catch (Exception e)
             {
-                input.WriteLine($"{gacUtilExe} /nologo /u \"MSBuild, Version=15.1.0.0\"\n" +
-                                $"{gacUtilExe} /nologo /u \"Microsoft.Build.Conversion.Core, Version=15.1.0.0\"\n" +
-                                $"{gacUtilExe} /nologo /u \"Microsoft.Build, Version=15.1.0.0\"\n" +
-                                $"{gacUtilExe} /nologo /u \"Microsoft.Build.Engine, Version=15.1.0.0\"\n" +
-                                $"{gacUtilExe} /nologo /u \"Microsoft.Build.Tasks.Core, Version=15.1.0.0\"\n" +
-                                $"{gacUtilExe} /nologo /u \"Microsoft.Build.Utilities.Core, Version=15.1.0.0\"\n" +
-                                $"{gacUtilExe} /nologo /u \"Microsoft.Build.Framework, Version=15.1.0.0\"\n");
+                Console.WriteLine($"Caught an exception! We don't want to throw because we want MSBuild to continue to install." +
+                                    $"Message: {e.Message}" +
+                                    $"Inner Exception: {e.InnerException}" +
+                                    $"Stack Trace: {e.StackTrace}");
             }
-
-            //hacky temporary workaround
-            int i = 0;
-
-            // Peek is a strange beast. It returns a -1 if "no character can be read or if the stream does not support seeking."
-            // Yet there are cases where you can peek a -1, yet read() returns a valid character.
-            // I've tested breakpoints where output.Peek() == -1 && output.BaseStream.Caneek == true, but it never gets hit.
-            while (!(i > 2000 && output.Peek() == -1))
-            {
-                // We're reading because if you happen to attempt a ReadLine() at the end of the stream, it will lock up.
-                // With reading we can at least preemptively catch it before it locks (hence the hacky temporary workaround).
-                c = (char)output.Read();
-
-                Console.Write(c);
-                i++;
-            }
-
-            proc.Close();
-            proc.Dispose();
-            Console.ReadKey();
         }
     }
 }
