@@ -2197,7 +2197,7 @@ namespace Microsoft.Build.CommandLine
                         if (!String.Equals(projectDirectory, s_exePath, StringComparison.OrdinalIgnoreCase))
                         {
                             // this combines any found, with higher precedence, with the switches from the original auto response file switches
-                            found = found | GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile);
+                            found |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile);
                         }
 
                         if (found)

@@ -778,7 +778,7 @@ namespace Microsoft.Build.BuildEngine
                     startInfo.hStdInput = NativeMethods.InvalidHandle;
                     startInfo.hStdOutput = NativeMethods.InvalidHandle;
                     startInfo.dwFlags = NativeMethods.STARTF_USESTDHANDLES;
-                    dwCreationFlags = dwCreationFlags | NativeMethods.CREATE_NO_WINDOW;
+                    dwCreationFlags |= NativeMethods.CREATE_NO_WINDOW;
                 }
 
                 NativeMethods.SECURITY_ATTRIBUTES pSec = new NativeMethods.SECURITY_ATTRIBUTES();

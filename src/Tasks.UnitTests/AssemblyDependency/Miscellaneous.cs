@@ -7985,7 +7985,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
                 Assert.NotEqual(0, mask); // "Unexpected assembly in resolved list."
                 Assert.Equal(0, (mask & set)); // "Assembly found twice in resolved list."
-                set = set | mask;
+                set |= mask;
             }
             return set;
         }

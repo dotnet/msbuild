@@ -430,12 +430,12 @@ namespace Microsoft.Build.BackEnd
                     startInfo.hStdInput = BackendNativeMethods.InvalidHandle;
                     startInfo.hStdOutput = BackendNativeMethods.InvalidHandle;
                     startInfo.dwFlags = BackendNativeMethods.STARTFUSESTDHANDLES;
-                    creationFlags = creationFlags | BackendNativeMethods.CREATENOWINDOW;
+                    creationFlags |= BackendNativeMethods.CREATENOWINDOW;
                 }
             }
             else
             {
-                creationFlags = creationFlags | BackendNativeMethods.CREATE_NEW_CONSOLE;
+                creationFlags |= BackendNativeMethods.CREATE_NEW_CONSOLE;
             }
 
             BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new BackendNativeMethods.SECURITY_ATTRIBUTES();

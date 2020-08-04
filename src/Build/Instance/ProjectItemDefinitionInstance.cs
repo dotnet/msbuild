@@ -198,7 +198,7 @@ namespace Microsoft.Build.Execution
         ProjectMetadataInstance IItemDefinition<ProjectMetadataInstance>.SetMetadata(ProjectMetadataElement xml, string evaluatedValue, ProjectMetadataInstance predecessor)
         {
             // No mutability check as this is used during creation (evaluation)
-            _metadata = _metadata ?? new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+            _metadata ??= new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
 
             ProjectMetadataInstance metadatum = new ProjectMetadataInstance(xml.Name, evaluatedValue);
             _metadata[xml.Name] = metadatum;

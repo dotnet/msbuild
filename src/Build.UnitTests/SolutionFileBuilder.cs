@@ -132,7 +132,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 }
             }
 
-            ProjectConfigurations = ProjectConfigurations ?? projectInfos.ToDictionary(
+            ProjectConfigurations ??= projectInfos.ToDictionary(
                 p => p.Key,
                 p => SolutionConfigurationPlatforms.ToDictionary(
                     sc => sc,

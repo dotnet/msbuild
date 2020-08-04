@@ -699,7 +699,7 @@ namespace Microsoft.Build.Execution
             ProjectItemDefinitionInstance itemDefinition;
             if (projectToUse.ItemDefinitions.TryGetValue(itemTypeToUse, out itemDefinition))
             {
-                inheritedItemDefinitions = inheritedItemDefinitions ?? new List<ProjectItemDefinitionInstance>();
+                inheritedItemDefinitions ??= new List<ProjectItemDefinitionInstance>();
                 inheritedItemDefinitions.Add(itemDefinition);
             }
 
@@ -1691,7 +1691,7 @@ namespace Microsoft.Build.Execution
             {
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                _directMetadata = _directMetadata ?? new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                _directMetadata ??= new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
                 ProjectMetadataInstance metadatum = new ProjectMetadataInstance(name, metadataValueEscaped, allowItemSpecModifiers /* may not be built-in metadata name */);
                 _directMetadata.Set(metadatum);
 
@@ -1713,7 +1713,7 @@ namespace Microsoft.Build.Execution
 
                 if (!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(name))
                 {
-                    _directMetadata = _directMetadata ?? new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                    _directMetadata ??= new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
                     ProjectMetadataInstance metadatum = new ProjectMetadataInstance(name, evaluatedValueEscaped, true /* may be built-in metadata name */);
                     _directMetadata.Set(metadatum);
                 }
@@ -1915,14 +1915,14 @@ namespace Microsoft.Build.Execution
                     List<ProjectItemDefinitionInstance> itemDefinitionsClone = null;
                     if (source._taskItem._itemDefinitions != null)
                     {
-                        itemDefinitionsClone = itemDefinitionsClone ?? new List<ProjectItemDefinitionInstance>(source._taskItem._itemDefinitions.Count + 1);
+                        itemDefinitionsClone ??= new List<ProjectItemDefinitionInstance>(source._taskItem._itemDefinitions.Count + 1);
                         itemDefinitionsClone.AddRange(source._taskItem._itemDefinitions);
                     }
 
                     ProjectItemDefinitionInstance sourceItemDefinition;
                     if (_project.ItemDefinitions.TryGetValue(source.ItemType, out sourceItemDefinition))
                     {
-                        itemDefinitionsClone = itemDefinitionsClone ?? new List<ProjectItemDefinitionInstance>();
+                        itemDefinitionsClone ??= new List<ProjectItemDefinitionInstance>();
                         itemDefinitionsClone.Add(sourceItemDefinition);
                     }
 

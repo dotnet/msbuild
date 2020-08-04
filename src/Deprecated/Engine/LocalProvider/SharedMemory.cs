@@ -553,7 +553,7 @@ namespace Microsoft.Build.BuildEngine
                             (int)writeLength // Length of bytes to write
                         );
 
-                        writeBytesRemaining = writeBytesRemaining - writeLength;
+                        writeBytesRemaining -= writeLength;
                         IncrementUnreadBatchCounter();
 
                         // Once the object is fully sent - remove it from the queue

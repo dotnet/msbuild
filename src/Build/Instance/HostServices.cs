@@ -130,7 +130,7 @@ namespace Microsoft.Build.Execution
             bool isExplicit;
             bool hasExplicitOutOfProcAffinity = (GetNodeAffinity(projectFile, out isExplicit) == NodeAffinity.OutOfProc) && (isExplicit);
             ErrorUtilities.VerifyThrowInvalidOperation(!hasExplicitOutOfProcAffinity || hostObject == null, "InvalidHostObjectOnOutOfProcProject");
-            _hostObjectMap = _hostObjectMap ?? new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
+            _hostObjectMap ??= new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
 
             HostObjects hostObjects = GetHostObjectsFromMapByKeyOrCreateNew(projectFile);
 
@@ -156,7 +156,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(taskName, "taskName");
             ErrorUtilities.VerifyThrowArgumentNull(monikerName, "monikerName");
 
-            _hostObjectMap = _hostObjectMap ?? new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
+            _hostObjectMap ??= new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
 
             HostObjects hostObjects = GetHostObjectsFromMapByKeyOrCreateNew(projectFile);
 

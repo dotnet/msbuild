@@ -2632,7 +2632,7 @@ namespace Microsoft.Build.Evaluation
             {
                 if (!_loadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements))
                 {
-                    _loadSettings = _loadSettings | ProjectLoadSettings.RecordEvaluatedItemElements;
+                    _loadSettings |= ProjectLoadSettings.RecordEvaluatedItemElements;
                     Reevaluate(LoggingService, _loadSettings, evaluationContext);
                 }
 

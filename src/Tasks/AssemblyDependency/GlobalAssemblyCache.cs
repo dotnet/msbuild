@@ -284,10 +284,10 @@ namespace Microsoft.Build.Tasks
             }
 
             // A delegate was not passed in to use the default one
-            getPathFromFusionName = getPathFromFusionName ?? pathFromFusionName;
+            getPathFromFusionName ??= pathFromFusionName;
 
             // A delegate was not passed in to use the default one
-            getGacEnumerator = getGacEnumerator ?? gacEnumerator;
+            getGacEnumerator ??= gacEnumerator;
 
             // If we have no processor architecture set then we can tryout a number of processor architectures.
             string location;

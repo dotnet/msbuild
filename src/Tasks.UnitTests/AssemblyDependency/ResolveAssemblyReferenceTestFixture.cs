@@ -836,8 +836,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 {
                     uniqueFileExists[lowerPath] = 0;
                 }
-                
-                uniqueFileExists[lowerPath] = uniqueFileExists[lowerPath] + 1;
+
+                uniqueFileExists[lowerPath] += 1;
             }
 
             // First, MyMissingAssembly doesn't exist anywhere.

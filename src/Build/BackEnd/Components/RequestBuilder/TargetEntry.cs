@@ -880,7 +880,7 @@ namespace Microsoft.Build.BackEnd
             if ((analysis == DependencyAnalysisResult.FullBuild) ||
                 (analysis == DependencyAnalysisResult.IncrementalBuild))
             {
-                executionMode = executionMode | TaskExecutionMode.ExecuteTaskAndGatherOutputs;
+                executionMode |= TaskExecutionMode.ExecuteTaskAndGatherOutputs;
             }
 
             return executionMode;
