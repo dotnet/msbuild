@@ -1417,7 +1417,7 @@ namespace Microsoft.Build.Tasks
         /// Log a specific item metadata.
         /// </summary>
         /// <param name="item"></param>
-        /// <param name="attribute"></param>
+        /// <param name="metadataName"></param>
         private void LogAttribute(ITaskItem item, string metadataName)
         {
             string metadataValue = item.GetMetadata(metadataName);
@@ -1567,6 +1567,7 @@ namespace Microsoft.Build.Tasks
         /// show information about them.
         /// </summary>
         /// <param name="reference">The reference.</param>
+        /// <param name="fusionName">The fusion name.</param>
         /// <param name="importance">The importance of the message.</param>
         private void LogAssembliesConsideredAndRejected(Reference reference, string fusionName, MessageImportance importance)
         {
@@ -1881,6 +1882,7 @@ namespace Microsoft.Build.Tasks
         #endregion
         #region ITask Members
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Execute the task.
         /// </summary>
@@ -1892,7 +1894,28 @@ namespace Microsoft.Build.Tasks
         /// <param name="getRegistrySubKeyNames">Used to get registry subkey names.</param>
         /// <param name="getRegistrySubKeyDefaultValue">Used to get registry default values.</param>
         /// <param name="getLastWriteTime">Delegate used to get the last write time.</param>
+        /// <param name="getRuntimeVersion">Delegate used to get the runtime version.</param>
+        /// <param name="openBaseKey">Key object to open.</param>
+        /// <param name="getAssemblyPathInGac">Delegate to get assembly path in the GAC.</param>
+        /// <param name="isWinMDFile">Delegate used for checking whether it is a WinMD file.</param>
+        /// <param name="readMachineTypeFromPEHeader">Delegate use to read machine type from PE Header</param>
         /// <returns>True if there was success.</returns>
+#else
+        /// <summary>
+        /// Execute the task.
+        /// </summary>
+        /// <param name="fileExists">Delegate used for checking for the existence of a file.</param>
+        /// <param name="directoryExists">Delegate used for checking for the existence of a directory.</param>
+        /// <param name="getDirectories">Delegate used for finding directories.</param>
+        /// <param name="getAssemblyName">Delegate used for finding fusion names of assemblyFiles.</param>
+        /// <param name="getAssemblyMetadata">Delegate used for finding dependencies of a file.</param>
+        /// <param name="getLastWriteTime">Delegate used to get the last write time.</param>
+        /// <param name="getRuntimeVersion">Delegate used to get the runtime version.</param>
+        /// <param name="getAssemblyPathInGac">Delegate to get assembly path in the GAC.</param>
+        /// <param name="isWinMDFile">Delegate used for checking whether it is a WinMD file.</param>
+        /// <param name="readMachineTypeFromPEHeader">Delegate use to read machine type from PE Header</param>
+        /// <returns>True if there was success.</returns>
+#endif
         internal bool Execute
         (
             FileExists fileExists,
@@ -2488,6 +2511,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="installedAssemblyTableInfo">Installed assembly info of the profile redist lists</param>
         /// <param name="fullRedistAssemblyTableInfo">Installed assemblyInfo for the full framework redist lists</param>
         /// <param name="blackList">Generated exclusion list</param>
+        /// <param name="fullFrameworkRedistList">Redist list which will contain the full framework redist list.</param>
         private void HandleProfile(AssemblyTableInfo[] installedAssemblyTableInfo, out AssemblyTableInfo[] fullRedistAssemblyTableInfo, out Dictionary<string, string> blackList, out RedistList fullFrameworkRedistList)
         {
             // Redist list which will contain the full framework redist list.

@@ -1308,6 +1308,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="outputDirectory">Directory the interop DLL should be written to</param>
         /// <param name="refName">Name of reference</param>
         /// <param name="topLevelRef">True if this is a top-level reference</param>
+        /// <param name="dependencyPaths">List of dependency paths for that reference</param>
         /// <param name="wrapperInfo">Information about wrapper locations</param>
         /// <returns>True if the reference was already found or successfully generated, false otherwise.</returns>
         internal bool ResolveComReferenceTlb(ComReferenceInfo referenceInfo, string outputDirectory, string refName, bool topLevelRef, List<string> dependencyPaths, out ComReferenceWrapperInfo wrapperInfo)

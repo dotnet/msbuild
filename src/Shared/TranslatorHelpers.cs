@@ -21,7 +21,7 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The reference type.</typeparam>
         /// <param name="translator">The translator</param>
         /// <param name="instance">The value to be translated.</param>
-        /// <param name="factory">The factory method used to instantiate values of type T.</param>
+        /// <param name="valueFactory">The factory method used to instantiate values of type T.</param>
         public static void Translate<T>(
             this ITranslator translator,
             ref T instance,

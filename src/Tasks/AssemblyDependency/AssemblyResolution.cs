@@ -99,6 +99,7 @@ namespace Microsoft.Build.Tasks
             return null;
         }
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Compile search paths into an array of resolvers.
         /// </summary>
@@ -118,6 +119,24 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyPathInGac"></param>
         /// <param name="log"></param>
         /// <returns></returns>
+#else
+        /// <summary>
+        /// Compile search paths into an array of resolvers.
+        /// </summary>
+        /// <param name="buildEngine"></param>
+        /// <param name="searchPaths"></param>
+        /// <param name="candidateAssemblyFiles">Paths to assembly files mentioned in the project.</param>
+        /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64, the processor architecture being targetted.</param>
+        /// <param name="frameworkPaths">Paths to FX folders.</param>
+        /// <param name="fileExists"></param>
+        /// <param name="getAssemblyName"></param>
+        /// <param name="installedAssemblies"></param>
+        /// <param name="getRuntimeVersion"></param>
+        /// <param name="targetedRuntimeVersion"></param>
+        /// <param name="getAssemblyPathInGac"></param>
+        /// <param name="log"></param>
+        /// <returns></returns>
+#endif
         public static Resolver[] CompileSearchPaths
         (
             IBuildEngine buildEngine,

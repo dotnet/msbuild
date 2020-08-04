@@ -148,6 +148,9 @@ namespace Microsoft.Build.Execution
         /// Register and unregister from ROT.
         /// Ensure the host object has appropriate COM interface that can be used in task.
         /// </summary>
+        /// <param name="projectFile">project file name</param>
+        /// <param name="targetName">target name</param>
+        /// <param name="taskName">task name</param>
         /// <param name="monikerName">the Moniker used to register host object in ROT</param>
         public void RegisterHostObject(string projectFile, string targetName, string taskName, string monikerName)
         {

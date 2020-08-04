@@ -35,7 +35,6 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Constructs an empty project item definition instance.
         /// </summary>
-        /// <param name="projectInstance">The project instance to which this item definition belongs.</param>
         /// <param name="itemType">The type of item this definition object represents.</param>
         internal ProjectItemDefinitionInstance(string itemType)
         {

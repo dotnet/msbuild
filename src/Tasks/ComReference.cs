@@ -328,6 +328,7 @@ namespace Microsoft.Build.Tasks
         /// Strips type library number from a type library path (for example, "ref.dll\2" becomes "ref.dll")
         /// </summary>
         /// <param name="typeLibPath">type library path with possible typelib number appended to it</param>
+        /// <param name="fileExists">Delegate to check whether the file exists</param>
         /// <returns>proper file path to the type library</returns>
         internal static string StripTypeLibNumberFromPath(string typeLibPath, FileExists fileExists)
         {
