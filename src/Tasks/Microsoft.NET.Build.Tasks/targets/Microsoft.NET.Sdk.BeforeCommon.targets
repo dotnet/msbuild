@@ -25,7 +25,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Make it opt-out, just in case, if something fails or we don't want to use 'WindowsDesktop' SDK.
   -->
   <PropertyGroup>
-    <ImportFrameworkWinFXTargets Condition="'$(ImportFrameworkWinFXTargets)' == ''">false</ImportFrameworkWinFXTargets>
+    <ImportFrameworkWinFXTargets Condition="'$(ImportFrameworkWinFXTargets)' == '' and '$(TargetFrameworkIdentifier)' != '.NETFramework'">false</ImportFrameworkWinFXTargets>
   </PropertyGroup>
 
   <PropertyGroup>
