@@ -155,6 +155,5 @@ namespace Microsoft.Build.UnitTests
                 base.AddResponseFileCommands(commandLine);
             }
         }
-
     }
 }

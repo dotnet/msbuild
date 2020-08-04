@@ -164,6 +164,5 @@ namespace Microsoft.Build.Shared
                 (pattern[1] == _backSlash ||
                 pattern[1] == _forwardSlash);
        }
-
     }
 }

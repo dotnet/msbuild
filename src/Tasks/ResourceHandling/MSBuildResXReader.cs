@@ -347,6 +347,5 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             }
             return result;
         }
-
     }
 }

@@ -28,7 +28,6 @@ namespace Microsoft.Build.Tasks
         protected abstract bool OnManifestResolved(Manifest manifest);
         protected abstract Type GetObjectType();
 
-
         protected GenerateManifestBase() : base(AssemblyResources.PrimaryResources, "MSBuild.")
         {
         }

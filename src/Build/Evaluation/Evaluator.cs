@@ -242,7 +242,7 @@ namespace Microsoft.Build.Evaluation
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
-            _isRunningInVisualStudio = BuildEnvironmentHelper.Instance.RunningInVisualStudio;
+            _isRunningInVisualStudio = String.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("BuildingInsideVisualStudio")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
 
             // In 15.9 we added support for the global property "NuGetInteractive" to allow SDK resolvers to be interactive.
             // In 16.0 we added the /interactive command-line argument so the line below keeps back-compat
@@ -2196,7 +2196,6 @@ namespace Microsoft.Build.Evaluation
 
                                     _evaluationLoggingContext.LogBuildEvent(eventArgs);
                                 }
-
 
                                 continue;
                             }

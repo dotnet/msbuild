@@ -678,7 +678,6 @@ namespace Microsoft.Build.BackEnd.Logging
             resetColor();
         }
 
-
         /// <summary>
         /// Returns a performance counter for a given scope (either task name or target name)
         /// from the given table.
@@ -1179,7 +1178,6 @@ namespace Microsoft.Build.BackEnd.Logging
         internal bool ignoreLoggerErrors = true;
 
         internal bool runningWithCharacterFileType = false;
-
 
         #region Per-build Members
 

@@ -62,7 +62,6 @@ namespace Microsoft.Build.Logging.StructuredLogger
             };
             eventSource.WarningRaised += (o, args) =>
             {
-
                 _warings++;
                 _build.AddMessage(args, string.Format("Warning {0}: {1}", args.Code, args.Message));
             };

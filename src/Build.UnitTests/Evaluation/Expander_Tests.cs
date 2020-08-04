@@ -2880,6 +2880,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [InlineData("net45", 2, "4.5")]
         [InlineData("net45", 3, "4.5.0")]
         [InlineData("net472", 3, "4.7.2")]
+        [InlineData("net472", 2, "4.7.2")]
         public void PropertyFunctionTargetFrameworkVersionMultipartParsing(string tfm, int versionPartCount, string expectedVersion)
         {
             var pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2890,7 +2891,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [Theory]
         [InlineData("net5.0-windows10.1.2.3", 4, "10.1.2.3")]
-        [InlineData("net5.0-windows10.1.2.3", 2, "10.1")]
+        [InlineData("net5.0-windows10.1.2.3", 2, "10.1.2.3")]
+        [InlineData("net5.0-windows10.0.0.3", 2, "10.0.0.3")]
+        [InlineData("net5.0-windows0.0.0.3", 2, "0.0.0.3")]
         public void PropertyFunctionTargetPlatformVersionMultipartParsing(string tfm, int versionPartCount, string expectedVersion)
         {
             var pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -3818,7 +3821,7 @@ $(
                     caughtException = true;
                 }
                 Assert.True(
-                        (success == false || caughtException == true),
+                        (success == false || caughtException),
                         "FAILURE: Expected '" + errorTests[i] + "' to not parse or not be evaluated but it evaluated to '" + result + "'"
                     );
             }

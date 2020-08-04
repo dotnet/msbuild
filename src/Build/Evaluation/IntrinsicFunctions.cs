@@ -187,7 +187,6 @@ namespace Microsoft.Build.Evaluation
             return GetRegistryValueFromView(keyName, valueName, defaultValue, new ArraySegment<object>(views));
         }
 
-
         /// <summary>
         /// Get the value of the registry key from one of the RegistryView's specified
         /// </summary>

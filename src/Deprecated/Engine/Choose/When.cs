@@ -83,7 +83,6 @@ namespace Microsoft.Build.BuildEngine
             }
 
             ProcessWhenChildren(whenElement, parentProject, importedFromAnotherProject, nestingDepth);
-
         }
         #endregion
 

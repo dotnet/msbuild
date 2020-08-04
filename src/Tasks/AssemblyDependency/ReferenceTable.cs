@@ -418,7 +418,6 @@ namespace Microsoft.Build.Tasks
             References[assemblyName] = reference;
         }
 
-
         /// <summary>
         /// Find the reference that corresponds to the given path.
         /// </summary>
@@ -627,7 +626,6 @@ namespace Microsoft.Build.Tasks
                     assemblyName = remappedExtension;
                 }
             }
-
 
             // Embed Interop Types aka "NOPIAs" support is not available for Fx < 4.0
             // So, we just ignore this setting on down-level platforms
@@ -1674,7 +1672,6 @@ namespace Microsoft.Build.Tasks
                     ErrorUtilities.VerifyThrow(dependencyIterations < maxIterations, "Maximum iterations exceeded while looking for dependencies.");
                 } while (moreDependencies);
 
-
                 // If everything is either resolved or unresolvable, then we can quit.
                 // Otherwise, loop again.
                 moreResolvable = false;
@@ -1964,7 +1961,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// If a reference is a higher version than what exists in the redist list of the target framework then 
-        /// this reference needs to be marked as excluded so that it is not not allowed to be referenced. 
+        /// this reference needs to be marked as excluded so that it is not allowed to be referenced. 
         /// 
         /// If the user needs this reference then they need to set specific version to true.
         /// </summary>
@@ -2236,7 +2233,6 @@ namespace Microsoft.Build.Tasks
                 if (baseNameToReferences[baseName].Count == 1)
                 {
                     baseNameToReferences.Remove(baseName);
-
                 }
             }
         }
@@ -2455,7 +2451,6 @@ namespace Microsoft.Build.Tasks
                     return assemblyName.Version != unifiedVersion;
                 }
             }
-
 
             return false;
         }

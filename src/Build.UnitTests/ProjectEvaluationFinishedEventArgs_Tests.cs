@@ -62,7 +62,6 @@ namespace Microsoft.Build.UnitTests
                 {EvaluationLocation.CreateLocationForGlob(null, EvaluationPass.InitialProperties, "1", "myFile", 42, "glob description"),
                 new ProfiledLocation(TimeSpan.MaxValue, TimeSpan.MinValue, 2)}
             }) };
-
         }
     }
 }

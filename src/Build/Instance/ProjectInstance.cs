@@ -182,7 +182,6 @@ namespace Microsoft.Build.Execution
         private bool _translateEntireState;
         private int _evaluationId = BuildEventContext.InvalidEvaluationId;
 
-
         /// <summary>
         /// Creates a ProjectInstance directly.
         /// No intermediate Project object is created.

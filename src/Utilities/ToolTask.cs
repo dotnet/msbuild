@@ -1367,7 +1367,6 @@ namespace Microsoft.Build.Utilities
                     }
                     else
                     {
-
                         Encoding encoding;
 
                         if (Traits.Instance.EscapeHatches.AvoidUnicodeWhenWritingToolTaskBatch)

@@ -510,7 +510,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
         #endregion
 
-
         public static Version ConvertFrameworkVersionToString(string version)
         {
             if (version.StartsWith("v", StringComparison.OrdinalIgnoreCase))

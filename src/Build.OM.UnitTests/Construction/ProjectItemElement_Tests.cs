@@ -458,7 +458,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             }
            );

@@ -131,13 +131,11 @@ namespace Microsoft.Build.BuildEngine
             ErrorUtilities.VerifyThrow(this.sharedMemory.IsUsable,
                 "Failed to create shared memory for local node input.");
 
-
             // Start the thread that will be processing the calls from the parent engine
             ThreadStart threadState = new ThreadStart(this.SharedMemoryReaderThread);
             readerThread = new Thread(threadState);
             readerThread.Name = "MSBuild Child<-Parent Reader";
             readerThread.Start();
-            
         }
 
         /// <summary>
@@ -280,7 +278,7 @@ namespace Microsoft.Build.BuildEngine
                     waitHandlesActive[2] = notInUseEvent;
 
                     eventType = WaitHandle.WaitTimeout;
-                    while (eventType == WaitHandle.WaitTimeout && continueRunning == true)
+                    while (eventType == WaitHandle.WaitTimeout && continueRunning)
                     {
                         eventType = WaitHandle.WaitAny(waitHandlesActive, parentCheckInterval, false);
 
@@ -495,7 +493,6 @@ namespace Microsoft.Build.BuildEngine
             // Host the msbuild engine and system
             node = new Node(nodeId, nodeLoggers, engineCallback, parentGlobalProperties, toolsetSearchLocations, parentStartupDirectory);
 
-
             // Write the initialization complete event out directly
             LocalCallDescriptorForInitializationComplete callDescriptor =
                 new LocalCallDescriptorForInitializationComplete(Process.GetCurrentProcess().Id);
@@ -562,7 +559,6 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="originalException"></param>
         internal void ReportNonFatalCommunicationError(Exception originalException)
         {
-             
             if (node != null)
             {
                 try

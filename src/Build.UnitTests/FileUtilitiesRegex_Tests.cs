@@ -355,7 +355,6 @@ namespace Microsoft.Build.Engine.UnitTests
 
             FileUtilitiesRegex.IsUncPattern(winDirectory).ShouldBe(false);
             FileUtilitiesRegex.IsUncPattern(unixDirectory).ShouldBe(false);
-
         }
 
         [Fact]
@@ -366,7 +365,6 @@ namespace Microsoft.Build.Engine.UnitTests
 
             StartsWithUncPattern.IsMatch(winDirectory).ShouldBeTrue();
             StartsWithUncPattern.IsMatch(unixDirectory).ShouldBeTrue();
-
         }
 
         [Fact]

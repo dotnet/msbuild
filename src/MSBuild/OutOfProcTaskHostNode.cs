@@ -178,10 +178,6 @@ namespace Microsoft.Build.CommandLine
             // was initially launched. 
             _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
-#if FEATURE_APPDOMAIN
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandling.UnhandledExceptionHandler);
-#endif
-
             _receivedPackets = new Queue<INodePacket>();
 
             // These WaitHandles are disposed in HandleShutDown()

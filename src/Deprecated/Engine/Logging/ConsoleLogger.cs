@@ -54,7 +54,6 @@ namespace Microsoft.Build.BuildEngine
         private bool skipProjectStartedText = false;
         private bool? showSummary;
 
-
         #region Constructors
 
         /// <summary>
@@ -255,7 +254,6 @@ namespace Microsoft.Build.BuildEngine
                 else
                 {
                     consoleLogger.ShowSummary = value;
-
                 }
             }
         }

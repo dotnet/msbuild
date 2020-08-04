@@ -128,7 +128,7 @@ namespace Microsoft.Build.Execution
             // We can only set the host object to a non-null value if the affinity for the project is not out of proc, or if it is, it is only implicitly
             // out of proc, in which case it will become in-proc after this call completes.  See GetNodeAffinity.
             bool isExplicit;
-            bool hasExplicitOutOfProcAffinity = (GetNodeAffinity(projectFile, out isExplicit) == NodeAffinity.OutOfProc) && (isExplicit == true);
+            bool hasExplicitOutOfProcAffinity = (GetNodeAffinity(projectFile, out isExplicit) == NodeAffinity.OutOfProc) && (isExplicit);
             ErrorUtilities.VerifyThrowInvalidOperation(!hasExplicitOutOfProcAffinity || hostObject == null, "InvalidHostObjectOnOutOfProcProject");
             _hostObjectMap = _hostObjectMap ?? new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
 

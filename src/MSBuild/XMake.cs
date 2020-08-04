@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 #if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
 #endif
@@ -512,6 +513,10 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrowArgumentLength(commandLine, "commandLine");
 #endif
 
+#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
+            AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
+#endif
+
             ExitType exitType = ExitType.Success;
 
             ConsoleCancelEventHandler cancelHandler = Console_CancelKeyPress;
@@ -627,11 +632,17 @@ namespace Microsoft.Build.CommandLine
 
                     // Honor the low priority flag, we place our selves below normal priority and let sub processes inherit
                     // that priority. Idle priority would prevent the build from proceeding as the user does normal actions.
-                    // We avoid increasing priority because that causes failures on mac/linux.
-                    if (lowPriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle)
+                    try
                     {
-                        Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
+                        if (lowPriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle)
+                        {
+                            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
+                        }
                     }
+                    // We avoid increasing priority because that causes failures on mac/linux, but there is no good way to
+                    // verify that a particular priority is lower than "BelowNormal." If the error appears, ignore it and
+                    // leave priority where it was.
+                    catch (Win32Exception) { }
 
                     DateTime t1 = DateTime.Now;
 
@@ -2574,7 +2585,6 @@ namespace Microsoft.Build.CommandLine
                     ex.Message);
             }
 
-
             var logger = new ProfilerLogger(profilerFile);
             loggers.Add(logger);
 
@@ -2624,7 +2634,8 @@ namespace Microsoft.Build.CommandLine
 
                         // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                         bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                        bool lowpriority = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority][0].Equals("true");
+                        string[] lowPriorityInput = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority];
+                        bool lowpriority = lowPriorityInput.Length > 0 ? lowPriorityInput[0].Equals("true") : false;
 
                         shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
 
@@ -2637,9 +2648,8 @@ namespace Microsoft.Build.CommandLine
                     }
                     else
                     {
-                        CommandLineSwitchException.Throw("InvalidNodeNumberValue", input[0]);
+                        CommandLineSwitchException.Throw("InvalidNodeNumberValue", nodeModeNumber.ToString());
                     }
-
 
                     if (shutdownReason == NodeEngineShutdownReason.Error)
                     {
@@ -2770,7 +2780,6 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
                 }
-
 
                 if (potentialSolutionFiles != null)
                 {
@@ -2913,7 +2922,7 @@ namespace Microsoft.Build.CommandLine
                     if (extensionToIgnore.IndexOfAny(s_wildcards) > -1)
                     {
                         InitializationException.Throw("InvalidExtensionToIgnore", extensionToIgnore, null, false);
-                    };
+                    }
                     if (!extensionsToIgnoreDictionary.ContainsKey(extensionToIgnore))
                     {
                         extensionsToIgnoreDictionary.Add(extensionToIgnore, null);
@@ -3615,7 +3624,6 @@ namespace Microsoft.Build.CommandLine
                     logger.Parameters = loggerDescription.LoggerSwitchParameters;
                 }
             }
-
             catch (LoggerException)
             {
                 // Logger failed politely during parameter/verbosity setting

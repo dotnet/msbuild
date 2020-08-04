@@ -2,7 +2,6 @@
 
 namespace Microsoft.Build.Eventing
 {
-
     /// <summary>
     /// This captures information of how various key methods of building with MSBuild ran.
     /// </summary>
@@ -277,7 +276,6 @@ namespace Microsoft.Build.Eventing
         [Event(33)]
         public void ParseStart(string projectFileName)
         {
-
             WriteEvent(33, projectFileName);
         }
 
@@ -406,6 +404,12 @@ namespace Microsoft.Build.Eventing
         public void ProjectGraphConstructionStop(string graphEntryPoints)
         {
             WriteEvent(54, graphEntryPoints);
+        }
+
+        [Event(55)]
+        public void PacketReadSize(int size)
+        {
+            WriteEvent(55, size);
         }
         #endregion
     }

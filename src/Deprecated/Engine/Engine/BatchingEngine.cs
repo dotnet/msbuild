@@ -414,7 +414,6 @@ namespace Microsoft.Build.BuildEngine
             return itemMetadataValues;
         }
 
-
         #endregion
     }
 }

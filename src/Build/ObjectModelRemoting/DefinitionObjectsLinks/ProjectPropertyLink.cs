@@ -71,5 +71,4 @@ namespace Microsoft.Build.ObjectModelRemoting
             return property.EvaluatedValueEscapedIntenral;
         }
     }
-
 }
