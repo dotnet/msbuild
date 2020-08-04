@@ -901,7 +901,7 @@ namespace Microsoft.Build.BuildEngine
                 // version is actually valid
                 ProjectElement.SetAttribute(XMakeAttributes.toolsVersion, value);
 
-                if (overridingToolsVersion == false)
+                if (!overridingToolsVersion)
                 {
                     this.toolsVersion = DefaultToolsVersion;
                 }

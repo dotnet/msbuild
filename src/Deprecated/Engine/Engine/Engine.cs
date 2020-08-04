@@ -1631,7 +1631,7 @@ namespace Microsoft.Build.BuildEngine
             bool forceFlush = false;
             while (
                     continueExecution && 
-                    (terminatingBuildRequest == null || terminatingBuildRequest.BuildCompleted == false)
+                    (terminatingBuildRequest == null || !terminatingBuildRequest.BuildCompleted)
                   )
             {
                 int eventType = 0;
@@ -1814,7 +1814,7 @@ namespace Microsoft.Build.BuildEngine
                 // TEM will be null if we're shutting down
                 if (NodeManager.TaskExecutionModule != null)
                 {
-                    if (NodeManager.TaskExecutionModule.UseBreadthFirstTraversal == false /* using depth first traversal */ &&
+                    if (!NodeManager.TaskExecutionModule.UseBreadthFirstTraversal /* using depth first traversal */ &&
                         buildRequests.Count == 0 && taskOutputUpdates.Count == 0 &&
                         NodeManager.TaskExecutionModule.IsIdle
                         )

@@ -943,7 +943,7 @@ namespace Microsoft.Build.Conversion
             ProjectImportElement fsharpTargetsDev12PlusImport = null;
             ProjectImportElement fsharpTargetsDev11PortableImport = null;
 
-            if (actuallyMakeChanges == false && this.xmakeProject == null)
+            if (!actuallyMakeChanges && this.xmakeProject == null)
             {
                 // when coming down the actuallyMakeChanges==false code path (from the F# project system's UpgradeProject_CheckOnly method), we may not have loaded the Xml yet, so do that now
                 this.xmakeProject = ProjectRootElement.Open(oldProjectFile);

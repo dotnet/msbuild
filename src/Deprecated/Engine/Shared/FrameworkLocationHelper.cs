@@ -517,7 +517,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // This was removed in beta2
             // We should favor \v3.5 over \v3.5.xxxxx
             // versions previous to 2.0 have .xxxx version numbers.  3.0 and 3.5 do not.
-            if (max.EndsWith(prefix, StringComparison.OrdinalIgnoreCase) != true )
+            if (!max.EndsWith(prefix, StringComparison.OrdinalIgnoreCase))
             {
                 for (int i = 1; i < directories.Length; ++i)
                 {

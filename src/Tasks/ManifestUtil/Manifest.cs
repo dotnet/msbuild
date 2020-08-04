@@ -597,7 +597,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     {
                         identityList.Add(key, false);
                     }
-                    else if (identityList[key] == false)
+                    else if (!identityList[key])
                     {
                         OutputMessages.AddWarningMessage("GenerateManifest.DuplicateAssemblyIdentity", identity);
                         identityList[key] = true; // only warn once per identity

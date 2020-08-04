@@ -315,7 +315,7 @@ namespace Microsoft.Build.BuildEngine
                         }
                     }
 
-                    if (useBreadthFirstTraversal == false)
+                    if (!useBreadthFirstTraversal)
                     {
                         if (Engine.debugMode)
                         {

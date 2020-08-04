@@ -2779,7 +2779,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 if (currentOutputDirectory != null &&
-                    currentOutputDirectoryAlreadyExisted == false)
+                    !currentOutputDirectoryAlreadyExisted)
                 {
                     // Do not annoy the user by removing an empty directory we did not create.
                     try
