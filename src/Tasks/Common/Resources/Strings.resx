@@ -653,4 +653,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Microsoft.NET.Sdk can be used instead.</value>
     <comment>{StrBegin="NETSDK1137: "}</comment>
   </data>
+  <data name="TargetFrameworkIsEol" xml:space="preserve">
+    <value>NETSDK1138: The target framework '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</value>
+    <comment>{StrBegin="NETSDK1138: "}</comment>
+  </data>
 </root>
