@@ -693,7 +693,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     yield return SdkReferencePropertyExpansionMode.ExpandLeaveEscaped;
                 }
 
-                static IEnumerable<(SdkPropertiesAreExpandedDataTemplate, bool, bool)> Templates()
+                static IEnumerable<(SdkPropertiesAreExpandedDataTemplate, bool setName, bool setVersion)> Templates()
                 {
                     var templates = new[]
                     {
