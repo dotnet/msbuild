@@ -198,13 +198,22 @@ Copyright (c) .NET Foundation. All rights reserved.
                  FormatArguments="$(MinimumOSPlatform);$(TargetPlatformVersion)"/>
   </Target>
 
-  <Target Name="_CheckForInvalidTargetPlatformVersion"
-      BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
-      Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
+  <Target Name="_StandardizeTargetPlatformVersion"
+    BeforeTargets="ProcessFrameworkReferences"
+    Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
     <ItemGroup>
-      <ValidTargetPlatformVersion Include="@(SupportedTargetPlatform)" Condition="'@(SupportedTargetPlatform)' != '' and '%(Identity)' == '$(TargetPlatformVersion)'" />
+      <ValidTargetPlatformVersion Include="@(SupportedTargetPlatform)" Condition="'@(SupportedTargetPlatform)' != '' and $([MSBuild]::VersionEquals(%(Identity), $(TargetPlatformVersion)))" />
     </ItemGroup>
 
+    <PropertyGroup>
+      <TargetPlatformVersion Condition="'@(ValidTargetPlatformVersion)' != '' and '@(ValidTargetPlatformVersion->Count())' == '1' and '@(ValidTargetPlatformVersion)' != '$(TargetPlatformVersion)'">@(ValidTargetPlatformVersion)</TargetPlatformVersion>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="_CheckForInvalidTargetPlatformVersion"
+      BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+      DependsOnTargets="_StandardizeTargetPlatformVersion"
+      Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
     <PropertyGroup>
       <TargetPlatformVersionSupported Condition="'$(TargetPlatformVersionSupported)' == '' and '@(ValidTargetPlatformVersion)' != ''" >true</TargetPlatformVersionSupported>
       <ValidTargetPlatformVersions Condition="'@(SupportedTargetPlatform)' != ''" >@(SupportedTargetPlatform, '%0a')</ValidTargetPlatformVersions>
