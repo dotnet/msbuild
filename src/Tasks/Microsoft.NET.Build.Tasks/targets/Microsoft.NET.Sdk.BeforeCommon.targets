@@ -20,12 +20,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     Workaround: https://github.com/microsoft/msbuild/issues/4948
-    Disable .NET Framework's inbox WinFX targets when using the SDK, since, we really don't use it's build logic
-    and is superseded by 'WindowsDesktop' SDK that provides it's own WinFX for both NETFX and CoreCLR targets.
-    Make it opt-out, just in case, if something fails or we don't want to use 'WindowsDesktop' SDK.
+    Allow opt-out of importing framework's winfx.targets.
   -->
   <PropertyGroup>
-    <ImportFrameworkWinFXTargets Condition="'$(ImportFrameworkWinFXTargets)' == '' and '$(TargetFrameworkIdentifier)' != '.NETFramework'">false</ImportFrameworkWinFXTargets>
+    <ImportFrameworkWinFXTargets Condition="'$(ImportFrameworkWinFXTargets)' == ''">true</ImportFrameworkWinFXTargets>
   </PropertyGroup>
 
   <PropertyGroup>
