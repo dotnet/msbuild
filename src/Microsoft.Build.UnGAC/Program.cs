@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnGAC
                 {
                     proc.Close();
                     proc.Dispose();
-                    Console.WriteLine("Could not find instances of gacutil, exiting...");
+                    Console.WriteLine("Could not use where.exe to find gacutil.exe. Exiting...");
                     return;
                 }
 
@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnGAC
                 {
                     proc.Close();
                     proc.Dispose();
-                    Console.WriteLine("Could not find instances of gacutil, exiting...");
+                    Console.WriteLine("Could not find instances of gacutil. Exiting...");
                     return;
                 }
 
@@ -73,7 +73,7 @@ namespace Microsoft.Build.UnGAC
                 {
                     proc.Close();
                     proc.Dispose();
-                    Console.WriteLine("Could not find instances of gacutil, exiting...");
+                    Console.WriteLine("Could not write gacutil commands. Exiting...");
                     return;
                 }
 
