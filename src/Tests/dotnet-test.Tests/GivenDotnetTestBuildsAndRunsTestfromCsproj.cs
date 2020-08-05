@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
         }
 
-        private readonly string [] ConsoleLoggerOutputNormal = new[] { "--logger", "console;verbosity=normal" };
+        private readonly string[] ConsoleLoggerOutputNormal = new[] { "--logger", "console;verbosity=normal" };
 
         [Fact]
         public void MSTestSingleTFM()
@@ -165,9 +165,9 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().Contain("Failed TestNamespace.VSTestXunitTests.VSTestXunitFailTest");
-                result.StdOut.Should().Contain("Total tests: 2");
-                result.StdOut.Should().Contain("Passed: 1");
-                result.StdOut.Should().Contain("Failed: 1");
+                result.StdOut.Should().Contain("Total:     2");
+                result.StdOut.Should().Contain("Passed:     1");
+                result.StdOut.Should().Contain("Failed:     1");
             }
         }
 
@@ -261,7 +261,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StdOut.Should().Contain(trxFiles[0]);
 
             // Cleanup trxLoggerDirectory if it exist
-            if(Directory.Exists(trxLoggerDirectory))
+            if (Directory.Exists(trxLoggerDirectory))
             {
                 Directory.Delete(trxLoggerDirectory, true);
             }
@@ -307,7 +307,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .WithVersionVariables()
                 .Path;
 
-            
+
             string pkgDir;
             //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             //{
@@ -362,9 +362,9 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify
             if (!TestContext.IsLocalized())
             {
-                result.StdOut.Should().Contain("Total tests: 2");
-                result.StdOut.Should().Contain("Passed: 1");
-                result.StdOut.Should().Contain("Failed: 1");
+                result.StdOut.Should().Contain("Total:     2");
+                result.StdOut.Should().Contain("Passed:     1");
+                result.StdOut.Should().Contain("Failed:     1");
                 result.StdOut.Should().NotContain("Passed TestNamespace.VSTestTests.VSTestPassTest");
                 result.StdOut.Should().NotContain("Failed TestNamespace.VSTestTests.VSTestFailTest");
             }
@@ -424,9 +424,9 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().NotContain("Microsoft (R) Test Execution Command Line Tool Version");
-                result.StdOut.Should().Contain("Total tests: 2");
-                result.StdOut.Should().Contain("Passed: 1");
-                result.StdOut.Should().Contain("Failed: 1");
+                result.StdOut.Should().Contain("Total:     2");
+                result.StdOut.Should().Contain("Passed:     1");
+                result.StdOut.Should().Contain("Failed:     1");
             }
         }
 
@@ -443,7 +443,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 Directory.Delete(resultsDirectory, true);
             }
 
-            var settingsPath =Path.Combine(AppContext.BaseDirectory, "CollectCodeCoverage.runsettings");
+            var settingsPath = Path.Combine(AppContext.BaseDirectory, "CollectCodeCoverage.runsettings");
 
             // Call test
             CommandResult result = new DotnetTestCommand(Log)
@@ -458,9 +458,9 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify test results
             if (!TestContext.IsLocalized())
             {
-                result.StdOut.Should().Contain("Total tests: 2");
-                result.StdOut.Should().Contain("Passed: 1");
-                result.StdOut.Should().Contain("Failed: 1");
+                result.StdOut.Should().Contain("Total:     2");
+                result.StdOut.Should().Contain("Passed:     1");
+                result.StdOut.Should().Contain("Failed:     1");
             }
 
             // Verify coverage file.
@@ -494,9 +494,9 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify test results
             if (!TestContext.IsLocalized())
             {
-                result.StdOut.Should().Contain("Total tests: 2");
-                result.StdOut.Should().Contain("Passed: 1");
-                result.StdOut.Should().Contain("Failed: 1");
+                result.StdOut.Should().Contain("Total:     2");
+                result.StdOut.Should().Contain("Passed:     1");
+                result.StdOut.Should().Contain("Failed:     1");
             }
 
             // Verify coverage file.
@@ -523,9 +523,9 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             if (!TestContext.IsLocalized())
             {
                 result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows.");
-                result.StdOut.Should().Contain("Total tests: 1");
-                result.StdOut.Should().Contain("Passed: 1");
-                result.StdOut.Should().Contain("Test Run Successful.");
+                result.StdOut.Should().Contain("Total:     1");
+                result.StdOut.Should().Contain("Passed:     1");
+                result.StdOut.Should().NotContain("Failed!");
             }
 
             result.ExitCode.Should().Be(0);
