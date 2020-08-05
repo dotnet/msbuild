@@ -495,7 +495,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Given the appropriate information, return the equivalent HandshakeOptions.
         /// </summary>
-        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, bool is64Bit = false, int clrVersion = 0, bool nodeReuse = false, bool lowPriority = false, IDictionary<string, string> taskHostParameters = null)
+        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, bool is64Bit = false, int clrVersion = 0, bool nodeReuse = false, bool lowPriority = false, bool workerNode = true, IDictionary<string, string> taskHostParameters = null)
         {
             HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
 
@@ -645,6 +645,33 @@ namespace Microsoft.Build.Internal
                     return hash1 + (hash2 * 1566083941);
                 }
             }
+        }
+
+        internal static string GetRARPipeName(bool nodeReuse, bool lowPriority)
+        {
+            var context = HandshakeOptions.None;
+            var userName = Environment.UserName;
+            var clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
+            var is64Bit = XMakeAttributes.GetCurrentMSBuildArchitecture().Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
+
+            if (is64Bit)
+            {
+                context |= HandshakeOptions.X64;
+            }
+            if (clrVersion == 2)
+            {
+                context |= HandshakeOptions.CLR2;
+            }
+            if (nodeReuse)
+            {
+                context |= HandshakeOptions.NodeReuse;
+            }
+            if (lowPriority)
+            {
+                context |= HandshakeOptions.LowPriority;
+            }
+
+            return $"MSBuild.RAR.{userName}.{(int)context}";
         }
     }
 }

@@ -128,6 +128,11 @@ namespace Microsoft.Build.BackEnd
         /// The SDK resolution service.
         /// </summary>
         SdkResolverService,
+
+        /// <summary>
+        /// The OutOfProc RAR node provider.
+        /// </summary>
+        OutOfProcNodeRarProvider,
     }
 
     /// <summary>

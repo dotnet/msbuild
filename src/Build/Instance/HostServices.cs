@@ -35,7 +35,12 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The project may be scheduled anywhere.
         /// </summary>
-        Any
+        Any,
+
+        /// <summary>
+        /// The node accepts only RAR tasks.
+        /// </summary>
+        RarNode
     }
 
     /// <summary>

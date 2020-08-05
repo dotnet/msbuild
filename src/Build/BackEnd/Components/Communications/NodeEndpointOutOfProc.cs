@@ -21,6 +21,8 @@ namespace Microsoft.Build.BackEnd
 
         private readonly bool _lowPriority;
 
+        private readonly bool _workerNode;
+
         #endregion
 
         #region Constructors and Factories
@@ -35,12 +37,15 @@ namespace Microsoft.Build.BackEnd
             string pipeName, 
             IBuildComponentHost host,
             bool enableReuse,
-            bool lowPriority)
+            bool lowPriority,
+            bool workerNode)
         {
             ErrorUtilities.VerifyThrowArgumentNull(host, "host");
             _componentHost = host;
             _enableReuse = enableReuse;
             _lowPriority = lowPriority;
+            _workerNode = workerNode;
+
 
             InternalConstruct(pipeName);
         }
@@ -52,7 +57,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected override long GetHostHandshake()
         {
-            return NodeProviderOutOfProc.GetHostHandshake(_enableReuse, _lowPriority);
+            return NodeProviderOutOfProc.GetHostHandshake(_enableReuse, _lowPriority, _workerNode);
         }
 
         /// <summary>
@@ -60,7 +65,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected override long GetClientHandshake()
         {
-            return NodeProviderOutOfProc.GetClientHandshake(_enableReuse, _lowPriority);
+            return NodeProviderOutOfProc.GetClientHandshake(_enableReuse, _lowPriority, _workerNode);
         }
 
         #region Structs

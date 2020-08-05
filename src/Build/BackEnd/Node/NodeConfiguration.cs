@@ -49,13 +49,15 @@ namespace Microsoft.Build.BackEnd
         /// <param name="forwardingLoggers">The forwarding loggers.</param>
         /// <param name="appDomainSetup">The AppDomain setup information.</param>
         /// <param name="loggingNodeConfiguration">The logging configuration for the node.</param>
+        /// <param name="rarNode">Indicates if node works as RAR node.</param>
         public NodeConfiguration
             (
             int nodeId,
             BuildParameters buildParameters,
             LoggerDescription[] forwardingLoggers,
             AppDomainSetup appDomainSetup,
-            LoggingNodeConfiguration loggingNodeConfiguration
+            LoggingNodeConfiguration loggingNodeConfiguration,
+            bool rarNode = false
             )
         {
             _nodeId = nodeId;
@@ -63,6 +65,7 @@ namespace Microsoft.Build.BackEnd
             _forwardingLoggers = forwardingLoggers;
             _appDomainSetup = appDomainSetup;
             _loggingNodeConfiguration = loggingNodeConfiguration;
+            RarNode = rarNode;
         }
 #else
         /// <summary>
@@ -162,9 +165,14 @@ namespace Microsoft.Build.BackEnd
             { return NodePacketType.NodeConfiguration; }
         }
 
-#endregion
+        /// <summary>
+        /// Indicates if the node is RAR node or not (executes only one task)
+        /// </summary>
+        public bool RarNode { get; }
 
-#region INodePacketTranslatable Members
+        #endregion
+
+        #region INodePacketTranslatable Members
 
         /// <summary>
         /// Translates the packet to/from binary form.

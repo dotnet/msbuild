@@ -126,12 +126,24 @@ namespace Microsoft.Build.BackEnd
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.
-                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHostHandshake(nodeReuse, false), NodeProviderOutOfProc.GetClientHandshake(nodeReuse, false));
+                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHostHandshake(nodeReuse, false, true), NodeProviderOutOfProc.GetClientHandshake(nodeReuse, false, true));
 
                 if (null == nodeStream)
                 {
                     // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHostHandshake(nodeReuse, true), NodeProviderOutOfProc.GetClientHandshake(nodeReuse, true));
+                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHostHandshake(nodeReuse, true, true), NodeProviderOutOfProc.GetClientHandshake(nodeReuse, true, true));
+                }
+
+                // Couldn't connect to normal node, try to connect to non-worker node.
+                if (null == nodeStream)
+                {
+                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHostHandshake(nodeReuse, false, false), NodeProviderOutOfProc.GetClientHandshake(nodeReuse, false, false));
+
+                    if (null == nodeStream)
+                    {
+                        // If we couldn't connect attempt to connect to the process with the handshake including low priority.
+                        nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHostHandshake(nodeReuse, true, false), NodeProviderOutOfProc.GetClientHandshake(nodeReuse, true, false));
+                    }
                 }
 
                 if (null != nodeStream)

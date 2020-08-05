@@ -24,7 +24,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The provider provides remote nodes.
         /// </summary>
-        Remote
+        Remote,
+        
+        /// <summary>
+        /// The provider provides RAR nodes.
+        /// </summary>
+        ResolveAssemblyReference
     }
 
     /// <summary>

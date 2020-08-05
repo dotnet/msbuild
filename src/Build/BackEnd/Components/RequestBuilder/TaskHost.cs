@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO.Pipes;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
@@ -23,6 +24,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
 using System.Reflection;
 using Microsoft.Build.Eventing;
+using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -34,7 +36,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine7
+        IBuildEngine7, IRarBuildEngine
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set. 
@@ -988,6 +990,46 @@ namespace Microsoft.Build.BackEnd
         private void VerifyActiveProxy()
         {
             ErrorUtilities.VerifyThrow(_activeProxy == true, "Attempted to use an inactive task host.");
+        }
+
+        /// <summary>
+        /// Inialize new RAR node
+        /// </summary>
+        bool IRarBuildEngine.CreateRarNode()
+        {
+            var nodeManager = _host.GetComponent(BuildComponentType.NodeManager) as INodeManager;
+
+            var configuration = new NodeConfiguration
+            (
+                -1, /* must be assigned by the NodeManager */
+                _host.BuildParameters,
+                null
+    #if FEATURE_APPDOMAIN
+                , AppDomain.CurrentDomain.SetupInformation
+    #endif
+                , new LoggingNodeConfiguration(_host.LoggingService.IncludeEvaluationMetaprojects, _host.LoggingService.IncludeEvaluationProfile, _host.LoggingService.IncludeTaskInputs)
+            );
+
+            var nodeInfo = nodeManager.CreateNode(configuration, NodeAffinity.RarNode);
+
+            return nodeInfo != null;
+        }
+
+        /// <summary>
+        /// Provides RAR node name for current configuration
+        /// </summary>
+        string IRarBuildEngine.GetRarPipeName()
+        {
+            var parameters = _host.BuildParameters;
+            return CommunicationsUtilities.GetRARPipeName(parameters.EnableNodeReuse, parameters.LowPriority);
+        }
+
+        /// <summary>
+        /// Constructs <seealso cref="NamedPipeClientStream"/>
+        /// </summary>
+        NamedPipeClientStream IRarBuildEngine.GetRarClientStream(string pipeName, int timeout)
+        {
+            return NamedPipeUtil.GetClientStream(pipeName, timeout);
         }
     }
 }

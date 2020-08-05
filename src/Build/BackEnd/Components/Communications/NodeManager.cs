@@ -35,6 +35,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary> 
         private INodeProvider _outOfProcNodeProvider;
 
+
+        /// <summary>
+        /// The node provider for out-of-proc RAR nodes.
+        /// </summary> 
+        private INodeProvider _outOfProcRarNodeProvider;
+
         /// <summary>
         /// The build component host.
         /// </summary>
@@ -113,6 +119,11 @@ namespace Microsoft.Build.BackEnd
                 nodeId = AttemptCreateNode(_outOfProcNodeProvider, configuration);
             }
 
+            if (nodeId == InvalidNodeId && (nodeAffinity == NodeAffinity.RarNode))
+            {
+                nodeId = AttemptCreateNode(_outOfProcRarNodeProvider, configuration);
+            }
+
             if (nodeId == InvalidNodeId)
             {
                 return null;
@@ -166,6 +177,11 @@ namespace Microsoft.Build.BackEnd
             {
                 _outOfProcNodeProvider.ShutdownConnectedNodes(enableReuse);
             }
+
+            if(null != _outOfProcRarNodeProvider)
+            {
+                _outOfProcRarNodeProvider.ShutdownConnectedNodes(enableReuse);
+            }
         }
 
         /// <summary>
@@ -177,6 +193,11 @@ namespace Microsoft.Build.BackEnd
             if (null != _outOfProcNodeProvider)
             {
                 _outOfProcNodeProvider.ShutdownAllNodes();
+            }
+
+            if (null != _outOfProcRarNodeProvider)
+            {
+                _outOfProcRarNodeProvider.ShutdownAllNodes();
             }
         }
 
@@ -196,6 +217,7 @@ namespace Microsoft.Build.BackEnd
 
             _inProcNodeProvider = _componentHost.GetComponent(BuildComponentType.InProcNodeProvider) as INodeProvider;
             _outOfProcNodeProvider = _componentHost.GetComponent(BuildComponentType.OutOfProcNodeProvider) as INodeProvider;
+            _outOfProcRarNodeProvider = _componentHost.GetComponent(BuildComponentType.OutOfProcNodeRarProvider) as INodeProvider;
 
             _componentShutdown = false;
 
@@ -217,8 +239,14 @@ namespace Microsoft.Build.BackEnd
                 ((IDisposable)_outOfProcNodeProvider).Dispose();
             }
 
+            if (_outOfProcRarNodeProvider != null && _outOfProcRarNodeProvider is IDisposable)
+            {
+                ((IDisposable)_outOfProcRarNodeProvider).Dispose();
+            }
+
             _inProcNodeProvider = null;
             _outOfProcNodeProvider = null;
+            _outOfProcRarNodeProvider = null;
             _componentHost = null;
             _componentShutdown = true;
 

@@ -206,8 +206,9 @@ namespace Microsoft.Build.BackEnd
             // down all the nodes on exit, we will attempt to shutdown
             // all matching notes with and without the priroity bit set.
             // So precompute both versions of the handshake now.
-            long hostHandshake = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: false);
-            long hostHandshakeWithLow = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: true);
+            // TODO: Chceck if this is necessary, shouldn't be...
+            long hostHandshake = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: false, workerNode: true);
+            long hostHandshakeWithLow = NodeProviderOutOfProc.GetHostHandshake(nodeReuse, enableLowPriority: true, workerNode: true);
 
             ShutdownAllNodes(nodeReuse, NodeContextTerminated);
         }
