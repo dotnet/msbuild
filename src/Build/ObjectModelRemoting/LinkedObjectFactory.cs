@@ -75,15 +75,15 @@ namespace Microsoft.Build.ObjectModelRemoting
 
         public ProjectItem Create(ProjectItemLink link, Project project = null, ProjectItemElement xml = null)
         {
-            project = project ?? link.Project;
-            xml = xml ?? link.Xml;
+            project ??= link.Project;
+            xml ??= link.Xml;
 
             return new LinkedProjectItem(xml, project, link);
         }
 
         public ProjectItemDefinition Create(ProjectItemDefinitionLink link, Project project = null)
         {
-            project = project ?? link.Project;
+            project ??= link.Project;
 
             return new LinkedProjectItemDefinition(link, project, link.ItemType);
         }
@@ -100,14 +100,14 @@ namespace Microsoft.Build.ObjectModelRemoting
 
         public ProjectMetadata Create(ProjectMetadataLink link, object parent = null)
         {
-            parent = parent ?? link.Parent;
+            parent ??= link.Parent;
 
             return new LinkedProjectMetadata(parent, link);
         }
 
         public ProjectProperty Create(ProjectPropertyLink link, Project project = null )
         {
-            project = project ?? link.Project;
+            project ??= link.Project;
 
             return new LinkedProjectProperty(project, link);
         }

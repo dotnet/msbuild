@@ -325,7 +325,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="blockingRequest">The request which is blocking this one.</param>
         /// <param name="activeTargets">The list of targets this request was currently building at the time it became blocked.</param>
-        /// <param name="blockerBlockingTarget">Target that we are blocked on which is being built by <paramref name="blockingRequest"/></param>
+        /// <param name="blockingTarget">Target that we are blocked on which is being built by <paramref name="blockingRequest"/></param>
         public void BlockByRequest(SchedulableRequest blockingRequest, string[] activeTargets, string blockingTarget = null)
         {
             VerifyOneOfStates(new SchedulableRequestState[] { SchedulableRequestState.Blocked, SchedulableRequestState.Executing });

@@ -139,7 +139,7 @@ After:
             bool isExplicit;
             bool hasExplicitOutOfProcAffinity = (GetNodeAffinity(projectFile, out isExplicit) == NodeAffinity.OutOfProc) && (isExplicit);
             ErrorUtilities.VerifyThrowInvalidOperation(!hasExplicitOutOfProcAffinity || hostObject == null, "InvalidHostObjectOnOutOfProcProject");
-            _hostObjectMap = _hostObjectMap ?? new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
+            _hostObjectMap ??= new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
 
             HostObjects hostObjects = GetHostObjectsFromMapByKeyOrCreateNew(projectFile);
 
@@ -157,6 +157,9 @@ After:
         /// Register and unregister from ROT.
         /// Ensure the host object has appropriate COM interface that can be used in task.
         /// </summary>
+        /// <param name="projectFile">project file name</param>
+        /// <param name="targetName">target name</param>
+        /// <param name="taskName">task name</param>
         /// <param name="monikerName">the Moniker used to register host object in ROT</param>
         public void RegisterHostObject(string projectFile, string targetName, string taskName, string monikerName)
         {
@@ -165,7 +168,7 @@ After:
             ErrorUtilities.VerifyThrowArgumentNull(taskName, nameof(taskName));
             ErrorUtilities.VerifyThrowArgumentNull(monikerName, nameof(monikerName));
 
-            _hostObjectMap = _hostObjectMap ?? new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
+            _hostObjectMap ??= new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
 
             HostObjects hostObjects = GetHostObjectsFromMapByKeyOrCreateNew(projectFile);
 

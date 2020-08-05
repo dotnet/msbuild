@@ -242,7 +242,7 @@ namespace Microsoft.Build.BuildEngine
 
                     // Unrecognized attribute.
                     default:
-                        ProjectXmlUtilities.ThrowProjectInvalidAttribute(propertyGroupAttribute); 
+                        ProjectXmlUtilities.ThrowProjectInvalidAttribute(propertyGroupAttribute);
                         break;
                 }
             }
@@ -386,7 +386,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Accessor for the XmlElement representing this property group.  This is 
+        /// Accessor for the XmlElement representing this property group.  This is
         /// internal to MSBuild, and is read-only.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -525,7 +525,7 @@ namespace Microsoft.Build.BuildEngine
         /// <returns>The property with the given name, or null if it does not exist in this group</returns>
         public BuildProperty this[string propertyName]
         {
-            get 
+            get
             {
                 // We don't support this method for PropertyGroups that are persisted.
                 // This is because persisted PropertyGroups can contain multiple 
@@ -545,7 +545,7 @@ namespace Microsoft.Build.BuildEngine
 
                 // Make sure that the property name passed into the indexer matches
                 // the property name on the BuildProperty object.
-                error.VerifyThrowArgument(0 == String.Compare(propertyName, value.Name, StringComparison.OrdinalIgnoreCase),
+                error.VerifyThrowArgument(String.Equals(propertyName, value.Name, StringComparison.OrdinalIgnoreCase),
                     "PropertyNamesDoNotMatch", "BuildProperty");
 
                 this.SetProperty(value);
@@ -627,7 +627,7 @@ namespace Microsoft.Build.BuildEngine
                     // Do not set the ParentProject on the new BuildPropertyGroup, because it isn't really
                     // part of the project
                     clone = new BuildPropertyGroup(null, propertyTableByName.Count);
-                    
+
                     foreach (DictionaryEntry propertyEntry in this.propertyTableByName)
                     {
                         // If the caller requested a deep clone, then deep clone the BuildProperty object,
@@ -707,8 +707,8 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// ImportInitialProperties is used when setting up an evaluated BuildProperty
         /// Group with the initial set of properties from MSBuild reserved properties,
-        /// environment variables, tools version dependent properties, and global 
-        /// properties.  After this virtual BuildPropertyGroup has been populated with 
+        /// environment variables, tools version dependent properties, and global
+        /// properties.  After this virtual BuildPropertyGroup has been populated with
         /// these, we can continue to read in the properties from the project file.
         /// </summary>
         /// <param name="environmentProperties"></param>
@@ -718,9 +718,9 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         internal void ImportInitialProperties
         (
-            BuildPropertyGroup environmentProperties, 
-            BuildPropertyGroup reservedProperties, 
-            BuildPropertyGroup toolsVersionDependentProperties, 
+            BuildPropertyGroup environmentProperties,
+            BuildPropertyGroup reservedProperties,
+            BuildPropertyGroup toolsVersionDependentProperties,
             BuildPropertyGroup globalProperties
         )
         {
@@ -754,7 +754,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Sets a property. 
+        /// Sets a property.
         ///
         /// Either overrides the value of the property with the given name, or adds it if it
         /// doesn't already exist. Setting to the same value as before does nothing.
@@ -831,7 +831,7 @@ namespace Microsoft.Build.BuildEngine
                 }
                 else
                 {
-                    error.VerifyThrow((existingProperty == null) || (existingProperty.Type != PropertyType.OutputProperty), 
+                    error.VerifyThrow((existingProperty == null) || (existingProperty.Type != PropertyType.OutputProperty),
                         "If the property already exists in the main property table, it can't already be there as an output property, because then we would have stored an entry in propertiesOverriddenByOutputProperties.");
 
                     // NOTE: Use Hashtable.Add() because each output property should only be added to this
@@ -851,8 +851,8 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Sets a property taking the property name and value as strings directly. 
-        /// 
+        /// Sets a property taking the property name and value as strings directly.
+        ///
         /// Either overrides the value of the property with the given name, or adds it if it
         /// doesn't already exist. Setting to the same value as before does nothing.
         ///
@@ -883,7 +883,7 @@ namespace Microsoft.Build.BuildEngine
             bool treatPropertyValueAsLiteral
             )
         {
-            this.SetProperty(propertyName, 
+            this.SetProperty(propertyName,
                 treatPropertyValueAsLiteral ? EscapingUtilities.Escape(propertyValue) : propertyValue);
         }
 
@@ -964,12 +964,12 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Adds an existing BuildProperty to the list of properties, does not attempt 
+        /// Adds an existing BuildProperty to the list of properties, does not attempt
         /// to add backing Xml for the item.
         /// </summary>
         /// <param name="propertyToAdd"></param>
         /// <owner>JomoF</owner>
-        internal void AddExistingProperty 
+        internal void AddExistingProperty
         (
             BuildProperty propertyToAdd
         )
@@ -1004,7 +1004,7 @@ namespace Microsoft.Build.BuildEngine
             // Make sure the property to be added has an XML element backing it,
             // and that its XML belongs to the same XML document as our BuildPropertyGroup.
             error.VerifyThrow(propertyToAdd.PropertyElement != null, "BuildProperty does not have an XML element");
-            error.VerifyThrow(propertyToAdd.PropertyElement.OwnerDocument == this.ownerDocument, 
+            error.VerifyThrow(propertyToAdd.PropertyElement.OwnerDocument == this.ownerDocument,
                 "Cannot add an BuildProperty with a different XML owner document.");
 
             // For persisted groups, just append the property at the end of the <BuildPropertyGroup> tag.
@@ -1087,7 +1087,7 @@ namespace Microsoft.Build.BuildEngine
                 // name.
                 foreach (BuildProperty property in this)
                 {
-                    if (0 == String.Compare(property.Name, propertyName, StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals(property.Name, propertyName, StringComparison.OrdinalIgnoreCase))
                     {
                         // Add the property to our list of things to remove.
                         propertiesToRemove.Add(property);
@@ -1286,7 +1286,7 @@ namespace Microsoft.Build.BuildEngine
         /// the previously gathered variables, and set new ones. This method
         /// will not, however, unset previously set variables.
         /// Requires property group to be virtual.
-        /// 
+        ///
         /// NOTE: this method does not allow environment variables to override
         /// previously set properties of type "GlobalProperty" or "ReservedProperty"
         /// </summary>
@@ -1332,7 +1332,7 @@ namespace Microsoft.Build.BuildEngine
             // "MSBuildExtensionsPath32". This points to whatever the value of "Program Files (x86)" environment variable is;
             // but on a 32 bit box this isn't set, and we should use "Program Files" instead.
             string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-    
+
             // Similarly for "MSBuildExtensionsPath32". This points to whatever the value of "Program Files (x86)" environment variable is;
             // but on a 32 bit box this isn't set, and we should use "Program Files" instead.
             string programFiles32 = Environment.GetEnvironmentVariable(Constants.programFilesx86);
@@ -1351,7 +1351,7 @@ namespace Microsoft.Build.BuildEngine
 
             bool useLegacyMSBuildExtensionsPathBehavior = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLEGACYEXTENSIONSPATH"));
 
-            string extensionsPath; 
+            string extensionsPath;
             if (useLegacyMSBuildExtensionsPathBehavior)
             {
                 extensionsPath = Path.Combine(programFiles, ReservedPropertyNames.extensionsPathSuffix);
@@ -1366,7 +1366,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method does a comparison of the actual contents of two property bags
-        /// and returns True if they are equal, else False.  Equality means that 
+        /// and returns True if they are equal, else False.  Equality means that
         /// the two collections contain the same set of property names (case insensitive)
         /// with the same values (case sensitive).
         /// Requires property group to be virtual.
@@ -1483,11 +1483,11 @@ namespace Microsoft.Build.BuildEngine
 
             // If this is a persisted element, then we should have an
             // ArrayList of BuildProperty objects, but not a hash table.
-            error.VerifyThrow(this.propertyList != null, 
+            error.VerifyThrow(this.propertyList != null,
                 "ArrayList of BuildProperty objects expected for this BuildPropertyGroup.");
-            error.VerifyThrow(this.propertyTableByName == null, 
+            error.VerifyThrow(this.propertyTableByName == null,
                 "HashTable of BuildProperty objects not expected for this BuildPropertyGroup.");
-            error.VerifyThrow(this.ownerDocument != null, 
+            error.VerifyThrow(this.ownerDocument != null,
                 "There must be an owner document. It should have been set in the constructor.");
         }
 
@@ -1500,7 +1500,7 @@ namespace Microsoft.Build.BuildEngine
             XmlElement propertyElement
         )
         {
-            error.VerifyThrowInvalidOperation(propertyElement != null, 
+            error.VerifyThrowInvalidOperation(propertyElement != null,
                 "PropertyDoesNotBelongToPropertyGroup");
             error.VerifyThrowInvalidOperation(propertyElement.ParentNode == this.propertyGroupElement,
                 "PropertyDoesNotBelongToPropertyGroup");

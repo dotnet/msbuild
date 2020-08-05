@@ -71,7 +71,8 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <summary>
         /// Construct.
         /// </summary>
-        /// <param name="binaryStream"></param>
+        /// <param name="binaryStream">The raw binary stream that's being read.</param>
+        /// <param name="forceANSI">When false, try to guess the encoding of binaryStream. When true, force the encoding to ANSI.</param>
         public StreamMappedString(Stream binaryStream, bool forceANSI)
             : this(binaryStream, forceANSI, /* pageSize */ DefaultPageSize)
         {
@@ -80,7 +81,9 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <summary>
         /// Construct.
         /// </summary>
-        /// <param name="binaryStream"></param>
+        /// <param name="binaryStream">The raw binary stream that's being read.</param>
+        /// <param name="forceANSI">When false, try to guess the encoding of binaryStream. When true, force the encoding to ANSI.</param>
+        /// <param name="pageSize">Size of pages to use for reading from source file.</param>
         internal StreamMappedString(Stream binaryStream, bool forceANSI, int pageSize)
         {
             _binaryStream = binaryStream;
@@ -92,7 +95,6 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <summary>
         /// Restart the stream reader at the beginning.
         /// </summary>
-        /// <param name="binaryStream"></param>
         private void RestartReader()
         {
             _currentPageNumber = -1;
@@ -340,7 +342,6 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// COnvert from absolute offset to relative offset within a particular page.
         /// </summary>
         /// <param name="offset"></param>
-        /// <param name="pageNumber"></param>
         /// <returns></returns>
         private int AbsoluteOffsetToPageOffset(int offset)
         {
@@ -360,7 +361,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <summary>
         /// Returns true of the given position is passed the end of the file.
         /// </summary>
-        /// <param name="position"></param>
+        /// <param name="offset"></param>
         /// <returns></returns>
         public bool IsPastEnd(int offset)
         {

@@ -1580,14 +1580,14 @@ namespace Microsoft.Build.UnitTests
                 List<string> fileNamesToReturn = new List<string>();
                 foreach (string file in _directoryFileNameList)
                 {
-                    if (String.Compare(searchPattern, "*.sln", StringComparison.OrdinalIgnoreCase) == 0)
+                    if (String.Equals(searchPattern, "*.sln", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (String.Compare(Path.GetExtension(file), ".sln", StringComparison.OrdinalIgnoreCase) == 0)
+                        if (String.Equals(Path.GetExtension(file), ".sln", StringComparison.OrdinalIgnoreCase))
                         {
                             fileNamesToReturn.Add(file);
                         }
                     }
-                    else if (String.Compare(searchPattern, "*.*proj", StringComparison.OrdinalIgnoreCase) == 0)
+                    else if (String.Equals(searchPattern, "*.*proj", StringComparison.OrdinalIgnoreCase))
                     {
                         if (Path.GetExtension(file).Contains("proj"))
                         {

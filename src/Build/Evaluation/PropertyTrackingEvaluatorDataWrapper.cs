@@ -38,6 +38,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="dataToWrap">The underlying <see cref="IEvaluatorData{P,I,M,D}"/> to wrap for property tracking.</param>
         /// <param name="evaluationLoggingContext">The <see cref="EvaluationLoggingContext"/> used to log relevant events.</param>
+        /// <param name="settingValue">Property tracking setting value</param>
         public PropertyTrackingEvaluatorDataWrapper(IEvaluatorData<P, I, M, D> dataToWrap, EvaluationLoggingContext evaluationLoggingContext, int settingValue)
         {
             ErrorUtilities.VerifyThrowInternalNull(dataToWrap, nameof(dataToWrap));

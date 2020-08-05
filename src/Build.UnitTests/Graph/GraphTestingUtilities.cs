@@ -77,7 +77,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
         public static void AssertNonMultitargetingNode(ProjectGraphNode node, Dictionary<string, string> additionalGlobalProperties = null)
         {
-            additionalGlobalProperties = additionalGlobalProperties ?? new Dictionary<string, string>();
+            additionalGlobalProperties ??= new Dictionary<string, string>();
 
             IsNotMultitargeting(node).ShouldBeTrue();
             node.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));

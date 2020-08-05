@@ -49,6 +49,7 @@ namespace Microsoft.Build.Framework
         /// components to take more appropriate action (for example installing optional workloads or downloading NuGet SDKs).
         /// </remarks>
         /// <param name="paths">SDK paths which should be imported</param>
+        /// <param name="version">SDK version which should be imported</param>
         /// <param name="propertiesToAdd">Properties to set in the evaluation</param>
         /// <param name="itemsToAdd">Items to add to the evaluation</param>
         /// <param name="warnings">Optional warnings to display during resolution.</param>

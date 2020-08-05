@@ -465,7 +465,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             if (String.IsNullOrEmpty(complusInstallRoot) && String.IsNullOrEmpty(complusVersion))
             {
                 // If the registry entry is 1 then the framework is installed. Go ahead and find the directory. If it is not 1 then the framework is not installed, return null.
-                return String.Compare("1", FindRegistryValueUnderKey(registryEntryToCheckInstall, registryValueToCheckInstall), StringComparison.OrdinalIgnoreCase) == 0;
+                return String.Equals("1", FindRegistryValueUnderKey(registryEntryToCheckInstall, registryValueToCheckInstall), StringComparison.OrdinalIgnoreCase);
             }
 
             return true;
@@ -517,7 +517,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // This was removed in beta2
             // We should favor \v3.5 over \v3.5.xxxxx
             // versions previous to 2.0 have .xxxx version numbers.  3.0 and 3.5 do not.
-            if (max.EndsWith(prefix, StringComparison.OrdinalIgnoreCase) != true )
+            if (!max.EndsWith(prefix, StringComparison.OrdinalIgnoreCase))
             {
                 for (int i = 1; i < directories.Length; ++i)
                 {

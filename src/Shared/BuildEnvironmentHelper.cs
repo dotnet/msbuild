@@ -23,7 +23,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Name of the Visual Studio (and Blend) process.
-        // VS ASP intellisense server fails without Microsoft.VisualStudio.Web.Host. Remove when issue fixed: https://devdiv.visualstudio.com/DevDiv/_workitems/edit/574986
+        /// VS ASP intellisense server fails without Microsoft.VisualStudio.Web.Host. Remove when issue fixed: https://devdiv.visualstudio.com/DevDiv/_workitems/edit/574986
         /// </summary>
         private static readonly string[] s_visualStudioProcess = {"DEVENV", "BLEND", "Microsoft.VisualStudio.Web.Host"};
 
@@ -471,7 +471,7 @@ namespace Microsoft.Build.Shared
         VisualStudio,
 
         /// <summary>
-        /// Running in a standalone toolset mode. All toolsets and extensions paths are relative to the app 
+        /// Running in a standalone toolset mode. All toolsets and extensions paths are relative to the app
         /// running and not dependent on Visual Studio. (e.g. dotnet CLI, open source clone of our repo)
         /// </summary>
         Standalone,

@@ -990,7 +990,7 @@ namespace Microsoft.Build.BackEnd
         /// This method is called to reset the current directory to the one appropriate for this project.  It should be called any time
         /// the project is resumed.
         /// If the directory does not exist, does nothing.
-        /// This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project. 
+        /// This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project.
         /// No errors are masked by doing this: errors loading the project from disk are reported at load time, if necessary.
         /// </summary>
         private void SetProjectCurrentDirectory()
@@ -1293,7 +1293,7 @@ namespace Microsoft.Build.BackEnd
             {
                 return null;
             }
-            
+
             return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
         }
 

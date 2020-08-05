@@ -119,19 +119,19 @@ namespace Microsoft.Build.Logging
                 {
                     if (param.Length <= 0) continue;
 
-                    if (0 == string.Compare(param, "ENABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(param, "ENABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
                     {
                         useMPLogger = true;
                     }
-                    if (0 == string.Compare(param, "DISABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(param, "DISABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
                     {
                         useMPLogger = false;
                     }
-                    if (0 == string.Compare(param, "DISABLECONSOLECOLOR", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(param, "DISABLECONSOLECOLOR", StringComparison.OrdinalIgnoreCase))
                     {
                         disableConsoleColor = true;
                     }
-                    if (0 == string.Compare(param, "FORCECONSOLECOLOR", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(param, "FORCECONSOLECOLOR", StringComparison.OrdinalIgnoreCase))
                     {
                         forceConsoleColor = true;
                     }

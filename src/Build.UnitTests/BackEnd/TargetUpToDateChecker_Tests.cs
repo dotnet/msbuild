@@ -1003,8 +1003,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                     long symlinkWriteTimeTicks = symlinkWriteTime.ToFileTimeUtc();
 
-                    if (SetFileTime(handle, ref symlinkWriteTimeTicks, ref symlinkWriteTimeTicks,
-                            ref symlinkWriteTimeTicks) != true)
+                    if (!SetFileTime(handle, ref symlinkWriteTimeTicks, ref symlinkWriteTimeTicks,
+                            ref symlinkWriteTimeTicks))
                     {
                         Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
                     }

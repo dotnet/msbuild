@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.Runtime.InteropServices;
-using System.Threading;
+﻿using System.Diagnostics.Tracing;
 
 namespace Microsoft.Build.Eventing
 {
@@ -331,7 +327,7 @@ namespace Microsoft.Build.Eventing
             WriteEvent(40, fileLocation);
         }
 
-        /// <param name="targetName"/>The name of the target being executed.</param>
+        /// <param name="targetName">The name of the target being executed.</param>
         [Event(43)]
         public void TargetStart(string targetName)
         {

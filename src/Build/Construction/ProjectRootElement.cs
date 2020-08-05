@@ -2031,6 +2031,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         /// <param name="fullPath">The full path to the document to load.</param>
         /// <param name="preserveFormatting"><code>true</code> to preserve the formatting of the document, otherwise <code>false</code>.</param>
+        /// <param name="loadAsReadOnly">Whether to load the file in read-only mode.</param>
         private XmlDocumentWithLocation LoadDocument(string fullPath, bool preserveFormatting, bool loadAsReadOnly)
         {
             ErrorUtilities.VerifyThrowInternalRooted(fullPath);

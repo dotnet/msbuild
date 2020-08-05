@@ -35,7 +35,6 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Constructs an empty project item definition instance.
         /// </summary>
-        /// <param name="projectInstance">The project instance to which this item definition belongs.</param>
         /// <param name="itemType">The type of item this definition object represents.</param>
         internal ProjectItemDefinitionInstance(string itemType)
         {
@@ -127,7 +126,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Implementation of IKeyed exposing the item type, so these 
+        /// Implementation of IKeyed exposing the item type, so these
         /// can be put in a dictionary conveniently.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -198,7 +197,7 @@ namespace Microsoft.Build.Execution
         ProjectMetadataInstance IItemDefinition<ProjectMetadataInstance>.SetMetadata(ProjectMetadataElement xml, string evaluatedValue, ProjectMetadataInstance predecessor)
         {
             // No mutability check as this is used during creation (evaluation)
-            _metadata = _metadata ?? new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+            _metadata ??= new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
 
             ProjectMetadataInstance metadatum = new ProjectMetadataInstance(xml.Name, evaluatedValue);
             _metadata[xml.Name] = metadatum;

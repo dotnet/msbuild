@@ -136,15 +136,15 @@ namespace Microsoft.Build.BuildEngine
 
             // If any of the following parameters are set, we will make sure we forward the events
             // necessary for the central logger to emit the requested information
-            if (0 == String.Compare(parameterName, PerformanceSummaryDescription, StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(parameterName, PerformanceSummaryDescription, StringComparison.OrdinalIgnoreCase))
             {
                 this.showPerfSummary = true;
             }
-            else if (0 == String.Compare(parameterName, NoSummaryDescription, StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, NoSummaryDescription, StringComparison.OrdinalIgnoreCase))
             {
                 this.showSummary = false;
             }
-            else if (0 == String.Compare(parameterName, ShowCommandLineDescription, StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, ShowCommandLineDescription, StringComparison.OrdinalIgnoreCase))
             {
                 showCommandLine = true;
             }

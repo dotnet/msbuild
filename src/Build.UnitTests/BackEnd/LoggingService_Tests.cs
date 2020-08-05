@@ -483,7 +483,7 @@ namespace Microsoft.Build.UnitTests.Logging
             int countForwardingLogger = 0;
             foreach (string loggerName in _initializedService.RegisteredLoggerTypeNames)
             {
-                if (String.Compare("Microsoft.Build.Logging.ConfigurableForwardingLogger", loggerName, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals("Microsoft.Build.Logging.ConfigurableForwardingLogger", loggerName, StringComparison.OrdinalIgnoreCase))
                 {
                     countForwardingLogger++;
                 }
@@ -585,7 +585,7 @@ namespace Microsoft.Build.UnitTests.Logging
             int countForwardingLogger = 0;
             foreach (string loggerName in _initializedService.RegisteredLoggerTypeNames)
             {
-                if (String.Compare("Microsoft.Build.Logging.ConfigurableForwardingLogger", loggerName, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals("Microsoft.Build.Logging.ConfigurableForwardingLogger", loggerName, StringComparison.OrdinalIgnoreCase))
                 {
                     countForwardingLogger++;
                 }
@@ -597,7 +597,7 @@ namespace Microsoft.Build.UnitTests.Logging
             countForwardingLogger = 0;
             foreach (string loggerName in _initializedService.RegisteredLoggerTypeNames)
             {
-                if (String.Compare("Microsoft.Build.BackEnd.Logging.CentralForwardingLogger", loggerName, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals("Microsoft.Build.BackEnd.Logging.CentralForwardingLogger", loggerName, StringComparison.OrdinalIgnoreCase))
                 {
                     countForwardingLogger++;
                 }

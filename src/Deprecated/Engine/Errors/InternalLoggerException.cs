@@ -84,11 +84,11 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="helpKeyword"></param>
         internal InternalLoggerException
         (
-            string message, 
-            Exception innerException, 
-            BuildEventArgs e, 
-            string errorCode, 
-            string helpKeyword, 
+            string message,
+            Exception innerException,
+            BuildEventArgs e,
+            string errorCode,
+            string helpKeyword,
             bool initializationException
          )
             : base(message, innerException)
@@ -107,7 +107,7 @@ namespace Microsoft.Build.BuildEngine
         #region Serialization (update when adding new class members)
 
         /// <summary>
-        /// Protected constructor used for (de)serialization. 
+        /// Protected constructor used for (de)serialization.
         /// If we ever add new members to this class, we'll need to update this.
         /// </summary>
         /// <param name="info"></param>
@@ -220,11 +220,11 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="messageArgs"></param>
         internal static void Throw
         (
-            Exception innerException, 
-            BuildEventArgs e, 
-            string messageResourceName, 
+            Exception innerException,
+            BuildEventArgs e,
+            string messageResourceName,
             bool initializationException,
-            params string[] messageArgs 
+            params string[] messageArgs
         )
         {
             ErrorUtilities.VerifyThrow(messageResourceName != null, "Need error message.");

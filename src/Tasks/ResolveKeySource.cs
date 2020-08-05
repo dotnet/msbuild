@@ -101,7 +101,7 @@ namespace Microsoft.Build.Tasks
                 }
                 if (pfxSuccess)
                 {
-                    if (0 != String.Compare(keyFileExtension, pfxFileExtension, StringComparison.OrdinalIgnoreCase))
+                    if (!String.Equals(keyFileExtension, pfxFileExtension, StringComparison.OrdinalIgnoreCase))
                     {
                         ResolvedKeyFile = KeyFile;
                     }

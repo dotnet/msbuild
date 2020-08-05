@@ -68,7 +68,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Set when a packet is available in the packet queue
-        /// </summary>      
+        /// </summary>
         private AutoResetEvent _packetAvailable;
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace Microsoft.Build.BackEnd
         private INodePacketFactory _packetFactory;
 
         /// <summary>
-        /// The asynchronous packet queue.  
+        /// The asynchronous packet queue.
         /// </summary>
         /// <remarks>
         /// Operations on this queue must be synchronized since it is accessible by multiple threads.
@@ -143,7 +143,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Causes this node to connect to the matched endpoint.  
+        /// Causes this node to connect to the matched endpoint.
         /// </summary>
         /// <param name="factory">The factory used to create packets.</param>
         public void Connect(INodePacketFactory factory)

@@ -298,7 +298,7 @@ namespace Microsoft.Build.CommandLine
             {
                 foreach (string parameterlessSwitchName in switchInfo.switchNames)
                 {
-                    if (String.Compare(switchName, parameterlessSwitchName, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (String.Equals(switchName, parameterlessSwitchName, StringComparison.OrdinalIgnoreCase))
                     {
                         parameterlessSwitch = switchInfo.parameterlessSwitch;
                         duplicateSwitchErrorMessage = switchInfo.duplicateSwitchErrorMessage;

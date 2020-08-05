@@ -132,7 +132,7 @@ namespace Microsoft.Build.Shared
             }
             else
             {
-                isPartialMatch = (String.Compare(typeName1, typeName2, StringComparison.OrdinalIgnoreCase) == 0);
+                isPartialMatch = (String.Equals(typeName1, typeName2, StringComparison.OrdinalIgnoreCase));
             }
 
             return isPartialMatch;
