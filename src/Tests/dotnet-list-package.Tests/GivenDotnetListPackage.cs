@@ -161,10 +161,10 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
 
         [Theory]
         [InlineData("", "[net451]", null)]
-        [InlineData("", "[netcoreapp3.0]", null)]
-        [InlineData("--framework netcoreapp3.0 --framework net451", "[net451]", null)]
-        [InlineData("--framework netcoreapp3.0 --framework net451", "[netcoreapp3.0]", null)]
-        [InlineData("--framework netcoreapp3.0", "[netcoreapp3.0]", "[net451]")]
+        [InlineData("", "[netcoreapp3.1]", null)]
+        [InlineData("--framework netcoreapp3.1 --framework net451", "[net451]", null)]
+        [InlineData("--framework netcoreapp3.1 --framework net451", "[netcoreapp3.1]", null)]
+        [InlineData("--framework netcoreapp3.1", "[netcoreapp3.1]", "[net451]")]
         [InlineData("--framework net451", "[net451]", "[netcoreapp3.0]")]
         public void ItListsValidFrameworks(string args, string shouldInclude, string shouldntInclude)
         {
@@ -225,7 +225,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .Fail();
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/12560")]
+        [Fact]
         public void ItListsFSharpProject()
         {
             var testAssetName = "FSharpTestAppSimple";

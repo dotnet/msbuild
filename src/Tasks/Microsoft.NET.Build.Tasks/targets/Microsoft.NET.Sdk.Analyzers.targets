@@ -11,10 +11,23 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+
+    <!-- Analysis level is a single property that can be used to control both the compiler warning waves
+         and enable .NET analyzers  -->
+    <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
+                              '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
+                              $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">5.0</AnalysisLevel>
+
+    <!-- EnableNETAnalyzers Allows analyzes to be disabled in bulk via msbuild if the user wants to -->
     <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers )' == '' And 
                                    '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
-                                   $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">true</EnableNETAnalyzers>
+                                   $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) And
+                                   $([MSBuild]::VersionGreaterThanOrEquals($(AnalysisLevel), '5.0'))">true</EnableNETAnalyzers>
     <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers )' == ''">false</EnableNETAnalyzers>
+    
+    <!-- Compiler warning level, defaulted to 4. We promote it to 5 if the user has set analysis level to 5 or higher -->
+    <WarningLevel Condition="'$(AnalysisLevel)' != '' And
+                              $([MSBuild]::VersionGreaterThanOrEquals($(AnalysisLevel), '5.0'))">5</WarningLevel>
   </PropertyGroup>
   <Import Project="..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
           Condition="$(EnableNETAnalyzers)" />

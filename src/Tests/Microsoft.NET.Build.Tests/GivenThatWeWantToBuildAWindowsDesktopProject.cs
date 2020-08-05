@@ -81,7 +81,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1136");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_warns_when_specifying_windows_desktop_sdk()
         {
             var targetFramework = "net5.0";
