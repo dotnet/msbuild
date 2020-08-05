@@ -117,7 +117,7 @@ namespace Microsoft.Build.BuildEngine
 
         // The name of the current default toolsVersion. Starts with Constants.defaultVersion
         private string defaultToolsVersion;
-        
+
         // The node Id which the engine is running on
         private int nodeId;
 
@@ -167,7 +167,7 @@ namespace Microsoft.Build.BuildEngine
         private DualQueue<BuildRequest> buildRequests;
 
         private ManualResetEvent engineAbortEvent = new ManualResetEvent(false);
-        
+
         // a cached version of the engineAbortEvent so we don't have to wait on it to determine the value.
         // If we do have to wait for something to happen we still need the event though.
         private volatile bool engineAbortCachedValue = false;
@@ -202,7 +202,7 @@ namespace Microsoft.Build.BuildEngine
 
         // this seed is used to generate unique logger ids for each distributed logger
         private int lastUsedLoggerId;
-        
+
         // this boolean is true if central logging is enabled 
         private bool enabledCentralLogging;
 
@@ -266,7 +266,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Default constructor that reads toolset information from both the registry
         /// and configuration file.
-        /// The need for parameterless constructor is dictated by COM interop. 
+        /// The need for parameterless constructor is dictated by COM interop.
         /// </summary>
         public Engine()
             : this(1 /* cpu */, false /* not child node */, 0 /* default NodeId */, null/*No msbuild.exe path*/, null, ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry)
@@ -297,7 +297,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Constructor to specify whether toolsets should be initialized from the msbuild configuration file and from the registry 
+        /// Constructor to specify whether toolsets should be initialized from the msbuild configuration file and from the registry
         /// </summary>
         public Engine(ToolsetDefinitionLocations locations)
             : this(null, locations)
@@ -305,7 +305,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Constructor to specify the global properties the engine should inherit and 
+        /// Constructor to specify the global properties the engine should inherit and
         /// the locations the engine should inspect for toolset definitions.
         /// </summary>
         public Engine(BuildPropertyGroup globalProperties, ToolsetDefinitionLocations locations)
@@ -330,7 +330,7 @@ namespace Microsoft.Build.BuildEngine
             // Override the startup directory with the one we were passed
             ErrorUtilities.VerifyThrow(startupDirectory != null, "Need startup directory");
             this.startupDirectory = startupDirectory;
-            
+
             forwardPropertiesFromChild = Environment.GetEnvironmentVariable("MSBuildForwardPropertiesFromChild");
             // Get a list of properties which should be serialized
             if (!String.IsNullOrEmpty(forwardPropertiesFromChild))
@@ -340,16 +340,16 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Constructor to init all data except for BinPath which is initialized separately because 
+        /// Constructor to init all data except for BinPath which is initialized separately because
         /// a parameterless constructor is needed for COM interop
         /// </summary>
         internal Engine
         (
-            int numberOfCpus, 
-            bool isChildNode, 
-            int parentNodeId, 
+            int numberOfCpus,
+            bool isChildNode,
+            int parentNodeId,
             string localNodeProviderParameters,
-            BuildPropertyGroup globalProperties, 
+            BuildPropertyGroup globalProperties,
             ToolsetDefinitionLocations locations
         )
         {
@@ -478,7 +478,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <remarks>
         /// BinPath is an obsolete concept. We retain it for now for all the hosts that use the BinPath
-        /// property, or the Engine(binPath) constructor, but internally it is just the tools path 
+        /// property, or the Engine(binPath) constructor, but internally it is just the tools path
         /// of the default tools version.
         /// </remarks>
         /// <value>The MSBuild path.</value>
@@ -508,7 +508,7 @@ namespace Microsoft.Build.BuildEngine
                 return numberOfProjectsInProgress > 0;
             }
         }
-        
+
         /// <summary>
         /// The node Id the current engine instance is running on
         /// </summary>
@@ -638,7 +638,7 @@ namespace Microsoft.Build.BuildEngine
                 return this.environmentProperties;
             }
         }
-        
+
         /// <summary>
         ///  Get a new TaskId
         /// (NOT Thread safe)
@@ -718,7 +718,7 @@ namespace Microsoft.Build.BuildEngine
         /// Returns the table of projects loaded by the host.
         /// </summary>
         /// <owner>RGoel</owner>
-        /// <remarks>Marked "internal" for unit tests only.  To maintain encapsulation, please try not to 
+        /// <remarks>Marked "internal" for unit tests only.  To maintain encapsulation, please try not to
         /// use this accessor in real msbuild code, except from within this class.</remarks>
         internal Hashtable ProjectsLoadedByHost
         {
@@ -872,7 +872,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// The current directory at the time the Engine was constructed -- 
+        /// The current directory at the time the Engine was constructed --
         /// if msbuild.exe is hosting, this is the current directory when
         /// msbuild.exe was started
         /// </summary>
@@ -880,7 +880,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get { return startupDirectory; }
         }
-        
+
         #endregion
 
         #region Methods
@@ -935,7 +935,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 buildProperties = toolsetStateMap[toolsVersion].BuildProperties.Clone(true /* deep clone */);
             }
-            
+
             toolsets.Add(new Toolset(toolsVersion, toolsPath, buildProperties));
         }
 
@@ -955,7 +955,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Populate ToolsetStateMap with a dictionary of (toolset version, ToolsetState) 
+        /// Populate ToolsetStateMap with a dictionary of (toolset version, ToolsetState)
         /// using information from the registry and config file, if any.
         /// </summary>
         /// <remarks>Internal for unit testing purposes only</remarks>
@@ -1007,7 +1007,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The default tools version of this Engine. Projects use this tools version if they
         /// aren't otherwise told what tools version to use.
-        /// This value is gotten from the .exe.config file, or else in the registry, 
+        /// This value is gotten from the .exe.config file, or else in the registry,
         /// or if neither specify a default tools version then it is hard-coded to the tools version "2.0".
         /// </summary>
         public string DefaultToolsVersion
@@ -1103,7 +1103,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Called to register distributed loggers with the engine. 
+        /// Called to register distributed loggers with the engine.
         /// This method is not thread safe. All loggers should registered prior to
         /// starting the build in order to guarantee uniform behavior
         /// </summary>
@@ -1251,7 +1251,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Log BuildFinished event (if there is no unhandled exception) and clear
-        /// the projects loaded by host from the 
+        /// the projects loaded by host from the
         /// </summary>
         internal void EndingEngineExecution(bool buildResult, bool exitedDueToError)
         {
@@ -1551,7 +1551,7 @@ namespace Microsoft.Build.BuildEngine
         {
             return BuildProject(project, (targetName == null) ? null : new string[] { targetName }, null, BuildSettings.None);
         }
-        
+
         /// <summary>
         /// Builds a list of targets in an already-loaded project.
         /// </summary>
@@ -1630,7 +1630,7 @@ namespace Microsoft.Build.BuildEngine
             int flushTimeout = EngineLoggingServices.flushTimeoutInMS; // Timeout with which the log is flushed
             bool forceFlush = false;
             while (
-                    continueExecution && 
+                    continueExecution &&
                     (terminatingBuildRequest == null || !terminatingBuildRequest.BuildCompleted)
                   )
             {
@@ -1669,7 +1669,7 @@ namespace Microsoft.Build.BuildEngine
                     // Decrement time remaining until deadlock check
                     if (loopTimeoutRemaining != Timeout.Infinite)
                     {
-                        loopTimeoutRemaining = flushTimeout > loopTimeoutRemaining ? 
+                        loopTimeoutRemaining = flushTimeout > loopTimeoutRemaining ?
                                                   0 : loopTimeoutRemaining - flushTimeout;
                     }
                     // Always force a flush on a time
@@ -1852,7 +1852,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void BuildProjectInternal
         (
-            BuildRequest buildRequest, 
+            BuildRequest buildRequest,
             ProjectBuildState buildContext,
             TaskExecutionContext taskExecutionContext,
             bool initialCall
@@ -1883,7 +1883,7 @@ namespace Microsoft.Build.BuildEngine
                 }
 
                 try
-                { 
+                {
                     if (initialCall)
                     {
                         BuildProjectInternalInitial(buildRequest, project);
@@ -1975,12 +1975,12 @@ namespace Microsoft.Build.BuildEngine
                 buildRequest.StartTime = DateTime.Now.Ticks;
                 buildRequest.ProcessingStartTime = buildRequest.StartTime;
             }
-            
+
             if (startRootProjectBuild)
             {
                 StartRootProjectBuild(buildRequest, project);
             }
-            
+
             project.BuildInternal(buildRequest);
         }
 
@@ -2203,7 +2203,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <remarks>
         /// If this project file is already in our list of in-progress projects, we use the
-        /// existing Project object instead of instantiating a new one. Always use this method to 
+        /// existing Project object instead of instantiating a new one. Always use this method to
         /// build projects within projects, otherwise the build won't be optimized.
         /// </remarks>
         /// <param name="projectFile"></param>
@@ -2234,7 +2234,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <remarks>
         /// If this project file is already in our list of in-progress projects, we use the
-        /// existing Project object instead of instantiating a new one. Always use this method to 
+        /// existing Project object instead of instantiating a new one. Always use this method to
         /// build projects within projects, otherwise the build won't be optimized.
         /// </remarks>
         /// <param name="projectFile"></param>
@@ -2262,7 +2262,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Loads a set of project files from disk, and builds the given list of targets for each one. This overload
-        /// takes a set of global properties for each project to use for the build, returns the target outputs, 
+        /// takes a set of global properties for each project to use for the build, returns the target outputs,
         /// and also allows the caller to specify additional build flags.
         /// </summary>
         /// <param name="projectFiles">Array of project files to build (can't be null)</param>
@@ -2297,7 +2297,7 @@ namespace Microsoft.Build.BuildEngine
             }
 
             return PostProjectEvaluationRequests
-                (null, projectFiles, targetNamesPerProject, globalPropertiesPerProject, targetOutputsPerProject, 
+                (null, projectFiles, targetNamesPerProject, globalPropertiesPerProject, targetOutputsPerProject,
                  buildFlags, toolsVersions);
         }
 
@@ -2317,7 +2317,7 @@ namespace Microsoft.Build.BuildEngine
             fatalErrorContext = null;
 
             BuildEventContext buildEventContext;
-               
+
             // Already have an instantiated project in the OM and it has not fired a project started event for itself yet
             if (project != null && !project.HaveUsedInitialProjectContextId)
             {
@@ -2332,7 +2332,7 @@ namespace Microsoft.Build.BuildEngine
                                                 BuildEventContext.InvalidTaskId
                                                 );
             }
-            
+
             // Currently, MSBuild requires that the calling thread be marked "STA" -- single
             // threaded apartment.  This is because today we are calling the tasks' Execute()
             // method on this main thread, and there are tasks out there that create unmarshallable
@@ -2364,7 +2364,7 @@ namespace Microsoft.Build.BuildEngine
                     targetOutputsWorkingCopy[i] = new Hashtable(StringComparer.OrdinalIgnoreCase);
                 }
 
-                buildRequests[i] = 
+                buildRequests[i] =
                     CreateLocalBuildRequest(buildEventContext, project, projectFiles[i], targetNames[i],
                                             globalPropertiesPerProject[i], targetOutputsWorkingCopy[i], buildFlags,
                                             toolVersions[i]);
@@ -2437,8 +2437,8 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Create a build request which will be posted to the local engine queue, having a HandleId of -1 meaning it came from the local 
-        /// engine rather than an engine call back 
+        /// Create a build request which will be posted to the local engine queue, having a HandleId of -1 meaning it came from the local
+        /// engine rather than an engine call back
         /// </summary>
         /// <returns></returns>
         private BuildRequest CreateLocalBuildRequest(BuildEventContext buildEventContext, Project project, string projectFile, string[] targetNames, BuildPropertyGroup globalProperties, IDictionary targetOutputs, BuildSettings buildFlags, string toolsVersion)
@@ -2481,7 +2481,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <remarks>
         /// If this project file is already in our list of in-progress projects, we use the
-        /// existing Project object instead of instantiating a new one. Always use this method to 
+        /// existing Project object instead of instantiating a new one. Always use this method to
         /// build projects within projects, otherwise the build won't be optimized.
         /// </remarks>
         internal void BuildProjectFileInternal
@@ -2642,7 +2642,7 @@ namespace Microsoft.Build.BuildEngine
         {
             // Flush out all the logging messages, which may have been posted outside target execution
             primaryLoggingServices.ProcessPostedLoggingEvents();
-            
+
             // Mark evaluation as complete
             buildRequest.BuildCompleted = true;
 
@@ -2663,9 +2663,9 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="cachedResult"></param>
         private void ProcessCachedResult
         (
-            BuildRequest buildRequest, 
-            FileInfo projectFileInfo, 
-            ArrayList actuallyBuiltTargets, 
+            BuildRequest buildRequest,
+            FileInfo projectFileInfo,
+            ArrayList actuallyBuiltTargets,
             BuildResult cachedResult
         )
         {
@@ -2853,24 +2853,24 @@ namespace Microsoft.Build.BuildEngine
 
             return returnProject;
         }
-        
+
         /// <summary>
-        /// When using the MSBuild task to build a child project, we need to figure out the set of 
+        /// When using the MSBuild task to build a child project, we need to figure out the set of
         /// global properties that the child should be built with.  It is a merge of whatever
         /// properties the parent project was being built with, plus whatever properties were
         /// actually passed into the MSBuild task (in the "Properties" parameter).  However,
-        /// the slightly wrinkle is the child project may have actually been one that is 
+        /// the slightly wrinkle is the child project may have actually been one that is
         /// currently loaded in the IDE, and the IDE controls what Configuration/Platform each
         /// project should be built with, so we have to honor that too.  So, the order in which
         /// we look at global properties are:
-        /// 
+        ///
         ///     1.  Whatever global properties the parent project was building with.  (The parent
         ///         project is the one that called the &lt;MSBuild&lt; task.
-        ///     2.  If the child project was already previously loaded by the host, whatever global 
+        ///     2.  If the child project was already previously loaded by the host, whatever global
         ///         properties were sent into the child project by the host (via Project.GlobalProperties).
         ///     3.  Whatever properties were passed into the "Properties" parameter of the &lt;MSBuild&lt;
         ///         task.
-        /// 
+        ///
         /// </summary>
         /// <param name="parentProjectGlobalProperties"></param>
         /// <param name="childProjectFile"></param>
@@ -2895,11 +2895,11 @@ namespace Microsoft.Build.BuildEngine
                 // If the project file doesn't actually exist on disk, it's a failure.
                 ErrorUtilities.VerifyThrowArgument(File.Exists(childProjectFile), "ProjectFileNotFound", childProjectFile);
             }
-            
+
             // Create a new BuildPropertyGroup to represent the final set of global properties that we're going to
             // use for the child project.
             BuildPropertyGroup finalGlobalProperties = new BuildPropertyGroup();
-            
+
             // Start with the global properties from the parent project.
             if (postMergeProperties == null)
             {
@@ -2909,7 +2909,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 finalGlobalProperties.ImportProperties(postMergeProperties);
             }
-            
+
             // childProjectFile could be null when no Projects were passed into the MSBuild task, which
             // means parentProject == childProject, which means no need to import the same properties again.
             if (childProjectFile != null)
@@ -2927,13 +2927,13 @@ namespace Microsoft.Build.BuildEngine
                     finalGlobalProperties.ImportProperties(loadedProjectWithSameFullPath.GlobalProperties);
                 }
             }
-            
+
             // Finally, whatever global properties were passed into the task ... those are the final winners.
             if (globalPropertiesPassedIntoTask != null)
             {
                 foreach (DictionaryEntry newGlobalProperty in globalPropertiesPassedIntoTask)
                 {
-                    finalGlobalProperties.SetProperty((string) newGlobalProperty.Key, 
+                    finalGlobalProperties.SetProperty((string) newGlobalProperty.Key,
                         (string) newGlobalProperty.Value);
                 }
             }
@@ -2975,7 +2975,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// This function collects status about the inprogress targets and engine operations. 
+        /// This function collects status about the inprogress targets and engine operations.
         /// This function should always run from the engine domain because it touch engine data
         /// structures.
         /// </summary>
@@ -2999,7 +2999,7 @@ namespace Microsoft.Build.BuildEngine
                     }
                 }
             }
-            TargetInProgessState[] stateOfInProgressTargets = 
+            TargetInProgessState[] stateOfInProgressTargets =
                     new TargetInProgessState[waitingTargets.Length + inProgressTargets.Count];
             for (int i = 0; i < waitingTargets.Length; i++)
             {

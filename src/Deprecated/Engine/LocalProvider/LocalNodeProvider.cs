@@ -56,7 +56,7 @@ namespace Microsoft.Build.BuildEngine
                         }
                         else // Only the parameter name is known, this could be for a boolean parameter
                         {
-                            ApplyParameter(parameters[param], null); 
+                            ApplyParameter(parameters[param], null);
                         }
                     }
                 }
@@ -249,7 +249,7 @@ namespace Microsoft.Build.BuildEngine
                             }
                             ThreadStart threadState = new ThreadStart(this.LaunchNodeAndPostBuildRequest);
                             Thread taskThread = new Thread(threadState);
-                            taskThread.Name = "MSBuild Node Launcher";                            
+                            taskThread.Name = "MSBuild Node Launcher";
                             taskThread.Start();
                         }
                         nodeData[nodeIndex].TargetList.AddFirst(new LinkedListNode<BuildRequest>(buildRequest));
@@ -293,10 +293,10 @@ namespace Microsoft.Build.BuildEngine
             SendShutdownRequests(nodeShutdownLevel);
 
             DateTime startTime = DateTime.Now;
-            
+
             // Wait for all nodes to shutdown
             bool timeoutExpired = false;
-            
+
             // Loop until we are ready to shutdown. We are ready to shutdown when
             // all nodes either have sent their shutdown completed response or they are dead.
             // Secondly, we will exit the loop if our shudtownTimeout has expired
@@ -364,7 +364,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public void UpdateSettings
         (
-            bool enableCentralizedLogging, 
+            bool enableCentralizedLogging,
             bool enableOnlyLogCriticalEvents,
             bool useBreadthFirstTraversalSetting
         )
@@ -478,10 +478,9 @@ namespace Microsoft.Build.BuildEngine
             {
                 return false;
             }
-            
+
             try
             {
-
                 bool isUninitialized = nodeData[nodeId].ProcessId == LocalNodeInfo.unInitializedProcessId;
 
                 if (isUninitialized)
@@ -729,7 +728,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This function attempts to find out if there is currently a node running
-        /// for a given index. The node is running if the global mutex with a 
+        /// for a given index. The node is running if the global mutex with a
         /// "Node_" + nodeId + "_ActiveReady" as a name was created
         /// </summary>
         private static  bool checkIfNodeActive(int nodeNumber)
@@ -826,7 +825,7 @@ namespace Microsoft.Build.BuildEngine
         private void ReportNodeCommunicationFailure
         (
             int nodeIndex,
-            Exception innerException, 
+            Exception innerException,
             bool decreaseActiveNodeCount
         )
         {
@@ -851,7 +850,7 @@ namespace Microsoft.Build.BuildEngine
                 // We can't really do anything except re-throw so this problem can be diagnosed.
                 throw wrappedException;
             }
-            
+
             engineCallback.PostStatus(nodeData[nodeIndex].NodeId, nodeStatus, false);
         }
 

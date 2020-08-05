@@ -218,7 +218,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Helper function for creating a ComReferenceInfo object using an existing TaskInfo object and 
+        /// Helper function for creating a ComReferenceInfo object using an existing TaskInfo object and
         /// typelib name/path. The type lib pointer will obviously not be initialized, so this object cannot
         /// be used in any code that uses it.
         /// </summary>
@@ -378,7 +378,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// ResolveComReference automatically adds missing tlbimp references for aximp references. 
+        /// ResolveComReference automatically adds missing tlbimp references for aximp references.
         /// This test verifies we actually create the missing references.
         /// </summary>
         [Fact]
@@ -646,10 +646,10 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// In order to make ResolveComReferences multitargetable, two properties, ExecuteAsTool
-        /// and SdkToolsPath were added.  In order to have correct behavior when using pre-4.0 
+        /// and SdkToolsPath were added.  In order to have correct behavior when using pre-4.0
         /// toolsversions, ExecuteAsTool must default to true, and the paths to the tools will be the
-        /// v3.5 path.  It is difficult to verify the tool paths in a unit test, however, so 
-        /// this was done by ad hoc testing and will be maintained by the dev suites.  
+        /// v3.5 path.  It is difficult to verify the tool paths in a unit test, however, so
+        /// this was done by ad hoc testing and will be maintained by the dev suites.
         /// </summary>
         [Fact]
         public void MultiTargetingDefaultSetCorrectly()
@@ -662,7 +662,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When calling AxImp.exe directly, the runtime-callable wrapper needs to be
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
-        /// its corresponding TLB wrapper. 
+        /// its corresponding TLB wrapper.
         /// </summary>
         [Fact]
         public void AxReferenceKnowsItsRCWCreateTlb()
@@ -673,7 +673,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When calling AxImp.exe directly, the runtime-callable wrapper needs to be
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
-        /// its corresponding TLB wrapper. 
+        /// its corresponding TLB wrapper.
         /// </summary>
         [Fact]
         public void AxReferenceKnowsItsRCWCreateTlb_IncludeVersion()
@@ -684,7 +684,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When calling AxImp.exe directly, the runtime-callable wrapper needs to be
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
-        /// its corresponding TLB wrapper. 
+        /// its corresponding TLB wrapper.
         /// </summary>
         [Fact]
         public void AxReferenceKnowsItsRCWTlbExists()
@@ -695,7 +695,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When calling AxImp.exe directly, the runtime-callable wrapper needs to be
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
-        /// its corresponding TLB wrapper. 
+        /// its corresponding TLB wrapper.
         ///
         /// Tests that still works when IncludeVersionInInteropName = true
         /// </summary>
@@ -708,7 +708,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When calling AxImp.exe directly, the runtime-callable wrapper needs to be
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
-        /// its corresponding TLB wrapper. 
+        /// its corresponding TLB wrapper.
         /// </summary>
         [Fact]
         public void AxReferenceKnowsItsRCWPiaExists()
@@ -719,7 +719,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When calling AxImp.exe directly, the runtime-callable wrapper needs to be
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
-        /// its corresponding TLB wrapper. 
+        /// its corresponding TLB wrapper.
         ///
         /// Tests that still works when IncludeVersionInInteropName = true
         /// </summary>
@@ -732,8 +732,8 @@ namespace Microsoft.Build.UnitTests
         private enum RcwStyle { GenerateTlb, PreexistingTlb, PreexistingPia };
 
         /// <summary>
-        /// Helper method that will new up an AX and matching TLB reference, and verify that the AX reference 
-        /// sets its RCW appropriately. 
+        /// Helper method that will new up an AX and matching TLB reference, and verify that the AX reference
+        /// sets its RCW appropriately.
         /// </summary>
         private void CheckAxReferenceRCWTlbExists(RcwStyle rcwStyle, bool includeVersionInInteropName)
         {

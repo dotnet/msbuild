@@ -514,7 +514,7 @@ namespace System.Deployment.Internal.CodeSigning
             byte[] cspPublicKeyBlob;
 
             if(snKey is RSACryptoServiceProvider){
-                cspPublicKeyBlob = (GetFixedRSACryptoServiceProvider((RSACryptoServiceProvider)snKey, useSha256)).ExportCspBlob(false);            
+                cspPublicKeyBlob = (GetFixedRSACryptoServiceProvider((RSACryptoServiceProvider)snKey, useSha256)).ExportCspBlob(false);
                 if (cspPublicKeyBlob == null || cspPublicKeyBlob.Length == 0)
                 {
                     throw new CryptographicException(Win32.NTE_BAD_KEY);

@@ -49,7 +49,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         UseExistingOrCreateAfterLastImport = 1
     };
-    
+
     /// <summary>
     /// Whether we are in the first (properties) pass, or the second (items) pass.
     /// </summary>
@@ -62,7 +62,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Second pass (evaluating items)
         /// </summary>
-        Pass2        
+        Pass2
     };
 
     /// <summary>
@@ -316,7 +316,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Items need the project directory in order to evaluate their built-in
-        /// metadata (like "%(FullPath)") when their itemspec is relative. We store this 
+        /// metadata (like "%(FullPath)") when their itemspec is relative. We store this
         /// here in thread-local-storage because we cannot modify the public constructors
         /// to require it, and also it can change during the life of a BuildItem
         /// (when the item is passed to another project).
@@ -595,7 +595,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Returns the array of actual target names that will be built by default. First choice is 
+        /// Returns the array of actual target names that will be built by default. First choice is
         /// the defaultTargets attribute on the Project node, if not present we fall back to the first target
         /// in the project file. Return value is null if there are no targets in the project file.
         /// </summary>
@@ -623,7 +623,7 @@ namespace Microsoft.Build.BuildEngine
         /// Read-write accessor for the "InitialTargets" attribute of the
         /// &lt;Project&gt; element.  This is passed in and out as a semicolon-separated
         /// list of target names.  The "get" returns all of the initial targets in both
-        /// the main project and all imported projects (after property expansion).  The 
+        /// the main project and all imported projects (after property expansion).  The
         /// "set" only sets the initial targets for the main project.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -792,12 +792,12 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// When gotten, returns the effective tools version being used by this project.
-        /// If the tools version is being overridden, the overriding value will be the effective tools version. 
-        /// Otherwise, if there is a ToolsVersion attribute on the Project element, that is the effective tools version. 
+        /// If the tools version is being overridden, the overriding value will be the effective tools version.
+        /// Otherwise, if there is a ToolsVersion attribute on the Project element, that is the effective tools version.
         /// Otherwise, the default tools version of the parent engine is the effective tools version.
-        /// 
+        ///
         /// When set, overrides the current tools version of this project with the provided value.
-        /// 
+        ///
         /// NOTE: This is distinct to the ToolsVersion attribute, if any, on the Project element.
         /// To get and set the ToolsVersion attribute on the Project element use the Project.DefaultToolsVersion
         /// property.
@@ -843,14 +843,14 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Public read-write accessor for the ToolsVersion xml attribute found on the 
+        /// Public read-write accessor for the ToolsVersion xml attribute found on the
         /// &lt;Project /&gt; element.  If this attribute is not present on the &lt;Project/&gt;
         /// element, getting the value will return the default tools version of the parent Engine.
-        /// 
+        ///
         /// NOTE: This value is distinct from the effective tools version used during a build,
         /// as that value may be overridden during construction of the Project instance or
-        /// by setting the Project.ToolsVersion property. Setting this attribute value will not change the 
-        /// effective tools version if it has been overridden. To change the effective tools version, 
+        /// by setting the Project.ToolsVersion property. Setting this attribute value will not change the
+        /// effective tools version if it has been overridden. To change the effective tools version,
         /// set the Project.ToolsVersion property.
         /// </summary>
         public string DefaultToolsVersion
@@ -958,7 +958,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// The project directory where the project file is in, this can be empty if the project is constructed in memory and does 
+        /// The project directory where the project file is in, this can be empty if the project is constructed in memory and does
         /// not come from a file location
         /// </summary>
         internal string ProjectDirectory
@@ -1448,7 +1448,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Determines whether a project file can be considered equivalent to this Project, taking into account
-        /// the set of global properties and the tools version (if any) that that project file 
+        /// the set of global properties and the tools version (if any) that that project file
         /// is going to be built with.
         /// </summary>
         /// <param name="projectFullPath"></param>
@@ -1670,7 +1670,7 @@ namespace Microsoft.Build.BuildEngine
             this.ReservedProperties.SetProperty(new BuildProperty(ReservedPropertyNames.programFiles32,
                     FrameworkLocationHelper.programFiles32, PropertyType.ReservedProperty));
 
-            this.ReservedProperties.SetProperty(new BuildProperty(ReservedPropertyNames.assemblyVersion, 
+            this.ReservedProperties.SetProperty(new BuildProperty(ReservedPropertyNames.assemblyVersion,
                     Constants.AssemblyVersion, PropertyType.ReservedProperty));
 
             if (this.fullFileName.Length == 0)
@@ -2361,7 +2361,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Sets a property, and optionally escapes it so that it will be treated as a literal 
+        /// Sets a property, and optionally escapes it so that it will be treated as a literal
         /// value despite any special characters that may be in it.
         /// </summary>
         /// <param name="propertyName"></param>
@@ -2379,7 +2379,7 @@ namespace Microsoft.Build.BuildEngine
             bool treatPropertyValueAsLiteral
             )
         {
-            this.SetProperty(propertyName, 
+            this.SetProperty(propertyName,
                 treatPropertyValueAsLiteral ? EscapingUtilities.Escape(propertyValue) : propertyValue,
                 condition, position);
         }
@@ -3168,7 +3168,7 @@ namespace Microsoft.Build.BuildEngine
             string targetName
             )
         {
-            return this.ParentEngine.BuildProject(this, (targetName == null) ? null : new string[] {targetName}, 
+            return this.ParentEngine.BuildProject(this, (targetName == null) ? null : new string[] {targetName},
                 null, BuildSettings.None);
         }
 
@@ -3525,7 +3525,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectBuildState buildContext = null;
 
             string[] targetNamesToBuild = buildRequest.TargetNames;
-            
+
             // Initialize to the parent requests project context id
             int projectContextId = buildRequest.ParentBuildEventContext.ProjectContextId;
 
@@ -3570,7 +3570,7 @@ namespace Microsoft.Build.BuildEngine
                 // Only log the project started event after making sure the project is reevaluated if necessary,
                 // otherwise we could log stale item/property information.
                 if (!ParentEngine.LoggingServices.OnlyLogCriticalEvents && buildRequest.FireProjectStartedFinishedEvents)
-                {  
+                {
                     string joinedTargetNamesToBuild = null;
                     if (targetNamesToBuild != null && targetNamesToBuild.Length > 0)
                     {
@@ -3613,7 +3613,7 @@ namespace Microsoft.Build.BuildEngine
                     BuildItemGroupProxy itemsProxy = new BuildItemGroupProxy(this.evaluatedItems);
 
                     ParentEngine.LoggingServices.LogProjectStarted(this.projectId, buildRequest.ParentBuildEventContext, buildEventContext, FullFileName, joinedTargetNamesToBuild, propertiesProxy, itemsProxy);
-                    
+
                     // See comment on DefaultToolsVersion setter.
                     if (treatinghigherToolsVersionsAs40)
                     {
@@ -3735,7 +3735,7 @@ namespace Microsoft.Build.BuildEngine
             // Technically, this belongs in ProcessProjectAttributes. However, ToolsVersion
             // affects strategic reserved properties, so it's better to process it before anything else happens
             ProcessToolsVersionDependentProperties();
-            
+
             if (IsValidated)
             {
                 // Validate the project schema. If we have a file, then validate that
@@ -3770,12 +3770,12 @@ namespace Microsoft.Build.BuildEngine
             // variables ... so we need to set these up early.
             this.evaluatedProperties.Clear();
             this.evaluatedProperties.ImportInitialProperties(this.EnvironmentProperties, this.ReservedProperties, this.Toolset.BuildProperties, this.GlobalProperties);
-            
+
             // Process the attributes of the <project> element.
             ProcessProjectAttributes(this.mainProjectElement, false);
 
             // Figure out where the project is located
-            this.projectDirectory = !string.IsNullOrEmpty(this.fullFileName) ? 
+            this.projectDirectory = !string.IsNullOrEmpty(this.fullFileName) ?
                 Path.GetDirectoryName(this.fullFileName) : Directory.GetCurrentDirectory();
 
             // Process the child elements of the <Project> element, instantiating
@@ -4050,8 +4050,8 @@ namespace Microsoft.Build.BuildEngine
                 // Do not expand properties or items before passing in the value of the
                 // condition attribute to EvaluateCondition, otherwise special characters
                 // inside the property values can really confuse the condition parser.
-                if (!Utilities.EvaluateCondition(temp.Condition, temp.ConditionAttribute, 
-                    new Expander(this.evaluatedProperties), this.conditionedPropertiesTable, 
+                if (!Utilities.EvaluateCondition(temp.Condition, temp.ConditionAttribute,
+                    new Expander(this.evaluatedProperties), this.conditionedPropertiesTable,
                     ParserOptions.AllowProperties, ParentEngine.LoggingServices, projectBuildEventContext))
                 {
                     return;
@@ -4063,14 +4063,14 @@ namespace Microsoft.Build.BuildEngine
 
             // Expand any $(propertyname) references inside the "Project" attribute value.
             string expandedImportedFilename = (new Expander(this.evaluatedProperties)).ExpandAllIntoStringLeaveEscaped(temp.ProjectPath, temp.ProjectPathAttribute);
-            
+
             // Expand any wildcards
             string[] importedFilenames = EngineFileUtilities.GetFileListEscaped(projectDirectoryLocation, expandedImportedFilename);
 
             for (int i = 0; i < importedFilenames.Length; i++)
             {
                 string importedFilename = EscapingUtilities.UnescapeAll(importedFilenames[i]);
-                         
+
                 ProjectErrorUtilities.VerifyThrowInvalidProject((importedFilename != null) && (importedFilename.Length != 0),
                     importElement, "MissingRequiredAttribute",
                     XMakeAttributes.project, XMakeElements.import);
@@ -4189,7 +4189,7 @@ namespace Microsoft.Build.BuildEngine
                         // look up the engine's cache to see if we've already loaded this imported project on behalf of another
                         // top-level project
                         ImportedProject previouslyImportedProject = (ImportedProject)ParentEngine.ImportedProjectsCache[import.EvaluatedProjectPath];
-                        
+
                         // if this project hasn't been imported before, or if it has changed on disk, we need to load it
                         if ((previouslyImportedProject == null) || previouslyImportedProject.HasChangedOnDisk(import.EvaluatedProjectPath))
                         {
@@ -4434,7 +4434,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Adds an item to the appropriate project's evaluated items collection.  This method is 
+        /// Adds an item to the appropriate project's evaluated items collection.  This method is
         /// NOT to be used during the build process to add items that are emitted by tasks.
         /// This is only for the purposes of adding statically-declared items in the logical
         /// project file, or items added to the project file by an IDE modifying the project contents.
@@ -4461,7 +4461,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Adds an item to the appropriate project's evaluated items collection.  This method is 
+        /// Adds an item to the appropriate project's evaluated items collection.  This method is
         /// NOT to be used during the build process to add items that are emitted by tasks.
         /// This is only for the purposes of adding statically-declared items in the logical
         /// project file, or items added to the project file by an IDE modifying the project contents.

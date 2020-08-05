@@ -142,7 +142,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This a base loop of a worker thread. The worker thread is asleep waiting for either an
-        /// event indicating that it should shut down or that it should become active and take 
+        /// event indicating that it should shut down or that it should become active and take
         /// ownership of the work item queue
         /// </summary>
         private void MainThreadLoop()
@@ -308,8 +308,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void NodeActionLoop
         (
-            NodeLoopExecutionMode executionMode, 
-            int handleId, 
+            NodeLoopExecutionMode executionMode,
+            int handleId,
             BuildResult [] buildResults
         )
         {
@@ -330,7 +330,7 @@ namespace Microsoft.Build.BuildEngine
                     entryTime = DateTime.Now.Ticks;
                 }
             }
-            
+
             bool continueExecution = true;
             while (continueExecution)
             {
@@ -430,7 +430,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         LinkedListNode<BuildResult> currentNode = postedBuildResults.First;
                         while (currentNode != null)
-                        {   
+                        {
                             BuildResult buildResult = currentNode.Value;
                             ErrorUtilities.VerifyThrow(
                                             buildResult.RequestId < buildResults.Length,
@@ -454,7 +454,7 @@ namespace Microsoft.Build.BuildEngine
                     }
                 }
                 // Check if we need to update the state
-                if (executionMode == NodeLoopExecutionMode.BaseActiveThread && !threadActive) 
+                if (executionMode == NodeLoopExecutionMode.BaseActiveThread && !threadActive)
                 {
                     continueExecution = false;
                 }
@@ -500,7 +500,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal void WaitForResults
         (
-            int handleId, 
+            int handleId,
             BuildResult[] buildResults,
             BuildRequest [] buildRequests
         )
@@ -512,7 +512,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 waitingTasks.Add(handleId, taskData);
             }
-            workerThread.NodeActionLoop(workerThread.threadActive ? NodeLoopExecutionMode.WaitingActiveThread : 
+            workerThread.NodeActionLoop(workerThread.threadActive ? NodeLoopExecutionMode.WaitingActiveThread :
                                         NodeLoopExecutionMode.WaitingPassiveThread,
                                         handleId, buildResults);
             lock (waitingTasks)
