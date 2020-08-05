@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
                 IsSdkProject = true,
                 TargetFrameworks = "net5.0"
             };
-            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "windows"; 
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "Windows"; 
             testProject.AdditionalProperties["TargetPlatformVersion"] = "10.0.18362.0"; // We must set this manually because if we set it in the TFM we remove the trailing zeroes. 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -52,6 +52,12 @@ namespace Microsoft.NET.Build.Tests
             buildCommand.Execute()
                 .Should()
                 .Pass();
+
+            var getValuesCommand = new GetValuesCommand(testAsset, "TargetPlatformVersion");
+            getValuesCommand.Execute()
+                .Should()
+                .Pass();
+            getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "10.0.18362" });
         }
 
         [Fact]
