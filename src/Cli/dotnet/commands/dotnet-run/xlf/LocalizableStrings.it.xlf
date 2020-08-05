@@ -32,6 +32,11 @@
         <target state="translated">Non è stato possibile convertire il valore della proprietà '{0}' in una stringa.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RunCommandBuilding">
+        <source>Building...</source>
+        <target state="new">Building...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Fix the build errors and run again.</source>
         <target state="translated">La compilazione non è riuscita. Correggere gli errori di compilazione e ripetere l'esecuzione.</target>

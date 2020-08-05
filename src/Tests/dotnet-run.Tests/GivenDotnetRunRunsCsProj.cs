@@ -572,5 +572,56 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .And
                 .HaveStdOutContaining($"0 = a{Environment.NewLine}1 = {Environment.NewLine}2 = c");
         }
+
+        [Fact]
+        public void ItDoesNotPrintBuildingMessageByDefault()
+        {
+            var expectedValue = "Building...";
+            var testAppName = "TestAppSimple";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            new DotnetCommand(Log, "run")
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute()
+               .Should()
+               .Pass()
+               .And
+               .NotHaveStdOutContaining(expectedValue);
+        }
+
+        [Fact]
+        public void ItPrintsBuildingMessageIfLaunchSettingHasDotnetRunMessagesSet()
+        {
+            var expectedValue = "Building...";
+            var testAppName = "TestAppWithLaunchSettings";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            new DotnetCommand(Log, "run")
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute()
+               .Should()
+               .Pass()
+               .And
+               .HaveStdOutContaining(expectedValue);
+        }
+
+        [Fact]
+        public void ItIncludesEnvironmentVariablesSpecifiedInLaunchSettings()
+        {
+            var expectedValue = "MyCoolEnvironmentVariableKey=MyCoolEnvironmentVariableValue";
+            var testAppName = "TestAppWithLaunchSettings";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            new DotnetCommand(Log, "run")
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute()
+               .Should()
+               .Pass()
+               .And
+               .HaveStdOutContaining(expectedValue);
+        }
     }
 }
