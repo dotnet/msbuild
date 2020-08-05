@@ -95,7 +95,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             get => _path;
             set
             {
-                if (!_fInitialized || string.Compare(_path, value, StringComparison.OrdinalIgnoreCase) != 0)
+                if (!_fInitialized || !string.Equals(_path, value, StringComparison.OrdinalIgnoreCase))
                 {
                     _path = value;
                     Refresh();
@@ -597,7 +597,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         int nStartIndex = packagePath.Length;
                         if ((strSubDirectory.ToCharArray())[nStartIndex] == System.IO.Path.DirectorySeparatorChar)
                         {
-                            nStartIndex = nStartIndex + 1;
+                            nStartIndex += 1;
                         }
 
                         ExploreDirectory(strSubDirectory.Substring(nStartIndex), rootElement, packagePath);
@@ -1460,7 +1460,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     }
 
                     if ((packageFileSource != null) && (packageFileDestination != null) &&
-                        ((packageFileCopy == null) || (String.Compare(packageFileCopy.Value, "False", StringComparison.InvariantCulture) != 0)))
+                        ((packageFileCopy == null) || (!String.Equals(packageFileCopy.Value, "False", StringComparison.InvariantCulture))))
                     {
                         // if this is the key for an external check, we will add it to the Resource Updater instead of copying the file
                         XmlNode subNode = null;
@@ -1612,7 +1612,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             FileAttributes attribs = File.GetAttributes(strFileName);
             if ((attribs & FileAttributes.ReadOnly) != 0)
             {
-                attribs = attribs & (~FileAttributes.ReadOnly);
+                attribs &= (~FileAttributes.ReadOnly);
                 File.SetAttributes(strFileName, attribs);
             }
         }

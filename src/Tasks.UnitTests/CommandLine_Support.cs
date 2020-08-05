@@ -175,10 +175,10 @@ namespace Microsoft.Build.UnitTests
                     // Skip anything shorter than the compare string.
                     continue;
                 }
-                if (String.Compare(s.Substring(0, startsWith.Length), startsWith, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(s.Substring(0, startsWith.Length), startsWith, StringComparison.OrdinalIgnoreCase))
                 {
                     // If this doesn't match the 'except' then this is an error.
-                    if (String.Compare(s, except, StringComparison.Ordinal) != 0)
+                    if (!String.Equals(s, except, StringComparison.Ordinal))
                     {
                         msg += String.Format(" Found something!\r\n");
                         Console.WriteLine(msg);

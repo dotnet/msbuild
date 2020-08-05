@@ -70,7 +70,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void ApplyFileLoggerParameter(string parameterName, string parameterValue)
         {
-            if (String.Compare("LOGFILE", parameterName, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals("LOGFILE", parameterName, StringComparison.OrdinalIgnoreCase))
             {
                 if (string.IsNullOrEmpty(parameterValue))
                 {

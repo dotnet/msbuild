@@ -279,7 +279,7 @@ namespace Microsoft.Build.Shared
                 string[] platforms = platformValue.Split(MSBuildConstants.SemicolonChar);
                 foreach (string p in platforms)
                 {
-                    if (String.Compare(p, platform, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (String.Equals(p, platform, StringComparison.OrdinalIgnoreCase))
                     {
                         match = true;
                         break;
@@ -369,7 +369,7 @@ namespace Microsoft.Build.Shared
             // Loop over versions from registry.
             foreach (string version in versions)
             {
-                if ((version.Length > 0) && (String.Compare(version.Substring(0, 1), "v", StringComparison.OrdinalIgnoreCase) == 0))
+                if ((version.Length > 0) && (String.Equals(version.Substring(0, 1), "v", StringComparison.OrdinalIgnoreCase)))
                 {
                     Version candidateVersion = VersionUtilities.ConvertToVersion(version);
 

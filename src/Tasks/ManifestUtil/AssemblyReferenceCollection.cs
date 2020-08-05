@@ -79,10 +79,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             foreach (AssemblyReference a in _list)
             {
-                if (a.AssemblyIdentity != null && String.Compare(
+                if (a.AssemblyIdentity != null && String.Equals(
                         name,
                         a.AssemblyIdentity.Name,
-                        StringComparison.OrdinalIgnoreCase) == 0)
+                        StringComparison.OrdinalIgnoreCase))
                 {
                     return a;
                 }
@@ -156,7 +156,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             foreach (AssemblyReference a in _list)
             {
-                if (String.Compare(targetPath, a.TargetPath, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(targetPath, a.TargetPath, StringComparison.OrdinalIgnoreCase))
                 {
                     return a;
                 }

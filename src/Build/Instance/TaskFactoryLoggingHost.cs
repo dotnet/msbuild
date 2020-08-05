@@ -69,11 +69,11 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Returns true in the multiproc case
-        /// REVIEW: Should this mean the same thing in the distributed build case?  If we have 
+        /// REVIEW: Should this mean the same thing in the distributed build case?  If we have
         /// a build which happens to be on a distributed cluster, but the build manager has only
         /// alotted a single machine to this build, is this true?  Because the build manager
         /// could later decide to add more nodes to this build.
-        /// UNDONE: This means we are building with multiple processes. If we are building on 
+        /// UNDONE: This means we are building with multiple processes. If we are building on
         /// one machine then I think the maxcpu-count is still 1. In my mind this means multiple nodes either distributed or on the same machine.
         /// </summary>
         public bool IsRunningMultipleNodes
@@ -247,7 +247,7 @@ namespace Microsoft.Build.BackEnd
 
 #if FEATURE_APPDOMAIN
         /// <summary>
-        /// InitializeLifetimeService is called when the remote object is activated. 
+        /// InitializeLifetimeService is called when the remote object is activated.
         /// This method will determine how long the lifetime for the object will be.
         /// </summary>
         /// <returns>The lease object to control this object's lifetime.</returns>

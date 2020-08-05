@@ -580,7 +580,7 @@ namespace Microsoft.Build.Evaluation
             string argValue = OpportunisticIntern.InternableToString(argumentBuilder).Trim();
 
             // We support passing of null through the argument constant value null
-            if (String.Compare("null", argValue, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
             {
                 arguments.Add(null);
             }
@@ -706,6 +706,7 @@ namespace Microsoft.Build.Evaluation
             /// <param name="expression">The expression containing item metadata references</param>
             /// <param name="metadata"></param>
             /// <param name="options"></param>
+            /// <param name="elementLocation"></param>
             /// <returns>The string with item metadata expanded in-place, escaped.</returns>
             internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation)
             {

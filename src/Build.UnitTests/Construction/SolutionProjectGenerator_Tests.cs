@@ -1200,7 +1200,7 @@ EndGlobal
                 {
                     foreach (ProjectTaskInstance childNode in target.Tasks)
                     {
-                        if (0 == String.Compare(childNode.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                        if (String.Equals(childNode.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
                         {
                             string projectsParameter = childNode.GetParameter("Projects");
                             if (projectsParameter != "@(ProjectReference)")
@@ -1369,56 +1369,56 @@ EndGlobal
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase)));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase)));
 
-            ProjectTargetInstance buildTarget = instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase) == 0).First().Value;
-            ProjectTargetInstance cleanTarget = instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase) == 0).First().Value;
-            ProjectTargetInstance rebuildTarget = instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase) == 0).First().Value;
-            ProjectTargetInstance publishTarget = instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase) == 0).First().Value;
+            ProjectTargetInstance buildTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)).First().Value;
+            ProjectTargetInstance cleanTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase)).First().Value;
+            ProjectTargetInstance rebuildTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)).First().Value;
+            ProjectTargetInstance publishTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase)).First().Value;
 
             // Check that the appropriate target is being passed to the child projects
             Assert.Null(buildTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Targets"));
 
             Assert.Equal("Clean", cleanTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Targets"));
 
             Assert.Equal("Rebuild", rebuildTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Targets"));
 
             Assert.Equal("Publish", publishTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Targets"));
 
             // Check that the child projects in question are the members of the "ProjectReference" item group
             Assert.Equal("@(ProjectReference)", buildTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Projects"));
 
             Assert.Equal("@(ProjectReference->Reverse())", cleanTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Projects"));
 
             Assert.Equal("@(ProjectReference)", rebuildTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Projects"));
 
             Assert.Equal("@(ProjectReference)", publishTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Projects"));
 
             // We should have only the four standard targets plus the two validation targets (ValidateSolutionConfiguration and ValidateToolsVersions).
@@ -2185,26 +2185,26 @@ EndGlobal
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "One" });
 
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "One", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "One", StringComparison.OrdinalIgnoreCase)));
 
             instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Two", "Three", "Four" });
 
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Two", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Three", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Four", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Two", StringComparison.OrdinalIgnoreCase)));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Three", StringComparison.OrdinalIgnoreCase)));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Four", StringComparison.OrdinalIgnoreCase)));
 
             instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Build" });
 
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)));
 
             instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Five", "Rebuild" });
 
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Five", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Five", StringComparison.OrdinalIgnoreCase)));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)));
 
             instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "My_Project:Six" });
 
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase)));
         }
 
         /// <summary>

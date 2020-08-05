@@ -23,7 +23,7 @@ namespace Microsoft.Build.Utilities
     /// Unlike System.Version, does not tolerate whitespace, and '+' is ignored as
     /// semver metadata as described above, not tolerated as positive sign of integer
     /// component.
-    /// <summary>
+    /// </summary>
     /// <remarks>
     /// Tolerating leading 'v' allows using $(TargetFrameworkVersion) directly.
     ///

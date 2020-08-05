@@ -161,12 +161,12 @@ namespace Microsoft.Build.Shared.LanguageParser
 
             if
             (
-                String.Compare
+                String.Equals
                 (
                     match,
                     compare,
                     (ignoreCase /* ignore case */) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal
-                ) == 0
+                )
             )
             {
                 Skip(match.Length);

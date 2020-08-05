@@ -146,7 +146,7 @@ namespace Microsoft.Build.Globbing
             // Ensure trailing slash because the fixed directory part has a trailing slash.
             if (stringToMatch == string.Empty)
             {
-                normalizedInput = normalizedInput + Path.DirectorySeparatorChar;
+                normalizedInput += Path.DirectorySeparatorChar;
             }
 
             return normalizedInput;

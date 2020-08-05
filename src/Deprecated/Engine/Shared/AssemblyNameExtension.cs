@@ -395,7 +395,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
 
             // Do the names match?
-            if (0 != String.Compare(Name, that.Name, StringComparison.OrdinalIgnoreCase))
+            if (!String.Equals(Name, that.Name, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
