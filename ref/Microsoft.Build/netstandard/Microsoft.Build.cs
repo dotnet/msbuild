@@ -1090,6 +1090,7 @@ namespace Microsoft.Build.Execution
         Any = 2,
         InProc = 0,
         OutOfProc = 1,
+        RarNode = 3,
     }
     public enum NodeEngineShutdownReason
     {
@@ -1101,6 +1102,7 @@ namespace Microsoft.Build.Execution
     public partial class OutOfProcNode
     {
         public OutOfProcNode() { }
+        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool enableReuse, bool lowPriority, bool workerNode, out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
         public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool enableReuse, bool lowPriority, out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
         public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool enableReuse, out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
         public Microsoft.Build.Execution.NodeEngineShutdownReason Run(out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
@@ -1375,6 +1377,12 @@ namespace Microsoft.Build.Execution
         public Microsoft.Build.Construction.ElementLocation PropertyNameLocation { get { throw null; } }
         public string TaskParameter { get { throw null; } }
         public override Microsoft.Build.Construction.ElementLocation TaskParameterLocation { get { throw null; } }
+    }
+    public sealed partial class RarNode
+    {
+        public RarNode() { }
+        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool nodeReuse, bool lowPriority, out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
+        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
     }
     public partial class RequestedProjectState
     {

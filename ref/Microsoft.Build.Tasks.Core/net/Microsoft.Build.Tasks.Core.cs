@@ -940,6 +940,7 @@ namespace Microsoft.Build.Tasks
         public string TargetFrameworkVersion { get { throw null; } set { } }
         public string TargetProcessorArchitecture { get { throw null; } set { } }
         public bool UnresolveFrameworkAssembliesFromHigherFrameworks { get { throw null; } set { } }
+        public bool UseResolveAssemblyReferenceService { get { throw null; } set { } }
         public string WarnOrErrorOnTargetArchitectureMismatch { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
@@ -2541,6 +2542,21 @@ namespace Microsoft.Build.Tasks.Hosting
     public partial interface IVbcHostObjectFreeThreaded
     {
         bool Compile();
+    }
+}
+namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
+{
+    public partial interface IResolveAssemblyReferenceTaskHandler : System.IDisposable
+    {
+        System.Threading.Tasks.Task<int> GetNumber(int parameter);
+    }
+}
+namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
+{
+    public sealed partial class RarController
+    {
+        public RarController(string pipeName) { }
+        public System.Threading.Tasks.Task<int> StartAsync(System.Threading.CancellationToken cancellationToken=default(System.Threading.CancellationToken)) { throw null; }
     }
 }
 namespace Microsoft.Build.Tasks.Xaml
