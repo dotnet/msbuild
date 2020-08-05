@@ -350,9 +350,9 @@
         <note>{StrBegin="NETSDK1049: "}</note>
       </trans-unit>
       <trans-unit id="GlobalJsonSDKResolutionFailed">
-        <source>NETSDK1138: Unable to resolve the .NET SDK version as specified in the global.json located at {0}.</source>
-        <target state="new">NETSDK1138: Unable to resolve the .NET SDK version as specified in the global.json located at {0}.</target>
-        <note>{StrBegin="NETSDK1138: "}</note>
+        <source>NETSDK1141: Unable to resolve the .NET SDK version as specified in the global.json located at {0}.</source>
+        <target state="new">NETSDK1141: Unable to resolve the .NET SDK version as specified in the global.json located at {0}.</target>
+        <note>{StrBegin="NETSDK1141: "}</note>
       </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
         <source>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</source>

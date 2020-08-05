@@ -57,9 +57,9 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         {
             string msbuildSdksDir = null;
             string netcoreSdkVersion = null;
-            IDictionary<string, string> propertiesToAdd = new Dictionary<string, string>();
-            IDictionary<string, SdkResultItem> itemsToAdd = new Dictionary<string, SdkResultItem>();
-            List<string> warnings = new List<string>();
+            IDictionary<string, string> propertiesToAdd = null;
+            IDictionary<string, SdkResultItem> itemsToAdd = null;
+            List<string> warnings = null;
 
             if (context.State is CachedResult priorResult)
             {
@@ -123,9 +123,17 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                         minimumVSDefinedSDKVersion);
                 }
 
-                if (resolverResult.FailedToResolveSpecifiedInGlobalJson)
+                if (resolverResult.FailedToResolveSDKSpecifiedInGlobalJson)
                 {
+                    if (warnings == null)
+                    {
+                        warnings = new List<string>();
+                    }
                     warnings.Add(Strings.GlobalJsonResolutionFailed);
+                    if (propertiesToAdd == null)
+                    {
+                        propertiesToAdd = new Dictionary<string, string>();
+                    }
                     propertiesToAdd.Add("SdkResolverHonoredGlobalJson", "false");
                     propertiesToAdd.Add("SdkResolverGlobalJsonPath", resolverResult.GlobalJsonPath);
                 }
@@ -229,7 +237,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                             continue;
                         }
 
-                        if (Int32.TryParse(netcoreSdkVersion.Split('.')[0], out int sdkMajorVersion) && sdkMajorVersion < minimumSdkMajorVersion)
+                        if (minimumSdkMajorVersion != 0 && Int32.TryParse(netcoreSdkVersion.Split('.')[0], out int sdkMajorVersion) && sdkMajorVersion < minimumSdkMajorVersion)
                         {
                             continue;
                         }
@@ -314,7 +322,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 && result.GlobalJsonPath != null
                 && context.IsRunningInVisualStudio)
             {
-                result.FailedToResolveSpecifiedInGlobalJson = true;
+                result.FailedToResolveSDKSpecifiedInGlobalJson = true;
+                // We need the SDK to be version 5 or higher to ensure that we generate a build error when we fail to resolve the SDK specified by global.json
                 mostCompatible = GetMostCompatibleSdk(dotnetExeDir, context.MSBuildVersion, 5);
             }
             else if (result.ResolvedSdkDirectory != null

@@ -156,7 +156,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             result.Success.Should().BeTrue();
             result.Path.Should().Be((disallowPreviews ? compatibleRtm : compatiblePreview).FullName);
             result.AdditionalPaths.Should().BeNull();
-            result.PropertiesToAdd.Should().BeEmpty();
+            result.PropertiesToAdd.Should().BeNull();
             result.Version.Should().Be(disallowPreviews ? "98.98.98" : "99.99.99-preview");
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().BeNullOrEmpty();
