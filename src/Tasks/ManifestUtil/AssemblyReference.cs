@@ -85,7 +85,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 if (AssemblyIdentity == null)
                     return false;
-                if (String.Compare(AssemblyIdentity.Name, Constants.CLRPlatformAssemblyName, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(AssemblyIdentity.Name, Constants.CLRPlatformAssemblyName, StringComparison.OrdinalIgnoreCase))
                     return true;
                 else
                     return false;

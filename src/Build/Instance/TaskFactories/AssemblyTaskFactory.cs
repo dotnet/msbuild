@@ -353,7 +353,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowInternalNull(buildComponentHost, "buildComponentHost");
 
-                mergedParameters = mergedParameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                mergedParameters ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 string runtime = null;
                 string architecture = null;

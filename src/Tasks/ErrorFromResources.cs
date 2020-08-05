@@ -51,7 +51,7 @@ namespace Microsoft.Build.Tasks
                 string message = ResourceUtilities.ExtractMessageCode(false /* all codes */, Log.FormatResourceString(Resource, Arguments), out string errorCode);
 
                 // If the user specifies a code, that should override. 
-                Code = Code ?? errorCode;
+                Code ??= errorCode;
 
                 Log.LogError(null, Code, HelpKeyword, File, 0, 0, 0, 0, message);
             }

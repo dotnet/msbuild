@@ -372,7 +372,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (i < end - 1 && expression[i] == c1 && expression[i + 1] == c2)
             {
-                i = i + 2;
+                i += 2;
                 return true;
             }
 

@@ -11,14 +11,14 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.Tasks
 {
     /// <remarks>
-    /// This task determines the output files for non-MSBuild project references. We look inside 
+    /// This task determines the output files for non-MSBuild project references. We look inside
     /// a special property set by the VS IDE for the list of project guids and their associated outputs.
     /// While there's nothing that would prevent resolution of MSBuild projects in this task, the IDE
     /// only pre-resolves non-MSBuild projects so that we can separate MSBuild project references from
     /// non-MSBuild ones and return the list of MSBuild projects as UnresolvedProjectReferences.
-    /// Then we can use more powerful MSBuild mechanisms to manipulate just the MSBuild project 
-    /// references (i.e. calling into specific targets of references to get the manifest file name) 
-    /// which would not be possible with a mixed list of MSBuild & non-MSBuild references.
+    /// Then we can use more powerful MSBuild mechanisms to manipulate just the MSBuild project
+    /// references (i.e. calling into specific targets of references to get the manifest file name)
+    /// which would not be possible with a mixed list of MSBuild and non-MSBuild references.
     /// </remarks>
     public class ResolveNonMSBuildProjectOutput : ResolveProjectBase
     {
@@ -155,9 +155,10 @@ namespace Microsoft.Build.Tasks
         #region Methods
 
         /// <summary>
-        /// Given a project reference task item and an XML document containing pre-resolved output paths, 
+        /// Given a project reference task item and an XML document containing pre-resolved output paths,
         /// find the output path for that task item.
         /// </summary>
+        /// <param name="projectRef">project reference to resolve</param>
         /// <param name="resolvedPath">resulting ITaskItem containing the resolved path</param>
         /// <returns>true if resolved successfully</returns>
         internal bool ResolveProject(ITaskItem projectRef, out ITaskItem resolvedPath)

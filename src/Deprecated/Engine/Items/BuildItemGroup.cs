@@ -17,7 +17,7 @@ namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
     /// This class represents a collection of items.  It may be represented
-    /// physically by an &lt;ItemGroup&gt; element persisted in the project file, 
+    /// physically by an &lt;ItemGroup&gt; element persisted in the project file,
     /// or it may just be a virtual BuildItemGroup (e.g., the evaluated items).
     /// </summary>
     [DebuggerDisplay("BuildItemGroup (Count = { Count }, Condition = { Condition })")]
@@ -363,7 +363,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Adds an BuildItem to this BuildItemGroup.  If this is a persisted BuildItemGroup, then
         /// this method also inserts the BuildItem's XML into the appropriate location
-        /// in the XML document.  For persisted ItemGroups, the behavior is that 
+        /// in the XML document.  For persisted ItemGroups, the behavior is that
         /// it tries to insert the new BuildItem such that it is "near" other items of the
         /// same type.  ("Near" is defined as just after the last existing item
         /// of the same type, or at the end if none is found.)
@@ -392,7 +392,7 @@ namespace Microsoft.Build.BuildEngine
                 int insertionIndex = items.Count;
                 for (int i = 0; i < items.Count; i++)
                 {
-                    if ( 0 == String.Compare(itemToAdd.Name, items[i].Name, StringComparison.OrdinalIgnoreCase))
+                    if ( String.Equals(itemToAdd.Name, items[i].Name, StringComparison.OrdinalIgnoreCase))
                     {
                         insertionIndex = i + 1;
 
@@ -439,7 +439,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Creates a new BuildItem defined by the given "Type" and "Include", and 
+        /// Creates a new BuildItem defined by the given "Type" and "Include", and
         /// adds it to the end of this BuildItemGroup.
         /// If the group is persisted, the item is persisted; otherwise it is virtual
         /// </summary>
@@ -453,7 +453,7 @@ namespace Microsoft.Build.BuildEngine
                 newItem = new BuildItem(xml.OwnerDocument, itemName, itemInclude, parentProject.ItemDefinitionLibrary);
             }
             else
-            { 
+            {
                 // Create a new virtual BuildItem.
                 newItem = new BuildItem(itemName, itemInclude);
             }
@@ -539,8 +539,8 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Clones the BuildItemGroup.  A shallow clone here is one that references
         /// the same BuildItem objects as the original, whereas a deep clone actually
-        /// clones the BuildItem objects as well.  If this is a persisted BuildItemGroup, 
-        /// only deep clones are allowed, because you can't have the same XML 
+        /// clones the BuildItem objects as well.  If this is a persisted BuildItemGroup,
+        /// only deep clones are allowed, because you can't have the same XML
         /// element belonging to two parents.
         /// </summary>
         public BuildItemGroup Clone(bool deepClone)
@@ -764,8 +764,8 @@ namespace Microsoft.Build.BuildEngine
         (
             BuildPropertyGroup existingProperties,
             Hashtable existingItemsByName,
-            bool collectItemsIgnoringCondition, 
-            bool collectItemsRespectingCondition, 
+            bool collectItemsIgnoringCondition,
+            bool collectItemsRespectingCondition,
             ProcessingPass pass
         )
         {
@@ -894,7 +894,7 @@ namespace Microsoft.Build.BuildEngine
                     itemsToInclude.RemoveItem(item);
                 }
             }
-            
+
             return itemsToInclude;
         }
 

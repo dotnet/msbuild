@@ -553,11 +553,11 @@ namespace Microsoft.Build.BuildEngine
         private bool ParseSimpleStringOrFunction( int start )
         {
             SkipSimpleStringChars();
-            if (0 == string.Compare(expression.Substring(start, parsePoint - start), "and", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(expression.Substring(start, parsePoint - start), "and", StringComparison.OrdinalIgnoreCase))
             {
                 lookahead = new Token(Token.TokenType.And, expression.Substring(start, parsePoint - start));
             }
-            else if (0 == string.Compare(expression.Substring(start, parsePoint - start), "or", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(expression.Substring(start, parsePoint - start), "or", StringComparison.OrdinalIgnoreCase))
             {
                 lookahead = new Token(Token.TokenType.Or, expression.Substring(start, parsePoint - start));
             }

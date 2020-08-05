@@ -69,7 +69,7 @@ namespace Microsoft.Build.Shared
 
                 code = message.Substring(i, 7);
 
-                i = i + 8;
+                i += 8;
             }
             else
 #endif

@@ -34,16 +34,23 @@ namespace Microsoft.Build.Tasks
         /// internal constructor
         /// </summary>
         /// <param name="taskLoggingHelper">task logger instance used for logging</param>
+        /// <param name="silent">true if this task should log only errors, no warnings or messages; false otherwise</param>
         /// <param name="resolverCallback">callback interface for resolving dependent COM refs/NET assemblies</param>
+        /// <param name="referenceFiles">List of referenc files</param>
         /// <param name="referenceInfo">cached reference information (typelib pointer, original task item, typelib name etc.)</param>
         /// <param name="itemName">reference name (for better logging experience)</param>
         /// <param name="outputDirectory">directory we should write the wrapper to</param>
+        /// <param name="hasTemporaryWrapper">Whether it has a temporary wrapper</param>
         /// <param name="delaySign">delay sign wrappers?</param>
         /// <param name="keyFile">file containing public/private keys</param>
         /// <param name="keyContainer">container name for public/private keys</param>
+        /// <param name="noClassMembers">Whether it has no class members</param>
+        /// <param name="targetProcessorArchitecture">Architecture to seek.</param>
+        /// <param name="includeTypeLibVersionInName">True if the interop name should include the typelib's version</param>
         /// <param name="executeAsTool">True if GenerateWrapper() should generate the wrapper out-of-proc using tlbimp.exe</param>
         /// <param name="sdkToolsPath">Path to the SDK tools directory where tlbimp.exe can be found</param>
         /// <param name="buildEngine">BuildEngine of parent task; needed for logging purposes when generating wrapper out-of-proc</param>
+        /// <param name="environmentVariables">Array of equals-separated pairs of environment variables that should be passed to the spawned executable, in addition to (or selectively overriding) the regular environment block.</param>
         internal TlbReference(TaskLoggingHelper taskLoggingHelper, bool silent, IComReferenceResolver resolverCallback, IEnumerable<string> referenceFiles, ComReferenceInfo referenceInfo, string itemName, string outputDirectory, bool hasTemporaryWrapper,
             bool delaySign, string keyFile, string keyContainer, bool noClassMembers, string targetProcessorArchitecture, bool includeTypeLibVersionInName, bool executeAsTool, string sdkToolsPath, IBuildEngine buildEngine, string[] environmentVariables)
             : base(taskLoggingHelper, silent, resolverCallback, referenceInfo, itemName, outputDirectory, delaySign, keyFile, keyContainer, includeTypeLibVersionInName, executeAsTool, sdkToolsPath, buildEngine, environmentVariables)
@@ -171,7 +178,7 @@ namespace Microsoft.Build.Tasks
                     // that the set of references will also contain the file that is meant to be written here (when reference resolution
                     // found the file in the output folder). We need to filter out this case.
                     var fullPathToOutput = Path.GetFullPath(wrapperPath); // Current directory is the directory of the project file.
-                    tlbImp.ReferenceFiles = _referenceFiles.Where(rf => String.Compare(fullPathToOutput, rf, StringComparison.OrdinalIgnoreCase) != 0).ToArray();
+                    tlbImp.ReferenceFiles = _referenceFiles.Where(rf => !String.Equals(fullPathToOutput, rf, StringComparison.OrdinalIgnoreCase)).ToArray();
                 }
 
                 switch (_targetProcessorArchitecture)

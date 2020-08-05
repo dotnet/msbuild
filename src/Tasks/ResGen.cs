@@ -538,7 +538,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             private void GenerateResGenCommands(CommandLineBuilderExtension resGenArguments, bool useForResponseFile)
             {
-                resGenArguments = resGenArguments ?? new CommandLineBuilderExtension();
+                resGenArguments ??= new CommandLineBuilderExtension();
 
                 if (IsNullOrEmpty(OutputFiles))
                 {

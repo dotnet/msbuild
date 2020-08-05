@@ -56,8 +56,6 @@
     <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <!-- Disable warnings from XML documentation. https://github.com/Microsoft/msbuild/issues/2927 -->
-    <NoWarn>$(NoWarn);1570;1572;1573;1587</NoWarn>
 
     <GenAPIAdditionalParameters>$(GenAPIAdditionalParameters) -excludeApiList:&quot;$(RepoRoot)ref\ExcludeAPIList.txt&quot;</GenAPIAdditionalParameters>
     <GenAPIAdditionalParameters>$(GenAPIAdditionalParameters) -excludeAttributesList:&quot;$(RepoRoot)ref\ExcludeAttributeList.txt&quot;</GenAPIAdditionalParameters>

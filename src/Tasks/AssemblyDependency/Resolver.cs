@@ -139,6 +139,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="assemblyName">The assembly name to look up.</param>
         /// <param name="isPrimaryProjectReference">True if this is a primary reference directly from the project file.</param>
         /// <param name="wantSpecificVersion">Whether the version needs to match exactly or loosely.</param>
+        /// <param name="allowMismatchBetweenFusionNameAndFileName">Whether to allow naming mismatch.</param>
         /// <param name="pathToCandidateAssembly">Path to a possible file.</param>
         /// <param name="searchLocation">Information about why the candidate file didn't match</param>
         protected bool FileMatchesAssemblyName
@@ -160,7 +161,7 @@ namespace Microsoft.Build.Tasks
             if (!allowMismatchBetweenFusionNameAndFileName)
             {
                 string candidateBaseName = Path.GetFileNameWithoutExtension(pathToCandidateAssembly);
-                if (String.Compare(assemblyName?.Name, candidateBaseName, StringComparison.CurrentCultureIgnoreCase) != 0)
+                if (!String.Equals(assemblyName?.Name, candidateBaseName, StringComparison.CurrentCultureIgnoreCase))
                 {
                     if (searchLocation != null)
                     {
@@ -284,6 +285,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="assemblyName">The assembly name to look up.</param>
         /// <param name="isPrimaryProjectReference">True if this is a primary reference directly from the project file.</param>
+        /// <param name="wantSpecificVersion">Whether an exact version match is requested.</param>
         /// <param name="executableExtensions">The possible filename extensions of the assembly. Must be one of these or its no match.</param>
         /// <param name="directory">the directory to look in</param>
         /// <param name="assembliesConsideredAndRejected">Receives the list of locations that this function tried to find the assembly. May be "null".</param>
@@ -371,7 +373,7 @@ namespace Microsoft.Build.Tasks
                     {
                         foreach (string executableExtension in executableExtensions)
                         {
-                            if (String.Compare(executableExtension, weakNameBaseExtension, StringComparison.CurrentCultureIgnoreCase) == 0)
+                            if (String.Equals(executableExtension, weakNameBaseExtension, StringComparison.CurrentCultureIgnoreCase))
                             {
                                 string fullPath = Path.Combine(directory, weakNameBase);
                                 var extensionlessAssemblyName = new AssemblyNameExtension(weakNameBaseFileName);

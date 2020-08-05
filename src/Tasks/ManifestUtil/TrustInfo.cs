@@ -129,7 +129,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 defaultAssemblyRequestElement.Attributes.Append(idrefAttribute);
             }
 
-            if (String.Compare(idAttribute.Value, idrefAttribute.Value, StringComparison.Ordinal) != 0)
+            if (!String.Equals(idAttribute.Value, idrefAttribute.Value, StringComparison.Ordinal))
             {
                 idrefAttribute.Value = idAttribute.Value;
             }

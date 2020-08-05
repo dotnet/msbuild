@@ -109,7 +109,7 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string switchAttribute = "SWITCH";
 
         #endregion
-        
+
         #region Properties
 
         /// <summary>
@@ -529,7 +529,7 @@ namespace Microsoft.Build.Tasks.Xaml
         }
 
         /// <summary>
-        /// Gets all the attributes assigned in the xml file for this parameter or all of the nested switches for 
+        /// Gets all the attributes assigned in the xml file for this parameter or all of the nested switches for
         /// this parameter group
         /// </summary>
         private static SwitchRelations ObtainAttributes(XmlNode node, SwitchRelations switchGroup)
@@ -572,7 +572,7 @@ namespace Microsoft.Build.Tasks.Xaml
         }
 
         /// <summary>
-        /// An XML document can have many root nodes, but usually we want the single root 
+        /// An XML document can have many root nodes, but usually we want the single root
         /// element. Callers can test each root node in turn with this method, until it returns
         /// true.
         /// </summary>

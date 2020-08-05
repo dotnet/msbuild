@@ -631,7 +631,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     {
                         targetPathList.Add(key, false);
                     }
-                    else if (targetPathList[key] == false)
+                    else if (!targetPathList[key])
                     {
                         OutputMessages.AddWarningMessage("GenerateManifest.DuplicateTargetPath", assembly.ToString());
                         targetPathList[key] = true; // only warn once per path
@@ -674,7 +674,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     {
                         targetPathList.Add(key, false);
                     }
-                    else if (targetPathList[key] == false)
+                    else if (!targetPathList[key])
                     {
                         OutputMessages.AddWarningMessage("GenerateManifest.DuplicateTargetPath", file.TargetPath);
                         targetPathList[key] = true; // only warn once per path

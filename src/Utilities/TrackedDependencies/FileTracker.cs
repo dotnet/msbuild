@@ -292,7 +292,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentNull(sources, "sources");
 
             // So we don't have to deal with null checks.
-            outputs = outputs ?? Array.Empty<ITaskItem>();
+            outputs ??= Array.Empty<ITaskItem>();
 
             var rootSources = new List<string>(sources.Length + outputs.Length);
 
@@ -641,7 +641,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>Process instance</returns>
         public static Process StartProcess(string command, string arguments, ExecutableType toolType, string dllName, string intermediateDirectory, string rootFiles, string cancelEventName)
         {
-            dllName = dllName ?? GetFileTrackerPath(toolType);
+            dllName ??= GetFileTrackerPath(toolType);
 
             string fullArguments = TrackerArguments(command, arguments, dllName, intermediateDirectory, rootFiles, cancelEventName);
             return Process.Start(GetTrackerPath(toolType), fullArguments);

@@ -866,7 +866,7 @@ namespace Microsoft.Build.Shared
                         continue;
                     }
                 }
-                files = files ?? new List<string>();
+                files ??= new List<string>();
                 files.Add(file);
             }
             // Add all matched files at once to reduce thread contention
@@ -2284,7 +2284,7 @@ namespace Microsoft.Build.Shared
                     var excludeBaseDirectory = excludeState.BaseDirectory;
                     var includeBaseDirectory = state.BaseDirectory;
 
-                    if (string.Compare(excludeBaseDirectory, includeBaseDirectory, StringComparison.OrdinalIgnoreCase) != 0)
+                    if (!string.Equals(excludeBaseDirectory, includeBaseDirectory, StringComparison.OrdinalIgnoreCase))
                     {
                         //  What to do if the BaseDirectory for the exclude search doesn't match the one for inclusion?
                         //  - If paths don't match (one isn't a prefix of the other), then ignore the exclude search.  Examples:

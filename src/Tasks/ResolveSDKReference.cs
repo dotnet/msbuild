@@ -140,7 +140,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                _targetPlatformIdentifier = _targetPlatformIdentifier ?? String.Empty;
+                _targetPlatformIdentifier ??= String.Empty;
                 return _targetPlatformIdentifier;
             }
 
@@ -155,7 +155,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                _projectName = _projectName ?? String.Empty;
+                _projectName ??= String.Empty;
                 return _projectName;
             }
 
@@ -241,7 +241,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                _targetPlatformVersion = _targetPlatformVersion ?? s_defaultTargetPlatformVersion;
+                _targetPlatformVersion ??= s_defaultTargetPlatformVersion;
                 return _targetPlatformVersion;
             }
 

@@ -50,6 +50,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private string _matchOnMetadataOptions;
 
+        /// <summary>
         /// The list of metadata to keep.
         /// </summary>
         private string _keepMetadata;
@@ -196,6 +197,7 @@ namespace Microsoft.Build.Execution
 
         private ProjectItemGroupTaskItemInstance()
         {
+
         }
 
         /// <summary>

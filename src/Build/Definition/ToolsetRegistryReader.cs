@@ -43,12 +43,12 @@ namespace Microsoft.Build.Evaluation
     {
         /// <summary>
         /// Registry location for storing tools version dependent data for msbuild
-        /// </summary> 
+        /// </summary>
         private const string MSBuildRegistryPath = @"SOFTWARE\Microsoft\MSBuild";
 
         /// <summary>
         /// Cached registry wrapper at root of the msbuild entries
-        /// </summary> 
+        /// </summary>
         private RegistryKeyWrapper _msbuildRegistryWrapper;
 
         /// <summary>
@@ -229,8 +229,8 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Provides an enumerator over property definitions for a specified sub-toolset version 
-        /// under a specified toolset version. 
+        /// Provides an enumerator over property definitions for a specified sub-toolset version
+        /// under a specified toolset version.
         /// </summary>
         /// <param name="toolsVersion">The tools version.</param>
         /// <param name="subToolsetVersion">The sub-toolset version.</param>

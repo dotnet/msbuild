@@ -241,7 +241,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             if (view == null && real == null) return;
             Assert.NotNull(view);
             Assert.NotNull(real);
-            
+
             Assert.Equal(real.Name, view.Name);
             Assert.Equal(real.Version, view.Version);
             Assert.Equal(real.MinimumVersion, view.MinimumVersion);
@@ -290,7 +290,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             if (pair == null) return;
             var real = pair.Real;
             var view = pair.View;
-            context = context ?? new ValidationContext();
+            context ??= new ValidationContext();
             context.Pair = pair;
 
 
@@ -320,7 +320,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 Verify(view.ImportsIncludingDuplicates, real.ImportsIncludingDuplicates, Verify, context);
             }
 
-            
             Verify(view.AllEvaluatedProperties, real.AllEvaluatedProperties, Verify, context);
             Verify(view.AllEvaluatedItemDefinitionMetadata, real.AllEvaluatedItemDefinitionMetadata, Verify, context);
             Verify(view.AllEvaluatedItems, real.AllEvaluatedItems, Verify, context);

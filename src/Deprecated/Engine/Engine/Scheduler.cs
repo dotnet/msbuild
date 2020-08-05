@@ -156,11 +156,11 @@ namespace Microsoft.Build.BuildEngine
                         }
                         #endregion
                     }
-                    else 
+                    else
                     {
                         // round robin schedule the build request 
                         nodeUsed = (lastUsedNode % nodes.Length);
-                        
+
                         // Running total of the number of times this round robin scheduler has been called
                         lastUsedNode++;
 
@@ -209,7 +209,7 @@ namespace Microsoft.Build.BuildEngine
             // Update the records
             ScheduleRecordKey recordKey = new ScheduleRecordKey(currentRequest.HandleId, currentRequest.RequestId);
             ScheduleRecordKey parentKey = new ScheduleRecordKey(currentRequest.ParentHandleId, currentRequest.ParentRequestId);
-            ScheduleRecord record = new ScheduleRecord(recordKey, parentKey, nodeUsed, currentRequest.ProjectFileName, 
+            ScheduleRecord record = new ScheduleRecord(recordKey, parentKey, nodeUsed, currentRequest.ProjectFileName,
                                                        currentRequest.ToolsetVersion, currentRequest.TargetNames);
 
             lock (scheduleTableLock)
@@ -265,7 +265,7 @@ namespace Microsoft.Build.BuildEngine
                         ErrorUtilities.VerifyThrow(handleIdToScheduleRecord.ContainsKey(scheduleRecord.ParentKey),
                                                    "Parent schedule record should be in the table");
                         ScheduleRecord parentRecord = handleIdToScheduleRecord[scheduleRecord.ParentKey];
-                        
+
                         // As long as there are child requests under the parent request the parent request is considered blocked
                         // Remove this build request from the list of requests the parent request is waiting on. This may unblock the parent request
                         parentRecord.ReportChildCompleted(recordKey);
@@ -283,14 +283,14 @@ namespace Microsoft.Build.BuildEngine
                 if (parentEngine.ProfileBuild && scheduleRecord != null && buildResult.TaskTime != 0 )
                 {
                     Console.WriteLine("N " + scheduleRecord.EvaluationNode + " Name " + scheduleRecord.ProjectName + ":" +
-                                      scheduleRecord.ParentKey.HandleId + ":" + scheduleRecord.ParentKey.RequestId + 
+                                      scheduleRecord.ParentKey.HandleId + ":" + scheduleRecord.ParentKey.RequestId +
                                       " Total " + buildResult.TotalTime + " Engine " + buildResult.EngineTime + " Task " + buildResult.TaskTime);
                 }
             }
         }
 
         /// <summary>
-        /// Called when the engine is in the process of sending a buildRequest to a child node. The entire purpose of this method 
+        /// Called when the engine is in the process of sending a buildRequest to a child node. The entire purpose of this method
         /// is to switch the traversal strategy of the systems if there are nodes which do not have enough work availiable to them.
         /// </summary>
         internal void NotifyOfBuildRequest(int nodeIndex, BuildRequest currentRequest, int parentHandleId)
@@ -315,14 +315,14 @@ namespace Microsoft.Build.BuildEngine
                         }
                     }
 
-                    if (useBreadthFirstTraversal == false)
+                    if (!useBreadthFirstTraversal)
                     {
                         if (Engine.debugMode)
                         {
                              Console.WriteLine("Switching to depth first traversal because all node have workitems");
                         }
                         parentEngine.NodeManager.TaskExecutionModule.UseBreadthFirstTraversal = false;
-                        
+
                         // Switch to depth first and change the traversal strategy of the entire system by notifying all child nodes of the change
                         parentEngine.PostEngineCommand(new ChangeTraversalTypeCommand(false, false));
                     }
@@ -410,7 +410,7 @@ namespace Microsoft.Build.BuildEngine
         #region Data
 
         /// <summary>
-        /// NodeId of the engine who instantiated the scheduler. This is used to determine if a 
+        /// NodeId of the engine who instantiated the scheduler. This is used to determine if a
         /// BuildRequest should be build locally as the project has already been loaded on this node.
         /// </summary>
         private int localNodeId;
@@ -428,10 +428,10 @@ namespace Microsoft.Build.BuildEngine
         private int[] totalRequestsPerNode;
 
         /// <summary>
-        /// The number of BuildRequests blocked waiting for results for each node. 
+        /// The number of BuildRequests blocked waiting for results for each node.
         /// This will be incremented once when a build request is scheduled which was generated as part of a msbuild callback
         /// and once for each call to NotifyOfBlockedRequest.
-        /// 
+        ///
         /// It is decremented for each call to NotifyOfUnblockedRequest and once all of the child requests have been fullfilled.
         /// </summary>
         private int[] blockedRequestsPerNode;
@@ -458,8 +458,8 @@ namespace Microsoft.Build.BuildEngine
         private Dictionary<ScheduleRecordKey, ScheduleRecord> handleIdToScheduleRecord;
 
         /// <summary>
-        /// Indicates the scheduler is instantiated on a child node. This is being determined by 
-        /// initializaing the variable to true in the constructor and then setting it to false in the 
+        /// Indicates the scheduler is instantiated on a child node. This is being determined by
+        /// initializaing the variable to true in the constructor and then setting it to false in the
         /// initialize method (the initialize method will only be called on the parent engine)
         /// </summary>
         private bool childMode;
@@ -474,7 +474,6 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private const int nodeWorkLoadProjectCount = 4;
 
-        
         /// <summary>
         /// Used to calculate which node a build request should be sent to if the scheduler is operating in a round robin fashion.
         /// Each time a build request is scheduled to a node in CalculateNodeForBuildRequest the lastUsedNode is incremented.

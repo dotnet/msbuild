@@ -171,7 +171,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <remarks>
         /// This class is designed to be passed to loggers.
-        /// The expense of copying items is only incurred if and when 
+        /// The expense of copying items is only incurred if and when
         /// a logger chooses to enumerate over it.
         /// The type of the items enumerated over is imposed by backwards compatibility for ProjectStartedEvent.
         /// </remarks>
@@ -221,7 +221,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <remarks>
         /// This class is designed to be passed to loggers.
-        /// The expense of copying items is only incurred if and when 
+        /// The expense of copying items is only incurred if and when
         /// a logger chooses to enumerate over it.
         /// The type of the items enumerated over is imposed by backwards compatibility for ProjectStartedEvent.
         /// </remarks>
