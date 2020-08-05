@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace Microsoft.DotNet.MSBuildSdkResolver
 {
-    internal static class NETCoreSdkResolver
+    internal static class NETCoreSdkResolverNativeWrapper
     {
         public sealed class Result
         {

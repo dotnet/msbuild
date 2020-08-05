@@ -225,7 +225,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                     string mostRecent = null;
                     string mostRecentNonPreview = null;
 
-                    string[] availableSdks = NETCoreSdkResolver.GetAvailableSdks(key.DotnetExeDirectory);
+                    string[] availableSdks = NETCoreSdkResolverNativeWrapper.GetAvailableSdks(key.DotnetExeDirectory);
                     for (int i = availableSdks.Length - 1; i >= 0; i--)
                     {
                         string netcoreSdkDir = availableSdks[i];
@@ -312,10 +312,10 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             return FXVersion.Compare(netCoreSdkFXVersion, minimumFXVersion) < 0;
         }
 
-        private NETCoreSdkResolver.Result ResolveNETCoreSdkDirectory(SdkResolverContext context, string dotnetExeDir)
+        private NETCoreSdkResolverNativeWrapper.Result ResolveNETCoreSdkDirectory(SdkResolverContext context, string dotnetExeDir)
         {
             string globalJsonStartDir = Path.GetDirectoryName(context.SolutionFilePath ?? context.ProjectFilePath);
-            var result = NETCoreSdkResolver.ResolveSdk(dotnetExeDir, globalJsonStartDir, _vsSettings.DisallowPrerelease());
+            var result = NETCoreSdkResolverNativeWrapper.ResolveSdk(dotnetExeDir, globalJsonStartDir, _vsSettings.DisallowPrerelease());
 
             string mostCompatible = result.ResolvedSdkDirectory;
             if (result.ResolvedSdkDirectory == null 
