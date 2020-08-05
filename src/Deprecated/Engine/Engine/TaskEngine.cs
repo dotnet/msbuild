@@ -1117,7 +1117,7 @@ namespace Microsoft.Build.BuildEngine
             // DevDiv bugs: 33981
             foreach (XmlAttribute taskNodeAttribute in taskNode.Attributes)
             {
-                if (String.Compare(taskNodeAttribute.Name, taskParameterName, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(taskNodeAttribute.Name, taskParameterName, StringComparison.OrdinalIgnoreCase))
                 {
                     taskParameterAttribute = taskNodeAttribute;
                     break;

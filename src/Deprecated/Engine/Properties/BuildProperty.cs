@@ -711,7 +711,7 @@ namespace Microsoft.Build.BuildEngine
 
             return 
                 (compareToProperty != null) &&
-                (0 == String.Compare(compareToProperty.propertyName, this.propertyName, StringComparison.OrdinalIgnoreCase)) &&
+                (String.Equals(compareToProperty.propertyName, this.propertyName, StringComparison.OrdinalIgnoreCase)) &&
                 (compareToProperty.propertyValue                == this.propertyValue) &&
                 (compareToProperty.FinalValue                   == this.FinalValue) &&
                 (compareToProperty.type                         == this.type);

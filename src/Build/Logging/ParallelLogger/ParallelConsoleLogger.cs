@@ -123,7 +123,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 return true;
             }
 
-            if (0 == String.Compare(parameterName, "SHOWCOMMANDLINE", StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(parameterName, "SHOWCOMMANDLINE", StringComparison.OrdinalIgnoreCase))
             {
                 if (String.IsNullOrEmpty(parameterValue))
                 {
@@ -144,17 +144,17 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 return true;
             }
-            else if (0 == String.Compare(parameterName, "SHOWTIMESTAMP", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, "SHOWTIMESTAMP", StringComparison.OrdinalIgnoreCase))
             {
                 _showTimeStamp = true;
                 return true;
             }
-            else if (0 == String.Compare(parameterName, "SHOWEVENTID", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, "SHOWEVENTID", StringComparison.OrdinalIgnoreCase))
             {
                 _showEventId = true;
                 return true;
             }
-            else if (0 == String.Compare(parameterName, "FORCENOALIGN", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, "FORCENOALIGN", StringComparison.OrdinalIgnoreCase))
             {
                 _forceNoAlign = true;
                 _alignMessages = false;
@@ -461,7 +461,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 // If the target where the error occurred is the same as the previous message do not print the location
                 // where the error occurred again
-                if (String.Compare(previousTarget, valuePair.Key.TargetName, StringComparison.OrdinalIgnoreCase) != 0)
+                if (!String.Equals(previousTarget, valuePair.Key.TargetName, StringComparison.OrdinalIgnoreCase))
                 {
                     // If no targetName was specified then do not show the target where the error occurred
                     if (!string.IsNullOrEmpty(valuePair.Key.TargetName))

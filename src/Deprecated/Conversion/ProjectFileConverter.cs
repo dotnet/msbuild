@@ -516,7 +516,7 @@ namespace Microsoft.Build.Conversion
                 // Find matching imports but don't delete whilst enumerating else it will throw an error
                 foreach (ProjectImportElement nextImport in xmakeProject.Imports)
                 {
-                    if (String.Compare(nextImport.Project, @"$(MSBuildBinPath)\Microsoft.WinFX.targets", StringComparison.OrdinalIgnoreCase) == 0)
+                    if (String.Equals(nextImport.Project, @"$(MSBuildBinPath)\Microsoft.WinFX.targets", StringComparison.OrdinalIgnoreCase))
                     {
                         listOfImportsToBeDeleted.Add(nextImport);
                     }
@@ -1521,7 +1521,7 @@ namespace Microsoft.Build.Conversion
             // convert web projects -- that's Venus's job.
             string projectType = languageElement.GetAttribute(VSProjectAttributes.projectType);
             ProjectErrorUtilities.VerifyThrowInvalidProject(projectType == null || projectType.Length == 0 ||
-                (String.Compare(projectType, VSProjectAttributes.local, StringComparison.OrdinalIgnoreCase) == 0),
+                (String.Equals(projectType, VSProjectAttributes.local, StringComparison.OrdinalIgnoreCase)),
                 languageElement.Location, "ProjectTypeCannotBeConverted", projectType);
 
             // All of the attributes on the language tag get converted to XMake
@@ -1714,7 +1714,7 @@ namespace Microsoft.Build.Conversion
                 {
                     if (this.outputType != null && this.outputType.Length > 0)
                     {
-                        if (String.Compare(this.outputType, XMakeProjectStrings.winExe, StringComparison.OrdinalIgnoreCase) == 0)
+                        if (String.Equals(this.outputType, XMakeProjectStrings.winExe, StringComparison.OrdinalIgnoreCase))
                         {
                             if (this.hasWindowsFormsReference)
                             {
@@ -1726,11 +1726,11 @@ namespace Microsoft.Build.Conversion
                                 this.globalPropertyGroup.AddProperty(XMakeProjectStrings.myType, XMakeProjectStrings.console);
                             }
                         }
-                        else if (String.Compare(this.outputType, XMakeProjectStrings.exe, StringComparison.OrdinalIgnoreCase) == 0)
+                        else if (String.Equals(this.outputType, XMakeProjectStrings.exe, StringComparison.OrdinalIgnoreCase))
                         {
                             this.globalPropertyGroup.AddProperty(XMakeProjectStrings.myType, XMakeProjectStrings.console);
                         }
-                        else if (String.Compare(this.outputType, XMakeProjectStrings.library, StringComparison.OrdinalIgnoreCase) == 0)
+                        else if (String.Equals(this.outputType, XMakeProjectStrings.library, StringComparison.OrdinalIgnoreCase))
                         {
                             this.globalPropertyGroup.AddProperty(XMakeProjectStrings.myType, XMakeProjectStrings.windows);
                         }
@@ -2180,11 +2180,11 @@ namespace Microsoft.Build.Conversion
                 if (String.IsNullOrEmpty(debugType))
                 {
                     string debugSymbols = configElement.GetAttribute(XMakeProjectStrings.debugSymbols);
-                    if (  0 == String.Compare ( debugSymbols, "true", StringComparison.OrdinalIgnoreCase ) )
+                    if (  String.Equals ( debugSymbols, "true", StringComparison.OrdinalIgnoreCase ) )
                     {
                         configPropertyGroup.AddProperty(VSProjectAttributes.debugType, VSProjectAttributes.debugTypeFull);
                     }
-                    else if ( 0 == String.Compare(debugSymbols, "false", StringComparison.OrdinalIgnoreCase) )
+                    else if ( String.Equals(debugSymbols, "false", StringComparison.OrdinalIgnoreCase) )
                     {
                         configPropertyGroup.AddProperty(VSProjectAttributes.debugType, VSProjectAttributes.debugTypeNone);
                     }
@@ -2528,14 +2528,14 @@ namespace Microsoft.Build.Conversion
                    ( this.language == VSProjectElements.EVisualBasic ) ) )
             {
                 if ( ( this.frameworkVersionForVSD == XMakeProjectStrings.vTwo ) &&
-                     ( 0 == String.Compare ( referenceName, VSProjectElements.SystemDataCommon, StringComparison.OrdinalIgnoreCase ) ) )
+                     ( String.Equals ( referenceName, VSProjectElements.SystemDataCommon, StringComparison.OrdinalIgnoreCase ) ) )
                 {
                     // We need to remove all references to "System.Data.Common" for VSD projects only.
                     //   Note : We only want to do this for projects that will be updated to v2.0
                     //          System.Data.Common is still valid for v1.0 upgraded projects.
                     return;
                 }
-                else if ( 0 == String.Compare ( referenceName, VSProjectElements.SystemSR, StringComparison.OrdinalIgnoreCase ) )
+                else if ( String.Equals ( referenceName, VSProjectElements.SystemSR, StringComparison.OrdinalIgnoreCase ) )
                 {
                     // We always want to remove all references to "System.SR"
                     return;
@@ -2543,7 +2543,7 @@ namespace Microsoft.Build.Conversion
             }
 
             if ( ( this.language == VSProjectElements.EVisualBasic ) &&
-                 ( 0 == String.Compare ( referenceName, VSProjectElements.MSCorLib, StringComparison.OrdinalIgnoreCase ) ) )
+                 ( String.Equals ( referenceName, VSProjectElements.MSCorLib, StringComparison.OrdinalIgnoreCase ) ) )
             {
                 // We also want to get rid of all 'mscorlib' references for VB projects only.
                 return;
@@ -2683,13 +2683,13 @@ namespace Microsoft.Build.Conversion
             {
                 // For VSD Projects, we want to transform all Everett ( .csdproj & .vbdproj ) project 2 project references into
                 // Whidbey ( .csproj & .vbproj ) references.
-                if (0 == String.Compare(Path.GetExtension(pathToReferencedProject),
+                if (String.Equals(Path.GetExtension(pathToReferencedProject),
                                         XMakeProjectStrings.csdprojFileExtension,
                                         StringComparison.OrdinalIgnoreCase))
                 {
                     pathToReferencedProject = Path.ChangeExtension(pathToReferencedProject, XMakeProjectStrings.csprojFileExtension);
                 }
-                else if (0 == String.Compare(Path.GetExtension(pathToReferencedProject),
+                else if (String.Equals(Path.GetExtension(pathToReferencedProject),
                                              XMakeProjectStrings.vbdprojFileExtension,
                                              StringComparison.OrdinalIgnoreCase))
                 {
@@ -2753,7 +2753,7 @@ namespace Microsoft.Build.Conversion
 
             // MyType should only be added when System.Windows.Forms is present. If this
             // reference is seen, then set a flag so we can later add MyType.
-            if (0 == String.Compare("System.Windows.Forms", assemblyName, StringComparison.OrdinalIgnoreCase))
+            if (String.Equals("System.Windows.Forms", assemblyName, StringComparison.OrdinalIgnoreCase))
             {
                 hasWindowsFormsReference = true;
             }
@@ -2803,7 +2803,7 @@ namespace Microsoft.Build.Conversion
                 {
                     // Check that the extension really is ".SLN", because the above call to
                     // GetFiles will also return files such as blah.SLN1 and bloo.SLN2.
-                    if (0 == String.Compare(".sln", slnFile.Extension, StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals(".sln", slnFile.Extension, StringComparison.OrdinalIgnoreCase))
                     {
                         // Parse the .SLN file.
                         SolutionFile solutionParser = new SolutionFile();
@@ -3240,7 +3240,7 @@ namespace Microsoft.Build.Conversion
             // Bug Whidbey #248965. If a .resx file is completely empty, do not include a reference
             // to it in the upgraded project file.
             if (!
-                (0 == String.Compare(Path.GetExtension(relPath), ".resx", StringComparison.OrdinalIgnoreCase)
+                (String.Equals(Path.GetExtension(relPath), ".resx", StringComparison.OrdinalIgnoreCase)
                  && IsFilePresentButEmpty(relPath, linkPath))
                )
             {
@@ -3311,7 +3311,7 @@ namespace Microsoft.Build.Conversion
                 // mark it to copy if newer.
                 if ( ( ( ( this.language == VSProjectElements.ECSharp ) ||
                          ( this.language == VSProjectElements.EVisualBasic ) ) ) &&
-                     ( 0 == String.Compare ( buildAction, XMakeProjectStrings.content, StringComparison.OrdinalIgnoreCase ) ) )
+                     ( String.Equals ( buildAction, XMakeProjectStrings.content, StringComparison.OrdinalIgnoreCase ) ) )
                 {
                     newFileItem.AddMetadata ( XMakeProjectStrings.copytooutput,
                                               XMakeProjectStrings.preservenewest );
@@ -3425,7 +3425,7 @@ namespace Microsoft.Build.Conversion
 
             ProjectItemElement newFolderItem;
 
-            if ((webReferences != null) && (0 == String.Compare(webReferences, "true", StringComparison.OrdinalIgnoreCase)))
+            if ((webReferences != null) && (String.Equals(webReferences, "true", StringComparison.OrdinalIgnoreCase)))
             {
                 // This is a web reference folder.
 
@@ -3822,7 +3822,7 @@ namespace Microsoft.Build.Conversion
                         string officeDocumentFullPath = Path.GetFullPath(Path.Combine(projectFileDirectory, officeDocumentPath));
 
                         // If the office document is in the project directory ...
-                        if (0 == String.Compare(projectFileDirectory, Path.GetDirectoryName(officeDocumentFullPath), StringComparison.OrdinalIgnoreCase))
+                        if (String.Equals(projectFileDirectory, Path.GetDirectoryName(officeDocumentFullPath), StringComparison.OrdinalIgnoreCase))
                         {
                             // If the office document actually exists on disk ...
                             if (File.Exists(officeDocumentFullPath))

@@ -235,7 +235,7 @@ namespace Microsoft.Build.BuildEngine
                             {
                                 // Verify that the project name is the same
                                 ErrorUtilities.VerifyThrow(
-                                    String.Compare(buildRequest.ProjectFileName, externalRequests[i].ProjectFileName, StringComparison.OrdinalIgnoreCase) == 0,
+                                    String.Equals(buildRequest.ProjectFileName, externalRequests[i].ProjectFileName, StringComparison.OrdinalIgnoreCase),
                                     "The two requests should have the same project name");
 
                                 // Link the two graph nodes together

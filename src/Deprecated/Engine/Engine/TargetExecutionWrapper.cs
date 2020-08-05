@@ -909,7 +909,7 @@ namespace Microsoft.Build.BuildEngine
                     buildContext.NameOfBlockingTarget == null)
                 {
                     ErrorUtilities.VerifyThrow(
-                        String.Compare(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), targetClass.Name, StringComparison.OrdinalIgnoreCase) == 0,
+                        String.Equals(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), targetClass.Name, StringComparison.OrdinalIgnoreCase),
                         "The name of the target in progress is inconsistent with the target being built");
 
                     ErrorUtilities.VerifyThrow(targetOutputItems != null,
@@ -1019,7 +1019,7 @@ namespace Microsoft.Build.BuildEngine
                 if (buildContext.NameOfBlockingTarget == null)
                 {
                     ErrorUtilities.VerifyThrow(
-                        String.Compare(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), targetClass.Name, StringComparison.OrdinalIgnoreCase) == 0,
+                        String.Equals(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), targetClass.Name, StringComparison.OrdinalIgnoreCase),
                         "The name of the target in progress is inconsistent with the target being built");
 
                     // This target was part of a sequential request so we need to notify the parent project
@@ -1035,7 +1035,7 @@ namespace Microsoft.Build.BuildEngine
                     // The target on the waiting list must be waiting for this target to complete due to
                     // a dependent or onerror relationship between targets
                     ErrorUtilities.VerifyThrow(
-                        String.Compare(buildContext.NameOfBlockingTarget, targetClass.Name, StringComparison.OrdinalIgnoreCase) == 0,
+                        String.Equals(buildContext.NameOfBlockingTarget, targetClass.Name, StringComparison.OrdinalIgnoreCase),
                         "This target should only be updated once the dependent target is completed");
 
                     if (Engine.debugMode)

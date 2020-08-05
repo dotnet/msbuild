@@ -1862,7 +1862,7 @@ namespace Microsoft.Build.CommandLine
 
                     foreach (string includedResponseFile in s_includedResponseFiles)
                     {
-                        if (String.Compare(responseFile, includedResponseFile, StringComparison.OrdinalIgnoreCase) == 0)
+                        if (String.Equals(responseFile, includedResponseFile, StringComparison.OrdinalIgnoreCase))
                         {
                             commandLineSwitches.SetParameterError("RepeatedResponseFileError", unquotedCommandLineArg);
                             isRepeatedResponseFile = true;
@@ -2817,7 +2817,7 @@ namespace Microsoft.Build.CommandLine
                     string solutionName = Path.GetFileNameWithoutExtension(potentialSolutionFiles[0]);
                     string projectName = Path.GetFileNameWithoutExtension(potentialProjectFiles[0]);
                     // Compare the names and error if they are not identical
-                    InitializationException.VerifyThrow(String.Compare(solutionName, projectName, StringComparison.OrdinalIgnoreCase) == 0, projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
+                    InitializationException.VerifyThrow(String.Equals(solutionName, projectName, StringComparison.OrdinalIgnoreCase), projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
                 }
                 // If there is more than one solution file in the current directory we have no idea which one to use
                 else if (potentialSolutionFiles.Length > 1)
@@ -2837,17 +2837,17 @@ namespace Microsoft.Build.CommandLine
                         string secondPotentialProjectExtension = Path.GetExtension(potentialProjectFiles[1]);
 
                         // If the two projects have the same extension we can't decide which one to pick
-                        if (String.Compare(firstPotentialProjectExtension, secondPotentialProjectExtension, StringComparison.OrdinalIgnoreCase) != 0)
+                        if (!String.Equals(firstPotentialProjectExtension, secondPotentialProjectExtension, StringComparison.OrdinalIgnoreCase))
                         {
                             // Check to see if the first project is the proj, if it is use it
-                            if (String.Compare(firstPotentialProjectExtension, ".proj", StringComparison.OrdinalIgnoreCase) == 0)
+                            if (String.Equals(firstPotentialProjectExtension, ".proj", StringComparison.OrdinalIgnoreCase))
                             {
                                 potentialProjectFiles = new string[] { potentialProjectFiles[0] };
                                 // We have made a decision
                                 isAmbiguousProject = false;
                             }
                             // If the first project is not the proj check to see if the second one is the proj, if so use it
-                            else if (String.Compare(secondPotentialProjectExtension, ".proj", StringComparison.OrdinalIgnoreCase) == 0)
+                            else if (String.Equals(secondPotentialProjectExtension, ".proj", StringComparison.OrdinalIgnoreCase))
                             {
                                 potentialProjectFiles = new string[] { potentialProjectFiles[1] };
                                 // We have made a decision
@@ -2913,7 +2913,7 @@ namespace Microsoft.Build.CommandLine
 
                     // The parsed extension does not match the passed in extension, this means that there were
                     // some other chars before the last extension
-                    if (string.Compare(extension, extensionToIgnore, StringComparison.OrdinalIgnoreCase) != 0)
+                    if (!string.Equals(extension, extensionToIgnore, StringComparison.OrdinalIgnoreCase))
                     {
                         InitializationException.Throw("InvalidExtensionToIgnore", extensionToIgnore, null, false);
                     }
@@ -3543,7 +3543,7 @@ namespace Microsoft.Build.CommandLine
             // DDB Bug msbuild.exe -Logger:FileLogger,Microsoft.Build.Engine fails due to moved engine file.
             // Only add strong naming if the assembly is a non-strong named 'Microsoft.Build.Engine' (i.e, no additional characteristics)
             // Concat full Strong Assembly to match v4.0
-            if (String.Compare(loggerAssemblySpec, "Microsoft.Build.Engine", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(loggerAssemblySpec, "Microsoft.Build.Engine", StringComparison.OrdinalIgnoreCase))
             {
                 loggerAssemblySpec = "Microsoft.Build.Engine,Version=4.0.0.0,Culture=neutral,PublicKeyToken=b03f5f7f11d50a3a";
             }

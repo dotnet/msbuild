@@ -545,7 +545,7 @@ namespace Microsoft.Build.BuildEngine
 
                 // Make sure that the property name passed into the indexer matches
                 // the property name on the BuildProperty object.
-                error.VerifyThrowArgument(0 == String.Compare(propertyName, value.Name, StringComparison.OrdinalIgnoreCase),
+                error.VerifyThrowArgument(String.Equals(propertyName, value.Name, StringComparison.OrdinalIgnoreCase),
                     "PropertyNamesDoNotMatch", "BuildProperty");
 
                 this.SetProperty(value);
@@ -1087,7 +1087,7 @@ namespace Microsoft.Build.BuildEngine
                 // name.
                 foreach (BuildProperty property in this)
                 {
-                    if (0 == String.Compare(property.Name, propertyName, StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals(property.Name, propertyName, StringComparison.OrdinalIgnoreCase))
                     {
                         // Add the property to our list of things to remove.
                         propertiesToRemove.Add(property);

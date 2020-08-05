@@ -124,7 +124,7 @@ namespace Microsoft.Build.BuildEngine
         {
             ErrorUtilities.VerifyThrowArgumentNull(parameterName, "parameterName");
 
-            if (0 == String.Compare(parameterName, "MAXCPUCOUNT", StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(parameterName, "MAXCPUCOUNT", StringComparison.OrdinalIgnoreCase))
             {
                  try
                 {
@@ -139,11 +139,11 @@ namespace Microsoft.Build.BuildEngine
                     //
                 }
             }
-            else if (0 == String.Compare(parameterName, "MSBUILDLOCATION", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, "MSBUILDLOCATION", StringComparison.OrdinalIgnoreCase))
             {
                 this.locationOfMSBuildExe = parameterValue;
             }
-            else if (0 == String.Compare(parameterName, "NODEREUSE", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, "NODEREUSE", StringComparison.OrdinalIgnoreCase))
             {
                 try
                 {

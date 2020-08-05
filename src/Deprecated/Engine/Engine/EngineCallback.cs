@@ -139,7 +139,7 @@ namespace Microsoft.Build.BuildEngine
                         // as what is being requested, just re-use it.  Otherwise, we need to instantiate a new
                         // project object that has the same project contents but different global properties.
                         if (!projectToBuild.GlobalProperties.IsEquivalent(buildRequest.GlobalProperties) &&
-                            (String.Compare(parentProject.ToolsVersion, buildRequest.ToolsetVersion, StringComparison.OrdinalIgnoreCase) == 0))
+                            (String.Equals(parentProject.ToolsVersion, buildRequest.ToolsetVersion, StringComparison.OrdinalIgnoreCase)))
                         {
                             projectToBuild = parentEngine.GetMatchingProject(parentProject,
                                                  parentProject.FullFileName, buildRequest.GlobalProperties,
