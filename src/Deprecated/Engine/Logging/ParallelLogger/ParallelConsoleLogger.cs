@@ -376,7 +376,6 @@ namespace Microsoft.Build.BuildEngine
             // Loop through each of the warnings and put them into the correct buckets
             for (int listCount = 0; listCount < listToProcess.Count; listCount++)
             {
-
                 T errorWarningEventArgs = (T)listToProcess[listCount];
 
                 // Target event may be null for a couple of reasons:
@@ -1176,7 +1175,7 @@ namespace Microsoft.Build.BuildEngine
                             // Calculate how many chars will fit on the console buffer
                             amountToCopy = (messageLength - index) < (bufferWidthMinusNewLine - adjustedPrefixWidth) ? (messageLength - index) : (bufferWidthMinusNewLine - adjustedPrefixWidth);
                             WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), (prefixAlreadyWritten && index == 0 && i == 0), adjustedPrefixWidth);
-                            index = index + amountToCopy;
+                            index += amountToCopy;
                         }
                     }
                     else
@@ -1509,7 +1508,6 @@ namespace Microsoft.Build.BuildEngine
             /// </summary>
             internal void AddEventFinished(string projectTargetNames, BuildEventContext buildEventContext, DateTime eventTimeStamp)
             {
-
                 if (!string.IsNullOrEmpty(projectTargetNames))
                 {
                     MPPerformanceCounter entryPoint = GetPerformanceCounter(projectTargetNames, ref internalPerformanceCounters);

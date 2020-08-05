@@ -169,7 +169,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// If there was a remapping entry in the redist list list then remap the passed in assemblynameextension 
+        /// If there was a remapping entry in the redist list then remap the passed in assemblynameextension 
         /// if not just return the original one. 
         /// </summary>
         public AssemblyNameExtension RemapAssembly(AssemblyNameExtension extensionToRemap)
@@ -497,6 +497,8 @@ namespace Microsoft.Build.Tasks
         /// 
         /// </summary>
         /// <param name="whiteListAssemblyTableInfo">List of paths to white list xml files</param>
+        /// <param name="whiteListErrors">List of white listed errors</param>
+        /// <param name="whiteListErrorFileNames">List of white listed error file names</param>
         /// <returns>A dictionary containing the full assembly names of black listed assemblies as the key, and null as the value. 
         ///          If there is no assemblies in the redist list null is returned.
         /// </returns> 
@@ -621,6 +623,10 @@ namespace Microsoft.Build.Tasks
         /// XML formatting issues will recorded in the 'errors' collection.
         /// </summary>
         /// <param name="assemblyTableInfo">Information about the redistlist file.</param>
+        /// <param name="assembliesList">List of assembly from installed assembly table.</param>
+        /// <param name="errorsList">Error list.</param>
+        /// <param name="errorFilenamesList">Error filename list.</param>
+        /// <param name="remapEntries">Assembly remaping.</param>
         /// <returns>Redist name of the redist list just read in</returns>
         internal static string ReadFile(AssemblyTableInfo assemblyTableInfo, List<AssemblyEntry> assembliesList, List<Exception> errorsList, List<string> errorFilenamesList, List<AssemblyRemapping> remapEntries)
         {
@@ -959,7 +965,7 @@ namespace Microsoft.Build.Tasks
         /// files exist.
         /// </summary>
         /// <param name="subsetToSearchFor">String array of subset names, ie  Client, Net, MySubset. This may be null or empty if no subsets were requested to be 
-        /// found in the target framework directories. This can happen if the the subsets are instead passed in as InstalledDefaultSubsetTables</param>
+        /// found in the target framework directories. This can happen if the subsets are instead passed in as InstalledDefaultSubsetTables</param>
         internal SubsetListFinder(string[] subsetToSearchFor)
         {
             ErrorUtilities.VerifyThrowArgumentNull(subsetToSearchFor, nameof(subsetToSearchFor));

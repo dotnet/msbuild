@@ -254,7 +254,6 @@ namespace Microsoft.Build.BuildEngine
             return null;
         }
 
-
         /// <summary>
         /// This function checks if the given ProjectBuildState is caused by a given parent target (via
         /// a dependency, onerror or IBuildEngine relationship)

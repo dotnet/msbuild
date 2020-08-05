@@ -974,7 +974,7 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
 
-                    ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length || overallSuccess == false, "The number of results returned {0} cannot be less than the number of project files {1} unless one of the results indicated failure.", results.Length, projectFileNames.Length);
+                    ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length || !overallSuccess, "The number of results returned {0} cannot be less than the number of project files {1} unless one of the results indicated failure.", results.Length, projectFileNames.Length);
                 }
 
                 BuildRequestsSucceeded = overallSuccess;
@@ -989,7 +989,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void VerifyActiveProxy()
         {
-            ErrorUtilities.VerifyThrow(_activeProxy == true, "Attempted to use an inactive task host.");
+            ErrorUtilities.VerifyThrow(_activeProxy, "Attempted to use an inactive task host.");
         }
 
         /// <summary>

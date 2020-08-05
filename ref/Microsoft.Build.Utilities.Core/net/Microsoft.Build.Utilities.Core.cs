@@ -401,7 +401,7 @@ namespace Microsoft.Build.Utilities
         public void LogCriticalMessage(string subcategory, string code, string helpKeyword, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, params object[] messageArgs) { }
         public void LogError(string message, params object[] messageArgs) { }
         public void LogError(string subcategory, string errorCode, string helpKeyword, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, params object[] messageArgs) { }
-        public void LogError(string subcategory, string errorCode, string helpKeyword, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpLink, params object[] messageArgs) { }
+        public void LogError(string subcategory, string errorCode, string helpKeyword, string helpLink, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, params object[] messageArgs) { }
         public void LogErrorFromException(System.Exception exception) { }
         public void LogErrorFromException(System.Exception exception, bool showStackTrace) { }
         public void LogErrorFromException(System.Exception exception, bool showStackTrace, bool showDetail, string file) { }

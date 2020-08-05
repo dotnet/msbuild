@@ -201,7 +201,7 @@ namespace Microsoft.Build.Utilities
         public readonly bool IgnoreEmptyImports = Environment.GetEnvironmentVariable("MSBUILDIGNOREEMPTYIMPORTS") == "1";
 
         /// <summary>
-        /// Whether to to respect the TreatAsLocalProperty parameter on the Project tag. 
+        /// Whether to respect the TreatAsLocalProperty parameter on the Project tag. 
         /// </summary>
         public readonly bool IgnoreTreatAsLocalProperty = Environment.GetEnvironmentVariable("MSBUILDIGNORETREATASLOCALPROPERTY") != null;
 

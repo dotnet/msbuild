@@ -257,12 +257,12 @@ namespace Microsoft.Build.BackEnd
 
             if (_taskFactoryWrapper.TaskFactoryLoadedType.HasSTAThreadAttribute())
             {
-                requirements = requirements | TaskRequirements.RequireSTAThread;
+                requirements |= TaskRequirements.RequireSTAThread;
             }
 
             if (_taskFactoryWrapper.TaskFactoryLoadedType.HasLoadInSeparateAppDomainAttribute())
             {
-                requirements = requirements | TaskRequirements.RequireSeparateAppDomain;
+                requirements |= TaskRequirements.RequireSeparateAppDomain;
 
                 // we're going to be remoting across the appdomain boundary, so
                 // create the list that we'll use to disconnect the taskitems once we're done
@@ -1480,7 +1480,7 @@ namespace Microsoft.Build.BackEnd
                         // if individual items in the array are null, ignore them
                         if (output != null)
                         {
-                            joinedOutputs = joinedOutputs ?? new StringBuilder();
+                            joinedOutputs ??= new StringBuilder();
 
                             if (joinedOutputs.Length > 0)
                             {
@@ -1556,7 +1556,7 @@ namespace Microsoft.Build.BackEnd
                         // if individual outputs in the array are null, ignore them
                         if (output != null)
                         {
-                            joinedOutputs = joinedOutputs ?? new StringBuilder();
+                            joinedOutputs ??= new StringBuilder();
 
                             if (joinedOutputs.Length > 0)
                             {

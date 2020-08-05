@@ -10,7 +10,6 @@ namespace Microsoft.Build.Construction
     /// </summary>
     public sealed class ProjectConfigurationInSolution
     {
-
         /// <summary>
         /// Constructor
         /// </summary>

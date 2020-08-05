@@ -507,8 +507,7 @@ namespace Microsoft.Build.Shared
                             // Path.Combine leaves no trailing slash, so if we had one before, be sure to add it back in
                             if (endsWithASlash)
                             {
-                                s_pathToV35ToolsInFallbackDotNetFrameworkSdk = s_pathToV35ToolsInFallbackDotNetFrameworkSdk
-                                                                             + Path.DirectorySeparatorChar;
+                                s_pathToV35ToolsInFallbackDotNetFrameworkSdk += Path.DirectorySeparatorChar;
                             }
                         }
                         else
@@ -553,7 +552,7 @@ namespace Microsoft.Build.Shared
                             // Path.Combine leaves no trailing slash, so if we had one before, be sure to add it back in
                             if (endsWithASlash)
                             {
-                                s_pathToV4ToolsInFallbackDotNetFrameworkSdk = s_pathToV4ToolsInFallbackDotNetFrameworkSdk + "\\";
+                                s_pathToV4ToolsInFallbackDotNetFrameworkSdk += "\\";
                             }
                         }
                         else
@@ -766,7 +765,7 @@ namespace Microsoft.Build.Shared
             else if (indexOfFramework64 == -1 && architecture == DotNetFrameworkArchitecture.Bitness64)
             {
                 // need to add 64 -- since this is a heuristic, we assume that we just need to append.  
-                baseLocation = baseLocation + "64";
+                baseLocation += "64";
             }
             // we don't need to do anything if it's DotNetFrameworkArchitecture.Current.  
 
@@ -916,7 +915,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Take the parts of the Target framework moniker and formulate the reference assembly path based on the the following pattern:
+        /// Take the parts of the Target framework moniker and formulate the reference assembly path based on the following pattern:
         /// For a framework and version:
         ///     $(TargetFrameworkRootPath)\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)
         /// For a subtype:
@@ -991,7 +990,7 @@ namespace Microsoft.Build.Shared
 
                 if (fixedPath != null && endedWithASlash)
                 {
-                    fixedPath = fixedPath + Path.DirectorySeparatorChar;
+                    fixedPath += Path.DirectorySeparatorChar;
                 }
             }
 

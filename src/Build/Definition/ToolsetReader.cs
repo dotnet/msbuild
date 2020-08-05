@@ -150,7 +150,7 @@ namespace Microsoft.Build.Evaluation
                 if (NativeMethodsShared.IsWindows || registryReader != null)
                 {
                     // If we haven't been provided a registry reader (i.e. unit tests), create one
-                    registryReader = registryReader ?? new ToolsetRegistryReader(environmentProperties, globalProperties);
+                    registryReader ??= new ToolsetRegistryReader(environmentProperties, globalProperties);
 
                     // We do not accumulate properties when reading them from the registry, because the order
                     // in which values are returned to us is essentially random: so we disallow one property
@@ -756,7 +756,6 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal struct MSBuildExtensionsPathReferenceKind
     {
-
         /// <summary>
         /// MSBuildExtensionsPathReferenceKind instance for property named "MSBuildExtensionsPath"
         /// </summary>

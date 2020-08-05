@@ -476,7 +476,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         // Found the start of a comment
                         insideComment = true;
-                        i = i + 3;
+                        i += 3;
                         continue;
                     }
                 }
@@ -500,7 +500,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         // Found the end of a comment
                         insideComment = false;
-                        i = i + 2;
+                        i += 2;
                         continue;
                     }
                 }

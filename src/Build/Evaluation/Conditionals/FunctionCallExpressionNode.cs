@@ -155,7 +155,6 @@ namespace Microsoft.Build.Evaluation
                 argument = FileUtilities.FixFilePath(argument);
             }
 
-
             IList<TaskItem> expanded = state.ExpandIntoTaskItems(argument);
             var expandedCount = expanded.Count;
 

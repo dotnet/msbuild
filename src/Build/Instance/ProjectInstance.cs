@@ -182,7 +182,6 @@ namespace Microsoft.Build.Execution
         private bool _translateEntireState;
         private int _evaluationId = BuildEventContext.InvalidEvaluationId;
 
-
         /// <summary>
         /// Creates a ProjectInstance directly.
         /// No intermediate Project object is created.
@@ -259,6 +258,7 @@ namespace Microsoft.Build.Execution
         /// <param name="toolsVersion">The tools version.</param>
         /// <param name="subToolsetVersion">The sub-toolset version, used in tandem with the ToolsVersion to determine the set of toolset properties.</param>
         /// <param name="projectCollection">Project collection</param>
+        /// <param name="projectLoadSettings">Project load settings</param>
         /// <param name="evaluationContext">The context to use for evaluation.</param>
         /// <returns>A new project instance</returns>
         private ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext)
@@ -340,6 +340,7 @@ namespace Microsoft.Build.Execution
         /// <param name="toolsVersion">The tools version.</param>
         /// <param name="subToolsetVersion">The sub-toolset version, used in tandem with the ToolsVersion to determine the set of toolset properties.</param>
         /// <param name="projectCollection">Project collection</param>
+        /// <param name="projectLoadSettings">Project load settings</param>
         /// <param name="evaluationContext">The context to use for evaluation.</param>
         /// <returns>A new project instance</returns>
         private ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext)

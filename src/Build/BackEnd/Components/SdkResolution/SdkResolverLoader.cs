@@ -47,6 +47,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         ///     Root\SdkResolver\(ResolverName)\(ResolverName).dll.
         /// </summary>
         /// <param name="rootFolder"></param>
+        /// <param name="location"></param>
         /// <returns></returns>
         internal virtual IList<string> FindPotentialSdkResolvers(string rootFolder, ElementLocation location)
         {

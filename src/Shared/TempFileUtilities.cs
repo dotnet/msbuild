@@ -86,7 +86,7 @@ namespace Microsoft.Build.Shared
 
             try
             {
-                directory = directory ?? Path.GetTempPath();
+                directory ??= Path.GetTempPath();
 
                 Directory.CreateDirectory(directory);
 
@@ -147,6 +147,5 @@ namespace Microsoft.Build.Shared
                 Directory.Delete(Path, true);
             }
         }
-
     }
 }

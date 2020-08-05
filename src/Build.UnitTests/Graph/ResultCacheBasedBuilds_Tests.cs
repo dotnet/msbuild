@@ -422,7 +422,7 @@ namespace Microsoft.Build.Graph.UnitTests
             // (current node, expected output dictionary) -> actual expected output for current node
             Func<ProjectGraphNode, ExpectedNodeBuildOutput, string[]> expectedOutputProducer = null)
         {
-            expectedOutputProducer = expectedOutputProducer ?? ((node, expectedOutputs) => expectedOutputs[node]);
+            expectedOutputProducer ??= ((node, expectedOutputs) => expectedOutputs[node]);
 
             var results = new Dictionary<string, (BuildResult Result, MockLogger Logger)>(topoSortedNodes.Count);
 

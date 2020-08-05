@@ -135,7 +135,7 @@ namespace Microsoft.Build.BuildEngine
                     // Calculate the time remaining and only continue if there is time left
                     TimeSpan timeSpent = new TimeSpan(DateTime.Now.Ticks - startTime);
                     startTime = DateTime.Now.Ticks;
-                    responseTimeout = responseTimeout - (int)timeSpent.TotalMilliseconds;
+                    responseTimeout -= (int)timeSpent.TotalMilliseconds;
                     if (responseTimeout <= 0)
                     {
                         Console.WriteLine("Response time out out exceeded :" + DateTime.Now.Ticks);
@@ -152,7 +152,6 @@ namespace Microsoft.Build.BuildEngine
 
             return statusForNodes;
         }
-
 
         internal void PostNodeStatus(int nodeId, NodeStatus nodeStatus)
         {
@@ -173,7 +172,6 @@ namespace Microsoft.Build.BuildEngine
             statusReplyCount++;
             statusMessageReceived.Set();
         }
-
 
         internal void PostCycleNotification
         (

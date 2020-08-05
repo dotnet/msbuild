@@ -227,16 +227,6 @@ namespace Microsoft.Build.Evaluation
         private int _maxNodeCount;
 
         /// <summary>
-        /// Hook up last minute dumping of any exceptions bringing down the process
-        /// </summary>
-        static ProjectCollection()
-        {
-#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
-            AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
-#endif
-        }
-
-        /// <summary>
         /// Instantiates a project collection with no global properties or loggers that reads toolset 
         /// information from the configuration file and registry.
         /// </summary>
@@ -483,7 +473,6 @@ namespace Microsoft.Build.Evaluation
                     s_assemblyDisplayVersion = plusIndex < 0
                                                     ? fullInformationalVersion
                                                     : fullInformationalVersion.Substring(startIndex: 0, length: plusIndex + 10);
-
                 }
 
                 return s_assemblyDisplayVersion;
@@ -819,7 +808,6 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-
         /// <summary>
         /// Global collection id.
         /// Can be used for external providers to optimize the cross-site link exchange
@@ -830,7 +818,6 @@ namespace Microsoft.Build.Evaluation
         /// External project support.
         /// Establish a remote project link for this collection.
         /// </summary>
-
         internal ExternalProjectsProvider Link
         {
             get => _link;
@@ -1099,7 +1086,6 @@ namespace Microsoft.Build.Evaluation
 
             return loaded;
         }
-
 
         /// <summary>
         /// Loads a project with the specified filename, using the collection's global properties and tools version.

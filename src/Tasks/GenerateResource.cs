@@ -50,7 +50,6 @@ namespace Microsoft.Build.Tasks
     public sealed partial class GenerateResource : TaskExtension
     {
 
-
 #region Fields
 
         // This cache helps us track the linked resource files listed inside of a resx resource file
@@ -692,7 +691,6 @@ namespace Microsoft.Build.Tasks
                     Sources = newSources.ToArray();
                 }
 
-
                 // If there are no sources to process, just return (with success) and report the condition.
                 if ((Sources == null) || (Sources.Length == 0))
                 {
@@ -1136,13 +1134,13 @@ namespace Microsoft.Build.Tasks
 #endif
         }
 
-
 #if FEATURE_RESGEN
         /// <summary>
         /// Given an instance of the ResGen task with everything but the strongly typed
         /// resource-related parameters filled out, execute the task and return the result
         /// </summary>
-        /// <param name="resGen">The task to execute.</param>
+        /// <param name="inputsToProcess">Input files to give to resgen.exe.</param>
+        /// <param name="outputsToProcess">Output files to give to resgen.exe.</param>
         private bool TransformResourceFilesUsingResGen(List<ITaskItem> inputsToProcess, List<ITaskItem> outputsToProcess)
         {
             ErrorUtilities.VerifyThrow(inputsToProcess.Count != 0, "There should be resource files to process");
@@ -1265,7 +1263,8 @@ namespace Microsoft.Build.Tasks
         /// Given an instance of the ResGen task with everything but the strongly typed
         /// resource-related parameters filled out, execute the task and return the result
         /// </summary>
-        /// <param name="resGen">The task to execute.</param>
+        /// <param name="inputsToProcess">Input files to give to resgen.exe.</param>
+        /// <param name="outputsToProcess">Output files to give to resgen.exe.</param>
         private bool GenerateStronglyTypedResourceUsingResGen(List<ITaskItem> inputsToProcess, List<ITaskItem> outputsToProcess)
         {
             ErrorUtilities.VerifyThrow(inputsToProcess.Count == 1 && outputsToProcess.Count == 1, "For STR, there should only be one input and one output.");
@@ -1302,7 +1301,6 @@ namespace Microsoft.Build.Tasks
         /// Factoring out the setting of the default parameters to the
         /// ResGen task.
         /// </summary>
-        /// <param name="resGen"></param>
         private ResGen CreateResGenTaskWithDefaultParameters()
         {
             ResGen resGen = new ResGen();
@@ -1442,7 +1440,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Given a cached portable library that is up to date, create ITaskItems to represent the output of the task, as if we did real work.
         /// </summary>
-        /// <param name="library">The portable library cache entry to extract output files & metadata from.</param>
+        /// <param name="library">The portable library cache entry to extract output files and metadata from.</param>
         /// <param name="cachedOutputFiles">List of output files produced from the cache.</param>
         private void AppendCachedOutputTaskItems(ResGenDependencies.PortableLibraryFile library, List<ITaskItem> cachedOutputFiles)
         {
@@ -1741,7 +1739,6 @@ namespace Microsoft.Build.Tasks
         /// needed, it should always err on the side of returning 'true'. This
         /// is because a separate AppDomain, while slow to create, is always safe.
         /// </summary>
-        /// <param name="sources">The list of .resx files.</param>
         /// <returns></returns>
         private bool NeedSeparateAppDomain()
         {
@@ -2563,7 +2560,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <remarks>Uses the input and output file extensions to determine their format</remarks>
         /// <param name="inFile">Input resources file</param>
-        /// <param name="outFile">Output resources file</param>
+        /// <param name="outFileOrDir">Output resources file or directory</param>
         /// <returns>True if conversion was successful, otherwise false</returns>
         private bool ProcessFile(string inFile, string outFileOrDir)
         {
@@ -2782,7 +2779,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 if (currentOutputDirectory != null &&
-                    currentOutputDirectoryAlreadyExisted == false)
+                    !currentOutputDirectoryAlreadyExisted)
                 {
                     // Do not annoy the user by removing an empty directory we did not create.
                     try
@@ -3255,6 +3252,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="name">Assembly's file name</param>
         /// <param name="assemblyName">AssemblyName of this assembly</param>
         /// <param name="culture">Assembly's CultureInfo</param>
+        /// <param name="a">The actual Assembly</param>
+        /// <param name="mainAssembly">Whether this is the main assembly</param>
         private NeutralResourcesLanguageAttribute CheckAssemblyCultureInfo(String name, AssemblyName assemblyName, CultureInfo culture, Assembly a, bool mainAssembly)
         {
             NeutralResourcesLanguageAttribute neutralResourcesLanguageAttribute = null;
@@ -3303,6 +3302,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Write resources from the resources ArrayList to the specified output file
         /// </summary>
+        /// <param name="reader">Reader information</param>
         /// <param name="filename">Output resources file</param>
         private void WriteResources(ReaderInfo reader, String filename)
         {
@@ -3320,7 +3320,6 @@ namespace Microsoft.Build.Tasks
                     _logger.LogError(format.ToString() + " not supported on .NET Core MSBuild");
 #endif
                     break;
-
 
                 case Format.Assembly:
                     _logger.LogErrorFromResources("GenerateResource.CannotWriteAssembly", filename);
@@ -3411,8 +3410,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Create a strongly typed resource class
         /// </summary>
+        /// <param name="reader">Reader information</param>
         /// <param name="outFile">Output resource filename, for defaulting the class filename</param>
         /// <param name="inputFileName">Input resource filename, for error messages</param>
+        /// <param name="sourceFile">The generated strongly typed filename</param>
         private void CreateStronglyTypedResources(ReaderInfo reader, String outFile, String inputFileName, out String sourceFile)
         {
             CodeDomProvider provider = null;
@@ -3498,6 +3499,7 @@ namespace Microsoft.Build.Tasks
         /// Broken out here so it can be called from GenerateResource class.
         /// Not a true "TryXXX" method, as it still throws if it encounters an exception it doesn't expect.
         /// </comments>
+        /// <param name="logger">Logger helper.</param>
         /// <param name="stronglyTypedLanguage">The language to create a provider for.</param>
         /// <param name="provider">The provider in question, if one is successfully created.</param>
         /// <returns>True if the provider was successfully created, false otherwise.</returns>
@@ -3527,6 +3529,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Read resources from an XML or binary format file
         /// </summary>
+        /// <param name="readerInfo">Reader info</param>
         /// <param name="reader">Appropriate IResourceReader</param>
         /// <param name="fileName">Filename, for error messages</param>
         private void ReadResources(ReaderInfo readerInfo, IResourceReader reader, String fileName)
@@ -3547,6 +3550,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Read resources from a text format file
         /// </summary>
+        /// <param name="reader">Reader info</param>
         /// <param name="fileName">Input resources filename</param>
         private void ReadTextResources(ReaderInfo reader, String fileName)
         {
@@ -3612,7 +3616,7 @@ namespace Microsoft.Build.Tasks
                     // sign.  Deal with it.
                     if (name[name.Length - 1] == ' ')
                     {
-                        name.Length = name.Length - 1;
+                        name.Length -= 1;
                     }
                     ch = sr.Read(); // move past =
                     // If it exists, move past the first space after the equals sign.
@@ -3718,11 +3722,11 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-
         /// <summary>
         /// Write resources to an XML or binary format resources file.
         /// </summary>
         /// <remarks>Closes writer automatically</remarks>
+        /// <param name="reader">Reader information</param>
         /// <param name="writer">Appropriate IResourceWriter</param>
         private void WriteResources(ReaderInfo reader,
             IResourceWriter writer)
@@ -3763,6 +3767,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Write resources to a text format resources file
         /// </summary>
+        /// <param name="reader">Reader information</param>
         /// <param name="fileName">Output resources file</param>
         private void WriteTextResources(ReaderInfo reader, String fileName)
         {
@@ -3796,6 +3801,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Add a resource from a text file to the internal data structures
         /// </summary>
+        /// <param name="reader">Reader information</param>
         /// <param name="name">Resource name</param>
         /// <param name="value">Resource value</param>
         /// <param name="inputFileName">Input file for messages</param>
@@ -3820,10 +3826,10 @@ namespace Microsoft.Build.Tasks
             reader.resourcesHashTable.Add(entry.Name, entry);
         }
 
-
         /// <summary>
         /// Add a resource from an XML or binary format file to the internal data structures
         /// </summary>
+        /// <param name="reader">Reader info</param>
         /// <param name="name">Resource name</param>
         /// <param name="value">Resource value</param>
         /// <param name="inputFileName">Input file for messages</param>
@@ -3934,7 +3940,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// For flow of control & passing sufficient error context back
+        /// For flow of control and passing sufficient error context back
         /// from ReadTextResources
         /// </summary>
         [Serializable]
@@ -4014,6 +4020,7 @@ namespace Microsoft.Build.Tasks
         /// Not implemented.  Not called by the ResxResourceReader.
         /// </summary>
         /// <param name="name"></param>
+        /// <param name="throwOnError"></param>
         /// <returns></returns>
         public Assembly GetAssembly(AssemblyName name, bool throwOnError)
         {

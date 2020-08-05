@@ -147,11 +147,11 @@ stages:
         ArtifactName: logs
       condition: succeededOrFailed()
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: symbols'
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Artifact: bin'
       inputs:
-        PathtoPublish: 'artifacts\bin'
-        ArtifactName: symbols
+        path: 'artifacts\bin'
+        artifactName: bin
       condition: succeededOrFailed()
 
     # Publishes setup VSIXes to a drop.

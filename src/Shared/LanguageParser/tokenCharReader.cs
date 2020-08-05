@@ -122,7 +122,6 @@ namespace Microsoft.Build.Shared.LanguageParser
             get { return _sources.IsPastEnd(_position); }
         }
 
-
         /*
          * Method:  GetCurrentMatchedString
          * 
@@ -157,7 +156,6 @@ namespace Microsoft.Build.Shared.LanguageParser
             {
                 return false;
             }
-
 
             string compare = _sources.Substring(_position, match.Length);
 

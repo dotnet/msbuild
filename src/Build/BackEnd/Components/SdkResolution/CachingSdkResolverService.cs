@@ -12,7 +12,6 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
-
     internal sealed class CachingSdkResolverService: SdkResolverService
     {
         /// <summary>

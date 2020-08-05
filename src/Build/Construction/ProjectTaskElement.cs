@@ -377,7 +377,7 @@ namespace Microsoft.Build.Construction
                 {
                     if (!XMakeAttributes.IsSpecialTaskAttribute(attribute.Name))
                     {
-                        toRemove = toRemove ?? new List<XmlAttribute>();
+                        toRemove ??= new List<XmlAttribute>();
                         toRemove.Add(attribute);
                     }
                 }

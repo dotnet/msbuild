@@ -180,7 +180,7 @@ namespace Microsoft.Build.Tasks
             var info = new FileInfo(file);
             if ((info.Attributes & FileAttributes.ReadOnly) != 0)
             {
-                info.Attributes = info.Attributes & ~FileAttributes.ReadOnly;
+                info.Attributes &= ~FileAttributes.ReadOnly;
             }
         }
 

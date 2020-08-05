@@ -132,7 +132,7 @@ namespace Microsoft.Build.BackEnd
                 // Add any item types that we were explicitly told to assume.
                 if (implicitBatchableItemType != null)
                 {
-                    consumedItemReferences = consumedItemReferences ?? new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
+                    consumedItemReferences ??= new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
                     consumedItemReferences.Add(implicitBatchableItemType);
                 }
 
@@ -232,7 +232,7 @@ namespace Microsoft.Build.BackEnd
                     // in the tag anywhere.  Adding it to this list allows us (down below in this
                     // method) to check that every item in this list has a value for each 
                     // unqualified metadata reference.
-                    consumedItemReferenceNames = consumedItemReferenceNames ?? new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
+                    consumedItemReferenceNames ??= new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
                     consumedItemReferenceNames.Add(consumedMetadataReference.ItemName);
                 }
             }

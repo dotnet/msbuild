@@ -252,7 +252,7 @@ namespace Microsoft.Build.Tasks
         ///         when false, any assembly with the same simple name will be a match.
         ///         when absent, then look at the value in Include. 
         ///           If its a simple name then behave as if specific version=false.
-        ///           If its a strong name name then behave as if specific version=true.
+        ///           If its a strong name then behave as if specific version=true.
         ///     string ExecutableExtension [default=absent] -- 
         ///         when present, the resolved assembly must have this extension.
         ///         when absent, .dll is considered and then .exe for each directory looked at.
@@ -502,7 +502,6 @@ namespace Microsoft.Build.Tasks
             set { _allowedAssemblyExtensions = value; }
         }
 
-
         /// <summary>
         /// [default=.pdb;.xml]
         /// These are the extensions that will be considered when looking for related files.
@@ -512,7 +511,6 @@ namespace Microsoft.Build.Tasks
             get { return _relatedFileExtensions; }
             set { _relatedFileExtensions = value; }
         }
-
 
         /// <summary>
         /// If this file name is passed in, then we parse it as an app.config file and extract bindingRedirect mappings. These mappings are used in the dependency
@@ -568,7 +566,6 @@ namespace Microsoft.Build.Tasks
             get { return _autoUnify; }
             set { _autoUnify = value; }
         }
-
 
         /// <summary>
         ///  When determining if a dependency should be copied locally one of the checks done is to see if the 
@@ -910,7 +907,6 @@ namespace Microsoft.Build.Tasks
             get;
             private set;
         }
-
 
         #endregion
         #region Logging
@@ -1414,7 +1410,6 @@ namespace Microsoft.Build.Tasks
                     Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", latestFolder);
                 }
 
-
                 Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "ProfileTablesLocation");
                 foreach (ITaskItem profileTable in FullFrameworkAssemblyTables)
                 {
@@ -1428,7 +1423,7 @@ namespace Microsoft.Build.Tasks
         /// Log a specific item metadata.
         /// </summary>
         /// <param name="item"></param>
-        /// <param name="attribute"></param>
+        /// <param name="metadataName"></param>
         private void LogAttribute(ITaskItem item, string metadataName)
         {
             string metadataValue = item.GetMetadata(metadataName);
@@ -1578,6 +1573,7 @@ namespace Microsoft.Build.Tasks
         /// show information about them.
         /// </summary>
         /// <param name="reference">The reference.</param>
+        /// <param name="fusionName">The fusion name.</param>
         /// <param name="importance">The importance of the message.</param>
         private void LogAssembliesConsideredAndRejected(Reference reference, string fusionName, MessageImportance importance)
         {
@@ -1607,7 +1603,6 @@ namespace Microsoft.Build.Tasks
                             _showAssemblyFoldersExLocations[location.SearchPath] = importance;
                         }
                     }
-
 
                     // If this is a new search location, then show the message.
                     if (lastSearchPath != location.SearchPath)
@@ -1776,7 +1771,6 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-
         /// <summary>
         /// Log a message about the imageruntime information.
         /// </summary>
@@ -1894,6 +1888,7 @@ namespace Microsoft.Build.Tasks
         #endregion
         #region ITask Members
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Execute the task.
         /// </summary>
@@ -1905,7 +1900,28 @@ namespace Microsoft.Build.Tasks
         /// <param name="getRegistrySubKeyNames">Used to get registry subkey names.</param>
         /// <param name="getRegistrySubKeyDefaultValue">Used to get registry default values.</param>
         /// <param name="getLastWriteTime">Delegate used to get the last write time.</param>
+        /// <param name="getRuntimeVersion">Delegate used to get the runtime version.</param>
+        /// <param name="openBaseKey">Key object to open.</param>
+        /// <param name="getAssemblyPathInGac">Delegate to get assembly path in the GAC.</param>
+        /// <param name="isWinMDFile">Delegate used for checking whether it is a WinMD file.</param>
+        /// <param name="readMachineTypeFromPEHeader">Delegate use to read machine type from PE Header</param>
         /// <returns>True if there was success.</returns>
+#else
+        /// <summary>
+        /// Execute the task.
+        /// </summary>
+        /// <param name="fileExists">Delegate used for checking for the existence of a file.</param>
+        /// <param name="directoryExists">Delegate used for checking for the existence of a directory.</param>
+        /// <param name="getDirectories">Delegate used for finding directories.</param>
+        /// <param name="getAssemblyName">Delegate used for finding fusion names of assemblyFiles.</param>
+        /// <param name="getAssemblyMetadata">Delegate used for finding dependencies of a file.</param>
+        /// <param name="getLastWriteTime">Delegate used to get the last write time.</param>
+        /// <param name="getRuntimeVersion">Delegate used to get the runtime version.</param>
+        /// <param name="getAssemblyPathInGac">Delegate to get assembly path in the GAC.</param>
+        /// <param name="isWinMDFile">Delegate used for checking whether it is a WinMD file.</param>
+        /// <param name="readMachineTypeFromPEHeader">Delegate use to read machine type from PE Header</param>
+        /// <returns>True if there was success.</returns>
+#endif
         internal bool Execute
         (
             FileExists fileExists,
@@ -1969,7 +1985,6 @@ namespace Microsoft.Build.Tasks
                             _targetFrameworkDirectories[i] = FileUtilities.EnsureTrailingSlash(_targetFrameworkDirectories[i]);
                         }
                     }
-
 
                     // Validate the contents of the InstalledAssemblyTables parameter.
                     AssemblyTableInfo[] installedAssemblyTableInfo = GetInstalledAssemblyTableInfo(_ignoreDefaultInstalledAssemblyTables, _installedAssemblyTables, new GetListPath(RedistList.GetRedistListPathsFromDisk), TargetFrameworkDirectories);
@@ -2202,7 +2217,6 @@ namespace Microsoft.Build.Tasks
                         {
                             dependencyTable.RemoveReferencesMarkedForExclusion(true /* Remove the reference and do not warn*/, subsetOrProfileName);
                         }
-
 
                         // Based on the closure, get a table of ideal remappings needed to 
                         // produce zero conflicts.
@@ -2475,7 +2489,6 @@ namespace Microsoft.Build.Tasks
             return combined;
         }
 
-
         /// <summary>
         /// If a targeted runtime is passed in use that, if none is passed in then we need to use v2.0.50727
         /// since the common way this would be empty is if we were using RAR as an override task.
@@ -2504,6 +2517,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="installedAssemblyTableInfo">Installed assembly info of the profile redist lists</param>
         /// <param name="fullRedistAssemblyTableInfo">Installed assemblyInfo for the full framework redist lists</param>
         /// <param name="blackList">Generated exclusion list</param>
+        /// <param name="fullFrameworkRedistList">Redist list which will contain the full framework redist list.</param>
         private void HandleProfile(AssemblyTableInfo[] installedAssemblyTableInfo, out AssemblyTableInfo[] fullRedistAssemblyTableInfo, out Dictionary<string, string> blackList, out RedistList fullFrameworkRedistList)
         {
             // Redist list which will contain the full framework redist list.
@@ -2678,7 +2692,6 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-
         /// <summary>
         /// Determine if a black list should be used or not
         /// 
@@ -2731,7 +2744,7 @@ namespace Microsoft.Build.Tasks
         /// Populates the suggested redirects output parameter.
         /// </summary>
         /// <param name="idealAssemblyRemappings">The list of ideal remappings.</param>
-        /// <param name="idealAssemblyRemappedReferences">The list of of references to ideal assembly remappings.</param>
+        /// <param name="idealAssemblyRemappedReferences">The list of references to ideal assembly remappings.</param>
         private void PopulateSuggestedRedirects(List<DependentAssembly> idealAssemblyRemappings, List<AssemblyNameReference> idealAssemblyRemappedReferences)
         {
             var holdSuggestedRedirects = new List<ITaskItem>();

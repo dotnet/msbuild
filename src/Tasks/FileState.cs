@@ -148,7 +148,6 @@ namespace Microsoft.Build.Tasks
                             IsReadOnly = fileInfo.IsReadOnly;
                             LastWriteTimeUtc = fileInfo.LastWriteTimeUtc;
                             Length = fileInfo.Length;
-
                         }
                         else
                         {
@@ -162,7 +161,6 @@ namespace Microsoft.Build.Tasks
                                 IsReadOnly = false;
                                 LastWriteTimeUtc = directoryInfo.LastWriteTimeUtc;
                             }
-
                         }
                     }
                 }

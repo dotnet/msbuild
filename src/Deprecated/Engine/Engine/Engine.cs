@@ -95,7 +95,6 @@ namespace Microsoft.Build.BuildEngine
     [Obsolete("This class has been deprecated. Please use Microsoft.Build.Evaluation.ProjectCollection from the Microsoft.Build assembly instead.")]
     public class Engine
     {
-
         #region Member Data
 
         // For those folks who want to share a single Engine object across many projects
@@ -453,7 +452,6 @@ namespace Microsoft.Build.BuildEngine
             {
                 LocalNodeProvider localNodeProvider = new LocalNodeProvider();
 
-
                 string configuration = string.Empty;
                 if (localNodeProviderParameters.EndsWith(";", StringComparison.OrdinalIgnoreCase))
                 {
@@ -499,7 +497,6 @@ namespace Microsoft.Build.BuildEngine
                 UpdateToolsPath(defaultToolsVersion, value);
             }
         }
-
 
         /// <summary>
         /// Is this engine in the process of building?
@@ -844,7 +841,6 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-
         internal bool EnabledCentralLogging
         {
             get
@@ -901,7 +897,6 @@ namespace Microsoft.Build.BuildEngine
 
             return toolsetState.GetTaskRegistry(buildEventContext);
         }
-
 
         /// <summary>
         /// Adds a new toolset to the engine. Any pre-existing toolset with the same
@@ -1007,7 +1002,6 @@ namespace Microsoft.Build.BuildEngine
                 // Now update the default tools version to 2.0
                 DefaultToolsVersion = Constants.defaultToolsVersion;
             }
-
         }
 
         /// <summary>
@@ -1332,7 +1326,6 @@ namespace Microsoft.Build.BuildEngine
             UnregisterAllLoggers();
         }
 
-
         /// <summary>
         /// Creates a new empty Project object that is associated with this engine. All projects must be associated with an
         /// engine, because they need loggers, global properties, reserved properties, etc.
@@ -1638,14 +1631,14 @@ namespace Microsoft.Build.BuildEngine
             bool forceFlush = false;
             while (
                     continueExecution && 
-                    (terminatingBuildRequest == null || terminatingBuildRequest.BuildCompleted == false)
+                    (terminatingBuildRequest == null || !terminatingBuildRequest.BuildCompleted)
                   )
             {
                 int eventType = 0;
 
                 // See if we have anything to do without waiting on the handles which is expensive 
                 // for kernel mode objects.
-                if (this.engineAbortCachedValue == true)
+                if (this.engineAbortCachedValue)
                 {
                     eventType = 0;
                 }
@@ -1821,7 +1814,7 @@ namespace Microsoft.Build.BuildEngine
                 // TEM will be null if we're shutting down
                 if (NodeManager.TaskExecutionModule != null)
                 {
-                    if (NodeManager.TaskExecutionModule.UseBreadthFirstTraversal == false /* using depth first traversal */ &&
+                    if (!NodeManager.TaskExecutionModule.UseBreadthFirstTraversal /* using depth first traversal */ &&
                         buildRequests.Count == 0 && taskOutputUpdates.Count == 0 &&
                         NodeManager.TaskExecutionModule.IsIdle
                         )
@@ -2024,7 +2017,6 @@ namespace Microsoft.Build.BuildEngine
 
             project.ContinueBuild(buildContext, taskExecutionContext);
         }
-
 
         private void IncrementProjectsInProgress()
         {
@@ -2331,7 +2323,6 @@ namespace Microsoft.Build.BuildEngine
             {
                 buildEventContext = project.ProjectBuildEventContext;
             }
-
             else // Dont have an already instantiated project, need to make a new context
             {
                 buildEventContext = new BuildEventContext(

@@ -137,7 +137,7 @@ namespace Microsoft.Build.BackEnd.Logging
         private List<LoggerDescription> _loggerDescriptions;
 
         /// <summary>
-        /// The event source to which filters will listen to to get the build events which are logged to the logging service through the 
+        /// The event source to which filters will listen to get the build events which are logged to the logging service through the 
         /// logging helper methods. Ie LogMessage and LogMessageEvent
         /// </summary>
         private EventSourceSink _filterEventSource;
@@ -483,7 +483,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public bool IncludeEvaluationMetaprojects
         {
-            get => (_includeEvaluationMetaprojects = _includeEvaluationMetaprojects ?? _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationMetaprojects)).Value;
+            get => _includeEvaluationMetaprojects ??= _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationMetaprojects);
             set => _includeEvaluationMetaprojects = value;
         }
 
@@ -492,7 +492,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public bool IncludeEvaluationProfile
         {
-            get => (_includeEvaluationProfile = _includeEvaluationProfile ??_eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationProfiles)).Value;
+            get => _includeEvaluationProfile ??= _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationProfiles);
             set => _includeEvaluationProfile = value;
         }
 
@@ -501,7 +501,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public bool IncludeTaskInputs
         {
-            get => (_includeTaskInputs = _includeTaskInputs ?? _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeTaskInputs)).Value;
+            get => _includeTaskInputs ??= _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeTaskInputs);
             set => _includeTaskInputs = value;
         }
 

@@ -555,7 +555,6 @@ namespace Microsoft.Build.Utilities
                 ErrorUtilities.ThrowInvalidOperation("LoggingBeforeTaskInitialization", e.Message);
             }
 
-
             BuildEngine.LogMessageEvent(e);
         }
 
@@ -572,7 +571,7 @@ namespace Microsoft.Build.Utilities
         /// <exception cref="ArgumentNullException">Thrown when <c>message</c> is null.</exception>
         public void LogError(string message, params object[] messageArgs)
         {
-            LogError(null, null, null, null, 0, 0, 0, 0, message, null, messageArgs);
+            LogError(null, null, null, null, null, 0, 0, 0, 0, message, messageArgs);
         }
 
         /// <summary>
@@ -604,7 +603,7 @@ namespace Microsoft.Build.Utilities
             params object[] messageArgs
         )
         {
-            LogError(subcategory, errorCode, helpKeyword, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, null, messageArgs);
+            LogError(subcategory, errorCode, helpKeyword, null, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, messageArgs);
         }
 
         /// <summary>
@@ -628,13 +627,13 @@ namespace Microsoft.Build.Utilities
             string subcategory,
             string errorCode,
             string helpKeyword,
+            string helpLink,
             string file,
             int lineNumber,
             int columnNumber,
             int endLineNumber,
             int endColumnNumber,
             string message,
-            string helpLink,
             params object[] messageArgs
         )
         {

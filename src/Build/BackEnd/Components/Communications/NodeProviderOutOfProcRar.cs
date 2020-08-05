@@ -33,10 +33,12 @@ namespace Microsoft.Build.BackEnd
             // Make it here.
             CommunicationsUtilities.Trace("Starting to acquire a new or existing node to establish node ID {0}...", nodeId);
 
-            // TODO: Fix this. Be able to decide which option to choose.
-            var hostHandShake = NodeProviderOutOfProc.GetHostHandshake(ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority, false);
-            var clientHandShake = NodeProviderOutOfProc.GetClientHandshake(ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority, false);
-            NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, hostHandShake, clientHandShake, NodeContextTerminated);
+            Handshake hostHandshake = new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false,
+                                                            nodeReuse: ComponentHost.BuildParameters.EnableNodeReuse,
+                                                            lowPriority: ComponentHost.BuildParameters.LowPriority,
+                                                            is64Bit: EnvironmentUtilities.Is64BitProcess,
+                                                            workerNode: false));
+            NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, hostHandshake, NodeContextTerminated);
 
             if (null != context)
             {
@@ -116,7 +118,7 @@ namespace Microsoft.Build.BackEnd
             // This means we need both versions of the handshake.
 
             // RAR node is special...
-            if(!nodeReuse)
+            if (!nodeReuse)
                 ShutdownAllNodes(nodeReuse, NodeContextTerminated);
         }
 
