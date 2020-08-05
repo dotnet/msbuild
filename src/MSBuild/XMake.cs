@@ -2635,6 +2635,15 @@ namespace Microsoft.Build.CommandLine
                         OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                         shutdownReason = node.Run(out nodeException);
                     }
+                    else if (nodeModeNumber == 3)
+                    {
+                        var node = new RarNode(); 
+                        // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
+                        bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+                        bool lowPriority = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority][0].Equals("true");
+
+                        shutdownReason = node.Run(nodeReuse, lowPriority, out nodeException);
+                    }
                     else
                     {
                         CommandLineSwitchException.Throw("InvalidNodeNumberValue", input[0]);
