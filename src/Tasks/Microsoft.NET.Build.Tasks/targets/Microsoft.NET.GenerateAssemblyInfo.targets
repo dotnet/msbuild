@@ -120,7 +120,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                          and '$(MinimumOSPlatform)' != ''
                          and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                          and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">
-      <AssemblyAttribute Include="System.Runtime.Versioning.MinimumOSPlatformAttribute">
+      <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">
         <_Parameter1>$(TargetPlatformIdentifier)$(MinimumOSPlatform)</_Parameter1>
       </AssemblyAttribute>
     </ItemGroup>
