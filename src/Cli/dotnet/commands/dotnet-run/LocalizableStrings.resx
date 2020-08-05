@@ -147,6 +147,9 @@
   <data name="RuntimeOptionDescription" xml:space="preserve">
     <value>The target runtime to run for.</value>
   </data>
+  <data name="RunCommandBuilding" xml:space="preserve">
+    <value>Building...</value>
+  </data>
   <data name="RunCommandException" xml:space="preserve">
     <value>The build failed. Fix the build errors and run again.</value>
   </data>

@@ -32,6 +32,11 @@
         <target state="translated">'{0}' özelliğinin değeri dizeye dönüştürülemedi.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RunCommandBuilding">
+        <source>Building...</source>
+        <target state="new">Building...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Fix the build errors and run again.</source>
         <target state="translated">Derleme başarısız oldu. Derleme hatalarını düzeltip yeniden çalıştırın.</target>

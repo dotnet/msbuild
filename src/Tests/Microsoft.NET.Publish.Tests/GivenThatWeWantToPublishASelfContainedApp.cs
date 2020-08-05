@@ -139,8 +139,8 @@ namespace Microsoft.NET.Publish.Tests
             var args = new string[]
             {
                 "/p:SelfContained=true",
-                "/p:TargetFramework=netcoreapp3.0",
-                $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid("netcoreapp3.0")}"
+                "/p:TargetFramework=netcoreapp3.1",
+                $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid("netcoreapp3.1")}"
             };
 
             var projectRoot = Path.Combine(testAsset.TestRoot, "main");

@@ -32,6 +32,11 @@
         <target state="translated">Impossible de convertir la valeur de la propriété '{0}' en chaîne.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RunCommandBuilding">
+        <source>Building...</source>
+        <target state="new">Building...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Fix the build errors and run again.</source>
         <target state="translated">La build a échoué. Corrigez les erreurs de la build et réexécutez-la.</target>
