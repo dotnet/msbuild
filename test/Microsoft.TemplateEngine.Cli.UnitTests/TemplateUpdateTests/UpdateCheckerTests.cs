@@ -21,12 +21,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
 
             // an updater that isn't related
             Guid unrelatedMountPointId = new Guid("44E776BF-0E75-43E3-97B0-1807B5207D90");
-            IInstallUnitDescriptor unrelatedInstallDescriptor = new NupkgInstallUnitDescriptor(Guid.NewGuid(), unrelatedMountPointId, "unrelatedPackage", "2.0.0", "TestAuthor");
+            IInstallUnitDescriptor unrelatedInstallDescriptor = new NupkgInstallUnitDescriptor(Guid.NewGuid(), unrelatedMountPointId, "unrelatedPackage", false, "2.0.0", "TestAuthor");
             IUpdateUnitDescriptor unrelatedUpdateDescriptor = new UpdateUnitDescriptor(unrelatedInstallDescriptor, "unrelatedPackage::2.1.0", "Unrelated Package Version 2.1.0");
 
             // the updater that should be found
             Guid mockMountPointId = new Guid("1EB31CA7-28C2-4AAD-B994-32A96A2EACB7");
-            IInstallUnitDescriptor testInstallDescriptor = new NupkgInstallUnitDescriptor(Guid.NewGuid(), mockMountPointId, "testPackage", "1.0.0", "TestAuthor");
+            IInstallUnitDescriptor testInstallDescriptor = new NupkgInstallUnitDescriptor(Guid.NewGuid(), mockMountPointId, "testPackage", false, "1.0.0", "TestAuthor");
             IUpdateUnitDescriptor mockUpdateDescriptor = new UpdateUnitDescriptor(testInstallDescriptor, "testPackage::1.1.0", "Test Package Version 1.0.0");
 
             MockNupkgUpdater.SetMockUpdates(new List<IUpdateUnitDescriptor>() { mockUpdateDescriptor, unrelatedUpdateDescriptor });

@@ -25,9 +25,9 @@ namespace Microsoft.TemplateEngine.Cli
             _paths = new Paths(environmentSettings);
         }
 
-        public void AddInstallDescriptorForLocation(Guid mountPointId, out IReadOnlyList<IInstallUnitDescriptor> descriptorList)
+        public void AddInstallDescriptorForLocation(Guid mountPointId, bool isPartOfAnOptionalWorkload, out IReadOnlyList<IInstallUnitDescriptor> descriptorList)
         {
-            ((SettingsLoader)(_environmentSettings.SettingsLoader)).InstallUnitDescriptorCache.TryAddDescriptorForLocation(mountPointId, out descriptorList);
+            ((SettingsLoader)(_environmentSettings.SettingsLoader)).InstallUnitDescriptorCache.TryAddDescriptorForLocation(mountPointId, isPartOfAnOptionalWorkload, out descriptorList);
         }
 
         public void InstallPackages(IEnumerable<string> installationRequests) => InstallPackages(installationRequests, null, false, false);
@@ -65,13 +65,63 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (localSources.Count > 0)
             {
+                InstallLocalPackages(localSources.Select(x => new InstallationRequest(x)), debugAllowDevInstall);
+            }
+
+            if (packages.Count > 0)
+            {
+                IList<string> additionalDotNetArguments = (interactive) ? new string[] { "--interactive" } : null;
+                InstallRemotePackages(packages, nuGetSources, additionalDotNetArguments, false);
+            }
+
+            _environmentSettings.SettingsLoader.Save();
+        }
+
+        public void InstallPackages(IEnumerable<InstallationRequest> installationRequests, IList<string> nuGetSources, bool debugAllowDevInstall, bool interactive)
+        {
+            List<InstallationRequest> localSources = new List<InstallationRequest>();
+            List<Package> packages = new List<Package>();
+            List<Package> optionalPackages = new List<Package>();
+
+            foreach (InstallationRequest request in installationRequests)
+            {
+                string req = request.InstallString;
+
+                //If the request string doesn't have any wild cards or probable path indicators,
+                //  and doesn't have a "::" delimiter either, try to convert it to "latest package"
+                //  form
+                if (OriginalRequestIsImplicitPackageVersionSyntax(request.InstallString))
+                {
+                    req += "::*";
+                }
+
+                if (Package.TryParse(req, out Package package))
+                {
+                    if(request.IsPartOfAnOptionalWorkload)
+                    {
+                        optionalPackages.Add(package);
+                    }
+                    else
+                    {
+                        packages.Add(package);
+                    }
+                }
+                else
+                {
+                    localSources.Add(request);
+                }
+            }
+
+            if (localSources.Count > 0)
+            {
                 InstallLocalPackages(localSources, debugAllowDevInstall);
             }
 
             if (packages.Count > 0)
             {
                 IList<string> additionalDotNetArguments = (interactive) ? new string[] { "--interactive" } : null;
-                InstallRemotePackages(packages, nuGetSources, additionalDotNetArguments);
+                InstallRemotePackages(packages, nuGetSources, additionalDotNetArguments, false);
+                InstallRemotePackages(optionalPackages, nuGetSources, additionalDotNetArguments, true);
             }
 
             _environmentSettings.SettingsLoader.Save();
@@ -197,7 +247,15 @@ namespace Microsoft.TemplateEngine.Cli
             return mountPoints;
         }
 
-        private void InstallRemotePackages(List<Package> packages, IList<string> nuGetSources, IList<string> additionalDotNetArguments)
+        /// <summary>
+        /// Acquires given nuget packages with 'dotnet restore' and installs them.
+        /// </summary>
+        /// <param name="packages">Packages to be installed.</param>
+        /// <param name="nuGetSources">Nuget sources to look for the packages.</param>
+        /// <param name="additionalDotNetArguments">Additional arguments to be passed to 'dotnet restore'.</param>
+        /// <param name="isPartOfAnOptionalWorkload">Specifies if given packages are part of an optional workload. This should be correct for
+        /// each of the specified packages (do not mix optional and non-optional packages when calling this method).</param>
+        private void InstallRemotePackages(List<Package> packages, IList<string> nuGetSources, IList<string> additionalDotNetArguments, bool isPartOfAnOptionalWorkload)
         {
             const string packageRef = @"    <PackageReference Include=""{0}"" Version=""{1}"" />";
             const string projectFile = @"<Project ToolsVersion=""15.0"" Sdk=""Microsoft.NET.Sdk"">
@@ -250,28 +308,28 @@ namespace Microsoft.TemplateEngine.Cli
             string stagingDir = Path.Combine(_paths.User.ScratchDir, "Staging");
             _paths.CreateDirectory(stagingDir);
 
-            List<string> newLocalPackages = new List<string>();
+            List<InstallationRequest> newLocalPackages = new List<InstallationRequest>();
             foreach (string packagePath in _paths.EnumerateFiles(restored, "*.nupkg", SearchOption.AllDirectories))
             {
                 string stagingPathForPackage = Path.Combine(stagingDir, Path.GetFileName(packagePath));
                 _paths.Copy(packagePath, stagingPathForPackage);
-                newLocalPackages.Add(stagingPathForPackage);
+                newLocalPackages.Add(new InstallationRequest(stagingPathForPackage, isPartOfAnOptionalWorkload ));
             }
 
             InstallLocalPackages(newLocalPackages, false);
             _paths.DeleteDirectory(_paths.User.ScratchDir);
         }
 
-        private void InstallLocalPackages(IReadOnlyList<string> packageNames, bool debugAllowDevInstall)
+        private void InstallLocalPackages(IEnumerable<InstallationRequest> packagesToInstall, bool debugAllowDevInstall)
         {
-            foreach (string package in packageNames)
+            foreach (InstallationRequest package in packagesToInstall)
             {
-                if (package == null)
+                if (string.IsNullOrWhiteSpace(package.InstallString))
                 {
                     continue;
                 }
 
-                string pkg = package.Trim();
+                string pkg = package.InstallString.Trim();
                 pkg = _environmentSettings.Environment.ExpandEnvironmentVariables(pkg);
                 string pattern = null;
 
@@ -311,7 +369,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                         foreach (Guid mountPointId in contentMountPointIds)
                         {
-                            AddInstallDescriptorForLocation(mountPointId, out IReadOnlyList<IInstallUnitDescriptor> descriptorList);
+                            AddInstallDescriptorForLocation(mountPointId, package.IsPartOfAnOptionalWorkload, out IReadOnlyList<IInstallUnitDescriptor> descriptorList);
 
                             foreach (IInstallUnitDescriptor descriptor in descriptorList)
                             {

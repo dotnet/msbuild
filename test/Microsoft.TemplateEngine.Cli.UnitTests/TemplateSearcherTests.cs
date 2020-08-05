@@ -68,7 +68,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         private static readonly PackInfo _bluePackInfo = new PackInfo("bluePack", "2.1");
         private static readonly PackInfo _greenPackInfo = new PackInfo("greenPack", "3.0.0");
 
-        private static readonly IInstallUnitDescriptor _fooPackInstallDescriptor = new NupkgInstallUnitDescriptor(Guid.NewGuid(), Guid.NewGuid(), _fooPackInfo.Name, _fooPackInfo.Version, string.Empty);
+        private static readonly IInstallUnitDescriptor _fooPackInstallDescriptor = new NupkgInstallUnitDescriptor(Guid.NewGuid(), Guid.NewGuid(), _fooPackInfo.Name, false, _fooPackInfo.Version, string.Empty);
 
         private static IReadOnlyDictionary<string, IReadOnlyList<ITemplateNameSearchResult>> GetMockNameSearchResults()
         {

@@ -3,6 +3,7 @@
 
 using Microsoft.TemplateEngine.Abstractions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
 {
@@ -31,6 +32,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
         public void InstallPackages(IEnumerable<string> installationRequests, IList<string> nuGetSources, bool debugAllowDevInstall, bool interactive)
         {
             Installed.UnionWith(installationRequests);
+        }
+
+        public void InstallPackages(IEnumerable<InstallationRequest> installationRequests, IList<string> nuGetSources = null, bool debugAllowDevInstall = false, bool interactive = false)
+        {
+            Installed.UnionWith(installationRequests.Select(r => r.InstallString));
         }
 
         // Removes the uninstallRequests from the _installed list.

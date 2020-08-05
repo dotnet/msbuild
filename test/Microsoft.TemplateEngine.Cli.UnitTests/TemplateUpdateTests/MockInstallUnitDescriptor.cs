@@ -27,5 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateUpdateTests
         public string UninstallString => Identifier;
 
         public IReadOnlyList<string> DetailKeysDisplayOrder { get; }
+
+        public bool IsPartOfAnOptionalWorkload { get; set; }
     }
 }
