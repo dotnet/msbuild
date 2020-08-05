@@ -56,7 +56,6 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>True if the directory exists.</returns>
         internal delegate bool DirectoryExists(string path);
 
-
         /// <summary>
         /// Determines whether the given path has any wild card characters.
         /// </summary>
@@ -253,7 +252,6 @@ namespace Microsoft.Build.BuildEngine.Shared
             GetFileSystemEntries getFileSystemEntries
         )
         {
-
             if (path.IndexOf("~", StringComparison.Ordinal) == -1)
             {
                 // A path with no '~' must not be a short name.
@@ -308,7 +306,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                 }
                 else
                 {
-
                     if (parts[i].IndexOf("~", StringComparison.Ordinal) == -1)
                     {
                         // If there's no ~, don't hit the disk.
@@ -841,7 +838,6 @@ namespace Microsoft.Build.BuildEngine.Shared
 
             } while (matchFileExpression.Length < sizeBefore);
 
-
             /*
              * By definition, "**" must appear alone between directory slashes. If there is any remaining "**" then this is not
              * a valid filespec.
@@ -901,8 +897,6 @@ namespace Microsoft.Build.BuildEngine.Shared
 
             return matchFileExpression.ToString();
         }
-
-
 
         /// <summary>
         /// Given a filespec, get the information needed for file matching. 

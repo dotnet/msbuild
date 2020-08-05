@@ -502,7 +502,7 @@ namespace Microsoft.Build.Execution
             }
 
             // If there is an exception and we did not previously have one, add it in.
-            _requestException = _requestException ?? results.Exception;
+            _requestException ??= results.Exception;
         }
 
         /// <summary>

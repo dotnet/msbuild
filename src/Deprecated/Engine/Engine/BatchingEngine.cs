@@ -392,7 +392,7 @@ namespace Microsoft.Build.BuildEngine
 
                 if  (
                         (metadataItemName != null) &&
-                        (0 != String.Compare(item.Name, metadataItemName, StringComparison.OrdinalIgnoreCase))
+                        (!String.Equals(item.Name, metadataItemName, StringComparison.OrdinalIgnoreCase))
                     )
                 {
                     itemMetadataValues[metadataQualifiedName] = String.Empty;
@@ -413,7 +413,6 @@ namespace Microsoft.Build.BuildEngine
 
             return itemMetadataValues;
         }
-
 
         #endregion
     }

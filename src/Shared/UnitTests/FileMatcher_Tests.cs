@@ -128,7 +128,6 @@ namespace Microsoft.Build.UnitTests
             //    of Directory.GetFiles, which is case-sensitive on Unix.
         }
 
-
         /// <summary>
         /// A test data class for providing data to the <see cref="FileMatcherTest.GetFilesComplexGlobbingMatching"/> test.
         /// </summary>
@@ -724,7 +723,6 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
-
         /*
         * Method:  GetLongFileNameForShortLocalPath
         *
@@ -982,7 +980,6 @@ namespace Microsoft.Build.UnitTests
             ValidateFileMatch(Path.Combine("**", "*.cs"), "file.cs", true);
         }
 
-
         [Fact]
         public void ReduceDoubleSlashes()
         {
@@ -1090,7 +1087,6 @@ namespace Microsoft.Build.UnitTests
                 "\\\\server\\c$\\Documents and Settings\\User\\Source.cs",
                 true
                 );
-
 
             ValidateFileMatch
                 (
@@ -1204,7 +1200,6 @@ namespace Microsoft.Build.UnitTests
             ValidateSplitFileSpec("bin\\**\\", "bin\\", "**\\", "");
             ValidateSplitFileSpec("bin\\**\\*", "bin\\", "**\\", "*");
             ValidateSplitFileSpec("**", "", "**\\", "*.*");
-
         }
 
         [Fact]
@@ -1455,7 +1450,6 @@ namespace Microsoft.Build.UnitTests
                     @"bin\**",
                     @"Program_old.cs",
                     @"Properties\AssemblyInfo_old.cs"
-
                 },
                 new[]    //  Matching files
                 {
@@ -1857,8 +1851,6 @@ namespace Microsoft.Build.UnitTests
             isLegalFileSpec.ShouldBe(expectedIsLegalFileSpec);
         }
 
-
-
         #region Support functions.
 
         /// <summary>
@@ -1972,7 +1964,7 @@ namespace Microsoft.Build.UnitTests
                             if
                             (
                                 pattern == null ||
-                                String.Compare(pattern, "*.*", StringComparison.OrdinalIgnoreCase) == 0
+                                String.Equals(pattern, "*.*", StringComparison.OrdinalIgnoreCase)
                             )
                             {
                                 ++hits;
@@ -1982,7 +1974,7 @@ namespace Microsoft.Build.UnitTests
                             {
                                 string tail = pattern.Substring(1);
                                 string candidateTail = candidate.Substring(candidate.Length - tail.Length);
-                                if (String.Compare(tail, candidateTail, StringComparison.OrdinalIgnoreCase) == 0)
+                                if (String.Equals(tail, candidateTail, StringComparison.OrdinalIgnoreCase))
                                 {
                                     ++hits;
                                     files.Add(FileMatcher.Normalize(candidate));
@@ -1992,11 +1984,11 @@ namespace Microsoft.Build.UnitTests
                             {
                                 string leader = pattern.Substring(0, pattern.Length - 4);
                                 string candidateLeader = candidate.Substring(candidate.Length - leader.Length - 4, leader.Length);
-                                if (String.Compare(leader, candidateLeader, StringComparison.OrdinalIgnoreCase) == 0)
+                                if (String.Equals(leader, candidateLeader, StringComparison.OrdinalIgnoreCase))
                                 {
                                     string tail = pattern.Substring(pattern.Length - 2);
                                     string candidateTail = candidate.Substring(candidate.Length - 2);
-                                    if (String.Compare(tail, candidateTail, StringComparison.OrdinalIgnoreCase) == 0)
+                                    if (String.Equals(tail, candidateTail, StringComparison.OrdinalIgnoreCase))
                                     {
                                         ++hits;
                                         files.Add(FileMatcher.Normalize(candidate));
@@ -2053,7 +2045,7 @@ namespace Microsoft.Build.UnitTests
 
                                 if
                                 (
-                                    String.Compare(pattern, "*.*", StringComparison.OrdinalIgnoreCase) == 0
+                                    String.Equals(pattern, "*.*", StringComparison.OrdinalIgnoreCase)
                                     || pattern == null
                                 )
                                 {
@@ -2067,7 +2059,7 @@ namespace Microsoft.Build.UnitTests
                                 {
                                     string tail = pattern.Substring(1);
                                     string baseMatchTail = baseMatch.Substring(1);
-                                    if (String.Compare(tail, baseMatchTail, StringComparison.OrdinalIgnoreCase) == 0)
+                                    if (String.Equals(tail, baseMatchTail, StringComparison.OrdinalIgnoreCase))
                                     {
                                         directories.Add(FileMatcher.Normalize(match));
                                     }
@@ -2138,7 +2130,6 @@ namespace Microsoft.Build.UnitTests
                 // Preserve parent-directory markers.
                 normalized = normalized.Replace(@".." + Path.DirectorySeparatorChar, "<:PARENT:>");
 
-
                 // Just get rid of doubles enough to satisfy our test cases.
                 string doubleSeparator = Path.DirectorySeparatorChar.ToString() + Path.DirectorySeparatorChar.ToString();
                 normalized = normalized.Replace(doubleSeparator, Path.DirectorySeparatorChar.ToString());
@@ -2189,7 +2180,6 @@ namespace Microsoft.Build.UnitTests
 
                 return false;
             }
-
 
             /// <summary>
             /// Searches the candidates array for one that matches path
@@ -2326,7 +2316,7 @@ namespace Microsoft.Build.UnitTests
                     int timesFound = 0;
                     foreach (string file in normalizedFiles)
                     {
-                        if (String.Compare(file, matchingFile, StringComparison.OrdinalIgnoreCase) == 0)
+                        if (String.Equals(file, matchingFile, StringComparison.OrdinalIgnoreCase))
                         {
                             ++timesFound;
                         }
@@ -2345,7 +2335,7 @@ namespace Microsoft.Build.UnitTests
                     int timesFound = 0;
                     foreach (string file in normalizedFiles)
                     {
-                        if (String.Compare(file, nonmatchingFile, StringComparison.OrdinalIgnoreCase) == 0)
+                        if (String.Equals(file, nonmatchingFile, StringComparison.OrdinalIgnoreCase))
                         {
                             ++timesFound;
                         }
@@ -2357,8 +2347,6 @@ namespace Microsoft.Build.UnitTests
             // Check untouchable files.
             Assert.Equal(0, mockFileSystem.FileHits3); // "At least one file that was marked untouchable was referenced."
         }
-
-
 
         /// <summary>
         /// Simulate GetFileSystemEntries
@@ -2376,7 +2364,6 @@ namespace Microsoft.Build.UnitTests
          *************************************************************************************/
 
         private static FileMatcher loopBackFileMatcher = new FileMatcher(FileSystems.Default, GetFileSystemEntriesLoopBack);
-
 
         private static void ValidateSplitFileSpec
             (

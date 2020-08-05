@@ -128,9 +128,9 @@ namespace Microsoft.Build.Execution
             // We can only set the host object to a non-null value if the affinity for the project is not out of proc, or if it is, it is only implicitly
             // out of proc, in which case it will become in-proc after this call completes.  See GetNodeAffinity.
             bool isExplicit;
-            bool hasExplicitOutOfProcAffinity = (GetNodeAffinity(projectFile, out isExplicit) == NodeAffinity.OutOfProc) && (isExplicit == true);
+            bool hasExplicitOutOfProcAffinity = (GetNodeAffinity(projectFile, out isExplicit) == NodeAffinity.OutOfProc) && (isExplicit);
             ErrorUtilities.VerifyThrowInvalidOperation(!hasExplicitOutOfProcAffinity || hostObject == null, "InvalidHostObjectOnOutOfProcProject");
-            _hostObjectMap = _hostObjectMap ?? new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
+            _hostObjectMap ??= new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
 
             HostObjects hostObjects = GetHostObjectsFromMapByKeyOrCreateNew(projectFile);
 
@@ -148,6 +148,9 @@ namespace Microsoft.Build.Execution
         /// Register and unregister from ROT.
         /// Ensure the host object has appropriate COM interface that can be used in task.
         /// </summary>
+        /// <param name="projectFile">project file name</param>
+        /// <param name="targetName">target name</param>
+        /// <param name="taskName">task name</param>
         /// <param name="monikerName">the Moniker used to register host object in ROT</param>
         public void RegisterHostObject(string projectFile, string targetName, string taskName, string monikerName)
         {
@@ -156,7 +159,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(taskName, "taskName");
             ErrorUtilities.VerifyThrowArgumentNull(monikerName, "monikerName");
 
-            _hostObjectMap = _hostObjectMap ?? new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
+            _hostObjectMap ??= new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
 
             HostObjects hostObjects = GetHostObjectsFromMapByKeyOrCreateNew(projectFile);
 

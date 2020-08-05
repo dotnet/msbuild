@@ -36,7 +36,7 @@ namespace Microsoft.Build.Tasks
             info.culture = null;
             string parentName = dependentUponFilename ?? String.Empty;
 
-            if (0 == String.Compare(Path.GetFileNameWithoutExtension(parentName),
+            if (String.Equals(Path.GetFileNameWithoutExtension(parentName),
                                    Path.GetFileNameWithoutExtension(name),
                                    StringComparison.OrdinalIgnoreCase))
             {

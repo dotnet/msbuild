@@ -106,7 +106,7 @@ namespace Microsoft.Build.Evaluation
         protected override string MSBuildOverrideTasksPath => ConfigurationSection?.MSBuildOverrideTasksPath;
 
         /// <summary>
-        /// DefaultOverrideToolsVersion attribute on msbuildToolsets element, specifying the tools version that should be used by 
+        /// DefaultOverrideToolsVersion attribute on msbuildToolsets element, specifying the tools version that should be used by
         /// default to build projects with this version of MSBuild.
         /// </summary>
         protected override string DefaultOverrideToolsVersion => ConfigurationSection?.DefaultOverrideToolsVersion;
@@ -171,7 +171,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Provides an enumerator over the set of sub-toolset names available to a particular
         /// tools version.  MSBuild config files do not currently support sub-toolsets, so
-        /// we return nothing. 
+        /// we return nothing.
         /// </summary>
         /// <param name="toolsVersion">The tools version.</param>
         /// <returns>An enumeration of the sub-toolsets that belong to that tools version.</returns>
@@ -181,9 +181,9 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Provides an enumerator over property definitions for a specified sub-toolset version 
-        /// under a specified toolset version. In the ToolsetConfigurationReader case, breaks 
-        /// immediately because we do not currently support sub-toolsets in the configuration file. 
+        /// Provides an enumerator over property definitions for a specified sub-toolset version
+        /// under a specified toolset version. In the ToolsetConfigurationReader case, breaks
+        /// immediately because we do not currently support sub-toolsets in the configuration file.
         /// </summary>
         /// <param name="toolsVersion">The tools version.</param>
         /// <param name="subToolsetVersion">The sub-toolset version.</param>

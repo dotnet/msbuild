@@ -513,7 +513,6 @@ namespace Microsoft.Build.BuildEngine
             this.errorInTarget = false;
             this.buildEventContext = startedEvent.BuildEventContext;
             this.timeStamp = startedEvent.Timestamp;
-
         }
         #endregion
     }
@@ -566,7 +565,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 return false;
             }
-           return  eventComparer.Equals(entryPointContext, key.EntryPointContext) && (String.Compare(targetName, key.TargetName, StringComparison.OrdinalIgnoreCase) == 0);
+           return  eventComparer.Equals(entryPointContext, key.EntryPointContext) && (String.Equals(targetName, key.TargetName, StringComparison.OrdinalIgnoreCase));
         }
 
         public override int GetHashCode()
@@ -657,7 +656,6 @@ namespace Microsoft.Build.BuildEngine
             ProjectFullKey compareKey = obj as ProjectFullKey;
             if (compareKey != null)
             {
-                
                 return ((compareKey.projectKey == this.projectKey) && (compareKey.entryPointKey == this.entryPointKey));
             }
             else

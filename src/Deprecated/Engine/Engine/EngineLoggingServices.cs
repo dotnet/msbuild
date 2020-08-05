@@ -616,7 +616,6 @@ namespace Microsoft.Build.BuildEngine
                 subcategory = AssemblyResources.GetString(subcategoryResourceName);
             }
 
-
             BuildWarningEventArgs e = new BuildWarningEventArgs
                 (
                     subcategory,
@@ -1012,7 +1011,6 @@ namespace Microsoft.Build.BuildEngine
         /// a spike in logging activity.
         /// </summary>
         protected ManualResetEvent flushRequestEvent;
-
 
         internal const int flushTimeoutInMS = 500;          // flush the queue at least every 1/2 second
         internal const int flushTimeoutInTicks = 500*10000; // flush the queue at least every 1/2 second

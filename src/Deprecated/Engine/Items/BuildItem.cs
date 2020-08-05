@@ -1196,7 +1196,6 @@ namespace Microsoft.Build.BuildEngine
 
                         // Add this metadata to the running table we're using, so that one piece of metadata can refer to another one above
                         expander.SetMetadataInMetadataTable(name, metadataElement.Name, evaluatedMetadataValue);
-
                     }
                 }
             }
@@ -1662,7 +1661,7 @@ namespace Microsoft.Build.BuildEngine
 
             if (modifiedItemSpec.Length == 0)
             {
-                if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(modifier, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase))
                 {
                     modifiedItemSpec = ExtractRecursivePortionOfFinalItemSpecDirectory();
 

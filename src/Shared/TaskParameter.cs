@@ -95,7 +95,7 @@ namespace Microsoft.Build.BackEnd
 
             Type wrappedParameterType = wrappedParameter.GetType();
 
-            if ((wrappedParameter as Exception) != null)
+            if (wrappedParameter is Exception)
             {
                 _parameterType = TaskParameterType.Invalid;
                 _wrappedParameter = wrappedParameter;
@@ -620,7 +620,7 @@ namespace Microsoft.Build.BackEnd
                 // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
                 ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
 
-                _customEscapedMetadata = _customEscapedMetadata ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                _customEscapedMetadata ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 _customEscapedMetadata[metadataName] = metadataValue ?? String.Empty;
             }

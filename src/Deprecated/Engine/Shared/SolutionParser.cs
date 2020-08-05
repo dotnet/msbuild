@@ -412,7 +412,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                 // Update the hash table with this unique name
                 projectsByUniqueName[uniqueName] = proj;
             }
-
         } // ParseSolutionFile()
 
         /// <summary>
@@ -500,7 +499,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                 new BuildEventFileInfo(SolutionFile, this.currentLineNumber, 0), 
                 "SolutionParseVersionMismatchError", 
                 slnFileMinUpgradableVersion, slnFileMaxVersion);
-
 
             // If the solution file version is greater than the maximum one we will create a comment rather than warn
             // as users such as blend opening a dev10 project cannot do anything about it.
@@ -942,7 +940,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             else
             {
                 // ProjectReferences = "{FD705688-88D1-4C22-9BFF-86235D89C2FC}|CSClassLibrary1.dll;{F0726D09-042B-4A7A-8A01-6BED2422BD5D}|VCClassLibrary1.dll;" 
-                if (string.Compare(propertyName, "ProjectReferences", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Equals(propertyName, "ProjectReferences", StringComparison.OrdinalIgnoreCase))
                 {
                     string[] projectReferenceEntries = propertyValue.Split(new char[] { ';' });
 
@@ -1022,21 +1020,21 @@ namespace Microsoft.Build.BuildEngine.Shared
             ValidateProjectRelativePath(proj);
             
             // Figure out what type of project this is.
-            if ((String.Compare(projectTypeGuid, vbProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(projectTypeGuid, csProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(projectTypeGuid, vjProjectGuid, StringComparison.OrdinalIgnoreCase) == 0))
+            if ((String.Equals(projectTypeGuid, vbProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(projectTypeGuid, csProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(projectTypeGuid, vjProjectGuid, StringComparison.OrdinalIgnoreCase)))
             {
                 proj.ProjectType = SolutionProjectType.ManagedProject;
             }
-            else if (String.Compare(projectTypeGuid, solutionFolderGuid, StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(projectTypeGuid, solutionFolderGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.SolutionFolder;
             }
-            else if (String.Compare(projectTypeGuid, vcProjectGuid, StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(projectTypeGuid, vcProjectGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.VCProject;
             }
-            else if (String.Compare(projectTypeGuid, webProjectGuid, StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(projectTypeGuid, webProjectGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.WebProject;
                 solutionContainsWebProjects = true;
@@ -1116,7 +1114,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 string fullConfigurationName = configurationNames[0].Trim();
 
                 //Fixing bug 555577: Solution file can have description information, in which case we ignore.
-                if (0 == String.Compare(fullConfigurationName, "DESCRIPTION", StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(fullConfigurationName, "DESCRIPTION", StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 // Both names must be identical
@@ -1258,7 +1256,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // Pick the Debug configuration as default if present
             foreach (ConfigurationInSolution solutionConfiguration in this.SolutionConfigurations)
             {
-                if (string.Compare(solutionConfiguration.ConfigurationName, "Debug", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Equals(solutionConfiguration.ConfigurationName, "Debug", StringComparison.OrdinalIgnoreCase))
                 {
                     defaultConfigurationName = solutionConfiguration.ConfigurationName;
                     break;
@@ -1293,7 +1291,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // Pick the Mixed Platforms platform as default if present
             foreach (ConfigurationInSolution solutionConfiguration in this.SolutionConfigurations)
             {
-                if (string.Compare(solutionConfiguration.PlatformName, "Mixed Platforms", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Equals(solutionConfiguration.PlatformName, "Mixed Platforms", StringComparison.OrdinalIgnoreCase))
                 {
                     defaultPlatformName = solutionConfiguration.PlatformName;
                     break;
@@ -1337,5 +1335,4 @@ namespace Microsoft.Build.BuildEngine.Shared
 
         #endregion
     } // class SolutionParser
-
 } // namespace Microsoft.Build.BuildEngine

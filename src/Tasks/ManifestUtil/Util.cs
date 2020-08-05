@@ -314,7 +314,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string PlatformToProcessorArchitecture(string platform)
         {
             for (int i = 0; i < s_platforms.Length; ++i)
-                if (String.Compare(platform, s_platforms[i], StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(platform, s_platforms[i], StringComparison.OrdinalIgnoreCase))
                     return s_processorArchitectures[i];
             return null;
         }
@@ -509,7 +509,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
         #endregion
-
 
         public static Version ConvertFrameworkVersionToString(string version)
         {

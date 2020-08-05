@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -133,7 +132,7 @@ namespace Microsoft.Build.Shared
             }
             else
             {
-                isPartialMatch = (String.Compare(typeName1, typeName2, StringComparison.OrdinalIgnoreCase) == 0);
+                isPartialMatch = (String.Equals(typeName1, typeName2, StringComparison.OrdinalIgnoreCase));
             }
 
             return isPartialMatch;

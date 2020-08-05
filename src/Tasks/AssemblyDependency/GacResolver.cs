@@ -43,7 +43,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="wantSpecificVersion">Whether an exact version match is requested.</param>
         /// <param name="executableExtensions">Allowed executable extensions.</param>
         /// <param name="hintPath">The item's hintpath value.</param>
-        /// <param name="assemblyFolderKey">Like "hklm\Vendor RegKey" as provided to a reference by the <AssemblyFolderKey> on the reference in the project.</param>
+        /// <param name="assemblyFolderKey">Like "hklm\Vendor RegKey" as provided to a reference by the &lt;AssemblyFolderKey&gt; on the reference in the project.</param>
         /// <param name="assembliesConsideredAndRejected">Receives the list of locations that this function tried to find the assembly. May be "null".</param>
         /// <param name="foundPath">The path where the file was found.</param>
         /// <param name="userRequestedSpecificFile">Whether or not the user wanted a specific file (for example, HintPath is a request for a specific file)</param>

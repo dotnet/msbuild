@@ -566,7 +566,6 @@ namespace Microsoft.Build.BuildEngine
             return itemTypes;
         }
 
-
         internal virtual void OutputItems(string itemType, ArrayList itemTypeList)
         {
             // Write each item, one per line
@@ -589,7 +588,6 @@ namespace Microsoft.Build.BuildEngine
             }
             resetColor();
         }
-
 
         /// <summary>
         /// Returns a performance counter for a given scope (either task name or target name)
@@ -719,7 +717,6 @@ namespace Microsoft.Build.BuildEngine
                             inScope = false;
 
                             elapsedTime += (System.DateTime.Now - scopeStartTime);
-
                         }
                         else if (!InScope && value)
                         {

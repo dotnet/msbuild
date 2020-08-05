@@ -29,7 +29,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (String.Compare(_functionName, "exists", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(_functionName, "exists", StringComparison.OrdinalIgnoreCase))
             {
                 // Check we only have one argument
                 VerifyArgumentCount(1, state);
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
             }
-            else if (String.Compare(_functionName, "HasTrailingSlash", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(_functionName, "HasTrailingSlash", StringComparison.OrdinalIgnoreCase))
             {
                 // Check we only have one argument
                 VerifyArgumentCount(1, state);
@@ -154,7 +154,6 @@ namespace Microsoft.Build.Evaluation
             {
                 argument = FileUtilities.FixFilePath(argument);
             }
-
 
             IList<TaskItem> expanded = state.ExpandIntoTaskItems(argument);
             var expandedCount = expanded.Count;

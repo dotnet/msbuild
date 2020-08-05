@@ -102,9 +102,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Shuts down all of the managed nodes permanently.
         /// </summary>
-        /// <param name="hostHandshake">host handshake key</param>
-        /// <param name="hostHandshakeWithLowPriority">host handshake key with low priority added</param>
-        /// <param name="clientHandshake">client handshake key</param>
+        /// <param name="nodeReuse">Whether to reuse the node</param>
         /// <param name="terminateNode">Delegate used to tell the node provider that a context has terminated</param>
         protected void ShutdownAllNodes(bool nodeReuse, NodeContextTerminateDelegate terminateNode)
         {
@@ -126,12 +124,12 @@ namespace Microsoft.Build.BackEnd
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.
-                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHostHandshake(nodeReuse, false), NodeProviderOutOfProc.GetClientHandshake(nodeReuse, false));
+                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false));
 
                 if (nodeStream == null)
                 {
                     // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHostHandshake(nodeReuse, true), NodeProviderOutOfProc.GetClientHandshake(nodeReuse, true));
+                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true));
                 }
 
                 if (nodeStream != null)
@@ -149,7 +147,7 @@ namespace Microsoft.Build.BackEnd
         /// Finds or creates a child process which can act as a node.
         /// </summary>
         /// <returns>The pipe stream representing the node.</returns>
-        protected NodeContext GetNode(string msbuildLocation, string commandLineArgs, int nodeId, INodePacketFactory factory, long hostHandshake, long clientHandshake, NodeContextTerminateDelegate terminateNode)
+        protected NodeContext GetNode(string msbuildLocation, string commandLineArgs, int nodeId, INodePacketFactory factory, Handshake hostHandshake, NodeContextTerminateDelegate terminateNode)
         {
 #if DEBUG
             if (Execution.BuildManager.WaitForDebugger)
@@ -189,7 +187,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     // Get the full context of this inspection so that we can always skip this process when we have the same taskhost context
-                    string nodeLookupKey = GetProcessesToIgnoreKey(hostHandshake, clientHandshake, nodeProcess.Id);
+                    string nodeLookupKey = GetProcessesToIgnoreKey(hostHandshake, nodeProcess.Id);
                     if (_processesToIgnore.Contains(nodeLookupKey))
                     {
                         continue;
@@ -199,7 +197,7 @@ namespace Microsoft.Build.BackEnd
                     _processesToIgnore.Add(nodeLookupKey);
 
                     // Attempt to connect to each process in turn.
-                    Stream nodeStream = TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake, clientHandshake);
+                    Stream nodeStream = TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
@@ -243,14 +241,14 @@ namespace Microsoft.Build.BackEnd
 
                 // Create the node process
                 int msbuildProcessId = LaunchNode(msbuildLocation, commandLineArgs);
-                _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, clientHandshake, msbuildProcessId));
+                _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, msbuildProcessId));
 
                 // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
                 // gotten back from CreateProcess is that of the debugger, which causes this to try to connect
                 // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
 
                 // Now try to connect to it.
-                Stream nodeStream = TryConnectToProcess(msbuildProcessId, TimeoutForNewNodeCreation, hostHandshake, clientHandshake);
+                Stream nodeStream = TryConnectToProcess(msbuildProcessId, TimeoutForNewNodeCreation, hostHandshake);
                 if (nodeStream != null)
                 {
                     // Connection successful, use this node.
@@ -293,9 +291,9 @@ namespace Microsoft.Build.BackEnd
         /// Generate a string from task host context and the remote process to be used as key to lookup processes we have already
         /// attempted to connect to or are already connected to
         /// </summary>
-        private string GetProcessesToIgnoreKey(long hostHandshake, long clientHandshake, int nodeProcessId)
+        private string GetProcessesToIgnoreKey(Handshake hostHandshake, int nodeProcessId)
         {
-            return hostHandshake.ToString(CultureInfo.InvariantCulture) + "|" + clientHandshake.ToString(CultureInfo.InvariantCulture) + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
+            return hostHandshake.ToString() + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
         }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
@@ -322,7 +320,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
-        private Stream TryConnectToProcess(int nodeProcessId, int timeout, long hostHandshake, long clientHandshake)
+        private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake)
         {
             // Try and connect to the process.
             string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + nodeProcessId);
@@ -348,26 +346,26 @@ namespace Microsoft.Build.BackEnd
                     // remote node could set the owner to something else would also let it change owners on other objects, so
                     // this would be a security flaw upstream of us.
                     ValidateRemotePipeSecurityOnWindows(nodeStream);
-
                 }
 #endif
 
-                CommunicationsUtilities.Trace("Writing handshake to pipe {0}", pipeName);
-                nodeStream.WriteLongForHandshake(hostHandshake);
+                int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
+                for (int i = 0; i < handshakeComponents.Length; i++)
+                {
+                    CommunicationsUtilities.Trace("Writing handshake part {0} to pipe {1}", i, pipeName);
+                    nodeStream.WriteIntForHandshake(handshakeComponents[i]);
+                }
+
+                // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
+                nodeStream.WriteEndOfHandshakeSignal();
 
                 CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
+
 #if NETCOREAPP2_1 || MONO
-                long handshake = nodeStream.ReadLongForHandshake(timeout);
+                nodeStream.ReadEndOfHandshakeSignal(true, timeout);
 #else
-                long handshake = nodeStream.ReadLongForHandshake();
+                nodeStream.ReadEndOfHandshakeSignal(true);
 #endif
-
-                if (handshake != clientHandshake)
-                {
-                    CommunicationsUtilities.Trace("Handshake failed. Received {0} from client not {1}. Probably the client is a different MSBuild build.", handshake, clientHandshake);
-                    throw new InvalidOperationException();
-                }
-
                 // We got a connection.
                 CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
                 return nodeStream;
@@ -430,12 +428,12 @@ namespace Microsoft.Build.BackEnd
                     startInfo.hStdInput = BackendNativeMethods.InvalidHandle;
                     startInfo.hStdOutput = BackendNativeMethods.InvalidHandle;
                     startInfo.dwFlags = BackendNativeMethods.STARTFUSESTDHANDLES;
-                    creationFlags = creationFlags | BackendNativeMethods.CREATENOWINDOW;
+                    creationFlags |= BackendNativeMethods.CREATENOWINDOW;
                 }
             }
             else
             {
-                creationFlags = creationFlags | BackendNativeMethods.CREATE_NEW_CONSOLE;
+                creationFlags |= BackendNativeMethods.CREATE_NEW_CONSOLE;
             }
 
             BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new BackendNativeMethods.SECURITY_ATTRIBUTES();
@@ -459,7 +457,6 @@ namespace Microsoft.Build.BackEnd
 
             if (!NativeMethodsShared.IsWindows)
             {
-
                 ProcessStartInfo processStartInfo = new ProcessStartInfo();
                 processStartInfo.FileName = exeName;
                 processStartInfo.Arguments = commandLineArgs;

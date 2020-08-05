@@ -70,7 +70,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-
         /// <summary>
         /// Helper method to tell us whether a particular metadata name is an MSBuild well-known metadata
         /// (e.g., "RelativeDir", "FullPath", etc.)
@@ -431,7 +430,6 @@ namespace Microsoft.Build.UnitTests
             foreach (var key in expected.Keys)
             {
                 item.GetMetadataValue(key).ShouldBe(expected[key]);
-
             }
         }
 
@@ -777,7 +775,6 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine();
             Assert.Equal(newExpectedProjectContents, newActualProjectContents); // "Project XML does not match expected XML.  See 'Standard Out' tab for details."
         }
-
 
         private static string s_tempProjectDir;
 
@@ -1351,7 +1348,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (var buildManager = new BuildManager())
             {
-                parameters = parameters ?? new BuildParameters();
+                parameters ??= new BuildParameters();
 
                 if (logger != null)
                 {
@@ -1607,7 +1604,7 @@ namespace Microsoft.Build.UnitTests
             IEnumerable<int> entryPoints = null,
             ProjectCollection projectCollection = null)
         {
-            createProjectFile = createProjectFile ?? CreateProjectFile;
+            createProjectFile ??= CreateProjectFile;
 
             var nodes = new Dictionary<int, (bool IsRoot, string ProjectPath)>();
 
@@ -1842,8 +1839,6 @@ namespace Microsoft.Build.UnitTests
                     : "sleep {0}";
         }
 
-
-
         /// <summary>
         /// Break the provided string into an array, on newlines
         /// </summary>
@@ -1897,7 +1892,6 @@ namespace Microsoft.Build.UnitTests
             private readonly BuildManager _buildManager;
 
             public MockLogger Logger { get; set; }
-
 
             public BuildManagerSession(
                 TestEnvironment env,

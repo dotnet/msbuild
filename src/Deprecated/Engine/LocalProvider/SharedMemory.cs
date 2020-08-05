@@ -25,7 +25,7 @@ namespace Microsoft.Build.BuildEngine
     }
 
     /// <summary>
-    /// The shared memory is used to transmit serialized LocalCallDescriptors. 
+    /// The shared memory is used to transmit serialized LocalCallDescriptors.
     /// These local call descriptors encapsulate commands and data that needs
     /// to be communicated between the parent and child objects. This enumeration
     /// is used by the shared memory to mark what kind of LocalCallDescriptor
@@ -36,7 +36,7 @@ namespace Microsoft.Build.BuildEngine
     internal enum ObjectType
     {
         // Has the object been serialized using .net serialization (binary formatter)
-        NetSerialization = 1, 
+        NetSerialization = 1,
         // Used to mark that the next int read represents how many bytes are in the
         // large object which is about to be sent      
         FrameMarker = 2,
@@ -61,10 +61,10 @@ namespace Microsoft.Build.BuildEngine
     }
 
     /// <summary>
-    /// This class is responsible for providing a communication channel between 
+    /// This class is responsible for providing a communication channel between
     /// a child process and a parent process. Each process (child or parent) will
     /// have two SharedMemory class instances, one for reading and one for writing.
-    /// For example, a parent will have one shared memory class to "read" data 
+    /// For example, a parent will have one shared memory class to "read" data
     /// sent from the child and one "write" shared The shared memory communicates
     /// through named shared memory regions.
     /// </summary>
@@ -81,7 +81,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="name">
         /// The name the shared memory will be given, this is combination of node,
-        /// username, admin status, and some other ones, 
+        /// username, admin status, and some other ones,
         /// see LocalNodeProviderGlobalNames.NodeInputMemoryName for greater detail.
         /// </param>
         /// <param name="type">
@@ -89,19 +89,19 @@ namespace Microsoft.Build.BuildEngine
         ///  within the shared memory class. For example,
         ///  read only means, only create a memory stream,
         ///  a read lock and a backing byte array and a binary reader. A write
-        ///  only type means,  create a memory stream, write lock and a binary writer. 
+        ///  only type means,  create a memory stream, write lock and a binary writer.
         ///  This type however does not set the type of the memory mapped section,
         ///  the memory mapped section itself is created
         ///  with READWRITE access.
         ///</param>
         /// <param name="allowExistingMapping">
-        ///  The shared memory is given a parameter to determine whether or not to 
-        ///  reuse an existing mapped memory secion. When the node is first created 
+        ///  The shared memory is given a parameter to determine whether or not to
+        ///  reuse an existing mapped memory secion. When the node is first created
         ///  this is false, however when the shared memory threads are created this
-        ///  is true. We do this because we create the shared memory when the node 
+        ///  is true. We do this because we create the shared memory when the node
         ///  is created, at this point the there should be no shared memory with the
-        ///  same name. However when we create the reader and writer threads 
-        ///  (which happens on node reuse) we want to reuse the memory. 
+        ///  same name. However when we create the reader and writer threads
+        ///  (which happens on node reuse) we want to reuse the memory.
         ///</param>
         internal SharedMemory(string name, SharedMemoryType type, bool allowExistingMapping)
         {
@@ -224,7 +224,7 @@ namespace Microsoft.Build.BuildEngine
                         0,  // Start mapped view at low order offset 0
                          // The size of the shared memory plus some extra space for an int
                          // to write the number of bytes written
-                        (IntPtr)(size + 4)  
+                        (IntPtr)(size + 4)
                     );
 
                 // Check to see if the file view has been created on the fileMapping.
@@ -255,7 +255,6 @@ namespace Microsoft.Build.BuildEngine
                 this.readStream = new MemoryStream(this.readBuffer);
                 this.binaryReader = new BinaryReader(this.readStream);
                 readLock = new object();
-
             }
             else if (streamType == SharedMemoryType.WriteOnly)
             {
@@ -267,7 +266,6 @@ namespace Microsoft.Build.BuildEngine
             {
                 ErrorUtilities.VerifyThrow(false, "Unknown shared memory type.");
             }
-
         }
 
         /// <summary>
@@ -328,12 +326,10 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-
         public void Dispose()
         {
             Dispose(true);
         }
-
 
         ~SharedMemory()
         {
@@ -360,7 +356,7 @@ namespace Microsoft.Build.BuildEngine
         /// Returns the readActionCounter as a WaitHandle. This WaitHandle is used
         /// to notify the SharedMemory reader threads that there is something ready
         /// in the shared memory to be read. The ReadFlag will remain set as long as
-        /// the number of times the shared memory has been read is less than the 
+        /// the number of times the shared memory has been read is less than the
         /// number of times writer thread has written to the shared memory.
         /// </summary>
         internal WaitHandle ReadFlag
@@ -441,7 +437,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// A batch has just been read out of shared memory. 
+        /// A batch has just been read out of shared memory.
         /// </summary>
         private void DecrementUnreadBatchCounter()
         {
@@ -450,13 +446,13 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// This function write out a set of objects into the the shared buffer.
+        /// This function write out a set of objects into the shared buffer.
         /// In normal operation all the objects in the queue are serialized into
         /// the buffer followed by an end marker class. If the buffer is not big
-        /// enough to contain a single object the object is broken into into 
+        /// enough to contain a single object the object is broken into
         /// multiple buffers as follows - first a frame marker is sent containing
         /// the size of the serialized object + size of end marker. The reader makes
-        /// sure upon receiving the frame marker that its buffer is large enough 
+        /// sure upon receiving the frame marker that its buffer is large enough
         /// to contain the object about to be sent. After the frame marker the object
         /// is sent as a series of buffers until all of it is written out.
         /// </summary>
@@ -557,7 +553,7 @@ namespace Microsoft.Build.BuildEngine
                             (int)writeLength // Length of bytes to write
                         );
 
-                        writeBytesRemaining = writeBytesRemaining - writeLength;
+                        writeBytesRemaining -= writeLength;
                         IncrementUnreadBatchCounter();
 
                         // Once the object is fully sent - remove it from the queue
@@ -692,9 +688,9 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// This function reads data from the shared memory buffer and returns a list
         /// of deserialized LocalCallDescriptors or null. The method will return null
-        /// if the object being sent accross is a multi buffer object. Read needs to 
+        /// if the object being sent accross is a multi buffer object. Read needs to
         /// be called multiple times until the entire large object has been recived.
-        /// Once this has happened the large object is deserialized and returned in 
+        /// Once this has happened the large object is deserialized and returned in
         /// the Ilist. Read is used by the shared memory reader threads in the LocalNode
         /// (child end) and the LocalNodeProvider(ParentEnd) to read LocalCallDescriptors
         /// from the shared memory. Read is called from loops in the SharedMemoryReaderThread
@@ -802,12 +798,12 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// This method first reads the objectId as an int from the stream, 
-        /// this int should be found in the "ObjectType" enumeration. This 
-        /// objectId informs the method what kind of object should be 
+        /// This method first reads the objectId as an int from the stream,
+        /// this int should be found in the "ObjectType" enumeration. This
+        /// objectId informs the method what kind of object should be
         /// deserialized and returned from the method. The objectId is an
-        /// output parameter. This parameter is also returned so it can be 
-        /// used in the read and write methods to determine if 
+        /// output parameter. This parameter is also returned so it can be
+        /// used in the read and write methods to determine if
         /// a frame or end marker was found.
         /// </summary>
         private object DeserializeFromStream(out int objectId)
@@ -915,12 +911,12 @@ namespace Microsoft.Build.BuildEngine
         private IntPtr pageFileView;
 
         private BinaryFormatter binaryFormatter;
-        
+
         // Binary reader and writer used to read and write from the memory streams used to contain the deserialized LocalCallDescriptors before and after they are copied 
         // to and from the shared memory region.
         private BinaryWriter binaryWriter;
         private BinaryReader binaryReader;
-        
+
         /// <summary>
         /// Memory stream to contain the deserialized objects before they are sent accross the shared memory region
         /// </summary>
@@ -929,7 +925,7 @@ namespace Microsoft.Build.BuildEngine
         // Backing byte array of the readStream
         private byte[] readBuffer;
         private MemoryStream readStream;
-        
+
         // The count on a semaphore is decremented each time a thread enters the semaphore,
         // and incremented when a thread releases the semaphore. 
         // When the count is zero, subsequent requests block until other threads release the semaphore. 
@@ -937,7 +933,7 @@ namespace Microsoft.Build.BuildEngine
 
         // unreadBatchCounter is used to track how many batches are remaining to be read from shared memory.
         private Semaphore unreadBatchCounter;
- 
+
         //Used to inform the shared memory reader threads the writer thread has written something in shared memory to read.
 	//The semaphore is incremented when the shared memory is full and when there is an unreadBatch availiable to be read or the shared memory is full.
 	//The semaphore is decremented when the shared memory reader thread is about to read from the shared memory.
@@ -946,7 +942,7 @@ namespace Microsoft.Build.BuildEngine
         // Whether or not the shared memory is full
         private EventWaitHandle fullFlag;
         private EventWaitHandle notFullFlag;
-        
+
         private object writeLock;
         private object readLock;
 
@@ -959,7 +955,7 @@ namespace Microsoft.Build.BuildEngine
 
         // Have we disposed this object yet;
         private bool disposed;
-        
+
         // Is the memory read only or write only
         private SharedMemoryType type;
 
@@ -967,7 +963,7 @@ namespace Microsoft.Build.BuildEngine
         // we were spending a lot of time reflecting for these methods. The loggingTypeCache, caches the methodInfo for the classes and then look them
         // up when serializing or deserializing the objects. 
         private Hashtable loggingTypeCache;
-        
+
         // Keep a pointer to the queue which contains the large object which is being deserialized. We do this because we want to make sure 
         // after the object is properly sent we dequeue off the correct queue.
         private DualQueue<LocalCallDescriptor> largeObjectsQueue;

@@ -343,7 +343,6 @@ namespace Microsoft.Build.BuildEngine
             #endregion
         }
 
-
         internal static BuildResult CreateFromStream(BinaryReader reader)
         {
             BuildResult buildResult = new BuildResult();

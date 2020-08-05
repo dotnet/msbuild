@@ -144,7 +144,7 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception)
                     {
-                        Debug.Assert(false, "Unexpected exception in ResolveNativeReference.Execute. " + 
+                        Debug.Assert(false, "Unexpected exception in ResolveNativeReference.Execute. " +
                             "Please log a MSBuild bug specifying the steps to reproduce the problem.");
                         throw;
                     }

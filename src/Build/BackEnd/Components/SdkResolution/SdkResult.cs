@@ -43,7 +43,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         public SdkResult()
         {
-
         }
 
         public SdkResult(SdkReference sdkReference, IEnumerable<string> paths, string version, IDictionary<string, string> propertiesToAdd,

@@ -64,7 +64,6 @@ namespace Microsoft.Build.Tasks
         /// The resulting manifest names.
         /// </summary>
         /// <value></value>
-
         [Output]
         public ITaskItem[] ManifestResourceNames { get; private set; }
 

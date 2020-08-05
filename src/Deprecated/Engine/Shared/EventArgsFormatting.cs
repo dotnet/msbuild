@@ -236,7 +236,6 @@ namespace Microsoft.Build.BuildEngine.Shared
             return formattedMessage.ToString();
         }
 
-
         /// <summary>
         /// Splits strings on 'newLines' with tolerance for Everett and Dogfood builds.
         /// </summary>

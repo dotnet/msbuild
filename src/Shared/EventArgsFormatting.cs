@@ -200,6 +200,7 @@ namespace Microsoft.Build.Shared
         /// <param name="columnNumber">column number (0 if n/a)</param>
         /// <param name="endColumnNumber">end column number (0 if n/a)</param>
         /// <param name="threadId">thread id</param>
+        /// <param name="logOutputProperties">log output properties</param>
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage
         (
@@ -347,7 +348,6 @@ namespace Microsoft.Build.Shared
 
             return formattedMessage.ToString();
         }
-
 
         /// <summary>
         /// Splits strings on 'newLines' with tolerance for Everett and Dogfood builds.

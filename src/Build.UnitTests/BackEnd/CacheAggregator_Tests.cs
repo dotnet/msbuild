@@ -67,7 +67,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 });
                 e.Message.ShouldContain("Cannot add after aggregation");
             }
-
         }
 
         [Fact]

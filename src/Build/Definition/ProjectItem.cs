@@ -521,7 +521,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         ProjectMetadata IItem<ProjectMetadata>.SetMetadata(ProjectMetadataElement metadataElement, string evaluatedInclude)
         {
-            _directMetadata = _directMetadata ?? new PropertyDictionary<ProjectMetadata>();
+            _directMetadata ??= new PropertyDictionary<ProjectMetadata>();
 
             ProjectMetadata predecessor = GetMetadata(metadataElement.Name);
 
@@ -598,7 +598,7 @@ namespace Microsoft.Build.Evaluation
 
             if (!propagateMetadataToSiblingItems)
             {
-                _directMetadata = _directMetadata ?? new PropertyDictionary<ProjectMetadata>();
+                _directMetadata ??= new PropertyDictionary<ProjectMetadata>();
                 _directMetadata.Set(metadatum);
             }
             else
@@ -607,7 +607,7 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (var siblingItem in siblingItems)
                 {
-                    siblingItem._directMetadata = siblingItem._directMetadata ?? new PropertyDictionary<ProjectMetadata>();
+                    siblingItem._directMetadata ??= new PropertyDictionary<ProjectMetadata>();
                     siblingItem._directMetadata.Set(metadatum.DeepClone());
                 }
             }
@@ -1060,14 +1060,14 @@ namespace Microsoft.Build.Evaluation
 
                 if (source._inheritedItemDefinitions != null)
                 {
-                    inheritedItemDefinitionsClone = inheritedItemDefinitionsClone ?? new List<ProjectItemDefinition>(inheritedItemDefinitionsCount + 1);
+                    inheritedItemDefinitionsClone ??= new List<ProjectItemDefinition>(inheritedItemDefinitionsCount + 1);
                     inheritedItemDefinitionsClone.AddRange(source._inheritedItemDefinitions);
                 }
 
                 ProjectItemDefinition sourceItemDefinition;
                 if (_project.ItemDefinitions.TryGetValue(source.ItemType, out sourceItemDefinition))
                 {
-                    inheritedItemDefinitionsClone = inheritedItemDefinitionsClone ?? new List<ProjectItemDefinition>(inheritedItemDefinitionsCount + 1);
+                    inheritedItemDefinitionsClone ??= new List<ProjectItemDefinition>(inheritedItemDefinitionsCount + 1);
                     inheritedItemDefinitionsClone.Add(sourceItemDefinition);
                 }
 
