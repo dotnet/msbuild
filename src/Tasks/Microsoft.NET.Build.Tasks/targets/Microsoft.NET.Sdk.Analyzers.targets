@@ -11,24 +11,24 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers )' == '' And 
+    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == '' And 
                                    '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
                                    $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">true</EnableNETAnalyzers>
-    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers )' == ''">false</EnableNETAnalyzers>
+    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
   </PropertyGroup>
-  <Import Project="..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
+  <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
           Condition="$(EnableNETAnalyzers)" />
   <ItemGroup Condition="$(EnableNETAnalyzers)">
     <Analyzer
       Condition="'$(Language)' == 'VB'"
-      Include="..\analyzers\Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll"
+      Include="$(MSBuildThisFileDirectory)..\analyzers\Microsoft.CodeAnalysis.VisualBasic.NetAnalyzers.dll"
       IsImplicitlyDefined="true" />
     <Analyzer
       Condition="'$(Language)' == 'C#'"
-      Include="..\analyzers\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll"
+      Include="$(MSBuildThisFileDirectory)..\analyzers\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll"
       IsImplicitlyDefined="true" />
     <Analyzer
-      Include="..\analyzers\Microsoft.CodeAnalysis.NetAnalyzers.dll"
+      Include="$(MSBuildThisFileDirectory)..\analyzers\Microsoft.CodeAnalysis.NetAnalyzers.dll"
       IsImplicitlyDefined="true" />
   </ItemGroup>
 </Project>
