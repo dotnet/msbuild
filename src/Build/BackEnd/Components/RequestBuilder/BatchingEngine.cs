@@ -395,7 +395,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (
                         (metadataItemName != null) &&
-                        (0 != String.Compare(item.ItemType, metadataItemName, StringComparison.OrdinalIgnoreCase))
+                        (!String.Equals(item.ItemType, metadataItemName, StringComparison.OrdinalIgnoreCase))
                     )
                 {
                     itemMetadataValues[metadataQualifiedName] = String.Empty;

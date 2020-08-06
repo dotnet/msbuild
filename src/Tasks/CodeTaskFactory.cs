@@ -31,7 +31,7 @@ namespace Microsoft.Build.Tasks
         /// This dictionary keeps track of custom references to compiled assemblies.  The in-memory assembly is loaded from a byte
         /// stream and as such its dependencies cannot be found unless they are in the MSBuild.exe directory or the GAC.  They
         /// cannot be found even if they are already loaded in the AppDomain.  This dictionary knows the FullName of the assembly
-        /// and a reference to the assembly itself.  In the <see cref="CurrentDomainOnAssemblyResolve"/> handler, the dictionary 
+        /// and a reference to the assembly itself.  In the <see cref="CurrentDomainOnAssemblyResolve"/> handler, the dictionary
         /// is used to return the loaded assemblies as a way to allow custom references that are not in the normal assembly Load
         /// context.
         /// </summary>
@@ -71,7 +71,7 @@ namespace Microsoft.Build.Tasks
         private static readonly ConcurrentDictionary<FullTaskSpecification, Assembly> s_compiledTaskCache = new ConcurrentDictionary<FullTaskSpecification, Assembly>();
 
         /// <summary>
-        /// The default assemblies to reference when compiling inline code. 
+        /// The default assemblies to reference when compiling inline code.
         /// </summary>
         private static List<string> s_defaultReferencedAssemblies;
 
@@ -81,7 +81,7 @@ namespace Microsoft.Build.Tasks
         private List<string> _referencedAssemblies;
 
         /// <summary>
-        /// Merged set of namespaces (default + specified) 
+        /// Merged set of namespaces (default + specified)
         /// </summary>
         private List<string> _usingNamespaces;
 
@@ -151,7 +151,7 @@ namespace Microsoft.Build.Tasks
         public Type TaskType { get; private set; }
 
         /// <summary>
-        /// The assemblies that the codetaskfactory should reference by default. 
+        /// The assemblies that the codetaskfactory should reference by default.
         /// </summary>
         private static List<string> DefaultReferencedAssemblies
         {
@@ -624,7 +624,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Add a reference assembly to the list of references passed to the compiler. We will try and load the assembly to make sure it is found 
+        /// Add a reference assembly to the list of references passed to the compiler. We will try and load the assembly to make sure it is found
         /// before sending it to the compiler. The reason we load here is that we will be using it in this appdomin anyways as soon as we are going to compile, which should be right away.
         /// </summary>
         [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.Reflection.Assembly.LoadWithPartialName", Justification = "Necessary since we don't have the full assembly name. ")]

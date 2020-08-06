@@ -10,7 +10,7 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// Base class for task that determines the appropriate manifest resource name to 
+    /// Base class for task that determines the appropriate manifest resource name to
     /// assign to a given resx or other resource.
     /// </summary>
     public class CreateVisualBasicManifestResourceName : CreateManifestResourceName
@@ -18,8 +18,8 @@ namespace Microsoft.Build.Tasks
         protected override string SourceFileExtension => ".vb";
 
         /// <summary>
-        /// Utility function for creating a VB-style manifest name from 
-        /// a resource name. 
+        /// Utility function for creating a VB-style manifest name from
+        /// a resource name.
         /// </summary>
         /// <param name="fileName">The file name of the dependent (usually a .resx)</param>
         /// <param name="linkFileName">The file name of the dependent (usually a .resx)</param>
@@ -62,7 +62,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Utility function for creating a VB-style manifest name from 
+        /// Utility function for creating a VB-style manifest name from
         /// a resource name. Note that this function attempts to emulate the
         /// Everret implementation of this code which can be found by searching for
         /// ComputeNonWFCResourceName() or ComputeWFCResourceName() in

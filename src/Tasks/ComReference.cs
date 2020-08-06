@@ -254,7 +254,7 @@ namespace Microsoft.Build.Tasks
 
                 // if returned namespace is null or its type is not System.String, fall back to the default 
                 // way of getting the type lib name (just to be safe)
-                if (data == null || string.Compare(data.GetType().ToString(), "system.string", StringComparison.OrdinalIgnoreCase) != 0)
+                if (data == null || !string.Equals(data.GetType().ToString(), "system.string", StringComparison.OrdinalIgnoreCase))
                 {
                     typeLibName = Marshal.GetTypeLibName(typeLib);
                     return true;
@@ -265,7 +265,7 @@ namespace Microsoft.Build.Tasks
 
                 if (typeLibName.Length >= 4)
                 {
-                    if (string.Compare(typeLibName.Substring(typeLibName.Length - 4), ".dll", StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Equals(typeLibName.Substring(typeLibName.Length - 4), ".dll", StringComparison.OrdinalIgnoreCase))
                     {
                         typeLibName = typeLibName.Substring(0, typeLibName.Length - 4);
                     }
@@ -453,7 +453,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            if (typeLibPath != null && typeLibPath.Length > 0)
+            if (!string.IsNullOrEmpty(typeLibPath))
             {
                 // We have to check for NULL here because QueryPathOfRegTypeLib() returns
                 // a BSTR with a NULL character appended to it.

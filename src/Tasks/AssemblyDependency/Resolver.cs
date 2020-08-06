@@ -161,7 +161,7 @@ namespace Microsoft.Build.Tasks
             if (!allowMismatchBetweenFusionNameAndFileName)
             {
                 string candidateBaseName = Path.GetFileNameWithoutExtension(pathToCandidateAssembly);
-                if (String.Compare(assemblyName?.Name, candidateBaseName, StringComparison.CurrentCultureIgnoreCase) != 0)
+                if (!String.Equals(assemblyName?.Name, candidateBaseName, StringComparison.CurrentCultureIgnoreCase))
                 {
                     if (searchLocation != null)
                     {
@@ -373,7 +373,7 @@ namespace Microsoft.Build.Tasks
                     {
                         foreach (string executableExtension in executableExtensions)
                         {
-                            if (String.Compare(executableExtension, weakNameBaseExtension, StringComparison.CurrentCultureIgnoreCase) == 0)
+                            if (String.Equals(executableExtension, weakNameBaseExtension, StringComparison.CurrentCultureIgnoreCase))
                             {
                                 string fullPath = Path.Combine(directory, weakNameBase);
                                 var extensionlessAssemblyName = new AssemblyNameExtension(weakNameBaseFileName);

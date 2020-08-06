@@ -12,7 +12,7 @@ namespace Microsoft.Build.Tasks
     {
         /// <summary>
         /// Passed to the "Transform" property on the TlbImp task to indicate
-        /// what transforms, if any, to apply to the type library during 
+        /// what transforms, if any, to apply to the type library during
         /// assembly generation
         /// </summary>
         internal enum TlbImpTransformFlags
@@ -35,7 +35,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Defines the "TlbImp" MSBuild task, which enables using TlbImp.exe 
+        /// Defines the "TlbImp" MSBuild task, which enables using TlbImp.exe
         /// to generate assemblies from type libraries.
         /// </summary>
         internal class TlbImp : AxTlbBaseTask
@@ -296,7 +296,7 @@ namespace Microsoft.Build.Tasks
             }
 
             /// <summary>
-            /// Verifies that an allowed combination of TlbImpTransformFlags has been 
+            /// Verifies that an allowed combination of TlbImpTransformFlags has been
             /// passed to the Transform property.
             /// </summary>
             /// <returns>True if Transform is valid and false otherwise</returns>
@@ -318,7 +318,7 @@ namespace Microsoft.Build.Tasks
             }
 
             /// <summary>
-            /// Converts a given flag to the equivalent parameter passed to the /transform: 
+            /// Converts a given flag to the equivalent parameter passed to the /transform:
             /// option of tlbimp.exe
             /// </summary>
             /// <param name="flags">The TlbImpTransformFlags being converted</param>

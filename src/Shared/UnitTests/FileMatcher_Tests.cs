@@ -1964,7 +1964,7 @@ namespace Microsoft.Build.UnitTests
                             if
                             (
                                 pattern == null ||
-                                String.Compare(pattern, "*.*", StringComparison.OrdinalIgnoreCase) == 0
+                                String.Equals(pattern, "*.*", StringComparison.OrdinalIgnoreCase)
                             )
                             {
                                 ++hits;
@@ -1974,7 +1974,7 @@ namespace Microsoft.Build.UnitTests
                             {
                                 string tail = pattern.Substring(1);
                                 string candidateTail = candidate.Substring(candidate.Length - tail.Length);
-                                if (String.Compare(tail, candidateTail, StringComparison.OrdinalIgnoreCase) == 0)
+                                if (String.Equals(tail, candidateTail, StringComparison.OrdinalIgnoreCase))
                                 {
                                     ++hits;
                                     files.Add(FileMatcher.Normalize(candidate));
@@ -1984,11 +1984,11 @@ namespace Microsoft.Build.UnitTests
                             {
                                 string leader = pattern.Substring(0, pattern.Length - 4);
                                 string candidateLeader = candidate.Substring(candidate.Length - leader.Length - 4, leader.Length);
-                                if (String.Compare(leader, candidateLeader, StringComparison.OrdinalIgnoreCase) == 0)
+                                if (String.Equals(leader, candidateLeader, StringComparison.OrdinalIgnoreCase))
                                 {
                                     string tail = pattern.Substring(pattern.Length - 2);
                                     string candidateTail = candidate.Substring(candidate.Length - 2);
-                                    if (String.Compare(tail, candidateTail, StringComparison.OrdinalIgnoreCase) == 0)
+                                    if (String.Equals(tail, candidateTail, StringComparison.OrdinalIgnoreCase))
                                     {
                                         ++hits;
                                         files.Add(FileMatcher.Normalize(candidate));
@@ -2045,7 +2045,7 @@ namespace Microsoft.Build.UnitTests
 
                                 if
                                 (
-                                    String.Compare(pattern, "*.*", StringComparison.OrdinalIgnoreCase) == 0
+                                    String.Equals(pattern, "*.*", StringComparison.OrdinalIgnoreCase)
                                     || pattern == null
                                 )
                                 {
@@ -2059,7 +2059,7 @@ namespace Microsoft.Build.UnitTests
                                 {
                                     string tail = pattern.Substring(1);
                                     string baseMatchTail = baseMatch.Substring(1);
-                                    if (String.Compare(tail, baseMatchTail, StringComparison.OrdinalIgnoreCase) == 0)
+                                    if (String.Equals(tail, baseMatchTail, StringComparison.OrdinalIgnoreCase))
                                     {
                                         directories.Add(FileMatcher.Normalize(match));
                                     }
@@ -2316,7 +2316,7 @@ namespace Microsoft.Build.UnitTests
                     int timesFound = 0;
                     foreach (string file in normalizedFiles)
                     {
-                        if (String.Compare(file, matchingFile, StringComparison.OrdinalIgnoreCase) == 0)
+                        if (String.Equals(file, matchingFile, StringComparison.OrdinalIgnoreCase))
                         {
                             ++timesFound;
                         }
@@ -2335,7 +2335,7 @@ namespace Microsoft.Build.UnitTests
                     int timesFound = 0;
                     foreach (string file in normalizedFiles)
                     {
-                        if (String.Compare(file, nonmatchingFile, StringComparison.OrdinalIgnoreCase) == 0)
+                        if (String.Equals(file, nonmatchingFile, StringComparison.OrdinalIgnoreCase))
                         {
                             ++timesFound;
                         }

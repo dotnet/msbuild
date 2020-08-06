@@ -15,7 +15,7 @@ namespace Microsoft.Build.BackEnd
     internal delegate IBuildComponent BuildComponentFactoryDelegate(BuildComponentType type);
 
     /// <summary>
-    /// An enumeration of all component types recognized by the system    
+    /// An enumeration of all component types recognized by the system
     /// </summary>
     internal enum BuildComponentType
     {
@@ -95,7 +95,7 @@ namespace Microsoft.Build.BackEnd
         RequestBuilder,
 
         /// <summary>
-        /// The component responsible for building targets.        
+        /// The component responsible for building targets.
         /// </summary>
         TargetBuilder,
 

@@ -514,7 +514,7 @@ namespace System.Deployment.Internal.CodeSigning
             byte[] cspPublicKeyBlob;
 
             if(snKey is RSACryptoServiceProvider){
-                cspPublicKeyBlob = (GetFixedRSACryptoServiceProvider((RSACryptoServiceProvider)snKey, useSha256)).ExportCspBlob(false);            
+                cspPublicKeyBlob = (GetFixedRSACryptoServiceProvider((RSACryptoServiceProvider)snKey, useSha256)).ExportCspBlob(false);
                 if (cspPublicKeyBlob == null || cspPublicKeyBlob.Length == 0)
                 {
                     throw new CryptographicException(Win32.NTE_BAD_KEY);
@@ -756,7 +756,7 @@ namespace System.Deployment.Internal.CodeSigning
             issuerNode.AppendChild(licenseDom.ImportNode(xmlDigitalSignature, true));
 
             // Time stamp it if requested.
-            if (timeStampUrl != null && timeStampUrl.Length != 0)
+            if (!string.IsNullOrEmpty(timeStampUrl))
             {
                 TimestampSignedLicenseDom(licenseDom, timeStampUrl, useSha256);
             }

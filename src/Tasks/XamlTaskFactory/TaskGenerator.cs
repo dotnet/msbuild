@@ -420,7 +420,7 @@ namespace Microsoft.Build.Tasks.Xaml
         }
 
         /// <summary>
-        /// Generates a method called "AddDefaultsToActiveSwitchList" that takes all of the properties that have 
+        /// Generates a method called "AddDefaultsToActiveSwitchList" that takes all of the properties that have
         /// default values and adds them to the active switch list
         /// </summary>
         private void GenerateDefaultSetProperties(CodeTypeDeclaration taskClass)
@@ -469,7 +469,7 @@ namespace Microsoft.Build.Tasks.Xaml
         }
 
         /// <summary>
-        /// Generates a method called "AddFallbacksToActiveSwitchList" that takes all of the properties that 
+        /// Generates a method called "AddFallbacksToActiveSwitchList" that takes all of the properties that
         /// are not set but have fallbacks and adds the fallbacks to the active list if they are set.
         /// </summary>
         private void GenerateFallbacks(CodeTypeDeclaration taskClass)
@@ -992,7 +992,7 @@ namespace Microsoft.Build.Tasks.Xaml
         }
 
         /// <summary>
-        /// This method generates overrides array 
+        /// This method generates overrides array
         /// </summary>
         private void GenerateOverrides(Property property, CodeMemberProperty propertyName)
         {
@@ -1171,7 +1171,7 @@ namespace Microsoft.Build.Tasks.Xaml
                     if (switchRelations.Value.Requires.Count > 0)
                     {
                         var checkRequired = new CodeConditionStatement { Condition = null };
-                        
+
                         foreach (string required in switchRelations.Value.Requires)
                         {
                             if (checkRequired.Condition != null)

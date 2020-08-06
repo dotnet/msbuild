@@ -178,7 +178,7 @@ namespace Microsoft.Build.Tasks
                     // that the set of references will also contain the file that is meant to be written here (when reference resolution
                     // found the file in the output folder). We need to filter out this case.
                     var fullPathToOutput = Path.GetFullPath(wrapperPath); // Current directory is the directory of the project file.
-                    tlbImp.ReferenceFiles = _referenceFiles.Where(rf => String.Compare(fullPathToOutput, rf, StringComparison.OrdinalIgnoreCase) != 0).ToArray();
+                    tlbImp.ReferenceFiles = _referenceFiles.Where(rf => !String.Equals(fullPathToOutput, rf, StringComparison.OrdinalIgnoreCase)).ToArray();
                 }
 
                 switch (_targetProcessorArchitecture)

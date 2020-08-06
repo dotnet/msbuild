@@ -161,7 +161,7 @@ namespace Microsoft.Build.Execution
             ((IBuildComponentHost) this).RegisterFactory(BuildComponentType.SdkResolverService, sdkResolverServiceFactory.CreateInstance);
 
             _sdkResolverService = (this as IBuildComponentHost).GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
-            
+
             if (s_projectRootElementCacheBase == null)
             {
                 s_projectRootElementCacheBase = new ProjectRootElementCache(true /* automatically reload any changes from disk */);

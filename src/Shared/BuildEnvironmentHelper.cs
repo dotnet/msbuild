@@ -471,7 +471,7 @@ namespace Microsoft.Build.Shared
         VisualStudio,
 
         /// <summary>
-        /// Running in a standalone toolset mode. All toolsets and extensions paths are relative to the app 
+        /// Running in a standalone toolset mode. All toolsets and extensions paths are relative to the app
         /// running and not dependent on Visual Studio. (e.g. dotnet CLI, open source clone of our repo)
         /// </summary>
         Standalone,

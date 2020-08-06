@@ -11,7 +11,7 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.Tasks
 {
     /// <remarks>
-    /// This task determines the output files for non-MSBuild project references. We look inside 
+    /// This task determines the output files for non-MSBuild project references. We look inside
     /// a special property set by the VS IDE for the list of project guids and their associated outputs.
     /// While there's nothing that would prevent resolution of MSBuild projects in this task, the IDE
     /// only pre-resolves non-MSBuild projects so that we can separate MSBuild project references from
@@ -155,7 +155,7 @@ namespace Microsoft.Build.Tasks
         #region Methods
 
         /// <summary>
-        /// Given a project reference task item and an XML document containing pre-resolved output paths, 
+        /// Given a project reference task item and an XML document containing pre-resolved output paths,
         /// find the output path for that task item.
         /// </summary>
         /// <param name="projectRef">project reference to resolve</param>

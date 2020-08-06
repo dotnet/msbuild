@@ -163,7 +163,7 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Sets the value of an attribute, removing the attribute if the value is null, but still setting it 
+        /// Sets the value of an attribute, removing the attribute if the value is null, but still setting it
         /// if the value is the empty string. Returns the attribute, or null if it was removed.
         /// UNDONE: Make this return a bool if the attribute did not change, so we can avoid dirtying.
         /// </summary>
@@ -185,7 +185,7 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Returns the value of the attribute. 
+        /// Returns the value of the attribute.
         /// If the attribute is null, returns an empty string.
         /// </summary>
         internal static string GetAttributeValue(XmlAttributeWithLocation attribute, bool returnNullForNonexistentAttributes)
@@ -201,7 +201,7 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Returns the value of the attribute. 
+        /// Returns the value of the attribute.
         /// If the attribute is not present, returns an empty string.
         /// </summary>
         internal static string GetAttributeValue(XmlElementWithLocation element, string attributeName)
@@ -210,8 +210,8 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Returns the value of the attribute. 
-        /// If the attribute is not present, returns either null or an empty string, depending on the value 
+        /// Returns the value of the attribute.
+        /// If the attribute is not present, returns either null or an empty string, depending on the value
         /// of nullIfNotExists.
         /// </summary>
         internal static string GetAttributeValue(XmlElementWithLocation element, string attributeName, bool nullIfNotExists)

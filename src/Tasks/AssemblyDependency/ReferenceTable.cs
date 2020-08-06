@@ -145,9 +145,9 @@ namespace Microsoft.Build.Tasks
         private readonly ConcurrentDictionary<string, AssemblyMetadata> _assemblyMetadataCache;
 
         /// <summary>
-        /// When we exclude an assembly from resolution because it is part of out exclusion list we need to let the user know why this is. 
-        /// There can be a number of reasons each for un-resolving a reference, these reasons are encapsulated by a different black list. We need to log a specific message 
-        /// depending on which black list we have found the offending assembly in. This delegate allows one to tie a set of logging messages to a black list so that when we 
+        /// When we exclude an assembly from resolution because it is part of out exclusion list we need to let the user know why this is.
+        /// There can be a number of reasons each for un-resolving a reference, these reasons are encapsulated by a different black list. We need to log a specific message
+        /// depending on which black list we have found the offending assembly in. This delegate allows one to tie a set of logging messages to a black list so that when we
         /// discover an assembly in the black list we can log the correct message.
         /// </summary>
         internal delegate void LogExclusionReason(bool displayPrimaryReferenceMessage, AssemblyNameExtension assemblyName, Reference reference, ITaskItem referenceItem, string targetedFramework);
@@ -1086,7 +1086,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Given an enumerator of pre-unified assembly names, return an enumerator of unified 
+        /// Given an enumerator of pre-unified assembly names, return an enumerator of unified
         /// assembly names.
         /// </summary>
         private IEnumerable<UnifiedAssemblyName> GetUnifiedAssemblyNames
@@ -1233,10 +1233,10 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Based on the set of parent assemblies we want to add their directories to the list of resolvers so that 
+        /// Based on the set of parent assemblies we want to add their directories to the list of resolvers so that
         /// if the dependency is sitting beside the assembly which requires it then we will resolve the assembly from that location first.
-        /// 
-        /// The only time we do not want to do this is if the parent assembly came from the GAC or AssemblyFoldersEx then we want the assembly 
+        ///
+        /// The only time we do not want to do this is if the parent assembly came from the GAC or AssemblyFoldersEx then we want the assembly
         /// to be found using those resolvers so that our GAC and AssemblyFolders checks later on will work on those assemblies.
         /// </summary>
         internal static void CalculateParentAssemblyDirectories(List<string> parentReferenceFolders, Reference parentReference)
@@ -1264,7 +1264,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Given an unresolved reference (one that we don't know the full name for yet), figure out the 
+        /// Given an unresolved reference (one that we don't know the full name for yet), figure out the
         /// full name. Should only be called on references that haven't been resolved yet--otherwise, its
         /// a perf problem.
         /// </summary>
@@ -1471,7 +1471,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// References usually only contains who they depend on, they do not know who depends on them. Given a reference
-        /// A we cannot inspect A to find out that B,C,D depend on it. This method will traverse the references and build up this other direction of the graph, 
+        /// A we cannot inspect A to find out that B,C,D depend on it. This method will traverse the references and build up this other direction of the graph,
         /// therefore we will be able to know given reference A, that B,C,D depend on it.
         /// </summary>
         private static void AddToDependencyGraph(Dictionary<Reference, List<ReferenceAssemblyExtensionPair>> dependencyGraph, AssemblyNameExtension assemblyName, Reference assemblyReference)
@@ -1572,7 +1572,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Go through the dependency graph and make sure that for a reference to remove that we get rid of all dependency assemblies which are not referenced by any other 
+        /// Go through the dependency graph and make sure that for a reference to remove that we get rid of all dependency assemblies which are not referenced by any other
         /// assembly. The remove reference list should contain ALL primary references which should be removed because they, or one of their dependencies is in the black list.
         /// </summary>
         /// <param name="removedReference">Reference to remove dependencies for</param>
@@ -1617,7 +1617,7 @@ namespace Microsoft.Build.Tasks
         /// Searches the table for references that haven't been resolved to their full file names and
         /// for dependencies that haven't yet been found.
         ///
-        /// If any are found, they're resolved and then dependencies are found. Then the process is repeated 
+        /// If any are found, they're resolved and then dependencies are found. Then the process is repeated
         /// until nothing is left unresolved.
         /// </summary>
         /// <param name="remappedAssembliesValue">The table of remapped assemblies.</param>
@@ -1810,7 +1810,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// This methods looks for conflicts between assemblies and attempts to 
+        /// This methods looks for conflicts between assemblies and attempts to
         /// resolve them.
         /// </summary>
         private void ResolveConflictsBetweenReferences(Dictionary<string, List<AssemblyNameReference>> baseNameToReferences)
@@ -1849,7 +1849,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Based on the closure, get a table of ideal remappings needed to 
+        /// Based on the closure, get a table of ideal remappings needed to
         /// produce zero conflicts.
         /// </summary>
         internal void ResolveConflicts
@@ -1960,8 +1960,8 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// If a reference is a higher version than what exists in the redist list of the target framework then 
-        /// this reference needs to be marked as excluded so that it is not allowed to be referenced. 
+        /// If a reference is a higher version than what exists in the redist list of the target framework then
+        /// this reference needs to be marked as excluded so that it is not allowed to be referenced.
         /// 
         /// If the user needs this reference then they need to set specific version to true.
         /// </summary>
@@ -2018,12 +2018,12 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Get the redist list which corresponds to the highest target framework for a given target framework moniker.
-        /// 
+        ///
         /// This is done in two ways:
         ///  First, if the latestTargetFrameworkDirectories parameter is passed into RAR those directories will be used to get the redist list
-        ///  regardless of the target framework moniker. 
-        ///  
-        /// Second, if latest Target Framework Directories is not passed in then we ask the ToollocationHelper for the highest target framework which has 
+        ///  regardless of the target framework moniker.
+        ///
+        /// Second, if latest Target Framework Directories is not passed in then we ask the ToollocationHelper for the highest target framework which has
         /// a TargetFrameworkIdentifier which matches the passed in TargetFrameworkMoniker.
         /// </summary>
         private Tuple<RedistList, string> GetHighestVersionFullFrameworkForTFM(FrameworkNameVersioning targetFrameworkMoniker)
@@ -2087,7 +2087,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Based on a target framework moniker, get the set of reference assembly directories which 
+        /// Based on a target framework moniker, get the set of reference assembly directories which
         /// correspond to the highest version of the target framework identifier property on the target framework moniker.
         /// </summary>
         private static IList<string> GetHighestVersionReferenceAssemblyDirectories(FrameworkNameVersioning targetFrameworkMoniker, out FrameworkNameVersioning highestVersionMoniker)
@@ -2106,7 +2106,7 @@ namespace Microsoft.Build.Tasks
             }
             return referenceAssemblyDirectories;
         }
-        
+
         /// <summary>
         /// Is the assemblyName in the current redist list and does it have a version number which is higher than what is in the current redist list.
         /// This may happen if someone passes in a p2p reference whcih is a framework assembly which is a higher version than what is in the redist list.
@@ -2187,7 +2187,7 @@ namespace Microsoft.Build.Tasks
 
             return haveMarkedReference;
         }
-        
+
         /// <summary>
         /// Build a table of simple names mapped to assemblyname+reference.
         /// </summary>
@@ -2334,7 +2334,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            
+
             // Remove the one chosen.
             int victor = 1 - victim;
 
@@ -2375,7 +2375,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Get unification information for the given assembly name. 
+        /// Get unification information for the given assembly name.
         /// </summary>
         /// <param name="assemblyName">The assembly name.</param>
         /// <param name="unifiedVersion">The new version of the assembly to use.</param>

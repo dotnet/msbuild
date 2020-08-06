@@ -39,7 +39,7 @@ namespace Microsoft.Build.BackEnd
         IBuildEngine7, IRarBuildEngine
     {
         /// <summary>
-        /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set. 
+        /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set.
         /// </summary>
         private static bool s_onlyUseOutOfProcNodes = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
 
@@ -133,7 +133,7 @@ namespace Microsoft.Build.BackEnd
         /// Returns true in the multiproc case
         /// </summary>
         /// <comment>
-        /// If MSBUILDNOINPROCNODE is set, then even if there's only one node in the buildparameters, it will be an out-of-proc node.  
+        /// If MSBUILDNOINPROCNODE is set, then even if there's only one node in the buildparameters, it will be an out-of-proc node.
         /// </comment>
         public bool IsRunningMultipleNodes
         {
@@ -322,7 +322,7 @@ namespace Microsoft.Build.BackEnd
         #region IBuildEngine3 Members
 
         /// <summary>
-        /// Builds multiple project files in parallel. 
+        /// Builds multiple project files in parallel.
         /// Thread safe.
         /// </summary>
         /// <param name="projectFileNames">The list of projects to build</param>
@@ -728,7 +728,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         /// <inheritdoc />
         /// <summary>
-        /// InitializeLifetimeService is called when the remote object is activated. 
+        /// InitializeLifetimeService is called when the remote object is activated.
         /// This method will determine how long the lifetime for the object will be.
         /// </summary>
         /// <returns>The lease object to control this object's lifetime.</returns>

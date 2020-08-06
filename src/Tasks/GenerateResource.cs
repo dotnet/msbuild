@@ -1752,15 +1752,15 @@ namespace Microsoft.Build.Tasks
             {
                 string extension = Path.GetExtension(source.ItemSpec);
 
-                if (String.Compare(extension, ".resources.dll", StringComparison.OrdinalIgnoreCase) == 0 ||
-                    String.Compare(extension, ".dll", StringComparison.OrdinalIgnoreCase) == 0 ||
-                    String.Compare(extension, ".exe", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(extension, ".resources.dll", StringComparison.OrdinalIgnoreCase) ||
+                    String.Equals(extension, ".dll", StringComparison.OrdinalIgnoreCase) ||
+                    String.Equals(extension, ".exe", StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
 
-                if (String.Compare(extension, ".resx", StringComparison.OrdinalIgnoreCase) == 0 ||
-                    String.Compare(extension, ".resw", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(extension, ".resx", StringComparison.OrdinalIgnoreCase) ||
+                    String.Equals(extension, ".resw", StringComparison.OrdinalIgnoreCase))
                 {
                     XmlReader reader = null;
                     string name = null;
@@ -2506,7 +2506,7 @@ namespace Microsoft.Build.Tasks
 
                     if (candidateAssemblyName != null)
                     {
-                        if (String.Compare(requestedAssemblyName.Name, candidateAssemblyName.Name, StringComparison.CurrentCultureIgnoreCase) == 0)
+                        if (String.Equals(requestedAssemblyName.Name, candidateAssemblyName.Name, StringComparison.CurrentCultureIgnoreCase))
                         {
                             return Assembly.UnsafeLoadFrom(_assemblyFiles[i].ItemSpec);
                         }
@@ -2929,23 +2929,23 @@ namespace Microsoft.Build.Tasks
                 return Format.Error;
             }
 
-            if (String.Compare(extension, ".txt", StringComparison.OrdinalIgnoreCase) == 0 ||
-                String.Compare(extension, ".restext", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(extension, ".txt", StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(extension, ".restext", StringComparison.OrdinalIgnoreCase))
             {
                 return Format.Text;
             }
-            else if (String.Compare(extension, ".resx", StringComparison.OrdinalIgnoreCase) == 0 ||
-                     String.Compare(extension, ".resw", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(extension, ".resx", StringComparison.OrdinalIgnoreCase) ||
+                     String.Equals(extension, ".resw", StringComparison.OrdinalIgnoreCase))
             {
                 return Format.XML;
             }
-            else if (String.Compare(extension, ".resources.dll", StringComparison.OrdinalIgnoreCase) == 0 ||
-                     String.Compare(extension, ".dll", StringComparison.OrdinalIgnoreCase) == 0 ||
-                     String.Compare(extension, ".exe", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(extension, ".resources.dll", StringComparison.OrdinalIgnoreCase) ||
+                     String.Equals(extension, ".dll", StringComparison.OrdinalIgnoreCase) ||
+                     String.Equals(extension, ".exe", StringComparison.OrdinalIgnoreCase))
             {
                 return Format.Assembly;
             }
-            else if (String.Compare(extension, ".resources", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(extension, ".resources", StringComparison.OrdinalIgnoreCase))
             {
                 return Format.Binary;
             }

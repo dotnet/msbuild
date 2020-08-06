@@ -226,7 +226,7 @@ namespace Microsoft.Build.BuildEngine
             }
 
             // It's considered an error if a target does not have a name.
-            ProjectErrorUtilities.VerifyThrowInvalidProject((targetName != null) && (targetName.Length > 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(targetName),
                 targetElement, "MissingRequiredAttribute", XMakeAttributes.name, XMakeElements.target);
 
             this.taskElementList = new ArrayList();
@@ -600,7 +600,7 @@ namespace Microsoft.Build.BuildEngine
                          buildContext.NameOfBlockingTarget == null))
                     {
                         error.VerifyThrow(
-                            String.Compare(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), this.Name, StringComparison.OrdinalIgnoreCase) == 0,
+                            String.Equals(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), this.Name, StringComparison.OrdinalIgnoreCase),
                             "The name of the target in progress is inconsistent with the target being built");
 
                         error.VerifyThrow(targetOutputItems != null,

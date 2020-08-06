@@ -69,7 +69,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             string file = defaultFile;
 
             // NOTE: the XML node may not have a filename if it's purely an in-memory node
-            if ((node.OwnerDocument.BaseURI != null) && (node.OwnerDocument.BaseURI.Length > 0))
+            if (!string.IsNullOrEmpty(node.OwnerDocument.BaseURI))
             {
                 file = new Uri(node.OwnerDocument.BaseURI).LocalPath;
             }
@@ -211,14 +211,14 @@ namespace Microsoft.Build.BuildEngine.Shared
                     {
                         if (xmlReader.NodeType == XmlNodeType.Element)
                         {
-                            if (String.Compare(xmlReader.Name, elementName, StringComparison.OrdinalIgnoreCase) == 0)
+                            if (String.Equals(xmlReader.Name, elementName, StringComparison.OrdinalIgnoreCase))
                             {
                                 if (xmlReader.HasAttributes)
                                 {
                                     for (int i = 0; i < xmlReader.AttributeCount; i++)
                                     {
                                         xmlReader.MoveToAttribute(i);
-                                        if (String.Compare(xmlReader.Name, attributeName, StringComparison.OrdinalIgnoreCase) == 0)
+                                        if (String.Equals(xmlReader.Name, attributeName, StringComparison.OrdinalIgnoreCase))
                                         {
                                             attributeValue = xmlReader.Value;
                                             break;
