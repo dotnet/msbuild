@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "MSBuild": {
-      "commandName": "Project",
-      "commandLineArgs": "C:/dev/sample"
-    }
-  }
-}

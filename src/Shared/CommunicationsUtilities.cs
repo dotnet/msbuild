@@ -7,12 +7,13 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
 
 using Microsoft.Build.Shared;
-using System.Reflection;
+using Microsoft.Build.BackEnd.Logging;
 
 #if !FEATURE_APM
 using System.Threading.Tasks;
@@ -152,6 +153,22 @@ namespace Microsoft.Build.Internal
         static internal int NodeConnectionTimeout
         {
             get { return GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout); }
+        }
+
+        private static int? _clrVersion = null;
+        /// <summary>
+        /// Provides cahced value of current CLR version
+        /// </summary>
+        private static int ClrVersion
+        {
+            get
+            {
+                if (_clrVersion.HasValue)
+                    return _clrVersion.Value;
+
+                _clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
+                return _clrVersion.Value;
+            }
         }
 
         /// <summary>
@@ -471,7 +488,7 @@ namespace Microsoft.Build.Internal
                 // Take the current TaskHost context
                 if (taskHostParameters == null)
                 {
-                    clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
+                    clrVersion = ClrVersion;
                     is64Bit = XMakeAttributes.GetCurrentMSBuildArchitecture().Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
                 }
                 else
@@ -629,11 +646,11 @@ namespace Microsoft.Build.Internal
             return x == EndOfHandshakeSignal ? ~x : x;
         }
 
-        internal static string GetRARPipeName(bool nodeReuse, bool lowPriority)
+        internal static string GetRarPipeName(bool nodeReuse, bool lowPriority)
         {
             var context = HandshakeOptions.None;
             var userName = Environment.UserName;
-            var clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
+            var clrVersion = ClrVersion;
             var is64Bit = XMakeAttributes.GetCurrentMSBuildArchitecture().Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
 
             if (is64Bit)

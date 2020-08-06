@@ -35,7 +35,7 @@ namespace Microsoft.Build.Execution
         {
             var cancellationTokenSource = new CancellationTokenSource();
 
-            var pipeName = CommunicationsUtilities.GetRARPipeName(nodeReuse, lowPriority);
+            var pipeName = CommunicationsUtilities.GetRarPipeName(nodeReuse, lowPriority);
             var controller = new RarController(pipeName);
 
             Console.CancelKeyPress += (e, sender) => cancellationTokenSource.Cancel();

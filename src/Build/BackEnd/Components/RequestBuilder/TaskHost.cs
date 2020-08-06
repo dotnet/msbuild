@@ -1021,7 +1021,7 @@ namespace Microsoft.Build.BackEnd
         string IRarBuildEngine.GetRarPipeName()
         {
             var parameters = _host.BuildParameters;
-            return CommunicationsUtilities.GetRARPipeName(parameters.EnableNodeReuse, parameters.LowPriority);
+            return CommunicationsUtilities.GetRarPipeName(parameters.EnableNodeReuse, parameters.LowPriority);
         }
 
         /// <summary>

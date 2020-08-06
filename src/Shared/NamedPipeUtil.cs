@@ -6,10 +6,14 @@ using System.IO;
 using System.IO.Pipes;
 using System.Security.Principal;
 
+using Microsoft.Build.Internal;
+
 namespace Microsoft.Build.Shared
 {
     internal static class NamedPipeUtil
     {
+        private static readonly Type SecurityIdentiferType = typeof(SecurityIdentifier);
+
         internal static string GetPipeNameOrPath(string pipeName)
         {
             if (NativeMethodsShared.IsUnixLike)
@@ -85,10 +89,10 @@ namespace Microsoft.Build.Shared
             var remoteSecurity = new PipeSecurity(nodeStream.SafePipeHandle, System.Security.AccessControl.AccessControlSections.Access |
                 System.Security.AccessControl.AccessControlSections.Owner | System.Security.AccessControl.AccessControlSections.Group);
 #endif
-            IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
+            IdentityReference remoteOwner = remoteSecurity.GetOwner(SecurityIdentiferType);
             if (remoteOwner != identifier)
             {
-                //CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
+                CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
                 throw new UnauthorizedAccessException();
             }
         }
