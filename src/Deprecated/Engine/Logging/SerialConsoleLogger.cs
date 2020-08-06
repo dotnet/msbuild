@@ -600,7 +600,7 @@ namespace Microsoft.Build.BuildEngine
 
                 if (previous == null)
                 {
-                    if ((targetNames == null) || (targetNames.Length == 0))
+                    if (string.IsNullOrEmpty(targetNames))
                     {
                         WriteLinePrettyFromResource(indentLevel, "ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", current);
                     }
@@ -611,7 +611,7 @@ namespace Microsoft.Build.BuildEngine
                 }
                 else
                 {
-                    if ((targetNames == null) || (targetNames.Length == 0))
+                    if (string.IsNullOrEmpty(targetNames))
                     {
                         WriteLinePrettyFromResource(indentLevel, "ProjectStartedPrefixForNestedProjectWithDefaultTargets", previous, current);
                     }

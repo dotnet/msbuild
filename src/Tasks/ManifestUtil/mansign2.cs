@@ -756,7 +756,7 @@ namespace System.Deployment.Internal.CodeSigning
             issuerNode.AppendChild(licenseDom.ImportNode(xmlDigitalSignature, true));
 
             // Time stamp it if requested.
-            if (timeStampUrl != null && timeStampUrl.Length != 0)
+            if (!string.IsNullOrEmpty(timeStampUrl))
             {
                 TimestampSignedLicenseDom(licenseDom, timeStampUrl, useSha256);
             }

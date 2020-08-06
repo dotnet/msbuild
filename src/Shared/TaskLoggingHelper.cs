@@ -736,7 +736,7 @@ namespace Microsoft.Build.Utilities
             string messageCode;
             string throwAwayMessageBody = ResourceUtilities.ExtractMessageCode(true /* only msbuild codes */, FormatResourceString(messageResourceName, messageArgs), out messageCode);
 
-            ErrorUtilities.VerifyThrow(messageCode == null || messageCode.Length == 0, "Called LogErrorFromResources instead of LogErrorWithCodeFromResources, but message '" + throwAwayMessageBody + "' does have an error code '" + messageCode + "'");
+            ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(messageCode), "Called LogErrorFromResources instead of LogErrorWithCodeFromResources, but message '" + throwAwayMessageBody + "' does have an error code '" + messageCode + "'");
 #endif
 
             LogError
@@ -1324,7 +1324,7 @@ namespace Microsoft.Build.Utilities
                 //  Log it as a warning or error.
                 string origin = messageParts.origin;
 
-                if ((origin == null) || (origin.Length == 0))
+                if (string.IsNullOrEmpty(origin))
                 {
                     // Use the task class name as the origin, if none specified.
                     origin = TaskNameUpperCase;

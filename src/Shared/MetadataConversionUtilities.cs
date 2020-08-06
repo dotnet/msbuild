@@ -31,7 +31,7 @@ namespace Microsoft.Build.Shared
             )
         {
             string metadataValue = item.GetMetadata(itemMetadataName);
-            if (metadataValue == null || metadataValue.Length == 0)
+            if (string.IsNullOrEmpty(metadataValue))
             {
                 metadataFound = false;
                 return false;

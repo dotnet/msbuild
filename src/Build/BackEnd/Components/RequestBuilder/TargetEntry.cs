@@ -917,7 +917,7 @@ namespace Microsoft.Build.BackEnd
                 batchableTargetParameters.Add(_target.Outputs);
             }
 
-            if (_target.Returns != null && _target.Returns.Length > 0)
+            if (!string.IsNullOrEmpty(_target.Returns))
             {
                 batchableTargetParameters.Add(_target.Returns);
             }
