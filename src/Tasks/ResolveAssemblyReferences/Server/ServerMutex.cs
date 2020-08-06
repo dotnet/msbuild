@@ -11,16 +11,11 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         private readonly Mutex _mutex;
         public bool IsLocked { get; private set; }
         public bool IsDisposed { get; private set; }
-        public bool CreatedNew { get; }
 
         public ServerMutex(string name)
         {
-            bool createdNew;
-            _mutex = new Mutex(true, name, out createdNew);
-            if (createdNew)
-                IsLocked = true;
-
-            CreatedNew = createdNew;
+            _mutex = new Mutex(true, name, out bool createdNew);
+            IsLocked = createdNew;
         }
 
         public void Dispose()

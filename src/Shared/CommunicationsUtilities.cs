@@ -157,7 +157,7 @@ namespace Microsoft.Build.Internal
 
         private static int? _clrVersion = null;
         /// <summary>
-        /// Provides cahced value of current CLR version
+        /// Provides cached value of current CLR version
         /// </summary>
         private static int ClrVersion
         {
@@ -649,7 +649,7 @@ namespace Microsoft.Build.Internal
         internal static string GetRarPipeName(bool nodeReuse, bool lowPriority)
         {
             var context = HandshakeOptions.None;
-            var userName = Environment.UserName;
+            var userName = $"{Environment.UserDomainName}.{Environment.UserName}";
             var clrVersion = ClrVersion;
             var is64Bit = XMakeAttributes.GetCurrentMSBuildArchitecture().Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
 

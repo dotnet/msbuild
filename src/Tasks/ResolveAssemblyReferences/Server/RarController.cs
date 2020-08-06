@@ -43,7 +43,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
 
             using var mutex = new ServerMutex(_pipeName);
 
-            if (mutex.CreatedNew)
+            if (mutex.IsLocked)
                 return 1;
 
             while (true)
@@ -54,12 +54,12 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
                 _serverStream = GetStream(_pipeName);
                 await _serverStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
                 // TODO: This waits for completion of the connection, make to accept multiple connection
-                await HandelConnectionAsync(_serverStream, cancellationToken).ConfigureAwait(false);
+                await HandleConnectionAsync(_serverStream, cancellationToken).ConfigureAwait(false);
             }
             return 0;
         }
 
-        private async Task HandelConnectionAsync(Stream serverStream, CancellationToken cancellationToken = default)
+        private async Task HandleConnectionAsync(Stream serverStream, CancellationToken cancellationToken = default)
         {
             var server = GetRpcServer(serverStream, _resolveAssemblyReferenceTaskHandler);
             server.StartListening();
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
 #endif
             {
                 return new NamedPipeServerStream
-                    (
+                (
                     pipeName,
                     PipeDirection.InOut,
                     1, // Only allow one connection at a time.

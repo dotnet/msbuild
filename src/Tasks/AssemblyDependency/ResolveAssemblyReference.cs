@@ -2979,7 +2979,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
-            if(UseResolveAssemblyReferenceService && BuildEngine is IRarBuildEngine rarBuildEngine)
+            if (UseResolveAssemblyReferenceService && BuildEngine is IRarBuildEngine rarBuildEngine)
             {
                 using var client = new RarClient(rarBuildEngine);
 
@@ -2992,13 +2992,11 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                if(connected)
+                if (connected)
                 {
                     // Client is connected to the RAR node, we can execute RAR task remotely
                     // return client.Execute(); // TODO: Let it do something.
-                    var number = client.GetNumber(42);
-
-                    Debug.Assert(number == 42);
+                    //var number = client.GetNumber(42);
                 }
 
             }
