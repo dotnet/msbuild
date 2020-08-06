@@ -8,8 +8,6 @@ using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Exceptions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.Run.LaunchSettings;
 using Microsoft.DotNet.CommandFactory;
 
@@ -41,17 +39,37 @@ namespace Microsoft.DotNet.Tools.Run
         {
             Initialize();
 
+            if (!TryGetLaunchProfileSettingsIfNeeded(out var launchSettings))
+            {
+                return 1;
+            }
+
             if (ShouldBuild)
             {
+                if (string.Equals("true", launchSettings?.DotNetRunMessages, StringComparison.OrdinalIgnoreCase))
+                {
+                    Reporter.Output.WriteLine(LocalizableStrings.RunCommandBuilding);
+                }
+
                 EnsureProjectIsBuilt();
             }
 
             try
             {
                 ICommand targetCommand = GetTargetCommand();
-                if (!ApplyLaunchProfileSettingsIfNeeded(ref targetCommand))
+                if (launchSettings != null)
                 {
-                    return 1;
+                    if (!string.IsNullOrEmpty(launchSettings.ApplicationUrl))
+                    {
+                        targetCommand.EnvironmentVariable("ASPNETCORE_URLS", launchSettings.ApplicationUrl);
+                    }
+
+                    foreach (var entry in launchSettings.EnvironmentVariables)
+                    {
+                        string value = Environment.ExpandEnvironmentVariables(entry.Value);
+                        //NOTE: MSBuild variables are not expanded like they are in VS
+                        targetCommand.EnvironmentVariable(entry.Key, value);
+                    }
                 }
 
                 // Ignore Ctrl-C for the remainder of the command's execution
@@ -92,8 +110,9 @@ namespace Microsoft.DotNet.Tools.Run
             Interactive = interactive;
         }
 
-        private bool ApplyLaunchProfileSettingsIfNeeded(ref ICommand targetCommand)
+        private bool TryGetLaunchProfileSettingsIfNeeded(out ProjectLaunchSettingsModel launchSettingsModel)
         {
+            launchSettingsModel = default;
             if (!UseLaunchProfile)
             {
                 return true;
@@ -117,7 +136,8 @@ namespace Microsoft.DotNet.Tools.Run
 
             if (File.Exists(launchSettingsPath))
             {
-                if (!HasQuietVerbosity) {
+                if (!HasQuietVerbosity)
+                {
                     Reporter.Output.WriteLine(string.Format(LocalizableStrings.UsingLaunchSettingsFromMessage, launchSettingsPath));
                 }
 
@@ -126,10 +146,14 @@ namespace Microsoft.DotNet.Tools.Run
                 try
                 {
                     var launchSettingsFileContents = File.ReadAllText(launchSettingsPath);
-                    var applyResult = LaunchSettingsManager.TryApplyLaunchSettings(launchSettingsFileContents, ref targetCommand, LaunchProfile);
+                    var applyResult = LaunchSettingsManager.TryApplyLaunchSettings(launchSettingsFileContents, LaunchProfile);
                     if (!applyResult.Success)
                     {
                         Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, profileName, applyResult.FailureReason).Bold().Red());
+                    }
+                    else
+                    {
+                        launchSettingsModel = applyResult.LaunchSettings;
                     }
                 }
                 catch (IOException ex)
@@ -155,7 +179,7 @@ namespace Microsoft.DotNet.Tools.Run
                 new RestoringCommand(
                     restoreArgs.Prepend(Project),
                     restoreArgs,
-                    new [] { Project },
+                    new[] { Project },
                     NoRestore
                 ).Execute();
 
