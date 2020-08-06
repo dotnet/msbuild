@@ -198,22 +198,31 @@ Copyright (c) .NET Foundation. All rights reserved.
                  FormatArguments="$(MinimumOSPlatform);$(TargetPlatformVersion)"/>
   </Target>
 
-  <Target Name="_CheckForInvalidTargetPlatformVersion"
-      BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
-      Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
+  <Target Name="_NormalizeTargetPlatformVersion"
+    BeforeTargets="ProcessFrameworkReferences"
+    Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
     <ItemGroup>
-      <ValidTargetPlatformVersion Include="@(SupportedTargetPlatform)" Condition="'@(SupportedTargetPlatform)' != '' and '%(Identity)' == '$(TargetPlatformVersion)'" />
+      <_ValidTargetPlatformVersion Include="@(SupportedTargetPlatform)" Condition="'@(SupportedTargetPlatform)' != '' and $([MSBuild]::VersionEquals(%(Identity), $(TargetPlatformVersion)))" />
     </ItemGroup>
 
     <PropertyGroup>
-      <TargetPlatformVersionSupported Condition="'$(TargetPlatformVersionSupported)' == '' and '@(ValidTargetPlatformVersion)' != ''" >true</TargetPlatformVersionSupported>
-      <ValidTargetPlatformVersions Condition="'@(SupportedTargetPlatform)' != ''" >@(SupportedTargetPlatform, '%0a')</ValidTargetPlatformVersions>
-      <ValidTargetPlatformVersions Condition="'@(SupportedTargetPlatform)' == ''" >None</ValidTargetPlatformVersions>
+      <TargetPlatformVersion Condition="'@(_ValidTargetPlatformVersion)' != '' and '@(_ValidTargetPlatformVersion->Count())' == '1' and '@(_ValidTargetPlatformVersion)' != '$(TargetPlatformVersion)'">@(_ValidTargetPlatformVersion)</TargetPlatformVersion>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="_CheckForInvalidTargetPlatformVersion"
+      BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+      DependsOnTargets="_NormalizeTargetPlatformVersion"
+      Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
+    <PropertyGroup>
+      <TargetPlatformVersionSupported Condition="'$(TargetPlatformVersionSupported)' == '' and '@(_ValidTargetPlatformVersion)' != ''" >true</TargetPlatformVersionSupported>
+      <_ValidTargetPlatformVersions Condition="'@(SupportedTargetPlatform)' != ''" >@(SupportedTargetPlatform, '%0a')</_ValidTargetPlatformVersions>
+      <_ValidTargetPlatformVersions Condition="'@(SupportedTargetPlatform)' == ''" >None</_ValidTargetPlatformVersions>
     </PropertyGroup>
 
     <NetSdkError Condition="'$(TargetPlatformVersionSupported)' != 'true'"
                  ResourceName="InvalidTargetPlatformVersion"
-                 FormatArguments="$(TargetPlatformVersion);$(TargetPlatformIdentifier);$(ValidTargetPlatformVersions)" />
+                 FormatArguments="$(TargetPlatformVersion);$(TargetPlatformIdentifier);$(_ValidTargetPlatformVersions)" />
   </Target>
 
   <!-- Exclude files from OutputPath and IntermediateOutputPath from default item globs.  Use the value
