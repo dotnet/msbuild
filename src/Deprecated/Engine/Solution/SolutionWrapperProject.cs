@@ -514,7 +514,7 @@ namespace Microsoft.Build.BuildEngine
             BuildTask newTask = target.AddNewTask("MSBuild");
             newTask.SetParameterValue("Projects", projectPath, true /* treat as literal */);
 
-            if (msbuildTargetName != null && msbuildTargetName.Length > 0)
+            if (!string.IsNullOrEmpty(msbuildTargetName))
             {
                 newTask.SetParameterValue("Targets", msbuildTargetName);
             }
@@ -556,7 +556,7 @@ namespace Microsoft.Build.BuildEngine
         )
         {
             string targetName = ProjectInSolution.DisambiguateProjectTargetName(proj.GetUniqueProjectName());
-            if (subTargetName != null && subTargetName.Length > 0)
+            if (!string.IsNullOrEmpty(subTargetName))
             {
                 targetName = targetName + ":" + subTargetName;
             }
@@ -899,7 +899,7 @@ namespace Microsoft.Build.BuildEngine
         )
         {
             string targetName = ProjectInSolution.DisambiguateProjectTargetName(proj.GetUniqueProjectName());
-            if (subTargetName != null && subTargetName.Length > 0)
+            if (!string.IsNullOrEmpty(subTargetName))
             {
                 targetName = targetName + ":" + subTargetName;
             }
@@ -1341,7 +1341,7 @@ namespace Microsoft.Build.BuildEngine
             AddTargetForGetFrameworkPathAndRedistList(msbuildProject);
 
             string targetName = ProjectInSolution.DisambiguateProjectTargetName(proj.GetUniqueProjectName());
-            if (subTargetName != null && subTargetName.Length > 0)
+            if (!string.IsNullOrEmpty(subTargetName))
             {
                 targetName = targetName + ":" + subTargetName;
             }
@@ -1538,7 +1538,7 @@ namespace Microsoft.Build.BuildEngine
         )
         {
             string targetName = ProjectInSolution.DisambiguateProjectTargetName(proj.GetUniqueProjectName());
-            if (subTargetName != null && subTargetName.Length > 0)
+            if (!string.IsNullOrEmpty(subTargetName))
             {
                 targetName = targetName + ":" + subTargetName;
             }
@@ -1621,7 +1621,7 @@ namespace Microsoft.Build.BuildEngine
                 msbuildTask.SetParameterValue("Projects", buildItemReference);
                 msbuildTask.SetParameterValue("Properties", "Configuration=%(Configuration); Platform=%(Platform); BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)");
 
-                if (subTargetName != null && subTargetName.Length > 0)
+                if (!string.IsNullOrEmpty(subTargetName))
                 {
                     msbuildTask.SetParameterValue("Targets", subTargetName);
                 }
@@ -1690,7 +1690,7 @@ namespace Microsoft.Build.BuildEngine
                     "SolutionParseProjectDepNotFoundError", project.ProjectGuid, dependency);
 
                 dependencies.Append(ProjectInSolution.DisambiguateProjectTargetName(projectUniqueName));
-                if (subTargetName != null && subTargetName.Length > 0)
+                if (!string.IsNullOrEmpty(subTargetName))
                 {
                     dependencies.Append(":");
                     dependencies.Append(subTargetName);
@@ -1735,7 +1735,7 @@ namespace Microsoft.Build.BuildEngine
                 }
 
                 dependencies.Append(ProjectInSolution.DisambiguateProjectTargetName(proj.GetUniqueProjectName()));
-                if (subTargetName != null && subTargetName.Length > 0)
+                if (!string.IsNullOrEmpty(subTargetName))
                 {
                     dependencies.Append(":");
                     dependencies.Append(subTargetName);

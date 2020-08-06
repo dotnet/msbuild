@@ -1484,7 +1484,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         WriteLinePrefix(projectStartedEvent.FullProjectKey, projectStartedEvent.TimeStamp, false);
                         setColor(ConsoleColor.Cyan);
                         string message;
-                        if ((targetNames == null) || (targetNames.Length == 0))
+                        if (string.IsNullOrEmpty(targetNames))
                         {
                             message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedTopLevelProjectWithDefaultTargets", current, currentProjectNodeId);
                         }
@@ -1500,7 +1500,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     {
                         WriteLinePrefix(parentStartedEvent.FullProjectKey, parentStartedEvent.TimeStamp, false);
                         setColor(ConsoleColor.Cyan);
-                        if ((targetNames == null) || (targetNames.Length == 0))
+                        if (string.IsNullOrEmpty(targetNames))
                         {
                             WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedWithDefaultTargetsMultiProc", previous, parentStartedEvent.FullProjectKey, current, projectStartedEvent.FullProjectKey, currentProjectNodeId), true);
                         }

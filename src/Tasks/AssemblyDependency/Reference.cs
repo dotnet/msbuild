@@ -493,7 +493,7 @@ namespace Microsoft.Build.Tasks
                     _fileNameWithoutExtension = null;
                     _directoryName = null;
 
-                    if (_fullPath == null || _fullPath.Length == 0)
+                    if (string.IsNullOrEmpty(_fullPath))
                     {
                         _scatterFiles = Array.Empty<string>();
                         _satelliteFiles = new List<string>();
@@ -521,7 +521,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                if ((_directoryName == null || _directoryName.Length == 0) && (_fullPath != null && _fullPath.Length != 0))
+                if ((string.IsNullOrEmpty(_directoryName)) && (!string.IsNullOrEmpty(_fullPath)))
                 {
                     _directoryName = Path.GetDirectoryName(_fullPath);
                     if (_directoryName.Length == 0)
@@ -541,7 +541,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                if ((_fileNameWithoutExtension == null || _fileNameWithoutExtension.Length == 0) && (_fullPath != null && _fullPath.Length != 0))
+                if ((string.IsNullOrEmpty(_fileNameWithoutExtension)) && (!string.IsNullOrEmpty(_fullPath)))
                 {
                     _fileNameWithoutExtension = Path.GetFileNameWithoutExtension(_fullPath);
                 }
@@ -556,7 +556,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                if ((_fullPathWithoutExtension == null || _fullPathWithoutExtension.Length == 0) && (_fullPath != null && _fullPath.Length != 0))
+                if ((string.IsNullOrEmpty(_fullPathWithoutExtension)) && (!string.IsNullOrEmpty(_fullPath)))
                 {
                     _fullPathWithoutExtension = Path.Combine(DirectoryName, FileNameWithoutExtension);
                 }
@@ -882,7 +882,7 @@ namespace Microsoft.Build.Tasks
             _primarySourceItem = sourceItem;
             SDKName = sourceItem.GetMetadata("SDKName");
 
-            if (executableExtension != null && executableExtension.Length > 0)
+            if (!string.IsNullOrEmpty(executableExtension))
             {
                 // Set the expected extension.
                 SetExecutableExtension(executableExtension);
