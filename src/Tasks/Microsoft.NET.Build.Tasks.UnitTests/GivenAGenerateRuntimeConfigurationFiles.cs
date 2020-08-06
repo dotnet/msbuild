@@ -40,7 +40,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
                 TargetFrameworkMoniker = ".NETCoreApp,Version=v3.0",
-                TargetFramework = "netcoreapp3.0",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]
@@ -82,7 +81,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
                 TargetFrameworkMoniker = ".NETCoreApp,Version=v3.0",
-                TargetFramework = "netcoreapp3.0",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]
@@ -143,7 +141,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
                 TargetFrameworkMoniker = ".NETCoreApp,Version=v3.0",
-                TargetFramework = "netcoreapp3.0",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]
@@ -184,16 +181,13 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     "There is no Microsoft.NETCore.App.");
         }
 
-        [Theory]
-        [InlineData("windows")]
-        [InlineData("windows7.0")]
-        public void GivenTargetFrameworkItDoesNotIncludeTargetPlatform(string targetPlatform)
+        [Fact]
+        public void GivenTargetMonikerItGeneratesShortName()
         {
             var task = new TestableGenerateRuntimeConfigurationFiles
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
                 TargetFrameworkMoniker = ".NETCoreApp,Version=v5.0",
-                TargetFramework = $"net5.0-{targetPlatform}",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]

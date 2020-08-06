@@ -24,9 +24,6 @@ namespace Microsoft.NET.Build.Tasks
         public string AssetsFilePath { get; set; }
 
         [Required]
-        public string TargetFramework { get; set; }
-
-        [Required]
         public string TargetFrameworkMoniker { get; set; }
 
         [Required]
@@ -180,8 +177,7 @@ namespace Microsoft.NET.Build.Tasks
                                    LockFileTargetLibrary lockFilePlatformLibrary,
                                    bool isFrameworkDependent)
         {
-            var targetPlatformSubstring = $"-{NuGetFramework.Parse(TargetFramework).Platform}";
-            runtimeOptions.Tfm = TargetFramework.Split(new[] { targetPlatformSubstring }, StringSplitOptions.RemoveEmptyEntries)[0];
+            runtimeOptions.Tfm = NuGetFramework.Parse(TargetFrameworkMoniker).GetShortFolderName();
 
             var frameworks = new List<RuntimeConfigFramework>();
             if (runtimeFrameworks == null || runtimeFrameworks.Length == 0)

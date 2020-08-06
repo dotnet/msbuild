@@ -103,7 +103,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
       RuntimeConfigPath="$(_DesignerRuntimeConfigFilePath)"
       RuntimeFrameworks="@(RuntimeFramework)"
-      TargetFramework="$(TargetFramework)"
       TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
       UserRuntimeConfig="$(UserRuntimeConfig)"
       WriteAdditionalProbingPathsToMainConfig="true"
