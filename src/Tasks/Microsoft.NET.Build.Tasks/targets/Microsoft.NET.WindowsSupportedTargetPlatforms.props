@@ -13,11 +13,11 @@ Copyright (c) .NET Foundation. All rights reserved.
 <!-- This file contains a list of the windows target platform versions that are supported by this SDK for .NET. -->
 <Project>
     <ItemGroup>
-        <WindowsSupportedTargetPlatform Include="7.0" />
-        <WindowsSupportedTargetPlatform Include="8.0" />
-        <WindowsSupportedTargetPlatform Include="10.0.17763" />
-        <WindowsSupportedTargetPlatform Include="10.0.18362" />
         <WindowsSupportedTargetPlatform Include="10.0.19041" />
+        <WindowsSupportedTargetPlatform Include="10.0.18362" />
+        <WindowsSupportedTargetPlatform Include="10.0.17763" />
+        <WindowsSupportedTargetPlatform Include="8.0" />
+        <WindowsSupportedTargetPlatform Include="7.0" />
     </ItemGroup>
   
     <ItemGroup>
