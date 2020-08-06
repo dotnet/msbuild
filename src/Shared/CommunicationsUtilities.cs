@@ -163,10 +163,10 @@ namespace Microsoft.Build.Internal
         {
             get
             {
-                if (_clrVersion.HasValue)
-                    return _clrVersion.Value;
-
-                _clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
+                if (!_clrVersion.HasValue)
+                {
+                    _clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
+                }
                 return _clrVersion.Value;
             }
         }
