@@ -119,7 +119,7 @@ namespace Microsoft.Build.BackEnd
                 nodeId = AttemptCreateNode(_outOfProcNodeProvider, configuration);
             }
 
-            if (nodeId == InvalidNodeId && (nodeAffinity == NodeAffinity.RarNode))
+            if (nodeId == InvalidNodeId && nodeAffinity == NodeAffinity.RarNode)
             {
                 nodeId = AttemptCreateNode(_outOfProcRarNodeProvider, configuration);
             }
@@ -178,10 +178,7 @@ namespace Microsoft.Build.BackEnd
                 _outOfProcNodeProvider.ShutdownConnectedNodes(enableReuse);
             }
 
-            if(null != _outOfProcRarNodeProvider)
-            {
-                _outOfProcRarNodeProvider.ShutdownConnectedNodes(enableReuse);
-            }
+            _outOfProcRarNodeProvider?.ShutdownConnectedNodes(enableReuse);
         }
 
         /// <summary>
@@ -195,10 +192,7 @@ namespace Microsoft.Build.BackEnd
                 _outOfProcNodeProvider.ShutdownAllNodes();
             }
 
-            if (null != _outOfProcRarNodeProvider)
-            {
-                _outOfProcRarNodeProvider.ShutdownAllNodes();
-            }
+            _outOfProcRarNodeProvider?.ShutdownAllNodes();
         }
 
         #endregion
@@ -239,9 +233,9 @@ namespace Microsoft.Build.BackEnd
                 ((IDisposable)_outOfProcNodeProvider).Dispose();
             }
 
-            if (_outOfProcRarNodeProvider != null && _outOfProcRarNodeProvider is IDisposable)
+            if (_outOfProcRarNodeProvider is IDisposable rarNodeProvider)
             {
-                ((IDisposable)_outOfProcRarNodeProvider).Dispose();
+                rarNodeProvider.Dispose();
             }
 
             _inProcNodeProvider = null;

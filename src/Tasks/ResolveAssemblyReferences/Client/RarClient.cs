@@ -1,16 +1,14 @@
-﻿using Microsoft.Build.Framework;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.IO.Pipes;
+
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
-using Microsoft.VisualStudio.Threading;
 using StreamJsonRpc;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Pipes;
-using System.Linq;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
 {
@@ -60,8 +58,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
 
         public void Dispose()
         {
-            if (_clientStream != null)
-                ((IDisposable)_clientStream).Dispose();
+            _clientStream?.Dispose();
         }
     }
 }

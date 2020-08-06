@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Build.BackEnd
 {
-    class NodeProviderOutOfProcRar : NodeProviderOutOfProcBase, INodeProvider
+    internal sealed class NodeProviderOutOfProcRar : NodeProviderOutOfProcBase, INodeProvider
     {
         private int? _rarNodeId = null;
         private NodeContext _rarNodeContext = null;
@@ -17,15 +17,10 @@ namespace Microsoft.Build.BackEnd
         public bool CreateNode(int nodeId, INodePacketFactory factory, NodeConfiguration configuration)
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory, "factory");
+            ErrorUtilities.VerifyThrow(_rarNodeId.HasValue, "RAR node already created.");
 
-            if (_rarNodeId.HasValue)
-            {
-                ErrorUtilities.ThrowInternalError("RAR node already creared.");
-                return false;
-            }
-
-            // Start the new process.  We pass in a node mode with a node number of 1, to indicate that we
-            // want to start up just a standard MSBuild out-of-proc node.
+            // Start the new process.  We pass in a node mode with a node number of 3, to indicate that we
+            // want to start up RAR out-of-proc node.
             // Note: We need to always pass /nodeReuse to ensure the value for /nodeReuse from msbuild.rsp
             // (next to msbuild.exe) is ignored.
             string commandLineArgs = $"/nologo /nodemode:3 /nodeReuse:{ComponentHost.BuildParameters.EnableNodeReuse.ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()}";
@@ -40,7 +35,7 @@ namespace Microsoft.Build.BackEnd
                                                             workerNode: false));
             NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, hostHandshake, NodeContextTerminated);
 
-            if (null != context)
+            if (context != null)
             {
                 _rarNodeId = nodeId;
                 _rarNodeContext = context;
@@ -98,6 +93,8 @@ namespace Microsoft.Build.BackEnd
 
         public void SendData(int node, INodePacket packet)
         {
+            ErrorUtilities.VerifyThrowInternalNull(packet, "Packet is null");
+
             if (_rarNodeId == node)
             {
                 _rarNodeContext.SendData(packet);
@@ -127,7 +124,7 @@ namespace Microsoft.Build.BackEnd
             // RAR node is special
             if (_rarNodeId != null && !enableReuse)
             {
-                var contextList = new List<NodeContext>()
+                List<NodeContext> contextList = new List<NodeContext>()
                 {
                     _rarNodeContext
                 };

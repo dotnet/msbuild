@@ -133,14 +133,14 @@ namespace Microsoft.Build.BackEnd
                     nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true, true));
                 }
 
-                if (null == nodeStream)
+                if (nodeStream == null)
                 {
                     // Attempt to connect to the non-worker process
 
                     // Attempt to connect to the process with the handshake without low priority.
                     nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false, false));
 
-                    if (null == nodeStream)
+                    if (nodeStream == null)
                     {
                         // If we couldn't connect attempt to connect to the process with the handshake including low priority.
                         nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true, false));

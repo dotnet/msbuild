@@ -1,14 +1,15 @@
-﻿using Microsoft.Build.BackEnd;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Server;
 using Microsoft.VisualStudio.Threading;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.Build.Execution
 {
@@ -17,7 +18,7 @@ namespace Microsoft.Build.Execution
         private readonly OutOfProcNode _msBuildNode;
 
         private Task _rarTask;
-        private int rarResult;
+        private int _rarResult;
 
         private Task _msBuildTask;
         private Exception shutdownException;
@@ -39,12 +40,12 @@ namespace Microsoft.Build.Execution
 
             Console.CancelKeyPress += (e, sender) => cancellationTokenSource.Cancel();
 
-            _rarTask = Task.Run(async () => rarResult = await controller.StartAsync(cancellationTokenSource.Token));
+            _rarTask = Task.Run(async () => _rarResult = await controller.StartAsync(cancellationTokenSource.Token).ConfigureAwait(false));
             _msBuildTask = Task.Run(() => shutdownReason = _msBuildNode.Run(nodeReuse, lowPriority, out this.shutdownException)).WithCancellation(cancellationTokenSource.Token);
 
             Task.WaitAny(_msBuildTask, _rarTask);
             cancellationTokenSource.Cancel();
-            Console.ReadLine();
+
             shutdownException = this.shutdownException;
             return shutdownReason;
         }

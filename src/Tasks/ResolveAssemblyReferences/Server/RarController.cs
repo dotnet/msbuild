@@ -1,6 +1,6 @@
-﻿using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
-using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.IO;
 using System.IO.Pipes;
 using System.Security.AccessControl;
@@ -8,14 +8,12 @@ using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 
-using StreamJsonRpc;
-using Microsoft.Build.Tasks.ResolveAssemblyReferences;
-using System.Collections.Generic;
-using Nerdbank.Streams;
-using Microsoft.VisualStudio.Threading;
-using System.Diagnostics;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Services;
+using Microsoft.VisualStudio.Threading;
+
+using StreamJsonRpc;
 
 #nullable enable
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
@@ -26,23 +24,26 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         
         private readonly string _pipeName;
 
-        private readonly IResolveAssemblyReferenceTaskHandler _rarTaskHandler;
+        private readonly IResolveAssemblyReferenceTaskHandler _resolveAssemblyReferenceTaskHandler;
 
         private NamedPipeServerStream? _serverStream;
 
+        public RarController(string pipeName) : this(pipeName, new RarTaskHandler())
+        {
+        }
 
-        public RarController(string pipeName)
+        internal RarController(string pipeName, IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler)
         {
             _pipeName = pipeName;
-            _rarTaskHandler = new RarTaskHandler();
+            _resolveAssemblyReferenceTaskHandler = resolveAssemblyReferenceTaskHandler;
         }
 
         public async Task<int> StartAsync(CancellationToken cancellationToken = default)
         {
 
-            using var mutex = new ServerMutex(_pipeName, out var createdNew);
+            using var mutex = new ServerMutex(_pipeName);
 
-            if (!createdNew)
+            if (mutex.CreatedNew)
                 return 1;
 
             while (true)
@@ -51,19 +52,19 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
                     break;
 
                 _serverStream = GetStream(_pipeName);
-                await _serverStream.WaitForConnectionAsync(cancellationToken);
+                await _serverStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
                 // TODO: This waits for completion of the connection, make to accept multiple connection
-                await HandelConnectionAsync(_serverStream, cancellationToken);
+                await HandelConnectionAsync(_serverStream, cancellationToken).ConfigureAwait(false);
             }
             return 0;
         }
 
         private async Task HandelConnectionAsync(Stream serverStream, CancellationToken cancellationToken = default)
         {
-            var server = GetRpcServer(serverStream, _rarTaskHandler);
+            var server = GetRpcServer(serverStream, _resolveAssemblyReferenceTaskHandler);
             server.StartListening();
 
-            await server.Completion.WithCancellation(cancellationToken);
+            await server.Completion.WithCancellation(cancellationToken).ConfigureAwait(false);
         }
 
         private JsonRpc GetRpcServer(Stream stream, IResolveAssemblyReferenceTaskHandler handler)
@@ -80,9 +81,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         private NamedPipeServerStream GetStream(string pipeName)
         {
             ErrorUtilities.VerifyThrowArgumentLength(pipeName, "pipeName");
-
-            //_sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
-
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
             if (!NativeMethodsShared.IsMono)
             {

@@ -60,7 +60,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected override Handshake GetHandshake()
         {
-            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, is64Bit: EnvironmentUtilities.Is64BitProcess, nodeReuse: _enableReuse, lowPriority: _lowPriority, _workerNode));
+            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(
+                taskHost: false,
+                is64Bit: EnvironmentUtilities.Is64BitProcess,
+                nodeReuse: _enableReuse,
+                lowPriority: _lowPriority,
+                _workerNode));
         }
 
         #region Structs
