@@ -349,6 +349,11 @@
         <target state="translated">NETSDK1049: Çözümlenen dosyada hatalı görüntü var, meta veri yok veya dosya erişilemez durumda. {0} {1}</target>
         <note>{StrBegin="NETSDK1049: "}</note>
       </trans-unit>
+      <trans-unit id="GlobalJsonSDKResolutionFailed">
+        <source>NETSDK1141: Unable to resolve the .NET SDK version as specified in the global.json located at {0}.</source>
+        <target state="new">NETSDK1141: Unable to resolve the .NET SDK version as specified in the global.json located at {0}.</target>
+        <note>{StrBegin="NETSDK1141: "}</note>
+      </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
         <source>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</source>
         <target state="translated">NETSDK1102: Derlemeleri boyut için iyileştirme, seçilen yayımlama yapılandırması için desteklenmiyor. Lütfen kendi içinde bulunan bir uygulama yayımladığınızdan emin olun.</target>

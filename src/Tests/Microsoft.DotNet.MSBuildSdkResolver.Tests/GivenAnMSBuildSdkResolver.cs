@@ -156,6 +156,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             result.Success.Should().BeTrue();
             result.Path.Should().Be((disallowPreviews ? compatibleRtm : compatiblePreview).FullName);
             result.AdditionalPaths.Should().BeNull();
+            result.PropertiesToAdd.Should().BeNull();
             result.Version.Should().Be(disallowPreviews ? "98.98.98" : "99.99.99-preview");
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().BeNullOrEmpty();
@@ -164,7 +165,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void ItDoesNotReturnHighestSdkAvailableThatIsCompatibleWithMSBuildWhenVersionInGlobalJsonCannotBeFound(bool disallowPreviews)
+        public void ItDoesNotReturnHighestSdkAvailableThatIsCompatibleWithMSBuildWhenVersionInGlobalJsonCannotBeFoundOutsideOfVisualStudio(bool disallowPreviews)
         {
             var environment = new TestEnvironment(_testAssetsManager, callingMethod: "ItDoesNotReturnHighest___", identifier: disallowPreviews.ToString())
             {
@@ -185,15 +186,57 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 {
                     MSBuildVersion = new Version(20, 0, 0, 0),
                     ProjectFileDirectory = environment.TestDirectory,
+                    IsRunningInVisualStudio = false
                 },
                 new MockFactory());
 
             result.Success.Should().BeFalse();
             result.Path.Should().BeNull();
             result.AdditionalPaths.Should().BeNull();
-            result.Version.Should().BeNull();;
+            result.PropertiesToAdd.Should().BeNull();
+            result.Version.Should().BeNull();
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().NotBeEmpty();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ItReturnsHighestSdkAvailableThatIsCompatibleWithMSBuildWhenVersionInGlobalJsonCannotBeFoundAndRunningInVisualStudio(bool disallowPreviews)
+        {
+            var environment = new TestEnvironment(_testAssetsManager, callingMethod: "ItReturnsHighest___", identifier: disallowPreviews.ToString())
+            {
+                DisallowPrereleaseByDefault = disallowPreviews
+            };
+
+            var compatibleRtm = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "98.98.98", new Version(19, 0, 0, 0));
+            var compatiblePreview = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.99-preview", new Version(20, 0, 0, 0));
+            var incompatible = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "100.100.100", new Version(21, 0, 0, 0));
+
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+            environment.CreateGlobalJson(environment.TestDirectory, "1.2.3");
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, null),
+                new MockContext
+                {
+                    MSBuildVersion = new Version(20, 0, 0, 0),
+                    ProjectFileDirectory = environment.TestDirectory,
+                    IsRunningInVisualStudio = true
+                },
+                new MockFactory());
+
+            result.Success.Should().BeTrue();
+            result.Path.Should().Be((disallowPreviews ? compatibleRtm : compatiblePreview).FullName);
+            result.AdditionalPaths.Should().BeNull();
+            result.PropertiesToAdd.Count.Should().Be(2);
+            result.PropertiesToAdd.ContainsKey("SdkResolverHonoredGlobalJson");
+            result.PropertiesToAdd.ContainsKey("SdkResolverGlobalJsonPath");
+            result.PropertiesToAdd["SdkResolverHonoredGlobalJson"].Should().Be("false");
+            result.Version.Should().Be(disallowPreviews ? "98.98.98" : "99.99.99-preview");
+            result.Warnings.Should().BeEquivalentTo(new[] { "Unable to locate the .NET SDK as specified by global.json, please check that the specified version is installed." });
+            result.Errors.Should().BeNullOrEmpty();
         }
 
         [Fact]
@@ -609,6 +652,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             public new string ProjectFilePath { get => base.ProjectFilePath; set => base.ProjectFilePath = value; }
             public new string SolutionFilePath { get => base.SolutionFilePath; set => base.SolutionFilePath = value; }
             public new Version MSBuildVersion { get => base.MSBuildVersion; set => base.MSBuildVersion = value; }
+            public new bool IsRunningInVisualStudio { get => base.IsRunningInVisualStudio; set => base.IsRunningInVisualStudio = value; }
 
             public DirectoryInfo ProjectFileDirectory
             {
@@ -630,6 +674,9 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             public override SdkResult IndicateSuccess(string path, string version, IEnumerable<string> warnings = null)
                 => new MockResult(success: true, path: path, version: version, warnings: warnings);
 
+            public override SdkResult IndicateSuccess(string path, string version, IDictionary<string, string> propertiesToAdd, IDictionary<string, SdkResultItem> itemsToAdd, IEnumerable<string> warnings = null)
+                => new MockResult(success: true, path: path, version: version, warnings: warnings, propertiesToAdd: propertiesToAdd, itemsToAdd: itemsToAdd);
+
             public override SdkResult IndicateSuccess(IEnumerable<string> paths, string version,
                 IDictionary<string, string> propertiesToAdd = null, IDictionary<string, SdkResultItem> itemsToAdd = null,
                 IEnumerable<string> warnings = null) => new MockResult(success: true, paths: paths, version: version, propertiesToAdd, itemsToAdd, warnings);
@@ -638,13 +685,15 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         private sealed class MockResult : SdkResult
         {
             public MockResult(bool success, string path, string version, IEnumerable<string> warnings = null,
-                IEnumerable<string> errors = null)
+                IEnumerable<string> errors = null, IDictionary<string, string> propertiesToAdd = null, IDictionary<string, SdkResultItem> itemsToAdd = null)
             {
                 Success = success;
                 Path = path;
                 Version = version;
                 Warnings = warnings;
                 Errors = errors;
+                PropertiesToAdd = propertiesToAdd;
+                ItemsToAdd = itemsToAdd;
             }
 
             public MockResult(bool success, IEnumerable<string> paths, string version, 

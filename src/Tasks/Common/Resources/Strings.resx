@@ -666,4 +666,8 @@ The following are names of parameters or literal values and should not be transl
 {2}</value>
     <comment>{StrBegin="NETSDK1140: "}</comment>
   </data>
+  <data name="GlobalJsonSDKResolutionFailed" xml:space="preserve">
+    <value>NETSDK1141: Unable to resolve the .NET SDK version as specified in the global.json located at {0}.</value>
+    <comment>{StrBegin="NETSDK1141: "}</comment>
+  </data>
 </root>
