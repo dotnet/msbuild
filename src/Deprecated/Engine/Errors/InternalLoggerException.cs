@@ -93,10 +93,10 @@ namespace Microsoft.Build.BuildEngine
          )
             : base(message, innerException)
         {
-            ErrorUtilities.VerifyThrow((message?.Length > 0), "Need error message.");
-            ErrorUtilities.VerifyThrow(innerException != null || initializationException == true, "Need the logger exception.");
-            ErrorUtilities.VerifyThrow((errorCode?.Length > 0), "Must specify the error message code.");
-            ErrorUtilities.VerifyThrow((helpKeyword?.Length > 0), "Must specify the help keyword for the IDE.");
+            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(message), "Need error message.");
+            ErrorUtilities.VerifyThrow(innerException != null || initializationException, "Need the logger exception.");
+            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(errorCode), "Must specify the error message code.");
+            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(helpKeyword), "Must specify the help keyword for the IDE.");
 
             this.e = e;
             this.errorCode = errorCode;

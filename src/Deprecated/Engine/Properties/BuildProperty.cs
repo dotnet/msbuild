@@ -384,7 +384,7 @@ namespace Microsoft.Build.BuildEngine
                 else
                 {
                     // If we are not persisted, propertyName and propertyValue must not be null.
-                    ErrorUtilities.VerifyThrow((this.propertyName?.Length > 0) && (this.propertyValue != null),
+                    ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(this.propertyName) && (this.propertyValue != null),
                         "BuildProperty object doesn't have a name/value pair.");
 
                     // Get the property name from the string variable

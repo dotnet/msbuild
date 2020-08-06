@@ -1236,7 +1236,7 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public string GetMetadataEscaped(string metadataName)
             {
-                if (metadataName == null || metadataName.Length == 0)
+                if (string.IsNullOrEmpty(metadataName))
                 {
                     ErrorUtilities.VerifyThrowArgumentLength(metadataName, "metadataName");
                 }

@@ -453,7 +453,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            if (typeLibPath?.Length > 0)
+            if (!string.IsNullOrEmpty(typeLibPath))
             {
                 // We have to check for NULL here because QueryPathOfRegTypeLib() returns
                 // a BSTR with a NULL character appended to it.

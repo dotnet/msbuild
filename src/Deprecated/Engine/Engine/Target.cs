@@ -226,7 +226,7 @@ namespace Microsoft.Build.BuildEngine
             }
 
             // It's considered an error if a target does not have a name.
-            ProjectErrorUtilities.VerifyThrowInvalidProject((targetName?.Length > 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(targetName),
                 targetElement, "MissingRequiredAttribute", XMakeAttributes.name, XMakeElements.target);
 
             this.taskElementList = new ArrayList();

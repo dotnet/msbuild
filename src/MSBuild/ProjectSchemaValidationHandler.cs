@@ -41,7 +41,7 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
             ErrorUtilities.VerifyThrowArgumentNull(binPath, "binPath");
 
-            if ((schemaFile == null) || (schemaFile.Length == 0))
+            if (string.IsNullOrEmpty(schemaFile))
             {
                 schemaFile = Path.Combine(binPath, "Microsoft.Build.xsd");
             }

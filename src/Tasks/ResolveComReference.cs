@@ -1632,7 +1632,7 @@ namespace Microsoft.Build.Tasks
 
                 // if Private is not set on the original item, we set CopyLocal to false for GAC items 
                 // and true for non-GAC items
-                if ((privateMetadata == null) || (privateMetadata.Length == 0))
+                if (string.IsNullOrEmpty(privateMetadata))
                 {
                     if (String.Compare(taskItem.ItemSpec, 0, gacPath, 0, gacPath.Length, StringComparison.OrdinalIgnoreCase) == 0)
                     {

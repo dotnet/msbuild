@@ -236,7 +236,7 @@ namespace Microsoft.Build.Shared
                         {
                             if (keyPlatform?.ValueCount > 0)
                             {
-                                if (platform?.Length > 0)
+                                if (!string.IsNullOrEmpty(platform))
                                 {
                                     string platformValue = keyPlatform.GetValue("Platform", null) as string;
 
@@ -246,7 +246,7 @@ namespace Microsoft.Build.Shared
                                     }
                                 }
 
-                                if (osVersion?.Length > 0)
+                                if (!string.IsNullOrEmpty(osVersion))
                                 {
                                     Version ver = VersionUtilities.ConvertToVersion(osVersion);
 
@@ -274,7 +274,7 @@ namespace Microsoft.Build.Shared
         {
             bool match = false;
 
-            if (platformValue?.Length > 0)
+            if (!string.IsNullOrEmpty(platformValue))
             {
                 string[] platforms = platformValue.Split(MSBuildConstants.SemicolonChar);
                 foreach (string p in platforms)

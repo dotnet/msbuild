@@ -99,7 +99,7 @@ namespace Microsoft.Build.BuildEngine
 
             newTask.SetParameterValue("SolutionFile", solutionPath);
 
-            if ((vcbuildTargetName?.Length > 0))
+            if (!string.IsNullOrEmpty(vcbuildTargetName))
             {
                 newTask.SetParameterValue(vcbuildTargetName, "true");
             }
