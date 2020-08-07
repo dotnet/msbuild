@@ -137,6 +137,16 @@ namespace Microsoft.Build.Shared
             PROCESS_ALL_ACCESS = SYNCHRONIZE | 0xFFF
         }
 
+        internal enum LOGICAL_PROCESSOR_RELATIONSHIP
+		{
+			RelationProcessorCore,
+			RelationNumaNode,
+			RelationCache,
+			RelationProcessorPackage,
+			RelationGroup,
+			RelationAll = 0xffff
+		}
+
         /// <summary>
         /// Flags for CoWaitForMultipleHandles
         /// </summary>
@@ -469,6 +479,42 @@ namespace Microsoft.Build.Shared
                 }
             }
         }
+
+        public static int GetPhysicalCoreCount()
+        {
+            const int ERROR_INSUFFICIENT_BUFFER = 122;
+
+			// Determine the required buffer size to store the processor information
+			uint ReturnLength = 0;
+			if(!GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP.RelationProcessorCore, IntPtr.Zero, ref ReturnLength) && Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER)
+			{
+                IntPtr ptr = IntPtr.Zero;
+				try
+				{
+                    ptr = Marshal.AllocHGlobal((int)ReturnLength);
+					if (GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP.RelationProcessorCore, ptr, ref ReturnLength))
+					{
+						int count = 0;
+						for(int pos = 0; pos < ReturnLength; )
+						{
+							LOGICAL_PROCESSOR_RELATIONSHIP Type = (LOGICAL_PROCESSOR_RELATIONSHIP)Marshal.ReadInt16(ptr, pos);
+							if(Type == LOGICAL_PROCESSOR_RELATIONSHIP.RelationProcessorCore)
+							{
+								count++;
+							}
+							pos += Marshal.ReadInt32(ptr, pos + 4);
+						}
+						return count;
+					}
+				}
+				finally
+				{
+					Marshal.FreeHGlobal(ptr);		
+				}
+			}
+
+			return -1;
+		}
 
         #endregion
 
@@ -810,6 +856,10 @@ namespace Microsoft.Build.Shared
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
+        
+        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern bool GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP RelationshipType, IntPtr Buffer, ref uint ReturnedLength);
 
         /// <summary>
         /// Get the last write time of the fullpath to a directory. If the pointed path is not a directory, or
