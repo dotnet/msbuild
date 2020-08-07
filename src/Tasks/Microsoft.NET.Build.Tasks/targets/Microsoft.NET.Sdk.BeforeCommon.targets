@@ -19,16 +19,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Import Project="Microsoft.NET.WindowsSupportedTargetPlatforms.props" />
   </ImportGroup>
 
-  <!--
-    Workaround: https://github.com/microsoft/msbuild/issues/4948
-    Disable .NET Framework's inbox WinFX targets when using the SDK, since, we really don't use it's build logic
-    and is superseded by 'WindowsDesktop' SDK that provides it's own WinFX for both NETFX and CoreCLR targets.
-    Make it opt-out, just in case, if something fails or we don't want to use 'WindowsDesktop' SDK.
-  -->
-  <PropertyGroup>
-    <ImportFrameworkWinFXTargets Condition="'$(ImportFrameworkWinFXTargets)' == ''">false</ImportFrameworkWinFXTargets>
-  </PropertyGroup>
-
   <PropertyGroup>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
     <OutputType Condition="'$(DisableWinExeOutputInference)' != 'true' and '$(OutputType)' == 'Exe' and ('$(UseWindowsForms)' == 'true' or '$(UseWPF)' == 'true')">WinExe</OutputType>
@@ -55,6 +45,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     and adjust intermediate and output paths to include it.
   -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.TargetFrameworkInference.targets" />
+
+  <!-- Related issue: https://github.com/dotnet/sdk/issues/12324-->
+  <PropertyGroup>
+    <!-- Import winfx targets when we're targeting .NETFramework and not importing the newer WindowsDesktop targets via `UseWPF`. -->
+    <ImportFrameworkWinFXTargets Condition="'$(ImportFrameworkWinFXTargets)' == '' and '$(UseWPF)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">true</ImportFrameworkWinFXTargets>
+
+    <!-- Otherwise, don't import. -->
+    <ImportFrameworkWinFXTargets Condition="'$(ImportFrameworkWinFXTargets)' == ''">false</ImportFrameworkWinFXTargets>
+  </PropertyGroup>
 
   <!-- For .NET Framework, reference core assemblies -->
   <PropertyGroup>
