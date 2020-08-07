@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnGAC
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Caught an exception! We don't want to throw because we want MSBuild to continue to install." +
+                Console.WriteLine($"Caught an exception! We don't want to throw because we want MSBuild to install." +
                                     $"Message: {e.Message}" +
                                     $"Inner Exception: {e.InnerException}" +
                                     $"Stack Trace: {e.StackTrace}");
