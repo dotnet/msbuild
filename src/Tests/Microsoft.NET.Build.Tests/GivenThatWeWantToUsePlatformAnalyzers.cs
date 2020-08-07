@@ -293,15 +293,8 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager
                 .CreateTestProject(testProject, identifier: "analyzerConsoleApp", targetExtension: ".csproj");
 
-            var buildCommand = new GetValuesCommand(
-                Log,
-                Path.Combine(testAsset.TestRoot, testProject.Name),
-                targetFrameworkNetCore31, "Analyzer")
-            {
-                DependsOnTargets = "Build"
-            };
-            var buildResult = buildCommand.Execute();
-            buildResult.StdErr.Should().Be(string.Empty);
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            buildCommand.Execute().Should().Pass();
         }
     }
 }
