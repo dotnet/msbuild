@@ -678,4 +678,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1143: Including all content in a single file bundle also includes native libraries. If IncludeAllContentForSelfExtract is true, IncludeNativeLibrariesForSelfExtract must not be false.</value>
     <comment>{StrBegin="NETSDK1143: "}</comment>
   </data>
+  <data name="ILLinkFailed" xml:space="preserve">
+    <value>NETSDK1144: Optimizing assemblies for size failed. Optimization can be disabled by setting the PublishTrimmed property to false.</value>
+    <comment>{StrBegin="NETSDK1144: "}</comment>
+  </data>
 </root>

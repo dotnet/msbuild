@@ -364,6 +364,11 @@
         <target state="new">NETSDK1141: Unable to resolve the .NET SDK version as specified in the global.json located at {0}.</target>
         <note>{StrBegin="NETSDK1141: "}</note>
       </trans-unit>
+      <trans-unit id="ILLinkFailed">
+        <source>NETSDK1144: Optimizing assemblies for size failed. Optimization can be disabled by setting the PublishTrimmed property to false.</source>
+        <target state="new">NETSDK1144: Optimizing assemblies for size failed. Optimization can be disabled by setting the PublishTrimmed property to false.</target>
+        <note>{StrBegin="NETSDK1144: "}</note>
+      </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
         <source>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</source>
         <target state="translated">NETSDK1102: 선택한 게시 구성에서는 크기에 대한 어셈블리 최적화가 지원되지 않습니다. 자체 포함 앱을 게시하고 있는지 확인하세요.</target>
