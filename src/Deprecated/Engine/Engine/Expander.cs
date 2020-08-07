@@ -1610,7 +1610,7 @@ namespace Microsoft.Build.BuildEngine
 
                         ProjectErrorUtilities.VerifyThrowInvalidProject(n != 0, null, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
-                        argumentBuilder.Append(argumentsContent.Substring(nestedPropertyStart, (n - nestedPropertyStart) + 1));
+                        argumentBuilder.Append(argumentsContent, nestedPropertyStart, (n - nestedPropertyStart) + 1);
                     }
                     else if (argumentsContent[n] == '`' || argumentsContent[n] == '"' || argumentsContent[n] == '\'')
                     {
@@ -1621,7 +1621,7 @@ namespace Microsoft.Build.BuildEngine
 
                         ProjectErrorUtilities.VerifyThrowInvalidProject(n != 0, null, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
-                        argumentBuilder.Append(argumentsContent.Substring(quoteStart, (n - quoteStart) + 1));
+                        argumentBuilder.Append(argumentsContent, quoteStart, (n - quoteStart) + 1);
                     }
                     else if (argumentsContent[n] == ',')
                     {

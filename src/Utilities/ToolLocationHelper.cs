@@ -2297,7 +2297,7 @@ namespace Microsoft.Build.Utilities
 
             displayNameBuilder.Append(frameworkName.Identifier);
             displayNameBuilder.Append(" ");
-            displayNameBuilder.Append("v" + frameworkName.Version.ToString());
+            displayNameBuilder.Append('v').Append(frameworkName.Version.ToString());
 
             if (!string.IsNullOrEmpty(frameworkName.Profile))
             {

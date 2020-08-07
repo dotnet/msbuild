@@ -176,7 +176,7 @@ namespace Microsoft.Build.Tasks
 
                     if (debugXamlTask)
                     {
-                        errorList.AppendLine(String.Format(Thread.CurrentThread.CurrentUICulture, "({0},{1}) {2}", error.Line, error.Column, error.ErrorText));
+                        errorList.AppendFormat(Thread.CurrentThread.CurrentUICulture, "({0},{1}) {2}", error.Line, error.Column, error.ErrorText).AppendLine();
                     }
                     else
                     {

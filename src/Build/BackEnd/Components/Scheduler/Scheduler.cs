@@ -2092,7 +2092,7 @@ namespace Microsoft.Build.BackEnd
                 currentWork[i] = invalidWorkId;
                 previousWork[i] = invalidWorkId;
                 runningRequests[i] = new HashSet<int>();
-                nodeIndices.Append(String.Format(CultureInfo.InvariantCulture, "{0,-5}   ", indexToAvailableNodeId[i]));
+                nodeIndices.AppendFormat(CultureInfo.InvariantCulture, "{0,-5}   ", indexToAvailableNodeId[i]);
             }
 
             loggingService.LogComment(context, MessageImportance.Normal, "NodeUtilizationHeader", nodeIndices.ToString());
@@ -2217,7 +2217,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    stringBuilder.Append(String.Format(CultureInfo.InvariantCulture, "{0,-5}   ", currentWork[i]));
+                    stringBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0,-5}   ", currentWork[i]);
                     haveNonIdleNode = true;
                 }
             }

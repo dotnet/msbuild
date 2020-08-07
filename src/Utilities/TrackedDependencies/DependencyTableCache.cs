@@ -175,7 +175,7 @@ namespace Microsoft.Build.Utilities
                 if (i >= 0)
                 {
                     // If we bailed out early, add everything else before reversing the filename itself
-                    normalizedTlogPath.Append(tlogPath.Substring(0, i + 1));
+                    normalizedTlogPath.Append(tlogPath, 0, i + 1);
                 }
 
                 // now add the reversed filename
