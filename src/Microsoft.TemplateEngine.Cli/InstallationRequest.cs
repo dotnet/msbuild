@@ -26,9 +26,34 @@ namespace Microsoft.TemplateEngine.Cli
                 IsPartOfAnOptionalWorkload == other.IsPartOfAnOptionalWorkload;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (!(obj is InstallationRequest other))
+            {
+                return false;
+            }
+
+            return Equals(other);
+        }
+
         public override string ToString()
         {
             return $"{(IsPartOfAnOptionalWorkload ? "[OW]" : string.Empty)}{InstallString}";
+        }
+
+        public override int GetHashCode()
+        {
+            return unchecked((InstallString?.GetHashCode() ?? 0) + 13 * IsPartOfAnOptionalWorkload.GetHashCode());
+        }
+
+        public static bool operator ==(InstallationRequest x, InstallationRequest y)
+        {
+            return x.Equals(y);
+        }
+
+        public static bool operator !=(InstallationRequest x, InstallationRequest y)
+        {
+            return !(x == y);
         }
     }
 }
