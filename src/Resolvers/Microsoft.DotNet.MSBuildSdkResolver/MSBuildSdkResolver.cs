@@ -27,13 +27,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         public override int Priority => 5000;
 
         private readonly Func<string, string> _getEnvironmentVariable;
-        private readonly VSSettings _vsSettings;
-
-        private static readonly ConcurrentDictionary<string, Version> s_minimumMSBuildVersions
-            = new ConcurrentDictionary<string, Version>();
-
-        private static readonly ConcurrentDictionary<CompatibleSdkKey, CompatibleSdkValue> s_compatibleSdks
-            = new ConcurrentDictionary<CompatibleSdkKey, CompatibleSdkValue>();
+        private readonly NETCoreSdkResolver _netCoreSdkResolver;
 
         public DotNetMSBuildSdkResolver() 
             : this(Environment.GetEnvironmentVariable, VSSettings.Ambient)
@@ -44,7 +38,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         internal DotNetMSBuildSdkResolver(Func<string, string> getEnvironmentVariable, VSSettings vsSettings)
         {
             _getEnvironmentVariable = getEnvironmentVariable;
-            _vsSettings = vsSettings;
+            _netCoreSdkResolver = new NETCoreSdkResolver(getEnvironmentVariable, vsSettings);
         }
 
         private sealed class CachedResult
@@ -78,20 +72,19 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
             if (msbuildSdksDir == null)
             {
-                string dotnetExeDir = GetDotnetExeDirectory();
-                var resolverResult = ResolveNETCoreSdkDirectory(context, dotnetExeDir);
-                string netcoreSdkDir = resolverResult.ResolvedSdkDirectory;
-                string globalJsonPath = resolverResult.GlobalJsonPath;
+                string dotnetExeDir = _netCoreSdkResolver.GetDotnetExeDirectory();
+                string globalJsonStartDir = Path.GetDirectoryName(context.SolutionFilePath ?? context.ProjectFilePath);
+                var resolverResult = _netCoreSdkResolver.ResolveNETCoreSdkDirectory(globalJsonStartDir, context.MSBuildVersion, context.IsRunningInVisualStudio, dotnetExeDir);
 
-                if (netcoreSdkDir == null)
+                if (resolverResult.ResolvedSdkDirectory == null)
                 {
                     return Failure(
                         factory,
                         Strings.UnableToLocateNETCoreSdk);
                 }
 
-                msbuildSdksDir = Path.Combine(netcoreSdkDir, "Sdks");
-                netcoreSdkVersion = new DirectoryInfo(netcoreSdkDir).Name;
+                msbuildSdksDir = Path.Combine(resolverResult.ResolvedSdkDirectory, "Sdks");
+                netcoreSdkVersion = new DirectoryInfo(resolverResult.ResolvedSdkDirectory).Name;
 
                 if (IsNetCoreSDKSmallerThanTheMinimumVersion(netcoreSdkVersion, sdkReference.MinimumVersion))
                 {
@@ -102,7 +95,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                         sdkReference.MinimumVersion);
                 }
 
-                Version minimumMSBuildVersion = GetMinimumMSBuildVersion(netcoreSdkDir);
+                Version minimumMSBuildVersion = _netCoreSdkResolver.GetMinimumMSBuildVersion(resolverResult.ResolvedSdkDirectory);
                 if (context.MSBuildVersion < minimumMSBuildVersion)
                 {
                     return Failure(
@@ -162,121 +155,6 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             return factory.IndicateFailure(new[] { string.Format(format, args) });
         }
 
-        private sealed class CompatibleSdkKey : IEquatable<CompatibleSdkKey>
-        {
-            public readonly string DotnetExeDirectory;
-            public readonly Version MSBuildVersion;
-
-            public CompatibleSdkKey(string dotnetExeDirectory, Version msbuildVersion)
-            {
-                DotnetExeDirectory = dotnetExeDirectory;
-                MSBuildVersion = msbuildVersion;
-            }
-
-            public bool Equals(CompatibleSdkKey other)
-            {
-                return other != null
-                    && DotnetExeDirectory == other.DotnetExeDirectory
-                    && MSBuildVersion == other.MSBuildVersion;
-            }
-
-            public override bool Equals(object obj)
-            {
-                return Equals(obj as CompatibleSdkValue);
-            }
-
-            public override int GetHashCode()
-            {
-                int h1 = DotnetExeDirectory.GetHashCode();
-                int h2 = MSBuildVersion.GetHashCode();
-                return unchecked(((h1 << 5) + h1) ^ h2);
-            }
-        }
-
-        private sealed class CompatibleSdkValue
-        {
-            public readonly string MostRecentCompatible;
-            public readonly string MostRecentCompatibleNonPreview;
-
-            public CompatibleSdkValue(string mostRecentCompatible, string mostRecentCompatibleNonPreview)
-            {
-                MostRecentCompatible = mostRecentCompatible;
-                MostRecentCompatibleNonPreview = mostRecentCompatibleNonPreview;
-            }
-        }
-
-        private string GetMostCompatibleSdk(string dotnetExeDirectory, Version msbuildVersion, int minimumSdkMajorVersion = 0)
-        {
-            CompatibleSdkValue sdks = GetMostCompatibleSdks(dotnetExeDirectory, msbuildVersion, minimumSdkMajorVersion);
-            if (_vsSettings.DisallowPrerelease())
-            {
-                return sdks.MostRecentCompatibleNonPreview;
-            }
-
-            return sdks.MostRecentCompatible;
-        }
-
-        private CompatibleSdkValue GetMostCompatibleSdks(string dotnetExeDirectory, Version msbuildVersion, int minimumSdkMajorVersion)
-        {
-            return s_compatibleSdks.GetOrAdd(
-                new CompatibleSdkKey(dotnetExeDirectory, msbuildVersion),
-                key =>
-                {
-                    string mostRecent = null;
-                    string mostRecentNonPreview = null;
-
-                    string[] availableSdks = NETCoreSdkResolverNativeWrapper.GetAvailableSdks(key.DotnetExeDirectory);
-                    for (int i = availableSdks.Length - 1; i >= 0; i--)
-                    {
-                        string netcoreSdkDir = availableSdks[i];
-                        string netcoreSdkVersion = new DirectoryInfo(netcoreSdkDir).Name;
-                        Version minimumMSBuildVersion = GetMinimumMSBuildVersion(netcoreSdkDir);
-
-                        if (key.MSBuildVersion < minimumMSBuildVersion)
-                        {
-                            continue;
-                        }
-
-                        if (minimumSdkMajorVersion != 0 && Int32.TryParse(netcoreSdkVersion.Split('.')[0], out int sdkMajorVersion) && sdkMajorVersion < minimumSdkMajorVersion)
-                        {
-                            continue;
-                        }
-
-                        if (mostRecent == null)
-                        {
-                            mostRecent = netcoreSdkDir;
-                        }
-
-                        if (netcoreSdkVersion.IndexOf('-') < 0)
-                        {
-                            mostRecentNonPreview = netcoreSdkDir;
-                            break;
-                        }
-                    }
-
-                    return new CompatibleSdkValue(mostRecent, mostRecentNonPreview);
-                });
-        }
-
-        private Version GetMinimumMSBuildVersion(string netcoreSdkDir)
-        {
-            return s_minimumMSBuildVersions.GetOrAdd(
-                netcoreSdkDir,
-                dir => 
-                {
-                    string minimumVersionFilePath = Path.Combine(netcoreSdkDir, "minimumMSBuildVersion");
-                    if (!File.Exists(minimumVersionFilePath))
-                    {
-                        // smallest version that had resolver support and also
-                        // greater than or equal to the version required by any 
-                        // .NET Core SDK that did not have this file.
-                        return new Version(15, 3, 0);
-                    }
-
-                return Version.Parse(File.ReadLines(minimumVersionFilePath).First().Trim());
-            });
-        }
-
         private static string GetMinimumVSDefinedSDKVersion()
         {
             string dotnetMSBuildSdkResolverDirectory =
@@ -312,54 +190,6 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             return FXVersion.Compare(netCoreSdkFXVersion, minimumFXVersion) < 0;
         }
 
-        private NETCoreSdkResolverNativeWrapper.Result ResolveNETCoreSdkDirectory(SdkResolverContext context, string dotnetExeDir)
-        {
-            string globalJsonStartDir = Path.GetDirectoryName(context.SolutionFilePath ?? context.ProjectFilePath);
-            var result = NETCoreSdkResolverNativeWrapper.ResolveSdk(dotnetExeDir, globalJsonStartDir, _vsSettings.DisallowPrerelease());
 
-            string mostCompatible = result.ResolvedSdkDirectory;
-            if (result.ResolvedSdkDirectory == null 
-                && result.GlobalJsonPath != null
-                && context.IsRunningInVisualStudio)
-            {
-                result.FailedToResolveSDKSpecifiedInGlobalJson = true;
-                // We need the SDK to be version 5 or higher to ensure that we generate a build error when we fail to resolve the SDK specified by global.json
-                mostCompatible = GetMostCompatibleSdk(dotnetExeDir, context.MSBuildVersion, 5);
-            }
-            else if (result.ResolvedSdkDirectory != null
-                     && result.GlobalJsonPath == null
-                     && context.MSBuildVersion < GetMinimumMSBuildVersion(result.ResolvedSdkDirectory))
-            {
-                mostCompatible = GetMostCompatibleSdk(dotnetExeDir, context.MSBuildVersion);
-            }
-
-            if (mostCompatible != null)
-            {
-                result.ResolvedSdkDirectory = mostCompatible;
-            }
-
-            return result;
-        }
-
-        private string GetDotnetExeDirectory()
-        {
-            string environmentOverride = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR");
-            if (environmentOverride != null)
-            {
-                return environmentOverride;
-            }
-
-            var environmentProvider = new EnvironmentProvider(_getEnvironmentVariable);
-            var dotnetExe = environmentProvider.GetCommandPath("dotnet");
-
-            if (dotnetExe != null && !Interop.RunningOnWindows)
-            {
-                // e.g. on Linux the 'dotnet' command from PATH is a symlink so we need to
-                // resolve it to get the actual path to the binary
-                dotnetExe = Interop.Unix.realpath(dotnetExe) ?? dotnetExe;
-            }
-
-            return Path.GetDirectoryName(dotnetExe);
-        }
     }
 }
