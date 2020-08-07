@@ -3429,6 +3429,7 @@ namespace Microsoft.Build.Conversion
                     ProjectCollection.Escape(relPath));
             }
             else if (!string.IsNullOrEmpty(webReferenceUrl))
+            {
                 // This is an actual web reference URL.
 
                 // The <Folder> element gets converted to XMake as an item of type
