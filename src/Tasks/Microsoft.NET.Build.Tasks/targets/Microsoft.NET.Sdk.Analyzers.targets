@@ -28,6 +28,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <WarningLevel Condition="'$(AnalysisLevel)' != '' And
                               $([MSBuild]::VersionGreaterThanOrEquals($(AnalysisLevel), '5.0'))">5</WarningLevel>
   </PropertyGroup>
+  <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.props"
+          Condition="$(EnableNETAnalyzers)" />
   <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
           Condition="$(EnableNETAnalyzers)" />
   <ItemGroup Condition="$(EnableNETAnalyzers)">
