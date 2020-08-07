@@ -77,7 +77,7 @@ namespace Microsoft.TemplateEngine.Cli
             _environmentSettings.SettingsLoader.Save();
         }
 
-        public void InstallPackages(IEnumerable<InstallationRequest> installationRequests, IList<string> nuGetSources, bool debugAllowDevInstall, bool interactive)
+        public void InstallPackages(IEnumerable<InstallationRequest> installationRequests, IList<string> nuGetSources = null, bool debugAllowDevInstall = false, bool interactive = false)
         {
             List<InstallationRequest> localSources = new List<InstallationRequest>();
             List<Package> packages = new List<Package>();
