@@ -20,6 +20,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- EnableNETAnalyzers Allows analyzes to be disabled in bulk via msbuild if the user wants to -->
     <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == '' And 
+                                   '$(AnalysisLevel)' != '' And
                                     $([MSBuild]::VersionGreaterThanOrEquals($(AnalysisLevel), '5.0'))">true</EnableNETAnalyzers>
     <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
     
