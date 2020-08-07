@@ -19,6 +19,7 @@ namespace Microsoft.Build.Internal
         ///     Creates an XmlReaderExtension with handle to an XmlReader.
         /// </summary>
         /// <param name="filePath">Path to the file on disk.</param>
+        /// <param name="loadAsReadOnly">Whther to load the file in real only mode.</param>
         /// <returns>Disposable XmlReaderExtension object.</returns>
         internal static XmlReaderExtension Create(string filePath, bool loadAsReadOnly)
         {

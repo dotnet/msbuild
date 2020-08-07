@@ -305,11 +305,11 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                _propertyInfoCache = _propertyInfoCache ?? ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance;
+                _propertyInfoCache ??= ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance;
 
-                _namesOfPropertiesWithRequiredAttribute = _namesOfPropertiesWithRequiredAttribute ?? ReadOnlyEmptyDictionary<string, string>.Instance;
-                _namesOfPropertiesWithOutputAttribute = _namesOfPropertiesWithOutputAttribute ?? ReadOnlyEmptyDictionary<string, string>.Instance;
-                _namesOfPropertiesWithAmbiguousMatches = _namesOfPropertiesWithAmbiguousMatches ?? ReadOnlyEmptyDictionary<string, string>.Instance;
+                _namesOfPropertiesWithRequiredAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
+                _namesOfPropertiesWithOutputAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
+                _namesOfPropertiesWithAmbiguousMatches ??= ReadOnlyEmptyDictionary<string, string>.Instance;
             }
         }
         #endregion

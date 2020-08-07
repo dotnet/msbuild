@@ -34,7 +34,7 @@ namespace Microsoft.Build.Evaluation
 {
     /// <summary>
     /// Evaluates a ProjectRootElement, updating the fresh Project.Data passed in.
-    /// Handles evaluating conditions, expanding expressions, and building up the 
+    /// Handles evaluating conditions, expanding expressions, and building up the
     /// lists of applicable properties, items, and itemdefinitions, as well as gathering targets and tasks
     /// and creating a TaskRegistry from the using tasks.
     /// </summary>
@@ -88,7 +88,7 @@ namespace Microsoft.Build.Evaluation
         private readonly List<Pair<string, ProjectUsingTaskElement>> _usingTaskElements;
 
         /// <summary>
-        /// List of ProjectTargetElement's traversing into imports. 
+        /// List of ProjectTargetElement's traversing into imports.
         /// Gathered during the first pass to avoid traversing again.
         /// </summary>
         private readonly List<ProjectTargetElement> _targetElements;
@@ -99,14 +99,14 @@ namespace Microsoft.Build.Evaluation
         private readonly Dictionary<string, ProjectImportElement> _importsSeen;
 
         /// <summary>
-        /// Depth first collection of InitialTargets strings declared in the main 
+        /// Depth first collection of InitialTargets strings declared in the main
         /// Project and all its imported files, split on semicolons.
         /// </summary>
         private readonly List<string> _initialTargetsList;
 
         /// <summary>
-        /// Dictionary of project full paths and a boolean that indicates whether at least one 
-        /// of their targets has the "Returns" attribute set.  
+        /// Dictionary of project full paths and a boolean that indicates whether at least one
+        /// of their targets has the "Returns" attribute set.
         /// </summary>
         private readonly Dictionary<ProjectRootElement, NGen<bool>> _projectSupportsReturnsAttribute;
 
@@ -139,7 +139,7 @@ namespace Microsoft.Build.Evaluation
         /// The current build submission ID.
         /// </summary>
         private readonly int _submissionId;
-        
+
         private readonly EvaluationContext _evaluationContext;
 
         /// <summary>
@@ -647,7 +647,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 SetAllProjectsProperty();
-                
+
                 List<string> initialTargets = new List<string>(_initialTargetsList.Count);
                 foreach (var initialTarget in _initialTargetsList)
                 {
@@ -966,7 +966,7 @@ namespace Microsoft.Build.Evaluation
                         string target = EscapingUtilities.UnescapeAll(temp[i].Trim());
                         if (target.Length > 0)
                         {
-                            _data.DefaultTargets = _data.DefaultTargets ?? new List<string>(temp.Count);
+                            _data.DefaultTargets ??= new List<string>(temp.Count);
                             _data.DefaultTargets.Add(target);
                         }
                     }
@@ -980,7 +980,7 @@ namespace Microsoft.Build.Evaluation
         private void EvaluatePropertyGroupElement(ProjectPropertyGroupElement propertyGroupElement)
         {
             using (_evaluationProfiler.TrackElement(propertyGroupElement))
-            { 
+            {
                 if (EvaluateConditionCollectingConditionedProperties(propertyGroupElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties))
                 {
                     foreach (ProjectPropertyElement propertyElement in propertyGroupElement.Properties)
@@ -1135,7 +1135,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Set the built-in properties, most of which are read-only 
+        /// Set the built-in properties, most of which are read-only
         /// </summary>
         private ICollection<P> AddBuiltInProperties()
         {
@@ -1474,7 +1474,7 @@ namespace Microsoft.Build.Evaluation
                 foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
                 {
                     _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version, sdkResult);
-                    
+
                     PerformDepthFirstPass(importedProjectRootElement);
                 }
             }
@@ -1506,7 +1506,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <remarks>
         /// We enter here in both the property and item passes, since Chooses can contain both.
-        /// However, we only evaluate the When conditions on the first pass, so we only pulse 
+        /// However, we only evaluate the When conditions on the first pass, so we only pulse
         /// those states on that pass. On the other pass, it's as if they're not there.
         /// </remarks>
         private void EvaluateChooseElement(ProjectChooseElement chooseElement)
@@ -1575,7 +1575,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Expands and loads project imports.
         /// <remarks>
-        /// Imports may contain references to "projectImportSearchPaths" defined in the app.config 
+        /// Imports may contain references to "projectImportSearchPaths" defined in the app.config
         /// toolset section. If this is the case, this method will search for the imported project
         /// in those additional paths if the default fails.
         /// </remarks>
@@ -1642,7 +1642,7 @@ namespace Microsoft.Build.Evaluation
             var pathsToSearch = new string[fallbackSearchPathMatch.SearchPaths.Count + 1];
             pathsToSearch[0] = prop?.EvaluatedValue;                       // The actual value of the property, with no fallbacks
             fallbackSearchPathMatch.SearchPaths.CopyTo(pathsToSearch, 1);  // The list of fallbacks, in order
-            
+
             string extensionPropertyRefAsString = fallbackSearchPathMatch.MsBuildPropertyFormat;
 
             _evaluationLoggingContext.LogComment(MessageImportance.Low, "SearchPathsForMSBuildExtensionsPath",
@@ -1951,7 +1951,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Load and parse the specified project import, which may have wildcards,
         /// into one or more ProjectRootElements.
-        /// Caches the parsed import into the provided collection, so future 
+        /// Caches the parsed import into the provided collection, so future
         /// requests can be satisfied without re-parsing it.
         /// </summary>
         private LoadImportsResult ExpandAndLoadImportsFromUnescapedImportExpression(string directoryOfImportingFile, ProjectImportElement importElement, string unescapedExpression,

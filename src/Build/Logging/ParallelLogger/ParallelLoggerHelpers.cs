@@ -601,7 +601,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 return false;
             }
-            return s_eventComparer.Equals(_entryPointContext, key.EntryPointContext) && (String.Compare(_targetName, key.TargetName, StringComparison.OrdinalIgnoreCase) == 0);
+            return s_eventComparer.Equals(_entryPointContext, key.EntryPointContext) && (String.Equals(_targetName, key.TargetName, StringComparison.OrdinalIgnoreCase));
         }
 
         public override int GetHashCode()

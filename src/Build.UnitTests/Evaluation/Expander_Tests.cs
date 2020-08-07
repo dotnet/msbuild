@@ -3821,7 +3821,7 @@ $(
                     caughtException = true;
                 }
                 Assert.True(
-                        (success == false || caughtException),
+                        (!success || caughtException),
                         "FAILURE: Expected '" + errorTests[i] + "' to not parse or not be evaluated but it evaluated to '" + result + "'"
                     );
             }

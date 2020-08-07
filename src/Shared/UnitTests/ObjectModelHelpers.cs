@@ -1348,7 +1348,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (var buildManager = new BuildManager())
             {
-                parameters = parameters ?? new BuildParameters();
+                parameters ??= new BuildParameters();
 
                 if (logger != null)
                 {
@@ -1604,7 +1604,7 @@ namespace Microsoft.Build.UnitTests
             IEnumerable<int> entryPoints = null,
             ProjectCollection projectCollection = null)
         {
-            createProjectFile = createProjectFile ?? CreateProjectFile;
+            createProjectFile ??= CreateProjectFile;
 
             var nodes = new Dictionary<int, (bool IsRoot, string ProjectPath)>();
 

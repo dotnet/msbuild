@@ -28,6 +28,7 @@ namespace Microsoft.Build.BackEnd
     /// <param name="issuingEntry">The build request entry which is being blocked.</param>
     /// <param name="blockingGlobalRequestId">The request on which we are blocked.</param>
     /// <param name="blockingTarget">The target on which we are blocked.</param>
+    /// <param name="partialBuildResult">The partial build result on which we are blocked.</param>
     internal delegate void BuildRequestBlockedDelegate(BuildRequestEntry issuingEntry, int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult);
 
     /// <summary>

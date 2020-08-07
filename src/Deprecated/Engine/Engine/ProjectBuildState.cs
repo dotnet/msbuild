@@ -138,7 +138,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if ((indexOfTargetInProgress + 1) < targetNamesToBuild.Count)
             {
-                indexOfTargetInProgress = indexOfTargetInProgress + 1;
+                indexOfTargetInProgress += 1;
                 return (string)targetNamesToBuild[indexOfTargetInProgress];
             }
             else
@@ -209,7 +209,7 @@ namespace Microsoft.Build.BuildEngine
             if (!containsCycle && requiredTargets != null && requiredTargets.Count > 0)
             {
                 containsCycle = 
-                    (String.Compare(name, (string)targetNamesToBuild[indexOfTargetInProgress], StringComparison.OrdinalIgnoreCase) == 0);
+                    (String.Equals(name, (string)targetNamesToBuild[indexOfTargetInProgress], StringComparison.OrdinalIgnoreCase));
             }
             return containsCycle;
         }

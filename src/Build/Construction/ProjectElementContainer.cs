@@ -481,7 +481,7 @@ namespace Microsoft.Build.Construction
                 // Therefore, we need to traverse both directions to find the first sibling of the same type as the one being added.
                 // If none is found, then the node being added is inserted as the only node of its kind
 
-                bool SiblingIsExplicitElement(ProjectElement _) => _.ExpressedAsAttribute == false;
+                bool SiblingIsExplicitElement(ProjectElement _) => !_.ExpressedAsAttribute;
 
                 if (TrySearchLeftSiblings(child.PreviousSibling, SiblingIsExplicitElement, out ProjectElement referenceSibling))
                 {
