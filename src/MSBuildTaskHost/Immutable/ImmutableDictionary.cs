@@ -36,9 +36,7 @@ namespace System.Collections.Immutable
         /// </summary>
         private Dictionary<K, V> _backing;
 
-        //
-        // READ-ONLY OPERATIONS
-        //
+        #region Read-only Operations
 
         public ICollection<K> Keys => _backing.Keys;
         public ICollection<V> Values => _backing.Values;
@@ -125,9 +123,9 @@ namespace System.Collections.Immutable
             }
         }
 
-        //
-        // WRITE OPERATIONS
-        //
+        #endregion
+
+        #region Write Operations
 
         internal ImmutableDictionary<K, V> SetItem(K key, V value)
         {
@@ -205,9 +203,9 @@ namespace System.Collections.Immutable
             return new ImmutableDictionary<K, V>(n);
         }
 
-        //
-        // UNSUPPORTED OPERATIONS
-        //
+        #endregion
+
+        #region Unsupported Operations
 
         object IDictionary.this[object key]
         {
@@ -260,5 +258,7 @@ namespace System.Collections.Immutable
         {
             throw new NotSupportedException();
         }
+
+        #endregion
     }
 }
