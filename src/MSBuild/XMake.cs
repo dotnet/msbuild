@@ -2945,8 +2945,8 @@ namespace Microsoft.Build.CommandLine
                                 )
         {
             // If we got to this method we should have to possible projects or solutions and some extensions to ignore
-            ErrorUtilities.VerifyThrow(((potentialProjectOrSolutionFiles != null) && (potentialProjectOrSolutionFiles.Length > 0)), "There should be some potential project or solution files");
-            ErrorUtilities.VerifyThrow(((extensionsToIgnoreDictionary != null) && (extensionsToIgnoreDictionary.Count > 0)), "There should be some extensions to Ignore");
+            ErrorUtilities.VerifyThrow((potentialProjectOrSolutionFiles != null) && (potentialProjectOrSolutionFiles.Length > 0), "There should be some potential project or solution files");
+            ErrorUtilities.VerifyThrow((extensionsToIgnoreDictionary != null) && (extensionsToIgnoreDictionary.Count > 0), "There should be some extensions to Ignore");
 
             List<string> filesToKeep = new List<string>();
             foreach (string projectOrSolutionFile in potentialProjectOrSolutionFiles)

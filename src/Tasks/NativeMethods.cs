@@ -1398,7 +1398,7 @@ typedef enum _tagAssemblyComparisonResult
                 return false;
             }
 
-            return (strValue != null);
+            return strValue != null;
         }
 #endif
         /// <summary>
@@ -1432,12 +1432,12 @@ typedef enum _tagAssemblyComparisonResult
             // Medium.  
             else if ((*bytes & 0xC0) == 0x80)  // 10?? ????    
             {
-                uncompressedDataLength = (int)(((*bytes & 0x3f) << 8 | *(bytes + 1)));
+                uncompressedDataLength = (int)((*bytes & 0x3f) << 8 | *(bytes + 1));
                 count = 2;
             }
             else if ((*bytes & 0xE0) == 0xC0)      // 110? ????    
             {
-                uncompressedDataLength = (int)(((*bytes & 0x1f) << 24 | *(bytes + 1) << 16 | *(bytes + 2) << 8 | *(bytes + 3)));
+                uncompressedDataLength = (int)((*bytes & 0x1f) << 24 | *(bytes + 1) << 16 | *(bytes + 2) << 8 | *(bytes + 3));
                 count = 4;
             }
 

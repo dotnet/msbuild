@@ -89,8 +89,8 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (requiredTargets != null && requiredTargets.Count > 0 ?
-                        this.requiredTargets.Peek() : null);
+                return requiredTargets != null && requiredTargets.Count > 0 ?
+                        this.requiredTargets.Peek() : null;
             }
         }
 

@@ -94,7 +94,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (this.itemNameAttribute != null);
+                return this.itemNameAttribute != null;
             }
         }
 
@@ -106,7 +106,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (this.propertyNameAttribute != null);
+                return this.propertyNameAttribute != null;
             }
         }
 

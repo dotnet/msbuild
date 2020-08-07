@@ -88,7 +88,7 @@ namespace Microsoft.Build.Construction
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
                 if (_name != null) return _name;
                 string unescapedValue = EscapingUtilities.UnescapeAll(GetAttributeValue(XMakeAttributes.name));
-                return (_name = unescapedValue);
+                return _name = unescapedValue;
             }
 
             set

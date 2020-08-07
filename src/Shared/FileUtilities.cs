@@ -242,7 +242,7 @@ namespace Microsoft.Build.Shared
         /// <returns>true, if slash</returns>
         internal static bool IsSlash(char c)
         {
-            return ((c == Path.DirectorySeparatorChar) || (c == Path.AltDirectorySeparatorChar));
+            return (c == Path.DirectorySeparatorChar) || (c == Path.AltDirectorySeparatorChar);
         }
 
         /// <summary>

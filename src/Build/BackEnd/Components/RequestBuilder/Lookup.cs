@@ -662,7 +662,7 @@ namespace Microsoft.Build.BackEnd
                 var existingItems = GetItems(itemType);
                 if (existingItems.Count > 0)
                 {
-                    itemsToAdd = itemsToAdd.Where(item => !(existingItems.Contains(item, ProjectItemInstance.EqualityComparer)));
+                    itemsToAdd = itemsToAdd.Where(item => !existingItems.Contains(item, ProjectItemInstance.EqualityComparer));
                 }
             }
 
@@ -1271,7 +1271,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public bool KeepValue
             {
-                get { return (!_remove && _newValue == null); }
+                get { return !_remove && _newValue == null; }
             }
 
             /// <summary>

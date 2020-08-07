@@ -450,9 +450,9 @@ namespace Microsoft.Build.Internal
 
         private static bool UsingDifferentToolsVersionFromProjectFile(string toolsVersionFromProject, string toolsVersionToUse, bool explicitToolsVersionSpecified)
         {
-            return (!explicitToolsVersionSpecified &&
+            return !explicitToolsVersionSpecified &&
                     !String.IsNullOrEmpty(toolsVersionFromProject) &&
-                    !String.Equals(toolsVersionFromProject, toolsVersionToUse, StringComparison.OrdinalIgnoreCase));
+                    !String.Equals(toolsVersionFromProject, toolsVersionToUse, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

@@ -55,7 +55,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (conditionAttribute != null ? conditionAttribute.Value : String.Empty);
+                return conditionAttribute != null ? conditionAttribute.Value : String.Empty;
             }
 
             set

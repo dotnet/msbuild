@@ -2016,7 +2016,7 @@ namespace Microsoft.Build.Evaluation
 
                                 if (reason != null)
                                 {
-                                    Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1} - {2}] [PC Hash {3}]", reason, FullPath, (import.ImportedProject.FullPath == FullPath ? String.Empty : import.ImportedProject.FullPath), ProjectCollection.GetHashCode()));
+                                    Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1} - {2}] [PC Hash {3}]", reason, FullPath, import.ImportedProject.FullPath == FullPath ? String.Empty : import.ImportedProject.FullPath, ProjectCollection.GetHashCode()));
                                 }
                             }
 
@@ -2665,7 +2665,7 @@ namespace Microsoft.Build.Evaluation
                 IEnumerable<ProjectItemElement> relevantElementsAfterInclude = evaluatedItemElements
                     // Skip until we encounter the element that produced the item because
                     // there are no item operations that can affect future items
-                    .SkipWhile((i => i != item.Xml))
+                    .SkipWhile(i => i != item.Xml)
                     .Where(itemElement =>
                         // items operations of different item types cannot affect each other
                         itemElement.ItemType.Equals(item.ItemType) &&

@@ -259,7 +259,7 @@ namespace Microsoft.Build.BuildEngine
         public int GetHashCode(T x)
         {
             BuildEventContext context = x as BuildEventContext;
-            return (context.ProjectContextId + (context.NodeId << 24));
+            return context.ProjectContextId + (context.NodeId << 24);
         }
         #endregion
     }
@@ -289,7 +289,7 @@ namespace Microsoft.Build.BuildEngine
         public int GetHashCode(T x)
         {
             BuildEventContext context = x as BuildEventContext;
-            return (context.ProjectContextId + (context.NodeId << 24));
+            return context.ProjectContextId + (context.NodeId << 24);
         }
 
         #endregion
@@ -570,7 +570,7 @@ namespace Microsoft.Build.BuildEngine
 
         public override int GetHashCode()
         {
-            return (entryPointContext.GetHashCode() + targetName.GetHashCode());
+            return entryPointContext.GetHashCode() + targetName.GetHashCode();
         }
         #endregion
 
@@ -656,7 +656,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectFullKey compareKey = obj as ProjectFullKey;
             if (compareKey != null)
             {
-                return ((compareKey.projectKey == this.projectKey) && (compareKey.entryPointKey == this.entryPointKey));
+                return (compareKey.projectKey == this.projectKey) && (compareKey.entryPointKey == this.entryPointKey);
             }
             else
             {
@@ -666,7 +666,7 @@ namespace Microsoft.Build.BuildEngine
 
         public override int GetHashCode()
         {
-            return (this.projectKey + (this.entryPointKey << 16));
+            return this.projectKey + (this.entryPointKey << 16);
         }
         #endregion
     }

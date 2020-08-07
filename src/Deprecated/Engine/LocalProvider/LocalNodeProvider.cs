@@ -208,7 +208,7 @@ namespace Microsoft.Build.BuildEngine
             // on its behalf
             if (nodeData[nodeIndex].NodeState != NodeState.Launched)
             {
-                NodeStatus nodeStatus = new NodeStatus(requestId, false, 0, 0, 0, (nodeData[nodeIndex].NodeState == NodeState.LaunchInProgress));
+                NodeStatus nodeStatus = new NodeStatus(requestId, false, 0, 0, 0, nodeData[nodeIndex].NodeState == NodeState.LaunchInProgress);
                 engineCallback.PostStatus(nodeData[nodeIndex].NodeId, nodeStatus, false);
             }
             else if (!IsNodeProcessAliveOrUninitialized(nodeIndex))
@@ -316,7 +316,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     //Terminate all of the nodes which have valid processId's but for which we
                     // have not recieved a shutdown response
-                    if ((nodeInfo.ProcessId > 0 && !nodeInfo.ShutdownResponseReceived))
+                    if (nodeInfo.ProcessId > 0 && !nodeInfo.ShutdownResponseReceived)
                     {
                         TerminateChildNode(nodeInfo.ProcessId);
                     }

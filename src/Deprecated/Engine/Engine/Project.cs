@@ -1471,8 +1471,8 @@ namespace Microsoft.Build.BuildEngine
                 projectToolsVersion = this.DefaultToolsVersion;
             }
 
-            return (String.Equals(ToolsVersion, projectToolsVersion, StringComparison.OrdinalIgnoreCase)
-                && this.GlobalProperties.IsEquivalent(projectGlobalProperties));
+            return String.Equals(ToolsVersion, projectToolsVersion, StringComparison.OrdinalIgnoreCase)
+                && this.GlobalProperties.IsEquivalent(projectGlobalProperties);
         }
 
         /// <summary>
@@ -4495,7 +4495,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>jomof</owner>
         internal static bool IsSolutionFilename(string filename)
         {
-            return (string.Equals(Path.GetExtension(filename), ".sln", StringComparison.OrdinalIgnoreCase));
+            return string.Equals(Path.GetExtension(filename), ".sln", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -4504,7 +4504,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>LukaszG</owner>
         internal static bool IsVCProjFilename(string filename)
         {
-            return (string.Equals(Path.GetExtension(filename), ".vcproj", StringComparison.OrdinalIgnoreCase));
+            return string.Equals(Path.GetExtension(filename), ".vcproj", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

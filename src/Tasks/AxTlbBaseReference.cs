@@ -179,7 +179,7 @@ namespace Microsoft.Build.Tasks
                 wrapperInfo.assembly = null;
             }
 
-            return (wrapperInfo.assembly != null);
+            return wrapperInfo.assembly != null;
         }
 
         /// <summary>

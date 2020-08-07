@@ -477,7 +477,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private bool IsVerbosityAtLeast(LoggerVerbosity checkVerbosity)
         {
-            return (_verbosity >= checkVerbosity);
+            return _verbosity >= checkVerbosity;
         }
         #endregion
 

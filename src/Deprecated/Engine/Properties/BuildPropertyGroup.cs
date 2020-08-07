@@ -195,7 +195,7 @@ namespace Microsoft.Build.BuildEngine
         /// be imported
         /// </summary>
         internal BuildPropertyGroup(Project parentProject, XmlElement propertyGroupElement, bool isImported)
-            : this(parentProject, propertyGroupElement, (isImported ? PropertyType.ImportedProperty : PropertyType.NormalProperty))
+            : this(parentProject, propertyGroupElement, isImported ? PropertyType.ImportedProperty : PropertyType.NormalProperty)
         {
         }
 
@@ -1464,7 +1464,7 @@ namespace Microsoft.Build.BuildEngine
         /// <returns></returns>
         private bool IsPersisted
         {
-            get { return (this.propertyGroupElement != null); }
+            get { return this.propertyGroupElement != null; }
         }
 
         /// <summary>

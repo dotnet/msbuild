@@ -681,7 +681,7 @@ namespace Microsoft.Build.Construction
             // Validate against our minimum for upgradable projects
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
                 (
-                (_solutionFile.Version >= SolutionFile.slnFileMinVersion),
+                _solutionFile.Version >= SolutionFile.slnFileMinVersion,
                 "SubCategoryForSolutionParsingErrors",
                 new BuildEventFileInfo(_solutionFile.FullPath),
                 "SolutionParseUpgradeNeeded"

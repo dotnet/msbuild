@@ -119,7 +119,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (IsPersisted ? xml.Condition : String.Empty);
+                return IsPersisted ? xml.Condition : String.Empty;
             }
 
             set
@@ -715,7 +715,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal bool IsBackedUp
         {
-            get { return (persistedItemBackup != null); }
+            get { return persistedItemBackup != null; }
         }
 
         /// <summary>
@@ -778,7 +778,7 @@ namespace Microsoft.Build.BuildEngine
             Expander expander = new Expander(existingProperties, existingItemsByName, ExpanderOptions.ExpandAll);
 
             bool itemGroupCondition = Utilities.EvaluateCondition(Condition,
-                                                         (IsPersisted ? xml.ConditionAttribute : null),
+                                                         IsPersisted ? xml.ConditionAttribute : null,
                                                          expander,
                                                          ParserOptions.AllowPropertiesAndItemLists,
                                                          parentProject);

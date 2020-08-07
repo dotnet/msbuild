@@ -125,7 +125,7 @@ namespace Microsoft.Build.Shared
         /// <returns>true, if name is valid</returns>
         internal static bool IsValidElementName(string name)
         {
-            return (LocateFirstInvalidElementNameCharacter(name) == -1);
+            return LocateFirstInvalidElementNameCharacter(name) == -1;
         }
 
         /// <summary>

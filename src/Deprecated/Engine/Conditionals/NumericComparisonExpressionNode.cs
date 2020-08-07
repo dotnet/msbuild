@@ -33,8 +33,8 @@ namespace Microsoft.Build.BuildEngine
                 "ComparisonOnNonNumericExpression",
                  state.parsedCondition,
                  /* helpfully display unexpanded token and expanded result in error message */
-                 (LeftChild.CanNumericEvaluate(state) ? RightChild.GetUnexpandedValue(state) : LeftChild.GetUnexpandedValue(state)),
-                 (LeftChild.CanNumericEvaluate(state) ? RightChild.GetExpandedValue(state) : LeftChild.GetExpandedValue(state)));
+                 LeftChild.CanNumericEvaluate(state) ? RightChild.GetUnexpandedValue(state) : LeftChild.GetUnexpandedValue(state),
+                 LeftChild.CanNumericEvaluate(state) ? RightChild.GetExpandedValue(state) : LeftChild.GetExpandedValue(state));
 
             return Compare(LeftChild.NumericEvaluate(state), RightChild.NumericEvaluate(state));
         }

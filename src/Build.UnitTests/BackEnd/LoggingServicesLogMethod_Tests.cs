@@ -1268,7 +1268,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <param name="success">Success value to test</param>
         private void TestProjectFinishedEvent(string projectFile, bool success)
         {
-            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword((success ? "ProjectFinishedSuccess" : "ProjectFinishedFailure"), Path.GetFileName(projectFile));
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(success ? "ProjectFinishedSuccess" : "ProjectFinishedFailure", Path.GetFileName(projectFile));
             MockHost componentHost = new MockHost();
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1, componentHost);
             try
@@ -1339,7 +1339,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <param name="succeeded">Succeeded value to test</param>
         private void TestTaskFinished(string taskName, string projectFile, string projectFileOfTask, bool succeeded)
         {
-            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword((succeeded ? "TaskFinishedSuccess" : "TaskFinishedFailure"), taskName);
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(succeeded ? "TaskFinishedSuccess" : "TaskFinishedFailure", taskName);
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.LogTaskFinished(s_buildEventContext, taskName, projectFile, projectFileOfTask, succeeded);
             VerifyTaskFinishedEvent(taskName, projectFile, projectFileOfTask, succeeded, message, service);
@@ -1359,7 +1359,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <param name="succeeded">Succeeded value to test</param>
         private void TestTargetFinished(string targetName, string projectFile, string projectFileOfTarget, bool succeeded)
         {
-            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword((succeeded ? "TargetFinishedSuccess" : "TargetFinishedFailure"), targetName, Path.GetFileName(projectFile));
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(succeeded ? "TargetFinishedSuccess" : "TargetFinishedFailure", targetName, Path.GetFileName(projectFile));
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
             List<TaskItem> outputs = new List<TaskItem>();
             outputs.Add(new TaskItem("ItemInclude", projectFile));

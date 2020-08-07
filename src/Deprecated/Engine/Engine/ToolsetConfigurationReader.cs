@@ -77,7 +77,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (ConfigurationSection == null ? null : ConfigurationSection.Default);
+                return ConfigurationSection == null ? null : ConfigurationSection.Default;
             }
         }
 
@@ -226,7 +226,7 @@ namespace Microsoft.Build.BuildEngine
                 // Note this means we can't distinguish between the attribute being present but containing
                 // an empty string for its value and the attribute not being present at all.
                 string defaultValue = (string)base["default"];
-                return (String.IsNullOrEmpty(defaultValue) ? null : defaultValue);
+                return String.IsNullOrEmpty(defaultValue) ? null : defaultValue;
             }
             set
             {

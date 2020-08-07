@@ -299,7 +299,7 @@ namespace Microsoft.Build.BuildEngine
                         }
 
                         BuildResultCacheEntry cacheEntry = new BuildResultCacheEntry((string)entry.Key, targetOutputs,
-                            (buildState == Target.BuildState.CompletedSuccessfully));
+                            buildState == Target.BuildState.CompletedSuccessfully);
 
                         if (Engine.debugMode)
                         {

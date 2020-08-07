@@ -171,7 +171,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
             var project = GetOrAddProject(taskStartedEventArgs.BuildEventContext.ProjectContextId);
             var target = project.GetTargetById(taskStartedEventArgs.BuildEventContext.TargetId);
 
-            target.AddChildTask(new Task(taskStartedEventArgs.TaskName, taskStartedEventArgs, GetTaskAssembly((taskStartedEventArgs.TaskName))));
+            target.AddChildTask(new Task(taskStartedEventArgs.TaskName, taskStartedEventArgs, GetTaskAssembly(taskStartedEventArgs.TaskName)));
         }
 
         /// <summary>

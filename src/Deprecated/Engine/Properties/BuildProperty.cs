@@ -519,7 +519,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (this.type == PropertyType.ImportedProperty);
+                return this.type == PropertyType.ImportedProperty;
             }
         }
 

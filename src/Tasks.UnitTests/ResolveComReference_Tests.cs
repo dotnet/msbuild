@@ -518,18 +518,18 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 // if Private is missing, by default GAC items are CopyLocal=false, non GAC CopyLocal=true
-                Assert.Equal(nonGacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal), (enabledNoPIA ? "false" : "true"));
+                Assert.Equal(nonGacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "true");
 
-                Assert.Equal(gacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal), (enabledNoPIA ? "false" : "false"));
+                Assert.Equal(gacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "false");
 
                 // if Private is set, it takes precedence
-                Assert.Equal(nonGacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal), (enabledNoPIA ? "false" : "false"));
+                Assert.Equal(nonGacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "false");
 
-                Assert.Equal(gacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal), (enabledNoPIA ? "false" : "false"));
+                Assert.Equal(gacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "false");
 
-                Assert.Equal(nonGacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal), (enabledNoPIA ? "false" : "true"));
+                Assert.Equal(nonGacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "true");
 
-                Assert.Equal(gacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal), (enabledNoPIA ? "false" : "true"));
+                Assert.Equal(gacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "true");
             }
         }
 

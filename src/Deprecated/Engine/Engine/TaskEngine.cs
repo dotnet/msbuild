@@ -190,7 +190,7 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
 
-            return (TaskClass != null);
+            return TaskClass != null;
         }
 
         /// <summary>
@@ -1492,7 +1492,7 @@ namespace Microsoft.Build.BuildEngine
                 // to avoid project authors having to add Conditions on all their tasks to avoid calling them
                 // when a particular item list is empty.  This way, we just call the task with an empty list,
                 // the task will loop over an empty list, and return quickly.
-                if ((finalTaskInputs.Count > 0) || (isRequired))
+                if ((finalTaskInputs.Count > 0) || isRequired)
                 {
                     // Send the array into the task parameter.
                     success = SetTaskParameter(task, parameter, finalTaskInputs.ToArray(parameterType.GetElementType()));

@@ -85,7 +85,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (!childMode && nodeManager.MaxNodeCount == 1);
+                return !childMode && nodeManager.MaxNodeCount == 1;
             }
         }
 

@@ -500,7 +500,7 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            return (request != null);
+            return request != null;
         }
 
         /// <summary>

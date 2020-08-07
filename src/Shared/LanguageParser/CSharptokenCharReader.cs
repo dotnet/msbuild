@@ -132,7 +132,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                 ++count;
             }
 
-            return (count > 0);
+            return count > 0;
         }
     }
 }

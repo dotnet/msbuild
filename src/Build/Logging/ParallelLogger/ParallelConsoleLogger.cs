@@ -1285,7 +1285,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             bool prefixAlreadyWritten = true;
             ProjectFullKey currentProjectFullKey = GetFullProjectKey(e.BuildEventContext);
-            if (!(_lastProjectFullKey.Equals(currentProjectFullKey)))
+            if (!_lastProjectFullKey.Equals(currentProjectFullKey))
             {
                 // Write the prefix information about the target for the message
                 WriteLinePrefix(context, timeStamp, false);
@@ -1347,7 +1347,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         {
                             // Calculate how many chars will fit on the console buffer
                             int amountToCopy = (messageLength - index) < (bufferWidthMinusNewLine - adjustedPrefixWidth) ? (messageLength - index) : (bufferWidthMinusNewLine - adjustedPrefixWidth);
-                            WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), (prefixAlreadyWritten && index == 0 && i == 0), adjustedPrefixWidth);
+                            WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), prefixAlreadyWritten && index == 0 && i == 0, adjustedPrefixWidth);
                             index += amountToCopy;
                         }
                     }

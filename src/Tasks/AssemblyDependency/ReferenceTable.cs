@@ -2142,7 +2142,7 @@ namespace Microsoft.Build.Tasks
                 // Check assemblies versions when target framework version is less than 4.5
 
                 // Make sure the version is higher than the version in the redist. 
-                bool higherThanCurrentRedistList = (reference.ReferenceVersion != null && reference.ExclusionListLoggingProperties.HighestVersionInRedist != null)
+                bool higherThanCurrentRedistList = reference.ReferenceVersion != null && reference.ExclusionListLoggingProperties.HighestVersionInRedist != null
                                                    && reference.ReferenceVersion.CompareTo(reference.ExclusionListLoggingProperties.HighestVersionInRedist) > 0;
 
                 if (higherThanCurrentRedistList)

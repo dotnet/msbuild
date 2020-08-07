@@ -93,7 +93,7 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            return ((this.AssemblyName == otherAssemblyInfo.AssemblyName) && (this.AssemblyFile == otherAssemblyInfo.AssemblyFile));
+            return (this.AssemblyName == otherAssemblyInfo.AssemblyName) && (this.AssemblyFile == otherAssemblyInfo.AssemblyFile);
         }
 
         public void Translate(ITranslator translator)

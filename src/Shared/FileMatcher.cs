@@ -186,11 +186,11 @@ namespace Microsoft.Build.Shared
         internal static bool HasWildcardsSemicolonItemOrPropertyReferences(string filespec)
         {
             return
-                (
+
                 (-1 != filespec.IndexOfAny(s_wildcardAndSemicolonCharacters)) ||
                 filespec.Contains("$(") ||
                 filespec.Contains("@(")
-                );
+                ;
         }
 
         /// <summary>
@@ -692,7 +692,7 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool IsDirectorySeparator(char c)
         {
-            return (c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar);
+            return c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar;
         }
         /// <summary>
         /// Removes the current directory converting the file back to relative path 
@@ -2069,9 +2069,9 @@ namespace Microsoft.Build.Shared
 
             var searchData = new FilesSearchData(
                 // if using the regular expression, ignore the file pattern
-                (matchWithRegex ? null : filenamePart),
+                matchWithRegex ? null : filenamePart,
                 // if using the file pattern, ignore the regular expression
-                (matchWithRegex ? new Regex(matchFileExpression, RegexOptions.IgnoreCase) : null),
+                matchWithRegex ? new Regex(matchFileExpression, RegexOptions.IgnoreCase) : null,
                 needsRecursion);
 
             result.SearchData = searchData;
@@ -2176,7 +2176,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsValidDriveChar(char value)
         {
-            return ((value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z'));
+            return (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z');
         }
 
         static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, List<string> excludeSpecsUnescaped)

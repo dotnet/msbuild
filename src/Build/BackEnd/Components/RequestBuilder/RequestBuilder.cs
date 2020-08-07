@@ -213,7 +213,7 @@ namespace Microsoft.Build.BackEnd
             VerifyEntryInReadyState();
 
             _continueResults = _requestEntry.Continue();
-            ErrorUtilities.VerifyThrow((_blockType == BlockType.BlockedOnTargetInProgress || _blockType == BlockType.Yielded) || (_continueResults != null), "Unexpected null results for request {0} (nr {1})", _requestEntry.Request.GlobalRequestId, _requestEntry.Request.NodeRequestId);
+            ErrorUtilities.VerifyThrow(_blockType == BlockType.BlockedOnTargetInProgress || _blockType == BlockType.Yielded || (_continueResults != null), "Unexpected null results for request {0} (nr {1})", _requestEntry.Request.GlobalRequestId, _requestEntry.Request.NodeRequestId);
 
             // Setting the continue event will wake up the build thread, which is suspended in StartNewBuildRequests.
             _continueEvent.Set();

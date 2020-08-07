@@ -206,9 +206,9 @@ namespace Microsoft.Build.BuildEngine
         /// <returns>true, if specified type is a logger</returns>
         private static bool IsForwardingLoggerClass(Type type, object unused)
         {
-            return (type.IsClass &&
+            return type.IsClass &&
                 !type.IsAbstract &&
-                (type.GetInterface("IForwardingLogger") != null));
+                (type.GetInterface("IForwardingLogger") != null);
         }
 
         /// <summary>
@@ -218,9 +218,9 @@ namespace Microsoft.Build.BuildEngine
         /// <returns>true, if specified type is a logger</returns>
         private static bool IsLoggerClass(Type type, object unused)
         {
-            return (type.IsClass &&
+            return type.IsClass &&
                 !type.IsAbstract &&
-                (type.GetInterface("ILogger") != null));
+                (type.GetInterface("ILogger") != null);
         }
 
         /// <summary>

@@ -353,7 +353,7 @@ namespace Microsoft.Build.UnitTests
                         // If the items are expected to be in the same order, then the expected item
                         // should always be found at index zero, because we remove items from the expected
                         // list as we find them.
-                        if ((expectedItemIndex != 0) && (orderOfItemsShouldMatch))
+                        if ((expectedItemIndex != 0) && orderOfItemsShouldMatch)
                         {
                             outOfOrder = true;
                         }

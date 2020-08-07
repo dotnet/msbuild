@@ -204,8 +204,8 @@ namespace Microsoft.Build.Execution
                 return false;
             }
 
-            return (_escapedValue == other._escapedValue &&
-                    String.Equals(_name, other._name, StringComparison.OrdinalIgnoreCase));
+            return _escapedValue == other._escapedValue &&
+                    String.Equals(_name, other._name, StringComparison.OrdinalIgnoreCase);
         }
 
         #endregion

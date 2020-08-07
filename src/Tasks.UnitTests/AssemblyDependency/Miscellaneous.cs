@@ -2018,9 +2018,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.NotNull(returnedVersions);
             Assert.Equal(3, returnedVersions.Count);
-            Assert.Equal("v1.0", ((string)returnedVersions[0].RegistryKey));
-            Assert.Equal("v1", ((string)returnedVersions[1].RegistryKey));
-            Assert.Equal("v00001.0", ((string)returnedVersions[2].RegistryKey));
+            Assert.Equal("v1.0", (string)returnedVersions[0].RegistryKey);
+            Assert.Equal("v1", (string)returnedVersions[1].RegistryKey);
+            Assert.Equal("v00001.0", (string)returnedVersions[2].RegistryKey);
         }
 
         [Fact]
@@ -2030,10 +2030,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.NotNull(returnedVersions);
             Assert.Equal(4, returnedVersions.Count);
-            Assert.Equal("v2.0.50727", ((string)returnedVersions[0].RegistryKey));
-            Assert.Equal("v1.0", ((string)returnedVersions[1].RegistryKey));
-            Assert.Equal("v1", ((string)returnedVersions[2].RegistryKey));
-            Assert.Equal("v00001.0", ((string)returnedVersions[3].RegistryKey));
+            Assert.Equal("v2.0.50727", (string)returnedVersions[0].RegistryKey);
+            Assert.Equal("v1.0", (string)returnedVersions[1].RegistryKey);
+            Assert.Equal("v1", (string)returnedVersions[2].RegistryKey);
+            Assert.Equal("v00001.0", (string)returnedVersions[3].RegistryKey);
         }
 
         [Fact]
@@ -2044,13 +2044,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.NotNull(returnedVersions);
             Assert.Equal(7, returnedVersions.Count);
 
-            Assert.Equal("v3.0", ((string)returnedVersions[0].RegistryKey));
-            Assert.Equal("v2.0.50727", ((string)returnedVersions[1].RegistryKey));
-            Assert.Equal("v1.0", ((string)returnedVersions[2].RegistryKey));
-            Assert.Equal("v1", ((string)returnedVersions[3].RegistryKey));
-            Assert.Equal("v00001.0", ((string)returnedVersions[4].RegistryKey));
-            Assert.Equal("v3.0SP1", ((string)returnedVersions[5].RegistryKey));
-            Assert.Equal("v3.0 BAZ", ((string)returnedVersions[6].RegistryKey));
+            Assert.Equal("v3.0", (string)returnedVersions[0].RegistryKey);
+            Assert.Equal("v2.0.50727", (string)returnedVersions[1].RegistryKey);
+            Assert.Equal("v1.0", (string)returnedVersions[2].RegistryKey);
+            Assert.Equal("v1", (string)returnedVersions[3].RegistryKey);
+            Assert.Equal("v00001.0", (string)returnedVersions[4].RegistryKey);
+            Assert.Equal("v3.0SP1", (string)returnedVersions[5].RegistryKey);
+            Assert.Equal("v3.0 BAZ", (string)returnedVersions[6].RegistryKey);
         }
 
         [Fact]
@@ -2061,33 +2061,33 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.NotNull(returnedVersions);
             Assert.Equal(27, returnedVersions.Count);
 
-            Assert.Equal("v5.0", ((string)returnedVersions[0].RegistryKey));
-            Assert.Equal("v5", ((string)returnedVersions[1].RegistryKey));
-            Assert.Equal("v4.0001.0", ((string)returnedVersions[2].RegistryKey));
-            Assert.Equal("v4.1", ((string)returnedVersions[3].RegistryKey));
-            Assert.Equal("v4.0.255.87", ((string)returnedVersions[4].RegistryKey));
-            Assert.Equal("v4.0.255", ((string)returnedVersions[5].RegistryKey));
-            Assert.Equal("v4.0.0000", ((string)returnedVersions[6].RegistryKey));
-            Assert.Equal("v4.0.9999", ((string)returnedVersions[7].RegistryKey));
-            Assert.Equal("v4.0.2116.87", ((string)returnedVersions[8].RegistryKey));
-            Assert.Equal("v4.0.2116", ((string)returnedVersions[9].RegistryKey));
-            Assert.Equal("v4.0", ((string)returnedVersions[10].RegistryKey));
-            Assert.Equal("v3.5", ((string)returnedVersions[11].RegistryKey));
-            Assert.Equal("v3.0", ((string)returnedVersions[12].RegistryKey));
-            Assert.Equal("v2.0.50727", ((string)returnedVersions[13].RegistryKey));
-            Assert.Equal("v1.0", ((string)returnedVersions[14].RegistryKey));
-            Assert.Equal("v1", ((string)returnedVersions[15].RegistryKey));
-            Assert.Equal("v00001.0", ((string)returnedVersions[16].RegistryKey));
-            Assert.Equal("v3.0SP1", ((string)returnedVersions[17].RegistryKey));
-            Assert.Equal("v3.0 BAZ", ((string)returnedVersions[18].RegistryKey));
-            Assert.Equal("v3.5.0.x86chk", ((string)returnedVersions[19].RegistryKey));
-            Assert.Equal("v3.5.1.x86chk", ((string)returnedVersions[20].RegistryKey));
-            Assert.Equal("v3.5.256.x86chk", ((string)returnedVersions[21].RegistryKey));
-            Assert.Equal("v", ((string)returnedVersions[22].RegistryKey));
-            Assert.Equal("V3.5.0.0.0", ((string)returnedVersions[23].RegistryKey));
-            Assert.Equal("V3..", ((string)returnedVersions[24].RegistryKey));
-            Assert.Equal("V-1", ((string)returnedVersions[25].RegistryKey));
-            Assert.Equal("v9999999999999999", ((string)returnedVersions[26].RegistryKey), true);
+            Assert.Equal("v5.0", (string)returnedVersions[0].RegistryKey);
+            Assert.Equal("v5", (string)returnedVersions[1].RegistryKey);
+            Assert.Equal("v4.0001.0", (string)returnedVersions[2].RegistryKey);
+            Assert.Equal("v4.1", (string)returnedVersions[3].RegistryKey);
+            Assert.Equal("v4.0.255.87", (string)returnedVersions[4].RegistryKey);
+            Assert.Equal("v4.0.255", (string)returnedVersions[5].RegistryKey);
+            Assert.Equal("v4.0.0000", (string)returnedVersions[6].RegistryKey);
+            Assert.Equal("v4.0.9999", (string)returnedVersions[7].RegistryKey);
+            Assert.Equal("v4.0.2116.87", (string)returnedVersions[8].RegistryKey);
+            Assert.Equal("v4.0.2116", (string)returnedVersions[9].RegistryKey);
+            Assert.Equal("v4.0", (string)returnedVersions[10].RegistryKey);
+            Assert.Equal("v3.5", (string)returnedVersions[11].RegistryKey);
+            Assert.Equal("v3.0", (string)returnedVersions[12].RegistryKey);
+            Assert.Equal("v2.0.50727", (string)returnedVersions[13].RegistryKey);
+            Assert.Equal("v1.0", (string)returnedVersions[14].RegistryKey);
+            Assert.Equal("v1", (string)returnedVersions[15].RegistryKey);
+            Assert.Equal("v00001.0", (string)returnedVersions[16].RegistryKey);
+            Assert.Equal("v3.0SP1", (string)returnedVersions[17].RegistryKey);
+            Assert.Equal("v3.0 BAZ", (string)returnedVersions[18].RegistryKey);
+            Assert.Equal("v3.5.0.x86chk", (string)returnedVersions[19].RegistryKey);
+            Assert.Equal("v3.5.1.x86chk", (string)returnedVersions[20].RegistryKey);
+            Assert.Equal("v3.5.256.x86chk", (string)returnedVersions[21].RegistryKey);
+            Assert.Equal("v", (string)returnedVersions[22].RegistryKey);
+            Assert.Equal("V3.5.0.0.0", (string)returnedVersions[23].RegistryKey);
+            Assert.Equal("V3..", (string)returnedVersions[24].RegistryKey);
+            Assert.Equal("V-1", (string)returnedVersions[25].RegistryKey);
+            Assert.Equal("v9999999999999999", (string)returnedVersions[26].RegistryKey, true);
         }
 
         [Fact]
@@ -2097,16 +2097,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.NotNull(returnedVersions);
             Assert.Equal(10, returnedVersions.Count);
-            Assert.Equal("v3.5", ((string)returnedVersions[0].RegistryKey));
-            Assert.Equal("v3.0", ((string)returnedVersions[1].RegistryKey));
-            Assert.Equal("v2.0.50727", ((string)returnedVersions[2].RegistryKey));
-            Assert.Equal("v1.0", ((string)returnedVersions[3].RegistryKey));
-            Assert.Equal("v1", ((string)returnedVersions[4].RegistryKey));
-            Assert.Equal("v00001.0", ((string)returnedVersions[5].RegistryKey));
-            Assert.Equal("v3.5.0.x86chk", ((string)returnedVersions[6].RegistryKey));
-            Assert.Equal("v3.5.1.x86chk", ((string)returnedVersions[7].RegistryKey));
-            Assert.Equal("v3.5.256.x86chk", ((string)returnedVersions[8].RegistryKey));
-            Assert.Equal("V3.5.0.0.0", ((string)returnedVersions[9].RegistryKey));
+            Assert.Equal("v3.5", (string)returnedVersions[0].RegistryKey);
+            Assert.Equal("v3.0", (string)returnedVersions[1].RegistryKey);
+            Assert.Equal("v2.0.50727", (string)returnedVersions[2].RegistryKey);
+            Assert.Equal("v1.0", (string)returnedVersions[3].RegistryKey);
+            Assert.Equal("v1", (string)returnedVersions[4].RegistryKey);
+            Assert.Equal("v00001.0", (string)returnedVersions[5].RegistryKey);
+            Assert.Equal("v3.5.0.x86chk", (string)returnedVersions[6].RegistryKey);
+            Assert.Equal("v3.5.1.x86chk", (string)returnedVersions[7].RegistryKey);
+            Assert.Equal("v3.5.256.x86chk", (string)returnedVersions[8].RegistryKey);
+            Assert.Equal("V3.5.0.0.0", (string)returnedVersions[9].RegistryKey);
         }
 
         [Fact]
@@ -2116,16 +2116,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.NotNull(returnedVersions);
             Assert.Equal(10, returnedVersions.Count);
-            Assert.Equal("v4.0.9999", ((string)returnedVersions[0].RegistryKey));
-            Assert.Equal("v4.0.2116.87", ((string)returnedVersions[1].RegistryKey));
-            Assert.Equal("v4.0.2116", ((string)returnedVersions[2].RegistryKey));
-            Assert.Equal("v4.0", ((string)returnedVersions[3].RegistryKey));
-            Assert.Equal("v3.5", ((string)returnedVersions[4].RegistryKey));
-            Assert.Equal("v3.0", ((string)returnedVersions[5].RegistryKey));
-            Assert.Equal("v2.0.50727", ((string)returnedVersions[6].RegistryKey));
-            Assert.Equal("v1.0", ((string)returnedVersions[7].RegistryKey));
-            Assert.Equal("v1", ((string)returnedVersions[8].RegistryKey));
-            Assert.Equal("v00001.0", ((string)returnedVersions[9].RegistryKey));
+            Assert.Equal("v4.0.9999", (string)returnedVersions[0].RegistryKey);
+            Assert.Equal("v4.0.2116.87", (string)returnedVersions[1].RegistryKey);
+            Assert.Equal("v4.0.2116", (string)returnedVersions[2].RegistryKey);
+            Assert.Equal("v4.0", (string)returnedVersions[3].RegistryKey);
+            Assert.Equal("v3.5", (string)returnedVersions[4].RegistryKey);
+            Assert.Equal("v3.0", (string)returnedVersions[5].RegistryKey);
+            Assert.Equal("v2.0.50727", (string)returnedVersions[6].RegistryKey);
+            Assert.Equal("v1.0", (string)returnedVersions[7].RegistryKey);
+            Assert.Equal("v1", (string)returnedVersions[8].RegistryKey);
+            Assert.Equal("v00001.0", (string)returnedVersions[9].RegistryKey);
         }
 
         [Fact]
@@ -2135,17 +2135,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.NotNull(returnedVersions);
             Assert.Equal(11, returnedVersions.Count);
-            Assert.Equal("v4.0.0000", ((string)returnedVersions[0].RegistryKey));
-            Assert.Equal("v4.0.9999", ((string)returnedVersions[1].RegistryKey));
-            Assert.Equal("v4.0.2116.87", ((string)returnedVersions[2].RegistryKey));
-            Assert.Equal("v4.0.2116", ((string)returnedVersions[3].RegistryKey));
-            Assert.Equal("v4.0", ((string)returnedVersions[4].RegistryKey));
-            Assert.Equal("v3.5", ((string)returnedVersions[5].RegistryKey));
-            Assert.Equal("v3.0", ((string)returnedVersions[6].RegistryKey));
-            Assert.Equal("v2.0.50727", ((string)returnedVersions[7].RegistryKey));
-            Assert.Equal("v1.0", ((string)returnedVersions[8].RegistryKey));
-            Assert.Equal("v1", ((string)returnedVersions[9].RegistryKey));
-            Assert.Equal("v00001.0", ((string)returnedVersions[10].RegistryKey));
+            Assert.Equal("v4.0.0000", (string)returnedVersions[0].RegistryKey);
+            Assert.Equal("v4.0.9999", (string)returnedVersions[1].RegistryKey);
+            Assert.Equal("v4.0.2116.87", (string)returnedVersions[2].RegistryKey);
+            Assert.Equal("v4.0.2116", (string)returnedVersions[3].RegistryKey);
+            Assert.Equal("v4.0", (string)returnedVersions[4].RegistryKey);
+            Assert.Equal("v3.5", (string)returnedVersions[5].RegistryKey);
+            Assert.Equal("v3.0", (string)returnedVersions[6].RegistryKey);
+            Assert.Equal("v2.0.50727", (string)returnedVersions[7].RegistryKey);
+            Assert.Equal("v1.0", (string)returnedVersions[8].RegistryKey);
+            Assert.Equal("v1", (string)returnedVersions[9].RegistryKey);
+            Assert.Equal("v00001.0", (string)returnedVersions[10].RegistryKey);
         }
 
         [Fact]
@@ -2156,20 +2156,20 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.NotNull(returnedVersions);
             Assert.Equal(14, returnedVersions.Count);
 
-            Assert.Equal("v4.1", ((string)returnedVersions[0].RegistryKey));
-            Assert.Equal("v4.0.255.87", ((string)returnedVersions[1].RegistryKey));
-            Assert.Equal("v4.0.255", ((string)returnedVersions[2].RegistryKey));
-            Assert.Equal("v4.0.0000", ((string)returnedVersions[3].RegistryKey));
-            Assert.Equal("v4.0.9999", ((string)returnedVersions[4].RegistryKey));
-            Assert.Equal("v4.0.2116.87", ((string)returnedVersions[5].RegistryKey));
-            Assert.Equal("v4.0.2116", ((string)returnedVersions[6].RegistryKey));
-            Assert.Equal("v4.0", ((string)returnedVersions[7].RegistryKey));
-            Assert.Equal("v3.5", ((string)returnedVersions[8].RegistryKey));
-            Assert.Equal("v3.0", ((string)returnedVersions[9].RegistryKey));
-            Assert.Equal("v2.0.50727", ((string)returnedVersions[10].RegistryKey));
-            Assert.Equal("v1.0", ((string)returnedVersions[11].RegistryKey));
-            Assert.Equal("v1", ((string)returnedVersions[12].RegistryKey));
-            Assert.Equal("v00001.0", ((string)returnedVersions[13].RegistryKey));
+            Assert.Equal("v4.1", (string)returnedVersions[0].RegistryKey);
+            Assert.Equal("v4.0.255.87", (string)returnedVersions[1].RegistryKey);
+            Assert.Equal("v4.0.255", (string)returnedVersions[2].RegistryKey);
+            Assert.Equal("v4.0.0000", (string)returnedVersions[3].RegistryKey);
+            Assert.Equal("v4.0.9999", (string)returnedVersions[4].RegistryKey);
+            Assert.Equal("v4.0.2116.87", (string)returnedVersions[5].RegistryKey);
+            Assert.Equal("v4.0.2116", (string)returnedVersions[6].RegistryKey);
+            Assert.Equal("v4.0", (string)returnedVersions[7].RegistryKey);
+            Assert.Equal("v3.5", (string)returnedVersions[8].RegistryKey);
+            Assert.Equal("v3.0", (string)returnedVersions[9].RegistryKey);
+            Assert.Equal("v2.0.50727", (string)returnedVersions[10].RegistryKey);
+            Assert.Equal("v1.0", (string)returnedVersions[11].RegistryKey);
+            Assert.Equal("v1", (string)returnedVersions[12].RegistryKey);
+            Assert.Equal("v00001.0", (string)returnedVersions[13].RegistryKey);
         }
 
         [Fact]
@@ -2180,21 +2180,21 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.NotNull(returnedVersions);
             Assert.Equal(15, returnedVersions.Count);
 
-            Assert.Equal("v4.0001.0", ((string)returnedVersions[0].RegistryKey));
-            Assert.Equal("v4.1", ((string)returnedVersions[1].RegistryKey));
-            Assert.Equal("v4.0.255.87", ((string)returnedVersions[2].RegistryKey));
-            Assert.Equal("v4.0.255", ((string)returnedVersions[3].RegistryKey));
-            Assert.Equal("v4.0.0000", ((string)returnedVersions[4].RegistryKey));
-            Assert.Equal("v4.0.9999", ((string)returnedVersions[5].RegistryKey));
-            Assert.Equal("v4.0.2116.87", ((string)returnedVersions[6].RegistryKey));
-            Assert.Equal("v4.0.2116", ((string)returnedVersions[7].RegistryKey));
-            Assert.Equal("v4.0", ((string)returnedVersions[8].RegistryKey));
-            Assert.Equal("v3.5", ((string)returnedVersions[9].RegistryKey));
-            Assert.Equal("v3.0", ((string)returnedVersions[10].RegistryKey));
-            Assert.Equal("v2.0.50727", ((string)returnedVersions[11].RegistryKey));
-            Assert.Equal("v1.0", ((string)returnedVersions[12].RegistryKey));
-            Assert.Equal("v1", ((string)returnedVersions[13].RegistryKey));
-            Assert.Equal("v00001.0", ((string)returnedVersions[14].RegistryKey));
+            Assert.Equal("v4.0001.0", (string)returnedVersions[0].RegistryKey);
+            Assert.Equal("v4.1", (string)returnedVersions[1].RegistryKey);
+            Assert.Equal("v4.0.255.87", (string)returnedVersions[2].RegistryKey);
+            Assert.Equal("v4.0.255", (string)returnedVersions[3].RegistryKey);
+            Assert.Equal("v4.0.0000", (string)returnedVersions[4].RegistryKey);
+            Assert.Equal("v4.0.9999", (string)returnedVersions[5].RegistryKey);
+            Assert.Equal("v4.0.2116.87", (string)returnedVersions[6].RegistryKey);
+            Assert.Equal("v4.0.2116", (string)returnedVersions[7].RegistryKey);
+            Assert.Equal("v4.0", (string)returnedVersions[8].RegistryKey);
+            Assert.Equal("v3.5", (string)returnedVersions[9].RegistryKey);
+            Assert.Equal("v3.0", (string)returnedVersions[10].RegistryKey);
+            Assert.Equal("v2.0.50727", (string)returnedVersions[11].RegistryKey);
+            Assert.Equal("v1.0", (string)returnedVersions[12].RegistryKey);
+            Assert.Equal("v1", (string)returnedVersions[13].RegistryKey);
+            Assert.Equal("v00001.0", (string)returnedVersions[14].RegistryKey);
         }
 
         [Fact]
@@ -2204,19 +2204,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.NotNull(returnedVersions);
             Assert.Equal(13, returnedVersions.Count);
-            Assert.Equal("v4.0.255.87", ((string)returnedVersions[0].RegistryKey));
-            Assert.Equal("v4.0.255", ((string)returnedVersions[1].RegistryKey));
-            Assert.Equal("v4.0.0000", ((string)returnedVersions[2].RegistryKey));
-            Assert.Equal("v4.0.9999", ((string)returnedVersions[3].RegistryKey));
-            Assert.Equal("v4.0.2116.87", ((string)returnedVersions[4].RegistryKey));
-            Assert.Equal("v4.0.2116", ((string)returnedVersions[5].RegistryKey));
-            Assert.Equal("v4.0", ((string)returnedVersions[6].RegistryKey));
-            Assert.Equal("v3.5", ((string)returnedVersions[7].RegistryKey));
-            Assert.Equal("v3.0", ((string)returnedVersions[8].RegistryKey));
-            Assert.Equal("v2.0.50727", ((string)returnedVersions[9].RegistryKey));
-            Assert.Equal("v1.0", ((string)returnedVersions[10].RegistryKey));
-            Assert.Equal("v1", ((string)returnedVersions[11].RegistryKey));
-            Assert.Equal("v00001.0", ((string)returnedVersions[12].RegistryKey));
+            Assert.Equal("v4.0.255.87", (string)returnedVersions[0].RegistryKey);
+            Assert.Equal("v4.0.255", (string)returnedVersions[1].RegistryKey);
+            Assert.Equal("v4.0.0000", (string)returnedVersions[2].RegistryKey);
+            Assert.Equal("v4.0.9999", (string)returnedVersions[3].RegistryKey);
+            Assert.Equal("v4.0.2116.87", (string)returnedVersions[4].RegistryKey);
+            Assert.Equal("v4.0.2116", (string)returnedVersions[5].RegistryKey);
+            Assert.Equal("v4.0", (string)returnedVersions[6].RegistryKey);
+            Assert.Equal("v3.5", (string)returnedVersions[7].RegistryKey);
+            Assert.Equal("v3.0", (string)returnedVersions[8].RegistryKey);
+            Assert.Equal("v2.0.50727", (string)returnedVersions[9].RegistryKey);
+            Assert.Equal("v1.0", (string)returnedVersions[10].RegistryKey);
+            Assert.Equal("v1", (string)returnedVersions[11].RegistryKey);
+            Assert.Equal("v00001.0", (string)returnedVersions[12].RegistryKey);
         }
 
         [Fact]
@@ -2227,23 +2227,23 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.NotNull(returnedVersions);
             Assert.Equal(17, returnedVersions.Count);
 
-            Assert.Equal("v5.0", ((string)returnedVersions[0].RegistryKey));
-            Assert.Equal("v5", ((string)returnedVersions[1].RegistryKey));
-            Assert.Equal("v4.0001.0", ((string)returnedVersions[2].RegistryKey));
-            Assert.Equal("v4.1", ((string)returnedVersions[3].RegistryKey));
-            Assert.Equal("v4.0.255.87", ((string)returnedVersions[4].RegistryKey));
-            Assert.Equal("v4.0.255", ((string)returnedVersions[5].RegistryKey));
-            Assert.Equal("v4.0.0000", ((string)returnedVersions[6].RegistryKey));
-            Assert.Equal("v4.0.9999", ((string)returnedVersions[7].RegistryKey));
-            Assert.Equal("v4.0.2116.87", ((string)returnedVersions[8].RegistryKey));
-            Assert.Equal("v4.0.2116", ((string)returnedVersions[9].RegistryKey));
-            Assert.Equal("v4.0", ((string)returnedVersions[10].RegistryKey));
-            Assert.Equal("v3.5", ((string)returnedVersions[11].RegistryKey));
-            Assert.Equal("v3.0", ((string)returnedVersions[12].RegistryKey));
-            Assert.Equal("v2.0.50727", ((string)returnedVersions[13].RegistryKey));
-            Assert.Equal("v1.0", ((string)returnedVersions[14].RegistryKey));
-            Assert.Equal("v1", ((string)returnedVersions[15].RegistryKey));
-            Assert.Equal("v00001.0", ((string)returnedVersions[16].RegistryKey));
+            Assert.Equal("v5.0", (string)returnedVersions[0].RegistryKey);
+            Assert.Equal("v5", (string)returnedVersions[1].RegistryKey);
+            Assert.Equal("v4.0001.0", (string)returnedVersions[2].RegistryKey);
+            Assert.Equal("v4.1", (string)returnedVersions[3].RegistryKey);
+            Assert.Equal("v4.0.255.87", (string)returnedVersions[4].RegistryKey);
+            Assert.Equal("v4.0.255", (string)returnedVersions[5].RegistryKey);
+            Assert.Equal("v4.0.0000", (string)returnedVersions[6].RegistryKey);
+            Assert.Equal("v4.0.9999", (string)returnedVersions[7].RegistryKey);
+            Assert.Equal("v4.0.2116.87", (string)returnedVersions[8].RegistryKey);
+            Assert.Equal("v4.0.2116", (string)returnedVersions[9].RegistryKey);
+            Assert.Equal("v4.0", (string)returnedVersions[10].RegistryKey);
+            Assert.Equal("v3.5", (string)returnedVersions[11].RegistryKey);
+            Assert.Equal("v3.0", (string)returnedVersions[12].RegistryKey);
+            Assert.Equal("v2.0.50727", (string)returnedVersions[13].RegistryKey);
+            Assert.Equal("v1.0", (string)returnedVersions[14].RegistryKey);
+            Assert.Equal("v1", (string)returnedVersions[15].RegistryKey);
+            Assert.Equal("v00001.0", (string)returnedVersions[16].RegistryKey);
         }
 
         [Fact]
@@ -2254,23 +2254,23 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.NotNull(returnedVersions);
             Assert.Equal(17, returnedVersions.Count);
 
-            Assert.Equal("v5.0", ((string)returnedVersions[0].RegistryKey));
-            Assert.Equal("v5", ((string)returnedVersions[1].RegistryKey));
-            Assert.Equal("v4.0001.0", ((string)returnedVersions[2].RegistryKey));
-            Assert.Equal("v4.1", ((string)returnedVersions[3].RegistryKey));
-            Assert.Equal("v4.0.255.87", ((string)returnedVersions[4].RegistryKey));
-            Assert.Equal("v4.0.255", ((string)returnedVersions[5].RegistryKey));
-            Assert.Equal("v4.0.0000", ((string)returnedVersions[6].RegistryKey));
-            Assert.Equal("v4.0.9999", ((string)returnedVersions[7].RegistryKey));
-            Assert.Equal("v4.0.2116.87", ((string)returnedVersions[8].RegistryKey));
-            Assert.Equal("v4.0.2116", ((string)returnedVersions[9].RegistryKey));
-            Assert.Equal("v4.0", ((string)returnedVersions[10].RegistryKey));
-            Assert.Equal("v3.5", ((string)returnedVersions[11].RegistryKey));
-            Assert.Equal("v3.0", ((string)returnedVersions[12].RegistryKey));
-            Assert.Equal("v2.0.50727", ((string)returnedVersions[13].RegistryKey));
-            Assert.Equal("v1.0", ((string)returnedVersions[14].RegistryKey));
-            Assert.Equal("v1", ((string)returnedVersions[15].RegistryKey));
-            Assert.Equal("v00001.0", ((string)returnedVersions[16].RegistryKey));
+            Assert.Equal("v5.0", (string)returnedVersions[0].RegistryKey);
+            Assert.Equal("v5", (string)returnedVersions[1].RegistryKey);
+            Assert.Equal("v4.0001.0", (string)returnedVersions[2].RegistryKey);
+            Assert.Equal("v4.1", (string)returnedVersions[3].RegistryKey);
+            Assert.Equal("v4.0.255.87", (string)returnedVersions[4].RegistryKey);
+            Assert.Equal("v4.0.255", (string)returnedVersions[5].RegistryKey);
+            Assert.Equal("v4.0.0000", (string)returnedVersions[6].RegistryKey);
+            Assert.Equal("v4.0.9999", (string)returnedVersions[7].RegistryKey);
+            Assert.Equal("v4.0.2116.87", (string)returnedVersions[8].RegistryKey);
+            Assert.Equal("v4.0.2116", (string)returnedVersions[9].RegistryKey);
+            Assert.Equal("v4.0", (string)returnedVersions[10].RegistryKey);
+            Assert.Equal("v3.5", (string)returnedVersions[11].RegistryKey);
+            Assert.Equal("v3.0", (string)returnedVersions[12].RegistryKey);
+            Assert.Equal("v2.0.50727", (string)returnedVersions[13].RegistryKey);
+            Assert.Equal("v1.0", (string)returnedVersions[14].RegistryKey);
+            Assert.Equal("v1", (string)returnedVersions[15].RegistryKey);
+            Assert.Equal("v00001.0", (string)returnedVersions[16].RegistryKey);
         }
 
         [Fact]
@@ -2281,7 +2281,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.NotNull(returnedVersions);
             Assert.Single(returnedVersions);
 
-            Assert.Equal("v3.5.0.x86chk", ((string)returnedVersions[0].RegistryKey));
+            Assert.Equal("v3.5.0.x86chk", (string)returnedVersions[0].RegistryKey);
         }
 #endif
 
@@ -7984,7 +7984,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     mask = 4;
                 }
                 Assert.NotEqual(0, mask); // "Unexpected assembly in resolved list."
-                Assert.Equal(0, (mask & set)); // "Assembly found twice in resolved list."
+                Assert.Equal(0, mask & set); // "Assembly found twice in resolved list."
                 set |= mask;
             }
             return set;

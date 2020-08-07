@@ -347,7 +347,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal bool IsVerbosityAtLeast(LoggerVerbosity checkVerbosity)
         {
-            return (this.verbosity >= checkVerbosity);
+            return this.verbosity >= checkVerbosity;
         }
 
         /// <summary>

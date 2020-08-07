@@ -285,18 +285,18 @@ namespace Microsoft.Build.Collections
         // Convenience
         internal bool Contains(string key)
         {
-            return (Get(key) != null);
+            return Get(key) != null;
         }
 
         bool ICollection<KeyValuePair<string, T>>.Contains(KeyValuePair<string, T> entry)
         {
             Debug.Assert(String.Equals(entry.Key, entry.Value.Key, StringComparison.Ordinal));
-            return (Get(entry.Value.Key) != null);
+            return Get(entry.Value.Key) != null;
         }
 
         public bool ContainsKey(string key)
         {
-            return (Get(key) != null);
+            return Get(key) != null;
         }
 
         T IDictionary<string, T>.this[string name]
@@ -312,14 +312,14 @@ namespace Microsoft.Build.Collections
         /// <returns>true if item contained; false if not</returns>
         public bool Contains(T item)
         {
-            return (Get(item.Key) != null);
+            return Get(item.Key) != null;
         }
 
         // Convenience to minimise change to callers used to dictionaries
         public bool TryGetValue(string key, out T item)
         {
             item = Get(key);
-            return (item != null);
+            return item != null;
         }
 
         /// <summary>

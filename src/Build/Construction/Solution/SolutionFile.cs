@@ -255,7 +255,7 @@ namespace Microsoft.Build.Construction
         /// <returns>Whether the project is expected to be buildable</returns>
         internal static bool IsBuildableProject(ProjectInSolution project)
         {
-            return (project.ProjectType != SolutionProjectType.SolutionFolder && project.ProjectConfigurations.Count > 0);
+            return project.ProjectType != SolutionProjectType.SolutionFolder && project.ProjectConfigurations.Count > 0;
         }
 
         /// <summary>

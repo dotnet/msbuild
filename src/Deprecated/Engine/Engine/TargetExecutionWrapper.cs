@@ -115,8 +115,8 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (inProgressBuildState == InProgressBuildState.BuildingDependencies ||
-                        inProgressBuildState == InProgressBuildState.BuildingErrorClause);
+                return inProgressBuildState == InProgressBuildState.BuildingDependencies ||
+                        inProgressBuildState == InProgressBuildState.BuildingErrorClause;
             }
         }
 
@@ -690,7 +690,7 @@ namespace Microsoft.Build.BuildEngine
             // Send the task for execution 
             SubmitNonIntrinsicTask(
                 (XmlElement)targetChildNode,
-                ((BuildTask)taskElementList[(currentTask - skippedNodeCount)]).HostObject,
+                ((BuildTask)taskElementList[currentTask - skippedNodeCount]).HostObject,
                 buildContext);
 
             return;
@@ -876,7 +876,7 @@ namespace Microsoft.Build.BuildEngine
                 targetClass.Name,
                 this.parentProject.FullFileName,
                 targetClass.ProjectFileOfTargetElement,
-                (overallSuccess && targetBuildSuccessful));
+                overallSuccess && targetBuildSuccessful);
             loggedTargetStart = false;
 
             // Get the next bucket

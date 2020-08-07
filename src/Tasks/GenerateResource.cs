@@ -2025,7 +2025,7 @@ namespace Microsoft.Build.Tasks
             {
                 object result = binaryFormatter.Deserialize(memoryStream);
 
-                return (result != null);
+                return result != null;
             }
         }
 
