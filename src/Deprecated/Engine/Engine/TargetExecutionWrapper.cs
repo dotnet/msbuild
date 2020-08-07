@@ -220,8 +220,8 @@ namespace Microsoft.Build.BuildEngine
             string nameDependentTarget = dependsOnTargetNames[currentDependentTarget];
 
             ErrorUtilities.VerifyThrow(
-                parentProject.Targets[nameDependentTarget].TargetBuildState != Target.BuildState.InProgress &&
-                parentProject.Targets[nameDependentTarget].TargetBuildState != Target.BuildState.NotStarted ||
+                (parentProject.Targets[nameDependentTarget].TargetBuildState != Target.BuildState.InProgress &&
+                parentProject.Targets[nameDependentTarget].TargetBuildState != Target.BuildState.NotStarted) ||
                 buildContext.CurrentBuildContextState == ProjectBuildState.BuildContextState.ExceptionThrown,
                 "This target should only be updated once the dependent target is completed");
 
@@ -291,8 +291,8 @@ namespace Microsoft.Build.BuildEngine
             string nameErrorTarget = onErrorTargets[currentErrorTarget];
 
             ErrorUtilities.VerifyThrow(
-                parentProject.Targets[nameErrorTarget].TargetBuildState != Target.BuildState.InProgress &&
-                parentProject.Targets[nameErrorTarget].TargetBuildState != Target.BuildState.NotStarted ||
+                (parentProject.Targets[nameErrorTarget].TargetBuildState != Target.BuildState.InProgress &&
+                parentProject.Targets[nameErrorTarget].TargetBuildState != Target.BuildState.NotStarted) ||
                 buildContext.CurrentBuildContextState == ProjectBuildState.BuildContextState.ExceptionThrown,
                 "This target should only be updated once the error target is completed");
 

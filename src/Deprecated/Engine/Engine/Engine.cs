@@ -1943,7 +1943,7 @@ namespace Microsoft.Build.BuildEngine
                 // Flush out all the logging messages, which may have been posted outside target execution
                 primaryLoggingServices.ProcessPostedLoggingEvents();
 
-                if (buildRequest != null && buildRequest.BuildCompleted || exitedDueToError)
+                if ((buildRequest != null && buildRequest.BuildCompleted) || exitedDueToError)
                 {
 #if (!STANDALONEBUILD)
                     CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildEngineBuildProjectEnd);
@@ -2030,8 +2030,8 @@ namespace Microsoft.Build.BuildEngine
                 buildRequest.ProcessingTotalTime += DateTime.Now.Ticks - buildRequest.ProcessingStartTime;
             }
 
-            if (buildRequest != null && buildRequest.BuildCompleted ||
-                buildContext != null && buildContext.BuildComplete )
+            if ((buildRequest != null && buildRequest.BuildCompleted) ||
+                (buildContext != null && buildContext.BuildComplete))
             {
                 DecrementProjectsInProgress();
             }

@@ -35,7 +35,7 @@ namespace Microsoft.Build.Evaluation
                 var matchOnMetadataValid = !_matchOnMetadata.IsEmpty && _itemSpec.Fragments.Count == 1
                     && _itemSpec.Fragments.First() is ItemSpec<ProjectProperty, ProjectItem>.ItemExpressionFragment;
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                    _matchOnMetadata.IsEmpty || matchOnMetadataValid && _matchOnMetadata.Count == 1,
+                    _matchOnMetadata.IsEmpty || (matchOnMetadataValid && _matchOnMetadata.Count == 1),
                     new BuildEventFileInfo(string.Empty),
                     "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
 

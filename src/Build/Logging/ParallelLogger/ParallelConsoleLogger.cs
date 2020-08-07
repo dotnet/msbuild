@@ -749,7 +749,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Gray);
 
                 // Indent the text by two tab lengths
-                StringBuilder result = new StringBuilder(2 * tabWidth + item.ItemSpec.Length);
+                StringBuilder result = new StringBuilder((2 * tabWidth) + item.ItemSpec.Length);
                 result.Append(' ', 2 * tabWidth).Append(item.ItemSpec);
                 WriteMessageAligned(result.ToString(), false);
 

@@ -2004,7 +2004,7 @@ namespace Microsoft.Build.Tasks
                     List<string> whiteListErrorFilesNames = new List<string>();
 
                     // Check for partial success in GetRedistList and log any tolerated exceptions.
-                    if (redistList != null && redistList.Count > 0 || targetingProfile || ShouldUseSubsetBlackList())
+                    if ((redistList != null && redistList.Count > 0) || targetingProfile || ShouldUseSubsetBlackList())
                     {
                         // If we are not targeting a dev 10 profile and we have the required components to generate a orcas style subset, do so
                         if (!targetingProfile && ShouldUseSubsetBlackList())

@@ -1128,7 +1128,7 @@ namespace Microsoft.Build.Shared
                 FileSpecRegexMinLength == FileSpecRegexParts.FixedDirGroupStart.Length
                 + FileSpecRegexParts.WildcardGroupStart.Length
                 + FileSpecRegexParts.FilenameGroupStart.Length
-                + FileSpecRegexParts.GroupEnd.Length * 3
+                + (FileSpecRegexParts.GroupEnd.Length * 3)
                 + FileSpecRegexParts.EndOfLine.Length,
                 "Checked-in length of known regex components differs from computed length. Update checked-in constant."
             );

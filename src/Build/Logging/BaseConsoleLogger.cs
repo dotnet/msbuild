@@ -276,7 +276,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WritePretty(int indentLevel, string formattedString)
         {
-            StringBuilder result = new StringBuilder(indentLevel * tabWidth + formattedString.Length);
+            StringBuilder result = new StringBuilder((indentLevel * tabWidth) + formattedString.Length);
             result.Append(' ', indentLevel * tabWidth).Append(formattedString);
             WriteHandler(result.ToString());
         }
