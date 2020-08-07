@@ -123,6 +123,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
 
   <PropertyGroup>
+    <GenerateFullPaths Condition="'$(GenerateFullPaths)' == ''">true</GenerateFullPaths>
     <!-- Ensure any OutputPath has a trailing slash, so it can be concatenated -->
     <OutputPath Condition="'$(OutputPath)' != '' and !HasTrailingSlash('$(OutputPath)')">$(OutputPath)\</OutputPath>
     <AssemblyName Condition=" '$(AssemblyName)'=='' ">$(MSBuildProjectName)</AssemblyName>
@@ -4922,7 +4923,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <Target
        Name="IncrementalClean"
-       DependsOnTargets="_CleanGetCurrentAndPriorFileWrites">
+       DependsOnTargets="$(IncrementalCleanDependsOn);_CleanGetCurrentAndPriorFileWrites">
 
     <!-- Subtract list of files produced in prior builds from list of files produced in this build. -->
     <ItemGroup>

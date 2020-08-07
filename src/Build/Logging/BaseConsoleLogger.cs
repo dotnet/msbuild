@@ -64,7 +64,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// Gets or sets the number of MSBuild processes participating in the build. If greater than 1,
-        /// include the node ID 
+        /// include the node ID
         /// </summary>
         public int NumberOfProcessors { get; set; } = 1;
 
@@ -113,7 +113,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// An implementation of IComparer useful for comparing the keys 
+        /// An implementation of IComparer useful for comparing the keys
         /// on DictionaryEntry's
         /// </summary>
         /// <remarks>Uses CurrentCulture for display purposes</remarks>
@@ -126,7 +126,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// An implementation of IComparer useful for comparing the ItemSpecs 
+        /// An implementation of IComparer useful for comparing the ItemSpecs
         /// on ITaskItem's
         /// </summary>
         /// <remarks>Uses CurrentCulture for display purposes</remarks>
@@ -208,7 +208,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Writes to the log, using the default indentation. Does not 
+        /// Writes to the log, using the default indentation. Does not
         /// terminate with a newline.
         /// </summary>
         internal void WritePretty(string formattedString)
@@ -271,7 +271,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Writes to the log, using the specified indentation. Does not 
+        /// Writes to the log, using the specified indentation. Does not
         /// terminate with a newline.
         /// </summary>
         internal void WritePretty(int indentLevel, string formattedString)
@@ -481,7 +481,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Writes out the list of property names and their values.
         /// This could be done at any time during the build to show the latest
-        /// property values, using the cached reference to the list from the 
+        /// property values, using the cached reference to the list from the
         /// appropriate ProjectStarted event.
         /// </summary>
         /// <param name="properties">List of properties</param>
@@ -520,7 +520,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Generate a list which contains the properties referenced by the properties 
+        /// Generate a list which contains the properties referenced by the properties
         /// enumerable object
         /// </summary>
         internal List<DictionaryEntry> ExtractPropertyList(IEnumerable properties)
@@ -578,7 +578,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Writes out the list of item specs and their metadata.
         /// This could be done at any time during the build to show the latest
-        /// items, using the cached reference to the list from the 
+        /// items, using the cached reference to the list from the
         /// appropriate ProjectStarted event.
         /// </summary>
         internal void WriteItems(SortedList itemTypes)
@@ -677,7 +677,6 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             resetColor();
         }
-
 
         /// <summary>
         /// Returns a performance counter for a given scope (either task name or target name)
@@ -837,13 +836,13 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             /// <summary>
-            /// Returns an IComparer that will put performance counters 
+            /// Returns an IComparer that will put performance counters
             /// in descending order by elapsed time.
             /// </summary>
             internal static IComparer DescendingByElapsedTimeComparer => new DescendingByElapsedTime();
 
             /// <summary>
-            /// Private IComparer class for sorting performance counters 
+            /// Private IComparer class for sorting performance counters
             /// in descending order by elapsed time.
             /// </summary>
             internal class DescendingByElapsedTime : IComparer
@@ -1180,7 +1179,6 @@ namespace Microsoft.Build.BackEnd.Logging
 
         internal bool runningWithCharacterFileType = false;
 
-
         #region Per-build Members
 
         /// <summary>
@@ -1219,7 +1217,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal Dictionary<string, PerformanceCounter> taskPerformanceCounters;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         internal Dictionary<string, PerformanceCounter> projectEvaluationPerformanceCounters;
 

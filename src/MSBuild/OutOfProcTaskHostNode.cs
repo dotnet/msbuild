@@ -178,10 +178,6 @@ namespace Microsoft.Build.CommandLine
             // was initially launched. 
             _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
-#if FEATURE_APPDOMAIN
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandling.UnhandledExceptionHandler);
-#endif
-
             _receivedPackets = new Queue<INodePacket>();
 
             // These WaitHandles are disposed in HandleShutDown()
@@ -626,7 +622,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void HandleTaskHostConfiguration(TaskHostConfiguration taskHostConfiguration)
         {
-            ErrorUtilities.VerifyThrow(_isTaskExecuting == false, "Why are we getting a TaskHostConfiguration packet while we're still executing a task?");
+            ErrorUtilities.VerifyThrow(!_isTaskExecuting, "Why are we getting a TaskHostConfiguration packet while we're still executing a task?");
             _currentConfiguration = taskHostConfiguration;
 
             // Kick off the task running thread.
@@ -640,7 +636,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void CompleteTask()
         {
-            ErrorUtilities.VerifyThrow(_isTaskExecuting == false, "The task should be done executing before CompleteTask.");
+            ErrorUtilities.VerifyThrow(!_isTaskExecuting, "The task should be done executing before CompleteTask.");
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
                 TaskHostTaskComplete taskCompletePacketToSend;

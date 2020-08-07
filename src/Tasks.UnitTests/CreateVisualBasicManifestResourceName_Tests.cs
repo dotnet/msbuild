@@ -16,7 +16,6 @@ namespace Microsoft.Build.UnitTests
 {
     sealed public class CreateVisualBasicManifestResourceName_Tests
     {
-
         private readonly ITestOutputHelper _testOutput;
 
         public CreateVisualBasicManifestResourceName_Tests(ITestOutputHelper output)
@@ -411,7 +410,7 @@ End Namespace");
         /// <returns>The Stream</returns>
         private Stream CreateFileStream(string path, FileMode mode, FileAccess access)
         {
-            if (String.Compare(path, "SR1.strings", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, "SR1.strings", StringComparison.OrdinalIgnoreCase))
             {
                 return StreamHelpers.StringToStream(
 @"

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -503,7 +502,7 @@ namespace Microsoft.Build.Execution
             }
 
             // If there is an exception and we did not previously have one, add it in.
-            _requestException = _requestException ?? results.Exception;
+            _requestException ??= results.Exception;
         }
 
         /// <summary>

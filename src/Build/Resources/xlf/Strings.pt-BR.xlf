@@ -124,7 +124,7 @@
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
         <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="new">A required NuGet assembly was not found. Expected Path: {0}</target>
+        <target state="translated">Um assembly NuGet necessário não foi encontrado. Caminho Esperado: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -137,22 +137,22 @@
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
         <source>Only one item type may be referenced when removing with MatchOnMetadata.</source>
-        <target state="new">Only one item type may be referenced when removing with MatchOnMetadata.</target>
+        <target state="translated">Somente um tipo de item pode ser referenciado na remoção com MatchOnMetadata.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
         <source>MatchOnMetadata only applies to Remove operations on items.</source>
-        <target state="new">MatchOnMetadata only applies to Remove operations on items.</target>
+        <target state="translated">MatchOnMetadata só se aplica a operações de Remoção em itens.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOptionsOnlyApplicableToItemsWithMatchOnMetadata">
         <source>MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</source>
-        <target state="new">MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</target>
+        <target state="translated">MatchOnMetadataOptions é válido somente ao remover itens usando MatchOnMetadata.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_NoMatchOnMetadataOutsideTargets">
         <source>MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</source>
-        <target state="new">MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</target>
+        <target state="translated">MatchOnMetadata não pode ser usado fora de um &lt;Target&gt;.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
@@ -182,10 +182,15 @@
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
         <source>MSB4261: Multiple entry points with solutions detected: {0}. If static graph is loaded from a solution, that that solution must be the only entry point.</source>
-        <target state="needs-review-translation">MSB4261: o grafo estático aceita apenas uma solução como o único ponto de entrada. Vários pontos de entrada detectados: {0}</target>
+        <target state="translated">MSB4261: Vários pontos de entrada com soluções detectados: {0}. Se o grafo estático for carregado de uma solução, ela precisará ser o único ponto de entrada.</target>
         <note>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>
+      </trans-unit>
+      <trans-unit id="StaticGraphConstructionMetrics">
+        <source>"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</source>
+        <target state="translated">"Grafo estático carregado em {0} segundos: {1} nós, {2} bordas"</target>
+        <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
         <source>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
@@ -211,7 +216,7 @@
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
         <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
-        <target state="translated">MSB4181: a tarefa "{0}" retornou false, mas não registrou um erro.</target>
+        <target state="translated">MSB4181: A tarefa "{0}" retornou false, mas não registrou um erro.</target>
         <note>{StrBegin="MSB4181: "}</note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">

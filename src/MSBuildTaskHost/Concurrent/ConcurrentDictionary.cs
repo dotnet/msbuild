@@ -93,7 +93,6 @@ namespace Microsoft.Build.Shared.Concurrent
         /// </summary>
         public ConcurrentDictionary(IEqualityComparer<TKey> comparer = null)
         {
-
             int concurrencyLevel = Environment.ProcessorCount;
             int capacity = DefaultCapacity;
 

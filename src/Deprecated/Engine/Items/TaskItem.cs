@@ -12,7 +12,6 @@ using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.BuildEngine
 {
-
     /// <summary>
     /// This class wraps a project item, and provides a "view" on the item's BuildItem class that is suitable to expose to tasks.
     /// </summary>
@@ -97,7 +96,6 @@ namespace Microsoft.Build.BuildEngine
                 return item.MetadataCount;
             }
         }
-
 
         /// <summary>
         /// Gets the names of custom metadata on the item
@@ -185,7 +183,7 @@ namespace Microsoft.Build.BuildEngine
 
                 string destinationValue = destinationItem.GetMetadata(key);
 
-                if ((destinationValue == null) || (destinationValue.Length == 0))
+                if (string.IsNullOrEmpty(destinationValue))
                 {
                     destinationItem.SetMetadata(key, EscapingUtilities.UnescapeAll((string)entry.Value));
                 }
@@ -195,12 +193,11 @@ namespace Microsoft.Build.BuildEngine
             // between items, and need to know the source item where the metadata came from
             string originalItemSpec = destinationItem.GetMetadata("OriginalItemSpec");
 
-            if ((originalItemSpec == null) || (originalItemSpec.Length == 0))
+            if (string.IsNullOrEmpty(originalItemSpec))
             {
                 destinationItem.SetMetadata("OriginalItemSpec", ItemSpec);
             }
         }
-
 
         /// <summary>
         /// Get the collection of metadata. This does not include built-in metadata.

@@ -580,7 +580,7 @@ namespace Microsoft.Build.Evaluation
             string argValue = OpportunisticIntern.InternableToString(argumentBuilder).Trim();
 
             // We support passing of null through the argument constant value null
-            if (String.Compare("null", argValue, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
             {
                 arguments.Add(null);
             }
@@ -706,6 +706,7 @@ namespace Microsoft.Build.Evaluation
             /// <param name="expression">The expression containing item metadata references</param>
             /// <param name="metadata"></param>
             /// <param name="options"></param>
+            /// <param name="elementLocation"></param>
             /// <returns>The string with item metadata expanded in-place, escaped.</returns>
             internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation)
             {
@@ -2552,7 +2553,7 @@ namespace Microsoft.Build.Evaluation
                         // the caller to possibly do correlation.
 
                         // We pass in the existing item so we can copy over its metadata
-                        if (include != null && include.Length > 0)
+                        if (!string.IsNullOrEmpty(include))
                         {
                             yield return new Pair<string, S>(include, item.Value);
                         }
@@ -2651,7 +2652,7 @@ namespace Microsoft.Build.Evaluation
 
                         // GetMetadataValueEscaped returns empty string for missing metadata,
                         // but IItem specifies it should return null
-                        if (metadataValue != null && metadataValue.Length > 0)
+                        if (!string.IsNullOrEmpty(metadataValue))
                         {
                             // return a result through the enumerator
                             yield return new Pair<string, S>(item.Key, item.Value);
@@ -3929,12 +3930,38 @@ namespace Microsoft.Build.Evaluation
                                 returnVal = IntrinsicFunctions.GetTargetFrameworkVersion(arg0);
                                 return true;
                             }
+                            if (TryGetArgs(args, out string arg1, out int arg2))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetFrameworkVersion(arg1, arg2);
+                                return true;
+                            }
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsTargetFrameworkCompatible), StringComparison.OrdinalIgnoreCase))
                         {
                             if (TryGetArgs(args, out string arg0, out string arg1))
                             {
                                 returnVal = IntrinsicFunctions.IsTargetFrameworkCompatible(arg0, arg1);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetPlatformIdentifier), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetPlatformIdentifier(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetPlatformVersion), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg0);
+                                return true;
+                            }
+                            if (TryGetArgs(args, out string arg1, out int arg2))
+                            {
+                                returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg1, arg2);
                                 return true;
                             }
                         }

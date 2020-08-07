@@ -1460,7 +1460,6 @@ namespace Microsoft.Build.BuildEngine
                 return null;
             }
 
-
             /// <summary>
             /// Get the specified type from the assembly partial name supplied
             /// </summary>
@@ -1594,7 +1593,7 @@ namespace Microsoft.Build.BuildEngine
             private static string[] ExtractFunctionArguments(string expressionFunction, string argumentsContent)
             {
                 List<string> arguments = new List<string>();
-                StringBuilder argumentBuilder = new StringBuilder(argumentsContent.Length); ;
+                StringBuilder argumentBuilder = new StringBuilder(argumentsContent.Length); 
 
                 // Iterate over the contents of the arguments extracting the
                 // the individual arguments as we go
@@ -1677,7 +1676,7 @@ namespace Microsoft.Build.BuildEngine
                 // to our arguments. 
                 string argValue = argumentBuilder.ToString().Trim();
                 // We support passing of null through the argument constant value null
-                if (String.Compare("null", argValue, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
                 {
                     arguments.Add(null);
                 }

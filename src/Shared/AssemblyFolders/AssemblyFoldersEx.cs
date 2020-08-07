@@ -47,6 +47,11 @@ namespace Microsoft.Build.Shared
         private List<AssemblyFoldersExInfo> _directoryNames = new List<AssemblyFoldersExInfo>();
 
         /// <summary>
+        /// Set of unique paths to directories found from the registry
+        /// </summary>
+        private HashSet<string> _uniqueDirectoryPaths = new HashSet<string>();
+
+        /// <summary>
         /// Construct.
         /// </summary>
         /// <param name="registryKeyRoot">Like Software\Microsoft\[.NetFramework | .NetCompactFramework]</param>
@@ -231,7 +236,7 @@ namespace Microsoft.Build.Shared
                         {
                             if (keyPlatform != null && keyPlatform.ValueCount > 0)
                             {
-                                if (platform != null && platform.Length > 0)
+                                if (!string.IsNullOrEmpty(platform))
                                 {
                                     string platformValue = keyPlatform.GetValue("Platform", null) as string;
 
@@ -241,7 +246,7 @@ namespace Microsoft.Build.Shared
                                     }
                                 }
 
-                                if (osVersion != null && osVersion.Length > 0)
+                                if (!string.IsNullOrEmpty(osVersion))
                                 {
                                     Version ver = VersionUtilities.ConvertToVersion(osVersion);
 
@@ -258,6 +263,7 @@ namespace Microsoft.Build.Shared
 
                     if (null != directoryName)
                     {
+                        _uniqueDirectoryPaths.Add(directoryName);
                         _directoryNames.Add(new AssemblyFoldersExInfo(hive, view, directoryKey.RegistryKey, directoryName, directoryKey.TargetFrameworkVersion));
                     }
                 }
@@ -268,12 +274,12 @@ namespace Microsoft.Build.Shared
         {
             bool match = false;
 
-            if (platformValue != null && platformValue.Length > 0)
+            if (!string.IsNullOrEmpty(platformValue))
             {
                 string[] platforms = platformValue.Split(MSBuildConstants.SemicolonChar);
                 foreach (string p in platforms)
                 {
-                    if (String.Compare(p, platform, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (String.Equals(p, platform, StringComparison.OrdinalIgnoreCase))
                     {
                         match = true;
                         break;
@@ -363,7 +369,7 @@ namespace Microsoft.Build.Shared
             // Loop over versions from registry.
             foreach (string version in versions)
             {
-                if ((version.Length > 0) && (String.Compare(version.Substring(0, 1), "v", StringComparison.OrdinalIgnoreCase) == 0))
+                if ((version.Length > 0) && (String.Equals(version.Substring(0, 1), "v", StringComparison.OrdinalIgnoreCase)))
                 {
                     Version candidateVersion = VersionUtilities.ConvertToVersion(version);
 
@@ -482,6 +488,11 @@ namespace Microsoft.Build.Shared
         IEnumerator IEnumerable.GetEnumerator()
         {
             return ((IEnumerable<AssemblyFoldersExInfo>)this).GetEnumerator();
+        }
+
+        internal IEnumerable<string> UniqueDirectoryPaths
+        {
+            get => _uniqueDirectoryPaths;
         }
     }
 }

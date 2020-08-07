@@ -121,6 +121,43 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        public void RemoveRespectsItemTransform()
+        {
+            var content = @"
+                            <i Include='a;b;c' />
+
+                            <i Remove='@(i->WithMetadataValue(`Identity`, `b`))' />
+                            <i Remove='@(i->`%(Extension)`)' /> <!-- should do nothing -->";
+
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, allItems: true);
+
+            ObjectModelHelpers.AssertItems(new[] { "a", "c" }, items);
+        }
+
+        [Fact]
+        public void UpdateRespectsItemTransform()
+        {
+            var content = @"
+                            <i Include='a;b;c' />
+
+                            <i Update='@(i->WithMetadataValue(`Identity`, `b`))'>
+                                <m1>m1_updated</m1>
+                            </i>
+                            <i Update=`@(i->'%(Extension)')`> <!-- should do nothing -->
+                                <m2>m2_updated</m2>
+                            </i>";
+
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, allItems: true);
+
+            ObjectModelHelpers.AssertItems(new[] { "a", "b", "c" }, items,
+                new[] {
+                    new Dictionary<string, string>(),
+                    new Dictionary<string, string> { ["m1"] = "m1_updated" },
+                    new Dictionary<string, string>(),
+                });
+        }
+
+        [Fact]
         public void UpdateShouldPreserveIntermediaryReferences()
         {
             var content = @"

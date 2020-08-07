@@ -124,7 +124,7 @@
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
         <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="new">A required NuGet assembly was not found. Expected Path: {0}</target>
+        <target state="translated">找不到必要的 NuGet 元件。預期的路徑: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -137,22 +137,22 @@
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
         <source>Only one item type may be referenced when removing with MatchOnMetadata.</source>
-        <target state="new">Only one item type may be referenced when removing with MatchOnMetadata.</target>
+        <target state="translated">使用 MatchOnMetadata 移除時，只能參考一個項目類型。</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
         <source>MatchOnMetadata only applies to Remove operations on items.</source>
-        <target state="new">MatchOnMetadata only applies to Remove operations on items.</target>
+        <target state="translated">MatchOnMetadata 只可對項目執行移除作業。</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOptionsOnlyApplicableToItemsWithMatchOnMetadata">
         <source>MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</source>
-        <target state="new">MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</target>
+        <target state="translated">僅當使用 MatchOnMetadata 移除項目時，MatchOnMetadataOptions 才有效。</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_NoMatchOnMetadataOutsideTargets">
         <source>MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</source>
-        <target state="new">MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</target>
+        <target state="translated">MatchOnMetadata 無法在 &lt;目標&gt; 之外使用。</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
@@ -182,10 +182,15 @@
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
         <source>MSB4261: Multiple entry points with solutions detected: {0}. If static graph is loaded from a solution, that that solution must be the only entry point.</source>
-        <target state="needs-review-translation">MSB4261: 靜態圖表只接受解決方案作為唯一的進入點。偵測到多個進入點: {0}</target>
+        <target state="translated">MSB4261: 偵測到解決方案有多個進入點: {0}。若是從解決方案載入靜態圖表，則該解決方案只可有一個進入點。</target>
         <note>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>
+      </trans-unit>
+      <trans-unit id="StaticGraphConstructionMetrics">
+        <source>"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</source>
+        <target state="translated">"在 {0} 秒內載入的靜態圖形: {1} 個節點、{2} 個邊緣"</target>
+        <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
         <source>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
@@ -211,7 +216,7 @@
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
         <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
-        <target state="translated">MSB4181: "{0}" 工作傳回了 false，但並未記錄錯誤。</target>
+        <target state="translated">MSB4181: "{0}" 工作傳回了 False，但未記錄錯誤。</target>
         <note>{StrBegin="MSB4181: "}</note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">

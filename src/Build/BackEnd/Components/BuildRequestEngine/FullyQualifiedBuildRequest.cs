@@ -24,6 +24,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="config">The configuration to use for the request.</param>
         /// <param name="targets">The set of targets to build.</param>
         /// <param name="resultsNeeded">Whether or not to wait for the results of this request.</param>
+        /// <param name="skipStaticGraphIsolationConstraints">Whether to skip the constraints of static graph isolation.</param>
         /// <param name="flags">Flags specified for the build request.</param>
         public FullyQualifiedBuildRequest(
             BuildRequestConfiguration config,

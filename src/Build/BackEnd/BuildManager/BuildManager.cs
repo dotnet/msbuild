@@ -26,7 +26,6 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
@@ -1295,7 +1294,7 @@ namespace Microsoft.Build.Execution
         {
             if (ex is InvalidProjectFileException projectException)
             {
-                if (projectException.HasBeenLogged != true)
+                if (!projectException.HasBeenLogged)
                 {
                     BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                     ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(buildEventContext, projectException);
@@ -1322,7 +1321,7 @@ namespace Microsoft.Build.Execution
         {
             if (ex is InvalidProjectFileException projectException)
             {
-                if (projectException.HasBeenLogged != true)
+                if (!projectException.HasBeenLogged)
                 {
                     BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                     ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(buildEventContext, projectException);
@@ -1374,7 +1373,7 @@ namespace Microsoft.Build.Execution
                 InvalidProjectFileException projectException = ex as InvalidProjectFileException;
                 if (projectException != null)
                 {
-                    if (projectException.HasBeenLogged != true)
+                    if (!projectException.HasBeenLogged)
                     {
                         BuildEventContext projectBuildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                         ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, projectException);
@@ -1445,6 +1444,13 @@ namespace Microsoft.Build.Execution
                                 projectLoadSettings);
                         });
                 }
+
+                LogMessage(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "StaticGraphConstructionMetrics",
+                        Math.Round(projectGraph.ConstructionMetrics.ConstructionTime.TotalSeconds, 3),
+                        projectGraph.ConstructionMetrics.NodeCount,
+                        projectGraph.ConstructionMetrics.EdgeCount));
 
                 IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
 
@@ -1523,7 +1529,7 @@ namespace Microsoft.Build.Execution
                     foreach (var innerException in aggregateException.InnerExceptions)
                     {
                         var projectException = (InvalidProjectFileException) innerException;
-                        if (projectException.HasBeenLogged != true)
+                        if (!projectException.HasBeenLogged)
                         {
                             BuildEventContext projectBuildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                             ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, projectException);
@@ -2497,6 +2503,13 @@ namespace Microsoft.Build.Execution
                 CancelAndMarkAsFailure();
                 throw;
             }
+        }
+
+        private void LogMessage(string message)
+        {
+            var loggingService = ((IBuildComponentHost)this).LoggingService;
+
+            loggingService?.LogCommentFromText(BuildEventContext.Invalid, MessageImportance.High, message);
         }
 
         private void LogErrorAndShutdown(string message)

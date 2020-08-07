@@ -18,7 +18,6 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal class TypeLoader
     {
-
         /// <summary>
         /// Cache to keep track of the assemblyLoadInfos based on a given typeFilter.
         /// </summary>
@@ -119,7 +118,7 @@ namespace Microsoft.Build.Shared
             }
             else
             {
-                isPartialMatch = (String.Compare(typeName1, typeName2, StringComparison.OrdinalIgnoreCase) == 0);
+                isPartialMatch = (String.Equals(typeName1, typeName2, StringComparison.OrdinalIgnoreCase));
             }
 
             return isPartialMatch;

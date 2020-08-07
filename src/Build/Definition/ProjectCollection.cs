@@ -208,7 +208,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Whether reevaluation is temporarily disabled on projects in this collection.
-        /// This is useful when the host expects to make a number of reads and writes 
+        /// This is useful when the host expects to make a number of reads and writes
         /// to projects, and wants to temporarily sacrifice correctness for performance.
         /// </summary>
         private bool _skipEvaluation;
@@ -227,17 +227,7 @@ namespace Microsoft.Build.Evaluation
         private int _maxNodeCount;
 
         /// <summary>
-        /// Hook up last minute dumping of any exceptions bringing down the process
-        /// </summary>
-        static ProjectCollection()
-        {
-#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
-            AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
-#endif
-        }
-
-        /// <summary>
-        /// Instantiates a project collection with no global properties or loggers that reads toolset 
+        /// Instantiates a project collection with no global properties or loggers that reads toolset
         /// information from the configuration file and registry.
         /// </summary>
         public ProjectCollection()
@@ -416,7 +406,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Retrieves the global project collection object.
-        /// This is a singleton project collection with no global properties or loggers that reads toolset 
+        /// This is a singleton project collection with no global properties or loggers that reads toolset
         /// information from the configuration file and registry.
         /// May throw InvalidToolsetDefinitionException.
         /// Thread safe.
@@ -483,7 +473,6 @@ namespace Microsoft.Build.Evaluation
                     s_assemblyDisplayVersion = plusIndex < 0
                                                     ? fullInformationalVersion
                                                     : fullInformationalVersion.Substring(startIndex: 0, length: plusIndex + 10);
-
                 }
 
                 return s_assemblyDisplayVersion;
@@ -493,7 +482,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The default tools version of this project collection. Projects use this tools version if they
         /// aren't otherwise told what tools version to use.
-        /// This value is gotten from the .exe.config file, or else in the registry, 
+        /// This value is gotten from the .exe.config file, or else in the registry,
         /// or if neither specify a default tools version then it is hard-coded to the tools version "2.0".
         /// Setter throws InvalidOperationException if a toolset with the provided tools version has not been defined.
         /// Always defined.
@@ -542,8 +531,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <remarks>
         /// This is the publicly exposed getter, that translates into a read-only dead IDictionary&lt;string, string&gt;.
-        /// 
-        /// To be consistent with Project, setting and removing global properties is done with 
+        ///
+        /// To be consistent with Project, setting and removing global properties is done with
         /// <see cref="SetGlobalProperty">SetGlobalProperty</see> and <see cref="RemoveGlobalProperty">RemoveGlobalProperty</see>.
         /// </remarks>
         public IDictionary<string, string> GlobalProperties
@@ -750,7 +739,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Whether reevaluation is temporarily disabled on projects in this collection.
-        /// This is useful when the host expects to make a number of reads and writes 
+        /// This is useful when the host expects to make a number of reads and writes
         /// to projects, and wants to temporarily sacrifice correctness for performance.
         /// </summary>
         public bool SkipEvaluation
@@ -819,7 +808,6 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-
         /// <summary>
         /// Global collection id.
         /// Can be used for external providers to optimize the cross-site link exchange
@@ -830,7 +818,6 @@ namespace Microsoft.Build.Evaluation
         /// External project support.
         /// Establish a remote project link for this collection.
         /// </summary>
-
         internal ExternalProjectsProvider Link
         {
             get => _link;
@@ -862,7 +849,7 @@ namespace Microsoft.Build.Evaluation
             get
             {
                 var clone = new PropertyDictionary<ProjectPropertyInstance>();
-                
+
                 using (_locker.EnterUpgradeableReadLock())
                 {
                     foreach (ProjectPropertyInstance property in _globalProperties)
@@ -975,7 +962,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Returns true if there is a toolset defined for the specified 
+        /// Returns true if there is a toolset defined for the specified
         /// tools version, otherwise false.
         /// </summary>
         public bool ContainsToolset(string toolsVersion) => GetToolset(toolsVersion) != null;
@@ -1055,7 +1042,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Figure out what ToolsVersion to use to actually build the project with. 
+        /// Figure out what ToolsVersion to use to actually build the project with.
         /// </summary>
         /// <param name="explicitToolsVersion">The user-specified ToolsVersion (through e.g. /tv: on the command line). May be null</param>
         /// <param name="toolsVersionFromProject">The ToolsVersion from the project file. May be null</param>
@@ -1099,7 +1086,6 @@ namespace Microsoft.Build.Evaluation
 
             return loaded;
         }
-
 
         /// <summary>
         /// Loads a project with the specified filename, using the collection's global properties and tools version.
@@ -1766,8 +1752,8 @@ namespace Microsoft.Build.Evaluation
 #endif
 
         /// <summary>
-        /// Populate Toolsets with a dictionary of (toolset version, Toolset) 
-        /// using information from the registry and config file, if any.  
+        /// Populate Toolsets with a dictionary of (toolset version, Toolset)
+        /// using information from the registry and config file, if any.
         /// </summary>
         private void InitializeToolsetCollection(
 #if FEATURE_WIN32_REGISTRY
@@ -2374,7 +2360,7 @@ namespace Microsoft.Build.Evaluation
             /// with different global properties and/or tools version.
             /// </summary>
             /// <remarks>
-            /// If hosts tend to load lots of projects with the same path, the value will have to be 
+            /// If hosts tend to load lots of projects with the same path, the value will have to be
             /// changed to a more efficient type of collection.
             ///
             /// Lock on this object. Concurrent load must be thread safe.

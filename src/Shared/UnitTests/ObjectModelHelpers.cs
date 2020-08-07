@@ -70,7 +70,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-
         /// <summary>
         /// Helper method to tell us whether a particular metadata name is an MSBuild well-known metadata
         /// (e.g., "RelativeDir", "FullPath", etc.)
@@ -243,7 +242,10 @@ namespace Microsoft.Build.UnitTests
                 expectedItems.ShouldNotBeEmpty();
             }
 
-            for (var i = 0; i < expectedItems.Length; i++)
+            // iterate to the minimum length; if the lengths don't match but there's a prefix match the count assertion below will trigger
+            int minimumLength = Math.Min(expectedItems.Length, items.Count);
+
+            for (var i = 0; i < minimumLength; i++)
             {
                 if (!normalizeSlashes)
                 {
@@ -258,7 +260,8 @@ namespace Microsoft.Build.UnitTests
                 AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);
             }
 
-            items.Count.ShouldBe(expectedItems.Length);
+            items.Count.ShouldBe(expectedItems.Length,
+                () => $"got items \"{string.Join(", ", items)}\", expected \"{string.Join(", ", expectedItems)}\"");
 
             expectedItems.Length.ShouldBe(expectedDirectMetadataPerItem.Length);
         }
@@ -422,12 +425,11 @@ namespace Microsoft.Build.UnitTests
         {
             expected ??= new Dictionary<string, string>();
 
-            item.DirectMetadataCount.ShouldBe(expected.Keys.Count);
+            item.DirectMetadataCount.ShouldBe(expected.Keys.Count, () => $"Expected {expected.Keys.Count} metadata, ({string.Join(", ", expected.Keys)}), got {item.DirectMetadataCount}");
 
             foreach (var key in expected.Keys)
             {
                 item.GetMetadataValue(key).ShouldBe(expected[key]);
-
             }
         }
 
@@ -773,7 +775,6 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine();
             Assert.Equal(newExpectedProjectContents, newActualProjectContents); // "Project XML does not match expected XML.  See 'Standard Out' tab for details."
         }
-
 
         private static string s_tempProjectDir;
 
@@ -1347,7 +1348,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (var buildManager = new BuildManager())
             {
-                parameters = parameters ?? new BuildParameters();
+                parameters ??= new BuildParameters();
 
                 if (logger != null)
                 {
@@ -1603,7 +1604,7 @@ namespace Microsoft.Build.UnitTests
             IEnumerable<int> entryPoints = null,
             ProjectCollection projectCollection = null)
         {
-            createProjectFile = createProjectFile ?? CreateProjectFile;
+            createProjectFile ??= CreateProjectFile;
 
             var nodes = new Dictionary<int, (bool IsRoot, string ProjectPath)>();
 
@@ -1838,8 +1839,6 @@ namespace Microsoft.Build.UnitTests
                     : "sleep {0}";
         }
 
-
-
         /// <summary>
         /// Break the provided string into an array, on newlines
         /// </summary>
@@ -1893,7 +1892,6 @@ namespace Microsoft.Build.UnitTests
             private readonly BuildManager _buildManager;
 
             public MockLogger Logger { get; set; }
-
 
             public BuildManagerSession(
                 TestEnvironment env,

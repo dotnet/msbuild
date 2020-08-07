@@ -224,7 +224,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // check if the type names match exactly
             else
             {
-                isPartialMatch = (String.Compare(typeName1, typeName2, StringComparison.OrdinalIgnoreCase) == 0);
+                isPartialMatch = (String.Equals(typeName1, typeName2, StringComparison.OrdinalIgnoreCase));
             }
 
             return isPartialMatch;

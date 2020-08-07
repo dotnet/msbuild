@@ -216,16 +216,9 @@
     <Content Include="MSBuild.rsp" Pack="false">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="MSBuild\Microsoft.Build.CommonTypes.xsd">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="MSBuild\Microsoft.Build.Core.xsd">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Microsoft.Build.xsd">
-      <SubType>Designer</SubType>
+    <XsdsForVS Include="**\*.xsd" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <XsdsForVS Include="Update-MSBuildXsds.ps1" />
+    <None Include="@(XsdsForVS)">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -246,6 +239,14 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" PrivateAssets="All" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
   </ItemGroup>
+
+  <Target Name="CopyXsds"
+          BeforeTargets="AfterBuild">
+    <Copy SourceFiles="@(XsdsForVS)"
+          DestinationFiles="@(XsdsForVS->'$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'xsd'))%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+          />
+  </Target>
 
   <!-- Include MSBuild.deps.json and MSBuild.runtimeconfig.json in ContentWithTargetPath so they will be copied to the output folder of projects
        that reference this one. -->

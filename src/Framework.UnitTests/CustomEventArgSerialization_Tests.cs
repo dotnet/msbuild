@@ -172,6 +172,23 @@ namespace Microsoft.Build.UnitTests
             _stream.Position.ShouldBe(streamWriteEndPosition); // "Stream End Positions Should Match"
             VerifyGenericEventArg(genericEvent, newGenericEvent);
             VerifyBuildErrorEventArgs(genericEvent, newGenericEvent);
+
+            // Test using HelpLink
+            _stream.Position = 0;
+            genericEvent = new BuildErrorEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "SenderName", "HelpLink", DateTime.Now);
+            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+
+            // Serialize
+            genericEvent.WriteToStream(_writer);
+            streamWriteEndPosition = _stream.Position;
+
+            // Deserialize and Verify
+            _stream.Position = 0;
+            newGenericEvent = new BuildErrorEventArgs("Something", "SomeThing", "SomeThing", -1, -1, -1, -1, "Something", "SomeThing", "Something", "HelpLink", DateTime.Now);
+            newGenericEvent.CreateFromStream(_reader, _eventArgVersion);
+            _stream.Position.ShouldBe(streamWriteEndPosition); // "Stream End Positions Should Match"
+            VerifyGenericEventArg(genericEvent, newGenericEvent);
+            VerifyBuildErrorEventArgs(genericEvent, newGenericEvent);
         }
 
         /// <summary>
@@ -184,6 +201,7 @@ namespace Microsoft.Build.UnitTests
             newGenericEvent.ColumnNumber.ShouldBe(genericEvent.ColumnNumber); // "Expected ColumnNumber to Match"
             newGenericEvent.EndColumnNumber.ShouldBe(genericEvent.EndColumnNumber); // "Expected EndColumnNumber to Match"
             newGenericEvent.EndLineNumber.ShouldBe(genericEvent.EndLineNumber); // "Expected EndLineNumber to Match"
+            newGenericEvent.HelpLink.ShouldBe(genericEvent.HelpLink); // "Expected HelpLink to Match"
         }
 
 
@@ -464,6 +482,23 @@ namespace Microsoft.Build.UnitTests
             _stream.Position.ShouldBe(streamWriteEndPosition); // "Stream End Positions Should Match"
             VerifyGenericEventArg(genericEvent, newGenericEvent);
             VerifyBuildWarningEventArgs(genericEvent, newGenericEvent);
+
+            // Test with help link
+            _stream.Position = 0;
+            genericEvent = new BuildWarningEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "SenderName", "HelpLink", DateTime.Now, null);
+            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+
+            // Serialize
+            genericEvent.WriteToStream(_writer);
+            streamWriteEndPosition = _stream.Position;
+
+            // Deserialize and Verify
+            _stream.Position = 0;
+            newGenericEvent = new BuildWarningEventArgs("Something", "SomeThing", "SomeThing", -1, -1, -1, -1, "Something", "SomeThing", "Something");
+            newGenericEvent.CreateFromStream(_reader, _eventArgVersion);
+            _stream.Position.ShouldBe(streamWriteEndPosition); // "Stream End Positions Should Match"
+            VerifyGenericEventArg(genericEvent, newGenericEvent);
+            VerifyBuildWarningEventArgs(genericEvent, newGenericEvent);
         }
 
         /// <summary>
@@ -477,6 +512,7 @@ namespace Microsoft.Build.UnitTests
             newGenericEvent.ColumnNumber.ShouldBe(genericEvent.ColumnNumber); // "Expected ColumnNumber to Match"
             newGenericEvent.EndColumnNumber.ShouldBe(genericEvent.EndColumnNumber); // "Expected EndColumnNumber to Match"
             newGenericEvent.EndLineNumber.ShouldBe(genericEvent.EndLineNumber); // "Expected EndLineNumber to Match"
+            newGenericEvent.HelpLink.ShouldBe(genericEvent.HelpLink); // "Expected HelpLink to Match"
         }
 
         [Fact]

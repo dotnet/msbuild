@@ -55,7 +55,7 @@ namespace Microsoft.Build.UnitTests
                 expectedMissingAttribute, missingAttr);
 
             Assert.Equal(result, expectedResult);
-            if (result == false)
+            if (!result)
             {
                 Assert.Equal(missingAttr, expectedMissingAttribute);
             }
@@ -107,7 +107,7 @@ namespace Microsoft.Build.UnitTests
                 itemSpec, projectGuid, package, name, xmlString, expectedResult, result, expectedPath, resolvedPath);
 
             Assert.Equal(result, expectedResult);
-            if (result == true)
+            if (result)
             {
                 Assert.Equal(resolvedPath.ItemSpec, expectedPath);
             }

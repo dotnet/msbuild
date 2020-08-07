@@ -65,6 +65,21 @@ namespace Microsoft.Build.Graph.UnitTests
         }
 
         [Fact]
+        public void ConstructionMetricsAreAvailable()
+        {
+            var graph = Helpers.CreateProjectGraph(
+                _env,
+                new Dictionary<int, int[]>()
+                {
+                    {1, new[] {2, 3}}
+                });
+
+            graph.ConstructionMetrics.ConstructionTime.Ticks.ShouldBeGreaterThan(0);
+            graph.ConstructionMetrics.NodeCount.ShouldBe(3);
+            graph.ConstructionMetrics.EdgeCount.ShouldBe(2);
+        }
+
+        [Fact]
         public void ConstructWithSingleNodeWithProjectInstanceFactory()
         {
             using (var env = TestEnvironment.Create())
@@ -1501,7 +1516,7 @@ $@"
             Dictionary<string, string> additionalGlobalProperties = null,
             int expectedInnerBuildCount = 2)
         {
-            additionalGlobalProperties = additionalGlobalProperties ?? new Dictionary<string, string>();
+            additionalGlobalProperties ??= new Dictionary<string, string>();
 
             AssertOuterBuildEvaluation(outerBuild, additionalGlobalProperties);
 

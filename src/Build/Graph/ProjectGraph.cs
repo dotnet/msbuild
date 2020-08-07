@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
@@ -57,6 +58,25 @@ namespace Microsoft.Build.Graph
         private GraphBuilder.GraphEdges Edges { get; }
 
         internal GraphBuilder.GraphEdges TestOnly_Edges => Edges;
+
+        public GraphConstructionMetrics ConstructionMetrics { get; private set;}
+
+        /// <summary>
+        /// Various metrics on graph construction.
+        /// </summary>
+        public readonly struct GraphConstructionMetrics
+        {
+            public GraphConstructionMetrics(TimeSpan constructionTime, int nodeCount, int edgeCount)
+            {
+                ConstructionTime = constructionTime;
+                NodeCount = nodeCount;
+                EdgeCount = edgeCount;
+            }
+
+            public TimeSpan ConstructionTime { get; }
+            public int NodeCount { get; }
+            public int EdgeCount { get; }
+        }
 
         /// <summary>
         ///     Gets the project nodes representing the entry points.
@@ -156,7 +176,6 @@ namespace Microsoft.Build.Graph
         ///     <see cref="InvalidProjectFileException" />
         ///     If a null reference is returned from <paramref name="projectInstanceFactory" />, the InnerException contains
         ///     <see cref="InvalidOperationException" />
-        /// </exception>
         /// </exception>
         public ProjectGraph(string entryProjectFile, ProjectCollection projectCollection, ProjectInstanceFactoryFunc projectInstanceFactory)
             : this(new ProjectGraphEntryPoint(entryProjectFile).AsEnumerable(), projectCollection, projectInstanceFactory)
@@ -396,7 +415,9 @@ namespace Microsoft.Build.Graph
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
-            projectInstanceFactory = projectInstanceFactory ?? DefaultProjectInstanceFactory;
+            var measurementInfo = BeginMeasurement();
+
+            projectInstanceFactory ??= DefaultProjectInstanceFactory;
 
             var graphBuilder = new GraphBuilder(
                 entryPoints,
@@ -413,6 +434,45 @@ namespace Microsoft.Build.Graph
             Edges = graphBuilder.Edges;
 
             _projectNodesTopologicallySorted = new Lazy<IReadOnlyCollection<ProjectGraphNode>>(() => TopologicalSort(GraphRoots, ProjectNodes));
+
+            ConstructionMetrics = EndMeasurement();
+
+            (Stopwatch Timer, string ETWArgs) BeginMeasurement()
+            {
+                string etwArgs = null;
+
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    etwArgs = string.Join(";", entryPoints.Select(
+                        e =>
+                        {
+                            var globalPropertyString = e.GlobalProperties == null
+                                ? string.Empty
+                                : string.Join(", ", e.GlobalProperties.Select(kvp => $"{kvp.Key} = {kvp.Value}"));
+
+                            return $"{e.ProjectFile}({globalPropertyString})";
+                        }));
+
+                    MSBuildEventSource.Log.ProjectGraphConstructionStart(etwArgs);
+                }
+
+                return (Stopwatch.StartNew(), etwArgs);
+            }
+
+            GraphConstructionMetrics EndMeasurement()
+            {
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    MSBuildEventSource.Log.ProjectGraphConstructionStop(measurementInfo.ETWArgs);
+                }
+
+                measurementInfo.Timer.Stop();
+
+                return new GraphConstructionMetrics(
+                    measurementInfo.Timer.Elapsed,
+                    ProjectNodes.Count,
+                    Edges.Count);
+            }
         }
 
         internal string ToDot()

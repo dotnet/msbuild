@@ -3,19 +3,13 @@
 
 using System;
 using System.Collections;
-using System.Collections.Specialized;
-using System.Text.RegularExpressions;
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-
 
 using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using MSBuildApp = Microsoft.Build.CommandLine.MSBuildApp;
-using Project = Microsoft.Build.Evaluation.Project;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 
 using Toolset = Microsoft.Build.Evaluation.Toolset;
@@ -27,14 +21,21 @@ using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocati
 using Xunit;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.Internal;
+using Shouldly;
+using System.Linq;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
     public class UtilitiesTestStandard : UtilitiesTest
     {
-        public UtilitiesTestStandard()
+        private readonly ITestOutputHelper _output;
+
+        public UtilitiesTestStandard(ITestOutputHelper output)
         {
             this.loadAsReadOnly = false;
+            _output = output;
         }
 
         [Fact]

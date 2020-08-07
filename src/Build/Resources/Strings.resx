@@ -1828,4 +1828,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="NuGetAssemblyNotFound" xml:space="preserve">
     <value>A required NuGet assembly was not found. Expected Path: {0}</value>
   </data>
+  <data name="StaticGraphConstructionMetrics" xml:space="preserve">
+    <value>"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</value>
+  </data>
 </root>

@@ -90,9 +90,8 @@ namespace Microsoft.Build.Tasks
                 totalItemSize += item.ItemSpec.Length;
             }
 
-            var separatorSize = itemsToHash.Length - 1;
-
-            return totalItemSize + separatorSize;
+            // Add one ItemSeparatorCharacter per item
+            return totalItemSize + itemsToHash.Length;
         }
     }
 }

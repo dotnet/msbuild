@@ -94,6 +94,11 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
 
+        /// <summary>
+        /// Setting this environment variable to 1 disables the node reuse feature.
+        /// </summary>
+        public readonly bool DisableNodeReuse = Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1";
+
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
             return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)
@@ -196,7 +201,7 @@ namespace Microsoft.Build.Utilities
         public readonly bool IgnoreEmptyImports = Environment.GetEnvironmentVariable("MSBUILDIGNOREEMPTYIMPORTS") == "1";
 
         /// <summary>
-        /// Whether to to respect the TreatAsLocalProperty parameter on the Project tag. 
+        /// Whether to respect the TreatAsLocalProperty parameter on the Project tag.
         /// </summary>
         public readonly bool IgnoreTreatAsLocalProperty = Environment.GetEnvironmentVariable("MSBUILDIGNORETREATASLOCALPROPERTY") != null;
 

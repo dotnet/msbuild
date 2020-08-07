@@ -28,9 +28,11 @@ namespace Microsoft.Build.UnitTests
             buildWarningEvent = new BuildWarningEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "sender");
             buildWarningEvent = new BuildWarningEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "sender", DateTime.Now);
             buildWarningEvent = new BuildWarningEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "sender", DateTime.Now, "Message");
+            buildWarningEvent = new BuildWarningEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "sender", "HelpLink", DateTime.Now, "Message");
             buildWarningEvent = new BuildWarningEventArgs(null, null, null, 1, 2, 3, 4, null, null, null);
             buildWarningEvent = new BuildWarningEventArgs(null, null, null, 1, 2, 3, 4, null, null, null, DateTime.Now);
             buildWarningEvent = new BuildWarningEventArgs(null, null, null, 1, 2, 3, 4, null, null, null, DateTime.Now, null);
+            buildWarningEvent = new BuildWarningEventArgs(null, null, null, 1, 2, 3, 4, null, null, null, null, DateTime.Now, null);
         }
 
         /// <summary>

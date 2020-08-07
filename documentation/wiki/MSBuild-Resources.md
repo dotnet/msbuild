@@ -19,7 +19,7 @@
    * Provides a large collection of MSBuild Tasks, MSBuild Loggers and MSBuild TaskFactories.
  * [MSBuilder](https://github.com/MobileEssentials/MSBuilder)
    * Reusable blocks of MSBuild helpers; MSBuilder's goal is to provide fine-grained nuget packages that can be installed when only a certain MSBuild extension (task, property, target) is needed.
- * [MSBuildExplorer](http://msbuildexplorer.com) ([GitHub](https://github.com/mikefourie/MSBuildExplorer))
+ * [MSBuildExplorer](https://github.com/mikefourie/MSBuildExplorer)
    * Use MSBuild Explorer to help you find your way around the make-up of your build file(s).
  * [MSBuild Sidekick](http://attrice.info/msbuild)
    * MSBuild Sidekick allows you to view, edit, build and debug Visual Studio projects and solution files as well as custom MSBuild projects.

@@ -115,7 +115,7 @@ namespace Microsoft.Build.BuildEngine
             validatorSettings.XmlResolver = null;
             validatorSettings.ValidationEventHandler += new ValidationEventHandler(this.OnSchemaValidationError);
             
-            if ((schemaFile == null) || (schemaFile.Length == 0))
+            if (string.IsNullOrEmpty(schemaFile))
             {
                 schemaFile = Path.Combine(binPath, "Microsoft.Build.xsd");
             }

@@ -124,7 +124,7 @@
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
         <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="new">A required NuGet assembly was not found. Expected Path: {0}</target>
+        <target state="translated">Un assembly NuGet obligatoire est introuvable. Chemin attendu : {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -137,22 +137,22 @@
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
         <source>Only one item type may be referenced when removing with MatchOnMetadata.</source>
-        <target state="new">Only one item type may be referenced when removing with MatchOnMetadata.</target>
+        <target state="translated">Un seul type d'élément peut être référencé pour la suppression à l'aide de MatchOnMetadata.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
         <source>MatchOnMetadata only applies to Remove operations on items.</source>
-        <target state="new">MatchOnMetadata only applies to Remove operations on items.</target>
+        <target state="translated">MatchOnMetadata s'applique uniquement aux opérations de suppression sur des éléments.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOptionsOnlyApplicableToItemsWithMatchOnMetadata">
         <source>MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</source>
-        <target state="new">MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</target>
+        <target state="translated">MatchOnMetadataOptions est valide uniquement pour la suppression d'éléments à l'aide de MatchOnMetadata.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_NoMatchOnMetadataOutsideTargets">
         <source>MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</source>
-        <target state="new">MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</target>
+        <target state="translated">Impossible d'utiliser MatchOnMetadata en dehors de &lt;Target&gt;.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
@@ -182,10 +182,15 @@
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
         <source>MSB4261: Multiple entry points with solutions detected: {0}. If static graph is loaded from a solution, that that solution must be the only entry point.</source>
-        <target state="needs-review-translation">MSB4261: le graphe statique n'accepte qu'une solution comme seul point d'entrée. Plusieurs points d'entrée ont été détectés : {0}</target>
+        <target state="translated">MSB4261: détection de plusieurs points d'entrée avec des solutions : {0}. Si un graphe statique est chargé à partir d'une solution, cette solution doit être le seul point d'entrée.</target>
         <note>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>
+      </trans-unit>
+      <trans-unit id="StaticGraphConstructionMetrics">
+        <source>"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</source>
+        <target state="translated">"Graphe statique chargé en {0} secondes : {1} nœuds, {2} arêtes"</target>
+        <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
         <source>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.

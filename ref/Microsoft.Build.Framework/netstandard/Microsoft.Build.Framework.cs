@@ -16,11 +16,13 @@ namespace Microsoft.Build.Framework
         public BuildErrorEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName) { }
         public BuildErrorEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp) { }
         public BuildErrorEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
+        public BuildErrorEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, string helpLink, System.DateTime eventTimestamp, params object[] messageArgs) { }
         public string Code { get { throw null; } }
         public int ColumnNumber { get { throw null; } }
         public int EndColumnNumber { get { throw null; } }
         public int EndLineNumber { get { throw null; } }
         public string File { get { throw null; } }
+        public string HelpLink { get { throw null; } }
         public int LineNumber { get { throw null; } }
         public string ProjectFile { get { throw null; } set { } }
         public string Subcategory { get { throw null; } }
@@ -118,11 +120,13 @@ namespace Microsoft.Build.Framework
         public BuildWarningEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName) { }
         public BuildWarningEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp) { }
         public BuildWarningEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
+        public BuildWarningEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, string helpLink, System.DateTime eventTimestamp, params object[] messageArgs) { }
         public string Code { get { throw null; } }
         public int ColumnNumber { get { throw null; } }
         public int EndColumnNumber { get { throw null; } }
         public int EndLineNumber { get { throw null; } }
         public string File { get { throw null; } }
+        public string HelpLink { get { throw null; } }
         public int LineNumber { get { throw null; } }
         public string ProjectFile { get { throw null; } set { } }
         public string Subcategory { get { throw null; } }
@@ -486,6 +490,7 @@ namespace Microsoft.Build.Framework
     {
         protected SdkResolverContext() { }
         public virtual bool Interactive { get { throw null; } protected set { } }
+        public virtual bool IsRunningInVisualStudio { get { throw null; } protected set { } }
         public virtual Microsoft.Build.Framework.SdkLogger Logger { get { throw null; } protected set { } }
         public virtual System.Version MSBuildVersion { get { throw null; } protected set { } }
         public virtual string ProjectFilePath { get { throw null; } protected set { } }
@@ -508,6 +513,7 @@ namespace Microsoft.Build.Framework
         protected SdkResultFactory() { }
         public abstract Microsoft.Build.Framework.SdkResult IndicateFailure(System.Collections.Generic.IEnumerable<string> errors, System.Collections.Generic.IEnumerable<string> warnings=null);
         public virtual Microsoft.Build.Framework.SdkResult IndicateSuccess(System.Collections.Generic.IEnumerable<string> paths, string version, System.Collections.Generic.IDictionary<string, string> propertiesToAdd=null, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.SdkResultItem> itemsToAdd=null, System.Collections.Generic.IEnumerable<string> warnings=null) { throw null; }
+        public virtual Microsoft.Build.Framework.SdkResult IndicateSuccess(string path, string version, System.Collections.Generic.IDictionary<string, string> propertiesToAdd, System.Collections.Generic.IDictionary<string, Microsoft.Build.Framework.SdkResultItem> itemsToAdd, System.Collections.Generic.IEnumerable<string> warnings=null) { throw null; }
         public abstract Microsoft.Build.Framework.SdkResult IndicateSuccess(string path, string version, System.Collections.Generic.IEnumerable<string> warnings=null);
     }
     public partial class SdkResultItem

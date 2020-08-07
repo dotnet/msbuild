@@ -121,7 +121,7 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool _onlyLogCriticalEvents;
 
         /// <summary>
-        /// Contains a dictionary of loggerId's and the sink which the logger (of the given Id) is expecting to consume its messages 
+        /// Contains a dictionary of loggerId's and the sink which the logger (of the given Id) is expecting to consume its messages
         /// </summary>
         private Dictionary<int, IBuildEventSink> _eventSinkDictionary;
 
@@ -137,7 +137,7 @@ namespace Microsoft.Build.BackEnd.Logging
         private List<LoggerDescription> _loggerDescriptions;
 
         /// <summary>
-        /// The event source to which filters will listen to to get the build events which are logged to the logging service through the 
+        /// The event source to which filters will listen to get the build events which are logged to the logging service through the
         /// logging helper methods. Ie LogMessage and LogMessageEvent
         /// </summary>
         private EventSourceSink _filterEventSource;
@@ -245,7 +245,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// By default our logMode is Asynchronous. We do this
-        /// because we are hoping it will make the system 
+        /// because we are hoping it will make the system
         /// more responsive when there are a large number of logging messages
         /// </summary>
         private LoggerMode _logMode = LoggerMode.Asynchronous;
@@ -444,7 +444,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// The list of descriptions which describe how to create forwarding loggers on a node.
-        /// This is used by the node provider to get a list of registered descriptions so that 
+        /// This is used by the node provider to get a list of registered descriptions so that
         /// they can be transmitted to child nodes.
         /// </summary>
         public ICollection<LoggerDescription> LoggerDescriptions => _loggerDescriptions;
@@ -455,7 +455,7 @@ namespace Microsoft.Build.BackEnd.Logging
         public ICollection<ILogger> Loggers => _loggers;
 
         /// <summary>
-        /// What type of logging mode is the logger running under. 
+        /// What type of logging mode is the logger running under.
         /// Is it Synchronous or Asynchronous
         /// </summary>
         public LoggerMode LoggingMode => _logMode;
@@ -483,7 +483,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public bool IncludeEvaluationMetaprojects
         {
-            get => (_includeEvaluationMetaprojects = _includeEvaluationMetaprojects ?? _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationMetaprojects)).Value;
+            get => _includeEvaluationMetaprojects ??= _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationMetaprojects);
             set => _includeEvaluationMetaprojects = value;
         }
 
@@ -492,7 +492,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public bool IncludeEvaluationProfile
         {
-            get => (_includeEvaluationProfile = _includeEvaluationProfile ??_eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationProfiles)).Value;
+            get => _includeEvaluationProfile ??= _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationProfiles);
             set => _includeEvaluationProfile = value;
         }
 
@@ -501,7 +501,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public bool IncludeTaskInputs
         {
-            get => (_includeTaskInputs = _includeTaskInputs ?? _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeTaskInputs)).Value;
+            get => _includeTaskInputs ??= _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeTaskInputs);
             set => _includeTaskInputs = value;
         }
 
@@ -873,11 +873,11 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Register a distributed logger. This involves creating a new eventsource sink 
-        /// and associating this with the central logger. In addition the sinkId needs 
-        /// to be put in the loggerDescription so that nodes know what they need to 
+        /// Register a distributed logger. This involves creating a new eventsource sink
+        /// and associating this with the central logger. In addition the sinkId needs
+        /// to be put in the loggerDescription so that nodes know what they need to
         /// tag onto the event so that the message goes to the correct logger.
-        /// 
+        ///
         /// The central logger is initialized before the distributed logger
         /// </summary>
         /// <param name="centralLogger">Central logger to receive messages from the forwarding logger, This logger cannot have been registered before</param>
@@ -1000,7 +1000,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Will Log a build Event. Will also take into account OnlyLogCriticalEvents when determining
         /// if to drop the event or to log it.
-        /// 
+        ///
         /// Only the following events will be logged if OnlyLogCriticalEvents is true:
         /// CustomEventArgs
         /// BuildErrorEventArgs
@@ -1056,7 +1056,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// This method will becalled from multiple threads in asynchronous mode.
-        /// 
+        ///
         /// Determine where to send the buildevent either to the filters or to a specific sink.
         /// When in Asynchronous mode the event should to into the logging queue (as long as we are initialized).
         /// In Synchronous mode the event should be routed to the correct sink or logger right away
@@ -1372,7 +1372,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Route the build event to the correct filter or sink depending on what the sinId is in the build event. 
+        /// Route the build event to the correct filter or sink depending on what the sinId is in the build event.
         /// </summary>
         private void RouteBuildEvent(KeyValuePair<int, BuildEventArgs> nodeEvent)
         {
@@ -1491,10 +1491,10 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// When an exception is raised in the logging thread, we do not want the application to terminate right away. 
+        /// When an exception is raised in the logging thread, we do not want the application to terminate right away.
         /// Whidbey and orcas msbuild have the logger exceptions occurring on the engine thread so that the host can
         /// catch and deal with these exceptions as they may occur somewhat frequently due to user generated loggers.
-        /// This method will raise the exception on a delegate to which the engine is registered to. This delegate will 
+        /// This method will raise the exception on a delegate to which the engine is registered to. This delegate will
         /// send the exception to the engine so that it can be raised on the engine thread.
         /// </summary>
         /// <param name="ex">Exception to raise to event handlers</param>

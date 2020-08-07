@@ -601,7 +601,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 return false;
             }
-            return s_eventComparer.Equals(_entryPointContext, key.EntryPointContext) && (String.Compare(_targetName, key.TargetName, StringComparison.OrdinalIgnoreCase) == 0);
+            return s_eventComparer.Equals(_entryPointContext, key.EntryPointContext) && (String.Equals(_targetName, key.TargetName, StringComparison.OrdinalIgnoreCase));
         }
 
         public override int GetHashCode()
@@ -648,7 +648,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Output the projectKey or the projectKey and the entrypointKey depending on the verbosity level of the logger
         /// </summary>
-
         public string ToString(LoggerVerbosity verbosity)
         {
             string fullProjectKey;
