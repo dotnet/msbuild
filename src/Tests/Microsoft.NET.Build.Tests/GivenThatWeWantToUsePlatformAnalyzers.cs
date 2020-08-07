@@ -6,6 +6,7 @@ using System.IO;
 using FluentAssertions;
 
 using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 
@@ -254,6 +255,53 @@ namespace Microsoft.NET.Build.Tests
             var buildResult = buildCommand.Execute();
             buildResult.StdErr.Should().Be(string.Empty);
             buildResult.StdOut.Should().Contain("Program.cs(12,56): warning CA2014: Potential stack overflow. Move the stackalloc out of the loop.");
+        }
+
+        [RequiresMSBuildVersionFact("16.8")]
+        public void SDK_imports_the_analyzer_props_file()
+        {
+            var testProject = new TestProject
+            {
+                Name = "HelloWorld",
+                IsSdkProject = true,
+                TargetFrameworks = targetFrameworkNetCore31,
+                IsExe = true,
+                SourceFiles =
+                {
+                    ["Program.cs"] = @"
+                        using System;
+
+                        namespace ConsoleCore
+                        {
+                            class Program
+                            {
+                                static void Main()
+                                {
+                                    while (true)
+                                    {
+                                        Span<char> c = stackalloc char[5];
+                                    }
+                                }
+                            }
+                        }
+                    ",
+                }
+            };
+
+            testProject.AdditionalProperties.Add("CodeAnalysisTreatWarningsAsErrors", "false");
+            testProject.AdditionalProperties.Add("TreatWarningsAsErrors", "true");
+            var testAsset = _testAssetsManager
+                .CreateTestProject(testProject, identifier: "analyzerConsoleApp", targetExtension: ".csproj");
+
+            var buildCommand = new GetValuesCommand(
+                Log,
+                Path.Combine(testAsset.TestRoot, testProject.Name),
+                targetFrameworkNetCore31, "Analyzer")
+            {
+                DependsOnTargets = "Build"
+            };
+            var buildResult = buildCommand.Execute();
+            buildResult.StdErr.Should().Be(string.Empty);
         }
     }
 }
