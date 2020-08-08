@@ -144,7 +144,7 @@ namespace Microsoft.Build.Globbing
 
             // Degenerate case when the string to match is empty.
             // Ensure trailing slash because the fixed directory part has a trailing slash.
-            if (stringToMatch == string.Empty)
+            if (string.IsNullOrEmpty(stringToMatch))
             {
                 normalizedInput += Path.DirectorySeparatorChar;
             }
@@ -171,7 +171,7 @@ namespace Microsoft.Build.Globbing
             ErrorUtilities.VerifyThrowArgumentNull(fileSpec, nameof(fileSpec));
             ErrorUtilities.VerifyThrowArgumentInvalidPath(globRoot, nameof(globRoot));
 
-            if (globRoot == string.Empty)
+            if (string.IsNullOrEmpty(globRoot))
             {
                 globRoot = Directory.GetCurrentDirectory();
             }

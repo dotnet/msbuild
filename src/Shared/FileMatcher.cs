@@ -2435,7 +2435,7 @@ namespace Microsoft.Build.Shared
 
         private static bool IsSubdirectoryOf(string possibleChild, string possibleParent)
         {
-            if (possibleParent == string.Empty)
+            if (string.IsNullOrEmpty(possibleParent))
             {
                 // Something is always possibly a child of nothing
                 return true;

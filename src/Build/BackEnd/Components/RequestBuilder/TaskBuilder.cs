@@ -535,8 +535,8 @@ namespace Microsoft.Build.BackEnd
             {
                 taskIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                msbuildArchitecture = msbuildArchitecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : msbuildArchitecture.Trim();
-                msbuildRuntime = msbuildRuntime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : msbuildRuntime.Trim();
+                msbuildArchitecture = string.IsNullOrEmpty(msbuildArchitecture) ? XMakeAttributes.MSBuildArchitectureValues.any : msbuildArchitecture.Trim();
+                msbuildRuntime = string.IsNullOrEmpty(msbuildRuntime) ? XMakeAttributes.MSBuildRuntimeValues.any : msbuildRuntime.Trim();
 
                 taskIdentityParameters.Add(XMakeAttributes.runtime, msbuildRuntime);
                 taskIdentityParameters.Add(XMakeAttributes.architecture, msbuildArchitecture);

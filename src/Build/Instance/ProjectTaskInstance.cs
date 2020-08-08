@@ -141,10 +141,10 @@ namespace Microsoft.Build.Execution
             new CopyOnWriteDictionary<string, (string, ElementLocation)>(8, StringComparer.OrdinalIgnoreCase),
             new List<ProjectTaskInstanceChild>(),
             location,
-            condition == string.Empty ? null : ElementLocation.EmptyLocation,
-            continueOnError == string.Empty ? null : ElementLocation.EmptyLocation,
-            msbuildRuntime == string.Empty ? null : ElementLocation.EmptyLocation,
-            msbuildArchitecture == string.Empty ? null : ElementLocation.EmptyLocation)
+            string.IsNullOrEmpty(condition) ? null : ElementLocation.EmptyLocation,
+            string.IsNullOrEmpty(continueOnError) ? null : ElementLocation.EmptyLocation,
+            string.IsNullOrEmpty(msbuildRuntime) ? null : ElementLocation.EmptyLocation,
+            string.IsNullOrEmpty(msbuildArchitecture) ? null : ElementLocation.EmptyLocation)
         {
         }
 

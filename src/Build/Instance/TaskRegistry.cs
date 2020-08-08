@@ -380,8 +380,8 @@ namespace Microsoft.Build.Execution
             {
                 taskFactoryParameters = CreateTaskFactoryParametersDictionary();
 
-                taskFactoryParameters.Add(XMakeAttributes.runtime, (runtime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : runtime));
-                taskFactoryParameters.Add(XMakeAttributes.architecture, (architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture));
+                taskFactoryParameters.Add(XMakeAttributes.runtime, string.IsNullOrEmpty(runtime) ? XMakeAttributes.MSBuildRuntimeValues.any : runtime);
+                taskFactoryParameters.Add(XMakeAttributes.architecture, string.IsNullOrEmpty(architecture) ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
             taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord);
