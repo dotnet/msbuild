@@ -177,8 +177,8 @@ namespace Microsoft.Build.BuildEngine
         /// point.  This method does nothing to manipulate the project's XML content.
         /// </summary>
         /// <owner>DavidLe</owner>
-        /// <param name="insertionPoint"></param>
         /// <param name="newItemGroup"></param>
+        /// <param name="insertionPoint"></param>
         internal void InsertAfter
         (
             BuildItemGroup newItemGroup,

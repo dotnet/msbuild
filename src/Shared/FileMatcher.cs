@@ -200,8 +200,8 @@ namespace Microsoft.Build.Shared
         /// <param name="path">The path to search.</param>
         /// <param name="pattern">The pattern to search.</param>
         /// <param name="projectDirectory">The directory for the project within which the call is made</param>
-        /// <param name="stripProjectDirectory">If true the project directory should be stripped</param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
+        /// <param name="stripProjectDirectory">If true the project directory should be stripped</param>
         /// <returns></returns>
         private static ImmutableArray<string> GetAccessibleFileSystemEntries(IFileSystem fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
         {
@@ -223,8 +223,8 @@ namespace Microsoft.Build.Shared
         /// system entries are skipped.
         /// </summary>
         /// <param name="path"></param>
-        /// <param name="pattern"></param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
+        /// <param name="pattern"></param>
         /// <returns>An immutable array of matching file system entries (can be empty).</returns>
         private static ImmutableArray<string> GetAccessibleFilesAndDirectories(IFileSystem fileSystem, string path, string pattern)
         {
@@ -290,8 +290,8 @@ namespace Microsoft.Build.Shared
         /// <param name="path">The path.</param>
         /// <param name="filespec">The pattern.</param>
         /// <param name="projectDirectory">The project directory</param>
-        /// <param name="stripProjectDirectory"></param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
+        /// <param name="stripProjectDirectory"></param>
         /// <returns>Files that can be accessed.</returns>
         private static ImmutableArray<string> GetAccessibleFiles
         (
@@ -359,8 +359,8 @@ namespace Microsoft.Build.Shared
         /// <para>Other exceptions are passed through.</para>
         /// </summary>
         /// <param name="path">The path.</param>
-        /// <param name="pattern">Pattern to match</param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
+        /// <param name="pattern">Pattern to match</param>
         /// <returns>Accessible directories.</returns>
         private static ImmutableArray<string> GetAccessibleDirectories
         (

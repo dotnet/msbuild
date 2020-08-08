@@ -924,10 +924,10 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetSdkIdentifier">The target SDK name.</param>
         /// <param name="targetSdkVersion">The target SDK version.</param>
         /// <param name="targetPlatformIdentifier">The target platform name.</param>
-        /// <param name="targetPlatformVersion">The target platform version.</param>
         /// <param name="diskRoots">The disk roots used to gather installed SDKs.</param>
         /// <param name="extensionDiskRoots">The disk roots used to gather installed extension SDKs.</param>
         /// <param name="registryRoot">The registry root used to gather installed extension SDKs.</param>
+        /// <param name="targetPlatformVersion">The target platform version.</param>
         public static string[] GetPlatformOrFrameworkExtensionSdkReferences
             (
                 string extensionSdkMoniker,
@@ -1962,9 +1962,9 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Generate the list of reference assembly paths for well known .net framework versions
         /// </summary>
-        /// <param name="frameworkName">Target framework moniker class which contains the targetframeworkVersion</param>
         /// <param name="PathToDotNetFramework"></param>
         /// <param name="PathToReferenceAssemblies"></param>
+        /// <param name="frameworkName">Target framework moniker class which contains the targetframeworkVersion</param>
         /// <returns>A collection of strings which list the chained reference assembly paths with the highest version being first</returns>
         internal static IList<string> HandleLegacyDotNetFrameworkReferenceAssemblyPaths(VersionToPath PathToDotNetFramework, VersionToPath PathToReferenceAssemblies, FrameworkNameVersioning frameworkName)
         {

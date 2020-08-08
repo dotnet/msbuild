@@ -183,7 +183,6 @@ namespace Microsoft.Build.Tasks
         /// <param name="getRegistrySubKeyDefaultValue">Used to get registry default values.</param>
         /// <param name="openBaseKey"></param>
         /// <param name="unresolveFrameworkAssembliesFromHigherFrameworks"></param>
-        /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
         /// <param name="allowedAssemblyExtensions"></param>
         /// <param name="getRuntimeVersion"></param>
         /// <param name="targetedRuntimeVersion"></param>
@@ -199,6 +198,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="readMachineTypeFromPEHeader"></param>
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
+        /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
 #else
         /// <summary>
         /// Construct.
@@ -221,7 +221,6 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyName">Delegate used for getting assembly names.</param>
         /// <param name="getAssemblyMetadata">Delegate used for finding dependencies of a file.</param>
         /// <param name="unresolveFrameworkAssembliesFromHigherFrameworks"></param>
-        /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
         /// <param name="allowedAssemblyExtensions"></param>
         /// <param name="getRuntimeVersion"></param>
         /// <param name="targetedRuntimeVersion"></param>
@@ -237,6 +236,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="readMachineTypeFromPEHeader"></param>
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
+        /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
 #endif
         internal ReferenceTable
         (

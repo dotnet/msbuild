@@ -620,8 +620,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="columnNumber">The column in the file where the error occurs (set to zero if not available).</param>
         /// <param name="endLineNumber">The last line of a range of lines in the file where the error occurs (set to zero if not available).</param>
         /// <param name="endColumnNumber">The last column of a range of columns in the file where the error occurs (set to zero if not available).</param>
-        /// <param name="message">The message string.</param>
         /// <param name="helpLink">A link pointing to more information about the error.</param>
+        /// <param name="message">The message string.</param>
         /// <param name="messageArgs">Optional arguments for formatting the message string.</param>
         /// <exception cref="ArgumentNullException">Thrown when <c>message</c> is null.</exception>
         public void LogError

@@ -584,8 +584,8 @@ namespace Microsoft.Build.BuildEngine
         /// Displays the text for a project started message.
         /// </summary>
         /// <param name ="current">current project file</param>
-        /// <param name ="previous">previous project file</param>
         /// <param name="targetNames">targets that are being invoked</param>
+        /// <param name ="previous">previous project file</param>
         /// <param name="indentLevel">indentation level</param>
         /// <owner>t-jeffv, sumedhk</owner>
         private void WriteProjectStartedText(string current, string targetNames, string previous, int indentLevel)

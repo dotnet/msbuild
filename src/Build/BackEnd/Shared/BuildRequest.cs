@@ -99,9 +99,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="hostServices">Host services if any. May be null.</param>
         /// <param name="parentBuildEventContext">The build event context of the parent project.</param>
         /// <param name="parentRequest">The parent build request, if any.</param>
-        /// <param name="skipStaticGraphIsolationConstraints"></param>
         /// <param name="buildRequestDataFlags">Additional flags for the request.</param>
         /// <param name="requestedProjectState">Filter for desired build results.</param>
+        /// <param name="skipStaticGraphIsolationConstraints"></param>
         public BuildRequest(
             int submissionId,
             int nodeRequestId,

@@ -832,8 +832,8 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>SumedhK</owner>
         /// <param name="targetName"></param>
         /// <param name="projectFile">main project file</param>
-        /// <param name="success"></param>
         /// <param name="projectFileOfTargetElement">project file actually containing the target</param>
+        /// <param name="success"></param>
         virtual internal void LogTargetFinished(BuildEventContext buildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, bool success)
         {
             if (!OnlyLogCriticalEvents)
@@ -885,8 +885,8 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>SumedhK</owner>
         /// <param name="taskName"></param>
         /// <param name="projectFile"></param>
-        /// <param name="success"></param>
         /// <param name="projectFileOfTaskNode">project file actually containing the task</param>
+        /// <param name="success"></param>
         virtual internal void LogTaskFinished(BuildEventContext buildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, bool success)
         {
             if (!OnlyLogCriticalEvents)

@@ -72,8 +72,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="fileName">The file name of the dependent (usually a .resx)</param>
         /// <param name="linkFileName">The file name of the dependent (usually a .resx)</param>
-        /// <param name="rootNamespace">The root namespace (usually from the project file). May be null</param>
         /// <param name="prependCultureAsDirectory">should the culture name be prepended to the manifest name as a path</param>
+        /// <param name="rootNamespace">The root namespace (usually from the project file). May be null</param>
         /// <param name="dependentUponFileName">The file name of the parent of this dependency (usually a .cs file). May be null</param>
         /// <param name="culture">The override culture of this resource, if any</param>
         /// <param name="binaryStream">File contents binary stream, may be null</param>

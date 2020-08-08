@@ -133,9 +133,9 @@ namespace Microsoft.Build.Utilities
         /// <param name="ownerTask">The task that is using file tracker</param>
         /// <param name="tlogFiles">The .read. tlog files to interpret</param>
         /// <param name="sourceFiles">The primary source files to interpret dependencies for</param>
-        /// <param name="outputs">The output files produced by compiling this set of sources</param>
         /// <param name="outputFiles">The output files.</param>
         /// <param name="excludedInputPaths">The set of paths that contain files that are to be ignored during up to date check</param>
+        /// <param name="outputs">The output files produced by compiling this set of sources</param>
         /// <param name="useMinimalRebuildOptimization">WARNING: Minimal rebuild optimization requires 100% accurate computed outputs to be specified!</param>
         /// <param name="maintainCompositeRootingMarkers">True to keep composite rooting markers around (many-to-one case) or false to shred them (one-to-one or one-to-many case)</param>
         private void InternalConstruct(ITask ownerTask, ITaskItem[] tlogFiles, ITaskItem[] sourceFiles, ITaskItem[] outputFiles, ITaskItem[] excludedInputPaths, CanonicalTrackedOutputFiles outputs, bool useMinimalRebuildOptimization, bool maintainCompositeRootingMarkers)

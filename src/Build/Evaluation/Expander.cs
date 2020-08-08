@@ -1812,6 +1812,12 @@ namespace Microsoft.Build.Evaluation
             /// <para>Returns true if ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and so it broke out early.</para>
             /// </summary>
             /// <param name="isTransformExpression"></param>
+            /// <param name="expander">The expander whose state will be used to expand any transforms</param>
+            /// <param name="expressionCapture">The <see cref="ExpandSingleItemVectorExpressionIntoExpressionCapture"/> representing the structure of an item expression</param>
+            /// <param name="evaluatedItems"><see cref="IItemProvider{T}"/> to provide the inital items (which may get subsequently transformed, if <paramref name="expressionCapture"/> is a transform expression)></param>
+            /// <param name="elementLocation">Location of the xml element containing the <paramref name="expressionCapture"/></param>
+            /// <param name="options">expander options</param>
+            /// <param name="includeNullEntries">Wether to include items that evaluated to empty / null</param>
             /// <param name="itemsFromCapture">
             /// List of items.
             /// 
@@ -1821,12 +1827,6 @@ namespace Microsoft.Build.Evaluation
             /// Item1 differs from Item2's string when it is coming from a transform
             /// 
             /// </param>
-            /// <param name="expander">The expander whose state will be used to expand any transforms</param>
-            /// <param name="expressionCapture">The <see cref="ExpandSingleItemVectorExpressionIntoExpressionCapture"/> representing the structure of an item expression</param>
-            /// <param name="evaluatedItems"><see cref="IItemProvider{T}"/> to provide the inital items (which may get subsequently transformed, if <paramref name="expressionCapture"/> is a transform expression)></param>
-            /// <param name="elementLocation">Location of the xml element containing the <paramref name="expressionCapture"/></param>
-            /// <param name="options">expander options</param>
-            /// <param name="includeNullEntries">Wether to include items that evaluated to empty / null</param>
             internal static bool ExpandExpressionCapture<S>(
                 Expander<P, I> expander,
                 ExpressionShredder.ItemExpressionCapture expressionCapture,

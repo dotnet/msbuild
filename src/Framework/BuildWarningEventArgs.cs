@@ -140,8 +140,8 @@ namespace Microsoft.Build.Framework
         /// <param name="endColumnNumber">end column number (0 if not applicable)</param>
         /// <param name="message">text message</param>
         /// <param name="helpKeyword">help keyword </param>
-        /// <param name="helpLink">A link pointing to more  information about the warning</param>
         /// <param name="senderName">name of event sender</param>
+        /// <param name="helpLink">A link pointing to more  information about the warning</param>
         /// <param name="eventTimestamp">custom timestamp for the event</param>
         /// <param name="messageArgs">message arguments</param>
         public BuildWarningEventArgs

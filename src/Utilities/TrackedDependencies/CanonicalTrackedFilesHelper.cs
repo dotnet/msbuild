@@ -49,8 +49,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="files">The files being checked for existence.</param>
         /// <param name="log">The TaskLoggingHelper used to log the nonexistent files.</param>
-        /// <param name="outputNewestFilename">Name of the most recently modified file.</param>
         /// <param name="outputNewestTime">Timestamp of the most recently modified file.</param>
+        /// <param name="outputNewestFilename">Name of the most recently modified file.</param>
         /// <returns>True if all members of 'files' exist, false otherwise</returns>
         internal static bool FilesExistAndRecordNewestWriteTime(ICollection<ITaskItem> files, TaskLoggingHelper log, out DateTime outputNewestTime, out string outputNewestFilename)
             => FilesExistAndRecordRequestedWriteTime(files, log, true /* return information about the newest file */, out outputNewestTime, out outputNewestFilename);
@@ -62,8 +62,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="files">The files being checked for existence.</param>
         /// <param name="log">The TaskLoggingHelper used to log the nonexistent files.</param>
-        /// <param name="outputOldestFilename">Name of the least recently modified file.</param>
         /// <param name="outputOldestTime">Timestamp of the least recently modified file.</param>
+        /// <param name="outputOldestFilename">Name of the least recently modified file.</param>
         /// <returns>True if all members of 'files' exist, false otherwise</returns>
         internal static bool FilesExistAndRecordOldestWriteTime(ICollection<ITaskItem> files, TaskLoggingHelper log, out DateTime outputOldestTime, out string outputOldestFilename)
             => FilesExistAndRecordRequestedWriteTime(files, log, false /* return information about the oldest file */, out outputOldestTime, out outputOldestFilename);
