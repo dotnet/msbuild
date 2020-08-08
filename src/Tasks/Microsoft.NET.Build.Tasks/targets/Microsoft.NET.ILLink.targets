@@ -38,6 +38,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkInformation ResourceName="ILLink_Info" />
 
+    <NETSdkError Condition="'$(_ILLinkExitCode)' != '' And '$(_ILLinkExitCode)' != '0'" ResourceName="ILLinkFailed" />
+
     <ItemGroup>
       <_LinkedResolvedFileToPublish Include="@(_LinkedResolvedFileToPublishCandidate)" Condition="Exists('%(Identity)')" />
       <ResolvedFileToPublish Remove="@(ManagedAssemblyToLink)" />
@@ -90,6 +92,7 @@ Copyright (c) .NET Foundation. All rights reserved.
             RemoveSymbols="$(TrimmerRemoveSymbols)"
             FeatureSettings="@(_TrimmerFeatureSettings)"
             CustomData="@(_TrimmerCustomData)"
+            NoWarn="$(NoWarn)"
 
             BeforeFieldInit="$(_TrimmerBeforeFieldInit)"
             OverrideRemoval="$(_TrimmerOverrideRemoval)"
@@ -104,9 +107,12 @@ Copyright (c) .NET Foundation. All rights reserved.
             DumpDependencies="$(_TrimmerDumpDependencies)"
             ExtraArgs="$(_ExtraTrimmerArgs)"
             ToolExe="$(_DotNetHostFileName)"
-            ToolPath="$(_DotNetHostDirectory)" />
+            ToolPath="$(_DotNetHostDirectory)"
+            ContinueOnError="ErrorAndContinue">
+        <Output TaskParameter="ExitCode" PropertyName="_ILLinkExitCode" />
+      </ILLink>
 
-     <Touch Files="$(_LinkSemaphore)" AlwaysCreate="true" />
+     <Touch Files="$(_LinkSemaphore)" AlwaysCreate="true" Condition=" '$(_ILLinkExitCode)' == '0' " />
 
   </Target>
 
@@ -134,6 +140,23 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <_ExtraTrimmerArgs>--skip-unresolved true $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
       <TrimMode Condition=" '$(TrimMode)' == '' ">copyused</TrimMode>
+      <SuppressTrimAnalysisWarnings Condition=" '$(SuppressTrimAnalysisWarnings)' == '' ">true</SuppressTrimAnalysisWarnings>
+    </PropertyGroup>
+    
+    <!-- These warning codes need to be updated https://github.com/mono/linker/pull/1385 is finished. -->
+    <PropertyGroup Condition=" '$(SuppressTrimAnalysisWarnings)' == 'true' ">
+      <!-- Trim analysis warnings -->
+      <NoWarn>$(NoWarn);IL2006</NoWarn> <!-- Unrecognized reflection pattern -->
+      <NoWarn>$(NoWarn);IL2026</NoWarn> <!-- RequiresUnreferencedCodeAttribute method -->
+
+      <!-- Warnings from the framework. Can be removed once https://github.com/dotnet/runtime/issues/40336 is fixed. -->
+      <!-- Framework embedded XML descriptors reference windows-only members. -->
+      <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2008</NoWarn> <!-- Unresolved type referenced in XML. -->
+      <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2009</NoWarn> <!-- Unresolved member on type referenced in XML. -->
+      <!-- Framework has DynamicDependencyAttributes that reference windows-only members. -->
+      <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2037</NoWarn> <!-- Unresolved member for DynamicDependencyAttribute -->
+      <!-- Framework embedded XML descriptors reference 32-bit-only members. -->
+      <NoWarn Condition=" '$(PlatformTarget)' != 'x64' AND '$(PlatformTarget)' != 'arm64'">$(NoWarn);IL2012</NoWarn> <!-- Unresolved field referenced in XML -->
     </PropertyGroup>
 
     <!-- Set a default value for TrimmerRemoveSymbols unless set explicitly. -->

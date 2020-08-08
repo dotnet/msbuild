@@ -328,7 +328,7 @@ public class Program
             return testProject;
         }
 
-        private string GetPDBFileName(string assemblyFile)
+        public static string GetPDBFileName(string assemblyFile)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
