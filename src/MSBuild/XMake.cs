@@ -1725,7 +1725,7 @@ namespace Microsoft.Build.CommandLine
                                 String.Equals(switchName, "maxcpucount", StringComparison.OrdinalIgnoreCase))
                             {
                                 int numberOfCpus = Environment.ProcessorCount;
-                                if(numberOfCpus == 32 && NativeMethodsShared.IsWindows) // 32-bit process, 32-bit Windows had a 32-core limit
+                                if (numberOfCpus == 32 && NativeMethodsShared.IsWindows) // 32-bit process, 32-bit Windows had a 32-core limit
                                 {
                                     var result = NativeMethodsShared.GetPhysicalCoreCount();
                                     if(result != -1)
