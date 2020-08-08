@@ -73,7 +73,7 @@ namespace Microsoft.Build.UnitTests
             Roundtrip(args,
                 e => ToString(e.BuildEventContext),
                 e => ToString(e.GlobalProperties),
-                e => ToString(e.Items.OfType<DictionaryEntry>().ToDictionary(d => d.Key.ToString(), d => ((ITaskItem)d.Value).ItemSpec.ToString())),
+                e => ToString(e.Items.OfType<DictionaryEntry>().ToDictionary(d => d.Key.ToString(), d => ((ITaskItem)d.Value).ItemSpec)),
                 e => e.Message,
                 e => ToString(e.ParentProjectBuildEventContext),
                 e => e.ProjectFile,
