@@ -844,6 +844,7 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         /// <summary>
+        /// <para>
         /// Given the task name, this method tries to find the task. It uses the following search order:
         /// 1) checks the tasks declared by the project, searching by exact name and task identity parameters
         /// 2) checks the global task declarations (in *.TASKS in MSbuild bin dir), searching by exact name and task identity parameters
@@ -852,12 +853,13 @@ namespace Microsoft.Build.BackEnd
         /// 5) 1-4 again in order without the task identity parameters, to gather additional information for the user (if the task identity 
         ///    parameters don't match, it is an error, but at least we can return them a more useful error in this case than just "could not 
         ///    find task")
-        /// 
+        /// </para>
+        /// <para>
         /// The search ordering is meant to reduce the number of assemblies we scan, because loading assemblies can be expensive.
         /// The tasks and assemblies declared by the project are scanned first, on the assumption that if the project declared
         /// them, they are likely used.
-        /// 
-        /// If the set of task identity parameters are defined, only tasks that match that identity are chosen. 
+        /// </para>
+        /// <para>If the set of task identity parameters are defined, only tasks that match that identity are chosen. </para>
         /// </summary>
         /// <returns>The Type of the task, or null if it was not found.</returns>
         private TaskFactoryWrapper FindTaskInRegistry(IDictionary<string, string> taskIdentityParameters)

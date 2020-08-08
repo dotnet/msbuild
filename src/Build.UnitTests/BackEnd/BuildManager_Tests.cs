@@ -2602,6 +2602,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// <para>
         /// If two requests are made for the same project, and they call in with 
         /// just the right timing such that: 
         /// - request 1 builds for a while, reaches a P2P, and blocks
@@ -2609,12 +2610,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         ///   blocks waiting for request 1's results 
         /// - request 1 resumes building, errors, and exits
         /// - request 2 resumes building
-        /// 
-        /// Then request 2 should end up exiting in the same fashion.  
-        /// 
+        /// </para>
+        /// <para>Then request 2 should end up exiting in the same fashion.  </para>
+        /// <para>
         /// This simple test verifies that if there are two error targets in a row, the 
         /// second request will bail out where the first request did, as though it had 
         /// executed the target, rather than skipping and continuing. 
+        /// </para>
         /// </summary>
 #if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
@@ -2684,6 +2686,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// <para>
         /// If two requests are made for the same project, and they call in with
         /// just the right timing such that:
         /// - request 1 builds for a while, reaches a P2P, and blocks
@@ -2691,13 +2694,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         ///   blocks waiting for request 1's results
         /// - request 1 resumes building, errors, and exits
         /// - request 2 resumes building
-        /// 
-        /// Then request 2 should end up exiting in the same fashion.
-        /// 
+        /// </para>
+        /// <para>Then request 2 should end up exiting in the same fashion.</para>
+        /// <para>
         /// This simple test verifies that if there are two error targets in a row, and the
         /// first has a chain of OnError targets, the OnError targets will all execute as
         /// expected in the first request, but be skipped by the second (since if it's "skipping
         /// unsuccessful", it can assume that all other OnError targets have also already been run)
+        /// </para>
         /// </summary>
 #if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
@@ -2804,6 +2808,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// <para>
         /// If two requests are made for the same project, and they call in with
         /// just the right timing such that:
         /// - request 1 builds for a while, reaches a P2P, and blocks
@@ -2811,12 +2816,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         ///   blocks waiting for request 1's results
         /// - request 1 resumes building, errors, and exits
         /// - request 2 resumes building
-        /// 
-        /// Then request 2 should end up exiting in the same fashion.
-        /// 
+        /// </para>
+        /// <para>Then request 2 should end up exiting in the same fashion.</para>
+        /// <para>
         /// This simple test verifies that if there are two error targets in a row, AND
         /// they're marked as ContinueOnError=ErrorAndContinue, then we won't bail, but
         /// will continue executing (on the first request) or skipping (on the second)
+        /// </para>
         /// </summary>
 #if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
@@ -2895,6 +2901,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// <para>
         /// If two requests are made for the same project, and they call in with 
         /// just the right timing such that: 
         /// - request 1 builds for a while, reaches a P2P, and blocks
@@ -2902,11 +2909,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         ///   blocks waiting for request 1's results 
         /// - request 1 resumes building, errors, and exits
         /// - request 2 resumes building
-        /// 
-        /// Then request 2 should end up exiting in the same fashion.  
-        /// 
+        /// </para>
+        /// <para>Then request 2 should end up exiting in the same fashion.  </para>
+        /// <para>
         /// This test verifies that if the errors are in AfterTargets, we still 
         /// exit as though the target that those targets run after has already run. 
+        /// </para>
         /// </summary>
 #if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
@@ -3187,13 +3195,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// <para>
         /// Verify that we can submit multiple simultaneous submissions with 
         /// legacy threading mode active and successfully build, and that one of those
         /// submissions can P2P to the other.
-        /// 
+        /// </para>
+        /// <para>
         /// A variation of the above test, where multiple nodes are available, so the 
         /// submissions aren't restricted to running strictly serially by the single in-proc 
         /// node.
+        /// </para>
         /// </summary>
 #if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1245")]

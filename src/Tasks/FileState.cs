@@ -10,9 +10,8 @@ using Microsoft.Build.Shared.FileSystem;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// CopyFile delegate
-    /// 
-    /// returns  Success = true, Failure = false; Retry = null
+    /// <para>CopyFile delegate</para>
+    /// <para>returns  Success = true, Failure = false; Retry = null</para>
     /// </summary>
     /// <param name="source">Source file</param>
     /// <param name="destination">Destination file</param>
@@ -24,12 +23,13 @@ namespace Microsoft.Build.Tasks
     /// for this file.
     /// </summary>
     /// <remarks>
-    /// Uses PInvoke rather than FileInfo because the latter does all kinds of expensive checks.
-    /// 
+    /// <para>Uses PInvoke rather than FileInfo because the latter does all kinds of expensive checks.</para>
+    /// <para>
     /// Deficiency: some of the properties eat some or all exceptions. If they are called first, they will
     /// trigger the population and eat. Subsequent calls will then not throw, but instead eg return zero.
     /// This could be fixed by storing the exception from the population, and throwing no matter who does
     /// the population and whether it's been done before.
+    /// </para>
     /// </remarks>
     internal class FileState
     {

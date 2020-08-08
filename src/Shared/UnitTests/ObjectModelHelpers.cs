@@ -267,18 +267,21 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// <para>
         /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from
         /// a task match the expected set of ITaskItems.  It can also check that the ITaskItems have the expected
         /// metadata, and that the ITaskItems are returned in the correct order.
-        ///
+        /// </para>
+        /// <para>
         /// The "expectedItemsString" is a formatted way of easily specifying which items you expect to see.
         /// The format is:
-        ///
+        /// </para>
+        /// <para>
         ///         itemspec1 :   metadataname1=metadatavalue1 ; metadataname2=metadatavalue2 ; ...
         ///         itemspec2 :   metadataname3=metadatavalue3 ; metadataname4=metadatavalue4 ; ...
         ///         itemspec3 :   metadataname5=metadatavalue5 ; metadataname6=metadatavalue6 ; ...
-        ///
-        /// (Each item needs to be on its own line.)
+        /// </para>
+        /// <para>(Each item needs to be on its own line.)</para>
         ///
         /// </summary>
         /// <param name="expectedItemsString"></param>
@@ -289,18 +292,21 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// <para>
         /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from
         /// a task match the expected set of ITaskItems.  It can also check that the ITaskItems have the expected
         /// metadata, and that the ITaskItems are returned in the correct order.
-        ///
+        /// </para>
+        /// <para>
         /// The "expectedItemsString" is a formatted way of easily specifying which items you expect to see.
         /// The format is:
-        ///
+        /// </para>
+        /// <para>
         ///         itemspec1 :   metadataname1=metadatavalue1 ; metadataname2=metadatavalue2 ; ...
         ///         itemspec2 :   metadataname3=metadatavalue3 ; metadataname4=metadatavalue4 ; ...
         ///         itemspec3 :   metadataname5=metadatavalue5 ; metadataname6=metadatavalue6 ; ...
-        ///
-        /// (Each item needs to be on its own line.)
+        /// </para>
+        /// <para>(Each item needs to be on its own line.)</para>
         ///
         /// </summary>
         /// <param name="expectedItemsString"></param>

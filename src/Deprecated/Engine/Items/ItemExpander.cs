@@ -304,16 +304,15 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Expands a single item vector.
-        /// 
-        /// Item vectors are composed of a name, a transform, and a separator i.e.
-        /// 
-        ///     @(&lt;name&gt;->'&lt;transform&gt;','&lt;separator&gt;')
-        /// 
+        /// <para>Expands a single item vector.</para>
+        /// <para>Item vectors are composed of a name, a transform, and a separator i.e.</para>
+        /// <para>    @(&lt;name&gt;->'&lt;transform&gt;','&lt;separator&gt;')</para>
+        /// <para>
         /// If a separator is not specified it defaults to a semi-colon. The transform expression is also optional, but if
         /// specified, it allows each item in the vector to have its item-spec converted to a different form. The transform
         /// expression can reference any custom metadata defined on the item, as well as the pre-defined item-spec modifiers.
-        /// 
+        /// </para>
+        /// <para>
         /// NOTE:
         /// 1) white space between &lt;name&gt;, &lt;transform&gt; and &lt;separator&gt; is ignored
         ///    i.e. @(&lt;name&gt;, '&lt;separator&gt;') is valid
@@ -321,6 +320,7 @@ namespace Microsoft.Build.BuildEngine
         /// 3) the separator can be an empty string i.e. @(&lt;name&gt;,'')
         /// 4) specifying an empty transform is NOT the same as specifying no transform -- the former will reduce all item-specs
         ///    to empty strings
+        /// </para>
         /// </summary>
         /// <remarks>This is the MatchEvaluator delegate passed to Regex.Replace().</remarks>
         /// <example>

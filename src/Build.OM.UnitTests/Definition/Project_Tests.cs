@@ -2489,13 +2489,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
            );
         }
         /// <summary>
-        /// Create tree like this
-        ///
+        /// <para>Create tree like this</para>
+        /// <para>
         /// \b.targets
         /// \sub\a.proj
-        ///
+        /// </para>
+        /// <para>
         /// An item specified with "..\*" in b.targets should find b.targets
         /// as it was evaluated relative to the project file itself.
+        /// </para>
         /// </summary>
         [Fact]
         public void RelativePathsInItemsInTargetsFilesAreRelativeToProjectFile()

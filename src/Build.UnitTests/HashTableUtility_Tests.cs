@@ -12,13 +12,16 @@ namespace Microsoft.Build.UnitTests
     public class HashTableUtilityTests
     {
         /// <summary>
+        /// <para>
         /// Missing unittest found by mutation testing.
         /// REASON TEST WASN'T ORIGINALLY PRESENT: HashTableUtility was not a separate class and
         /// there was no way to hit this case through BatchingEngine directly because it never
         /// calls Compare() with unequal numbers of items.
-        ///
+        /// </para>
+        /// <para>
         /// This test ensures that hashtable     with unequal numbers of items are considered not
         /// equivalent.
+        /// </para>
         /// </summary>
         [Fact]
         public void Regress_Mutation_HashtablesWithDifferentCountsAreNotEquivalent()

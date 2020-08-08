@@ -6,13 +6,16 @@ using System.Security;
 namespace Microsoft.Build.Collections
 {
     /// <summary>
+    /// <para>
     /// ABOUT:
     /// Helps with operations that rely on bit marking to indicate whether an item in the 
     /// collection should be added, removed, visited already, etc. 
-    /// 
+    /// </para>
+    /// <para>
     /// BitHelper doesn't allocate the array; you must pass in an array or ints allocated on the 
     /// stack or heap. ToIntArrayLength() tells you the int array size you must allocate. 
-    /// 
+    /// </para>
+    /// <para>
     /// USAGE:
     /// Suppose you need to represent a bit array of length (i.e. logical bit array length)
     /// BIT_ARRAY_LENGTH. Then this is the suggested way to instantiate BitHelper:
@@ -26,21 +29,25 @@ namespace Microsoft.Build.Collections
     ///     int[] m_arrayPtr = new int[intArrayLength];
     ///     bitHelper = new BitHelper(m_arrayPtr, intArrayLength);
     /// ***************************************************************************
-    /// 
+    /// </para>
+    /// <para>
     /// IMPORTANT:
     /// The second ctor args, length, should be specified as the length of the int array, not
     /// the logical bit array. Because length is used for bounds checking into the int array,
     /// it's especially important to get this correct for the stackalloc version. See the code 
     /// samples above; this is the value gotten from ToIntArrayLength(). 
-    /// 
+    /// </para>
+    /// <para>
     /// The length ctor argument is the only exception; for other methods -- MarkBit and 
     /// IsMarked -- pass in values as indices into the logical bit array, and it will be mapped
     /// to the position within the array of ints.
-    /// 
+    /// </para>
+    /// <para>
     /// FUTURE OPTIMIZATIONS:
     /// A method such as FindFirstMarked/Unmarked Bit would be useful for callers that operate 
     /// on a bit array and then need to loop over it. In particular, if it avoided visiting 
     /// every bit, it would allow good perf improvements when the bit array is sparse.
+    /// </para>
     /// </summary>
     internal unsafe class BitHelper
     {   // should not be serialized

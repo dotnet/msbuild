@@ -32,13 +32,16 @@ namespace Microsoft.Build.Construction
     internal delegate void RenameHandlerDelegate(string oldFullPath);
 
     /// <summary>
+    /// <para>
     /// ProjectRootElement class represents an MSBuild project, an MSBuild targets file or any other file that conforms to MSBuild
     /// project file schema.
     /// This class and its related classes allow a complete MSBuild project or targets file to be read and written.
     /// Comments and whitespace cannot be edited through this model at present.
-    /// 
+    /// </para>
+    /// <para>
     /// Each project root element is associated with exactly one ProjectCollection. This allows the owner of that project collection
     /// to control its lifetime and not be surprised by edits via another project collection.
+    /// </para>
     /// </summary>
     [DebuggerDisplay("{FullPath} #Children={Count} DefaultTargets={DefaultTargets} ToolsVersion={ToolsVersion} InitialTargets={InitialTargets} ExplicitlyLoaded={IsExplicitlyLoaded}")]
     public class ProjectRootElement : ProjectElementContainer
@@ -577,24 +580,28 @@ namespace Microsoft.Build.Construction
         public bool PreserveFormatting => Link != null ? RootLink.PreserveFormatting : XmlDocument?.PreserveWhitespace ?? false;
 
         /// <summary>
+        /// <para>
         /// Version number of this object.
         /// A host can compare this to a stored version number to determine whether
         /// a project's XML has changed, even if it has also been saved since.
-        /// 
+        /// </para>
+        /// <para>
         /// The actual value is meaningless: an edit may increment it more than once,
         /// so it should only be compared to a stored value.
+        /// </para>
         /// </summary>
         /// <remarks>
+        /// <para>
         /// Used by the Project class to figure whether changes have occurred that 
         /// it might want to pick up by reevaluation.
-        /// 
-        /// Used by the ProjectRootElement class to determine whether it needs to save.
-        /// 
+        /// </para>
+        /// <para>Used by the ProjectRootElement class to determine whether it needs to save.</para>
+        /// <para>
         /// This number is unique to the appdomain. That means that it is possible
         /// to know when a ProjectRootElement has been unloaded (perhaps after modification) and
         /// reloaded -- the version won't reset to '0'.
-        /// 
-        /// We're assuming we don't have over 2 billion edits.
+        /// </para>
+        /// <para>We're assuming we don't have over 2 billion edits.</para>
         /// </remarks>
         public int Version
         {
@@ -1602,10 +1609,11 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// <para>
         /// Reload the existing project root element from its file.
         /// An <see cref="InvalidOperationException"/> is thrown if the project root element is not associated with any file on disk.
-        /// 
-        /// See <see cref="ProjectRootElement.ReloadFrom(XmlReader, bool, bool?)"/>
+        /// </para>
+        /// <para>See <see cref="ProjectRootElement.ReloadFrom(XmlReader, bool, bool?)"/></para>
         /// </summary>
         public void Reload(bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
         {
@@ -1615,10 +1623,11 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// <para>
         /// Reload the existing project root element from the given path
         /// An <see cref="InvalidOperationException"/> is thrown if the path does not exist.
-        /// 
-        /// See <see cref="ProjectRootElement.ReloadFrom(XmlReader, bool, bool?)"/>
+        /// </para>
+        /// <para>See <see cref="ProjectRootElement.ReloadFrom(XmlReader, bool, bool?)"/></para>
         /// </summary>
         public void ReloadFrom(string path, bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
         {
@@ -1635,14 +1644,16 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// <para>
         /// Reload the existing project root element from the given <paramref name="reader"/>
         /// A reload operation completely replaces the state of this <see cref="ProjectRootElement"/> object. This operation marks the 
         /// object as dirty (see <see cref="ProjectRootElement.MarkDirty"/> for side effects). 
-        /// 
+        /// </para>
+        /// <para>
         /// If the new state has invalid XML or MSBuild syntax, then this method throws an <see cref="InvalidProjectFileException"/>.
         /// When this happens, the state of this object does not change.
-        /// 
-        /// Reloading from an XMLReader will retain the previous root element location (<see cref="FullPath"/>, <see cref="DirectoryPath"/>, <see cref="ProjectFileLocation"/>).
+        /// </para>
+        /// <para>Reloading from an XMLReader will retain the previous root element location (<see cref="FullPath"/>, <see cref="DirectoryPath"/>, <see cref="ProjectFileLocation"/>).</para>
         /// 
         /// </summary>
         /// <param name="reader">Reader to read from</param>

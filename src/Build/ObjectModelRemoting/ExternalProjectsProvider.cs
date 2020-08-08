@@ -27,11 +27,9 @@ namespace Microsoft.Build.ObjectModelRemoting
         public virtual void Disconnected(ProjectCollection collection) { }
 
         /// <summary>
-        /// Attach an external project provider to a msbuild ProjectCollection.
-        ///
-        /// Note at any time there could be only one ExternalProvider attached.
-        ///
-        /// Can be called with link == null, in which case it will "clear" the external provider on the target collection
+        /// <para>Attach an external project provider to a msbuild ProjectCollection.</para>
+        /// <para>Note at any time there could be only one ExternalProvider attached.</para>
+        /// <para>Can be called with link == null, in which case it will "clear" the external provider on the target collection</para>
         /// </summary>
         public static void SetExternalProjectsProvider(ProjectCollection collection, ExternalProjectsProvider link)
         {

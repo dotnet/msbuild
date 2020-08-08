@@ -9,31 +9,37 @@ using System.Globalization;
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
+    /// <para>
     /// Simple replacement for System.Version used to implement version
     /// comparison intrinic property functions.
-    ///
+    /// </para>
+    /// <para>
     /// Allows major version only (e.g. "3" is 3.0.0.0), ignores leading 'v'
     /// (e.g. "v3.0" is 3.0.0.0).
-    ///
+    /// </para>
+    /// <para>
     /// Ignores semver prerelease and metadata portions (e.g. "1.0.0-preview+info"
     /// is 1.0.0.0).
-    ///
-    /// Treats unspecified components as 0 (e.g. x == x.0 == x.0.0 == x.0.0.0).
-    ///
+    /// </para>
+    /// <para>Treats unspecified components as 0 (e.g. x == x.0 == x.0.0 == x.0.0.0).</para>
+    /// <para>
     /// Unlike System.Version, does not tolerate whitespace, and '+' is ignored as
     /// semver metadata as described above, not tolerated as positive sign of integer
     /// component.
+    /// </para>
     /// </summary>
     /// <remarks>
-    /// Tolerating leading 'v' allows using $(TargetFrameworkVersion) directly.
-    ///
+    /// <para>Tolerating leading 'v' allows using $(TargetFrameworkVersion) directly.</para>
+    /// <para>
     /// Ignoring semver portions allows, for example, checking >= major.minor
     /// while still in development of that release.
-    ///
+    /// </para>
+    /// <para>
     /// Implemented as a struct to avoid heap allocation. Parsing is done
     /// without heap allocation at all on .NET Core. However, on .NET Framework,
     /// the integer component substrings are allocated as there is no int.Parse
     /// on span there.
+    /// </para>
     /// </remarks>
     internal readonly struct SimpleVersion : IEquatable<SimpleVersion>, IComparable<SimpleVersion>
     {

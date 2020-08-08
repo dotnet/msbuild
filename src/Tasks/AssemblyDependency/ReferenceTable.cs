@@ -1233,11 +1233,14 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// <para>
         /// Based on the set of parent assemblies we want to add their directories to the list of resolvers so that
         /// if the dependency is sitting beside the assembly which requires it then we will resolve the assembly from that location first.
-        ///
+        /// </para>
+        /// <para>
         /// The only time we do not want to do this is if the parent assembly came from the GAC or AssemblyFoldersEx then we want the assembly
         /// to be found using those resolvers so that our GAC and AssemblyFolders checks later on will work on those assemblies.
+        /// </para>
         /// </summary>
         internal static void CalculateParentAssemblyDirectories(List<string> parentReferenceFolders, Reference parentReference)
         {
@@ -1614,11 +1617,14 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// <para>
         /// Searches the table for references that haven't been resolved to their full file names and
         /// for dependencies that haven't yet been found.
-        ///
+        /// </para>
+        /// <para>
         /// If any are found, they're resolved and then dependencies are found. Then the process is repeated
         /// until nothing is left unresolved.
+        /// </para>
         /// </summary>
         /// <param name="remappedAssembliesValue">The table of remapped assemblies.</param>
         /// <param name="referenceAssemblyFiles">The task items which contain file names to add.</param>
@@ -1960,10 +1966,11 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// <para>
         /// If a reference is a higher version than what exists in the redist list of the target framework then
         /// this reference needs to be marked as excluded so that it is not allowed to be referenced.
-        /// 
-        /// If the user needs this reference then they need to set specific version to true.
+        /// </para>
+        /// <para>If the user needs this reference then they need to set specific version to true.</para>
         /// </summary>
         internal bool MarkReferencesExcludedDueToOtherFramework(AssemblyNameExtension assemblyName, Reference reference)
         {
@@ -2017,14 +2024,16 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Get the redist list which corresponds to the highest target framework for a given target framework moniker.
-        ///
+        /// <para>Get the redist list which corresponds to the highest target framework for a given target framework moniker.</para>
+        /// <para>
         /// This is done in two ways:
         ///  First, if the latestTargetFrameworkDirectories parameter is passed into RAR those directories will be used to get the redist list
         ///  regardless of the target framework moniker.
-        ///
+        /// </para>
+        /// <para>
         /// Second, if latest Target Framework Directories is not passed in then we ask the ToollocationHelper for the highest target framework which has
         /// a TargetFrameworkIdentifier which matches the passed in TargetFrameworkMoniker.
+        /// </para>
         /// </summary>
         private Tuple<RedistList, string> GetHighestVersionFullFrameworkForTFM(FrameworkNameVersioning targetFrameworkMoniker)
         {

@@ -61,10 +61,11 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
+        /// <para>
         /// If the ToolsVersion in the project file is bogus, we'll default to the current ToolsVersion and successfully 
         /// load it.  Make sure we can RE-load it, too, and successfully pick up the correct copy of the loaded project. 
-        /// 
-        /// ... Make sure we can do this even if we're not using the "always default everything to current anyway" codepath. 
+        /// </para>
+        /// <para>... Make sure we can do this even if we're not using the "always default everything to current anyway" codepath. </para>
         /// </summary>
         [Fact]
         public void ReloadProjectWithInvalidToolsVersionInFile()

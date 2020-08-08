@@ -1356,14 +1356,17 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// Removes a project object from our hash table of loaded projects.  After this is
         /// called, it is illegal to attempt to do anything else with the Project, so don't
         /// call it unless you are completely done with the project.
-        ///
+        /// </para>
+        /// <para>
         /// IDEs should call this when they're done with a particular project.  This
         /// causes us to unhook the project from the Engine object, so that there
         /// will be no more references to the project, and the garbage collector
         /// can clean up.
+        /// </para>
         /// </summary>
         /// <param name="project"></param>
         /// <owner>RGoel</owner>
@@ -2855,6 +2858,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// When using the MSBuild task to build a child project, we need to figure out the set of
         /// global properties that the child should be built with.  It is a merge of whatever
         /// properties the parent project was being built with, plus whatever properties were
@@ -2863,13 +2867,15 @@ namespace Microsoft.Build.BuildEngine
         /// currently loaded in the IDE, and the IDE controls what Configuration/Platform each
         /// project should be built with, so we have to honor that too.  So, the order in which
         /// we look at global properties are:
-        ///
+        /// </para>
+        /// <para>
         ///     1.  Whatever global properties the parent project was building with.  (The parent
         ///         project is the one that called the &lt;MSBuild&lt; task.
         ///     2.  If the child project was already previously loaded by the host, whatever global
         ///         properties were sent into the child project by the host (via Project.GlobalProperties).
         ///     3.  Whatever properties were passed into the "Properties" parameter of the &lt;MSBuild&lt;
         ///         task.
+        /// </para>
         ///
         /// </summary>
         /// <param name="parentProjectGlobalProperties"></param>

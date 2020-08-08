@@ -35,12 +35,13 @@ namespace Microsoft.Build.BackEnd
     }
 
     /// <summary>
+    /// <para>
     /// This interface represents the host for task execution.  When used in the in-proc scenario, these method calls essentially
     /// are pass-throughs to just set some member variables and call methods directly on the task and associated objects.
     /// In the out-of-proc/AppDomain-isolated case, the object implementing these methods may break apart the information
     /// in the parameters to be consumed by the IContract representing the remote object through MAF.
-    /// 
-    /// REFACTOR - Eliminate this interface.
+    /// </para>
+    /// <para>REFACTOR - Eliminate this interface.</para>
     /// </summary>
     internal interface ITaskExecutionHost
     {

@@ -12,14 +12,17 @@ using Microsoft.Build.BuildEngine.Shared;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// <para>
     /// This class is used to construct and analyze the graph of inprogress targets in order to find
     /// cycles inside the graph. To find cycles a post order traversal is used to assign a post order
     /// traversal to each node. Back edges indicate cycles in the graph and they can indentified by
     /// a link from lower index node to a higher index node.
-    ///
+    /// </para>
+    /// <para>
     /// The graph arrives in pieces from individual nodes and needs to be stiched together by identifying
     /// the parent and child for each cross node link. To do that it is necessary to match up parent
     /// build request for a child with and outstanding request from the parent (see LinkCrossNodeBuildRequests)
+    /// </para>
     /// </summary>
     internal class TargetCycleDetector
     {

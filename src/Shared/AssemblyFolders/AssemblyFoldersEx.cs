@@ -13,10 +13,9 @@ using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 namespace Microsoft.Build.Shared
 {
     /// <summary>
-    /// Implements the rules for finding component directories using the AssemblyFoldersEx scheme.
-    ///
-    /// This is the normal schema:
-    ///
+    /// <para>Implements the rules for finding component directories using the AssemblyFoldersEx scheme.</para>
+    /// <para>This is the normal schema:</para>
+    /// <para>
     ///  [HKLM | HKCU]\SOFTWARE\MICROSOFT\.NetFramework\ 
     ///    v1.0.3705 
     ///      AssemblyFoldersEx 
@@ -26,17 +25,15 @@ namespace Microsoft.Build.Shared
     ///              9466 
     ///                  @Default = c:\program files\infragistics\grid control\1.0sp1\bin 
     ///                  @Description = SP1 for Infragistics Grid Control for .NET version 1.0 
-    ///
-    /// 
-    /// The root registry path is the following:
-    ///
-    ///     [HKLM | HKCU]\{AssemblyFoldersBase}\{RuntimeVersion}\{AssemblyFoldersSuffix}
-    ///
-    /// Where:
-    ///
+    /// </para>
+    /// <para>The root registry path is the following:</para>
+    /// <para>    [HKLM | HKCU]\{AssemblyFoldersBase}\{RuntimeVersion}\{AssemblyFoldersSuffix}</para>
+    /// <para>Where:</para>
+    /// <para>
     ///     {AssemblyFoldersBase} = Software\Microsoft\[.NetFramework | .NetCompactFramework]
     ///     {RuntimeVersion} = the runtime version property from the project file
     ///     {AssemblyFoldersSuffix} = [ PocketPC | SmartPhone | WindowsCE]\AssemblyFoldersEx
+    /// </para>
     ///
     /// </summary>
     internal class AssemblyFoldersEx : IEnumerable<AssemblyFoldersExInfo>
@@ -317,34 +314,39 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         ///  The algorithm for gathering versions from the registry is as follows:
         ///     1) targetRuntimeVersion is the target framework version you are targeting
         ///     2) versions is a string list from reading the registry, this list is in what ever order the registry returns 
         ///        the keys to us in, this is usually alphabetical.
-        ///     
+        /// </para>
+        /// <para>
         ///     We will go through each version string and do the following:
         ///         1) Check to see if the string is a version
         ///             If the string is not a version we will check to see if the string starts with the framework we are targeting,
         ///             if it does we will add it to a list which will be added at the end 
         ///             of the versions list, if not it gets ignored. We do this to stay compatible to what we have been doing since whidbey.
-        ///             
+        /// </para>
+        /// <para>
         ///             If the string is a version
         ///                 We check to see if the version is a valid target framework version. Meaning.  It has a Maj.Minor version and may have 
         ///                 build, Build is less than or equal to 255 and there is no revision. The reason the build number needs to be less than 255 is because
         ///                 255 is the largest build number for a target framework version that visual studio 2010 supports. The build number is supposed to 
         ///                 represent a service pack on the 4.0 framework.
-        ///                 
+        /// </para>
+        /// <para>
         ///                 If the string is a valid target framework version we check to see we already have a dictionary entry and if not we 
         ///                 add one. 
         ///                 If the string is not a valid target framework then we will ignore the part of the version which makes it invalid
         ///                 (either the build or the revision, or both) and see where that version would fit in the dictionary as a key and
         ///                 then put the original version string into the list for that entry.
-        ///                 
+        /// </para>
+        /// <para>
         ///         Since the dictionary is sorted in reverse order to generate the list to return we do the following:
         ///         Go through the list of dictionary entries 
         ///             For each entry sort the list in reverse alphabetical order and add the entries in their internal list to the listToreturn.
-        ///
-        ///         This way we have a reverse sorted list of all of the version keys.
+        /// </para>
+        /// <para>        This way we have a reverse sorted list of all of the version keys.</para>
         /// </summary>
         internal static List<ExtensionFoldersRegistryKey> GatherVersionStrings(string targetRuntimeVersion, IEnumerable<string> versions)
         {

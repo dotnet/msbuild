@@ -37,12 +37,12 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// This method will take a sdkToolsPath and a toolName and return the path to the tool if it is found and exists.
-        ///
+        /// <para>This method will take a sdkToolsPath and a toolName and return the path to the tool if it is found and exists.</para>
+        /// <para>
         /// First the method will try and find the tool under the sdkToolsPath taking into account the current processor architecture
         /// If the tool could not be found the method will try and find the tool under the sdkToolsPath (which should point to the x86 sdk directory).
-        ///
-        /// Finally if the method has not found the tool yet it will fallback and use the toolslocation helper method to try and find the tool.
+        /// </para>
+        /// <para>Finally if the method has not found the tool yet it will fallback and use the toolslocation helper method to try and find the tool.</para>
         /// </summary>
         /// <returns>Path including the toolName of the tool if found, null if it is not found</returns>
         internal static string GeneratePathToTool(FileExists fileExists, string currentArchitecture, string sdkToolsPath, string toolName, TaskLoggingHelper log, bool logErrorsAndWarnings)
@@ -147,10 +147,11 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Provide a method which can be used with a delegate to provide a specific FileExists behavior.
-        ///
+        /// <para>Provide a method which can be used with a delegate to provide a specific FileExists behavior.</para>
+        /// <para>
         /// Use FileInfo instead of FileSystems.Default.FileExists(...) because the latter fails silently (by design) if CAS
         /// doesn't grant access. We want the security exception if there is going to be one.
+        /// </para>
         /// </summary>
         /// <returns>True if the file exists. False if it does not</returns>
         private static bool FileExists(string filePath)

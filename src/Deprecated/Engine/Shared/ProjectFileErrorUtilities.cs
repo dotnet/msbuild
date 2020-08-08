@@ -14,11 +14,14 @@ namespace Microsoft.Build.BuildEngine.Shared
     static internal class ProjectFileErrorUtilities
     {
         /// <summary>
+        /// <para>
         /// This method is used to flag errors in the project file being processed. Do NOT use this method in place of
         /// ErrorUtilities.VerifyThrow(), because ErrorUtilities.VerifyThrow() is used to flag internal/programming errors.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <param name="condition">The condition to check.</param>
@@ -37,11 +40,14 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
+        /// <para>
         /// This method is used to flag errors in the project file being processed. Do NOT use this method in place of
         /// ErrorUtilities.VerifyThrow(), because ErrorUtilities.VerifyThrow() is used to flag internal/programming errors.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <param name="condition">The condition to check.</param>

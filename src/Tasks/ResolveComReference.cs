@@ -120,9 +120,8 @@ namespace Microsoft.Build.Tasks
         string StateFile { get; set; }
 
         /// <summary>
-        /// The project target framework version.
-        ///
-        /// Default is empty. which means there will be no filtering for the reference based on their target framework.
+        /// <para>The project target framework version.</para>
+        /// <para>Default is empty. which means there will be no filtering for the reference based on their target framework.</para>
         /// </summary>
         string TargetFrameworkVersion { get; set; }
 

@@ -207,10 +207,11 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Expands item metadata, properties, and items (in that order), and produces a list of TaskItems.
-        /// 
+        /// <para>Expands item metadata, properties, and items (in that order), and produces a list of TaskItems.</para>
+        /// <para>
         /// All data accessed through the TaskItem (ItemSpec and metadata) is going to be unescaped, so it's nice 
         /// and ready for a task to consume.
+        /// </para>
         /// </summary>
         /// <param name="expression"></param>
         /// <param name="expressionAttribute"></param>
@@ -382,22 +383,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// This method takes a string which may contain any number of
         /// "$(propertyname)" tags in it.  It replaces all those tags with
         /// the actual property values, and returns a new string.  For example,
-        ///
+        /// </para>
+        /// <para>
         ///     string processedString =
         ///         propertyBag.ExpandProperties("Value of NoLogo is $(NoLogo).");
-        ///
-        /// This code might produce:
-        ///
-        ///     processedString = "Value of NoLogo is true."
-        ///
+        /// </para>
+        /// <para>This code might produce:</para>
+        /// <para>    processedString = "Value of NoLogo is true."</para>
+        /// <para>
         /// If the sourceString contains an embedded property which doesn't
         /// have a value, then we replace that tag with an empty string.
-        ///
+        /// </para>
+        /// <para>
         /// This method leaves the expression escaped.  Callers may need to unescape on their own as appropriate.
         /// This method leaves the result escaped.  Callers may need to unescape on their own as appropriate.
+        /// </para>
         /// </summary>
         internal string ExpandPropertiesLeaveEscaped
         (
@@ -409,21 +413,22 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// This method takes a string which may contain any number of
         /// "$(propertyname)" tags in it.  It replaces all those tags with
         /// the actual property values, and returns a new string.  For example,
-        ///
+        /// </para>
+        /// <para>
         ///     string processedString =
         ///         propertyBag.ExpandProperties("Value of NoLogo is $(NoLogo).");
-        ///
-        /// This code might produce:
-        ///
-        ///     processedString = "Value of NoLogo is true."
-        ///
+        /// </para>
+        /// <para>This code might produce:</para>
+        /// <para>    processedString = "Value of NoLogo is true."</para>
+        /// <para>
         /// If the sourceString contains an embedded property which doesn't
         /// have a value, then we replace that tag with an empty string.
-        ///
-        /// This method leaves the expression escaped.  Callers may need to unescape on their own as appropriate.
+        /// </para>
+        /// <para>This method leaves the expression escaped.  Callers may need to unescape on their own as appropriate.</para>
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
@@ -1875,9 +1880,8 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Expands all embedded item metadata in the given string, using the bucketed items.
-        /// 
-        /// This method leaves the expression escaped.  Callers may need to unescape on their own as appropriate.
+        /// <para>Expands all embedded item metadata in the given string, using the bucketed items.</para>
+        /// <para>This method leaves the expression escaped.  Callers may need to unescape on their own as appropriate.</para>
         /// </summary>
         /// <remarks>
         /// This method is marked internal only for unit-testing purposes. Ideally
@@ -2015,11 +2019,12 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// Takes the specified string and expands all item vectors embedded in it. The expansion is done in 2 passes:
         /// 1) the first pass expands only the item vectors that refer to the bucketed items
         /// 2) the second pass expands out the remaining item vectors using the project items
-        ///
-        /// This method leaves the expression escaped.  Callers may need to unescape on their own as appropriate.
+        /// </para>
+        /// <para>This method leaves the expression escaped.  Callers may need to unescape on their own as appropriate.</para>
         /// </summary>
         /// <param name="expression"></param>
         /// <param name="expressionNode">The XML attribute containing the string we're trying to expand here.  Solely

@@ -77,9 +77,11 @@ namespace Microsoft.Build.Evaluation
         internal const NewProjectFileOptions DefaultNewProjectTemplateOptions = NewProjectFileOptions.IncludeAllOptions;
 
         /// <summary>
+        /// <para>
         /// Certain item operations split the item element in multiple elements if the include
         /// contains globs, references to items or properties, or multiple item values.
-        ///
+        /// </para>
+        /// <para>
         /// The items operations that may expand item elements are:
         /// - <see cref="RemoveItem"/>
         /// - <see cref="RemoveItems"/>
@@ -90,9 +92,11 @@ namespace Microsoft.Build.Evaluation
         /// - <see cref="ProjectItem.RemoveMetadata"/>
         /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
         /// - <see cref="ProjectItem.SetMetadataValue(string,string, bool)"/>
-        ///
+        /// </para>
+        /// <para>
         /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
         /// instead of expanding the item element.
+        /// </para>
         /// </summary>
         public bool ThrowInsteadOfSplittingItemElement
         {
@@ -582,10 +586,11 @@ namespace Microsoft.Build.Evaluation
         /// of this project.
         /// </summary>
         /// <remarks>
-        /// This is the publicly exposed getter, that translates into a read-only dead IDictionary&lt;string, string&gt;.
-        ///
+        /// <para>This is the publicly exposed getter, that translates into a read-only dead IDictionary&lt;string, string&gt;.</para>
+        /// <para>
         /// In order to easily tell when we're dirtied, setting and removing global properties is done with
         /// <see cref="SetGlobalProperty">SetGlobalProperty</see> and <see cref="RemoveGlobalProperty">RemoveGlobalProperty</see>.
+        /// </para>
         /// </remarks>
         public IDictionary<string, string> GlobalProperties => implementation.GlobalProperties;
 
@@ -606,20 +611,21 @@ namespace Microsoft.Build.Evaluation
         public ICollection<ProjectProperty> Properties => implementation.Properties;
 
         /// <summary>
+        /// <para>
         /// Collection of possible values implied for properties contained in the conditions found on properties,
         /// property groups, imports, and whens.
-        ///
-        /// For example, if the following conditions existed on properties in a project:
-        ///
+        /// </para>
+        /// <para>For example, if the following conditions existed on properties in a project:</para>
+        /// <para>
         /// Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'"
         /// Condition="'$(Configuration)' == 'Release'"
-        ///
-        /// the table would be populated with
-        ///
+        /// </para>
+        /// <para>the table would be populated with</para>
+        /// <para>
         /// { "Configuration", { "Debug", "Release" }}
         /// { "Platform", { "x86" }}
-        ///
-        /// This is used by Visual Studio to determine the configurations defined in the project.
+        /// </para>
+        /// <para>This is used by Visual Studio to determine the configurations defined in the project.</para>
         /// </summary>
         public IDictionary<string, List<string>> ConditionedProperties => implementation.ConditionedProperties;
 
@@ -791,17 +797,21 @@ namespace Microsoft.Build.Evaluation
         public int EvaluationCounter => LastEvaluationId;
 
         /// <summary>
+        /// <para>
         /// The ID of the last evaluation for this Project.
         /// A project is always evaluated upon construction and can subsequently get evaluated multiple times via
         /// <see cref="Project.ReevaluateIfNecessary()" />
-        ///
+        /// </para>
+        /// <para>
         /// It is an arbitrary number that changes when this project reevaluates.
         /// Hosts don't know whether an evaluation actually happened in an interval, but they can compare this number to
         /// their previously stored value to find out, and if so perhaps decide to update their own state.
         /// Note that the number may not increase monotonically.
-        ///
+        /// </para>
+        /// <para>
         /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationId"/> and can be used to connect
         /// evaluation logging events back to the Project instance.
+        /// </para>
         /// </summary>
         public int LastEvaluationId => implementation.LastEvaluationId;
 
@@ -865,14 +875,17 @@ namespace Microsoft.Build.Evaluation
         ///]
         /// </example>
         /// <remarks>
+        /// <para>
         /// <see cref="GlobResult.MsBuildGlob"/> is a <see cref="IMSBuildGlob"/> that combines all globs in the include element and ignores
         /// all the fragments in the exclude attribute and all the fragments in all Remove elements that apply to the include element.
-        ///
+        /// </para>
+        /// <para>
         /// Users can construct a composite glob that incorporates all the globs in the Project:
         /// <code>
         /// var uberGlob = new CompositeGlob(project.GetAllGlobs().Select(r => r.MSBuildGlob).ToArray());
         /// uberGlob.IsMatch("foo.cs");
         /// </code>
+        /// </para>
         ///
         /// </remarks>
         /// <returns>
@@ -940,20 +953,23 @@ namespace Microsoft.Build.Evaluation
         /// </example>
         ///
         /// <remarks>
+        /// <para>
         /// This method and its overloads are useful for clients that need to inspect all the item elements
         /// that might refer to a specific item instance. For example, Visual Studio uses it to inspect
         /// projects with globs. Upon a file system or IDE file artifact change, VS calls this method to find all the items
         /// that might refer to the detected file change (e.g. 'which item elements refer to "Program.cs"?').
         /// It uses such information to know which elements it should edit to reflect the user or file system changes.
-        ///
+        /// </para>
+        /// <para>
         /// Literal string matching tries to first match the strings. If the check fails, it then tries to match
         /// the strings as if they represented files: it normalizes both strings as files relative to the current project directory
-        ///
+        /// </para>
+        /// <para>
         /// GetItemProvenance suffers from some sources of inaccuracy:
         /// - it is performed after evaluation, thus is insensitive to item data flow when item references are present
         /// (it sees items as they are at the end of evaluation)
-        ///
-        /// This API and its return types are prone to change.
+        /// </para>
+        /// <para>This API and its return types are prone to change.</para>
         /// </remarks>
         ///
         /// <param name="itemToMatch">The string to perform matching against</param>
@@ -1589,17 +1605,21 @@ namespace Microsoft.Build.Evaluation
         /// Returns true if a split occurred, otherwise false.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// A ProjectItemElement could have resulted in several items if it contains wildcards or item or property expressions.
         /// Before any edit to a ProjectItem (remove, rename, set metadata, or remove metadata) this must be called to make
         /// sure that the edit does not affect any other ProjectItems originating in the same ProjectItemElement.
-        ///
+        /// </para>
+        /// <para>
         /// For example, an item xml with an include of "@(x)" could evaluate to items "a", "b", and "c". If "b" is removed, then the original
         /// item xml must be removed and replaced with three, then the one corresponding to "b" can be removed.
-        ///
+        /// </para>
+        /// <para>
         /// This is an unsophisticated approach; the best that can be said is that the result will likely be correct, if not ideal.
         /// For example, perhaps the user would rather remove the item from the original list "x" instead of expanding the list.
         /// Or, perhaps the user would rather the property in "$(p)\a;$(p)\b" not be expanded when "$(p)\b" is removed.
         /// If that's important, the host can manipulate the ProjectItemElement's directly, instead, and it can be as fastidious as it wishes.
+        /// </para>
         /// </remarks>
         internal bool SplitItemElementIfNecessary(ProjectItemElement itemElement)
         {
@@ -1902,9 +1922,11 @@ namespace Microsoft.Build.Evaluation
             private ProjectCollection ProjectCollection => Owner.ProjectCollection;
 
             /// <summary>
+            /// <para>
             /// Certain item operations split the item element in multiple elements if the include
             /// contains globs, references to items or properties, or multiple item values.
-            ///
+            /// </para>
+            /// <para>
             /// The items operations that may expand item elements are:
             /// - <see cref="RemoveItem"/>
             /// - <see cref="RemoveItems"/>
@@ -1915,9 +1937,11 @@ namespace Microsoft.Build.Evaluation
             /// - <see cref="ProjectItem.RemoveMetadata"/>
             /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
             /// - <see cref="ProjectItem.SetMetadataValue(string,string, bool)"/>
-            ///
+            /// </para>
+            /// <para>
             /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
             /// instead of expanding the item element.
+            /// </para>
             /// </summary>
             public override bool ThrowInsteadOfSplittingItemElement { get; set; }
 
@@ -2033,10 +2057,11 @@ namespace Microsoft.Build.Evaluation
             /// of this project.
             /// </summary>
             /// <remarks>
-            /// This is the publicly exposed getter, that translates into a read-only dead IDictionary&lt;string, string&gt;.
-            ///
+            /// <para>This is the publicly exposed getter, that translates into a read-only dead IDictionary&lt;string, string&gt;.</para>
+            /// <para>
             /// In order to easily tell when we're dirtied, setting and removing global properties is done with
             /// <see cref="SetGlobalProperty">SetGlobalProperty</see> and <see cref="RemoveGlobalProperty">RemoveGlobalProperty</see>.
+            /// </para>
             /// </remarks>
             public override IDictionary<string, string> GlobalProperties
             {
@@ -2075,20 +2100,21 @@ namespace Microsoft.Build.Evaluation
             public override ICollection<ProjectProperty> Properties => new ReadOnlyCollection<ProjectProperty>(_data.Properties);
 
             /// <summary>
+            /// <para>
             /// Collection of possible values implied for properties contained in the conditions found on properties,
             /// property groups, imports, and whens.
-            ///
-            /// For example, if the following conditions existed on properties in a project:
-            ///
+            /// </para>
+            /// <para>For example, if the following conditions existed on properties in a project:</para>
+            /// <para>
             /// Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'"
             /// Condition="'$(Configuration)' == 'Release'"
-            ///
-            /// the table would be populated with
-            ///
+            /// </para>
+            /// <para>the table would be populated with</para>
+            /// <para>
             /// { "Configuration", { "Debug", "Release" }}
             /// { "Platform", { "x86" }}
-            ///
-            /// This is used by Visual Studio to determine the configurations defined in the project.
+            /// </para>
+            /// <para>This is used by Visual Studio to determine the configurations defined in the project.</para>
             /// </summary>
             public override IDictionary<string, List<string>> ConditionedProperties
             {
@@ -2373,17 +2399,21 @@ namespace Microsoft.Build.Evaluation
             public int EvaluationCounter => LastEvaluationId;
 
             /// <summary>
+            /// <para>
             /// The ID of the last evaluation for this Project.
             /// A project is always evaluated upon construction and can subsequently get evaluated multiple times via
             /// <see cref="ProjectLink.ReevaluateIfNecessary" />
-            ///
+            /// </para>
+            /// <para>
             /// It is an arbitrary number that changes when this project reevaluates.
             /// Hosts don't know whether an evaluation actually happened in an interval, but they can compare this number to
             /// their previously stored value to find out, and if so perhaps decide to update their own state.
             /// Note that the number may not increase monotonically.
-            ///
+            /// </para>
+            /// <para>
             /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationId"/> and can be used to connect
             /// evaluation logging events back to the Project instance.
+            /// </para>
             /// </summary>
             public override int LastEvaluationId => _data.EvaluationId;
 
@@ -2642,11 +2672,12 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
+            /// <para>
             /// Some project APIs need to do analysis that requires the Evaluator to record more data than usual as it evaluates.
             /// This method checks if the Evaluator was run with the extra required settings and if not, does a re-evaluation.
             /// If a re-evaluation was necessary, it saves this information so a next call does not re-evaluate.
-            ///
-            /// Using this method avoids storing extra data in memory when its not needed.
+            /// </para>
+            /// <para>Using this method avoids storing extra data in memory when its not needed.</para>
             /// </summary>
             /// <param name="evaluationContext"></param>
             private List<ProjectItemElement> GetEvaluatedItemElements(EvaluationContext evaluationContext)
@@ -2744,11 +2775,12 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
+            /// <para>
             /// Since:
             ///     - we have no proper AST and interpreter for itemspecs that we can do analysis on
             ///     - GetItemProvenance needs to have correct counts for exclude strings (as correct as it can get while doing it after evaluation)
-            ///
-            /// The temporary hack is to use the expander to expand the strings, and if any property or item references were encountered, return Provenance.Inconclusive
+            /// </para>
+            /// <para>The temporary hack is to use the expander to expand the strings, and if any property or item references were encountered, return Provenance.Inconclusive</para>
             /// </summary>
             private static int ItemMatchesInItemSpecString(string itemToMatch, string itemSpec, IElementLocation elementLocation, string projectDirectory, Expander<ProjectProperty, ProjectItem> expander, out Provenance provenance)
             {
@@ -3322,17 +3354,21 @@ namespace Microsoft.Build.Evaluation
             /// Returns true if a split occurred, otherwise false.
             /// </summary>
             /// <remarks>
+            /// <para>
             /// A ProjectItemElement could have resulted in several items if it contains wildcards or item or property expressions.
             /// Before any edit to a ProjectItem (remove, rename, set metadata, or remove metadata) this must be called to make
             /// sure that the edit does not affect any other ProjectItems originating in the same ProjectItemElement.
-            ///
+            /// </para>
+            /// <para>
             /// For example, an item xml with an include of "@(x)" could evaluate to items "a", "b", and "c". If "b" is removed, then the original
             /// item xml must be removed and replaced with three, then the one corresponding to "b" can be removed.
-            ///
+            /// </para>
+            /// <para>
             /// This is an unsophisticated approach; the best that can be said is that the result will likely be correct, if not ideal.
             /// For example, perhaps the user would rather remove the item from the original list "x" instead of expanding the list.
             /// Or, perhaps the user would rather the property in "$(p)\a;$(p)\b" not be expanded when "$(p)\b" is removed.
             /// If that's important, the host can manipulate the ProjectItemElement's directly, instead, and it can be as fastidious as it wishes.
+            /// </para>
             /// </remarks>
             internal bool SplitItemElementIfNecessary(ProjectItemElement itemElement)
             {
@@ -3752,15 +3788,17 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
+            /// <para>
             /// Tries to find a ProjectItemElement already in the project file XML that has a wildcard that would match the
             /// item we wish to add, does not have a condition or an exclude, and is within an itemgroup without a condition.
-            ///
+            /// </para>
+            /// <para>
             /// For perf reasons, this method does several jobs in one.
             /// If it finds a suitable existing item element, it returns that as the out parameter, otherwise the out parameter returns null.
             /// Otherwise, if it finds an item element suitable to be just below our new element, it returns that.
             /// Otherwise, if it finds an item group at least that's suitable to put our element in somewhere, it returns that.
-            ///
-            /// Returns null if the include of the item being added itself has wildcards, or semicolons, as the case is too difficult.
+            /// </para>
+            /// <para>Returns null if the include of the item being added itself has wildcards, or semicolons, as the case is too difficult.</para>
             /// </summary>
             private ProjectElement GetAnySuitableExistingItemXml(string itemType, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata, out ProjectItemElement suitableExistingItemXml)
             {
@@ -3872,9 +3910,8 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Internal
-        ///
-        /// Note: For deeper integration of remote project we might need to expose [some] of this functionality via IProjectLink3.
+        /// <para>Internal</para>
+        /// <para>Note: For deeper integration of remote project we might need to expose [some] of this functionality via IProjectLink3.</para>
         /// </summary>
         private interface IProjectLinkInternal
         {
@@ -4064,20 +4101,21 @@ namespace Microsoft.Build.Evaluation
             public PropertyDictionary<ProjectProperty> Properties { get; private set; }
 
             /// <summary>
+            /// <para>
             /// Collection of possible values implied for properties contained in the conditions found on properties,
             /// property groups, imports, and whens.
-            ///
-            /// For example, if the following conditions existed on properties in a project:
-            ///
+            /// </para>
+            /// <para>For example, if the following conditions existed on properties in a project:</para>
+            /// <para>
             /// Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'"
             /// Condition="'$(Configuration)' == 'Release'"
-            ///
-            /// the table would be populated with
-            ///
+            /// </para>
+            /// <para>the table would be populated with</para>
+            /// <para>
             /// { "Configuration", { "Debug", "Release" }}
             /// { "Platform", { "x86" }}
-            ///
-            /// This is used by Visual Studio to determine the configurations defined in the project.
+            /// </para>
+            /// <para>This is used by Visual Studio to determine the configurations defined in the project.</para>
             /// </summary>
             public Dictionary<string, List<string>> ConditionedProperties { get; private set; }
 

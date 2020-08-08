@@ -873,12 +873,13 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// <para>
         /// Register a distributed logger. This involves creating a new eventsource sink
         /// and associating this with the central logger. In addition the sinkId needs
         /// to be put in the loggerDescription so that nodes know what they need to
         /// tag onto the event so that the message goes to the correct logger.
-        ///
-        /// The central logger is initialized before the distributed logger
+        /// </para>
+        /// <para>The central logger is initialized before the distributed logger</para>
         /// </summary>
         /// <param name="centralLogger">Central logger to receive messages from the forwarding logger, This logger cannot have been registered before</param>
         /// <param name="forwardingLogger">Logger description which describes how to create the forwarding logger, the logger description cannot have been used before</param>
@@ -998,13 +999,16 @@ namespace Microsoft.Build.BackEnd.Logging
         #region Event based logging methods
 
         /// <summary>
+        /// <para>
         /// Will Log a build Event. Will also take into account OnlyLogCriticalEvents when determining
         /// if to drop the event or to log it.
-        ///
+        /// </para>
+        /// <para>
         /// Only the following events will be logged if OnlyLogCriticalEvents is true:
         /// CustomEventArgs
         /// BuildErrorEventArgs
         /// BuildWarningEventArgs
+        /// </para>
         /// </summary>
         /// <param name="buildEvent">BuildEvent to log</param>
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
@@ -1055,11 +1059,12 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         /// <summary>
-        /// This method will becalled from multiple threads in asynchronous mode.
-        ///
+        /// <para>This method will becalled from multiple threads in asynchronous mode.</para>
+        /// <para>
         /// Determine where to send the buildevent either to the filters or to a specific sink.
         /// When in Asynchronous mode the event should to into the logging queue (as long as we are initialized).
         /// In Synchronous mode the event should be routed to the correct sink or logger right away
+        /// </para>
         /// </summary>
         /// <param name="buildEvent">BuildEventArgs to process</param>
         /// <param name="allowThrottling"><code>true</code> to allow throttling, otherwise <code>false</code>.</param>

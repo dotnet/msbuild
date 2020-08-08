@@ -281,10 +281,11 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Same as Directory.EnumerateFiles(...) except that files that
         /// aren't accessible are skipped instead of throwing an exception.
-        /// 
-        /// Other exceptions are passed through.
+        /// </para>
+        /// <para>Other exceptions are passed through.</para>
         /// </summary>
         /// <param name="path">The path.</param>
         /// <param name="filespec">The pattern.</param>
@@ -351,10 +352,11 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Same as Directory.EnumerateDirectories(...) except that files that
         /// aren't accessible are skipped instead of throwing an exception.
-        /// 
-        /// Other exceptions are passed through.
+        /// </para>
+        /// <para>Other exceptions are passed through.</para>
         /// </summary>
         /// <param name="path">The path.</param>
         /// <param name="pattern">Pattern to match</param>
@@ -1097,13 +1099,16 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Given a split file spec consisting of a directory without wildcard characters,
         /// a sub-directory containing wildcard characters,
         /// and a filename which may contain wildcard characters,
         /// create a regular expression that will match that file spec.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: this method is called in performance-critical
         /// scenarios, so keep it fast and cheap
+        /// </para>
         /// </summary>
         /// <param name="fixedDirectoryPart">The fixed directory part.</param>
         /// <param name="wildcardDirectoryPart">The wildcard directory part.</param>
@@ -1144,12 +1149,12 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Determine if the filespec is legal according to the following conditions:
-        /// 
-        /// (1) It is not legal for there to be a ".." after a wildcard.
-        /// 
+        /// <para>Determine if the filespec is legal according to the following conditions:</para>
+        /// <para>(1) It is not legal for there to be a ".." after a wildcard.</para>
+        /// <para>
         /// (2) By definition, "**" must appear alone between directory slashes.If there is any remaining "**" then this is not
         ///     a valid filespec.
+        /// </para>
         /// </summary>
         /// <returns>True if both parts meet all conditions for a legal filespec.</returns>
         private static bool IsLegalFileSpec(string wildcardDirectoryPart, string filenamePart) =>
@@ -1188,11 +1193,9 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Append the regex equivalents for character sequences in the fixed directory part of a filespec:
-        ///
-        /// (1) The leading \\ in UNC paths, so that the doubled slash isn't reduced in the last step
-        /// 
-        /// (2) Common filespec characters
+        /// <para>Append the regex equivalents for character sequences in the fixed directory part of a filespec:</para>
+        /// <para>(1) The leading \\ in UNC paths, so that the doubled slash isn't reduced in the last step</para>
+        /// <para>(2) Common filespec characters</para>
         /// </summary>
         private static void AppendRegularExpressionFromFixedDirectory(ReuseableStringBuilder regex, string fixedDir)
         {
@@ -1215,13 +1218,10 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Append the regex equivalents for character sequences in the wildcard directory part of a filespec:
-        ///
-        /// (1) The leading **\ if existing
-        ///
-        /// (2) Each occurrence of recursive wildcard \**\
-        /// 
-        /// (3) Common filespec characters
+        /// <para>Append the regex equivalents for character sequences in the wildcard directory part of a filespec:</para>
+        /// <para>(1) The leading **\ if existing</para>
+        /// <para>(2) Each occurrence of recursive wildcard \**\</para>
+        /// <para>(3) Common filespec characters</para>
         /// </summary>
         private static void AppendRegularExpressionFromWildcardDirectory(ReuseableStringBuilder regex, string wildcardDir)
         {
@@ -1254,19 +1254,18 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Append the regex equivalents for character sequences in the filename part of a filespec:
-        ///
+        /// <para>Append the regex equivalents for character sequences in the filename part of a filespec:</para>
+        /// <para>
         /// (1) Trailing dots in file names have to be treated specially.
         ///     We want:
-        ///
-        ///         *. to match foo
-        ///
+        /// </para>
+        /// <para>        *. to match foo</para>
+        /// <para>
         ///     but 'foo' doesn't have a trailing '.' so we need to handle this while still being careful
         ///     not to match 'foo.txt' by modifying the generated regex for wildcard characters * and ?
-        /// 
-        /// (2) Common filespec characters
-        ///
-        /// (3) Ignore the .* portion of any *.* sequence when no trailing dot exists
+        /// </para>
+        /// <para>(2) Common filespec characters</para>
+        /// <para>(3) Ignore the .* portion of any *.* sequence when no trailing dot exists</para>
         /// </summary>
         private static void AppendRegularExpressionFromFilename(ReuseableStringBuilder regex, string filename)
         {
@@ -1335,26 +1334,27 @@ namespace Microsoft.Build.Shared
             || ch == '[' || ch == '^' || ch == '{' || ch == '|';
 
         /// <summary>
+        /// <para>
         /// Given an index at a directory separator,
         /// iteratively skip to the end of two sequences:
-        ///
+        /// </para>
+        /// <para>
         ///  (1) \.\ -> \
         ///     This is an identity, so for example, these two are equivalent,
-        ///
-        ///         dir1\.\dir2 == dir1\dir2
-        /// 
+        /// </para>
+        /// <para>        dir1\.\dir2 == dir1\dir2</para>
+        /// <para>
         ///     (2) \\ -> \
         ///         Double directory separators are treated as a single directory separator,
         ///         so, for example, this is an identity:
-        ///
-        ///             f:\dir1\\dir2 == f:\dir1\dir2
-        ///
-        ///         The single exemption is for UNC path names, like this:
-        ///
-        ///             \\server\share != \server\share
-        /// 
+        /// </para>
+        /// <para>            f:\dir1\\dir2 == f:\dir1\dir2</para>
+        /// <para>        The single exemption is for UNC path names, like this:</para>
+        /// <para>            \\server\share != \server\share</para>
+        /// <para>
         ///         This case is handled by isUncPath in
         ///         a prior step.
+        /// </para>
         ///
         /// </summary>
         /// <returns>The last index of a directory sequence.</returns>
@@ -1390,15 +1390,16 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Given an index at a directory separator or start of a recursive operator,
         /// iteratively skip to the end of three sequences:
-        /// 
-        /// (1), (2) Both sequences handled by IndexOfNextNonCollapsibleChar
-        /// 
+        /// </para>
+        /// <para>(1), (2) Both sequences handled by IndexOfNextNonCollapsibleChar</para>
+        /// <para>
         /// (3) \**\**\ -> \**\
         ///              This is an identity, so for example, these two are equivalent,
-        ///
-        ///                 dir1\**\**\ == dir1\**\
+        /// </para>
+        /// <para>                dir1\**\**\ == dir1\**\</para>
         /// </summary>
         /// <returns>]
         /// If starting at a recursive operator, the last index of a recursive sequence.

@@ -64,11 +64,14 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Loads the specified string resource and formats it with the arguments passed in. If the string resource has an MSBuild
         /// message code and help keyword associated with it, they too are returned.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
         /// <owner>SumedhK</owner>
@@ -86,11 +89,14 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Looks up a string in the resources, and formats it with the arguments passed in. If the string resource has an MSBuild
         /// message code and help keyword associated with it, they are discarded.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
         /// <owner>SumedhK</owner>
@@ -106,10 +112,11 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// Formats the given string using the variable arguments passed in.
-        /// 
+        /// <para>Formats the given string using the variable arguments passed in.</para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
         /// <owner>SumedhK</owner>

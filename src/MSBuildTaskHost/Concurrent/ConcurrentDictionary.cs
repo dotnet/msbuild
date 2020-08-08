@@ -10,10 +10,11 @@ namespace Microsoft.Build.Shared.Concurrent
     internal class ConcurrentDictionary<TKey, TValue>
     {
         /// <summary>
-        /// Tables that hold the internal state of the ConcurrentDictionary
-        ///
+        /// <para>Tables that hold the internal state of the ConcurrentDictionary</para>
+        /// <para>
         /// Wrapping the three tables in a single object allows us to atomically
         /// replace all tables at once.
+        /// </para>
         /// </summary>
         private sealed class Tables
         {

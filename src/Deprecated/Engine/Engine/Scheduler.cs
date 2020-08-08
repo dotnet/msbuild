@@ -428,11 +428,12 @@ namespace Microsoft.Build.BuildEngine
         private int[] totalRequestsPerNode;
 
         /// <summary>
+        /// <para>
         /// The number of BuildRequests blocked waiting for results for each node.
         /// This will be incremented once when a build request is scheduled which was generated as part of a msbuild callback
         /// and once for each call to NotifyOfBlockedRequest.
-        ///
-        /// It is decremented for each call to NotifyOfUnblockedRequest and once all of the child requests have been fullfilled.
+        /// </para>
+        /// <para>It is decremented for each call to NotifyOfUnblockedRequest and once all of the child requests have been fullfilled.</para>
         /// </summary>
         private int[] blockedRequestsPerNode;
 

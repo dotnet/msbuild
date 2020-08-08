@@ -349,8 +349,8 @@ namespace Microsoft.Build.Shared
             }
 
             /// <summary>
-            /// Performs path manipulations on the given item-spec as directed.
-            /// 
+            /// <para>Performs path manipulations on the given item-spec as directed.</para>
+            /// <para>
             /// Supported modifiers:
             ///     %(FullPath)         = full path of item
             ///     %(RootDir)          = root directory of item
@@ -363,22 +363,26 @@ namespace Microsoft.Build.Shared
             ///     %(ModifiedTime)     = last write time of item
             ///     %(CreatedTime)      = creation time of item
             ///     %(AccessedTime)     = last access time of item
-            /// 
+            /// </para>
+            /// <para>
             /// NOTES:
             /// 1) This method always returns an empty string for the %(RecursiveDir) modifier because it does not have enough
             ///    information to compute it -- only the BuildItem class can compute this modifier.
             /// 2) All but the file time modifiers could be cached, but it's not worth the space. Only full path is cached, as the others are just string manipulations.
+            /// </para>
             /// </summary>
             /// <remarks>
+            /// <para>
             /// Methods of the Path class "normalize" slashes and periods. For example:
             /// 1) successive slashes are combined into 1 slash
             /// 2) trailing periods are discarded
             /// 3) forward slashes are changed to back-slashes
-            /// 
+            /// </para>
+            /// <para>
             /// As a result, we cannot rely on any file-spec that has passed through a Path method to remain the same. We will
             /// therefore not bother preserving slashes and periods when file-specs are transformed.
-            /// 
-            /// Never returns null.
+            /// </para>
+            /// <para>Never returns null.</para>
             /// </remarks>
             /// <param name="currentDirectory">The root directory for relative item-specs. When called on the Engine thread, this is the project directory. When called as part of building a task, it is null, indicating that the current directory should be used.</param>
             /// <param name="itemSpec">The item-spec to modify.</param>

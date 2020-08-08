@@ -45,11 +45,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test for a namespace that has ANSI but non-ascii characters.
-        ///
+        /// <para>Test for a namespace that has ANSI but non-ascii characters.</para>
+        /// <para>
         /// NOTE: namespace dÃa {} get's compiled into different IL depending on the language of the OS
         /// that its running on. This is because 'Ã' is a high ANSI character which is interpreted differently
         /// for different codepages.
+        /// </para>
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact (Skip = "https://github.com/Microsoft/msbuild/issues/295")]
@@ -677,17 +678,17 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// <para>
         /// If the dependent upon filename and the resource filename both contain what looks like
         /// a culture, do not treat it as a culture identifier.  E.g.:
-        ///
-        ///     Form1.ro.resx == DependentUpon ==> Form1.ro.vb
-        ///
+        /// </para>
+        /// <para>    Form1.ro.resx == DependentUpon ==> Form1.ro.vb</para>
+        /// <para>
         /// In this case, we don't include "ro" as the culture because it's in both filenames.  In
         /// the case of:
-        ///
-        ///     Form1.ro.resx == DependentUpon ==> Form1.vb
-        ///
-        /// we continue to treat "ro" as the culture.
+        /// </para>
+        /// <para>    Form1.ro.resx == DependentUpon ==> Form1.vb</para>
+        /// <para>we continue to treat "ro" as the culture.</para>
         /// </summary>
         [Fact]
         public void Regress419591()
@@ -709,14 +710,16 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// <para>
         /// If the dependent upon filename and the resource filename both contain what looks like
         /// a culture, do not treat it as a culture identifier.  E.g.:
-        ///
-        ///     Form1.ro.resx == DependentUpon ==> Form1.ro.vb
-        ///
+        /// </para>
+        /// <para>    Form1.ro.resx == DependentUpon ==> Form1.ro.vb</para>
+        /// <para>
         /// In this case, we don't include "ro" as the culture because it's in both filenames.  If
         /// The parent source file doesn't have a class name in it, we just use the culture neutral
         /// filename of the resource file.
+        /// </para>
         /// </summary>
         [Fact]
         public void Regress419591_EmptySource()

@@ -26,11 +26,12 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] OutputItems { get; set; }
 
         /// <summary>
+        /// <para>
         /// Sets "Link" metadata on any item where the project file in which they 
         /// were defined is different from the parent project file to a sane default: 
         /// the relative directory compared to the defining file.  
-        /// 
-        /// Does NOT overwrite Link metadata if it's already defined. 
+        /// </para>
+        /// <para>Does NOT overwrite Link metadata if it's already defined. </para>
         /// </summary>
         public override bool Execute()
         {

@@ -464,6 +464,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// <para>
         /// Returns the default sub-toolset version for this sub-toolset.  Heuristic used is:
         /// 1) If Visual Studio 2010 is installed and our ToolsVersion is "4.0", use the base toolset, and return
         ///    a sub-toolset version of "10.0", to be set as a publicly visible property so that e.g. targets can
@@ -472,8 +473,8 @@ namespace Microsoft.Build.Evaluation
         ///    be ordered numerically; any additional sub-toolsets will be prepended to the beginning of the list in
         ///    the order found. We use the highest-versioned sub-toolset because, in the absence of any other information,
         ///    we assume that higher-versioned tools will be more likely to be able to generate something more correct.
-        ///
-        /// Will return null if there is no sub-toolset available (and Dev10 is not installed).
+        /// </para>
+        /// <para>Will return null if there is no sub-toolset available (and Dev10 is not installed).</para>
         /// </summary>
         public string DefaultSubToolsetVersion
         {
@@ -630,14 +631,17 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// <para>
         /// Generates the sub-toolset version to be used with this toolset.  Sub-toolset version is based on:
         /// 1. If "VisualStudioVersion" is set as a property on the toolset itself (global or environment),
         ///    use that.
         /// 2. Otherwise, use the default sub-toolset version for this toolset.
-        ///
+        /// </para>
+        /// <para>
         /// The sub-toolset version returned may be null; if so, that means that no sub-toolset should be used,
         /// just the base toolset on its own. The sub-toolset version returned may not map to an existing
         /// sub-toolset.
+        /// </para>
         /// </summary>
         public string GenerateSubToolsetVersion()
         {
@@ -646,18 +650,20 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// <para>
         /// Generates the sub-toolset version to be used with this toolset.  Sub-toolset version is based on:
         /// 1. If the "VisualStudioVersion" global property exists in the set of properties passed to us, use it.
         /// 2. Otherwise, if "VisualStudioVersion" is set as a property on the toolset itself (global or environment),
         ///    use that.
         /// 3. Otherwise, use Visual Studio version from solution file if it maps to an existing sub-toolset.
         /// 4. Otherwise, use the default sub-toolset version for this toolset.
-        ///
+        /// </para>
+        /// <para>
         /// The sub-toolset version returned may be null; if so, that means that no sub-toolset should be used,
         /// just the base toolset on its own. The sub-toolset version returned may not map to an existing
         /// sub-toolset.
-        ///
-        /// The global properties dictionary may be null.
+        /// </para>
+        /// <para>The global properties dictionary may be null.</para>
         /// </summary>
         [SuppressMessage("Microsoft.Usage", "CA2233:OperationsShouldNotOverflow", MessageId = "solutionVersion-1", Justification = "Method called in restricted places. Checks done by the callee and inside the method.")]
         public string GenerateSubToolsetVersion(IDictionary<string, string> overrideGlobalProperties, int solutionVersion)
@@ -749,18 +755,20 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// <para>
         /// Generates the sub-toolset version to be used with this toolset.  Sub-toolset version is based on:
         /// 1. If the "VisualStudioVersion" global property exists in the set of properties passed to us, use it.
         /// 2. Otherwise, if "VisualStudioVersion" is set as a property on the toolset itself (global or environment),
         ///    use that.
         /// 3. Otherwise, use Visual Studio version from solution file if it maps to an existing sub-toolset.
         /// 4. Otherwise, use the default sub-toolset version for this toolset.
-        ///
+        /// </para>
+        /// <para>
         /// The sub-toolset version returned may be null; if so, that means that no sub-toolset should be used,
         /// just the base toolset on its own. The sub-toolset version returned may not map to an existing
         /// sub-toolset.
-        ///
-        /// The global properties dictionary may be null.
+        /// </para>
+        /// <para>The global properties dictionary may be null.</para>
         /// </summary>
         internal string GenerateSubToolsetVersion(PropertyDictionary<ProjectPropertyInstance> overrideGlobalProperties)
         {
@@ -782,18 +790,20 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// <para>
         /// Generates the sub-toolset version to be used with this toolset.  Sub-toolset version is based on:
         /// 1. If the "VisualStudioVersion" global property exists in the set of properties passed to us, use it.
         /// 2. Otherwise, if "VisualStudioVersion" is set as a property on the toolset itself (global or environment),
         ///    use that.
         /// 3. Otherwise, use Visual Studio version from solution file if it maps to an existing sub-toolset.
         /// 4. Otherwise, use the default sub-toolset version for this toolset.
-        ///
+        /// </para>
+        /// <para>
         /// The sub-toolset version returned may be null; if so, that means that no sub-toolset should be used,
         /// just the base toolset on its own. The sub-toolset version returned may not map to an existing
         /// sub-toolset.
-        ///
-        /// The global properties dictionary may be null.
+        /// </para>
+        /// <para>The global properties dictionary may be null.</para>
         /// </summary>
         internal string GenerateSubToolsetVersion(int visualStudioVersionFromSolution)
         {

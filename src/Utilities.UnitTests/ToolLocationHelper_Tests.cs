@@ -2176,15 +2176,17 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Make sure when we are targeting .net framework 3.5 and are on a 64 bit machine we get the correct framework path.
-        ///
+        /// <para>Make sure when we are targeting .net framework 3.5 and are on a 64 bit machine we get the correct framework path.</para>
+        /// <para>
         /// We are on a 64 bit machine
         /// Targeting .net framework 3.5
-        ///
+        /// </para>
+        /// <para>
         /// 1) Target platform is x86. We expect to get the 32 bit framework directory
         /// 2) Target platform is x64, we expect to get the 64 bit framework directory
         /// 3) Target platform is Itanium, we expect to get the 64 bit framework directory
         /// 3) Target platform is some other value (AnyCpu, or anything else)  expect the framework directory for the "current" bitness of the process we are running under.
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -2228,12 +2230,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Make sure when we are targeting .net framework 3.5 and are on a 64 bit machine we get the correct framework path.
-        ///
+        /// <para>Make sure when we are targeting .net framework 3.5 and are on a 64 bit machine we get the correct framework path.</para>
+        /// <para>
         /// We are on a 64 bit machine
         /// Targeting .net framework 4.0
-        ///
-        /// We expect to always get the same path which is returned by GetPathToReferenceAssemblies.
+        /// </para>
+        /// <para>We expect to always get the same path which is returned by GetPathToReferenceAssemblies.</para>
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -2268,16 +2270,18 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Make sure when we are targeting .net framework 3.5 and are on a 32 bit machine we get the correct framework path.
-        ///
+        /// <para>Make sure when we are targeting .net framework 3.5 and are on a 32 bit machine we get the correct framework path.</para>
+        /// <para>
         /// We are on a 32 bit machine
         /// Targeting .net framework 3.5
-        ///
+        /// </para>
+        /// <para>
         /// 1) Target platform is x86. We expect to get the 32 bit framework directory
         /// 2) Target platform is x64, we expect to get the 32 bit framework directory
         /// 3) Target platform is Itanium, we expect to get the 32 bit framework directory
         /// 3) Target platform is some other value (AnyCpu, or anything else)  expect the framework directory for the "current" bitness of the process we are running under. In the
         ///    case of the unit test this should be the 32 bit framework directory.
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -2312,12 +2316,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Make sure when we are targeting .net framework 4.0 and are on a 32 bit machine we get the correct framework path.
-        ///
+        /// <para>Make sure when we are targeting .net framework 4.0 and are on a 32 bit machine we get the correct framework path.</para>
+        /// <para>
         /// We are on a 32 bit machine
         /// Targeting .net framework 4.0
-        ///
-        /// We expect to always get the same path which is returned by GetPathToReferenceAssemblies.
+        /// </para>
+        /// <para>We expect to always get the same path which is returned by GetPathToReferenceAssemblies.</para>
         /// </summary>
         [Fact]
         public void GetPathToStandardLibraries32Bit40()

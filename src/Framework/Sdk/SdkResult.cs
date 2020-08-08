@@ -29,17 +29,17 @@ namespace Microsoft.Build.Framework
         public virtual bool Success { get => _success; protected set => _success = value; }
 
         /// <summary>
-        ///     Resolved path to the SDK.
-        /// 
-        ///     Null if <see cref="Success"/> == false
+        /// <para>    Resolved path to the SDK.</para>
+        /// <para>    Null if <see cref="Success"/> == false</para>
         /// </summary>
         public virtual string Path { get => _path; protected set => _path = value; }
 
         /// <summary>
+        /// <para>
         ///     Resolved version of the SDK.
         ///     Can be null or empty if the resolver did not provide a version (e.g. a path based resolver)
-        /// 
-        ///     Null if <see cref="Success"/> == false
+        /// </para>
+        /// <para>    Null if <see cref="Success"/> == false</para>
         /// </summary>
         public virtual string Version { get => _version; protected set => _version = value; }
 

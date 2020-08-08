@@ -9,20 +9,24 @@ namespace Microsoft.Build.Framework
     /// Enumeration of the levels of detail of an event log.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The level of detail (i.e. verbosity) of an event log is entirely controlled by the logger generating the log -- a logger
     /// will be directed to keep its verbosity at a certain level, based on user preferences, but a logger is free to choose the
     /// events it logs for each verbosity level.
-    /// 
+    /// </para>
+    /// <para>
     /// LOGGING GUIDELINES FOR EACH VERBOSITY LEVEL:
     /// 1) Quiet -- only display a summary at the end of build
     /// 2) Minimal -- only display errors, warnings, high importance events and a build summary
     /// 3) Normal -- display all errors, warnings, high importance events, some status events, and a build summary
     /// 4) Detailed -- display all errors, warnings, high and normal importance events, all status events, and a build summary
     /// 5) Diagnostic -- display all events, and a build summary
-    /// 
+    /// </para>
+    /// <para>
     /// WARNING: VS Automation code for the Tools/Options MSBuild build verbosity setting will be broken
     /// by changes to this enum (not to mention existing MSBuild clients and vsproject code). 
     /// Please make sure to talk to automation devs before changing it.
+    /// </para>
     /// </remarks>
     [ComVisible(true)]
     public enum LoggerVerbosity

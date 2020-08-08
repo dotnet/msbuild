@@ -433,13 +433,14 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// If on Unix, convert backslashes to slashes for strings that resemble paths.
         /// The heuristic is if something resembles paths (contains slashes) check if the
         /// first segment exists and is a directory.
         /// Use a native shared method to massage file path. If the file is adjusted,
         /// that qualifies is as a path.
-        ///
-        /// @baseDirectory is just passed to LooksLikeUnixFilePath, to help with the check
+        /// </para>
+        /// <para>@baseDirectory is just passed to LooksLikeUnixFilePath, to help with the check</para>
         /// </summary>
         internal static string MaybeAdjustFilePath(string value, string baseDirectory = "")
         {
@@ -555,12 +556,15 @@ namespace Microsoft.Build.Shared
         internal static bool IsAnySlash(char c) => c == '/' || c == '\\';
 
         /// <summary>
+        /// <para>
         /// If on Unix, check if the string looks like a file path.
         /// The heuristic is if something resembles paths (contains slashes) check if the
         /// first segment exists and is a directory.
-        ///
+        /// </para>
+        /// <para>
         /// If @baseDirectory is not null, then look for the first segment exists under
         /// that
+        /// </para>
         /// </summary>
         internal static bool LooksLikeUnixFilePath(string value, string baseDirectory = "")
         {

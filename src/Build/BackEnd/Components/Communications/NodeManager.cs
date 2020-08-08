@@ -61,16 +61,19 @@ namespace Microsoft.Build.BackEnd
         private int _inprocNodeId = 1;
 
         /// <summary>
+        /// <para>
         /// Flag indicating when the nodes have been shut down.
         /// BUGBUG: This is a fix which corrects an RI blocking BVT failure.  The real fix must be determined before RTM.
         /// This must be investigated and resolved before RTM.  The apparent issue is that a design-time build has already called EndBuild
         /// through the BuildManagerAccessor, and the nodes are shut down.  Shortly thereafter, the solution build manager comes through and calls EndBuild, which throws
         /// another Shutdown packet in the queue, and causes the following build to stop prematurely.  This is all timing related - not every sequence of builds seems to 
         /// cause the problem, probably due to the order in which the packet queue gets serviced relative to other threads.
-        /// 
+        /// </para>
+        /// <para>
         /// It appears that the problem is that the BuildRequestEngine is being invoked in a way that causes a shutdown packet to appear to overlap with a build request packet.
         /// Interactions between the in-proc node communication thread and the shutdown mechanism must be investigated to determine how BuildManager.EndBuild is allowing itself
         /// to return before the node has indicated it is actually finished.
+        /// </para>
         /// </summary>
         private bool _nodesShutdown = true;
 

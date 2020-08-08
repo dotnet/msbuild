@@ -15,23 +15,29 @@ namespace Microsoft.Build.Tasks
         /// The in/out property value.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// So ... why is this a string[] instead of a string?
         /// Basically if the project author passed in:
-        /// 
+        /// </para>
+        /// <para>
         ///         CreateProperty Value="Clean;Build"
         ///             Output TaskParameter="Value" PropertyName="MyTargetsToBuild"
         ///         /CreateProperty
-        /// 
+        /// </para>
+        /// <para>
         /// We need to respect the semicolon that he put in the value, and need to treat
         /// this exactly as if he had done:
-        /// 
+        /// </para>
+        /// <para>
         ///         PropertyGroup
         ///             MyTargetsToBuild="Clean;Build"
         ///         /PropertyGroup
-        /// 
+        /// </para>
+        /// <para>
         /// If we make this parameter a "string", then the engine will escape the 
         /// value on the way out from the task back to the engine, creating a property
         /// that is set to "Clean%3BBuild", which is not what the user wanted.
+        /// </para>
         /// </remarks>
         [Output]
         public string[] Value { get; set; }

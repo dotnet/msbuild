@@ -10,10 +10,11 @@ using Microsoft.Build.Shared.FileSystem;
 namespace Microsoft.Build.Tasks
 {
     /// <remarks>
+    /// <para>
     /// Represents a single input to a compilation-style task.
     /// Keeps track of timestamp for later comparison.
-    /// 
-    /// On-disk serialization format, don't change field names or types or use readonly.
+    /// </para>
+    /// <para>On-disk serialization format, don't change field names or types or use readonly.</para>
     /// </remarks>
     [Serializable]
     internal class DependencyFile

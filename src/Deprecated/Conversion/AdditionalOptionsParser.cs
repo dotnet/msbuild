@@ -111,32 +111,37 @@ namespace Microsoft.Build.Conversion
 
     /// <summary>
     ///
+    /// <para>
     /// Class:       AdditionalOptionsParser
     /// Owner:       ParthaD
-    ///
+    /// </para>
+    /// <para>
     /// This class contains the logic to parse the AdditionalOptions project
     /// property of v7.x J# projects and add the individual options as project
     /// properties of the upgraded projects.
-    ///
+    /// </para>
+    /// <para>
     /// AdditionalOptions project property in v7.x was basically a string that
     /// was passed ditto to the compiler.
     /// It was used to hold J# compiler options that didnt have an 1-1 equivalent
     /// project property.
     /// For v8.0 and beyond, each J# compiler option has a corresponding project
     /// property.
-    ///
+    /// </para>
+    /// <para>
     /// AdditionalOptions property string is broken down into list of options.
     /// White space (only ' ' and '\t') are considered as delimiters if not wrapped
     /// inside double quotes (").
     /// NOTE:
     ///  1. Other unicode spaces or double quotes sequences not considered
     ///  2. Backslash (\) not considered as possible escape char for ".
-    ///
+    /// </para>
+    /// <para>
     /// Once broken down into individual options, only a few compiler options are
     /// seached for (viz. the options for which v8.0 has new project properties)
     /// Everything else is ignored.
-    ///
-    /// Refer to SwitchesToMigrade enum for the switches that are migrated.
+    /// </para>
+    /// <para>Refer to SwitchesToMigrade enum for the switches that are migrated.</para>
     /// </summary>
     internal sealed class AdditionalOptionsParser
     {

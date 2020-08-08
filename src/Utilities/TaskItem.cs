@@ -19,12 +19,15 @@ using Microsoft.Build.Collections;
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
+    /// <para>
     /// This class represents a single item of the project, as it is passed into a task. TaskItems do not exactly correspond to
     /// item elements in project files, because then tasks would have access to data that wasn't explicitly passed into the task
     /// via the project file. It's not a security issue, but more just an issue with project file clarity and transparency.
-    /// 
+    /// </para>
+    /// <para>
     /// Note: This class has to be sealed.  It has to be sealed because the engine instantiates it's own copy of this type and
     /// thus if someone were to extend it, they would not get the desired behavior from the engine.  
+    /// </para>
     /// </summary>
     /// <comment>
     /// Surprisingly few of these Utilities TaskItems are created: typically several orders of magnitude fewer than the number of engine TaskItems.

@@ -48,27 +48,32 @@ namespace Microsoft.Build.Evaluation
         private readonly string _evaluatedIncludeBeforeWildcardExpansionEscaped;
 
         /// <summary>
-        /// Item definitions are stored in one single table shared by all items of a particular item type.
-        /// 
+        /// <para>Item definitions are stored in one single table shared by all items of a particular item type.</para>
+        /// <para>
         /// When an item is created from another item, such as by using an expression like Include="@(x)",
         /// any item definition metadata those source items have must override any item definition metadata 
         /// associated with the new item type. 
-        /// 
+        /// </para>
+        /// <para>
         /// Copying all those item definition metadata into real metadata on this item would be very inefficient, because
         /// it would turn a single shared table into a separate table for every item.
-        /// 
+        /// </para>
+        /// <para>
         /// Instead, we get a reference to the item definition of the source items, and consult
         /// that table before we consult our own item type's item definition. Since item definitions can't change at this point,
         /// it's safe to reference their original table.
-        /// 
+        /// </para>
+        /// <para>
         /// If our item gets copied again, we need a reference to the inherited item definition and we need the real item
         /// definition of the source items. Thus a list is created. On copying, a list is created, beginning with a clone
         /// of any list the source item had, and ending with the item definition list of the source item type.
-        /// 
+        /// </para>
+        /// <para>
         /// When we look up a metadata value we look at 
         /// (1) directly associated metadata and built-in metadata
         /// (2) the inherited item definition list, starting from the top
         /// (3) the item definition associated with our item type
+        /// </para>
         /// </summary>
         private readonly List<ProjectItemDefinition> _inheritedItemDefinitions;
 
@@ -549,10 +554,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// <para>
         /// Overload of <see cref="SetMetadataValue(string,string)"/>. Adds the option of not splitting the item element and thus affecting all sibling items.
         /// Sibling items are defined as all ProjectItem instances that were created from the same item element.
-        /// 
-        /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state without a reevaluation
+        /// </para>
+        /// <para>This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state without a reevaluation</para>
         /// </summary>
         /// /// <param name="name">Metadata name</param>
         /// <param name="unevaluatedValue">Metadata value</param>

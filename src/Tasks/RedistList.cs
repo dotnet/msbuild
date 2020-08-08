@@ -482,18 +482,20 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// <para>
         /// This method will take a list of AssemblyTableInfo and generate a black list by subtracting the
         /// assemblies listed in the WhiteList from the RedistList.
-        ///
+        /// </para>
+        /// <para>
         /// 1) If there are assemblies in the redist list and one or more client subset files are read in with matching names then
         ///    the subtraction will take place. If there were no matching redist lists read in the black list will be empty.
-        ///
-        /// 2) If the subset has a matching name but there are no files inside of it then the black list will contain ALL files in the redist list.
-        ///
-        /// 3) If the redist list assembly has a null or empty redist name or the subset list has a null or empty subset name they will not be used for black list generation.
-        ///
+        /// </para>
+        /// <para>2) If the subset has a matching name but there are no files inside of it then the black list will contain ALL files in the redist list.</para>
+        /// <para>3) If the redist list assembly has a null or empty redist name or the subset list has a null or empty subset name they will not be used for black list generation.</para>
+        /// <para>
         /// When generating the blacklist, we will first see if the black list is in the appdomain wide cache
         /// so that we do not regenerate one for multiple calls using the same whiteListAssemblyTableInfo.
+        /// </para>
         ///
         /// </summary>
         /// <param name="whiteListAssemblyTableInfo">List of paths to white list xml files</param>

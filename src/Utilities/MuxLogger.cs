@@ -10,42 +10,45 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
+    /// <para>
     /// This is a multiplexing logger. The purpose of this logger is to allow the registration and deregistration of 
     /// multiple loggers during the build. This is to support the VS IDE scenario where loggers are registered and unregistered
     /// for each project system's build request. This means one physical build may have multiple logical builds
     /// each with their own set of loggers. 
-    /// 
+    /// </para>
+    /// <para>
     /// The Mux logger will register itself with the build manager as a regular central /l style logger. 
     /// It will be responsible for receiving messages from the build manager and route them to the correct
     /// logger based on the logical build the message came from.
-    /// 
+    /// </para>
+    /// <para>
     /// Requirements:
     ///     1) Multiplexing logger will be registered at the beginning of the build manager's Begin build
     ///         Any loggers registered before the build manager actually started building will get the build started event at the same time as the MUX logger
     ///         Any loggers registered after the build manager starts the build will get a synthesised build started event. The event cannot be cached because the 
     ///         timestamp of the build started event is determined when the event is created, caching the event would give incorrect build times in the loggers registered to the MUX.
-    ///         
+    /// </para>
+    /// <para>
     ///     2) The MUX logger will be initialized by the build manager.
     ///         The mux will listen to all events on the event source from the build manager and will route events correctly to the registered loggers.
-    ///     
-    ///     3) The MUX logger will be shutdown when the build is finished in end build . At this time it will un-register any loggers attached to it.
-    ///     
-    ///     4) The MUX logger will log the build finished event when the project finished event for the first project started event is seen for each logger.
-    ///    
-    /// Registering Loggers:
-    /// 
+    /// </para>
+    /// <para>    3) The MUX logger will be shutdown when the build is finished in end build . At this time it will un-register any loggers attached to it.</para>
+    /// <para>    4) The MUX logger will log the build finished event when the project finished event for the first project started event is seen for each logger.</para>
+    /// <para>Registering Loggers:</para>
+    /// <para>
     /// The multiplexing logger will function in the following way:
     ///     A logger will be passed to the MUX Register logger method with a submission ID which will be used to route a the message to the correct logger.
     ///     A new event source will be created so that the logger passed in can be registered to that event source
     ///     If the build started event has already been logged the MUX logger will create a new BuildStartedEvent and send that to the event source.
-    ///     
+    /// </para>
+    /// <para>
     /// UnregisterLoggers:
     ///     When a build submission is completed the UnregisterLoggers method will be called with the submission ID.
     ///     At this point we will look up the success state of the project finished event for the submission ID and log a build finished event to the logger.
     ///     The event source will be cleaned up.  This may be interesting because the unregister will come from a thread other than what is doing the logging.
     ///     This may create a Synchronization issue, if unregister is called while events are being logged.
-    ///     
-    /// UNDONE: If we can use ErrorUtilities, replace all InvalidOperation and Argument exceptions with the appropriate calls.
+    /// </para>
+    /// <para>UNDONE: If we can use ErrorUtilities, replace all InvalidOperation and Argument exceptions with the appropriate calls.</para>
     /// 
     /// </summary>
     public class MuxLogger : INodeLogger

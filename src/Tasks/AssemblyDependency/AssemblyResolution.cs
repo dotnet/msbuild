@@ -11,14 +11,13 @@ using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
+    /// <para>
     /// Utility class encapsulates steps to resolve assembly references.
     /// For example, this class has the code that will take:
-    ///
-    ///      System.Xml
-    ///
-    /// and turn it into:
-    ///
-    ///     [path-to-frameworks]\System.Xml.dll
+    /// </para>
+    /// <para>     System.Xml</para>
+    /// <para>and turn it into:</para>
+    /// <para>    [path-to-frameworks]\System.Xml.dll</para>
     ///
     /// 
     /// </summary>

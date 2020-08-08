@@ -15,15 +15,17 @@ namespace Microsoft.Build.Shared
     /// build tools.
     /// </summary>
     /// <remarks>
-    /// Various tools produce and consume CanonicalErrors in various formats.
-    ///
+    /// <para>Various tools produce and consume CanonicalErrors in various formats.</para>
+    /// <para>
     /// DEVENV Format When Clicking on Items in the Output Window
     /// (taken from env\msenv\core\findutil.cpp ParseLocation function)
-    ///
+    /// </para>
+    /// <para>
     ///      v:\dir\file.ext (loc) : msg
     ///      \\server\share\dir\file.ext(loc):msg
     ///      url
-    ///
+    /// </para>
+    /// <para>
     ///      loc:
     ///      (line)
     ///      (line-line)
@@ -31,24 +33,22 @@ namespace Microsoft.Build.Shared
     ///      (line,col-col)
     ///      (line,col,len)
     ///      (line,col,line,col)
-    ///
+    /// </para>
+    /// <para>
     /// DevDiv Build Process
     /// (taken from tools\devdiv2.def)
-    ///
+    /// </para>
+    /// <para>
     ///      To echo warnings and errors to the build console, the
     ///      "description block" must be recognized by build. To do this,
     ///      add a $(ECHO_COMPILING_COMMAND) or $(ECHO_PROCESSING_COMMAND)
     ///      to the first line of the description block, e.g.
-    ///
-    ///          $(ECHO_COMPILING_CMD) Resgen_$&lt;
-    ///
-    ///      Errors must have the format:
-    ///
-    ///          &lt;text&gt; : error [num]: &lt;msg&gt;
-    ///
-    ///      Warnings must have the format:
-    ///
-    ///          &lt;text&gt; : warning [num]: &lt;msg&gt;
+    /// </para>
+    /// <para>         $(ECHO_COMPILING_CMD) Resgen_$</para>
+    /// <para>     Errors must have the format:</para>
+    /// <para>text&gt; : error [num]: &lt;msg</para>
+    /// <para>     Warnings must have the format:</para>
+    /// <para>text&gt; : warning [num]: &lt;msg</para>&gt;
     /// </remarks>
     internal static class CanonicalError
     {

@@ -415,12 +415,12 @@ namespace Microsoft.Build.BuildEngine.Shared
         } // ParseSolutionFile()
 
         /// <summary>
+        /// <para>
         /// This method searches the first two lines of the solution file opened by the specified
         /// StreamReader for the solution file header.  An exception is thrown if it is not found.
-        /// 
-        /// The solution file header looks like this:
-        /// 
-        ///     Microsoft Visual Studio Solution File, Format Version 9.00
+        /// </para>
+        /// <para>The solution file header looks like this:</para>
+        /// <para>    Microsoft Visual Studio Solution File, Format Version 9.00</para>
         /// 
         /// </summary>
         /// <owner>RGoel</owner>
@@ -454,13 +454,13 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
+        /// <para>
         /// This method extracts the whole part of the version number from the specified line
         /// containing the solution file format header, and throws an exception if the version number
         /// is outside of the valid range.
-        /// 
-        /// The solution file header looks like this:
-        /// 
-        ///     Microsoft Visual Studio Solution File, Format Version 9.00
+        /// </para>
+        /// <para>The solution file header looks like this:</para>
+        /// <para>    Microsoft Visual Studio Solution File, Format Version 9.00</para>
         /// 
         /// </summary>
         /// <param name="versionString"></param>
@@ -510,18 +510,20 @@ namespace Microsoft.Build.BuildEngine.Shared
 
         /// <summary>
         /// 
+        /// <para>
         /// This method processes a "Project" section in the solution file opened by the specified
         /// StreamReader, and returns a populated ProjectInSolution instance, if successful.
         /// An exception is thrown if the solution file is invalid.
-        ///
-        /// The format of the parts of a Project section that we care about is as follows:
-        ///
+        /// </para>
+        /// <para>The format of the parts of a Project section that we care about is as follows:</para>
+        /// <para>
         ///  Project("{Project type GUID}") = "Project name", "Relative path to project file", "{Project GUID}"
         ///      ProjectSection(ProjectDependencies) = postProject
         ///          {Parent project unique name} = {Parent project unique name}
         ///          ...
         ///      EndProjectSection
         ///  EndProject
+        /// </para>
         /// 
         /// </summary>
         /// <param name="firstLine"></param>
@@ -993,9 +995,8 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// Parse the first line of a Project section of a solution file. This line should look like:
-        ///
-        ///  Project("{Project type GUID}") = "Project name", "Relative path to project file", "{Project GUID}"
+        /// <para>Parse the first line of a Project section of a solution file. This line should look like:</para>
+        /// <para> Project("{Project type GUID}") = "Project name", "Relative path to project file", "{Project GUID}"</para>
         /// 
         /// </summary>
         /// <param name="firstLine"></param>
@@ -1082,12 +1083,13 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// Read solution configuration section. 
         /// </summary>
         /// <remarks>
-        /// A sample section:
-        /// 
+        /// <para>A sample section:</para>
+        /// <para>
         /// GlobalSection(SolutionConfigurationPlatforms) = preSolution
         ///     Debug|Any CPU = Debug|Any CPU
         ///     Release|Any CPU = Release|Any CPU
         /// EndGlobalSection
+        /// </para>
         /// </remarks>
         /// <owner>LukaszG</owner>
         internal void ParseSolutionConfigurations()
@@ -1135,8 +1137,8 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// Read project configurations in solution configurations section.
         /// </summary>
         /// <remarks>
-        /// A sample (incomplete) section:
-        /// 
+        /// <para>A sample (incomplete) section:</para>
+        /// <para>
         /// GlobalSection(ProjectConfigurationPlatforms) = postSolution
         /// 	{6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
         /// 	{6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -1149,6 +1151,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// 	{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Release|Win32.ActiveCfg = Release|Win32
         /// 	{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Release|Win32.Build.0 = Release|Win32
         /// EndGlobalSection
+        /// </para>
         /// </remarks>
         /// <returns>An unprocessed hashtable of entries in this section</returns>
         internal Hashtable ParseProjectConfigurations()

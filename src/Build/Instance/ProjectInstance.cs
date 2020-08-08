@@ -789,11 +789,12 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Serialize the entire project instance state.
-        ///
+        /// <para>Serialize the entire project instance state.</para>
+        /// <para>
         /// When false, only a part of the project instance state is serialized (properties and items).
         /// In this case out of proc nodes re-evaluate the project instance from disk to obtain the un-serialized state.
         /// This partial state recombination may lead to build issues when the project instance state differs from what is on disk.
+        /// </para>
         /// </summary>
         public bool TranslateEntireState
         {
@@ -817,9 +818,8 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// The ID of the evaluation that produced this ProjectInstance.
-        ///
-        /// See <see cref="Project.LastEvaluationId"/>.
+        /// <para>The ID of the evaluation that produced this ProjectInstance.</para>
+        /// <para>See <see cref="Project.LastEvaluationId"/>.</para>
         /// </summary>
         public int EvaluationId
         {

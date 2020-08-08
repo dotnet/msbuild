@@ -18,51 +18,62 @@ using OutOfProcNode = Microsoft.Build.Execution.OutOfProcNode;
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
+    /// <para>
     /// Maintains a cache of all loaded ProjectRootElement's for design time purposes.
     /// Weak references are held to add added ProjectRootElement's.
     /// Strong references are held to a limited number of added ProjectRootElement's.
-    /// 
+    /// </para>
+    /// <para>
     /// 1. Loads of a ProjectRootElement will share any existing loaded ProjectRootElement, rather
     /// than loading and parsing a new one. This is the case whether the ProjectRootElement
     /// is loaded directly or imported.
-    /// 
-    /// 2. For design time, only a weak reference needs to be held, because all users have a strong reference.
-    /// 
+    /// </para>
+    /// <para>2. For design time, only a weak reference needs to be held, because all users have a strong reference.</para>
+    /// <para>
     /// 3. Because all loads of a ProjectRootElement consult this cache, they can be assured that any
     /// entries in this cache are up to date. For example, if a ProjectRootElement is modified and saved,
     /// the cached ProjectRootElement will be the loaded one that was saved, so it will be up to date.
-    /// 
+    /// </para>
+    /// <para>
     /// 4. If, after a project has been loaded, an external app changes the project file content on disk, it is
     /// important that a subsequent load of that project does not return stale ProjectRootElement. To avoid this, the
     /// timestamp of the file on disk is compared to the timestamp of the file at the time that the ProjectRootElement loaded it.
-    /// 
+    /// </para>
+    /// <para>
     /// 5. For build time, some strong references need to be held, as otherwise the ProjectRootElement's for reuseable
     /// imports will be collected, and time will be wasted reparsing them. However we do not want to hold strong references
     /// to all ProjectRootElement's, consuming memory without end. So a simple priority queue is used. All Adds and Gets boost their
     /// entry to the top. As the queue gets too big, low priority entries are dropped.
-    /// 
+    /// </para>
+    /// <para>
     /// No guesses are made at which files are more interesting to cache, beyond the most-recently-used list. For example, ".targets" files
     /// or imported files are not treated specially, as this is a potentially unreliable heuristic. Besides, caching a project file itself could
     /// be useful, if for example you want to build it twice with different sets of properties.
-    /// 
+    /// </para>
+    /// <para>
     /// Because of the strongly typed list, some ProjectRootElement's will be held onto indefinitely. This is an acceptable price to pay for
     /// being able to provide a commonly used ProjectRootElement immediately it's needed. It is mitigated by the list being finite and small, and
     /// because we allow ProjectCollection.UnloadAllProjects to hint to us to clear the list.
-    /// 
+    /// </para>
+    /// <para>
     /// Implicit references are those which were loaded as a result of a build, and not explicitly loaded through, for instance, the project
     /// collection.
+    /// </para>
     /// 
     /// </summary>
     internal class ProjectRootElementCache : ProjectRootElementCacheBase
     {
         /// <summary>
+        /// <para>
         /// The maximum number of entries to keep strong references to.
         /// This has to be strong enough to make sure that key .targets files aren't pushed
         /// off by transient loads of non-reusable files like .user files.
-        /// 
+        /// </para>
+        /// <para>
         /// Made this as large as 50 because VC has a large number of
         /// regularly used property sheets and other imports.
         /// If you change this, update the unit tests.
+        /// </para>
         /// </summary>
         /// <remarks>
         /// If this number is increased much higher, the datastructure may
@@ -132,15 +143,17 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// <para>
         /// Returns an existing ProjectRootElement for the specified file path, if any.
         /// If none exists, calls the provided delegate to load one, and adds that to the cache.
         /// The reason that it calls back to do this is so that the cache is locked between determining
         /// that the entry does not exist and adding the entry.
-        /// 
+        /// </para>
+        /// <para>
         /// If <see cref="_autoReloadFromDisk"/> was set to true, and the file on disk has changed since it was cached,
         /// it will be reloaded before being returned.
-        /// 
-        /// Thread safe.
+        /// </para>
+        /// <para>Thread safe.</para>
         /// </summary>
         /// <remarks>
         /// Never needs to consult the strong cache as well, since if the item is in there, it will

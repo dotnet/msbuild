@@ -10,34 +10,41 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Collections
 {
     /// <summary>
-    /// A dictionary of unordered property or metadata name/value pairs, with copy-on-write semantics.
-    /// 
+    /// <para>A dictionary of unordered property or metadata name/value pairs, with copy-on-write semantics.</para>
+    /// <para>
     /// The copy-on-write semantics are only possible if the contained type is immutable, which currently
     /// means it can only be used for ProjectMetadataInstance's.
     /// USE THIS DICTIONARY ONLY FOR IMMUTABLE TYPES. OTHERWISE USE PROPERTYDICTIONARY.
+    /// </para>
     /// 
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The value that this adds over IDictionary&lt;string, T&gt; is:
     ///     - enforces that key = T.Name
     ///     - default enumerator is over values
     ///     - (marginal) enforces the correct key comparer
     ///     - potentially makes copy on write possible
-    /// 
+    /// </para>
+    /// <para>
     /// Really a Dictionary&lt;string, T&gt; where the key (the name) is obtained from IKeyed.Key.
     /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and 
     /// either not expose this collection or expose it through a readonly wrapper.
-    ///
+    /// </para>
+    /// <para>
     /// At various places in this class locks are taken on the backing collection.  The reason for this is to allow
     /// this class to be asynchronously enumerated.  This is accomplished by the CopyOnReadEnumerable which will 
     /// lock the backing collection when it does its deep cloning.  This prevents asynchronous access from corrupting
     /// the state of the enumeration until the collection has been fully copied.
-    ///
+    /// </para>
+    /// <para>
     /// The use of a CopyOnWriteDictionary does not reduce the concurrency of this collection, because CopyOnWriteDictionary
     /// offers the same concurrency guarantees (concurrent readers OR single writer) for EACH user of the dictionary.
-    /// 
+    /// </para>
+    /// <para>
     /// Since we use the mutable ignore case comparer we need to make sure that we lock our self before we call the comparer since the comparer can call back 
     /// into this dictionary which could cause a deadlock if another thread is also accessing another method in the dictionary.
+    /// </para>
     /// </remarks>
     /// <typeparam name="T">Property or Metadata class type to store</typeparam>
     [DebuggerDisplay("#Entries={Count}")]

@@ -18,12 +18,15 @@ using Microsoft.Build.Utilities;
 namespace TaskUsageLogger
 {
     /// <summary>
+    /// <para>
     /// Sample logger used to gather a CSV-formatted list of all tasks run in the build,
     /// associated by Target, project, targets file they're defined in, and assembly the
     /// task comes from.
-    ///
+    /// </para>
+    /// <para>
     /// Usage:
     ///   /logger:TaskUsageLogger,[path to TaskUsageLogger.dll];[output csv filename]
+    /// </para>
     /// </summary>
     /// <remarks>
     /// KNOWN ISSUES:
@@ -392,10 +395,11 @@ namespace TaskUsageLogger
         }
 
         /// <summary>
-        /// Returns 'true' if this is a project we don't want to collect data from.
-        ///
+        /// <para>Returns 'true' if this is a project we don't want to collect data from.</para>
+        /// <para>
         /// Since both the '.sln' and '.metaproj' files are faked up projects used by MSBuild essentially
         /// as plumbing to connect other real projects, they're not very interesting to examine.
+        /// </para>
         /// </summary>
         /// <param name="projectPath"></param>
         /// <returns></returns>

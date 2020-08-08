@@ -489,28 +489,33 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        /// Creates a standard ProjectCollection and adds a fake toolset with the following contents to it:  
-        /// 
+        /// <para>Creates a standard ProjectCollection and adds a fake toolset with the following contents to it:  </para>
+        /// <para>
         /// ToolsVersion = Fake
         /// Base Properties: 
         /// a = a1
         /// b = b1
-        /// 
+        /// </para>
+        /// <para>
         /// SubToolset "12.0": 
         /// d = d4
         /// e = e5
-        /// 
+        /// </para>
+        /// <para>
         /// SubToolset "v11.0": 
         /// b = b2
         /// c = c2
-        /// 
+        /// </para>
+        /// <para>
         /// SubToolset "FakeSubToolset":
         /// a = a3
         /// c = c3
-        /// 
+        /// </para>
+        /// <para>
         /// SubToolset "v13.0":
         /// f = f6 
         /// g = g7
+        /// </para>
         /// </summary>
         private Toolset GetFakeToolset(IDictionary<string, string> globalPropertiesForProjectCollection)
         {

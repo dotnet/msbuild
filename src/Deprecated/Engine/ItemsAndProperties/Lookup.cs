@@ -13,51 +13,58 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// <para>
     /// Contains a list of item and property collections, optimized to allow
     ///     - very fast "cloning"
     ///     - quick lookups
     ///     - scoping down of item subsets in nested scopes (useful for batches)
     ///     - isolation of adds, removes, modifies, and property sets inside nested scopes
-    ///     
+    /// </para>
+    /// <para>
     /// When retrieving the item group for an item type, each table is consulted in turn,
     /// starting with the primary table (the "top" or "innermost" table), until a table is found that has an entry for that type.
     /// When an entry is found, it is returned without looking deeper.
     /// This makes it possible to let callers see only a subset of items without affecting or cloning the original item groups,
     /// by populating a scope with item groups that are empty or contain subsets of items in lower scopes.
-    /// 
-    /// Instances of this class can be cloned with Clone() to share between batches.
-    /// 
+    /// </para>
+    /// <para>Instances of this class can be cloned with Clone() to share between batches.</para>
+    /// <para>
     /// When EnterScope() is called, a fresh primary table is inserted, and all adds and removes will be invisible to
     /// any clones made before the scope was entered and anyone who has access to item groups in lower tables.
-    /// 
+    /// </para>
+    /// <para>
     /// When LeaveScope() is called, the primary tables are merged into the secondary tables, and the primary tables are discarded.
     /// This makes the adds and removes in the primary tables visible to clones made during the previous scope.
-    /// 
+    /// </para>
+    /// <para>
     /// Scopes can be populated (before Adds, Removes, and Lookups) using PopulateWithItem(). This reduces the set of items of a particular
     /// type that are visible in a scope, because lookups of items of this type will stop at this level and see the subset, rather than the
     /// larger set in a scope below.
-    /// 
+    /// </para>
+    /// <para>
     /// Items can be added or removed by calling AddNewItem() and RemoveItem(). Only the primary level is modified.
     /// When items are added or removed they enter into a primary table exclusively for adds or removes, instead of the main primary table.
     /// This allows the adds and removes to be applied to the scope below on LeaveScope(). Even when LeaveScope() is called, the adds and removes
     /// stay in their separate add and remove tables: if they were applied to a main table, they could truncate the downward traversal performed by lookups
     /// and hide items in a lower main table. Only on the final call of LeaveScope() can all adds and removes be applied to the outermost table, i.e., the project.
-    /// 
-    /// Much the same applies to properties.
-    /// 
-    /// For sensible semantics, only the current primary scope can be modified at any point.
+    /// </para>
+    /// <para>Much the same applies to properties.</para>
+    /// <para>For sensible semantics, only the current primary scope can be modified at any point.</para>
     /// </summary>
     /// <remarks>
+    /// <para>
     /// THREAD SAFETY:
     ///     - BuildItemGroups are currently unsafe for concurrent reading and writing (they have a List field). So a Lookup cannot be read and written to 
     ///       concurrently.
     ///     - To avoid this problem, the lookup can be populated with a clone of an item group, and lookup can be Truncate()'d at the level of that clone 
     ///       until control of the lookup goes back to the safe thread.
-    /// 
+    /// </para>
+    /// <para>
     /// FUTURE:
     ///     - We could eliminate all the code performing resetting of project build state (currently implemented using special tables for Output properties and 
     ///       backups of persisted item groups and metadata before modification) by using a Lookup, entering scope at the start of a build, 
     ///       then when build state needs to be reset, throwing away the Lookup (rather than leaving scope).
+    /// </para>
     /// </remarks>
     internal class Lookup
     {

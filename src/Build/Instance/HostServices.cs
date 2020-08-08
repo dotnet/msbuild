@@ -139,14 +139,17 @@ namespace Microsoft.Build.Execution
 
 #if FEATURE_COM_INTEROP
         /// <summary>
+        /// <para>
         /// Register a remote host object for a particular task/target pair.
         /// The remote host object require registered in Running Object Table(ROT) already.
         /// Overwrites any existing host object.
-        ///
+        /// </para>
+        /// <para>
         /// It's caller's responsibly:
         /// To maintain the live cycle of the host object.
         /// Register and unregister from ROT.
         /// Ensure the host object has appropriate COM interface that can be used in task.
+        /// </para>
         /// </summary>
         /// <param name="projectFile">project file name</param>
         /// <param name="targetName">target name</param>

@@ -530,10 +530,11 @@ namespace Microsoft.Build.Evaluation
         /// Read-only dead dictionary.
         /// </summary>
         /// <remarks>
-        /// This is the publicly exposed getter, that translates into a read-only dead IDictionary&lt;string, string&gt;.
-        ///
+        /// <para>This is the publicly exposed getter, that translates into a read-only dead IDictionary&lt;string, string&gt;.</para>
+        /// <para>
         /// To be consistent with Project, setting and removing global properties is done with
         /// <see cref="SetGlobalProperty">SetGlobalProperty</see> and <see cref="RemoveGlobalProperty">RemoveGlobalProperty</see>.
+        /// </para>
         /// </remarks>
         public IDictionary<string, string> GlobalProperties
         {
@@ -2360,12 +2361,15 @@ namespace Microsoft.Build.Evaluation
             /// with different global properties and/or tools version.
             /// </summary>
             /// <remarks>
+            /// <para>
             /// If hosts tend to load lots of projects with the same path, the value will have to be
             /// changed to a more efficient type of collection.
-            ///
+            /// </para>
+            /// <para>
             /// Lock on this object. Concurrent load must be thread safe.
             /// Not using ConcurrentDictionary because some of the add/update
             /// semantics would get convoluted.
+            /// </para>
             /// </remarks>
             private Dictionary<string, List<Project>> _loadedProjects = new Dictionary<string, List<Project>>(StringComparer.OrdinalIgnoreCase);
 

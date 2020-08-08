@@ -22,17 +22,21 @@ namespace Microsoft.Build.BackEnd
     /// The Target Builder is responsible for building a single target within a given project.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The Target Builder is a stack machine which builds project targets.  Each time a target needs to be built, it is
     /// pushed onto the stack.  The main loop for the Target Builder simply evaluates the top item on the stack to determine
     /// which action to take.  These actions comprise the target state machine, as represented by the states of the
     /// TargetEntry object.
-    ///
+    /// </para>
+    /// <para>
     /// When a target completes, all of its outputs are available in the Lookup contained in the TargetEntry.  In fact, everything that it changed
     /// in the global state is available by virtue of its Lookup being merged with the current Target's lookup.
-    ///
+    /// </para>
+    /// <para>
     /// For CallTarget tasks, this behavior is not the same.  Rather the Lookup from a CallTarget call does not get merged until the calling
     /// Target has completed.  This is considered erroneous behavior and 'normal' version of CallTarget will be implemented which does not exhibit
     /// this.
+    /// </para>
     /// </remarks>
     internal class TargetBuilder : ITargetBuilder, ITargetBuilderCallback, IBuildComponent
     {

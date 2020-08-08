@@ -169,11 +169,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// <para>
         /// Creates a new temp path
         /// Sets all OS temp environment variables to the new path
-        ///
+        /// </para>
+        /// <para>
         /// Cleanup:
         /// - restores OS temp environment variables
+        /// </para>
         /// </summary>
         public TransientTempPath SetTempPath(string tempPath, bool deleteTempDirectory = false)
         {

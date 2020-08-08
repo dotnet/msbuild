@@ -1321,13 +1321,16 @@ namespace Microsoft.Build.Execution
             }
 
             /// <summary>
+            /// <para>
             /// ITaskItem implementation which copies the metadata on this item to the specified item.
             /// Copies direct and item definition metadata.
             /// Does not copy built-in metadata, and will not overwrite existing, non-empty metadata.
             /// If the destination implements ITaskItem2, this avoids losing the escaped nature of values.
-            ///
+            /// </para>
+            /// <para>
             /// When copying metadata to a task item which can be accessed from a task (Utilities task item)
             /// this method will merge and expand any metadata originating with item definitions.
+            /// </para>
             /// </summary>
             /// <param name="destinationItem">destination item to copy the metadata from this to</param>
             /// <param name="addOriginalItemSpec">Whether the OriginalItemSpec should be added as a piece

@@ -195,10 +195,11 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Constructor, that initializes the property with cloned information.
-        ///
+        /// <para>Constructor, that initializes the property with cloned information.</para>
+        /// <para>
         /// Callers -- Please ensure that the propertyValue passed into this constructor
         /// is actually computed by calling GetXmlNodeInnerContents on the propertyElement.
+        /// </para>
         /// </summary>
         /// <param name="propertyElement"></param>
         /// <param name="propertyValue"></param>
@@ -635,14 +636,16 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Creates a shallow or deep clone of this BuildProperty object.
-        ///
+        /// <para>Creates a shallow or deep clone of this BuildProperty object.</para>
+        /// <para>
         /// A shallow clone points at the same XML element as the original, so
         /// that modifications to the name or value will be reflected in both
         /// copies.  However, the two copies could have different a finalValue.
-        ///
+        /// </para>
+        /// <para>
         /// A deep clone actually clones the XML element as well, so that the
         /// two copies are completely independent of each other.
+        /// </para>
         /// </summary>
         /// <param name="deepClone"></param>
         /// <returns></returns>

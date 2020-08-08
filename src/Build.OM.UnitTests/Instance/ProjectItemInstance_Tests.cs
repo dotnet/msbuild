@@ -353,10 +353,11 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
+        /// <para>
         /// Create a new Microsoft.Build.Utilities.TaskItem from the ProjectItemInstance where the ProjectItemInstance
         /// has item definition metadata on it.
-        /// 
-        /// Verify the Utilities task item gets the expanded metadata from the ItemDefinitionGroup.
+        /// </para>
+        /// <para>Verify the Utilities task item gets the expanded metadata from the ItemDefinitionGroup.</para>
         /// </summary>
         [Fact]
         public void InstanceItemToUtilItemIDG()

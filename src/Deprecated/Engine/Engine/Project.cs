@@ -66,15 +66,18 @@ namespace Microsoft.Build.BuildEngine
     };
 
     /// <summary>
+    /// <para>
     /// This class represents an MSBuild project.  It is a container for items,
     /// properties, and targets.  It can load in project content from in-memory
     /// XML or from an XML file, and it can save to an XML file, preserving
     /// most whitespace and all XML comments.
-    ///
+    /// </para>
+    /// <para>
     /// All Project objects must be associated with an Engine object, in order
     /// to get at the loggers and other shared information.  Also, when doing
     /// a "build", the Engine needs to keep track of which projects are currently
     /// building.
+    /// </para>
     /// </summary>
     [Obsolete("This class has been deprecated. Please use Microsoft.Build.Evaluation.Project from the Microsoft.Build assembly instead.")]
     public class Project
@@ -791,16 +794,18 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// When gotten, returns the effective tools version being used by this project.
         /// If the tools version is being overridden, the overriding value will be the effective tools version.
         /// Otherwise, if there is a ToolsVersion attribute on the Project element, that is the effective tools version.
         /// Otherwise, the default tools version of the parent engine is the effective tools version.
-        ///
-        /// When set, overrides the current tools version of this project with the provided value.
-        ///
+        /// </para>
+        /// <para>When set, overrides the current tools version of this project with the provided value.</para>
+        /// <para>
         /// NOTE: This is distinct to the ToolsVersion attribute, if any, on the Project element.
         /// To get and set the ToolsVersion attribute on the Project element use the Project.DefaultToolsVersion
         /// property.
+        /// </para>
         /// </summary>
         public string ToolsVersion
         {
@@ -843,15 +848,18 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// Public read-write accessor for the ToolsVersion xml attribute found on the
         /// &lt;Project /&gt; element.  If this attribute is not present on the &lt;Project/&gt;
         /// element, getting the value will return the default tools version of the parent Engine.
-        ///
+        /// </para>
+        /// <para>
         /// NOTE: This value is distinct from the effective tools version used during a build,
         /// as that value may be overridden during construction of the Project instance or
         /// by setting the Project.ToolsVersion property. Setting this attribute value will not change the
         /// effective tools version if it has been overridden. To change the effective tools version,
         /// set the Project.ToolsVersion property.
+        /// </para>
         /// </summary>
         public string DefaultToolsVersion
         {
@@ -1075,6 +1083,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// Read-only accessor for the final set of evaluated properties for
         /// this project.  This takes into account all conditions and property
         /// expansions, and gives back a single linear collection of project-level
@@ -1084,9 +1093,11 @@ namespace Microsoft.Build.BuildEngine
         /// properties, and the changes will be reflected in the project file
         /// when it is saved again.  However, adding or deleting properties
         /// from this collection will not impact the project.
-        ///
+        /// </para>
+        /// <para>
         /// PERF WARNING: cloning a BuildPropertyGroup can be very expensive -- use
         /// only when a copy of the entire property bag is strictly necessary
+        /// </para>
         /// </summary>
         /// <owner>RGoel</owner>
         public BuildPropertyGroup EvaluatedProperties
@@ -1133,6 +1144,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// Read-only accessor for the collection of evaluated items, taking into
         /// account property expansions and wildcards, but ignoring "Condition"s.
         /// This way, an IDE can display all items regardless of whether they're
@@ -1141,9 +1153,11 @@ namespace Microsoft.Build.BuildEngine
         /// will be reflected in the project file the next time it is saved.
         /// However, adding or deleting items from this collection will not impact
         /// the project.
-        ///
+        /// </para>
+        /// <para>
         /// See the comments for the "evaluatedItemsIgnoringCondition" member
         /// variable up above.
+        /// </para>
         /// </summary>
         /// <owner>RGoel</owner>
         public BuildItemGroup EvaluatedItemsIgnoringCondition
@@ -2279,6 +2293,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// This method is called from the IDE to set a particular property at
         /// the project level.  The IDE doesn't care which property group it's
         /// in, as long as it gets set.  This method will search the existing
@@ -2286,9 +2301,11 @@ namespace Microsoft.Build.BuildEngine
         /// change the value in place.  Otherwise, it will either add a new
         /// property to that property group, or possibly even add a new property
         /// group to the project.
-        ///
+        /// </para>
+        /// <para>
         /// This method also takes the "Condition" string for the property group
         /// that the IDE wants this property placed under.
+        /// </para>
         /// </summary>
         /// <owner>RGoel, DavidLe</owner>
         /// <param name="propertyName"></param>

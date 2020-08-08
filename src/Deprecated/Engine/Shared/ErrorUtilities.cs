@@ -32,13 +32,16 @@ namespace Microsoft.Build.BuildEngine.Shared
         #region VerifyThrow -- for internal errors
 
         /// <summary>
+        /// <para>
         /// Puts up an assertion dialog in debug builds, and throws an exception in
         /// both debug and release builds. Since this is not a no-op in release builds,
         /// it should not be called repeatedly in performance-critical scenarios.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <owner>RGoel, SumedhK</owner>
         /// <param name="showAssert"></param>
@@ -245,11 +248,12 @@ namespace Microsoft.Build.BuildEngine.Shared
         #region VerifyThrowInvalidOperation
 
         /// <summary>
-        /// Throws an InvalidOperationException.
-        /// 
+        /// <para>Throws an InvalidOperationException.</para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <owner>RGoel, SumedhK</owner>
         /// <param name="resourceName"></param>

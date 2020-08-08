@@ -1164,13 +1164,16 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// <para>
         /// Custom scheduler for the SQL folks to solve a performance problem with their builds where they end up with a few long-running
         /// requests on all but one node, and then a very large number of short-running requests on that one node -- which is by design for
         /// our current scheduler, but makes it so that later in the build, when these configurations are re-entered with new requests, the
         /// build becomes essentially serial because so many of the configurations are tied to that one node.
-        ///
+        /// </para>
+        /// <para>
         /// Fixes that problem by intentionally choosing to refrain from assigning new configurations to idle nodes if those idle nodes already
         /// have more than their fair share of the existing configurations assigned to them.
+        /// </para>
         /// </summary>
         private void AssignUnscheduledRequestsUsingCustomSchedulerForSQL(List<ScheduleResponse> responses, HashSet<int> idleNodes)
         {
@@ -1327,16 +1330,17 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Adds CreateNode responses to satisfy all the affinities in the list of requests, with the following constraints:
-        ///
+        /// <para>Adds CreateNode responses to satisfy all the affinities in the list of requests, with the following constraints:</para>
+        /// <para>
         /// a) Issue no more than one response to create an inproc node, and aggressively issues as many requests for an out-of-proc node
         ///    as there are requests to assign to them.
-        ///
+        /// </para>
+        /// <para>
         /// b) Don't exceed the max node count, *unless* there isn't even one node of the necessary affinity yet. (That means that even if there's a max
         ///    node count of e.g., 3, and we have already created 3 out of proc nodes, we will still create an inproc node if affinity requires it; if
         ///    we didn't, the build would jam.)
-        ///
-        /// Returns true if there is a pending response to create a new node.
+        /// </para>
+        /// <para>Returns true if there is a pending response to create a new node.</para>
         /// </summary>
         private bool CreateNewNodeIfPossible(List<ScheduleResponse> responses, IEnumerable<SchedulableRequest> requests)
         {

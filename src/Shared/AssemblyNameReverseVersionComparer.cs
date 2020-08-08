@@ -16,13 +16,13 @@ namespace Microsoft.Build.Shared
         internal readonly static IComparer<AssemblyNameExtension> GenericComparer = new AssemblyNameReverseVersionComparer();
 
         /// <summary>
-        /// Compare x and y by version only.
-        /// 
-        /// Change the return value to sort the values in reverse order.
-        /// 
+        /// <para>Compare x and y by version only.</para>
+        /// <para>Change the return value to sort the values in reverse order.</para>
+        /// <para>
         /// If x is greater than y  return -1 indicating x is less than y. 
         /// If x is less than y  return 1 indicating x is greater than  y.
         /// If x and y are equal return 0.
+        /// </para>
         /// </summary>
         public int Compare(AssemblyNameExtension x, AssemblyNameExtension y)
         {

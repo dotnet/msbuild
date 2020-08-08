@@ -23,16 +23,19 @@ namespace Microsoft.Build.Evaluation
             () => new Regex(@"^\$\(([^\$\(\)]*)\)$", RegexOptions.Compiled));
 
         /// <summary>
+        /// <para>
         /// Update our table which keeps track of all the properties that are referenced
         /// inside of a condition and the string values that they are being tested against.
         /// So, for example, if the condition was " '$(Configuration)' == 'Debug' ", we
         /// would get passed in leftValue="$(Configuration)" and rightValueExpanded="Debug".
         /// This call would add the string "Debug" to the list of possible values for the 
         /// "Configuration" property.
-        ///
+        /// </para>
+        /// <para>
         /// This method also handles the case when two or more properties are being
         /// concatenated together with a vertical bar, as in '
         ///     $(Configuration)|$(Platform)' == 'Debug|x86'
+        /// </para>
         /// </summary>
         /// <param name="conditionedPropertiesTable"></param>
         /// <param name="leftValue"></param>

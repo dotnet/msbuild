@@ -18,27 +18,29 @@ namespace Microsoft.Build.BuildEngine
     /// items they consume into "buckets", based on the values of select item metadata.
     /// </summary>
     /// <remarks>
-    /// What batching does
-    /// 
+    /// <para>What batching does</para>
+    /// <para>
     /// Batching partitions the items consumed by the batchable object into buckets, where each bucket 
     /// contains a set of items that have the same value set on all item metadata consumed by the object. 
     /// Metadata consumed may be unqualified, for example %(m), or qualified by the item list to which it 
     /// refers, for example %(a.m).
-    /// 
+    /// </para>
+    /// <para>
     /// If metadata is qualified, for example %(a.m), then this is considered distinct to metadata with the 
     /// same name on a different item type. For example, %(a.m) is distinct to %(b.m), and items of type �b� 
     /// are considered to always have a blank value for %(a.m). This means items of type �b� will only be 
     /// placed in buckets where %(a.m) is blank. However %(a.m) is equivalent to %(m) on items of type �a�.
-    /// 
+    /// </para>
+    /// <para>
     /// There is an extra ambiguity rule: every items consumed by the object must have an explicit value for 
     /// every piece of unqualified metadata. For example, if @(a), %(m), and %(a.n) are consumed, every item 
     /// of type �a� must have a value for the metadata �m� but need not all necessarily have a value for the 
     /// metadata �n�. This rule eliminates ambiguity about whether items that do not define values for an 
     /// unqualified metadata should go in all buckets, or just into buckets with a blank value for 
     /// that metadata.
-    /// 
-    /// For example 
-    /// 
+    /// </para>
+    /// <para>For example </para>
+    /// <para>
     /// <ItemGroup>
     /// <a Include='a1;a2'>
     ///   <n>m0</n>
@@ -54,18 +56,20 @@ namespace Microsoft.Build.BuildEngine
     /// </b>
     /// <b Include='b4'/>
     /// </ItemGroup>
-    /// 
+    /// </para>
+    /// <para>
     /// <Target Name="t" >
     ///   <Message Text="a={@(a).%(a.n)} b={@(b).%(b.n)}" />
     /// </Target>
-    /// 
-    /// Will produce 5 buckets: 
-    /// 
+    /// </para>
+    /// <para>Will produce 5 buckets: </para>
+    /// <para>
     /// a={a1;a2.m0} b={.}
     /// a={a3.m1} b={.}
     /// a={.} b={b1.n0}
     /// a={.} b={b2;b3.n1}
     /// a={.} b={b4.}
+    /// </para>
     /// 
     /// </remarks>
     internal static class BatchingEngine
@@ -177,18 +181,21 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// Of all the item lists that are referenced in this batchable object, which ones should we
         /// batch on, and which ones should we just pass in wholesale to every invocation of the 
         /// target/task?
-        /// 
+        /// </para>
+        /// <para>
         /// Rule #1.  If the user has referenced any *qualified* item metadata such as %(EmbeddedResource.Culture),
         /// then that item list "EmbeddedResource" will definitely get batched.
-        /// 
+        /// </para>
+        /// <para>
         /// Rule #2.  For all the unqualified item metadata such as %(Culture), we make sure that 
         /// every single item in every single item list being passed into the task contains a value
         /// for that metadata.  If not, it's an error.  If so, we batch all of those item lists.
-        /// 
-        /// All other item lists will not be batched, and instead will be passed in wholesale to all buckets.
+        /// </para>
+        /// <para>All other item lists will not be batched, and instead will be passed in wholesale to all buckets.</para>
         /// </summary>
         /// <returns>Hashtable containing the item names that should be batched.</returns>
         private static Hashtable GetItemListsToBeBatched

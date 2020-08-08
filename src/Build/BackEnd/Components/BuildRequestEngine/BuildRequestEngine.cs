@@ -1055,18 +1055,22 @@ namespace Microsoft.Build.BackEnd
         /// <param name="issuingEntry">The BuildRequestEntry which is making the request</param>
         /// <param name="newRequests">The array of "child" build requests to be issued.</param>
         /// <remarks>
+        /// <para>
         /// When we receive a build request, we first have to determine if we already have a configuration which matches the
         /// one used by the request.  We do this because everywhere we deal with requests and results beyond this function, we
         /// use configuration ids, which are assigned once by the Build Manager and are global to the system.  If we do
         /// not have a global configuration id, we can't check to see if we already have build results for the request, so we 
         /// cannot send the request out.  Thus, first we determine the configuration id.
-        /// 
+        /// </para>
+        /// <para>
         /// Assuming we don't have the global configuration id locally, we will send the configuration to the Build Manager.
         /// It will look up or assign the global configuration id and send it back to us.
-        /// 
+        /// </para>
+        /// <para>
         /// Once we have the global configuration id, we can then look up results locally.  If we have enough results to fulfill
         /// the request, we give them back to the request, otherwise we have to forward the request to the Build Mangager
         /// for scheduling.
+        /// </para>
         /// </remarks>
         private void IssueBuildRequests(BuildRequestEntry issuingEntry, FullyQualifiedBuildRequest[] newRequests)
         {

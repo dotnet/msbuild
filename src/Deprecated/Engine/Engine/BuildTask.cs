@@ -313,14 +313,17 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
 
         /// <summary>
+        /// <para>
         /// This retrieves the list of all parameter names from the element
         /// node of this task. Note that it excludes anything that a specific
         /// property is exposed for or that isn't valid here (Name, Condition,
         /// ContinueOnError).
-        ///
+        /// </para>
+        /// <para>
         /// Note that if there are none, it returns string[0], rather than null,
         /// as it makes writing foreach statements over the return value so
         /// much simpler.
+        /// </para>
         /// </summary>
         /// <returns></returns>
         /// <owner>rgoel</owner>
@@ -375,11 +378,12 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// This sets an arbitrary attribute on the task element.  These
         /// are attributes that the project author has placed on the task element
         /// that get passed in to the task.
-        ///
-        /// This optionally escapes the parameter value so it will be treated as a literal.
+        /// </para>
+        /// <para>This optionally escapes the parameter value so it will be treated as a literal.</para>
         /// </summary>
         /// <param name="parameterName"></param>
         /// <param name="parameterValue"></param>

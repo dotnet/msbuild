@@ -703,9 +703,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// This pattern should *not* recurse indefinitely since there is no '**' in the pattern:
-        ///
-        ///        c:\?emp\foo
+        /// <para>This pattern should *not* recurse indefinitely since there is no '**' in the pattern:</para>
+        /// <para>       c:\?emp\foo</para>
         ///
         /// </summary>
         [Fact]
@@ -2233,14 +2232,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// A general purpose method used to:
-        ///
+        /// <para>A general purpose method used to:</para>
+        /// <para>
         /// (1) Simulate a file system.
         /// (2) Check whether all matchingFiles where hit by the filespec pattern.
         /// (3) Check whether all nonmatchingFiles were *not* hit by the filespec pattern.
         /// (4) Check whether all untouchableFiles were not even requested (usually for perf reasons).
-        ///
-        /// These can be used in various combinations to test the filematcher framework.
+        /// </para>
+        /// <para>These can be used in various combinations to test the filematcher framework.</para>
         /// </summary>
         /// <param name="filespec">A FileMatcher filespec, possibly with wildcards.</param>
         /// <param name="matchingFiles">Files that exist and should be matched.</param>
@@ -2258,10 +2257,11 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// <para>
         /// Runs the test 4 times with the include and exclude using either forward or backward slashes.
         /// Expects the <param name="filespec"></param> and <param name="excludeFileSpects"></param> to contain only backward slashes
-        ///
-        /// To preserve current MSBuild behaviour, it only does so if the path is not rooted. Rooted paths do not support forward slashes (as observed on MSBuild 14.0.25420.1)
+        /// </para>
+        /// <para>To preserve current MSBuild behaviour, it only does so if the path is not rooted. Rooted paths do not support forward slashes (as observed on MSBuild 14.0.25420.1)</para>
         /// </summary>
         private static void MatchDriverWithDifferentSlashes
             (

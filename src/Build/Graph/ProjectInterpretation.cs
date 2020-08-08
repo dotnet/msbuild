@@ -378,11 +378,14 @@ namespace Microsoft.Build.Graph
             }
 
             /// <summary>
+            /// <para>
             /// Given a project and a set of entry targets the project would get called with,
             /// parse the project's project reference target specification and compute how the target would call its references.
-            ///
+            /// </para>
+            /// <para>
             /// The calling code should then call <see cref="GetApplicableTargetsForReference"/> for each of the project's references
             /// to get the concrete targets for each reference.
+            /// </para>
             /// </summary>
             /// <param name="project">Project containing the PRT protocol</param>
             /// <param name="entryTargets">Targets with which <paramref name="project"/> will get called</param>

@@ -114,9 +114,8 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
 
         /// <summary>
-        /// Used for validating the project (file) and its imported files against a designated schema.
-        ///
-        /// PERF NOTE: this property helps to delay creation of the ProjectSchemaValidationHandler object
+        /// <para>Used for validating the project (file) and its imported files against a designated schema.</para>
+        /// <para>PERF NOTE: this property helps to delay creation of the ProjectSchemaValidationHandler object</para>
         /// </summary>
         internal ProjectSchemaValidationHandler SchemaValidator(BuildEventContext buildEventContext)
         {

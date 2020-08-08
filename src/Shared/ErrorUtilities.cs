@@ -452,11 +452,12 @@ namespace Microsoft.Build.Shared
         #region VerifyThrowArgument
 
         /// <summary>
-        /// Throws an ArgumentException that can include an inner exception.
-        /// 
+        /// <para>Throws an ArgumentException that can include an inner exception.</para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         internal static void ThrowArgument
         (
@@ -468,11 +469,12 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Throws an ArgumentException that can include an inner exception.
-        /// 
+        /// <para>Throws an ArgumentException that can include an inner exception.</para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <remarks>
         /// This method is thread-safe.

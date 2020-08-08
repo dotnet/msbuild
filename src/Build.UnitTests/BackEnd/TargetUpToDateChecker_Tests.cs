@@ -123,14 +123,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 
         /// <summary>
-        /// Tests this case:
-        /// 
+        /// <para>Tests this case:</para>
+        /// <para>
         /// <Target Name="x"
         ///         Inputs="@(Items);c.cs"
         ///         Outputs="@(Items->'%(Filename).dll')" />
-        /// 
+        /// </para>
+        /// <para>
         /// If Items = [a.cs;b.cs], and only b.cs is out of date w/r/t its
         /// correlated output b.dll, then we should only build "b" incrementally.
+        /// </para>
         /// </summary>
         [Fact]
         public void MetaInputAndInputItemThatCorrelatesWithOutputItem()
@@ -160,14 +162,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Tests this case:
-        /// 
+        /// <para>Tests this case:</para>
+        /// <para>
         /// <Target Name="x"
         ///         Inputs="@(Items)"
         ///         Outputs="@(Items->'%(Filename).dll');@(Items->'%(Filename).xml')" />
-        /// 
+        /// </para>
+        /// <para>
         /// If Items = [a.cs;b.cs;c.cs], and only b.cs is out of date w/r/t its
         /// correlated outputs (dll or xml), then we should only build "b" incrementally.
+        /// </para>
         /// </summary>
         [Fact]
         public void InputItemThatCorrelatesWithMultipleTransformOutputItems()
@@ -203,14 +207,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Tests this case:
-        /// 
+        /// <para>Tests this case:</para>
+        /// <para>
         /// <Target Name="x"
         ///         Inputs="@(Items);@(MoreItems)"
         ///         Outputs="@(Items->'%(Filename).dll');@(MoreItems->'%(Filename).xml')" />
-        /// 
+        /// </para>
+        /// <para>
         /// If Items = [a.cs;b.cs;c.cs], and only b.cs is out of date w/r/t its
         /// correlated outputs (dll or xml), then we should only build "b" incrementally.
+        /// </para>
         /// </summary>
         [Fact]
         public void MultiInputItemsThatCorrelatesWithMultipleTransformOutputItems()

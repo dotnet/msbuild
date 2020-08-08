@@ -93,13 +93,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Let us have the following dependency structure
-        ///
-        /// X which is in the gac, depends on Z which is not in the GAC
-        ///
-        /// Let copyLocalDependenciesWhenParentReferenceInGac be set to false
-        ///
-        /// Since copyLocalDependenciesWhenParentReferenceInGac is set to false and the parent of Z is in the GAC
+        /// <para>Let us have the following dependency structure</para>
+        /// <para>X which is in the gac, depends on Z which is not in the GAC</para>
+        /// <para>Let copyLocalDependenciesWhenParentReferenceInGac be set to false</para>
+        /// <para>Since copyLocalDependenciesWhenParentReferenceInGac is set to false and the parent of Z is in the GAC</para>
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -168,14 +165,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Let us have the following dependency structure
-        ///
+        /// <para>Let us have the following dependency structure</para>
+        /// <para>
         /// X which is in the gac, depends on Z which is not in the GAC
         /// Y which is not in the gac, depends on Z which is not in the GAC
-        ///
-        /// Let copyLocalDependenciesWhenParentReferenceInGac be set to false
-        ///
-        /// Since copyLocalDependenciesWhenParentReferenceInGac is set to false but one of the parents of Z is not in the GAC and Z is not in the gac we should be copy local
+        /// </para>
+        /// <para>Let copyLocalDependenciesWhenParentReferenceInGac be set to false</para>
+        /// <para>Since copyLocalDependenciesWhenParentReferenceInGac is set to false but one of the parents of Z is not in the GAC and Z is not in the gac we should be copy local</para>
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -232,13 +228,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Let us have the following dependency structure
-        ///
-        /// X which is in the gac, depends on Z which is not in the GAC
-        ///
-        /// Let copyLocalDependenciesWhenParentReferenceInGac be set to true
-        ///
-        /// Since copyLocalDependenciesWhenParentReferenceInGac is set to true and Z is not in the GAC it will be copy local true
+        /// <para>Let us have the following dependency structure</para>
+        /// <para>X which is in the gac, depends on Z which is not in the GAC</para>
+        /// <para>Let copyLocalDependenciesWhenParentReferenceInGac be set to true</para>
+        /// <para>Since copyLocalDependenciesWhenParentReferenceInGac is set to true and Z is not in the GAC it will be copy local true</para>
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -280,14 +273,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Let us have the following dependency structure
-        ///
+        /// <para>Let us have the following dependency structure</para>
+        /// <para>
         /// X which is in the gac, depends on Z which is not in the GAC
         /// Y which is not in the gac, depends on Z which is not in the GAC
-        ///
-        /// Let copyLocalDependenciesWhenParentReferenceInGac be set to true
-        ///
-        /// Since copyLocalDependenciesWhenParentReferenceInGac is set to true and Z is not in the GAC it will be copy local true
+        /// </para>
+        /// <para>Let copyLocalDependenciesWhenParentReferenceInGac be set to true</para>
+        /// <para>Since copyLocalDependenciesWhenParentReferenceInGac is set to true and Z is not in the GAC it will be copy local true</para>
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -1161,19 +1153,23 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this situation.
-        ///
+        /// <para>Consider this situation.</para>
+        /// <para>
         ///    Assembly A
         ///     References: B (a simple name)
-        ///
+        /// </para>
+        /// <para>
         ///    Assembly B
         ///     Assembly Name: B, PKT=aaa, Version=bbb, Culture=ccc
-        ///
+        /// </para>
+        /// <para>
         /// A does _not_ want to load B because it simple name B does not match the
         /// B's assembly name.
-        ///
+        /// </para>
+        /// <para>
         /// Because of this, we want to be sure that if A asks for B (as a simple name)
         /// that we don't find a strongly named assembly.
+        /// </para>
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -1341,10 +1337,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
-        ///
+        /// <para>The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.</para>
+        /// <para>
         /// Target AMD64 and try to get an assembly out of the X86 directory.
         /// Expect it not to resolve and get a message on the console
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -1366,11 +1363,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Regress DevDiv Bugs 714052.
-        ///
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
-        ///
-        /// Target MSIL and get an assembly out of the X86 directory.
+        /// <para>Regress DevDiv Bugs 714052.</para>
+        /// <para>The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.</para>
+        /// <para>Target MSIL and get an assembly out of the X86 directory.</para>
         ///
         /// </summary>
         [Fact]
@@ -1471,9 +1466,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
-        ///
-        /// Target None and get an assembly out of the X86 directory.
+        /// <para>The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.</para>
+        /// <para>Target None and get an assembly out of the X86 directory.</para>
         ///
         /// </summary>
         [Fact]
@@ -1519,11 +1513,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
-        ///
+        /// <para>The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.</para>
+        /// <para>
         /// Assume the folders are searched in the order  A and B.  A contains an x86 assembly and B contains an MSIL assembly.
         /// When targeting MSIL we want to return the MSIL assembly even if we find one in a previous folder first.
         /// Target MSIL and get an assembly out of the MSIL directory.
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -1545,11 +1540,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
-        ///
+        /// <para>The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.</para>
+        /// <para>
         /// Assume the folders are searched in the order  A and B.  A contains an x86 assembly and B contains an MSIL assembly.
         /// When targeting None we want to return the MSIL assembly even if we find one in a previous folder first.
         /// Target None and get an assembly out of the MSIL directory.
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -1570,11 +1566,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,AssemblyFoldersEX}", StringCompareShould.IgnoreCase);
         }
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
-        ///
+        /// <para>The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.</para>
+        /// <para>
         /// Assume the folders are searched in the order  A and B.  A contains an x86 assembly and B contains an MSIL assembly.
         /// When targeting X86 we want to return the MSIL assembly even if we find one in a previous folder first.
         /// Target MSIL and get an assembly out of the MSIL directory.
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -1596,9 +1593,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
-        ///
-        /// Target X86 and get an assembly out of the MSIL directory.
+        /// <para>The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.</para>
+        /// <para>Target X86 and get an assembly out of the MSIL directory.</para>
         ///
         /// </summary>
         [Fact]
@@ -1619,9 +1615,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
-        ///
-        /// Target X86 and get an assembly out of the None directory.
+        /// <para>The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.</para>
+        /// <para>Target X86 and get an assembly out of the None directory.</para>
         ///
         /// </summary>
         [Fact]
@@ -1642,9 +1637,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
-        ///
-        /// Target None and get an assembly out of the None directory.
+        /// <para>The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.</para>
+        /// <para>Target None and get an assembly out of the None directory.</para>
         ///
         /// </summary>
         [Fact]
@@ -1664,9 +1658,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,None}", StringCompareShould.IgnoreCase);
         }
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
-        ///
-        /// Target MSIL and get an assembly out of the None directory.
+        /// <para>The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.</para>
+        /// <para>Target MSIL and get an assembly out of the None directory.</para>
         ///
         /// </summary>
         [Fact]
@@ -1686,9 +1679,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,None}", StringCompareShould.IgnoreCase);
         }
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
-        ///
-        /// Target None and get an assembly out of the MSIL directory.
+        /// <para>The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.</para>
+        /// <para>Target None and get an assembly out of the MSIL directory.</para>
         ///
         /// </summary>
         [Fact]
@@ -1709,9 +1701,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
-        ///
-        /// Target MSIL and get an assembly out of the MSIL directory.
+        /// <para>The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.</para>
+        /// <para>Target MSIL and get an assembly out of the MSIL directory.</para>
         ///
         /// </summary>
         [Fact]
@@ -1732,9 +1723,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
-        ///
-        /// Target X86 and get an assembly out of the X86 directory.
+        /// <para>The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.</para>
+        /// <para>Target X86 and get an assembly out of the X86 directory.</para>
         ///
         /// </summary>
         [Fact]
@@ -1756,11 +1746,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// If the target framework version specified in the registry search path
         /// provided by the targets file has some bogus value, we should just ignore it.
-        ///
+        /// </para>
+        /// <para>
         /// This means if there are remaining search paths to inspect, we should
         /// carry on and inspect those.
+        /// </para>
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
@@ -3550,8 +3543,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   Primary References
         ///         C
@@ -3562,10 +3555,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///        Depends on B
         ///   References - B
         ///        Depends on A version 2
-        ///
-        ///
+        /// </para>
+        /// <para>
         /// Expect to have some information indicating that C and B depend on two different versions of A and that the primary reference which caused the problems
         /// are A and C.
+        /// </para>
         /// </summary>
         [Fact]
         public void ConflictBetweenCopyLocalDependenciesRegress444809()
@@ -3597,8 +3591,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   Primary References
         ///         A version 20 (Un Resolved)
@@ -3608,9 +3602,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///        Depends on A version 2
         ///   References - D
         ///        Depends on A version 20
-        ///
-        ///
-        /// Expect to have some information indicating that Primary reference A, Reference B and Reference D conflict.
+        /// </para>
+        /// <para>Expect to have some information indicating that Primary reference A, Reference B and Reference D conflict.</para>
         /// </summary>
         [Fact]
         public void ConflictBetweenCopyLocalDependenciesRegress444809UnResolvedPrimaryReference()
@@ -3642,16 +3635,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - B
         ///        Depends on D version 2
         ///   References - D, version 1
-        ///
+        /// </para>
+        /// <para>
         /// Both D1 and D2 are CopyLocal. This is a warning because D1 is a lower version
         /// than both D2 so that can't unify. These means that eventually when 
         /// they're copied to the output directory they'll conflict.
+        /// </para>
         /// </summary>
         [Fact]
         public void ConflictGeneratesMessageReferencingAssemblyName()
@@ -3683,16 +3678,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - B
         ///        Depends on D version 2
         ///        Depends on G, version 2
         ///   References - D, version 1
         ///   References - G, version 1
-        ///
-        /// All of Dv1, Dv2, Gv1 and Gv2 are CopyLocal. We should get two conflict warnings, one for D and one for G.
+        /// </para>
+        /// <para>All of Dv1, Dv2, Gv1 and Gv2 are CopyLocal. We should get two conflict warnings, one for D and one for G.</para>
         /// </summary>
         [Fact]
         public void ConflictGeneratesMessageReferencingEachConflictingAssemblyName()
@@ -3726,18 +3721,20 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - A
         ///        Depends on D version 1
         ///   References - B
         ///        Depends on D version 2
         ///   References - D, version 2
-        ///
+        /// </para>
+        /// <para>
         /// Both D1 and D2 are CopyLocal. This is not an error because D2 is a higher version
         /// than D1 so that can unify. D2 should be output as a Primary and D1 should be output
         /// as a dependency.
+        /// </para>
         /// </summary>
         [Fact]
         public void ConflictWithForeVersionPrimary()
@@ -3771,14 +3768,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - D, version 1
         ///   References - D, version 2
-        ///
+        /// </para>
+        /// <para>
         /// Both D1 and D2 are CopyLocal. This is an error because both D1 and D2 can't be copied to
         /// the output directory.
+        /// </para>
         /// </summary>
         [Fact]
         public void ConflictBetweenBackAndForeVersionsCopyLocal()
@@ -3810,14 +3809,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - D, version 1
         ///   References - D, version 2
-        ///
+        /// </para>
+        /// <para>
         /// Neither D1 nor D2 are CopyLocal. This is a solvable conflict because D2 has a higher version
         /// than D1 and there won't be an output directory conflict.
+        /// </para>
         /// </summary>
         [Fact]
         public void ConflictBetweenBackAndForeVersionsNotCopyLocal()
@@ -3845,15 +3846,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - A
         ///        Depends on D version 1, PKT=XXXX
         ///   References - C
         ///        Depends on D version 1, PKT=YYYY
-        ///
-        /// We can't tell which should win because the PKTs are different. This should be an error.
+        /// </para>
+        /// <para>We can't tell which should win because the PKTs are different. This should be an error.</para>
         /// </summary>
         [Fact]
         public void ConflictingDependenciesWithNonMatchingNames()
@@ -3878,16 +3879,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - A
         ///        Depends on D version 1, PKT=XXXX
         ///   References - C
         ///        Depends on D version 1, PKT=YYYY
         ///   References - D version 1, PKT=XXXX
-        ///
-        /// D, PKT=XXXX should win because its referenced in the project.
+        /// </para>
+        /// <para>D, PKT=XXXX should win because its referenced in the project.</para>
         ///
         /// </summary>
         [Fact]
@@ -4248,13 +4249,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this situation:
-        ///
+        /// <para>Consider this situation:</para>
+        /// <para>
         /// App
         ///   References - D, version 1, IrreleventKeyValue=poo.
-        ///
+        /// </para>
+        /// <para>
         /// There's plenty of junk that might end up in a fusion name that have nothing to do with
         /// assembly resolution. Make sure we can tolerate this for primary references.
+        /// </para>
         /// </summary>
         [Fact]
         public void IrrelevantAssemblyNameElement()
@@ -4283,27 +4286,33 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// Regress EVERETT QFE 626
         /// Consider this dependency chain:
-        ///
+        /// </para>
+        /// <para>
         /// App
         ///   References - A (Private=undefined)
         ///        Depends on D
         ///             Depends on E
         ///   References - D (Private=false)
-        ///
+        /// </para>
+        /// <para>
         /// - Reference A does not have a Private attribute, but resolves to CopyLocal=true.
         /// - Reference D has explicit Private=false.
         /// - D would normally be CopyLocal=true.
         /// - E would normally be CopyLocal=true.
-        ///
+        /// </para>
+        /// <para>
         /// Expected:
         /// - D should be CopyLocal=false because the of the matching Reference D which has explicit private=false.
         /// - E should be CopyLocal=false because it's a dependency of D which has explicit private=false.
-        ///
+        /// </para>
+        /// <para>
         /// Rationale:
         /// This is QFE 626. If the user has set "Copy Local" to "false" in VS (means Private=false)
         /// then even if this turns out to be a dependency too, we still shouldn't copy.
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -4345,8 +4354,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - A (private=false)
         ///        Depends on D v1
@@ -4354,17 +4363,21 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///   References - B (private=true)
         ///        Depends on D v2
         ///             Depends on E
-        ///
+        /// </para>
+        /// <para>
         /// Reference A is explicitly Private=false.
         /// Reference B is explicitly Private=true.
         /// Dependencies D and E would normally be CopyLocal=true.
-        ///
+        /// </para>
+        /// <para>
         /// Expected:
         /// - D will be CopyLocal=false because it's dependency of A, which is private=false.
         /// - E will be CopyLocal=true because all source primary references aren't private=false.
-        ///
+        /// </para>
+        /// <para>
         /// Rationale:
         /// Dependencies will be CopyLocal=false if all source primary references are Private=false.
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -4413,21 +4426,24 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Here's how you get into this situation:
-        ///
+        /// <para>Here's how you get into this situation:</para>
+        /// <para>
         /// App
         ///   References - A
         ///   References - B
         ///        Depends on A
-        ///
+        /// </para>
+        /// <para>
         ///    And, the following conditions.
         ///     Primary "A" has no explicit Version (i.e. it's a simple name)
         ///        Primary "A" *is not* resolved.
         ///        Dependency "A" *is* resolved.
-        ///
+        /// </para>
+        /// <para>
         /// Expected result:
         /// * No exceptions.
         /// * Build error about unresolved primary reference.
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -4460,16 +4476,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// We weren't handling scatter assemblies.
-        ///
+        /// <para>We weren't handling scatter assemblies.</para>
+        /// <para>
         /// App
         ///   References - A
-        ///
+        /// </para>
+        /// <para>
         ///    And, the following conditions.
         ///     Primary "A" has two scatter files "M1" and "M2"
-        ///
+        /// </para>
+        /// <para>
         /// Expected result:
         /// * M1 and M2 should be output in ScatterFiles and CopyLocal.
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -4506,23 +4525,25 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// We weren't handling scatter assemblies.
-        ///
+        /// <para>We weren't handling scatter assemblies.</para>
+        /// <para>
         /// App
         ///   References - A
         ///        Depends on B v1.0.0.0
         ///   References - B v2.0.0.0
-        ///
-        ///
+        /// </para>
+        /// <para>
         ///    And, the following conditions.
         ///    * All assemblies are resolved.
         /// * All assemblies are CopyLocal=true.
         /// * Notice the conflict between versions of B.
-        ///
+        /// </para>
+        /// <para>
         /// Expected result:
         /// * During conflict resolution, B v2.0.0.0 should win.
         /// * B v1.0.0.0 should still be listed in dependencies (there's not a strong case for this either way)
         /// * B v1.0.0.0 should be CopyLocal='false'
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -4560,22 +4581,27 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// Mscorlib is special in that it doesn't always have complete metadata. For example,
         /// GetAssemblyName can return null. This was confusing the {RawFileName} resolution path,
         /// which is fairly different from the other code paths.
-        ///
+        /// </para>
+        /// <para>
         /// App
         ///   References - "c:\path-to-mscorlib\mscorlib.dll" (Current FX)
-        ///
+        /// </para>
+        /// <para>
         /// Expected result:
         /// * Even though mscorlib.dll doesn't have an assembly name, we should be able to return
         ///   a result.
-        ///
+        /// </para>
+        /// <para>
         /// NOTES:
         /// * This test works because path-to-mscorlib is the same as the path to the FX folder.
         ///   Because of this, the hard-cache is used rather than actually calling GetAssemblyName
         ///   on mscorlib.dll. This isn't going to work in cases where mscorlib is from an FX other
         ///   than the current target. See the Part2 for a test that covers this other case.
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -4603,20 +4629,25 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// Mscorlib is special in that it doesn't always have complete metadata. For example,
         /// GetAssemblyName can return null. This was confusing the {RawFileName} resolution path,
         /// which is fairly different from the other code paths.
-        ///
+        /// </para>
+        /// <para>
         /// App
         ///   References - "c:\path-to-mscorlib\mscorlib.dll" (non-Current FX)
-        ///
+        /// </para>
+        /// <para>
         /// Expected result:
         /// * Even though mscorlib.dll doesn't have an assembly name, we should be able to return
         ///   a result.
-        ///
+        /// </para>
+        /// <para>
         /// NOTES:
         /// * This test is covering the case where mscorlib.dll is coming from somewhere besides
         ///   the main (ie Whidbey) FX.
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -4831,20 +4862,24 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// 1.  Create a C# classlibrary, and build it.
         /// 2.  Go to disk, and rename ClassLibrary1.dll (or whatever it was) to Foo.dll
         /// 3.  Create a C# console application.
         /// 4.  In the console app, add a File reference to Foo.dll.
         /// 5.  Build the console app.
-        ///
+        /// </para>
+        /// <para>
         /// RESULTS (before bugfix):
         /// ========================
         /// MSBUILD : warning : Couldn't resolve this reference.  Could not locate assembly "ClassLibrary1"
-        ///
+        /// </para>
+        /// <para>
         /// EXPECTED (after bugfix):
         /// ========================
         /// We think it might be reasonable for the ResolveAssemblyReference task to correctly resolve
         /// this reference, especially given the fact that the HintPath was provided in the project file.
+        /// </para>
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -5124,16 +5159,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// The user might pass in a HintPath that has a trailing slash. Need to not crash.
-        ///
+        /// <para>The user might pass in a HintPath that has a trailing slash. Need to not crash.</para>
+        /// <para>
         ///    Assembly A
         ///     References: C, version 2
-        ///
+        /// </para>
+        /// <para>
         ///    Assembly B
         ///     References: C, version 1
-        ///
+        /// </para>
+        /// <para>
         /// There is an App.Config file that redirects all versions of C to V2.
         /// Assemblies A and B are both located via their HintPath.
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -5281,17 +5319,20 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Here's how you get into this situation:
-        ///
+        /// <para>Here's how you get into this situation:</para>
+        /// <para>
         /// App
         ///   References - Microsoft.Build.Engine
         ///     Hintpath = C:\Regress435487\microsoft.build.engine.dll
-        ///
+        /// </para>
+        /// <para>
         ///    And, the following conditions.
         ///     microsoft.build.engine.dll has the redistlist InGac=true flag set.
-        ///
+        /// </para>
+        /// <para>
         /// Expected result:
         /// * For the assembly to be CopyLocal=true
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -5699,16 +5740,20 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// Inputs:
         ///     Redist list which has entries and has a redist name
         ///     Subset list which has no redist name but has entries
-        ///
+        /// </para>
+        /// <para>
         /// Expected:
         ///     Expect a warning that a redist list or subset list has no redist name.
         ///     There should be no black list generated as no sub set lists were read in.
-        ///
+        /// </para>
+        /// <para>
         /// Rational:
         ///     If we have no redist name to compare to the redist list redist name we cannot subtract the lists correctly.
+        /// </para>
         /// </summary>
         [Fact]
         public void RedistListNoSubsetListName()
@@ -5746,15 +5791,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// Inputs:
         ///     Redist list which has entries but no redist name
         ///     Subset list which has a redist name and entries
-        ///
+        /// </para>
+        /// <para>
         /// Expected:
         ///     Expect no black list to be generated and no warnings to be emitted
-        ///
+        /// </para>
+        /// <para>
         /// Rational:
         ///     Since the redist list name is null or empty we have no way of matching any subset list up to it.
+        /// </para>
         /// </summary>
         [Fact]
         public void RedistListNullkRedistListName()
@@ -5797,16 +5846,20 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// Inputs:
         ///     Redist list which has entries and has a redist name
         ///     Subset list which has entries but has a different redist name than the redist list
-        ///
+        /// </para>
+        /// <para>
         /// Expected:
         ///     There should be no black list generated as no sub set lists with matching names were found.
-        ///
+        /// </para>
+        /// <para>
         /// Rational:
         ///     If the redist name does not match then that subset list should not be subtracted from the redist list.
         ///     We only add assemblies to the black list if there is a corosponding white list even if it is empty to inform us what assemblies are good and which are not.
+        /// </para>
         /// </summary>
         [Fact]
         public void RedistListDifferentNameToSubSet()
@@ -6004,11 +6057,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// Test the case where the white list and the redist list are identical
         /// In this case the black list should be empty.
-        ///
+        /// </para>
+        /// <para>
         /// We are also in a way testing the combining of subset files as we read in one assembly from two
         /// different subset lists while the redist list already contains both assemblies.
+        /// </para>
         /// </summary>
         [Fact]
         public void RedistListGenerateBlackListGoodListsSubsetIsSameAsRedistList()
@@ -6042,10 +6098,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// Test the case where the white list is a superset of the redist list.
         /// This means there are more assemblies in the white list than in the black list.
-        ///
-        /// The black list should be empty.
+        /// </para>
+        /// <para>The black list should be empty.</para>
         /// </summary>
         [Fact]
         public void RedistListGenerateBlackListGoodListsSubsetIsSuperSet()
@@ -7056,9 +7113,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify setting certain combinations of Profile parameters will case an error to be logged and rar to fail execution.
-        ///
-        /// Test the case where the profile name is not set and ProfileFullFrameworkFolders is set.
+        /// <para>Verify setting certain combinations of Profile parameters will case an error to be logged and rar to fail execution.</para>
+        /// <para>Test the case where the profile name is not set and ProfileFullFrameworkFolders is set.</para>
         ///</summary>
         [Fact]
         public void TestProfileParameterCombinations()
@@ -7165,13 +7221,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// This test will verify the IgnoreDefaultInstalledSubsetTables property on the RAR task.
         /// The property determines whether or not RAR will search the target framework directories under the subsetList folder for
         /// xml files matching the client subset names passed into the TargetFrameworkSubset property.
-        ///
+        /// </para>
+        /// <para>
         /// The default for the property is false, when the value is false RAR will search the SubsetList folder under the TargetFramework directories
         /// for the xml files with names in the TargetFrameworkSubset property.  When the value is true, RAR will not search the SubsetList directory. The only
         /// way to specify a TargetFrameworkSubset is to pass one to the InstalledAssemblySubsetTables property.
+        /// </para>
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -7635,16 +7694,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Here's how you get into this situation:
-        ///
+        /// <para>Here's how you get into this situation:</para>
+        /// <para>
         /// App
         ///   References - A
-        ///
+        /// </para>
+        /// <para>
         ///    And, the following conditions.
         ///     $(ReferencePath) = c:\apath;:
-        ///
+        /// </para>
+        /// <para>
         /// Expected result:
         /// * Invalid paths should be ignored.
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -7669,14 +7731,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Here's how you get into this situation:
-        ///
+        /// <para>Here's how you get into this situation:</para>
+        /// <para>
         /// App
         ///   References - A
         ///        Hintpath=||invalidpath||
-        ///
+        /// </para>
+        /// <para>
         /// Expected result:
         /// * No exceptions.
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -7837,13 +7901,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   Has project reference to c:\Regress315619\A\MyAssembly.dll
         ///   Has project reference to c:\Regress315619\B\MyAssembly.dll
-        ///
-        /// These two project references have different versions. Important: PKT is null.
+        /// </para>
+        /// <para>These two project references have different versions. Important: PKT is null.</para>
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -7875,17 +7939,21 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// This is a fix to help ClickOnce folks correctly display information about which
         /// redist components can be deployed.
-        ///
+        /// </para>
+        /// <para>
         /// Two new attributes are added to resolved references:
         /// (1) IsRedistRoot (bool) -- The flag from the redist *.xml file. If there is no
         /// flag in the file then there will be no flag on the resulting item. This flag means
         /// "I am the UI representative for this entire redist". ClickOnce will use this to hide
         /// all other redist items and to show only this item.
-        ///
+        /// </para>
+        /// <para>
         /// (2) Redist (string) -- This the value of FileList Redist from the *.xml file.
         /// This string means "I am the unique name of this entire redist".
+        /// </para>
         ///
         /// </summary>
         [Fact]
@@ -8458,10 +8526,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// Verify when a profile is used that assemblies not in the profile are excluded or have metadata attached to indicate there are dependencies
         /// which are not in the profile.
-        ///
-        /// Make sure the ProfileFullFrameworkAssemblyTable parameter works.
+        /// </para>
+        /// <para>Make sure the ProfileFullFrameworkAssemblyTable parameter works.</para>
         /// </summary>
         [Fact]
         public void VerifyClientProfileRedistListAndProfileList2()

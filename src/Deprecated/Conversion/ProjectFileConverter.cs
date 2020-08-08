@@ -3696,14 +3696,17 @@ namespace Microsoft.Build.Conversion
         }
 
         /// <summary>
+        /// <para>
         /// Processes the &lt;UserProperties&gt; element, and everything within it.
         /// Basically, this element and its contents end up going verbatim into
         /// the &lt;ProjectExtensions&gt; section of the newly converted MSBuild project
         /// file.
-        ///
+        /// </para>
+        /// <para>
         /// The one slight exception is that we do something special for Trinity
         /// conversion.  Specifically, if we detect that this is a White Rabbit
         /// project, we add the flavor GUID for Triumph.
+        /// </para>
         /// </summary>
         /// <param name="userPropertiesElement"></param>
         /// <param name="isTriumphProject"></param>
@@ -3838,12 +3841,13 @@ namespace Microsoft.Build.Conversion
         }
 
         /// <summary>
-        /// Fix hard-coded fully qualified paths in Code Analysis properties.
-        ///
+        /// <para>Fix hard-coded fully qualified paths in Code Analysis properties.</para>
+        /// <para>
         /// Due to a bug in Whidbey configuration cloning, some Code Analysis
         /// properties in Whidbey project files contain fully qualified paths.
         /// They need to be detected and removed during project conversion so
         /// that Code Analysis will work on converted Whidbey projects.
+        /// </para>
         /// </summary>
         /// <owner>duanek</owner>
         /// <returns>true if changes were required, false otherwise</returns>

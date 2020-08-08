@@ -9,17 +9,19 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
-    /// Maintains a cache of all loaded ProjectRootElement instances for design time purposes.
-    ///
+    /// <para>Maintains a cache of all loaded ProjectRootElement instances for design time purposes.</para>
+    /// <para>
     /// This avoids the LRU cache and class-wide lock used within ProjectRootElementCache and replaces these mechanisms
     /// with a single ConcurrentDictionary as a tradeoff for increased performance when evaluating projects in parallel.
     /// As a tradeoff, this implementation uses more memory, and is not intended for use when the cache needs to be
     /// long-lived e.g. within Visual Studio.
-    ///
+    /// </para>
+    /// <para>
     /// SimpleProjectRootElementCache is not currently intended for use outside of evaluation. Several code paths
     /// executed within a full build take a hard dependency on the strong/weak reference behavior used within
     /// ProjectRootElementCache, and further investigation is required to determine the best way to hide these behind
     /// an abstraction. As such, any method unused by evaluation will throw NotImplementedException.
+    /// </para>
     /// </summary>
     internal class SimpleProjectRootElementCache : ProjectRootElementCacheBase
     {

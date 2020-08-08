@@ -278,11 +278,14 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
+        /// <para>
         /// Move should overwrite any destination file even if it's not r/o
         /// if OverwriteReadOnlyFiles is set.
-        /// 
+        /// </para>
+        /// <para>
         /// This is a regression test for bug 814744 where a move operation with OverwriteReadonlyFiles = true on a destination file with the readonly 
         /// flag not set caused the readonly flag to be set before the move which caused the move to fail.
+        /// </para>
         /// </summary>
         [Fact]
         public void MoveOverExistingFileOverwriteReadOnly()

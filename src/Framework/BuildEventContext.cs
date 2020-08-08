@@ -230,11 +230,14 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        /// <para>
         /// Compare a BuildEventContext with this BuildEventContext. 
         /// A build event context is compared in the following way.
-        /// 
+        /// </para>
+        /// <para>
         /// 1. If the object references are the same the contexts are equivalent
         /// 2. If the object type is the same and the Id values in the context are the same, the contexts are equivalent
+        /// </para>
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>

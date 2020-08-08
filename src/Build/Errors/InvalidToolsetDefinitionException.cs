@@ -117,11 +117,12 @@ namespace Microsoft.Build.Exceptions
         #region Static Throw Helpers
 
         /// <summary>
-        /// Throws an InvalidToolsetDefinitionException.
-        /// 
+        /// <para>Throws an InvalidToolsetDefinitionException.</para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <param name="resourceName"></param>
         /// <param name="args"></param>
@@ -135,12 +136,15 @@ namespace Microsoft.Build.Exceptions
         }
 
         /// <summary>
+        /// <para>
         /// Throws an InvalidToolsetDefinitionException including a specified inner exception,
         /// which may be interesting to hosts.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         internal static void Throw
         (

@@ -14,10 +14,11 @@ namespace Microsoft.Build.Shared
     internal static class MetadataConversionUtilities
     {
         /// <summary>
+        /// <para>
         /// Convert a task item metadata to bool. Throw an exception if the string is badly formed and can't
         /// be converted.
-        /// 
-        /// If the metadata is not found, then set metadataFound to false and then return false.
+        /// </para>
+        /// <para>If the metadata is not found, then set metadataFound to false and then return false.</para>
         /// </summary>
         /// <param name="item">The item that contains the metadata.</param>
         /// <param name="itemMetadataName">The name of the metadata.</param>
@@ -49,10 +50,11 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Convert a task item metadata to bool. Throw an exception if the string is badly formed and can't
         /// be converted.
-        /// 
-        /// If the attribute is not found, then return false.
+        /// </para>
+        /// <para>If the attribute is not found, then return false.</para>
         /// </summary>
         /// <param name="item">The item that contains the metadata.</param>
         /// <param name="itemMetadataName">The name of the metadata.</param>

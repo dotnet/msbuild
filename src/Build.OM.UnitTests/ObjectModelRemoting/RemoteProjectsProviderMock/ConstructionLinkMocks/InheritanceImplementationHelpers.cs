@@ -7,19 +7,20 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Construction;
     using Microsoft.Build.ObjectModelRemoting;
     /// <summary>
+    /// <para>
     /// The C# does not really provide a easy way to efficiently implement inheritance in cases like this
     /// for abstract classes or interface, when there is a hierarchy, it is not way to share the implementation.
     /// Like if one have IFoo and IBar : IFoo (or as we do abstractFoo, abstractBar:abstractFoo) 
     /// we can provide implementation for IFoo, but we can not use that for implementations for IBar.
     /// Since no multiple inheritance or other suitable mechanism for code share across classes is supported by C#,
     /// Instead IBar implementation should fully implement both IFoo and IBar interfaces.
-    ///
+    /// </para>
+    /// <para>
     /// For construction model we do have a clear hierarchy like "Object" [: ProjectElementContainer] : ProjectElement
     /// that for the purpose of linkig is supported via ObjectLink[:ProjectElementContainer]:ProjectElementLink.
     /// Now implementation of all ProjectElementLink and ProjectElementContainer link is in fact identical, but each "ObjectLink" needs to implement it separately.
-    ///
-    ///
-    /// This approach with extension methods helps us put all implementation in one place, and only standard copy and pace "hookup" is needed for each classes.
+    /// </para>
+    /// <para>This approach with extension methods helps us put all implementation in one place, and only standard copy and pace "hookup" is needed for each classes.</para>
     /// </summary>
     internal interface IProjectElementContainerLinkHelper
     {

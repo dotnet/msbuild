@@ -12,10 +12,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
 
     /// <summary>
+    /// <para>
     /// We need to know the actual type of ProjectElements in order to do a proper remoting.
     /// Unless we do some explicit ProjectElement.GetXMLType() thing we need to use heuristic.
-    ///
-    /// Most of the types has a single implementation, but few has a wrapper classes. They are also internal for MSbuild.
+    /// </para>
+    /// <para>Most of the types has a single implementation, but few has a wrapper classes. They are also internal for MSbuild.</para>
     /// </summary>
     internal static class ProjectElemetExportHelper
     {

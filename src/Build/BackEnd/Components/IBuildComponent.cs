@@ -4,10 +4,11 @@
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
+    /// <para>
     /// Each component in the build system which is registered with the Build Manager or a Node must
     /// implement this interface.
-    /// 
-    /// REFACTOR: Maybe these could all implement IDisposable.
+    /// </para>
+    /// <para>REFACTOR: Maybe these could all implement IDisposable.</para>
     /// </summary>
     internal interface IBuildComponent
     {

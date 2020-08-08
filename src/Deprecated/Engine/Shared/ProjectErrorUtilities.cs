@@ -318,11 +318,12 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// Throws an InvalidProjectFileException using the given data.
-        /// 
+        /// <para>Throws an InvalidProjectFileException using the given data.</para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <param name="errorSubCategoryResourceName">The resource string for the

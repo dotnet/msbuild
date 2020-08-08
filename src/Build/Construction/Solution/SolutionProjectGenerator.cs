@@ -1144,35 +1144,42 @@ namespace Microsoft.Build.Construction
         /// following their dependencies without enforcing build levels.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// We want MSBuild to be able to parallelize the builds of these projects where possible and still honor references.
         /// Since the project files referenced by the solution do not (necessarily) themselves contain actual project references
         /// to the projects they depend on, we need to synthesize this relationship ourselves.  This is done by creating a target
         /// which first invokes the project's dependencies, then invokes the actual project itself.  However, invoking the
         /// dependencies must also invoke their dependencies and so on down the line.
-        ///
+        /// </para>
+        /// <para>
         /// Additionally, we do not wish to create a separate MSBuild project to contain this target yet we want to parallelize
         /// calls to these targets.  The way to do this is to pass in different global properties to the same project in the same
         /// MSBuild call.  MSBuild easily allows this using the AdditionalProperties metadata which can be specified on an Item.
-        ///
+        /// </para>
+        /// <para>
         /// Assuming the solution project we are generating is called "foo.proj", we can accomplish this parallelism as follows:
         /// <ItemGroup>
         ///     <ProjectReference Include="Project0"/>
         ///     <ProjectReference Include="Project1"/>
         ///     <ProjectReference Include="Project2"/>
         /// </ItemGroup>
-        ///
+        /// </para>
+        /// <para>
         /// We now have expressed the top level reference to all projects as @(SolutionReference) and each project's
         /// set of references as @(PROJECTNAMEReference).  We construct our target as:
-        ///
+        /// </para>
+        /// <para>
         /// <Target Name="Build">
         ///     <MSBuild Projects="@(ProjectReference)" Targets="Build" />
         ///     <MSBuild Projects="actualProjectName" Targets="Build" />
         /// </Target>
-        ///
+        /// </para>
+        /// <para>
         /// The first MSBuild call re-invokes the solution project instructing it to build the reference projects for the
         /// current project.  The second MSBuild call invokes the actual project itself.  Because all reference projects have
         /// the same additional properties, MSBuild will only build the first one it comes across and the rest will be
         /// satisfied from the cache.
+        /// </para>
         /// </remarks>
         private ProjectInstance CreateMetaproject(ProjectInstance traversalProject, ProjectInSolution project, ProjectConfigurationInSolution projectConfiguration)
         {

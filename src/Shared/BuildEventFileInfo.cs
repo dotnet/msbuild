@@ -18,12 +18,13 @@ namespace Microsoft.Build.Shared
         #region Constructors
 
         /// <summary>
+        /// <para>
         /// Creates an instance of this class using the given filename/path.
         /// Filename may be an empty string, if there is truly no file associated.
         /// This overload may also be used if there is a file but truly no line/column,
         /// for example when failing to load a project file.
-        /// 
-        /// IF AN IELEMENTLOCATION IS AVAILABLE, USE THE OVERLOAD ACCEPTING THAT INSTEAD.
+        /// </para>
+        /// <para>IF AN IELEMENTLOCATION IS AVAILABLE, USE THE OVERLOAD ACCEPTING THAT INSTEAD.</para>
         /// </summary>
         /// <param name="file"></param>
         internal BuildEventFileInfo(string file)
@@ -44,9 +45,8 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Creates an instance of this class using the given filename/path and a line/column of interest in the file.
-        /// 
-        /// IF AN IELEMENTLOCATION IS AVAILABLE, USE THE OVERLOAD ACCEPTING THAT INSTEAD.
+        /// <para>Creates an instance of this class using the given filename/path and a line/column of interest in the file.</para>
+        /// <para>IF AN IELEMENTLOCATION IS AVAILABLE, USE THE OVERLOAD ACCEPTING THAT INSTEAD.</para>
         /// </summary>
         /// <param name="file"></param>
         /// <param name="line">Set to zero if not available.</param>
@@ -58,9 +58,8 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Creates an instance of this class using the given filename/path and a range of lines/columns of interest in the file.
-        /// 
-        /// IF AN IELEMENTLOCATION IS AVAILABLE, USE THE OVERLOAD ACCEPTING THAT INSTEAD.
+        /// <para>Creates an instance of this class using the given filename/path and a range of lines/columns of interest in the file.</para>
+        /// <para>IF AN IELEMENTLOCATION IS AVAILABLE, USE THE OVERLOAD ACCEPTING THAT INSTEAD.</para>
         /// </summary>
         /// <param name="file"></param>
         /// <param name="line">Set to zero if not available.</param>

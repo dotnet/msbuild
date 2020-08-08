@@ -123,14 +123,17 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// <para>
         /// Verify when the conditions are evaluated outside of a target that they are evaluated relative to the file they are physically contained in,
         /// in the case of Imports, and ImportGroups, and PropertyGroups, but that property conditions are evaluated relative to the project file.
         /// When conditions are evaluated inside of a target they are evaluated relative to the project file.
-        ///
+        /// </para>
+        /// <para>
         /// File Structure
         /// test.targets
         /// test.tx, file to check for existence
         /// subdir\test.proj
+        /// </para>
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
@@ -255,14 +258,17 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// <para>
         /// Verify when the conditions are evaluated outside of a target that they are evaluated relative to the file they are physically contained in,
         /// in the case of Imports, and ImportGroups, and PropertyGroups, but that property conditions are evaluated relative to the project file.
         /// When conditions are evaluated inside of a target they are evaluated relative to the project file.
-        ///
+        /// </para>
+        /// <para>
         /// File Structure
         /// test.targets
         /// test.tx, file to check for existence
         /// subdir\test.proj
+        /// </para>
         /// </summary>
         [Fact]
         public void VerifyConditionsInsideOutsideTargets_ProjectInstance()
@@ -4392,12 +4398,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// <para>
         /// Tests that an import, target, or task with a condition that contains an error but is short-circuited does not fail the build.  This can happen when you have a condition like:
         /// 'true' == 'false' AND '$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))' != ''
-        /// 
-        /// The first condition is false so the second condition is not evaluated.  But in some cases we double evaluate the condition to log it.  The second evaluation will fail because it evaluates the whole string.
-        /// 
-        /// https://github.com/Microsoft/msbuild/issues/2259
+        /// </para>
+        /// <para>The first condition is false so the second condition is not evaluated.  But in some cases we double evaluate the condition to log it.  The second evaluation will fail because it evaluates the whole string.</para>
+        /// <para>https://github.com/Microsoft/msbuild/issues/2259</para>
         /// </summary>
         [Theory]
         [InlineData("<Target Name=\"Build\" /><Import Project=\"$(NonExistentProperty)\" Condition=\"\'true\' == \'false\' And \'$([MSBuild]::GetDirectoryNameOfFileAbove($(NonExistentProperty), init.props))\' != \'\'\" />")]
@@ -4837,20 +4843,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
 #endif
 
         /// <summary>
-        /// Creates a standard ProjectCollection and adds a fake toolset with the following contents to it:
-        ///
+        /// <para>Creates a standard ProjectCollection and adds a fake toolset with the following contents to it:</para>
+        /// <para>
         /// ToolsVersion = Fake
         /// Base Properties:
         /// a = a1
         /// b = b1
-        ///
+        /// </para>
+        /// <para>
         /// SubToolset "11.0":
         /// b = b2
         /// c = c2
-        ///
+        /// </para>
+        /// <para>
         /// SubToolset "FakeSubToolset":
         /// a = a3
         /// c = c3
+        /// </para>
         /// </summary>
         private ProjectCollection GetProjectCollectionWithFakeToolset(IDictionary<string, string> globalProperties)
         {

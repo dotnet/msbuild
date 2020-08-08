@@ -15,9 +15,8 @@ namespace Microsoft.Build.Evaluation
     internal interface IItemProvider<T> where T : IItem
     {
         /// <summary>
-        /// Returns a list of items with the specified item type.
-        /// 
-        /// If there are no items of this type, returns an empty list.
+        /// <para>Returns a list of items with the specified item type.</para>
+        /// <para>If there are no items of this type, returns an empty list.</para>
         /// </summary>
         /// <param name="itemType">The item type of items to return.</param>
         /// <returns>A list of matching items.</returns>

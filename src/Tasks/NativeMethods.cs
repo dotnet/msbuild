@@ -1324,12 +1324,15 @@ typedef enum _tagAssemblyComparisonResult
         #region Methods
 #if FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS
         /// <summary>
+        /// <para>
         /// Given a pointer to a metadata blob, read the string parameter from it.  Returns true if
         /// a valid string was constructed and false otherwise.
-        ///
+        /// </para>
+        /// <para>
         /// Adapted from bizapps\server\designers\models\packagemodel\nativemethods.cs (TryReadStringArgument) and
         /// the original ARD implementation in vsproject\compsvcspkg\enumcomplus.cpp (GetStringCustomAttribute)
         /// This code was taken from the vsproject\ReferenceManager\Providers\NativeMethods.cs
+        /// </para>
         /// </summary>
         [HandleProcessCorruptedStateExceptions]
         internal static unsafe bool TryReadMetadataString(string fullPath, IntPtr attrData, uint attrDataSize, out string strValue)
@@ -1402,12 +1405,15 @@ typedef enum _tagAssemblyComparisonResult
         }
 #endif
         /// <summary>
+        /// <para>
         /// Returns the number of bytes that compressed data -- the length of the uncompressed
         /// data -- takes up, and has an out value of the length of the string.
-        ///
+        /// </para>
+        /// <para>
         /// Decompression algorithm stolen from ndp\clr\src\toolbox\mdbg\corapi\metadata\cormetadata.cs, which
         /// was translated from the base implementation in ndp\clr\src\inc\cor.h
         /// This code was taken from the vsproject\ReferenceManager\Providers\NativeMethods.cs
+        /// </para>
         /// </summary>
         /// <param name="data">Pointer to the beginning of the data block</param>
         /// <param name="uncompressedDataLength">Length of the uncompressed data block</param>

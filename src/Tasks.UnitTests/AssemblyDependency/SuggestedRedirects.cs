@@ -21,16 +21,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - A
         ///        Depends on D version 1
         ///   References - B
         ///        Depends on D version 2
-        ///
+        /// </para>
+        /// <para>
         /// And neither D1 nor D2 are CopyLocal = true. In this case, both dependencies
         /// are kept because this will work in a SxS manner.
+        /// </para>
         /// </summary>
         [Fact]
         public void ConflictBetweenNonCopyLocalDependencies()
@@ -66,16 +68,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - A
         ///        Depends on D version 1
         ///   References - B
         ///        Depends on D version 2
-        ///
+        /// </para>
+        /// <para>
         /// And both D1 and D2 are CopyLocal = true. This case is a warning because both
         /// assemblies can't be copied to the output directory.
+        /// </para>
         /// </summary>
         [Fact]
         public void ConflictBetweenCopyLocalDependencies()
@@ -120,16 +124,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - A
         ///        Depends on D version 1
         ///   References - B
         ///        Depends on D version 2
-        ///
+        /// </para>
+        /// <para>
         /// And both D1 and D2 are CopyLocal = true. In this case, there is no warning because
         /// AutoUnify is set to true.
+        /// </para>
         /// </summary>
         [Fact]
         public void ConflictBetweenCopyLocalDependenciesWithAutoUnify()
@@ -158,18 +164,20 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - A
         ///        Depends on D version 1
         ///   References - B
         ///        Depends on D version 2
         ///   References - D, version 1
-        ///
+        /// </para>
+        /// <para>
         /// Both D1 and D2 are CopyLocal. This is a warning because D1 is a lower version
         /// than D2 so that can't unify. These means that eventually when they're copied
         /// to the output directory they'll conflict.
+        /// </para>
         /// </summary>
         [Fact]
         public void ConflictWithBackVersionPrimary()
@@ -245,17 +253,20 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - Microsoft.Office.Interop.Excel
         ///        Depends on Office, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c
-        ///
+        /// </para>
+        /// <para>
         ///   References - MS.Internal.Test.Automation.Office.Excel
         ///        Depends on Office, Version=12.0.0.0, Culture=neutral, PublicKeyToken=94de0004b6e3fcc5
-        ///
+        /// </para>
+        /// <para>
         /// Notice that the two primaries have dependencies that only differ by PKT. Suggested redirects should
         /// only happen if the two assemblies differ by nothing but version.
+        /// </para>
         /// </summary>
         [Fact]
         public void Regress313747_FalseSuggestedRedirectsWhenAssembliesDifferOnlyByPkt()
@@ -282,17 +293,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// (1) Primary reference A v 2.0.0.0 is found.
         /// (2) Primary reference B is found.
         /// (3) Primary reference B depends on A v 1.0.0.0
         /// (4) Dependency A v 1.0.0.0 is not found.
         /// (5) App.Config does not contain a binding redirect from A v 1.0.0.0 -> 2.0.0.0
-        ///
+        /// </para>
+        /// <para>
         /// We need to warn and suggest an app.config entry because the runtime environment will require a binding
         /// redirect to function. Without a binding redirect, loading B will cause A.V1 to try to load. It won't be
         /// there and there won't be a binding redirect to point it at 2.0.0.0.
+        /// </para>
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -324,13 +337,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// (1) Primary reference A v 2.0.0.0 is found and marked externally resolved.
         /// (2) Primary reference B is externally resolved and depends on A v 1.0.0.0
-        ///
+        /// </para>
+        /// <para>
         /// When AutoGenerateBindingRedirects is used, we need to find the redirect
         /// in the externally resolved graph.
+        /// </para>
         /// </summary>
         [Fact]
         public void RedirectsAreSuggestedInExternallyResolvedGraph()
@@ -363,16 +378,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - A
         ///        Depends on D version 1 (but PKT=null)
         ///   References - B
         ///        Depends on D version 2 (but PKT=null)
-        ///
+        /// </para>
+        /// <para>
         /// There should be no suggested redirect because only strongly named assemblies can have
         /// binding redirects.
+        /// </para>
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -408,15 +425,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Consider this dependency chain:
-        ///
+        /// <para>Consider this dependency chain:</para>
+        /// <para>
         /// App
         ///   References - A
         ///        Depends on D version 1 (but Culture=fr)
         ///   References - B
         ///        Depends on D version 2 (but Culture=en)
-        ///
-        /// There should be no suggested redirect because assemblies with different cultures cannot unify.
+        /// </para>
+        /// <para>There should be no suggested redirect because assemblies with different cultures cannot unify.</para>
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]

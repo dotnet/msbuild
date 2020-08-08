@@ -14,11 +14,14 @@ namespace Microsoft.Build.Shared
     static internal class ProjectFileErrorUtilities
     {
         /// <summary>
+        /// <para>
         /// This method is used to flag errors in the project file being processed. Do NOT use this method in place of
         /// ErrorUtilities.VerifyThrow(), because ErrorUtilities.VerifyThrow() is used to flag internal/programming errors.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <param name="projectFile">The invalid project file.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
@@ -34,11 +37,14 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// This method is used to flag errors in the project file being processed. Do NOT use this method in place of
         /// ErrorUtilities.VerifyThrow(), because ErrorUtilities.VerifyThrow() is used to flag internal/programming errors.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <param name="projectFile">The invalid project file.</param>
         /// <param name="innerException">Any inner exception. May be null.</param>
@@ -56,11 +62,14 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// This method is used to flag errors in the project file being processed. Do NOT use this method in place of
         /// ErrorUtilities.VerifyThrow(), because ErrorUtilities.VerifyThrow() is used to flag internal/programming errors.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <param name="condition">The condition to check.</param>
         /// <param name="projectFile">The invalid project file.</param>
@@ -78,11 +87,14 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// This method is used to flag errors in the project file being processed. Do NOT use this method in place of
         /// ErrorUtilities.VerifyThrow(), because ErrorUtilities.VerifyThrow() is used to flag internal/programming errors.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <param name="errorSubCategoryResourceName">The resource string for the error sub-category (can be null).</param>
         /// <param name="projectFile">The invalid project file.</param>
@@ -100,11 +112,14 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// This method is used to flag errors in the project file being processed. Do NOT use this method in place of
         /// ErrorUtilities.VerifyThrow(), because ErrorUtilities.VerifyThrow() is used to flag internal/programming errors.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <param name="condition">The condition to check.</param>
         /// <param name="errorSubCategoryResourceName">The resource string for the error sub-category (can be null).</param>
@@ -124,11 +139,14 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// This method is used to flag errors in the project file being processed. Do NOT use this method in place of
         /// ErrorUtilities.VerifyThrow(), because ErrorUtilities.VerifyThrow() is used to flag internal/programming errors.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <param name="condition">The condition to check.</param>
         /// <param name="errorSubCategoryResourceName">The resource string for the error sub-category (can be null).</param>

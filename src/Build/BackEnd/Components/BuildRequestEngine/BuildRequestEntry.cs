@@ -25,44 +25,54 @@ namespace Microsoft.Build.BackEnd
     internal enum BuildRequestEntryState
     {
         /// <summary>
+        /// <para>
         /// There should only ever be one entry in the Active state.  This is the request which is
         /// being actively built by the engine - i.e. it has a running task thread.  All other requests
         /// must be in one of the other states.  When in this state, the outstandingRequest and
         /// receivedResult members must be null.
-        /// 
+        /// </para>
+        /// <para>
         /// Transitions: 
         ///     Waiting:  When an msbuild callback is made the active build request needs to wait
         ///               for the results in order to continue to process.
         ///     Complete: The build request has generated all of the required results.
+        /// </para>
         /// </summary>
         Active,
 
         /// <summary>
+        /// <para>
         /// This state means the node has received all of the results needed to continue processing this
         /// request.  When this state is set, the receivedResult member of this entry must be non-null.  
         /// The request engine can continue it at some later point when it is no longer busy.
         /// Any number of entries may be in this state.
-        /// 
+        /// </para>
+        /// <para>
         /// Transitions:
         ///         Active: The build request engine picks this ready request to process.
+        /// </para>
         /// </summary>
         Ready,
 
         /// <summary>
+        /// <para>
         /// This state means the node is waiting for results from outstanding build requests.  When this 
         /// state is set, the outstandingRequest or outstandingConfiguration members of the entry 
         /// must be non-null.
-        /// 
+        /// </para>
+        /// <para>
         /// Transitions: 
         ///           Ready: All of the results which caused the build request to wait have been received
+        /// </para>
         /// </summary>
         Waiting,
 
         /// <summary>
+        /// <para>
         /// This state means the request has completed and results are available.  The engine will remove
         /// the request from the list and the results will be returned to the node for processing.
-        /// 
-        /// Transitions: None, this is the final state of the build request
+        /// </para>
+        /// <para>Transitions: None, this is the final state of the build request</para>
         /// </summary>
         Complete
     }

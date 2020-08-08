@@ -50,22 +50,18 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Computes the resolved rule set path.
-        /// 
-        /// There are four cases: null, file name, relative path, and full path.
-        ///
-        /// If we were given no value for the ruleset, simply return null.
-        ///
-        /// For full path we return the string as it is.
-        ///
+        /// <para>Computes the resolved rule set path.</para>
+        /// <para>There are four cases: null, file name, relative path, and full path.</para>
+        /// <para>If we were given no value for the ruleset, simply return null.</para>
+        /// <para>For full path we return the string as it is.</para>
+        /// <para>
         /// A simple file name can refer to either a file in the MSBuild project directory
         /// or a file in the rule set search paths. In the former case we return the string as-is.
         /// In the latter case, we create a full path by prepending the first rule set search path
         /// where the file is found.
-        ///
-        /// For relative paths we return the string as-is.
-        ///
-        /// In all cases, we return null if the file does not actual exist.
+        /// </para>
+        /// <para>For relative paths we return the string as-is.</para>
+        /// <para>In all cases, we return null if the file does not actual exist.</para>
         /// </summary>
         /// <returns>The full or relative path to the rule set, or null if the file does not exist.</returns>
         private string GetResolvedRuleSetPath()

@@ -154,15 +154,18 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// Given the task XML, this method tries to find the task. It uses the following search order:
         /// 1) checks the tasks declared by the project, searching by exact name
         /// 2) checks the global task declarations (in *.TASKS in MSbuild bin dir), searching by exact name
         /// 3) checks the tasks declared by the project, searching by fuzzy match (missing namespace, etc.)
         /// 4) checks the global task declarations (in *.TASKS in MSbuild bin dir), searching by fuzzy match (missing namespace, etc.)
-        ///
+        /// </para>
+        /// <para>
         /// The search ordering is meant to reduce the number of assemblies we scan, because loading assemblies can be expensive.
         /// The tasks and assemblies declared by the project are scanned first, on the assumption that if the project declared
         /// them, they are likely used.
+        /// </para>
         /// </summary>
         /// <remarks>
         /// This is internal so that BuildTask.Type can call it.

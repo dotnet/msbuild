@@ -14,12 +14,14 @@ namespace Microsoft.Build.Collections
     /// A dictionary of unordered property or metadata name/value pairs.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The value that this adds over IDictionary&lt;string, T&gt; is:
     ///     - enforces that key = T.Name
     ///     - default enumerator is over values
     ///     - (marginal) enforces the correct key comparer
     ///     - potentially makes copy on write possible
-    /// 
+    /// </para>
+    /// <para>
     /// Really a Dictionary&lt;string, T&gt; where the key (the name) is obtained from IKeyed.Key.
     /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and 
     /// either not expose this collection or expose it through a readonly wrapper.
@@ -27,9 +29,11 @@ namespace Microsoft.Build.Collections
     /// this class to be asynchronously enumerated.  This is accomplished by the CopyOnReadEnumerable which will 
     /// lock the backing collection when it does its deep cloning.  This prevents asynchronous access from corrupting
     /// the state of the enumeration until the collection has been fully copied.
-    /// 
+    /// </para>
+    /// <para>
     /// Since we use the mutable ignore case comparer we need to make sure that we lock our self before we call the comparer since the comparer can call back 
     /// into this dictionary which could cause a deadlock if another thread is also accessing another method in the dictionary.
+    /// </para>
     /// </remarks>
     /// <typeparam name="T">Property or Metadata class type to store</typeparam>
     [DebuggerDisplay("#Entries={Count}")]

@@ -228,10 +228,11 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Given a type filter and an asssemblyInfo object keep track of what types in a given assembly which match the type filter.
         /// Also, use this information to determine if a given TypeName is in the assembly which is pointed to by the AssemblyLoadInfo object.
-        /// 
-        /// This type represents a combination of a type filter and an assemblyInfo object.
+        /// </para>
+        /// <para>This type represents a combination of a type filter and an assemblyInfo object.</para>
         /// </summary>
         [DebuggerDisplay("Types in {_assemblyLoadInfo} matching {_isDesiredType}")]
         private class AssemblyInfoToLoadedTypes

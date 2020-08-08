@@ -27,13 +27,13 @@ namespace Microsoft.Build.Evaluation
     };
 
     /// <summary>
-    /// This class implements the grammar for complex conditionals.
-    ///
+    /// <para>This class implements the grammar for complex conditionals.</para>
+    /// <para>
     /// The usage is:
     ///    Parser p = new Parser(CultureInfo);
     ///    ExpressionTree t = p.Parse(expression, XmlNode);
-    ///
-    /// The expression tree can then be evaluated and re-evaluated as needed.
+    /// </para>
+    /// <para>The expression tree can then be evaluated and re-evaluated as needed.</para>
     /// </summary>
     /// <remarks>
     /// UNDONE: When we copied over the conditionals code, we didn't copy over the unit tests for scanner, parser, and expression tree.

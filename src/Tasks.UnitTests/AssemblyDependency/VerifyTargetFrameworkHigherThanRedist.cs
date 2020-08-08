@@ -440,10 +440,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// Test the case where the project has two references, one of them has dependencies which are contained within the projects target framework
         /// and there is another reference which has dependencies on a future framework (this is the light up scenario assembly).
-        ///
-        /// Make sure that if specific version is set on the lightup assembly that we do not unresolve it, and we also should not unify its dependencies.
+        /// </para>
+        /// <para>Make sure that if specific version is set on the lightup assembly that we do not unresolve it, and we also should not unify its dependencies.</para>
         /// </summary>
         [Fact]
         public void MixedDependenciesSpecificVersionOnHigherVersionMetadataSet()
@@ -480,11 +481,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// <para>
         /// Test the case where the project has two references, one of them has dependencies which are contained within the projects target framework
         /// and there is another reference which has dependencies on a future framework (this is the light up scenario assembly).
-        ///
+        /// </para>
+        /// <para>
         /// Verify that if specific version is set on the other reference that we get the expected behavior:
         /// Un resolve the light up assembly.
+        /// </para>
         /// </summary>
         [Fact]
         public void MixedDependenciesSpecificVersionOnLowerVersionMetadataSet()

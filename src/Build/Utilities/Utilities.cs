@@ -52,11 +52,12 @@ namespace Microsoft.Build.Internal
         internal delegate Toolset GetToolset(string toolsVersion);
 
         /// <summary>
-        /// INTERNAL FOR UNIT-TESTING ONLY
-        /// 
+        /// <para>INTERNAL FOR UNIT-TESTING ONLY</para>
+        /// <para>
         /// We've got several environment variables that we read into statics since we don't expect them to ever 
         /// reasonably change, but we need some way of refreshing their values so that we can modify them for 
         /// unit testing purposes. 
+        /// </para>
         /// </summary>
         internal static void RefreshInternalEnvironmentValues()
         {

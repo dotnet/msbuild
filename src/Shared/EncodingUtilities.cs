@@ -193,11 +193,14 @@ namespace Microsoft.Build.Shared
         /// Find the encoding for the batch file.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// The "best" encoding is the current OEM encoding, unless it's not capable of representing
         /// the characters we plan to put in the file. If it isn't, we can fall back to UTF-8.
-        ///
+        /// </para>
+        /// <para>
         /// Why not always UTF-8? Because tools don't always handle it well. See
         /// https://github.com/Microsoft/msbuild/issues/397
+        /// </para>
         /// </remarks>
         internal static Encoding BatchFileEncoding(string contents, string encodingSpecification)
         {

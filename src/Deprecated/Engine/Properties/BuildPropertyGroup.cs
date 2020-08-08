@@ -754,15 +754,16 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Sets a property.
-        ///
+        /// <para>Sets a property.</para>
+        /// <para>
         /// Either overrides the value of the property with the given name, or adds it if it
         /// doesn't already exist. Setting to the same value as before does nothing.
-        ///
+        /// </para>
+        /// <para>
         /// This method will take into account property precedence rules, so that for
         /// example, a reserved MSBuild property cannot be overridden by a normal property.
-        ///
-        /// PropertyGroup must be virtual.
+        /// </para>
+        /// <para>PropertyGroup must be virtual.</para>
         /// </summary>
         /// <param name="newProperty"></param>
         internal void SetProperty
@@ -851,15 +852,16 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Sets a property taking the property name and value as strings directly.
-        ///
+        /// <para>Sets a property taking the property name and value as strings directly.</para>
+        /// <para>
         /// Either overrides the value of the property with the given name, or adds it if it
         /// doesn't already exist. Setting to the same value as before does nothing.
-        ///
+        /// </para>
+        /// <para>
         /// This method will take into account property precedence rules, so that for
         /// example, a reserved MSBuild property cannot be overridden by a normal property.
-        ///
-        /// PropertyGroup must be virtual.
+        /// </para>
+        /// <para>PropertyGroup must be virtual.</para>
         /// </summary>
         /// <param name="propertyName"></param>
         /// <param name="propertyValue"></param>
@@ -1280,15 +1282,18 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// This method grabs all the environment variables and sets them as
         /// properties. This method can be invoked multiple times if there is
         /// reason to believe the environment has changed. It will update all
         /// the previously gathered variables, and set new ones. This method
         /// will not, however, unset previously set variables.
         /// Requires property group to be virtual.
-        ///
+        /// </para>
+        /// <para>
         /// NOTE: this method does not allow environment variables to override
         /// previously set properties of type "GlobalProperty" or "ReservedProperty"
+        /// </para>
         /// </summary>
         internal void GatherEnvironmentVariables()
         {

@@ -13,12 +13,13 @@ using error = Microsoft.Build.Shared.ErrorUtilities;
 namespace Microsoft.Build.Conversion
 {
     /// <summary>
+    /// <para>
     /// This class implements a custom text reader for the old VS7/Everett 
     /// project file format.  The old format allowed certain XML special 
     /// characters to be present within an XML attribute value.  For example,
-    ///
-    ///     &lt;MyElement MyAttribute="My --> Value" /&gt;
-    ///
+    /// </para>
+    /// <para>MyElement MyAttribute="My --> Value" /</para>
+    /// <para>
     /// However, the System.Xml classes are more strict, and do not allow
     /// the &lt; or &gt; characters to exist within an attribute value.  But 
     /// the conversion utility still needs to be able to convert all old
@@ -29,6 +30,7 @@ namespace Microsoft.Build.Conversion
     /// file, we replace all &gt; (less-than) characters inside attribute values with "&gt;",
     /// etc.  The XmlTextReader has no idea that this is going on, but 
     /// no longer complains about invalid characters.
+    /// </para>
     /// </summary>
     /// <owner>rgoel</owner>
     internal sealed class OldVSProjectFileReader : TextReader
@@ -276,24 +278,25 @@ namespace Microsoft.Build.Conversion
         }
 
         /// <summary>
+        /// <para>
         /// And this is where the real magic happens.  If our currently cached
         /// "singleLine" has been used up, we read a new line of text from the 
         /// underlying text file.  But as we read the line of text from the file,
         /// we immediately replace all instances of special characters that occur
         /// within double-quotes with the corresponding XML-friendly equivalents.
         /// For example, if the underlying text file contained this:
-        ///
-        ///     &lt;MyElement MyAttribute="My --&gt; Value" /&gt;
-        ///
-        /// then we would read it in and immediately convert it to this:
-        ///
-        ///     &lt;MyElement MyAttribute="My --&gt; Value" /&gt;
-        ///
+        /// </para>
+        /// <para>MyElement MyAttribute="My --&gt; Value" /</para>
+        /// <para>then we would read it in and immediately convert it to this:</para>
+        /// <para>MyElement MyAttribute="My --&gt; Value" /</para>
+        /// <para>
         /// and we would store it this way in our "singleLine", so that the callers
         /// never know the difference.
-        /// 
+        /// </para>
+        /// <para>
         /// This method returns true on success, and false if we were unable to
         /// read a new line (due to end of file).
+        /// </para>
         /// </summary>
         /// <returns></returns>
         /// <owner>rgoel</owner>

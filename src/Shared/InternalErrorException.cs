@@ -10,14 +10,17 @@ using System.Runtime.Serialization;
 namespace Microsoft.Build.Shared
 {
     /// <summary>
+    /// <para>
     /// This exception is to be thrown whenever an assumption we have made in the code turns out to be false. Thus, if this
     /// exception ever gets thrown, it is because of a bug in our own code, not because of something the user or project author
     /// did wrong.
-    /// 
+    /// </para>
+    /// <para>
     /// !~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~
     /// WARNING: When this file is shared into multiple assemblies each assembly will view this as a different type.
     ///          Don't throw this exception from one assembly and catch it in another.
     /// !~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~!~
+    /// </para>
     ///     
     /// </summary>
     [Serializable]
@@ -77,24 +80,27 @@ namespace Microsoft.Build.Shared
 
         #region ConsiderDebuggerLaunch
         /// <summary>
-        /// A fatal internal error due to a bug has occurred. Give the dev a chance to debug it, if possible.
-        /// 
-        /// Will in all cases launch the debugger, if the environment variable "MSBUILDLAUNCHDEBUGGER" is set.
-        /// 
+        /// <para>A fatal internal error due to a bug has occurred. Give the dev a chance to debug it, if possible.</para>
+        /// <para>Will in all cases launch the debugger, if the environment variable "MSBUILDLAUNCHDEBUGGER" is set.</para>
+        /// <para>
         /// In DEBUG build, will always launch the debugger, unless we are in razzle (_NTROOT is set) or in NUnit,
         /// or MSBUILDDONOTLAUNCHDEBUGGER is set (that could be useful in suite runs).
         /// We don't launch in retail or LKG so builds don't jam; they get a callstack, and continue or send a mail, etc.
         /// We don't launch in NUnit as tests often intentionally cause InternalErrorExceptions.
-        /// 
+        /// </para>
+        /// <para>
         /// Because we only call this method from this class, just before throwing an InternalErrorException, there is 
         /// no danger that this suppression will cause a bug to only manifest itself outside NUnit
         /// (which would be most unfortunate!). Do not make this non-private.
-        /// 
+        /// </para>
+        /// <para>
         /// Unfortunately NUnit can't handle unhandled exceptions like InternalErrorException on anything other than
         /// the main test thread. However, there's still a callstack displayed before it quits.
-        /// 
+        /// </para>
+        /// <para>
         /// If it is going to launch the debugger, it first does a Debug.Fail to give information about what needs to
         /// be debugged -- the exception hasn't been thrown yet. This automatically displays the current callstack.
+        /// </para>
         /// </summary>
         private static void ConsiderDebuggerLaunch(string message, Exception innerException)
         {

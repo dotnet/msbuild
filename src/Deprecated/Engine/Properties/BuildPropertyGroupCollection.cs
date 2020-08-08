@@ -13,13 +13,16 @@ using error = Microsoft.Build.BuildEngine.Shared.ErrorUtilities;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// <para>
     /// This class represents a collection of persisted &lt;PropertyGroup&gt;'s.  Each
     /// MSBuild project has exactly one BuildPropertyGroupCollection, which includes
     /// all the imported PropertyGroups as well as the ones in the main project file.
-    /// 
+    /// </para>
+    /// <para>
     /// The implementation of this class is that it's basically a Facade.  It just
     /// calls into the GroupingCollection within the Project to do it's work.  It
     /// doesn't maintain any BuildPropertyGroup state on its own.
+    /// </para>
     /// </summary>
     /// <owner>DavidLe</owner>
     public class BuildPropertyGroupCollection : ICollection, IEnumerable

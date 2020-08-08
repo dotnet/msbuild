@@ -426,17 +426,17 @@ End Namespace
         }
 
         /// <summary>
+        /// <para>
         /// If the dependent upon filename and the resource filename both contain what looks like
         /// a culture, do not treat it as a culture identifier.  E.g.:
-        ///
-        ///     Form1.ro.resx == DependentUpon ==> Form1.ro.vb
-        ///
+        /// </para>
+        /// <para>    Form1.ro.resx == DependentUpon ==> Form1.ro.vb</para>
+        /// <para>
         /// In this case, we don't include "ro" as the culture because it's in both filenames.  In
         /// the case of:
-        ///
-        ///     Form1.ro.resx == DependentUpon ==> Form1.vb
-        ///
-        /// we continue to treat "ro" as the culture.
+        /// </para>
+        /// <para>    Form1.ro.resx == DependentUpon ==> Form1.vb</para>
+        /// <para>we continue to treat "ro" as the culture.</para>
         /// </summary>
         [Fact]
         public void Regress419591()

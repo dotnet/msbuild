@@ -17,6 +17,7 @@ namespace Microsoft.Build.Collections
     /// <typeparam name="K">The key type.</typeparam>
     /// <typeparam name="V">The value type.</typeparam>
     /// <remarks>
+    /// <para>
     /// This dictionary works by having a backing dictionary which is ref-counted for each
     /// COWDictionary which references it.  When a write operation is performed on any
     /// COWDictionary, we check the reference count on the backing dictionary.  If it is 
@@ -24,10 +25,12 @@ namespace Microsoft.Build.Collections
     /// Therefore, we clone the backing dictionary and decrement the reference count on the
     /// original.  From there on we use the cloned dictionary, which now has a reference count
     /// of 1.
-    ///
+    /// </para>
+    /// <para>
     /// Thread safety: for all users, this class is as thread safe as the underlying Dictionary implementation, that is,
     /// safe for concurrent readers or one writer from EACH user. It achieves this by locking itself and cloning before
     /// any write, if it is being shared - i.e., stopping sharing before any writes occur.
+    /// </para>
     /// </remarks>
     /// <comment>
     /// This class must be serializable as it is used for metadata passed to tasks, which may

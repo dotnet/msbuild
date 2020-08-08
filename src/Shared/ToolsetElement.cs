@@ -608,10 +608,12 @@ namespace Microsoft.Build.Evaluation
     }
 
     /// <summary>
+    /// <para>
     /// This class is used to programmatically read msbuildToolsets section
     /// in from the configuration file.  An example of application config file:
-    ///
-    /// &lt;configuration&gt;
+    /// </para>
+    /// <para>
+    /// configuration&gt;
     ///     &lt;msbuildToolsets default="2.0"&gt;
     ///         &lt;toolset toolsVersion="2.0"&gt;
     ///             &lt;property name="MSBuildBinPath" value="D:\windows\Microsoft.NET\Framework\v2.0.x86ret\"/&gt;
@@ -621,7 +623,8 @@ namespace Microsoft.Build.Evaluation
     ///             &lt;property name="MSBuildBinPath" value="D:\windows\Microsoft.NET\Framework\v3.5.x86ret\"/&gt;
     ///         &lt;/toolset&gt;
     ///     &lt;/msbuildToolsets&gt;
-    /// &lt;/configuration&gt;
+    /// &lt;/configuration
+    /// </para>&gt;
     ///
     /// </summary>
     /// <remarks>

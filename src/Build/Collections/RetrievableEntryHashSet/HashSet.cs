@@ -43,25 +43,31 @@ using Microsoft.Build.Internal;
 namespace Microsoft.Build.Collections
 {
     /// <summary>
+    /// <para>
     /// Implementation notes:
     /// This uses an array-based implementation similar to <see cref="T:Dictionary{T}" />, using a buckets array
     /// to map hash values to the Slots array. Items in the Slots array that hash to the same value
     /// are chained together through the "next" indices. 
-    /// 
+    /// </para>
+    /// <para>
     /// The capacity is always prime; so during resizing, the capacity is chosen as the next prime
     /// greater than double the last capacity. 
-    /// 
+    /// </para>
+    /// <para>
     /// The underlying data structures are lazily initialized. Because of the observation that, 
     /// in practice, hashtables tend to contain only a few elements, the initial capacity is
     /// set very small (3 elements) unless the ctor with a collection is used.
-    /// 
+    /// </para>
+    /// <para>
     /// The +/- 1 modifications in methods that add, check for containment, etc allow us to 
     /// distinguish a hash code of 0 from an uninitialized bucket. This saves us from having to 
     /// reset each bucket to -1 when resizing. See Contains, for example.
-    /// 
+    /// </para>
+    /// <para>
     /// Set methods such as UnionWith, IntersectWith, ExceptWith, and SymmetricExceptWith modify
     /// this set.
-    /// 
+    /// </para>
+    /// <para>
     /// Some operations can perform faster if we can assume "other" contains unique elements
     /// according to this equality comparer. The only times this is efficient to check is if
     /// other is a hashset. Note that checking that it's a hashset alone doesn't suffice; we
@@ -69,13 +75,16 @@ namespace Microsoft.Build.Collections
     /// has a different equality comparer, it will have unique elements according to its own
     /// equality comparer, but not necessarily according to ours. Therefore, to go these 
     /// optimized routes we check that other is a hashset using the same equality comparer.
-    /// 
+    /// </para>
+    /// <para>
     /// A HashSet with no elements has the properties of the empty set. (See IsSubset, etc. for 
     /// special empty set checks.)
-    /// 
+    /// </para>
+    /// <para>
     /// A couple of methods have a special case if other is this (e.g. SymmetricExceptWith). 
     /// If we didn't have these checks, we could be iterating over the set and modifying at
     /// the same time. 
+    /// </para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [DebuggerTypeProxy(typeof(Microsoft.Build.Collections.HashSetDebugView<>))]
@@ -608,11 +617,12 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Take the union of this HashSet with other. Modifies this set.
-        /// 
+        /// <para>Take the union of this HashSet with other. Modifies this set.</para>
+        /// <para>
         /// Implementation note: GetSuggestedCapacity (to increase capacity in advance avoiding 
         /// multiple resizes ended up not being useful in practice; quickly gets to the 
         /// point where it's a wasteful check.
+        /// </para>
         /// </summary>
         /// <param name="other">enumerable with items to add</param>
         public void UnionWith(IEnumerable<T> other)
@@ -1081,15 +1091,19 @@ namespace Microsoft.Build.Collections
         }
 #endif
         /// <summary>
+        /// <para>
         /// Sets the capacity of this list to the size of the list (rounded up to nearest prime),
         /// unless count is 0, in which case we release references.
-        /// 
+        /// </para>
+        /// <para>
         /// This method can be used to minimize a list's memory overhead once it is known that no
         /// new elements will be added to the list. To completely clear a list and release all 
         /// memory referenced by the list, execute the following statements:
-        /// 
+        /// </para>
+        /// <para>
         /// list.Clear();
         /// list.TrimExcess(); 
+        /// </para>
         /// </summary>
         public void TrimExcess()
         {

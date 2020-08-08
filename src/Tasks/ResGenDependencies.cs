@@ -17,10 +17,11 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.Tasks
 {
     /// <remarks>
+    /// <para>
     /// This class is a caching mechanism for the resgen task to keep track of linked
     /// files within processed .resx files.
-    /// 
-    /// This is an on-disk serialization format, don't change field names or types or use readonly.
+    /// </para>
+    /// <para>This is an on-disk serialization format, don't change field names or types or use readonly.</para>
     /// </remarks>
     [Serializable]
     internal sealed class ResGenDependencies : StateFileBase
@@ -184,9 +185,8 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <remarks>
-        /// Represents a single .resx file in the dependency cache.
-        /// 
-        /// This is an on-disk serialization format, don't change field names or types or use readonly.
+        /// <para>Represents a single .resx file in the dependency cache.</para>
+        /// <para>This is an on-disk serialization format, don't change field names or types or use readonly.</para>
         /// </remarks>
         [Serializable]
         internal sealed class ResXFile : DependencyFile
@@ -276,10 +276,11 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <remarks>
+        /// <para>
         /// Represents a single assembly in the dependency cache, which may produce 
         /// 0 to many ResW files.
-        /// 
-        /// This is an on-disk serialization format, don't change field names or types or use readonly.
+        /// </para>
+        /// <para>This is an on-disk serialization format, don't change field names or types or use readonly.</para>
         /// </remarks>
         [Serializable]
         internal sealed class PortableLibraryFile : DependencyFile

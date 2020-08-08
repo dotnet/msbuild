@@ -41,28 +41,33 @@ namespace Microsoft.Build.CommandLine
 #endif
     {
         /// <summary>
+        /// <para>
         /// Keeps a record of all environment variables that, on startup of the task host, have a different
         /// value from those that are passed to the task host in the configuration packet for the first task.  
         /// These environments are assumed to be effectively identical, so the only difference between the 
         /// two sets of values should be any environment variables that differ between e.g. a 32-bit and a 64-bit 
         /// process.  Those are the variables that this dictionary should store.  
-        /// 
+        /// </para>
+        /// <para>
         /// - The key into the dictionary is the name of the environment variable. 
         /// - The Key of the KeyValuePair is the value of the variable in the parent process -- the value that we 
         ///   wish to ensure is replaced by whatever the correct value in our current process is. 
         /// - The Value of the KeyValuePair is the value of the variable in the current process -- the value that 
         ///   we wish to replay the Key value with in the environment that we receive from the parent before 
         ///   applying it to the current process. 
-        ///   
+        /// </para>
+        /// <para>
         /// Note that either value in the KeyValuePair can be null, as it is completely possible to have an 
         /// environment variable that is set in 32-bit processes but not in 64-bit, or vice versa.  
-        /// 
+        /// </para>
+        /// <para>
         /// This dictionary must be static because otherwise, if a node is sitting around waiting for reuse, it will 
         /// have inherited the environment from the previous build, and any differences between the two will be seen 
         /// as "legitimate".  There is no way for us to know what the differences between the startup environment of 
         /// the previous build and the environment of the first task run in the task host in this build -- so we 
         /// must assume that the 4ish system environment variables that this is really meant to catch haven't 
         /// somehow magically changed between two builds spaced no more than 15 minutes apart.  
+        /// </para>
         /// </summary>
         private static IDictionary<string, KeyValuePair<string, string>> s_mismatchedEnvironmentValues;
 

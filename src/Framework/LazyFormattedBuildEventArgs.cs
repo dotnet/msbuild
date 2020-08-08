@@ -180,10 +180,11 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Formats the given string using the variable arguments passed in.
-        /// 
+        /// <para>Formats the given string using the variable arguments passed in.</para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
         /// <param name="culture">The culture info for formatting the message.</param>

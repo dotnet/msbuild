@@ -830,12 +830,12 @@ namespace Microsoft.Build.Tasks
         internal bool ExternallyResolved { get; private set; }
 
         /// <summary>
-        /// Make this reference an assembly that is a dependency of 'sourceReference'
-        ///
+        /// <para>Make this reference an assembly that is a dependency of 'sourceReference'</para>
+        /// <para>
         /// For example, if 'sourceReference' is MyAssembly.dll then a dependent assembly file
         /// might be en\MyAssembly.resources.dll
-        /// 
-        /// Assembly references do not have their own dependencies, therefore they are
+        /// </para>
+        /// <para>Assembly references do not have their own dependencies, therefore they are</para>
         /// </summary>
         /// <param name="sourceReference">The source reference that this reference will be dependent on</param>
         internal void MakeDependentAssemblyReference(Reference sourceReference)

@@ -693,11 +693,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// <para>
         /// When calling AxImp.exe directly, the runtime-callable wrapper needs to be
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
         /// its corresponding TLB wrapper.
-        ///
-        /// Tests that still works when IncludeVersionInInteropName = true
+        /// </para>
+        /// <para>Tests that still works when IncludeVersionInInteropName = true</para>
         /// </summary>
         [Fact]
         public void AxReferenceKnowsItsRCWTlbExists_IncludeVersion()
@@ -717,11 +718,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// <para>
         /// When calling AxImp.exe directly, the runtime-callable wrapper needs to be
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
         /// its corresponding TLB wrapper.
-        ///
-        /// Tests that still works when IncludeVersionInInteropName = true
+        /// </para>
+        /// <para>Tests that still works when IncludeVersionInInteropName = true</para>
         /// </summary>
         [Fact]
         public void AxReferenceKnowsItsRCWPiaExists_IncludeVersion()

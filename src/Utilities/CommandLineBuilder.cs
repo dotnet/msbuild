@@ -23,31 +23,37 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     /// <remarks>
     /// 
+    /// <para>
     /// Below are some quoting experiments, using the /D switch with the CL and RC preprocessor.
     /// The /D switch is a little more tricky than most switches, because it has a name=value pair.
     /// The table below contains what the preprocessor actually embeds when passed the switch in the
     /// first column:
-    /// 
+    /// </para>
+    /// <para>
     ///                      CL via cmd line         CL via response file       RC
     ///     /DFOO="A"                A                   A   
     ///     /D"FOO="A""              A                   A                       A
     ///     /DFOO=A                  A                   A   
     ///     /D"FOO=A"                A                   A   
     ///     /DFOO=""A""              A                   A                       A
-    ///         
+    /// </para>
+    /// <para>
     ///     /DFOO=\"A\"             "A"                                         "A"
     ///     /DFOO="""A"""           "A"                broken                   "A"
     ///     /D"FOO=\"A\""           "A"                                         "A"
     ///     /D"FOO=""A"""           "A"                                         "A"
-    ///         
+    /// </para>
+    /// <para>
     ///     /DFOO="A B"             A B                 A B 
     ///     /D"FOO=A B"             A B                 A B 
-    ///         
+    /// </para>
+    /// <para>
     ///     /D"FOO="A B""          broken      
     ///     /DFOO=\"A B\"          broken      
     ///     /D"FOO=\"A B\""        "A B"               "A B"                   "A B"
     ///     /D"FOO=""A B"""        "A B"               broken                  broken
-    ///
+    /// </para>
+    /// <para>
     /// From my experiments (with CL and RC only) it seems that 
     ///    -- Literal double quotes are most reliably written in the form \" not ""
     ///    -- Backslashes falling just before doublequotes must be doubled.
@@ -56,6 +62,7 @@ namespace Microsoft.Build.Utilities
     ///    -- For /Dname=value style switches, functional double quotes (for example to handle spaces) are best put around both 
     ///           name and value (in other words, these kinds of switches don't need special treatment for their '=' signs).
     ///    -- Values containing hyphens should be quoted; RC requires this, and CL does not mind.
+    /// </para>
     /// </remarks>
     public class CommandLineBuilder
     {

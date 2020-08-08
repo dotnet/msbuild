@@ -16,21 +16,24 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build
 {
     /// <summary>
+    /// <para>
     /// This class is used to selectively intern strings. It should be used at the point of new string creation.
     /// For example,
-    ///
-    ///     string interned = OpportunisticIntern.Intern(String.Join(",",someStrings));
-    ///
+    /// </para>
+    /// <para>    string interned = OpportunisticIntern.Intern(String.Join(",",someStrings));</para>
+    /// <para>
     /// There are currently two underlying implementations. The new default one in WeakStringCacheInterner is based on weak GC handles.
     /// The legacy one in BucketedPrioritizedStringList is available only as an escape hatch by setting an environment variable.
-    ///
+    /// </para>
+    /// <para>
     /// The legacy implementation uses heuristics to decide whether it will be efficient to intern a string or not. There is no
     /// guarantee that a string will intern.
-    ///
+    /// </para>
+    /// <para>
     /// The thresholds and sizes were determined by experimentation to give the best number of bytes saved
     /// at reasonable elapsed time cost.
-    ///
-    /// The new implementation interns all strings but maintains only weak references so it doesn't keep the strings alive.
+    /// </para>
+    /// <para>The new implementation interns all strings but maintains only weak references so it doesn't keep the strings alive.</para>
     /// </summary>
     internal sealed class OpportunisticIntern
     {

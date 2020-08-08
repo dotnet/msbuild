@@ -285,10 +285,11 @@ namespace Microsoft.Build.Utilities
 
 #if FEATURE_WIN32_REGISTRY
         /// <summary>
-        /// Get a sorted list of AssemblyFoldersExInfo which contain information about what directories the 3rd party assemblies are registered under for use during build and design time.
-        ///
+        /// <para>Get a sorted list of AssemblyFoldersExInfo which contain information about what directories the 3rd party assemblies are registered under for use during build and design time.</para>
+        /// <para>
         /// This method will enumerate the AssemblyFoldersEx registry location and return a list of AssemblyFoldersExInfo in the same order in which
         /// they will be searched during both design and build time for reference assemblies.
+        /// </para>
         /// </summary>
         /// <param name="registryRoot">The root registry location for the targeted framework. For .NET this is SOFTWARE\MICROSOFT\.NETFramework</param>
         /// <param name="targetFrameworkVersion">The targeted framework version (2.0, 3.0, 3.5, 4.0, etc)</param>
@@ -321,10 +322,11 @@ namespace Microsoft.Build.Utilities
 #endif
 
         /// <summary>
-        /// Get a sorted list of AssemblyFoldersFromConfigInfo which contain information about what directories the 3rd party assemblies are registered under for use during build and design time.
-        ///
+        /// <para>Get a sorted list of AssemblyFoldersFromConfigInfo which contain information about what directories the 3rd party assemblies are registered under for use during build and design time.</para>
+        /// <para>
         /// This method will read the specified configuration file and enumerate the and return a list of AssemblyFoldersFromConfigInfo in the same order in which
         /// they will be searched during both design and build time for reference assemblies.
+        /// </para>
         /// </summary>
         /// <param name="configFile">Full path to the Assembly Folders config file.</param>
         /// <param name="targetFrameworkVersion">The targeted framework version (2.0, 3.0, 3.5, 4.0, etc).</param>

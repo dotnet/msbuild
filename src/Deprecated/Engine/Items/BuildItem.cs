@@ -1015,16 +1015,14 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// <para>
         /// This method extracts from the final item-spec the portion of its directory that matches the recursive wildcard
         /// specification (if any) given in the original item-spec i.e. in the "Include" attribute.
-        ///
-        /// For the path:
-        ///
-        ///     subdir1\**\debug\*.txt
-        ///
-        /// Recursive portion:
-        ///
-        ///     bin\debug\
+        /// </para>
+        /// <para>For the path:</para>
+        /// <para>    subdir1\**\debug\*.txt</para>
+        /// <para>Recursive portion:</para>
+        /// <para>    bin\debug\</para>
         ///
         /// </summary>
         /// <returns>recursively matched portion of item directory</returns>

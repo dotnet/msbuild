@@ -15,10 +15,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Xunit.Sdk;
 
     /// <summary>
+    /// <para>
     /// Most importantly we want to touch implementation to all public method to catch any
     /// potential transitional error.
-    ///
-    /// Since we have 2 independent views of the same object we have the "luxury" to do a full complete validation.
+    /// </para>
+    /// <para>Since we have 2 independent views of the same object we have the "luxury" to do a full complete validation.</para>
     /// </summary>
     public class LinkedConstructionReadOnly_Tests : IClassFixture<LinkedConstructionReadOnly_Tests.ROTestCollectionGroup>
     {

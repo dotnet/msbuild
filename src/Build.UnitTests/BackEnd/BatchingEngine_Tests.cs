@@ -192,11 +192,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
            );
         }
         /// <summary>
+        /// <para>
         /// Missing unittest found by mutation testing.
         /// REASON TEST WASN'T ORIGINALLY PRESENT: Missed test.
-        ///
+        /// </para>
+        /// <para>
         /// This test ensures that two items with duplicate attributes end up in exactly one batching
         /// bucket.
+        /// </para>
         /// </summary>
         [Fact]
         public void Regress_Mutation_DuplicateBatchingBucketsAreFoldedTogether()

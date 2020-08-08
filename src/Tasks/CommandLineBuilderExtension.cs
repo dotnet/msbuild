@@ -225,13 +225,15 @@ namespace Microsoft.Build.Tasks
             return true;
         }
         /// <summary>
-        /// Designed to handle the /link and /embed swithes:
-        ///
+        /// <para>Designed to handle the /link and /embed swithes:</para>
+        /// <para>
         ///      /embed[resource]:&lt;filename&gt;[,&lt;name&gt;[,Private]]
         ///      /link[resource]:&lt;filename&gt;[,&lt;name&gt;[,Private]]
-        ///
+        /// </para>
+        /// <para>
         /// Where the last flag--Private--is either present or not present
         /// depending on whether the ITaskItem has a Private="True" attribue.
+        /// </para>
         /// </summary>
         /// <param name="switchName"></param>
         /// <param name="parameters"></param>

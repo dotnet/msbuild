@@ -225,11 +225,12 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Tries to retrieve the type information for a type name / method name combination. 
-        /// 
+        /// <para>Tries to retrieve the type information for a type name / method name combination. </para>
+        /// <para>
         /// It does 2 lookups:
         /// 1st try: 'typeFullName'
         /// 2nd try: 'typeFullName::simpleMethodName'
+        /// </para>
         /// 
         /// </summary>
         /// <param name="typeFullName">namespace qualified type name</param>

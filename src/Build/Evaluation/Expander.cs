@@ -107,11 +107,14 @@ namespace Microsoft.Build.Evaluation
     /// Encapsulates the data necessary for expansion.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Requires the caller to explicitly state what they wish to expand at the point of expansion (explicitly does not have a field for ExpanderOptions). 
     /// Callers typically use a single expander in many locations, and this forces the caller to make explicit what they wish to expand at the point of expansion.
-    /// 
+    /// </para>
+    /// <para>
     /// Requires the caller to have previously provided the necessary material for the expansion requested.
     /// For example, if the caller requests ExpanderOptions.ExpandItems, the Expander will throw if it was not given items.
+    /// </para>
     /// </remarks>
     /// <typeparam name="P">Type of the properties used</typeparam>
     /// <typeparam name="I">Type of the items used.</typeparam>
@@ -239,10 +242,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// <para>
         /// Expands embedded item metadata, properties, and embedded item lists (in that order) as specified in the provided options.
         /// This is the standard form. Before using the expanded value, it must be unescaped, and this does that for you.
-        /// 
-        /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.        
+        /// </para>
+        /// <para>If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.        </para>
         /// </summary>
         internal string ExpandIntoStringAndUnescape(string expression, ExpanderOptions options, IElementLocation elementLocation)
         {
@@ -254,11 +258,12 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// <para>
         /// Expands embedded item metadata, properties, and embedded item lists (in that order) as specified in the provided options.
         /// Use this form when the result is going to be processed further, for example by matching against the file system,
         /// so literals must be distinguished, and you promise to unescape after that.
-        /// 
-        /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
+        /// </para>
+        /// <para>If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.</para>
         /// </summary>
         internal string ExpandIntoStringLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
         {
@@ -319,13 +324,16 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// <para>
         /// Expands embedded item metadata, properties, and embedded item lists (in that order) as specified in the provided options
         /// and produces a list of items of the type for which it was specialized.
         /// If the expression is empty, returns an empty list.
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
-        /// 
+        /// </para>
+        /// <para>
         /// Use this form when the result is going to be processed further, for example by matching against the file system,
         /// so literals must be distinguished, and you promise to unescape after that.
+        /// </para>
         /// </summary>
         /// <typeparam name="T">Type of items to return</typeparam>
         internal IList<T> ExpandIntoItemsLeaveEscaped<T>(string expression, IItemFactory<I, T> itemFactory, ExpanderOptions options, IElementLocation elementLocation)
@@ -378,27 +386,29 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// This is a specialized method for the use of TargetUpToDateChecker and Evaluator.EvaluateItemXml only.
-        /// 
+        /// <para>This is a specialized method for the use of TargetUpToDateChecker and Evaluator.EvaluateItemXml only.</para>
+        /// <para>
         /// Extracts the items in the given SINGLE item vector.
         /// For example, expands @(Compile->'%(foo)') to a set of items derived from the items in the "Compile" list.
-        ///
-        /// If there is in fact more than one vector in the expression, throws InvalidProjectFileException.
-        /// 
+        /// </para>
+        /// <para>If there is in fact more than one vector in the expression, throws InvalidProjectFileException.</para>
+        /// <para>
         /// If there are no item expressions in the expression (for example a literal "foo.cpp"), returns null.
         /// If expression expands to no items, returns an empty list.
         /// If item expansion is not allowed by the provided options, returns null.
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
-        /// 
+        /// </para>
+        /// <para>
         /// If the expression is a transform, any transformations to an expression that evaluates to nothing (i.e., because
         /// an item has no value for a piece of metadata) are optionally indicated with a null entry in the list. This means 
         /// that the length of the returned list is always the same as the length of the referenced item list in the input string.
         /// That's important for any correlation the caller wants to do.
-        /// 
-        /// If expression was a transform, 'isTransformExpression' is true, otherwise false.
-        ///
+        /// </para>
+        /// <para>If expression was a transform, 'isTransformExpression' is true, otherwise false.</para>
+        /// <para>
         /// Item type of the items returned is determined by the IItemFactory passed in; if the IItemFactory does not 
         /// have an item type set on it, it will be given the item type of the item vector to use.
+        /// </para>
         /// </summary>
         /// <typeparam name="T">Type of the items that should be returned</typeparam>
         internal IList<T> ExpandSingleItemVectorExpressionIntoItems<T>(string expression, IItemFactory<I, T> itemFactory, ExpanderOptions options, bool includeNullItems, out bool isTransformExpression, IElementLocation elementLocation)
@@ -893,21 +903,22 @@ namespace Microsoft.Build.Evaluation
             where T : class, IProperty
         {
             /// <summary>
+            /// <para>
             /// This method takes a string which may contain any number of
             /// "$(propertyname)" tags in it.  It replaces all those tags with
             /// the actual property values, and returns a new string.  For example,
-            ///
+            /// </para>
+            /// <para>
             ///     string processedString =
             ///         propertyBag.ExpandProperties("Value of NoLogo is $(NoLogo).");
-            ///
-            /// This code might produce:
-            ///
-            ///     processedString = "Value of NoLogo is true."
-            ///
+            /// </para>
+            /// <para>This code might produce:</para>
+            /// <para>    processedString = "Value of NoLogo is true."</para>
+            /// <para>
             /// If the sourceString contains an embedded property which doesn't
             /// have a value, then we replace that tag with an empty string.
-            ///
-            /// This method leaves the result escaped.  Callers may need to unescape on their own as appropriate.
+            /// </para>
+            /// <para>This method leaves the result escaped.  Callers may need to unescape on their own as appropriate.</para>
             /// </summary>
             internal static string ExpandPropertiesLeaveEscaped(
                 string expression,
@@ -929,21 +940,22 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
+            /// <para>
             /// This method takes a string which may contain any number of
             /// "$(propertyname)" tags in it.  It replaces all those tags with
             /// the actual property values, and returns a new string.  For example,
-            ///
+            /// </para>
+            /// <para>
             ///     string processedString =
             ///         propertyBag.ExpandProperties("Value of NoLogo is $(NoLogo).");
-            ///
-            /// This code might produce:
-            ///
-            ///     processedString = "Value of NoLogo is true."
-            ///
+            /// </para>
+            /// <para>This code might produce:</para>
+            /// <para>    processedString = "Value of NoLogo is true."</para>
+            /// <para>
             /// If the sourceString contains an embedded property which doesn't
             /// have a value, then we replace that tag with an empty string.
-            ///
-            /// This method leaves the result typed and escaped.  Callers may need to convert to string, and unescape on their own as appropriate.
+            /// </para>
+            /// <para>This method leaves the result typed and escaped.  Callers may need to convert to string, and unescape on their own as appropriate.</para>
             /// </summary>
             internal static object ExpandPropertiesLeaveTypedAndEscaped(
                 string expression,
@@ -1565,16 +1577,15 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Expands item expressions, like @(Compile), possibly with transforms and/or separators.
-        ///
-        /// Item vectors are composed of a name, an optional transform, and an optional separator i.e.
-        /// 
-        ///     @(&lt;name&gt;->'&lt;transform&gt;','&lt;separator&gt;')
-        ///     
+        /// <para>Expands item expressions, like @(Compile), possibly with transforms and/or separators.</para>
+        /// <para>Item vectors are composed of a name, an optional transform, and an optional separator i.e.</para>
+        /// <para>    @(&lt;name&gt;->'&lt;transform&gt;','&lt;separator&gt;')</para>
+        /// <para>
         /// If a separator is not specified it defaults to a semi-colon. The transform expression is also optional, but if
         /// specified, it allows each item in the vector to have its item-spec converted to a different form. The transform
         /// expression can reference any custom metadata defined on the item, as well as the pre-defined item-spec modifiers.
-        /// 
+        /// </para>
+        /// <para>
         /// NOTE:
         /// 1) white space between &lt;name&gt;, &lt;transform&gt; and &lt;separator&gt; is ignored
         ///    i.e. @(&lt;name&gt;, '&lt;separator&gt;') is valid
@@ -1582,22 +1593,15 @@ namespace Microsoft.Build.Evaluation
         /// 3) the separator can be an empty string i.e. @(&lt;name&gt;,'')
         /// 4) specifying an empty transform is NOT the same as specifying no transform -- the former will reduce all item-specs
         ///    to empty strings
-        ///
-        /// if @(files) is a vector for the files a.txt and b.txt, then:
-        /// 
-        ///     "my list: @(files)"                                 expands to string     "my list: a.txt;b.txt"
-        /// 
-        ///     "my list: @(files,' ')"                             expands to string      "my list: a.txt b.txt"
-        /// 
-        ///     "my list: @(files, '')"                             expands to string      "my list: a.txtb.txt"
-        /// 
-        ///     "my list: @(files, '; ')"                           expands to string      "my list: a.txt; b.txt"
-        /// 
-        ///     "my list: @(files->'%(Filename)')"                  expands to string      "my list: a;b"
-        /// 
-        ///     "my list: @(files -> 'temp\%(Filename).xml', ' ')   expands to string      "my list: temp\a.xml temp\b.xml"
-        /// 
-        ///     "my list: @(files->'')                              expands to string      "my list: ;"
+        /// </para>
+        /// <para>if @(files) is a vector for the files a.txt and b.txt, then:</para>
+        /// <para>    "my list: @(files)"                                 expands to string     "my list: a.txt;b.txt"</para>
+        /// <para>    "my list: @(files,' ')"                             expands to string      "my list: a.txt b.txt"</para>
+        /// <para>    "my list: @(files, '')"                             expands to string      "my list: a.txtb.txt"</para>
+        /// <para>    "my list: @(files, '; ')"                           expands to string      "my list: a.txt; b.txt"</para>
+        /// <para>    "my list: @(files->'%(Filename)')"                  expands to string      "my list: a;b"</para>
+        /// <para>    "my list: @(files -> 'temp\%(Filename).xml', ' ')   expands to string      "my list: temp\a.xml temp\b.xml"</para>
+        /// <para>    "my list: @(files->'')                              expands to string      "my list: ;"</para>
         /// </summary>
         /// <remarks>
         /// This is a private nested class, exposed only through the Expander class.
@@ -1635,25 +1639,26 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// Expands any item vector in the expression into items.
-            /// 
-            /// For example, expands @(Compile->'%(foo)') to a set of items derived from the items in the "Compile" list.
-            /// 
+            /// <para>Expands any item vector in the expression into items.</para>
+            /// <para>For example, expands @(Compile->'%(foo)') to a set of items derived from the items in the "Compile" list.</para>
+            /// <para>
             /// If there is no item vector in the expression (for example a literal "foo.cpp"), returns null.
             /// If the item vector expression expands to no items, returns an empty list.
             /// If item expansion is not allowed by the provided options, returns null.
             /// If there is an item vector but concatenated with something else, throws InvalidProjectFileException.
             /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
-            /// 
+            /// </para>
+            /// <para>
             /// If the expression is a transform, any transformations to an expression that evaluates to nothing (i.e., because
             /// an item has no value for a piece of metadata) are optionally indicated with a null entry in the list. This means 
             /// that the length of the returned list is always the same as the length of the referenced item list in the input string.
             /// That's important for any correlation the caller wants to do.
-            /// 
-            /// If expression was a transform, 'isTransformExpression' is true, otherwise false.
-            ///
+            /// </para>
+            /// <para>If expression was a transform, 'isTransformExpression' is true, otherwise false.</para>
+            /// <para>
             /// Item type of the items returned is determined by the IItemFactory passed in; if the IItemFactory does not 
             /// have an item type set on it, it will be given the item type of the item vector to use.
+            /// </para>
             /// </summary>
             /// <typeparam name="S">Type of the items provided by the item source used for expansion</typeparam>
             /// <typeparam name="T">Type of the items that should be returned</typeparam>
@@ -1800,10 +1805,11 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
+            /// <para>
             /// Expands an expression capture into a list of items
             /// If the capture uses a separator, then all the items are concatenated into one string using that separator.
-            /// 
-            /// Returns true if ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and so it broke out early.
+            /// </para>
+            /// <para>Returns true if ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and so it broke out early.</para>
             /// </summary>
             /// <param name="isTransformExpression"></param>
             /// <param name="itemsFromCapture">

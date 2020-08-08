@@ -110,12 +110,12 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Test the case where the project reference does not have either of the metadata set on it.
-        ///
-        /// We would expect the following case:
-        ///
+        /// <para>Test the case where the project reference does not have either of the metadata set on it.</para>
+        /// <para>We would expect the following case:</para>
+        /// <para>
         /// 1) The xml element does not have the BuildProjectInSolution attribute set
         ///     Expect none of the metadata to be set
+        /// </para>
         /// </summary>
         [Fact]
         public void TestReferenceWithNoMetadataBadBuildInProjectAttribute()
@@ -131,12 +131,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test the case where the project reference does not have either of the metadata set on it.
-        ///
-        /// We would expect the following case:
-        ///
+        /// <para>Test the case where the project reference does not have either of the metadata set on it.</para>
+        /// <para>We would expect the following case:</para>
+        /// <para>
         /// 1) The xml element does not have the BuildProjectInSolution attribute set
         ///     Expect none of the metadata to be set
+        /// </para>
         /// </summary>
         [Fact]
         public void TestReferenceWithNoMetadataNoBuildInProjectAttribute()
@@ -151,11 +151,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test the case where the project reference does not have either of the metadata set on it.
-        ///
+        /// <para>Test the case where the project reference does not have either of the metadata set on it.</para>
+        /// <para>
         /// We would expect the following case:
         /// 1) The xml element has BuildProjectInSolution set to true
         ///     Expect none of the metadata to be set
+        /// </para>
         /// </summary>
         [Fact]
         public void TestReferenceWithNoMetadataBuildInProjectAttributeTrue()
@@ -172,13 +173,15 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Test the case where the project reference does not have either of the metadata set on it.
-        ///
+        /// <para>Test the case where the project reference does not have either of the metadata set on it.</para>
+        /// <para>
         /// We would expect the following case:
         /// ReferenceAndBuildProjectsDisabledInProjectConfiguration is set to true meaning we want to build disabled projects.
-        ///
+        /// </para>
+        /// <para>
         /// 1) The xml element has BuildProjectInSolution set to false
         ///     Expect no pieces of metadata to be set on the reference item
+        /// </para>
         /// </summary>
         [Fact]
         public void TestReferenceWithNoMetadataBuildInProjectAttributeFalseReferenceAndBuildProjectsDisabledInProjectConfiguration()
@@ -194,11 +197,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test the case where the project reference does not have either of the metadata set on it.
-        ///
+        /// <para>Test the case where the project reference does not have either of the metadata set on it.</para>
+        /// <para>
         /// We would expect the following case:
         /// 1) The xml element has BuildProjectInSolution set to false
         ///     Expect two pieces of metadata to be put on the item and be set to false (BuildReference, and ReferenceOutputAssembly)
+        /// </para>
         /// </summary>
         [Fact]
         public void TestReferenceWithNoMetadataBuildInProjectAttributeFalse()
@@ -215,11 +219,12 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Test the case where the project reference does has one or more of the metadata set on it.
-        ///
+        /// <para>Test the case where the project reference does has one or more of the metadata set on it.</para>
+        /// <para>
         /// We would expect the following case:
         /// 1) The xml element has BuildProjectInSolution set to false
         ///     Expect two pieces of metadata to be put on the item and be set to true since they were already set (BuildReference, and ReferenceOutputAssembly)
+        /// </para>
         /// </summary>
         [Fact]
         public void TestReferenceWithMetadataAlreadySetBuildInProjectAttributeFalse()

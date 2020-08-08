@@ -1115,10 +1115,11 @@ namespace ClassLibrary2
             private ISdkResolverService _sdkResolverService;
 
             /// <summary>
-            /// Constructor
-            ///
+            /// <para>Constructor</para>
+            /// <para>
             /// UNDONE: Refactor this, and the other MockHosts, to use a common base implementation.  The duplication of the
             /// logging implementation alone is unfortunate.
+            /// </para>
             /// </summary>
             public MockHost()
             {

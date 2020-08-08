@@ -23,12 +23,8 @@ namespace Microsoft.Build.Shared
     internal static class ResourceUtilities
     {
         /// <summary>
-        /// Extracts the message code (if any) prefixed to the given string. 
-        /// <![CDATA[
-        /// MSBuild codes match "^\s*(?<CODE>MSB\d\d\d\d):\s*(?<MESSAGE>.*)$"
-        /// Arbitrary codes match "^\s*(?<CODE>[A-Za-z]+\d+):\s*(?<MESSAGE>.*)$"
-        /// ]]>
-        /// Thread safe.
+        /// <para>Extracts the message code (if any) prefixed to the given string. </para>
+        /// <para>Thread safe.</para>
         /// </summary>
         /// <param name="msbuildCodeOnly">Whether to match only MSBuild error codes, or any error code.</param>
         /// <param name="message">The string to parse.</param>
@@ -152,11 +148,14 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Loads the specified string resource and formats it with the arguments passed in. If the string resource has an MSBuild
         /// message code and help keyword associated with it, they too are returned.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
         /// <param name="code">[out] The MSBuild message code, or null.</param>
@@ -180,11 +179,14 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Looks up a string in the resources, and formats it with the arguments passed in. If the string resource has an MSBuild
         /// message code and help keyword associated with it, they are discarded.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        /// </para>
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
         /// <param name="resourceName">Resource string to load.</param>
@@ -212,12 +214,12 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Formats the given string using the variable arguments passed in.
-        /// 
+        /// <para>Formats the given string using the variable arguments passed in.</para>
+        /// <para>
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
-        /// 
-        /// Thread safe.
+        /// </para>
+        /// <para>Thread safe.</para>
         /// </summary>
         /// <param name="unformatted">The string to format.</param>
         /// <param name="args">Optional arguments for formatting the given string.</param>

@@ -10,6 +10,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
+    /// <para>
     /// Class:       Scanner
     /// This class does the scanning of the input and returns tokens.
     /// The usage pattern is:
@@ -17,9 +18,11 @@ namespace Microsoft.Build.Evaluation
     ///    do {
     ///      s.Advance();
     ///    while (s.IsNext(Token.EndOfInput));
-    /// 
+    /// </para>
+    /// <para>
     ///  After Advance() is called, you can get the current token (s.CurrentToken),
     ///  check it's type (s.IsNext()), get the string for it (s.NextString()).
+    /// </para>
     /// </summary>
     internal sealed class Scanner
     {
@@ -122,12 +125,15 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// <para>
         /// Advance
         /// returns true on successful advance
         ///     and false on an erroneous token
-        ///
+        /// </para>
+        /// <para>
         /// Doesn't return error until the bogus input is encountered.
         /// Advance() returns true even after EndOfInput is encountered.
+        /// </para>
         /// </summary>
         internal bool Advance()
         {

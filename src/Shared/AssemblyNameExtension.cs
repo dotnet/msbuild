@@ -894,12 +894,13 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Do a partial comparison between two assembly name extensions.
         /// Compare the fields of A and B on the following conditions:
         /// 1) A.Field has a non null value
         /// 2) The field has been selected in the comparison flags or the default comparison flags are passed in.
-        ///
-        /// If A.Field is null then we will not compare A.Field and B.Field even when the comparison flag is set for that field unless skipNullFields is false.
+        /// </para>
+        /// <para>If A.Field is null then we will not compare A.Field and B.Field even when the comparison flag is set for that field unless skipNullFields is false.</para>
         /// </summary>
         internal bool PartialNameCompare(AssemblyNameExtension that, PartialComparisonFlags comparisonFlags)
         {
@@ -907,12 +908,13 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Do a partial comparison between two assembly name extensions.
         /// Compare the fields of A and B on the following conditions:
         /// 1) A.Field has a non null value
         /// 2) The field has been selected in the comparison flags or the default comparison flags are passed in.
-        ///
-        /// If A.Field is null then we will not compare A.Field and B.Field even when the comparison flag is set for that field unless skipNullFields is false.
+        /// </para>
+        /// <para>If A.Field is null then we will not compare A.Field and B.Field even when the comparison flag is set for that field unless skipNullFields is false.</para>
         /// </summary>
         internal bool PartialNameCompare(AssemblyNameExtension that, PartialComparisonFlags comparisonFlags, bool considerRetargetableFlag)
         {

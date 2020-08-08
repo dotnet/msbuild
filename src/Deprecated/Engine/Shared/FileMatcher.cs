@@ -130,10 +130,11 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Same as Directory.GetFiles(...) except that files that
         /// aren't accessible are skipped instead of throwing an exception.
-        /// 
-        /// Other exceptions are passed through.
+        /// </para>
+        /// <para>Other exceptions are passed through.</para>
         /// </summary>
         /// <param name="path">The path.</param>
         /// <param name="filespec">The pattern.</param>
@@ -189,10 +190,11 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Same as Directory.GetDirectories(...) except that files that
         /// aren't accessible are skipped instead of throwing an exception.
-        /// 
-        /// Other exceptions are passed through.
+        /// </para>
+        /// <para>Other exceptions are passed through.</para>
         /// </summary>
         /// <param name="path">The path.</param>
         /// <param name="pattern">Pattern to match</param>
@@ -668,11 +670,14 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Given a file spec, create a regular expression that will match that
         /// file spec.
-        /// 
+        /// </para>
+        /// <para>
         /// PERF WARNING: this method is called in performance-critical
         /// scenarios, so keep it fast and cheap
+        /// </para>
         /// </summary>
         /// <param name="fixedDirectoryPart">The fixed directory part.</param>
         /// <param name="wildcardDirectoryPart">The wildcard directory part.</param>

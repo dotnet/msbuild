@@ -31,34 +31,38 @@ namespace Microsoft.Build.BackEnd
     internal enum TargetEntryState
     {
         /// <summary>
-        /// The target's dependencies need to be evaluated and pushed onto the target stack.
-        ///
+        /// <para>The target's dependencies need to be evaluated and pushed onto the target stack.</para>
+        /// <para>
         /// Transitions:
         /// Execution, ErrorExecution
+        /// </para>
         /// </summary>
         Dependencies,
 
         /// <summary>
-        /// The target is ready to execute its tasks, batched as needed.
-        ///
+        /// <para>The target is ready to execute its tasks, batched as needed.</para>
+        /// <para>
         /// Transitions:
         /// ErrorExecution, Completed
+        /// </para>
         /// </summary>
         Execution,
 
         /// <summary>
-        /// The target is ready to provide error tasks.
-        ///
+        /// <para>The target is ready to provide error tasks.</para>
+        /// <para>
         /// Transitions:
         /// None
+        /// </para>
         /// </summary>
         ErrorExecution,
 
         /// <summary>
-        /// The target has finished building.  All of the results are in the Lookup.
-        ///
+        /// <para>The target has finished building.  All of the results are in the Lookup.</para>
+        /// <para>
         /// Transitions:
         /// None
+        /// </para>
         /// </summary>
         Completed
     }

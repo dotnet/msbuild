@@ -427,15 +427,17 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Because there is no longer a strong 1:1 mapping between FX versions and SDK
         /// versions, if we're unable to locate the desired SDK version, we will try to
         /// use whichever SDK version is installed by looking at the key pointing to the
         /// "latest" version.
-        ///
+        /// </para>
+        /// <para>
         /// This isn't ideal, but it will allow our tasks to function on any of several
         /// related SDKs even if they don't have exactly the same versions.
-        ///
-        /// NOTE:  This returns the path to the root of the fallback SDK
+        /// </para>
+        /// <para>NOTE:  This returns the path to the root of the fallback SDK</para>
         /// </summary>
         private static string FallbackDotNetFrameworkSdkInstallPath
         {
@@ -475,16 +477,20 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Because there is no longer a strong 1:1 mapping between FX versions and SDK
         /// versions, if we're unable to locate the desired SDK version, we will try to
         /// use whichever SDK version is installed by looking at the key pointing to the
         /// "latest" version.
-        ///
+        /// </para>
+        /// <para>
         /// This isn't ideal, but it will allow our tasks to function on any of several
         /// related SDKs even if they don't have exactly the same versions.
-        ///
+        /// </para>
+        /// <para>
         /// NOTE:  This explicitly returns the path to the 3.5 tools (bin) under the fallback
         /// SDK, to match the data we're pulling from the registry now.
+        /// </para>
         /// </summary>
         private static string PathToV35ToolsInFallbackDotNetFrameworkSdk
         {
@@ -522,16 +528,20 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// <para>
         /// Because there is no longer a strong 1:1 mapping between FX versions and SDK
         /// versions, if we're unable to locate the desired SDK version, we will try to
         /// use whichever SDK version is installed by looking at the key pointing to the
         /// "latest" version.
-        ///
+        /// </para>
+        /// <para>
         /// This isn't ideal, but it will allow our tasks to function on any of several
         /// related SDKs even if they don't have exactly the same versions.
-        ///
+        /// </para>
+        /// <para>
         /// NOTE:  This explicitly returns the path to the 4.X tools (bin\NetFX 4.0 Tools)
         /// under the fallback SDK, to match the data we're pulling from the registry now.
+        /// </para>
         /// </summary>
         private static string PathToV4ToolsInFallbackDotNetFrameworkSdk
         {

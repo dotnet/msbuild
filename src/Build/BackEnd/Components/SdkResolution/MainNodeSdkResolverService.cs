@@ -17,14 +17,17 @@ using System.Threading.Tasks;
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>
+    /// <para>
     /// An implementation of <see cref="ISdkResolverService"/> that is hosted in the main node for multi-proc builds.  This instance of the service
     /// listens for requests from out-of-proc nodes so that SDK resolution is handled in a central location.  This instance is registered in <see cref="BuildComponentFactoryCollection.RegisterDefaultFactories"/>
     /// and can be overridden for different contexts.  This service calls the <see cref="SdkResolverService"/> to do any actual SDK resolution
     /// because the <see cref="SdkResolverService"/> is used for stand-alone evaluations where there is no build context available so caching
     /// is not an option.
-    ///
+    /// </para>
+    /// <para>
     /// Since this object is a registered <see cref="IBuildComponent"/>, it is a singleton for the main process.  To get an instance of it, you
     /// must have access to an <see cref="IBuildComponentHost"/> and call <see cref="IBuildComponentHost.GetComponent"/> and pass <see cref="BuildComponentType.SdkResolverService"/>.
+    /// </para>
     /// </summary>
     internal sealed class MainNodeSdkResolverService : HostedSdkResolverServiceBase
     {

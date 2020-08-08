@@ -11,21 +11,19 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// Class: AssignCulture
-    /// 
+    /// <para>Class: AssignCulture</para>
+    /// <para>
     /// This task takes a list of resource file names and sets an attribute that
     /// contains the culture name embedded in the file name:
-    /// 
-    ///      MyResources.fr.resx     ==> Culture='fr'
-    /// 
-    /// The task can also return a list of "Culture-neutral" file names, like:
-    /// 
-    ///      MyGlyph.fr.bmp          ==> MyGlyph.bmp [Culture='fr']
-    /// 
-    /// This is because embedded resources are referred to this way.
-    /// 
+    /// </para>
+    /// <para>     MyResources.fr.resx     ==> Culture='fr'</para>
+    /// <para>The task can also return a list of "Culture-neutral" file names, like:</para>
+    /// <para>     MyGlyph.fr.bmp          ==> MyGlyph.bmp [Culture='fr']</para>
+    /// <para>This is because embedded resources are referred to this way.</para>
+    /// <para>
     /// There are plenty of corner cases with this task. See the unit test for
     /// more details.
+    /// </para>
     /// </summary>
     public class AssignCulture : TaskExtension
     {
@@ -38,70 +36,67 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] Files { get; set; } = Array.Empty<ITaskItem>();
 
         /// <summary>
+        /// <para>
         /// This outgoing list of files is exactly the same as the incoming Files
         /// list except that an attribute name "Culture" will have been added if 
         /// the particular file name is in the form:
-        /// 
-        ///      MyResource.&lt;any-valid-culture-id&gt;.resx
-        /// 
-        /// The value of Culture will be "&lt;any-valid-culture-id&gt;".
-        /// 
+        /// </para>
+        /// <para>     MyResource.&lt;any-valid-culture-id&gt;.resx</para>
+        /// <para>The value of Culture will be "&lt;any-valid-culture-id&gt;".</para>
+        /// <para>
         /// If the incoming item from Files already has a Culture attribute then
         /// that original attribute is used instead.
+        /// </para>
         /// </summary>
         [Output]
         public ITaskItem[] AssignedFiles { get; private set; }
 
         /// <summary>
+        /// <para>
         /// This is a subset of AssignedFiles that has all of the items that
         /// ended up have a Culture assigned to them. This includes items that
         /// already had a Culture in the incoming Files list as well as items
         /// that were assigned a Culture because they had a valid culture ID
         /// embedded in their file name.
-        /// 
-        /// The following is always true:
-        /// 
-        ///      AssignedFiles = AssignedFilesWithCulture + AssignedFilesWithNoCulture
+        /// </para>
+        /// <para>The following is always true:</para>
+        /// <para>     AssignedFiles = AssignedFilesWithCulture + AssignedFilesWithNoCulture</para>
         /// </summary>
         [Output]
         public ITaskItem[] AssignedFilesWithCulture { get; private set; }
 
         /// <summary>
+        /// <para>
         /// This is a subset of AssignedFiles that has all of the items that
         /// ended up with no Culture assigned to them. 
-        /// 
-        /// The following is always true:
-        /// 
-        ///      AssignedFiles = AssignedFilesWithCulture + AssignedFilesWithNoCulture
+        /// </para>
+        /// <para>The following is always true:</para>
+        /// <para>     AssignedFiles = AssignedFilesWithCulture + AssignedFilesWithNoCulture</para>
         /// </summary>
         [Output]
         public ITaskItem[] AssignedFilesWithNoCulture { get; private set; }
 
         /// <summary>
+        /// <para>
         /// This list has the same number of items as the Files list or the
         /// AssignedFiles list.
-        /// 
+        /// </para>
+        /// <para>
         /// Items in this list have the file name from Files or AssignedFiles
         /// but with the culture stripped if it was embedded in the file name.
-        /// 
-        /// So for example, if the incoming item in Files was:
-        /// 
-        ///      MyBitmap.fr.bmp
-        /// 
-        /// then the corresponding file in CultureNeutralAssignedFiles will be:
-        /// 
-        ///      MyBitmap.bmp
-        /// 
+        /// </para>
+        /// <para>So for example, if the incoming item in Files was:</para>
+        /// <para>     MyBitmap.fr.bmp</para>
+        /// <para>then the corresponding file in CultureNeutralAssignedFiles will be:</para>
+        /// <para>     MyBitmap.bmp</para>
+        /// <para>
         /// The culture will only be stripped if it is a valid culture identifier.
         /// So for example,
-        /// 
-        ///      MyCrazyFile.XX.txt
-        /// 
-        /// will result in exactly the same file name:
-        /// 
-        ///      MyCrazyFile.XX.txt
-        /// 
-        /// because 'XX' is not a valid culture identifier.
+        /// </para>
+        /// <para>     MyCrazyFile.XX.txt</para>
+        /// <para>will result in exactly the same file name:</para>
+        /// <para>     MyCrazyFile.XX.txt</para>
+        /// <para>because 'XX' is not a valid culture identifier.</para>
         /// </summary>
         [Output]
         public ITaskItem[] CultureNeutralAssignedFiles { get; private set; }
