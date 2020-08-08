@@ -147,6 +147,29 @@ namespace Microsoft.Build.Shared
 			RelationAll = 0xffff
 		}
 
+        internal struct SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX
+        {
+            public LOGICAL_PROCESSOR_RELATIONSHIP Relationship;
+            public uint Size;
+            public GROUP_RELATIONSHIP Group;
+        }
+
+        internal unsafe struct GROUP_RELATIONSHIP
+        {
+            private byte MaximumGroupCount;
+            public ushort ActiveGroupCount;
+            private fixed byte Reserved[20];
+            public PROCESSOR_GROUP_INFO GroupInfo;
+        }
+
+        internal unsafe struct PROCESSOR_GROUP_INFO
+        {
+            public byte MaximumProcessorCount;
+            public byte ActiveProcessorCount;
+            public fixed byte Reserved[38];
+            public IntPtr ActiveProcessorMask;
+        }
+
         /// <summary>
         /// Flags for CoWaitForMultipleHandles
         /// </summary>
@@ -474,41 +497,46 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        public static int GetPhysicalCoreCount()
+        public unsafe static int GetPhysicalCoreCount()
         {
+            uint len = 0;
             const int ERROR_INSUFFICIENT_BUFFER = 122;
 
-			// Determine the required buffer size to store the processor information
-			uint ReturnLength = 0;
-			if(!GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP.RelationProcessorCore, IntPtr.Zero, ref ReturnLength) && Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER)
-			{
-                IntPtr ptr = IntPtr.Zero;
-				try
-				{
-                    ptr = Marshal.AllocHGlobal((int)ReturnLength);
-					if (GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP.RelationProcessorCore, ptr, ref ReturnLength))
-					{
-						int count = 0;
-						for(int pos = 0; pos < ReturnLength; )
-						{
-							LOGICAL_PROCESSOR_RELATIONSHIP Type = (LOGICAL_PROCESSOR_RELATIONSHIP)Marshal.ReadInt16(ptr, pos);
-							if(Type == LOGICAL_PROCESSOR_RELATIONSHIP.RelationProcessorCore)
-							{
-								count++;
-							}
-							pos += Marshal.ReadInt32(ptr, pos + 4);
-						}
-						return count;
-					}
-				}
-				finally
-				{
-					Marshal.FreeHGlobal(ptr);		
-				}
-			}
+            if (!GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP.RelationGroup, IntPtr.Zero, ref len) &&
+                Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER)
+            {
+                // Allocate that much space
+                var buffer = new byte[len];
+                fixed (byte* bufferPtr = buffer)
+                {
+                    // Call GetLogicalProcessorInformationEx with the allocated buffer
+                    if (GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP.RelationGroup, (IntPtr)bufferPtr, ref len))
+                    {
+                        // Walk each SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX in the buffer, where the Size of each dictates how
+                        // much space it's consuming.  For each group relation, count the number of active processors in each of its group infos.
+                        int processorCount = 0;
+                        byte* ptr = bufferPtr, endPtr = bufferPtr + len;
+                        while (ptr < endPtr)
+                        {
+                            var current = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)ptr;
+                            if (current->Relationship == LOGICAL_PROCESSOR_RELATIONSHIP.RelationGroup)
+                            {
+                                PROCESSOR_GROUP_INFO* groupInfo = &current->Group.GroupInfo;
+                                int groupCount = current->Group.ActiveGroupCount;
+                                for (int i = 0; i < groupCount; i++)
+                                {
+                                    processorCount += (groupInfo + i)->ActiveProcessorCount;
+                                }
+                            }
+                            ptr += current->Size;
+                        }
+                        return processorCount;
+                    }
+                }
+            }
 
-			return -1;
-		}
+            return -1;
+        }
 
         #endregion
 
