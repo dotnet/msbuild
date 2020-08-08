@@ -55,7 +55,7 @@ namespace Microsoft.Build.BuildEngine
                     // allocate a new key for it and save it away
                     if (!projectKey.ContainsKey(e.ProjectFile))
                     {
-                        projectIncrementKey += 1;
+                        projectIncrementKey++;
 
                         projectKey[e.ProjectFile] = projectIncrementKey;
                         projectIncrementKeyLocal = projectIncrementKey;

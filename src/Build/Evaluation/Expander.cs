@@ -654,7 +654,7 @@ namespace Microsoft.Build.Evaluation
                             else if (argumentsContent[n] == '`' || argumentsContent[n] == '"' || argumentsContent[n] == '\'')
                             {
                                 int quoteStart = n;
-                                n += 1; // skip over the opening quote
+                                n++; // skip over the opening quote
 
                                 n = ScanForClosingQuote(argumentsString[quoteStart], argumentsString, n);
 

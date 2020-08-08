@@ -1615,7 +1615,7 @@ namespace Microsoft.Build.BuildEngine
                     else if (argumentsContent[n] == '`' || argumentsContent[n] == '"' || argumentsContent[n] == '\'')
                     {
                         int quoteStart = n;
-                        n += 1; // skip over the opening quote
+                        n++; // skip over the opening quote
 
                         n = ScanForClosingQuote(argumentsContent[quoteStart], argumentsContent, n);
 
