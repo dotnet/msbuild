@@ -567,6 +567,7 @@ namespace Microsoft.Build.Tasks
             retVal.SetGetLastWriteTime(getLastWriteTime);
             retVal.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
             retVal.isDirty = stateFiles.Length > 0;
+            HashSet<string> assembliesFound = new HashSet<string>();
 
             foreach (string stateFile in stateFiles)
             {
@@ -574,7 +575,7 @@ namespace Microsoft.Build.Tasks
                 SystemState sfBase = (SystemState)DeserializeCache(stateFile, log, requiredReturnType, false);
                 foreach (string relativePath in sfBase.instanceLocalFileStateCache.Keys)
                 {
-                    if (!retVal.instanceLocalFileStateCache.ContainsKey(relativePath))
+                    if (!assembliesFound.Contains(relativePath))
                     {
                         FileState fileState = (FileState)sfBase.instanceLocalFileStateCache[relativePath];
                         // Verify that the assembly is correct
@@ -592,6 +593,7 @@ namespace Microsoft.Build.Tasks
                                 // Correct file path and timestamp
                                 fileState.LastModified = retVal.getLastWriteTime(fullPath);
                                 retVal.instanceLocalFileStateCache[fullPath] = fileState;
+                                assembliesFound.Add(relativePath);
                             }
                         }
                     }
@@ -622,6 +624,10 @@ namespace Microsoft.Build.Tasks
             }
             instanceLocalFileStateCache = newInstanceLocalFileStateCache;
 
+            if (FileUtilities.FileExistsNoThrow(stateFile))
+            {
+                log.LogWarningWithCodeFromResources("General.StateFileAlreadyPresent", stateFile);
+            }
             SerializeCache(stateFile, log);
         }
 

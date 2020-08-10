@@ -509,6 +509,11 @@
         <target state="translated">Propriétés globales :</target>
         <note />
       </trans-unit>
+      <trans-unit id="General.StateFileAlreadyPresent">
+        <source>MSB3101: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running RAR normally, do not set the "_CacheOutputPath" field of RAR.</source>
+        <target state="new">MSB3101: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running RAR normally, do not set the "_CacheOutputPath" field of RAR.</target>
+        <note>{StrBegin="MSB3667: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">Suppression des propriétés :</target>
