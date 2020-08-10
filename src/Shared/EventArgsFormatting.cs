@@ -200,6 +200,7 @@ namespace Microsoft.Build.Shared
         /// <param name="columnNumber">column number (0 if n/a)</param>
         /// <param name="endColumnNumber">end column number (0 if n/a)</param>
         /// <param name="threadId">thread id</param>
+        /// <param name="logOutputProperties">log output properties</param>
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage
         (
@@ -227,7 +228,7 @@ namespace Microsoft.Build.Shared
             }
             */
 
-            if ((file == null) || (file.Length == 0))
+            if (string.IsNullOrEmpty(file))
             {
                 format.Append("MSBUILD : ");    // Should not be localized.
             }
@@ -280,7 +281,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            if ((subcategory != null) && (subcategory.Length != 0))
+            if (!string.IsNullOrEmpty(subcategory))
             {
                 format.Append("{9} ");
             }
@@ -347,7 +348,6 @@ namespace Microsoft.Build.Shared
 
             return formattedMessage.ToString();
         }
-
 
         /// <summary>
         /// Splits strings on 'newLines' with tolerance for Everett and Dogfood builds.

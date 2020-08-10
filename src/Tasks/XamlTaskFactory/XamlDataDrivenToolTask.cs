@@ -234,7 +234,7 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 foreach (KeyValuePair<string, string> overridePair in overriddenSwitch.Value.Overrides)
                 {
-                    if (String.Equals(overridePair.Key, (overriddenSwitch.Value.Type == CommandLineToolSwitchType.Boolean && overriddenSwitch.Value.BooleanValue == false) ? overriddenSwitch.Value.ReverseSwitchValue.TrimStart('/') : overriddenSwitch.Value.SwitchValue.TrimStart('/'), StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals(overridePair.Key, (overriddenSwitch.Value.Type == CommandLineToolSwitchType.Boolean && !overriddenSwitch.Value.BooleanValue) ? overriddenSwitch.Value.ReverseSwitchValue.TrimStart('/') : overriddenSwitch.Value.SwitchValue.TrimStart('/'), StringComparison.OrdinalIgnoreCase))
                     {
                         foreach (KeyValuePair<string, CommandLineToolSwitch> overrideTarget in ActiveToolSwitches)
                         {
@@ -245,7 +245,7 @@ namespace Microsoft.Build.Tasks.Xaml
                                     overriddenSwitches.Add(overrideTarget.Key);
                                     break;
                                 }
-                                else if ((overrideTarget.Value.Type == CommandLineToolSwitchType.Boolean) && (overrideTarget.Value.BooleanValue == false) && String.Equals(overrideTarget.Value.ReverseSwitchValue.TrimStart('/'), overridePair.Value, StringComparison.OrdinalIgnoreCase))
+                                else if ((overrideTarget.Value.Type == CommandLineToolSwitchType.Boolean) && (!overrideTarget.Value.BooleanValue) && String.Equals(overrideTarget.Value.ReverseSwitchValue.TrimStart('/'), overridePair.Value, StringComparison.OrdinalIgnoreCase))
                                 {
                                     overriddenSwitches.Add(overrideTarget.Key);
                                     break;

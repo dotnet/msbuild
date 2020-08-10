@@ -56,7 +56,6 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>True if the directory exists.</returns>
         internal delegate bool DirectoryExists(string path);
 
-
         /// <summary>
         /// Determines whether the given path has any wild card characters.
         /// </summary>
@@ -253,7 +252,6 @@ namespace Microsoft.Build.BuildEngine.Shared
             GetFileSystemEntries getFileSystemEntries
         )
         {
-
             if (path.IndexOf("~", StringComparison.Ordinal) == -1)
             {
                 // A path with no '~' must not be a short name.
@@ -308,7 +306,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                 }
                 else
                 {
-
                     if (parts[i].IndexOf("~", StringComparison.Ordinal) == -1)
                     {
                         // If there's no ~, don't hit the disk.
@@ -841,7 +838,6 @@ namespace Microsoft.Build.BuildEngine.Shared
 
             } while (matchFileExpression.Length < sizeBefore);
 
-
             /*
              * By definition, "**" must appear alone between directory slashes. If there is any remaining "**" then this is not
              * a valid filespec.
@@ -901,8 +897,6 @@ namespace Microsoft.Build.BuildEngine.Shared
 
             return matchFileExpression.ToString();
         }
-
-
 
         /// <summary>
         /// Given a filespec, get the information needed for file matching. 
@@ -1249,8 +1243,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // 2) if the extension is three characters, and the filename contains the * wildcard, it matches files with longer
             //    extensions that start with the same three characters e.g. "*.htm" would match both "file.htm" and "file.html"
             bool needToEnforceExtensionLength =
-                    (extensionPart != null) &&
-                    (extensionPart.IndexOf('*') == -1)
+                    (extensionPart?.IndexOf('*') == -1)
                 &&
                     (extensionPart.EndsWith("?", StringComparison.Ordinal)
                 ||

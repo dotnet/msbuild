@@ -266,7 +266,6 @@ namespace Microsoft.Build.UnitTests.Definition
                 Assert.Equal(foundFiles[i], sortedTasksExpectedPaths[i]);
             }
 
-
             Assert.Equal(sortedOverrideExpectedPaths.Count, foundoverrideFiles.Length);
             for (int i = 0; i < foundoverrideFiles.Length; i++)
             {
@@ -942,7 +941,7 @@ namespace Microsoft.Build.UnitTests.Definition
             matches.RemoveAll(
                 delegate (string candidate)
                 {
-                    bool sameFolder = (0 == String.Compare(Path.GetDirectoryName(candidate),
+                    bool sameFolder = (String.Equals(Path.GetDirectoryName(candidate),
                                                            pathWithoutTrailingSlash,
                                                            StringComparison.OrdinalIgnoreCase));
                     return !sameFolder || !Regex.IsMatch(Path.GetFileName(candidate), finalPattern);

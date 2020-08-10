@@ -246,7 +246,7 @@ namespace Microsoft.Build.BuildEngine
                     // If the project file is malformed the build may fail without initializing the initialtargets or
                     // the default targests fields. The retrieval code expects non-null values
                     // so it is necessary to replace null with empty string
-                    ErrorUtilities.VerifyThrow(buildResult.EvaluationResult == false || buildResult.InitialTargets != null 
+                    ErrorUtilities.VerifyThrow(!buildResult.EvaluationResult || buildResult.InitialTargets != null 
                                                && buildResult.DefaultTargets != null , 
                                                "Expect initial targets to be non-null for successful builds");
                     string defaultTargets = buildResult.DefaultTargets == null ? String.Empty : buildResult.DefaultTargets;

@@ -48,7 +48,7 @@ namespace Microsoft.Build.Construction
         internal ProjectTaskElement(XmlElementWithLocation xmlElement, ProjectTargetElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the continue on error value. 
+        /// Gets or sets the continue on error value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty.
         /// </summary>
@@ -80,7 +80,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the runtime value for the task. 
+        /// Gets or sets the runtime value for the task.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty.
         /// </summary>
@@ -100,7 +100,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the architecture value for the task. 
+        /// Gets or sets the architecture value for the task.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty.
         /// </summary>
@@ -226,8 +226,8 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Convenience method to add an Output Item to this task. 
-        /// Adds after the last child. 
+        /// Convenience method to add an Output Item to this task.
+        /// Adds after the last child.
         /// </summary>
         public ProjectOutputElement AddOutputItem(string taskParameter, string itemType)
         {
@@ -238,8 +238,8 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Convenience method to add a conditioned Output Item to this task. 
-        /// Adds after the last child. 
+        /// Convenience method to add a conditioned Output Item to this task.
+        /// Adds after the last child.
         /// </summary>
         public ProjectOutputElement AddOutputItem(string taskParameter, string itemType, string condition)
         {
@@ -256,8 +256,8 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Convenience method to add an Output Property to this task. 
-        /// Adds after the last child. 
+        /// Convenience method to add an Output Property to this task.
+        /// Adds after the last child.
         /// </summary>
         public ProjectOutputElement AddOutputProperty(string taskParameter, string propertyName)
         {
@@ -268,8 +268,8 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Convenience method to add a conditioned Output Property to this task. 
-        /// Adds after the last child. 
+        /// Convenience method to add a conditioned Output Property to this task.
+        /// Adds after the last child.
         /// </summary>
         public ProjectOutputElement AddOutputProperty(string taskParameter, string propertyName, string condition)
         {
@@ -377,7 +377,7 @@ namespace Microsoft.Build.Construction
                 {
                     if (!XMakeAttributes.IsSpecialTaskAttribute(attribute.Name))
                     {
-                        toRemove = toRemove ?? new List<XmlAttribute>();
+                        toRemove ??= new List<XmlAttribute>();
                         toRemove.Add(attribute);
                     }
                 }

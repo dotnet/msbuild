@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
                     sw.Write("This is a source temp file.");
                 FileInfo file = new FileInfo(sourceFile);
-                file.Attributes = file.Attributes | FileAttributes.ReadOnly; // mark read only
+                file.Attributes |= FileAttributes.ReadOnly; // mark read only
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamWriter sw = FileUtilities.OpenWrite(sourceFile, true))
                     sw.Write("This is a source temp file.");
                 FileInfo file = new FileInfo(sourceFile);
-                file.Attributes = file.Attributes | FileAttributes.ReadOnly; // mark read only
+                file.Attributes |= FileAttributes.ReadOnly; // mark read only
 
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests
                 if (File.Exists(sourceFile))
                 {
                     FileInfo file = new FileInfo(sourceFile);
-                    file.Attributes = file.Attributes & ~FileAttributes.ReadOnly; // mark read only
+                    file.Attributes &= ~FileAttributes.ReadOnly; // mark read only
                     File.Delete(sourceFile);
                 }
 
@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
 
                 FileInfo file = new FileInfo(destinationFile);
-                file.Attributes = file.Attributes | FileAttributes.ReadOnly; // mark destination read only
+                file.Attributes |= FileAttributes.ReadOnly; // mark destination read only
 
                 Move t = new Move();
                 t.BuildEngine = new MockEngine(true /* log to console */);
@@ -230,7 +230,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(sourceFile);
 
                 FileInfo file = new FileInfo(destinationFile);
-                file.Attributes = file.Attributes ^ FileAttributes.ReadOnly; // mark destination writable only
+                file.Attributes ^= FileAttributes.ReadOnly; // mark destination writable only
                 File.Delete(destinationFile);
             }
         }
@@ -301,7 +301,7 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
 
                 FileInfo file = new FileInfo(destinationFile);
-                file.Attributes = file.Attributes & ~FileAttributes.ReadOnly; // mark not read only
+                file.Attributes &= ~FileAttributes.ReadOnly; // mark not read only
 
                 Move t = new Move();
                 t.OverwriteReadOnlyFiles = true;
@@ -349,7 +349,7 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
 
                 FileInfo file = new FileInfo(destinationFile);
-                file.Attributes = file.Attributes | FileAttributes.ReadOnly; // mark read only
+                file.Attributes |= FileAttributes.ReadOnly; // mark read only
 
                 Move t = new Move();
                 t.OverwriteReadOnlyFiles = true;

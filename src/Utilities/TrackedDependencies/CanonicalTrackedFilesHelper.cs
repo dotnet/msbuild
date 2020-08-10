@@ -23,7 +23,7 @@ namespace Microsoft.Build.Utilities
         internal static bool RootContainsAllSubRootComponents(string compositeRoot, string compositeSubRoot)
         {
             // If the two are identical, then clearly all keys are present
-            if (string.Compare(compositeRoot, compositeSubRoot, StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(compositeRoot, compositeSubRoot, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }

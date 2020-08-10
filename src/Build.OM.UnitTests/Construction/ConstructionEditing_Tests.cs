@@ -890,7 +890,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         <m>v</m>
                       </i>"
                 };
-
             }
         }
 
@@ -1014,7 +1013,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         <b>value_b</b>
                       </i>"
                 };
-
             }
         }
 

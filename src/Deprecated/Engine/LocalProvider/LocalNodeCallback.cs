@@ -122,7 +122,7 @@ namespace Microsoft.Build.BuildEngine
             lock (repliesFromParent)
             {
                 ReplyData replyData = (ReplyData) repliesFromParent[requestingCallNumber];
-                ErrorUtilities.VerifyThrow(replyData != null && replyData.waitEvent != null, 
+                ErrorUtilities.VerifyThrow(replyData?.waitEvent != null, 
                     "We must have an event for this call at this point");
 
                 replyData.reply = reply;

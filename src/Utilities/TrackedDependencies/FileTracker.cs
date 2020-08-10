@@ -289,10 +289,10 @@ namespace Microsoft.Build.Utilities
         /// <param name="outputs">ITaskItem array of outputs.</param>
         public static string FormatRootingMarker(ITaskItem[] sources, ITaskItem[] outputs)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sources, "sources");
+            ErrorUtilities.VerifyThrowArgumentNull(sources, nameof(sources));
 
             // So we don't have to deal with null checks.
-            outputs = outputs ?? Array.Empty<ITaskItem>();
+            outputs ??= Array.Empty<ITaskItem>();
 
             var rootSources = new List<string>(sources.Length + outputs.Length);
 
@@ -641,7 +641,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>Process instance</returns>
         public static Process StartProcess(string command, string arguments, ExecutableType toolType, string dllName, string intermediateDirectory, string rootFiles, string cancelEventName)
         {
-            dllName = dllName ?? GetFileTrackerPath(toolType);
+            dllName ??= GetFileTrackerPath(toolType);
 
             string fullArguments = TrackerArguments(command, arguments, dllName, intermediateDirectory, rootFiles, cancelEventName);
             return Process.Start(GetTrackerPath(toolType), fullArguments);
@@ -727,10 +727,7 @@ namespace Microsoft.Build.Utilities
         internal static void LogMessage(TaskLoggingHelper Log, MessageImportance importance, string message, params object[] messageArgs)
         {
             // Only log when we have been passed a TaskLoggingHelper
-            if (Log != null)
-            {
-                Log.LogMessage(importance, message, messageArgs);
-            }
+            Log?.LogMessage(importance, message, messageArgs);
         }
 
         /// <summary>
@@ -743,10 +740,7 @@ namespace Microsoft.Build.Utilities
         internal static void LogWarningWithCodeFromResources(TaskLoggingHelper Log, string messageResourceName, params object[] messageArgs)
         {
             // Only log when we have been passed a TaskLoggingHelper
-            if (Log != null)
-            {
-                Log.LogWarningWithCodeFromResources(messageResourceName, messageArgs);
-            }
+            Log?.LogWarningWithCodeFromResources(messageResourceName, messageArgs);
         }
 
         #endregion

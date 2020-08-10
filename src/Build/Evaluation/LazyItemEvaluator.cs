@@ -304,7 +304,6 @@ namespace Microsoft.Build.Evaluation
 
                     return ComputeItems(this, globsToIgnore);
                 }
-
             }
 
             private static ImmutableList<ItemData>.Builder ComputeItems(LazyItemList lazyItemList, ImmutableHashSet<string> globsToIgnore)

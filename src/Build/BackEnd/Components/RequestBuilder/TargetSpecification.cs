@@ -26,8 +26,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="referenceLocation">The location from which it was referred.</param>
         internal TargetSpecification(string targetName, ElementLocation referenceLocation)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(targetName, "targetName");
-            ErrorUtilities.VerifyThrowArgumentNull(referenceLocation, "referenceLocation");
+            ErrorUtilities.VerifyThrowArgumentLength(targetName, nameof(targetName));
+            ErrorUtilities.VerifyThrowArgumentNull(referenceLocation, nameof(referenceLocation));
 
             this._targetName = targetName;
             this._referenceLocation = referenceLocation;

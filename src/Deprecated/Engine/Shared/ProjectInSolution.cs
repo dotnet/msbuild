@@ -249,9 +249,9 @@ namespace Microsoft.Build.BuildEngine.Shared
                     }
                 }
 
-                if (mainProjectElement != null && mainProjectElement.LocalName == "Project")
+                if (mainProjectElement?.LocalName == "Project")
                 {
-                    if (String.Compare(mainProjectElement.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (String.Equals(mainProjectElement.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase))
                     {
                         canBeMSBuildProjectFile = true;
                         return canBeMSBuildProjectFile;
@@ -374,7 +374,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // entry point targets
             foreach (string projectName in projectNamesToDisambiguate)
             {
-                if (String.Compare(uniqueProjectName, projectName, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(uniqueProjectName, projectName, StringComparison.OrdinalIgnoreCase))
                 {
                     // Prepend "Solution:" so that the collision is resolved, but the
                     // log of the solution project still looks reasonable.

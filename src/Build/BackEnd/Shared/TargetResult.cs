@@ -392,7 +392,7 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public ItemsStore(TaskItem[] items)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(items, "items");
+                ErrorUtilities.VerifyThrowArgumentNull(items, nameof(items));
                 _uncompressedItems = items;
                 _itemsCount = items.Length;
             }

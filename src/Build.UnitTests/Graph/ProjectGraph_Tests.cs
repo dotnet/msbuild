@@ -1516,7 +1516,7 @@ $@"
             Dictionary<string, string> additionalGlobalProperties = null,
             int expectedInnerBuildCount = 2)
         {
-            additionalGlobalProperties = additionalGlobalProperties ?? new Dictionary<string, string>();
+            additionalGlobalProperties ??= new Dictionary<string, string>();
 
             AssertOuterBuildEvaluation(outerBuild, additionalGlobalProperties);
 

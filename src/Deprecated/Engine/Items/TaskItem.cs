@@ -12,7 +12,6 @@ using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.BuildEngine
 {
-
     /// <summary>
     /// This class wraps a project item, and provides a "view" on the item's BuildItem class that is suitable to expose to tasks.
     /// </summary>
@@ -98,7 +97,6 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-
         /// <summary>
         /// Gets the names of custom metadata on the item
         /// </summary>
@@ -132,7 +130,7 @@ namespace Microsoft.Build.BuildEngine
         /// <returns>value of metadata</returns>
         public string GetMetadata(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName, "metadataName");
+            ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
 
             // Return the unescaped data to the task.
             return item.GetEvaluatedMetadata(metadataName);
@@ -146,8 +144,8 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="metadataValue"></param>
         public void SetMetadata(string metadataName, string metadataValue)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(metadataName, "metadataName");
-            ErrorUtilities.VerifyThrowArgumentNull(metadataValue, "metadataValue");
+            ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
+            ErrorUtilities.VerifyThrowArgumentNull(metadataValue, nameof(metadataValue));
 
             item.SetMetadata(metadataName, EscapingUtilities.Escape(metadataValue));
         }
@@ -159,7 +157,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="metadataName"></param>
         public void RemoveMetadata(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName, "metadataName");
+            ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
 
             item.RemoveMetadata(metadataName);
         }
@@ -175,7 +173,7 @@ namespace Microsoft.Build.BuildEngine
             ITaskItem destinationItem
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(destinationItem, "destinationItem");
+            ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
 
             // Intentionally not _computed_ properties. These are slow and don't really
             // apply anyway.
@@ -185,7 +183,7 @@ namespace Microsoft.Build.BuildEngine
 
                 string destinationValue = destinationItem.GetMetadata(key);
 
-                if ((destinationValue == null) || (destinationValue.Length == 0))
+                if (string.IsNullOrEmpty(destinationValue))
                 {
                     destinationItem.SetMetadata(key, EscapingUtilities.UnescapeAll((string)entry.Value));
                 }
@@ -195,12 +193,11 @@ namespace Microsoft.Build.BuildEngine
             // between items, and need to know the source item where the metadata came from
             string originalItemSpec = destinationItem.GetMetadata("OriginalItemSpec");
 
-            if ((originalItemSpec == null) || (originalItemSpec.Length == 0))
+            if (string.IsNullOrEmpty(originalItemSpec))
             {
                 destinationItem.SetMetadata("OriginalItemSpec", ItemSpec);
             }
         }
-
 
         /// <summary>
         /// Get the collection of metadata. This does not include built-in metadata.

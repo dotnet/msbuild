@@ -114,10 +114,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // If no central logger was registered with the system
             // there will not be a build event redirector as there is 
             // nowhere to forward the events to.
-            if (BuildEventRedirector != null)
-            {
-                BuildEventRedirector.ForwardEvent(buildEvent);
-            }
+            BuildEventRedirector?.ForwardEvent(buildEvent);
         }
 
         #endregion

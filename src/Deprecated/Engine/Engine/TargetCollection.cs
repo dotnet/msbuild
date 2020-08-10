@@ -159,7 +159,6 @@ namespace Microsoft.Build.BuildEngine
             return this.targetTable.Values.GetEnumerator();
         }
 
-
         /// <summary>
         /// Adds a new Target to our collection.  This method does nothing
         /// to manipulate the project's XML content.
@@ -218,7 +217,7 @@ namespace Microsoft.Build.BuildEngine
             Target targetToRemove
         )
         {
-            error.VerifyThrowArgumentNull(targetToRemove, "targetToRemove");
+            error.VerifyThrowArgumentNull(targetToRemove, nameof(targetToRemove));
 
             // Confirm that it's not an imported target.
             error.VerifyThrowInvalidOperation(!targetToRemove.IsImported,

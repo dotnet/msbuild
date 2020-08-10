@@ -214,7 +214,7 @@ namespace Microsoft.Build.BuildEngine
         {
             ProjectStartedEventMinimumFields startedEvent = GetProjectStartedEvent(e);
             // Only remove the project from the event list if it is in the list, and no errors have occurred in the project
-            if (startedEvent != null && !startedEvent.ErrorInProject)
+            if (startedEvent?.ErrorInProject == false)
             {
                 projectStartedEvents.Remove(e);
             }
@@ -227,7 +227,7 @@ namespace Microsoft.Build.BuildEngine
         {
             TargetStartedEventMinimumFields startedEvent = GetTargetStartedEvent(e);
             // Only remove the project from the event list if it is in the list, and no errors have occurred in the project
-            if (startedEvent != null && !startedEvent.ErrorInTarget)
+            if (startedEvent?.ErrorInTarget == false)
             {
                 targetStartedEvents.Remove(e);
             }
@@ -513,7 +513,6 @@ namespace Microsoft.Build.BuildEngine
             this.errorInTarget = false;
             this.buildEventContext = startedEvent.BuildEventContext;
             this.timeStamp = startedEvent.Timestamp;
-
         }
         #endregion
     }
@@ -566,7 +565,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 return false;
             }
-           return  eventComparer.Equals(entryPointContext, key.EntryPointContext) && (String.Compare(targetName, key.TargetName, StringComparison.OrdinalIgnoreCase) == 0);
+           return  eventComparer.Equals(entryPointContext, key.EntryPointContext) && (String.Equals(targetName, key.TargetName, StringComparison.OrdinalIgnoreCase));
         }
 
         public override int GetHashCode()
@@ -657,7 +656,6 @@ namespace Microsoft.Build.BuildEngine
             ProjectFullKey compareKey = obj as ProjectFullKey;
             if (compareKey != null)
             {
-                
                 return ((compareKey.projectKey == this.projectKey) && (compareKey.entryPointKey == this.entryPointKey));
             }
             else

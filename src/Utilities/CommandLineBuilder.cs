@@ -109,7 +109,6 @@ namespace Microsoft.Build.Utilities
         /// <returns></returns>
         public override string ToString() => CommandLine.ToString();
 
-
         // Use if escaping of hyphens is supposed to take place
         private static readonly string s_allowedUnquotedRegexNoHyphen =
                          "^"                             // Beginning of line
@@ -401,7 +400,7 @@ namespace Microsoft.Build.Utilities
         {
             ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
 
-            if (fileNames != null && fileNames.Length > 0)
+            if (fileNames?.Length > 0)
             {
                 // Don't let injection attackers escape from our quotes by sticking in
                 // their own quotes. Quotes are illegal.
@@ -436,7 +435,7 @@ namespace Microsoft.Build.Utilities
         {
             ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
 
-            if (fileItems != null && fileItems.Length > 0)
+            if (fileItems?.Length > 0)
             {
                 // Don't let injection attackers escape from our quotes by sticking in
                 // their own quotes. Quotes are illegal.
@@ -572,7 +571,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
             ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
 
-            if (parameters != null && parameters.Length > 0)
+            if (parameters?.Length > 0)
             {
                 AppendSwitch(switchName);
                 bool first = true;
@@ -604,7 +603,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
             ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
 
-            if (parameters != null && parameters.Length > 0)
+            if (parameters?.Length > 0)
             {
                 AppendSwitch(switchName);
                 bool first = true;
@@ -683,7 +682,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
             ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
 
-            if (parameters != null && parameters.Length > 0)
+            if (parameters?.Length > 0)
             {
                 AppendSwitch(switchName);
                 bool first = true;
@@ -714,7 +713,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
             ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
 
-            if (parameters != null && parameters.Length > 0)
+            if (parameters?.Length > 0)
             {
                 AppendSwitch(switchName);
                 bool first = true;

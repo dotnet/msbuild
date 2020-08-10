@@ -332,7 +332,6 @@ namespace Microsoft.Build.BuildEngine
             }
             else
             {
-
                 string assemblyName = null;
                 string assemblyFile = null;
 

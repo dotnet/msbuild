@@ -123,7 +123,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 return true;
             }
 
-            if (0 == String.Compare(parameterName, "SHOWCOMMANDLINE", StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(parameterName, "SHOWCOMMANDLINE", StringComparison.OrdinalIgnoreCase))
             {
                 if (String.IsNullOrEmpty(parameterValue))
                 {
@@ -144,17 +144,17 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 return true;
             }
-            else if (0 == String.Compare(parameterName, "SHOWTIMESTAMP", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, "SHOWTIMESTAMP", StringComparison.OrdinalIgnoreCase))
             {
                 _showTimeStamp = true;
                 return true;
             }
-            else if (0 == String.Compare(parameterName, "SHOWEVENTID", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, "SHOWEVENTID", StringComparison.OrdinalIgnoreCase))
             {
                 _showEventId = true;
                 return true;
             }
-            else if (0 == String.Compare(parameterName, "FORCENOALIGN", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, "FORCENOALIGN", StringComparison.OrdinalIgnoreCase))
             {
                 _forceNoAlign = true;
                 _alignMessages = false;
@@ -461,7 +461,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 // If the target where the error occurred is the same as the previous message do not print the location
                 // where the error occurred again
-                if (String.Compare(previousTarget, valuePair.Key.TargetName, StringComparison.OrdinalIgnoreCase) != 0)
+                if (!String.Equals(previousTarget, valuePair.Key.TargetName, StringComparison.OrdinalIgnoreCase))
                 {
                     // If no targetName was specified then do not show the target where the error occurred
                     if (!string.IsNullOrEmpty(valuePair.Key.TargetName))
@@ -575,7 +575,6 @@ namespace Microsoft.Build.BackEnd.Logging
         public override void ProjectFinishedHandler(object sender, ProjectFinishedEventArgs e)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
-
 
             // Get the project started event so we can use its information to properly display a project finished event
             ProjectStartedEventMinimumFields startedEvent = _buildEventManager.GetProjectStartedEvent(e.BuildEventContext);
@@ -785,7 +784,6 @@ namespace Microsoft.Build.BackEnd.Logging
             // Add the target started information to the buildEventManager so its information can be used
             // later in the build
             _buildEventManager.AddTargetStartedEvent(e, _showTimeStamp || IsVerbosityAtLeast(LoggerVerbosity.Detailed));
-
 
             if (this.showPerfSummary)
             {
@@ -1350,7 +1348,7 @@ namespace Microsoft.Build.BackEnd.Logging
                             // Calculate how many chars will fit on the console buffer
                             int amountToCopy = (messageLength - index) < (bufferWidthMinusNewLine - adjustedPrefixWidth) ? (messageLength - index) : (bufferWidthMinusNewLine - adjustedPrefixWidth);
                             WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), (prefixAlreadyWritten && index == 0 && i == 0), adjustedPrefixWidth);
-                            index = index + amountToCopy;
+                            index += amountToCopy;
                         }
                     }
                     else
@@ -1389,7 +1387,7 @@ namespace Microsoft.Build.BackEnd.Logging
             TargetStartedEventMinimumFields targetStartedEvent = _buildEventManager.GetTargetStartedEvent(e);
 
             // Make sure we have not shown the event before
-            if (targetStartedEvent != null && !targetStartedEvent.ShowTargetFinishedEvent)
+            if (targetStartedEvent?.ShowTargetFinishedEvent == false)
             {
                 // Since the target started event has been shows, the target finished event should also be shown
                 targetStartedEvent.ShowTargetFinishedEvent = true;
@@ -1463,7 +1461,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 ProjectStartedEventMinimumFields projectStartedEvent = _buildEventManager.GetProjectStartedEvent(e);
 
                 // Make sure the project started event has not been show yet
-                if (projectStartedEvent != null && !projectStartedEvent.ShowProjectFinishedEvent)
+                if (projectStartedEvent?.ShowProjectFinishedEvent == false)
                 {
                     projectStartedEvent.ShowProjectFinishedEvent = true;
 
@@ -1486,7 +1484,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         WriteLinePrefix(projectStartedEvent.FullProjectKey, projectStartedEvent.TimeStamp, false);
                         setColor(ConsoleColor.Cyan);
                         string message;
-                        if ((targetNames == null) || (targetNames.Length == 0))
+                        if (string.IsNullOrEmpty(targetNames))
                         {
                             message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedTopLevelProjectWithDefaultTargets", current, currentProjectNodeId);
                         }
@@ -1502,7 +1500,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     {
                         WriteLinePrefix(parentStartedEvent.FullProjectKey, parentStartedEvent.TimeStamp, false);
                         setColor(ConsoleColor.Cyan);
-                        if ((targetNames == null) || (targetNames.Length == 0))
+                        if (string.IsNullOrEmpty(targetNames))
                         {
                             WriteMessageAligned(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedWithDefaultTargetsMultiProc", previous, parentStartedEvent.FullProjectKey, current, projectStartedEvent.FullProjectKey, currentProjectNodeId), true);
                         }
@@ -1721,7 +1719,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     String.Format(CultureInfo.CurrentCulture, "{0,-40}" /* pad to 40 align left */, scopeName),
                     String.Format(CultureInfo.CurrentCulture, "{0,3}", calls));
 
-                if (_internalPerformanceCounters != null && _internalPerformanceCounters.Count > 0)
+                if (_internalPerformanceCounters?.Count > 0)
                 {
                     // For each of the entry points in the project print out the performance numbers for them
                     foreach (var counter in _internalPerformanceCounters.Values)

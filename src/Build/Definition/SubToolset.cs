@@ -35,7 +35,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal SubToolset(string subToolsetVersion, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(subToolsetVersion, "subToolsetVersion");
+            ErrorUtilities.VerifyThrowArgumentLength(subToolsetVersion, nameof(subToolsetVersion));
 
             _subToolsetVersion = subToolsetVersion;
             _properties = properties;

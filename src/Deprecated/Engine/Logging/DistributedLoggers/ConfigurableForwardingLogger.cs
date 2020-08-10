@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 
-
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
@@ -127,7 +126,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void ApplyParameter(string parameterName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameterName, "parameterName");
+            ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
 
             if (forwardingTable.ContainsKey(parameterName))
             {
@@ -137,15 +136,15 @@ namespace Microsoft.Build.BuildEngine
 
             // If any of the following parameters are set, we will make sure we forward the events
             // necessary for the central logger to emit the requested information
-            if (0 == String.Compare(parameterName, PerformanceSummaryDescription, StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(parameterName, PerformanceSummaryDescription, StringComparison.OrdinalIgnoreCase))
             {
                 this.showPerfSummary = true;
             }
-            else if (0 == String.Compare(parameterName, NoSummaryDescription, StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, NoSummaryDescription, StringComparison.OrdinalIgnoreCase))
             {
                 this.showSummary = false;
             }
-            else if (0 == String.Compare(parameterName, ShowCommandLineDescription, StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, ShowCommandLineDescription, StringComparison.OrdinalIgnoreCase))
             {
                 showCommandLine = true;
             }
@@ -156,7 +155,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public virtual void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventSource, "eventSource");
+            ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
 
             ParseParameters();
 
@@ -191,7 +190,6 @@ namespace Microsoft.Build.BuildEngine
 
         private void SetForwardingBasedOnVerbosity()
         {
-
             forwardingTable[BuildStartedEventDescription] = 0;
             forwardingTable[BuildFinishedEventDescription] = 0;
 
@@ -253,7 +251,6 @@ namespace Microsoft.Build.BuildEngine
                 forwardingTable[CommandLineDescription] = 1;
             }
         }
-
 
         /// <summary>
         /// Reset the states of per-build member variables.

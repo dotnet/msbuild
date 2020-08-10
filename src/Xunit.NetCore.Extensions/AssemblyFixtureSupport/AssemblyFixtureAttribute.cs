@@ -21,5 +21,4 @@ namespace Xunit
             Method
         }
     }
-
 }
