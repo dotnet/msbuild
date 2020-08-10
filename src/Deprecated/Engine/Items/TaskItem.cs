@@ -130,7 +130,7 @@ namespace Microsoft.Build.BuildEngine
         /// <returns>value of metadata</returns>
         public string GetMetadata(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName, "metadataName");
+            ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
 
             // Return the unescaped data to the task.
             return item.GetEvaluatedMetadata(metadataName);
@@ -144,8 +144,8 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="metadataValue"></param>
         public void SetMetadata(string metadataName, string metadataValue)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(metadataName, "metadataName");
-            ErrorUtilities.VerifyThrowArgumentNull(metadataValue, "metadataValue");
+            ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
+            ErrorUtilities.VerifyThrowArgumentNull(metadataValue, nameof(metadataValue));
 
             item.SetMetadata(metadataName, EscapingUtilities.Escape(metadataValue));
         }
@@ -157,7 +157,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="metadataName"></param>
         public void RemoveMetadata(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName, "metadataName");
+            ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
 
             item.RemoveMetadata(metadataName);
         }
@@ -173,7 +173,7 @@ namespace Microsoft.Build.BuildEngine
             ITaskItem destinationItem
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(destinationItem, "destinationItem");
+            ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
 
             // Intentionally not _computed_ properties. These are slow and don't really
             // apply anyway.

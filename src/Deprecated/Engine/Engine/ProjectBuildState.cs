@@ -89,7 +89,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return requiredTargets != null && requiredTargets.Count > 0 ?
+                return requiredTargets?.Count > 0 ?
                         this.requiredTargets.Peek() : null;
             }
         }
@@ -199,14 +199,14 @@ namespace Microsoft.Build.BuildEngine
         internal bool ContainsCycle(string name)
         {
             bool containsCycle = false;
-            if (requiredTargets != null && requiredTargets.Count > 1)
+            if (requiredTargets?.Count > 1)
             {
                 string topTarget = requiredTargets.Pop();
                 ErrorUtilities.VerifyThrow(topTarget == name, "Requesting target should be on the top of stack");
                 containsCycle = requiredTargets.Contains(name);
                 requiredTargets.Push(topTarget);
             }
-            if (!containsCycle && requiredTargets != null && requiredTargets.Count > 0)
+            if (!containsCycle && requiredTargets?.Count > 0)
             {
                 containsCycle = 
                     (String.Equals(name, (string)targetNamesToBuild[indexOfTargetInProgress], StringComparison.OrdinalIgnoreCase));
@@ -221,7 +221,7 @@ namespace Microsoft.Build.BuildEngine
         internal bool ContainsBlockingTarget(string name)
         {
             bool containsName = false;
-            if (requiredTargets != null && requiredTargets.Count > 0)
+            if (requiredTargets?.Count > 0)
             {
                 containsName = requiredTargets.Contains(name);
             }
@@ -237,7 +237,7 @@ namespace Microsoft.Build.BuildEngine
         internal string GetParentTarget(string name)
         {
             string parentName = null;
-            if (requiredTargets != null && requiredTargets.Count > 0)
+            if (requiredTargets?.Count > 0)
             {
                 parentName = (string)targetNamesToBuild[indexOfTargetInProgress];
 

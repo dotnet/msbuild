@@ -63,7 +63,7 @@ namespace Microsoft.Build.CommandLine
             base(info, context)
 
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, "info");
+            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
 
             invalidSwitch = info.GetString("invalidSwitch");
         }

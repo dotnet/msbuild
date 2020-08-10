@@ -40,7 +40,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="parentEngine"></param>
         internal ToolsetCollection(Engine parentEngine)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parentEngine, "parentEngine");
+            ErrorUtilities.VerifyThrowArgumentNull(parentEngine, nameof(parentEngine));
 
             this.parentEngine = parentEngine;
             this.toolsetMap = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
@@ -66,7 +66,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, "toolsVersion");
+                ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
 
                 if (this.toolsetMap.ContainsKey(toolsVersion))
                 {
@@ -121,7 +121,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="item"></param>
         public void Add(Toolset item)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(item, "item");
+            ErrorUtilities.VerifyThrowArgumentNull(item, nameof(item));
 
             if (toolsetMap.ContainsKey(item.ToolsVersion))
             {

@@ -968,7 +968,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal virtual bool ApplyParameter(string parameterName, string parameterValue)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameterName, "parameterName");
+            ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
 
             switch (parameterName.ToUpperInvariant())
             {
@@ -1006,16 +1006,11 @@ namespace Microsoft.Build.BackEnd.Logging
                         }
                         else
                         {
-                            switch (parameterValue.ToUpperInvariant())
+                            showProjectFile = (parameterValue.ToUpperInvariant()) switch
                             {
-                                case "TRUE":
-                                    showProjectFile = true;
-                                    break;
-
-                                default:
-                                    showProjectFile = false;
-                                    break;
-                            }
+                                "TRUE" => true,
+                                _ => false,
+                            };
                         }
                     }
 

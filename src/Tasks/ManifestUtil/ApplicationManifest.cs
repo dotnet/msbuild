@@ -704,7 +704,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             else
             {
-                if (assembly.AssemblyIdentity != null && assembly.AssemblyIdentity.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion))
+                if (assembly.AssemblyIdentity?.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion) == true)
                 {
                     // if the binary is targeting v4.0 and it has the transparent attribute then we may allow partially trusted callers.
                     if (assembly.IsPrimary

@@ -282,7 +282,7 @@ namespace Microsoft.Build.Construction
                     }
                 }
 
-                if (mainProjectElement != null && mainProjectElement.LocalName == "Project")
+                if (mainProjectElement?.LocalName == "Project")
                 {
                     // MSBuild supports project files with an empty (supported in Visual Studio 2017) or the default MSBuild
                     // namespace.

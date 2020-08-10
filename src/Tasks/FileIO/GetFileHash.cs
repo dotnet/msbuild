@@ -115,15 +115,12 @@ namespace Microsoft.Build.Tasks
 
         internal static string EncodeHash(HashEncoding encoding, byte[] hash)
         {
-            switch (encoding)
+            return encoding switch
             {
-                case Tasks.HashEncoding.Hex:
-                    return ConversionUtilities.ConvertByteArrayToHex(hash);
-                case Tasks.HashEncoding.Base64:
-                    return Convert.ToBase64String(hash);
-                default:
-                    throw new NotImplementedException();
-            }
+                Tasks.HashEncoding.Hex => ConversionUtilities.ConvertByteArrayToHex(hash),
+                Tasks.HashEncoding.Base64 => Convert.ToBase64String(hash),
+                _ => throw new NotImplementedException(),
+            };
         }
 
         internal static bool TryParseHashEncoding(string value, out HashEncoding encoding)

@@ -38,7 +38,7 @@ namespace Microsoft.Build.Shared
         internal static string ExtractMessageCode(bool msbuildCodeOnly, string message, out string code)
         {
 #if !BUILDINGAPPXTASKS
-            ErrorUtilities.VerifyThrowInternalNull(message, "message");
+            ErrorUtilities.VerifyThrowInternalNull(message, nameof(message));
 #endif
 
             code = null;
@@ -227,7 +227,7 @@ namespace Microsoft.Build.Shared
             string formatted = unformatted;
 
             // NOTE: String.Format() does not allow a null arguments array
-            if ((args != null) && (args.Length > 0))
+            if ((args?.Length > 0))
             {
 #if DEBUG
 

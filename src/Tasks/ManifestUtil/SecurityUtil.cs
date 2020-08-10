@@ -32,16 +32,23 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(false)]
     public static class SecurityUtilities
     {
+#if RUNTIME_TYPE_NETCORE
+        // Partial trust and permission sets are not supported by .NET Core.
+#else
         private const string PermissionSetsFolder = "PermissionSets";
         private const string LocalIntranet = "LocalIntranet";
         private const string Internet = "Internet";
         private const string Custom = "Custom";
+#endif
         private const string ToolName = "signtool.exe";
+#if !RUNTIME_TYPE_NETCORE
         private const int Fx2MajorVersion = 2;
         private const int Fx3MajorVersion = 3;
+#endif
         private static readonly Version s_dotNet40Version = new Version("4.0");
         private static readonly Version s_dotNet45Version = new Version("4.5");
 
+#if !RUNTIME_TYPE_NETCORE
         private const string InternetPermissionSetXml = "<PermissionSet class=\"System.Security.PermissionSet\" version=\"1\" ID=\"Custom\" SameSite=\"site\">\n" +
                                                           "<IPermission class=\"System.Security.Permissions.FileDialogPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\" version=\"1\" Access=\"Open\" />\n" +
                                                           "<IPermission class=\"System.Security.Permissions.IsolatedStorageFilePermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\" version=\"1\" Allowed=\"ApplicationIsolationByUser\" UserQuota=\"512000\" />\n" +
@@ -112,15 +119,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static PermissionSet GetNamedPermissionSetFromZone(string targetZone, string targetFrameworkMoniker)
         {
-            switch (targetZone)
+            return targetZone switch
             {
-                case LocalIntranet:
-                    return GetNamedPermissionSet(LocalIntranet, targetFrameworkMoniker);
-                case Internet:
-                    return GetNamedPermissionSet(Internet, targetFrameworkMoniker);
-                default:
-                    throw new ArgumentException(String.Empty /* no message */, nameof(targetZone));
-            }
+                LocalIntranet => GetNamedPermissionSet(LocalIntranet, targetFrameworkMoniker),
+                Internet => GetNamedPermissionSet(Internet, targetFrameworkMoniker),
+                _ => throw new ArgumentException(String.Empty /* no message */, nameof(targetZone)),
+            };
         }
 
         private static PermissionSet GetNamedPermissionSet(string targetZone, string targetFrameworkMoniker)
@@ -235,19 +239,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.")]
         private static XmlElement GetCurrentCLRPermissions(string targetZone)
         {
-            SecurityZone zone;
-            switch (targetZone)
+            var zone = targetZone switch
             {
-                case LocalIntranet:
-                    zone = SecurityZone.Intranet;
-                    break;
-                case Internet:
-                    zone = SecurityZone.Internet;
-                    break;
-                default:
-                    throw new ArgumentException(String.Empty /* no message */, nameof(targetZone));
-            }
-
+                LocalIntranet => SecurityZone.Intranet,
+                Internet => SecurityZone.Internet,
+                _ => throw new ArgumentException(String.Empty /* no message */, nameof(targetZone)),
+            };
             var evidence = new Evidence(new EvidenceBase[] { new Zone(zone), new System.Runtime.Hosting.ActivationArguments(new System.ApplicationIdentity("")) }, null);
 
             PermissionSet sandbox = SecurityManager.GetStandardSandbox(evidence);
@@ -267,20 +264,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static XmlElement GetXmlElement(string targetZone, int majorVersion)
         {
-            XmlDocument doc;
-
-            switch (majorVersion)
+            XmlDocument doc = majorVersion switch
             {
-                case Fx2MajorVersion:
-                    doc = CreateXmlDocV2(targetZone);
-                    break;
-                case Fx3MajorVersion:
-                    doc = CreateXmlDocV3(targetZone);
-                    break;
-                default:
-                    throw new ArgumentException(String.Empty /* no message */, nameof(majorVersion));
-            }
-
+                Fx2MajorVersion => CreateXmlDocV2(targetZone),
+                Fx3MajorVersion => CreateXmlDocV3(targetZone),
+                _ => throw new ArgumentException(String.Empty /* no message */, nameof(majorVersion)),
+            };
             XmlElement rootElement = doc.DocumentElement;
 
             return rootElement;
@@ -481,6 +470,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             return ps;
         }
+#endif
 
         /// <summary>
         /// Signs a ClickOnce manifest or PE file.
@@ -598,7 +588,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             else
             {
-                using(RSA rsa = CngLightup.GetRSAPrivateKey(cert))
+#if RUNTIME_TYPE_NETCORE
+                IntPtr hModule = IntPtr.Zero;
+
+                using (RSA rsa = cert.GetRSAPrivateKey())
+#else
+                using (RSA rsa = CngLightup.GetRSAPrivateKey(cert))
+#endif
                 {
                     if (rsa == null)
                         throw new ApplicationException(resources.GetString("SecurityUtil.OnlyRSACertsAreAllowed"));
@@ -622,6 +618,20 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                             signer = new CmiManifestSigner2(rsa, cert, useSha256);
                         }
 
+#if RUNTIME_TYPE_NETCORE
+                        // Manifest signing uses .NET FX APIs, implemented in clr.dll.
+                        // Load the library explicitly.
+
+                        string clrDllDir = Path.Combine(
+                                Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                                "Microsoft.NET",
+                                Environment.Is64BitProcess ? "Framework64" : "Framework",
+                                "v4.0.30319");
+
+                        NativeMethods.SetDllDirectoryW(clrDllDir);
+                        hModule = NativeMethods.LoadLibraryExW(Path.Combine(clrDllDir, "clr.dll"), IntPtr.Zero, NativeMethods.LOAD_LIBRARY_AS_DATAFILE);
+                        // No need to check hModule - Sign() method will quickly fail if we did not load clr.dll
+#endif
                         if (timestampUrl == null)
                             manifest.Sign(signer);
                         else
@@ -637,6 +647,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         }
                         throw new ApplicationException(ex.Message, ex);
                     }
+#if RUNTIME_TYPE_NETCORE
+                    finally
+                    {
+                        if (hModule != IntPtr.Zero)
+                        {
+                            NativeMethods.FreeLibrary(hModule);
+                        }
+
+                        NativeMethods.SetDllDirectoryW(null);
+                    }
+#endif
                 }
             }
         }

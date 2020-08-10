@@ -44,11 +44,11 @@ namespace Microsoft.Build.BuildEngine.Shared
                 newElement.AppendChild(newChildNode);
             }
 
-            if (oldElement.ParentNode != null)
-            {
+               
+            
                 // Add the new element in the same place the old element was.
-                oldElement.ParentNode.ReplaceChild(newElement, oldElement);
-            }
+                oldElement.ParentNode?.ReplaceChild(newElement, oldElement);
+            
 
             return newElement;
         }

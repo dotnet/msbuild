@@ -132,12 +132,12 @@ namespace Microsoft.Build.Tasks
                 return null;
             string res = sys._resources.GetString(name, SR.Culture);
 
-            if (args != null && args.Length > 0)
+            if (args?.Length > 0)
             {
                 for (int i = 0; i < args.Length; i++)
                 {
                     String value = args[i] as String;
-                    if (value != null && value.Length > 1024)
+                    if (value?.Length > 1024)
                     {
                         args[i] = value.Substring(0, 1024 - 3) + "...";
                     }

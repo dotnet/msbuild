@@ -1653,7 +1653,7 @@ namespace Microsoft.Build.UnitTests
             {
                 foreach (var nodeDependencies in dependencyEdges)
                 {
-                    if (nodeDependencies.Value != null && nodeDependencies.Value.Contains(node))
+                    if (nodeDependencies.Value?.Contains(node) == true)
                     {
                         return false;
                     }

@@ -447,7 +447,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 IDictionary<string, string> environmentProperties = null;
 
-                if (_componentHost != null && _componentHost.BuildParameters != null)
+                if (_componentHost?.BuildParameters != null)
                 {
                     environmentProperties = _componentHost.BuildParameters.BuildProcessEnvironment;
                 }

@@ -29,6 +29,7 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using Constants = Microsoft.Build.Internal.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+using SdkReferencePropertyExpansionMode = Microsoft.Build.Utilities.EscapeHatches.SdkReferencePropertyExpansionMode;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -323,7 +324,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(unevaluatedIncludeEscaped, "unevaluatedIncludeEscaped");
+            ErrorUtilities.VerifyThrowArgumentLength(unevaluatedIncludeEscaped, nameof(unevaluatedIncludeEscaped));
 
             List<I> items = new List<I>();
             itemFactory.ItemElement = itemElement;
@@ -1779,7 +1780,8 @@ namespace Microsoft.Build.Evaluation
 
             string project = importElement.Project;
 
-            if (importElement.SdkReference != null)
+            SdkReference sdkReference = importElement.SdkReference;
+            if (sdkReference != null)
             {
                 // Try to get the path to the solution and project being built. The solution path is not directly known
                 // in MSBuild. It is passed in as a property either by the VS project system or by MSBuild's solution
@@ -1790,8 +1792,58 @@ namespace Microsoft.Build.Evaluation
                 if (solutionPath == "*Undefined*") solutionPath = null;
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
+                CompareInfo compareInfo = CultureInfo.InvariantCulture.CompareInfo;
+
+                static bool HasProperty(string value, CompareInfo compareInfo) =>
+                    value != null && compareInfo.IndexOf(value, "$(") != -1;
+
+                if (HasProperty(sdkReference.Name, compareInfo) ||
+                    HasProperty(sdkReference.Version, compareInfo) ||
+                    HasProperty(sdkReference.MinimumVersion, compareInfo))
+                {
+                    SdkReferencePropertyExpansionMode mode =
+                        Traits.Instance.EscapeHatches.SdkReferencePropertyExpansion ??
+                        SdkReferencePropertyExpansionMode.DefaultExpand;
+
+                    if (mode != SdkReferencePropertyExpansionMode.NoExpansion)
+                    {
+                        if (mode == SdkReferencePropertyExpansionMode.DefaultExpand)
+                            mode = SdkReferencePropertyExpansionMode.ExpandUnescape;
+
+                        static string EvaluateProperty(string value, IElementLocation location,
+                            Expander<P, I> expander, SdkReferencePropertyExpansionMode mode)
+                        {
+                            if (value == null)
+                                return null;
+
+                            const ExpanderOptions Options = ExpanderOptions.ExpandProperties;
+
+                            switch (mode)
+                            {
+                                case SdkReferencePropertyExpansionMode.ExpandUnescape:
+                                    return expander.ExpandIntoStringAndUnescape(value, Options, location);
+                                case SdkReferencePropertyExpansionMode.ExpandLeaveEscaped:
+                                    return expander.ExpandIntoStringLeaveEscaped(value, Options, location);
+                                case SdkReferencePropertyExpansionMode.NoExpansion:
+                                case SdkReferencePropertyExpansionMode.DefaultExpand:
+                                default:
+                                    ErrorUtilities.ThrowArgumentOutOfRange(nameof(mode));
+                                    return value;
+                            }
+                        }
+
+                        IElementLocation sdkReferenceOrigin = importElement.SdkLocation;
+
+                        sdkReference = new SdkReference(
+                            EvaluateProperty(sdkReference.Name, sdkReferenceOrigin, _expander, mode),
+                            EvaluateProperty(sdkReference.Version, sdkReferenceOrigin, _expander, mode),
+                            EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander, mode)
+                        );
+                    }
+                }
+
                 // Combine SDK path with the "project" relative path
-                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.SdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio);
+                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio);
 
                 if (!sdkResult.Success)
                 {
@@ -1801,7 +1853,7 @@ namespace Microsoft.Build.Evaluation
                             importElement.Location.Line,
                             importElement.Location.Column,
                             ResourceUtilities.GetResourceString("CouldNotResolveSdk"),
-                            importElement.SdkReference.ToString())
+                            sdkReference.ToString())
                         {
                             BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                             UnexpandedProject = importElement.Project,
@@ -1817,7 +1869,7 @@ namespace Microsoft.Build.Evaluation
                         return;
                     }
 
-                    ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", importElement.SdkReference.ToString());
+                    ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", sdkReference.ToString());
                 }
 
                 if (sdkResult.Path == null)
@@ -1841,8 +1893,8 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                if ((sdkResult.PropertiesToAdd != null && sdkResult.PropertiesToAdd.Any()) ||
-                    (sdkResult.ItemsToAdd != null && sdkResult.ItemsToAdd.Any()))
+                if ((sdkResult.PropertiesToAdd?.Any() == true) ||
+                    (sdkResult.ItemsToAdd?.Any() == true))
                 {
                     //  Inserting at the beginning will mean that the properties or items from the SdkResult will be evaluated before
                     //  any projects from paths returned by the SDK Resolver.
@@ -1907,7 +1959,7 @@ namespace Microsoft.Build.Evaluation
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.FullPath = projectPath;
 
-                if (sdkResult.PropertiesToAdd != null && sdkResult.PropertiesToAdd.Any())
+                if (sdkResult.PropertiesToAdd?.Any() == true)
                 {
                     var propertyGroup = project.AddPropertyGroup();
                     foreach (var propertyNameAndValue in sdkResult.PropertiesToAdd)
@@ -1916,7 +1968,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                if (sdkResult.ItemsToAdd != null && sdkResult.ItemsToAdd.Any())
+                if (sdkResult.ItemsToAdd?.Any() == true)
                 {
                     var itemGroup = project.AddItemGroup();
                     foreach (var item in sdkResult.ItemsToAdd)

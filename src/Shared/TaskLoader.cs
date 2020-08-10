@@ -181,7 +181,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static Assembly AssemblyResolver(object sender, ResolveEventArgs args)
         {
-            if ((s_resolverLoadedType != null) && (s_resolverLoadedType.LoadedAssembly != null))
+            if ((s_resolverLoadedType?.LoadedAssembly != null))
             {
                 // Match the name being requested by the resolver with the FullName of the assembly we have loaded
                 if (args.Name.Equals(s_resolverLoadedType.LoadedAssembly.FullName, StringComparison.Ordinal))

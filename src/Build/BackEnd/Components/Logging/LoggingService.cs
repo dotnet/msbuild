@@ -519,7 +519,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             // Determine if any of the event sinks have logged an error with this submission ID
-            return _buildSubmissionIdsThatHaveLoggedErrors != null && _buildSubmissionIdsThatHaveLoggedErrors.Contains(submissionId);
+            return _buildSubmissionIdsThatHaveLoggedErrors?.Contains(submissionId) == true;
         }
 
         public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
@@ -723,10 +723,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
 
                     // 3. Null out sinks and the filter event source so that no more events can get to the central loggers
-                    if (_filterEventSource != null)
-                    {
-                        _filterEventSource.ShutDown();
-                    }
+                    _filterEventSource?.ShutDown();
 
                     foreach (IBuildEventSink sink in _eventSinkDictionary.Values)
                     {
@@ -779,7 +776,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // PERF: Not using VerifyThrow to avoid allocations for enum.ToString (boxing of NodePacketType) in the non-error case.
             if (packet.Type != NodePacketType.LogMessage)
             {
-                ErrorUtilities.ThrowInternalError("Expected packet type \"{0}\" but instead got packet type \"{1}\".", NodePacketType.LogMessage.ToString(), packet.Type.ToString());
+                ErrorUtilities.ThrowInternalError("Expected packet type \"{0}\" but instead got packet type \"{1}\".", nameof(NodePacketType.LogMessage), packet.Type.ToString());
             }
 
             LogMessagePacket loggingPacket = (LogMessagePacket)packet;
@@ -1109,7 +1106,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void InjectNonSerializedData(LogMessagePacket loggingPacket)
         {
-            if (loggingPacket != null && loggingPacket.NodeBuildEvent != null && _componentHost != null)
+            if (loggingPacket?.NodeBuildEvent != null && _componentHost != null)
             {
                 var projectStartedEventArgs = loggingPacket.NodeBuildEvent.Value.Value as ProjectStartedEventArgs;
                 if (projectStartedEventArgs != null && _configCache.Value != null)
@@ -1196,10 +1193,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             try
             {
-                if (logger != null)
-                {
-                    logger.Shutdown();
-                }
+                logger?.Shutdown();
             }
             catch (LoggerException)
             {
@@ -1563,7 +1557,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             // This only applies if the user specified /nowarn at the command-line or added the warning code through the object model
             //
-            if (WarningsAsMessages != null && WarningsAsMessages.Contains(warningEvent.Code))
+            if (WarningsAsMessages?.Contains(warningEvent.Code) == true)
             {
                 return true;
             }
@@ -1574,7 +1568,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (_warningsAsMessagesByProject.TryGetValue(GetWarningsAsErrorOrMessageKey(warningEvent), out ISet<string> codesByProject))
                 {
-                    return codesByProject != null && codesByProject.Contains(warningEvent.Code);
+                    return codesByProject?.Contains(warningEvent.Code) == true;
                 }
             }
 

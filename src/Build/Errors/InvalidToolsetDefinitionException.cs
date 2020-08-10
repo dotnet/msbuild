@@ -56,7 +56,7 @@ namespace Microsoft.Build.Exceptions
         protected InvalidToolsetDefinitionException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, "info");
+            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
 
             errorCode = info.GetString("errorCode");
         }
@@ -95,7 +95,7 @@ namespace Microsoft.Build.Exceptions
 #endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, "info");
+            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
 
             base.GetObjectData(info, context);
 

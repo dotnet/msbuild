@@ -1951,10 +1951,7 @@ EndGlobal
                 // Since we're creating our own BuildManager, we need to make sure that the default 
                 // one has properly relinquished the inproc node
                 NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
-                if (nodeProviderInProc != null)
-                {
-                    nodeProviderInProc.Dispose();
-                }
+                nodeProviderInProc?.Dispose();
 
                 File.WriteAllText(projectFilePath, solutionFileContents.Replace('\'', '"'));
                 MockLogger logger = new MockLogger(output);
@@ -2042,10 +2039,7 @@ EndGlobal
                 // Since we're creating our own BuildManager, we need to make sure that the default 
                 // one has properly relinquished the inproc node
                 NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
-                if (nodeProviderInProc != null)
-                {
-                    nodeProviderInProc.Dispose();
-                }
+                nodeProviderInProc?.Dispose();
 
                 File.WriteAllText(projectFilePath, solutionFileContents.Replace('\'', '"'));
                 MockLogger logger = new MockLogger(output);

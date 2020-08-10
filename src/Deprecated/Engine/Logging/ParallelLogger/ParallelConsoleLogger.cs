@@ -1217,7 +1217,7 @@ namespace Microsoft.Build.BuildEngine
             TargetStartedEventMinimumFields targetStartedEvent = buildEventManager.GetTargetStartedEvent(e);
 
             //Make sure we have not shown the event before
-            if (targetStartedEvent != null && !targetStartedEvent.ShowTargetFinishedEvent)
+            if (targetStartedEvent?.ShowTargetFinishedEvent == false)
             {
                 //Since the target started event has been shows, the target finished event should also be shown
                 targetStartedEvent.ShowTargetFinishedEvent = true;
@@ -1270,7 +1270,7 @@ namespace Microsoft.Build.BuildEngine
                 ProjectStartedEventMinimumFields projectStartedEvent = buildEventManager.GetProjectStartedEvent(e);
 
                 // Make sure the project started event has not been show yet
-                if (projectStartedEvent != null && !projectStartedEvent.ShowProjectFinishedEvent)
+                if (projectStartedEvent?.ShowProjectFinishedEvent == false)
                 {
                     projectStartedEvent.ShowProjectFinishedEvent = true;
 
@@ -1548,7 +1548,7 @@ namespace Microsoft.Build.BuildEngine
                                "{0,3}", calls)
                    );
 
-                if (internalPerformanceCounters != null && internalPerformanceCounters.Count > 0)
+                if (internalPerformanceCounters?.Count > 0)
                 {
                     // For each of the entry points in the project print out the performance numbers for them
                     foreach (MPPerformanceCounter counter in internalPerformanceCounters.Values)

@@ -64,10 +64,7 @@ namespace Microsoft.Build.BuildEngine
             this.propertyGroupCount += delta;
             ErrorUtilities.VerifyThrow(this.propertyGroupCount >= 0, "The property group count should never be negative");
 
-            if (parentGroupingCollection != null)
-            {
-                parentGroupingCollection.ChangePropertyGroupCount(delta);
-            }
+            parentGroupingCollection?.ChangePropertyGroupCount(delta);
         }
 
         /// <summary>
@@ -155,10 +152,7 @@ namespace Microsoft.Build.BuildEngine
             this.itemGroupCount += delta;
             ErrorUtilities.VerifyThrow(this.itemGroupCount >= 0, "The item group count should never be negative");
 
-            if (parentGroupingCollection != null)
-            {
-                parentGroupingCollection.ChangeItemGroupCount(delta);
-            }
+            parentGroupingCollection?.ChangeItemGroupCount(delta);
         }
 
         /// <summary>

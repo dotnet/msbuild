@@ -182,7 +182,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
         {
             Project parent = null;
 
-            if (projectStartedEventArgs.ParentProjectBuildEventContext != null && projectStartedEventArgs.ParentProjectBuildEventContext.ProjectContextId >= 0)
+            if (projectStartedEventArgs.ParentProjectBuildEventContext?.ProjectContextId >= 0)
             {
                 parent = GetOrAddProject(projectStartedEventArgs.ParentProjectBuildEventContext.ProjectContextId);
             }

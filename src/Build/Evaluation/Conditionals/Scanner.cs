@@ -134,7 +134,7 @@ namespace Microsoft.Build.Evaluation
             if (_errorState)
                 return false;
 
-            if (_lookahead != null && _lookahead.IsToken(Token.TokenType.EndOfInput))
+            if (_lookahead?.IsToken(Token.TokenType.EndOfInput) == true)
                 return true;
 
             SkipWhiteSpace();

@@ -191,7 +191,7 @@ namespace Microsoft.Build.BuildEngine
 
             itemVectorMatch = GetItemVectorMatches(itemVectorExpression);
 
-            if (itemVectorMatch != null && itemVectorMatch.Success)
+            if (itemVectorMatch?.Success == true)
             {
                 // The method above reports a match if there are any
                 // valid @(itemlist) references in the given expression.
@@ -236,7 +236,7 @@ namespace Microsoft.Build.BuildEngine
         {
             Match itemVectorMatch = GetItemVectorMatches(expression);
 
-            if (itemVectorMatch != null && itemVectorMatch.Success)
+            if (itemVectorMatch?.Success == true)
             {
                 return true;
             }

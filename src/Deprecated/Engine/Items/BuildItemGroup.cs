@@ -663,10 +663,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void MarkItemGroupAsDirty()
         {
-            if (parentProject != null)
-            {
-                parentProject.MarkProjectAsDirty();
-            }
+            parentProject?.MarkProjectAsDirty();
         }
 
         /// <summary>
@@ -747,7 +744,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void MustHaveThisParentElement(BuildItem item)
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(item != null && item.ItemElement != null && item.ItemElement.ParentNode == xml.Element, "ItemDoesNotBelongToItemGroup");
+            ErrorUtilities.VerifyThrowInvalidOperation(item?.ItemElement?.ParentNode == xml.Element, "ItemDoesNotBelongToItemGroup");
         }
 
         /// <summary>

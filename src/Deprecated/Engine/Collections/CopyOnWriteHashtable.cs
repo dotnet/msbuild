@@ -45,7 +45,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal CopyOnWriteHashtable(int capacity, StringComparer stringComparer)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(stringComparer, "stringComparer");
+            ErrorUtilities.VerifyThrowArgumentNull(stringComparer, nameof(stringComparer));
             this.sharedLock = new object();
 
             if (capacity == 0)
@@ -68,8 +68,8 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="stringComparer">The string comparer to use.</param>
         internal CopyOnWriteHashtable(IDictionary dictionary, StringComparer stringComparer)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(dictionary, "dictionary");
-            ErrorUtilities.VerifyThrowArgumentNull(stringComparer, "stringComparer");
+            ErrorUtilities.VerifyThrowArgumentNull(dictionary, nameof(dictionary));
+            ErrorUtilities.VerifyThrowArgumentNull(stringComparer, nameof(stringComparer));
 
             this.sharedLock = new object();
             CopyOnWriteHashtable source = dictionary as CopyOnWriteHashtable;

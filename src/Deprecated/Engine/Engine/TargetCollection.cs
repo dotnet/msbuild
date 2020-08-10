@@ -217,7 +217,7 @@ namespace Microsoft.Build.BuildEngine
             Target targetToRemove
         )
         {
-            error.VerifyThrowArgumentNull(targetToRemove, "targetToRemove");
+            error.VerifyThrowArgumentNull(targetToRemove, nameof(targetToRemove));
 
             // Confirm that it's not an imported target.
             error.VerifyThrowInvalidOperation(!targetToRemove.IsImported,

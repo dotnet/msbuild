@@ -21,12 +21,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(false)]
     public sealed class TrustInfo
     {
+#if !RUNTIME_TYPE_NETCORE
+        // Partial trust and permission sets are not supported by .NET Core.
+        // SameSite evaluation is conditioned on .NET FX but always done in .NET Core code.
         private PermissionSet _inputPermissionSet;
+        private PermissionSet _outputPermissionSet;
+        private bool _sameSiteChanged;
+#endif
         private XmlDocument _inputTrustInfoDocument;
         private bool _isFullTrust = true;
-        private PermissionSet _outputPermissionSet;
         private string _sameSiteSetting = "site";
-        private bool _sameSiteChanged;
 
         private void AddSameSiteAttribute(XmlElement permissionSetElement)
         {
@@ -45,10 +49,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// </summary>
         public void Clear()
         {
+#if !RUNTIME_TYPE_NETCORE
             _inputPermissionSet = null;
+            _outputPermissionSet = null;
+#endif
             _inputTrustInfoDocument = null;
             _isFullTrust = true;
-            _outputPermissionSet = null;
         }
 
         private void FixupPermissionSetElement(XmlElement permissionSetElement)
@@ -135,6 +141,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
+#if !RUNTIME_TYPE_NETCORE
         private PermissionSet GetInputPermissionSet()
         {
             if (_inputPermissionSet == null)
@@ -161,6 +168,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             return _inputPermissionSet;
         }
+#endif
 
         private XmlElement GetInputPermissionSetElement()
         {
@@ -251,7 +259,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     //  keep the default null value which means we will not create one in the
                     //  output document)
                     //
-                    if (previousNode != null && previousNode.NodeType == XmlNodeType.Comment)
+                    if (previousNode?.NodeType == XmlNodeType.Comment)
                     {
                         commentString = ((XmlComment)previousNode).Data;
                     }
@@ -328,6 +336,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return permissionSetElement;
         }
 
+#if !RUNTIME_TYPE_NETCORE
         private PermissionSet GetOutputPermissionSet()
         {
             if (_outputPermissionSet == null)
@@ -350,6 +359,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             return outputDocument;
         }
+#endif
 
         /// <summary>
         /// Determines whether the application has permission to call unmanaged code.
@@ -358,6 +368,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             get
             {
+#if RUNTIME_TYPE_NETCORE
+                // Always use full-trust on .NET Core.
+                return true;
+#else
                 PermissionSet ps = GetOutputPermissionSet();
                 if (ps == null)
                 {
@@ -366,6 +380,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 var ups = new PermissionSet(PermissionState.None);
                 ups.AddPermission(new SecurityPermission(SecurityPermissionFlag.UnmanagedCode));
                 return ps.Intersect(ups) != null;
+#endif
             }
         }
 
@@ -376,12 +391,20 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             get
             {
+#if RUNTIME_TYPE_NETCORE
+                // Always use full-trust on .NET Core.
+               return true;
+#else
                 GetInputPermissionSet();
                 return _isFullTrust;
+#endif
             }
+#if !RUNTIME_TYPE_NETCORE
             set => _isFullTrust = value;
+#endif
         }
 
+#if !RUNTIME_TYPE_NETCORE
         /// <summary>
         /// Gets or sets the permission set object for the application trust.
         /// </summary>
@@ -390,6 +413,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             get => GetOutputPermissionSet();
             set => _outputPermissionSet = value ?? throw new ArgumentNullException("PermissionSet cannot be set to null.");
         }
+#endif
 
         /// <summary>
         /// Determines whether to preserve partial trust permission when the full trust flag is set.
@@ -466,7 +490,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             _inputTrustInfoDocument.LoadXml(xml);
             XmlElement psElement = GetInputPermissionSetElement();
             XmlAttribute unrestrictedAttribute = (XmlAttribute)psElement.Attributes.GetNamedItem(XmlUtil.TrimPrefix(XPaths.unrestrictedAttribute));
+#if RUNTIME_TYPE_NETCORE
+            // Partial trust is not supported on .NET Core.
+            // Fail if loaded manifest does not specify full-trust.
+            // It can happen if manifest is manually modifed.
+            if (unrestrictedAttribute == null || (false == Boolean.Parse(unrestrictedAttribute.Value)))
+            {
+                throw new ArgumentException("Partial trust is not supported.");
+            }
+#else
             _isFullTrust = unrestrictedAttribute != null && Boolean.Parse(unrestrictedAttribute.Value);
+#endif
             XmlAttribute sameSiteAttribute = (XmlAttribute)psElement.Attributes.GetNamedItem(XmlUtil.TrimPrefix(XPaths.sameSiteAttribute));
             if (sameSiteAttribute != null)
                 _sameSiteSetting = sameSiteAttribute.Value;
@@ -481,7 +515,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             set
             {
                 _sameSiteSetting = value;
+#if !RUNTIME_TYPE_NETCORE
                 _sameSiteChanged = true;
+#endif
             }
         }
 
@@ -543,6 +579,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
                 // If permission set was not altered, just write out what was read in...
                 MemoryStream m = new MemoryStream();
+#if RUNTIME_TYPE_NETCORE
+                // Simpler code on .NET Core - due to no support for custom permission sets.
+                XmlElement permissionSetElement = outputDocument.DocumentElement;
+                FixupPermissionSetElement(permissionSetElement);
+
+                outputDocument.Save(m);
+                m.Position = 0;
+#else
                 if (_outputPermissionSet == null && !_sameSiteChanged)
                 {
                     XmlElement permissionSetElement = outputDocument.DocumentElement;
@@ -572,6 +616,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         m.Position = 0;
                     }
                 }
+#endif
 
                 // Wrap <PermissionSet> in a <TrustInfo> section
                 Stream s = tempPrivilegeDocument != null ? XmlUtil.XslTransform(trustInfoResource2, m, new DictionaryEntry("defaultRequestedPrivileges", tempPrivilegeDocument)) : XmlUtil.XslTransform(trustInfoResource2, m);
@@ -667,6 +712,32 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 assemblyElement.AppendChild(trustInfoElement);
             }
 
+#if RUNTIME_TYPE_NETCORE
+            // Partial trust and permission sets are not supported on .NET Core.
+            // Consequently we do not support updating permissionSet element.
+            XmlElement securityElement = (XmlElement)trustInfoElement.SelectSingleNode(XPaths.securityElement, nsmgr);
+            if (securityElement == null)
+            {
+                securityElement = document.CreateElement(XmlUtil.TrimPrefix(XPaths.securityElement), XmlNamespaces.asmv2);
+                trustInfoElement.AppendChild(securityElement);
+            }
+            XmlElement applicationRequestMinimumElement = (XmlElement)securityElement.SelectSingleNode(XPaths.applicationRequestMinimumElement, nsmgr);
+            if (applicationRequestMinimumElement == null)
+            {
+                applicationRequestMinimumElement = document.CreateElement(XmlUtil.TrimPrefix(XPaths.applicationRequestMinimumElement), XmlNamespaces.asmv2);
+                securityElement.AppendChild(applicationRequestMinimumElement);
+            }
+
+            XmlNodeList permissionSetNodes = applicationRequestMinimumElement.SelectNodes(XPaths.permissionSetElement, nsmgr);
+            foreach (XmlNode permissionSetNode in permissionSetNodes)
+                applicationRequestMinimumElement.RemoveChild(permissionSetNode);
+
+            XmlElement fullTrustPermissionSetElement = document.CreateElement(XmlUtil.TrimPrefix(XPaths.permissionSetElement), XmlNamespaces.asmv2);
+            XmlAttribute unrestrictedAttribute = document.CreateAttribute(XmlUtil.TrimPrefix(XPaths.unrestrictedAttribute), XmlNamespaces.asmv2);
+            unrestrictedAttribute.Value = "true";
+            applicationRequestMinimumElement.AppendChild(fullTrustPermissionSetElement);
+            FixupPermissionSetElement(fullTrustPermissionSetElement);
+#else
             // If we have an input trustinfo document and no output specified then just copy the input to the output
             if (_inputTrustInfoDocument != null && _outputPermissionSet == null && !_sameSiteChanged)
             {
@@ -699,6 +770,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 applicationRequestMinimumElement.AppendChild(permissionSetElement);
                 FixupPermissionSetElement(permissionSetElement);
             }
+#endif
 
             // Truncate any contents that may be in the file
             if (output.Length > 0)

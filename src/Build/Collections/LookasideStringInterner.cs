@@ -98,17 +98,12 @@ namespace Microsoft.Build.Collections
         /// <returns>The corresponding string.</returns>
         public string GetString(int index)
         {
-            switch (index)
+            return index switch
             {
-                case NullStringIndex:
-                    return null;
-
-                case EmptyStringIndex:
-                    return String.Empty;
-
-                default:
-                    return _strings[index];
-            }
+                NullStringIndex => null,
+                EmptyStringIndex => String.Empty,
+                _ => _strings[index],
+            };
         }
 
         /// <summary>

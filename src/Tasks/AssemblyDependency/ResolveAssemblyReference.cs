@@ -1553,7 +1553,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="importance">The importance of the message.</param>
         private void LogFullName(Reference reference, MessageImportance importance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(reference, "reference");
+            ErrorUtilities.VerifyThrowArgumentNull(reference, nameof(reference));
 
             if (reference.IsResolved)
             {
@@ -1987,7 +1987,7 @@ namespace Microsoft.Build.Tasks
                     InstalledAssemblies installedAssemblies = null;
                     RedistList redistList = null;
 
-                    if (installedAssemblyTableInfo != null && installedAssemblyTableInfo.Length > 0)
+                    if (installedAssemblyTableInfo?.Length > 0)
                     {
                         redistList = RedistList.GetRedistList(installedAssemblyTableInfo);
                     }
@@ -2004,7 +2004,7 @@ namespace Microsoft.Build.Tasks
                     List<string> whiteListErrorFilesNames = new List<string>();
 
                     // Check for partial success in GetRedistList and log any tolerated exceptions.
-                    if ((redistList != null && redistList.Count > 0) || targetingProfile || ShouldUseSubsetBlackList())
+                    if (redistList?.Count > 0 || targetingProfile || ShouldUseSubsetBlackList())
                     {
                         // If we are not targeting a dev 10 profile and we have the required components to generate a orcas style subset, do so
                         if (!targetingProfile && ShouldUseSubsetBlackList())
@@ -2012,7 +2012,7 @@ namespace Microsoft.Build.Tasks
                             // Based in the target framework subset names find the paths to the files
                             SubsetListFinder whiteList = new SubsetListFinder(_targetFrameworkSubsets);
                             whiteListSubsetTableInfo = GetInstalledAssemblyTableInfo(IgnoreDefaultInstalledAssemblySubsetTables, InstalledAssemblySubsetTables, new GetListPath(whiteList.GetSubsetListPathsFromDisk), TargetFrameworkDirectories);
-                            if (whiteListSubsetTableInfo.Length > 0 && (redistList != null && redistList.Count > 0))
+                            if (whiteListSubsetTableInfo.Length > 0 && (redistList?.Count > 0))
                             {
                                 blackList = redistList.GenerateBlackList(whiteListSubsetTableInfo, whiteListErrors, whiteListErrorFilesNames);
                             }
@@ -2056,7 +2056,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        if (redistList != null && redistList.Count > 0)
+                        if (redistList?.Count > 0)
                         {
                             installedAssemblies = new InstalledAssemblies(redistList);
                         }
@@ -2196,7 +2196,7 @@ namespace Microsoft.Build.Tasks
                         try
                         {
                             excludedReferencesExist = false;
-                            if (redistList != null && redistList.Count > 0)
+                            if (redistList?.Count > 0)
                             {
                                 excludedReferencesExist = dependencyTable.MarkReferencesForExclusion(blackList);
                             }
@@ -2234,7 +2234,7 @@ namespace Microsoft.Build.Tasks
                         try
                         {
                             excludedReferencesExist = false;
-                            if (redistList != null && redistList.Count > 0)
+                            if (redistList?.Count > 0)
                             {
                                 excludedReferencesExist = dependencyTable.MarkReferencesForExclusion(blackList);
                             }
@@ -2441,7 +2441,7 @@ namespace Microsoft.Build.Tasks
         private AssemblyNameExtension[] GetDependencies(Reference resolvedReference, FileExists fileExists, GetAssemblyMetadata getAssemblyMetadata, ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache)
         {
             AssemblyNameExtension[] result = null;
-            if (resolvedReference != null && resolvedReference.IsPrimary && !resolvedReference.IsBadImage)
+            if (resolvedReference?.IsPrimary == true && !resolvedReference.IsBadImage)
             {
                 System.Runtime.Versioning.FrameworkName frameworkName = null;
                 string[] scatterFiles = null;
@@ -2806,7 +2806,7 @@ namespace Microsoft.Build.Tasks
 
                 if (String.IsNullOrEmpty(frameworkDirectory))
                 {
-                    if (TargetFrameworkDirectories != null && TargetFrameworkDirectories.Length == 1)
+                    if (TargetFrameworkDirectories?.Length == 1)
                     {
                         // Exactly one TargetFrameworkDirectory, so assume it's related to this
                         // InstalledAssemblyTable.

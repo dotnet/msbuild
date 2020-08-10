@@ -715,17 +715,11 @@ namespace Microsoft.Build.UnitTests
         {
             string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("MSBuild.exe", TargetDotNetFrameworkVersion.Version20);
 
-            if (net20Path != null)
-            {
-                net20Path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", "2.0"));
-            }
+            net20Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", "2.0"));
 
             string net35Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("MSBuild.exe", TargetDotNetFrameworkVersion.Version35);
 
-            if (net35Path != null)
-            {
-                net35Path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", "3.5"));
-            }
+            net35Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", "3.5"));
 
             ToolLocationHelper.GetPathToDotNetFrameworkFile("MSBuild.exe", TargetDotNetFrameworkVersion.Version40).ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", "4.0"));
 

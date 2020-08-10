@@ -50,7 +50,7 @@ namespace Microsoft.Build.BuildEngine
         /// <returns></returns>
         internal bool RegisterNodeProvider(INodeProvider nodeProviderToRegister)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(nodeProviderToRegister,"nodeProviderToRegister");
+            ErrorUtilities.VerifyThrowArgumentNull(nodeProviderToRegister, nameof(nodeProviderToRegister));
 
             INodeDescription[] nodeDescriptions = nodeProviderToRegister.QueryNodeDescriptions();
 

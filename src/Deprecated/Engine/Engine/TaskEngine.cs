@@ -293,15 +293,9 @@ namespace Microsoft.Build.BuildEngine
             finally
             {
                 // Remove the AssemblyResolve handler in the default AppDomain, we are done with the task.
-                if (resolver != null)
-                {
-                    resolver.RemoveHandler();
-                }
+                resolver?.RemoveHandler();
 
-                if (engineProxy != null)
-                {
-                    engineProxy.MarkAsInActive();
-                }
+                engineProxy?.MarkAsInActive();
 
                 // Now all task batches are done, apply all item adds to the outer 
                 // target batch; we do this even if the task wasn't found (in that case,
@@ -1129,7 +1123,6 @@ namespace Microsoft.Build.BuildEngine
                 if (taskOutputSpecification.IsItemVector)
                 {
                     // This is an output item.
-
                     ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(itemName), "Need item type.");
 
                     // Expand only with properties first, so that expressions like Include="@(foo)" will transfer the metadata of the "foo" items as well, not just their item specs.
@@ -1163,7 +1156,6 @@ namespace Microsoft.Build.BuildEngine
                 else
                 {
                     // This is an output property.
-
                     Debug.Assert(taskOutputSpecification.IsProperty);
                     ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(propertyName), "Need property name.");
 

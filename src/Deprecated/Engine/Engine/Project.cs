@@ -1016,10 +1016,7 @@ namespace Microsoft.Build.BuildEngine
                 // the XML every time any property value changes.
 
                 // Unhook the old globalProperties from this project.
-                if (globalProperties != null)
-                {
-                    globalProperties.ClearParentProject();
-                }
+                globalProperties?.ClearParentProject();
 
                 globalProperties = value.Clone(true);
 
@@ -1354,7 +1351,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                if (mainProjectEntireContents != null && mainProjectEntireContents.HasChildNodes)
+                if (mainProjectEntireContents?.HasChildNodes == true)
                 {
                     return mainProjectEntireContents.FirstChild as XmlDeclaration;
                 }
@@ -1785,7 +1782,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectLoadSettings projectLoadSettings
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFileName, "projectFileName");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFileName, nameof(projectFileName));
             ErrorUtilities.VerifyThrowArgument(projectFileName.Length > 0, "EmptyProjectFileName");
             ErrorUtilities.VerifyThrowArgument(File.Exists(projectFileName), "ProjectFileNotFound", projectFileName);
 
@@ -1931,7 +1928,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectLoadSettings projectLoadSettings
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(textReader, "textReader");
+            ErrorUtilities.VerifyThrowArgumentNull(textReader, nameof(textReader));
 
             try
             {
@@ -1983,7 +1980,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectLoadSettings projectLoadSettings
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectXml, "projectXml");
+            ErrorUtilities.VerifyThrowArgumentNull(projectXml, nameof(projectXml));
 
             try
             {
@@ -2025,7 +2022,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectLoadSettings projectLoadSettings
             )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectXml, "projectXml");
+            ErrorUtilities.VerifyThrowArgumentNull(projectXml, nameof(projectXml));
 
             try
             {
@@ -2458,7 +2455,7 @@ namespace Microsoft.Build.BuildEngine
         )
         {
             // Property name must be non-empty.
-            error.VerifyThrowArgumentLength(propertyName, "propertyName");
+            error.VerifyThrowArgumentLength(propertyName, nameof(propertyName));
 
             // Property value must be non-null.
             error.VerifyThrowArgument(propertyValue != null,
@@ -2636,7 +2633,7 @@ namespace Microsoft.Build.BuildEngine
             BuildPropertyGroup propertyGroupToRemove
         )
         {
-            error.VerifyThrowArgumentNull(propertyGroupToRemove, "propertyGroupToRemove");
+            error.VerifyThrowArgumentNull(propertyGroupToRemove, nameof(propertyGroupToRemove));
 
             // Confirm that it's not an imported property group.
             error.VerifyThrowInvalidOperation(!propertyGroupToRemove.IsImported,
@@ -2671,7 +2668,7 @@ namespace Microsoft.Build.BuildEngine
             BuildPropertyGroup propertyGroupToRemove
         )
         {
-            error.VerifyThrowArgumentNull(propertyGroupToRemove, "propertyGroupToRemove");
+            error.VerifyThrowArgumentNull(propertyGroupToRemove, nameof(propertyGroupToRemove));
 
             // Confirm that it's actually a persisted BuildPropertyGroup in the current project.
             error.VerifyThrowInvalidOperation(
@@ -2785,8 +2782,8 @@ namespace Microsoft.Build.BuildEngine
             string itemInclude
             )
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemName, "itemName");
-            ErrorUtilities.VerifyThrowArgumentLength(itemInclude, "itemInclude");
+            ErrorUtilities.VerifyThrowArgumentLength(itemName, nameof(itemName));
+            ErrorUtilities.VerifyThrowArgumentLength(itemInclude, nameof(itemInclude));
 
             BuildItemGroup matchingItemGroup = null;
 
@@ -2924,7 +2921,7 @@ namespace Microsoft.Build.BuildEngine
             BuildItemGroup itemGroupToRemove
         )
         {
-            error.VerifyThrowArgumentNull(itemGroupToRemove, "itemGroupToRemove");
+            error.VerifyThrowArgumentNull(itemGroupToRemove, nameof(itemGroupToRemove));
 
             // Confirm that it's not an imported item group.
             error.VerifyThrowInvalidOperation(!itemGroupToRemove.IsImported,
@@ -2973,7 +2970,7 @@ namespace Microsoft.Build.BuildEngine
             BuildItem itemToRemove
         )
         {
-            error.VerifyThrowArgumentNull(itemToRemove, "itemToRemove");
+            error.VerifyThrowArgumentNull(itemToRemove, nameof(itemToRemove));
 
             // Confirm that it's not an imported item.
             error.VerifyThrowInvalidOperation(!itemToRemove.IsImported, "CannotModifyImportedProjects");
@@ -3304,7 +3301,7 @@ namespace Microsoft.Build.BuildEngine
                 else if (buildContext.CurrentBuildContextState == ProjectBuildState.BuildContextState.CycleDetected)
                 {
                     ErrorUtilities.VerifyThrow(
-                        taskExecutionContext != null && taskExecutionContext.ParentTarget != null,
+                        taskExecutionContext?.ParentTarget != null,
                         "Unexpected task context. Should not be null");
                     // Check that the target is in progress
                     ErrorUtilities.VerifyThrow(
@@ -3350,8 +3347,7 @@ namespace Microsoft.Build.BuildEngine
                             while (buildContext.NameOfBlockingTarget != null)
                             {
                                 Target blockingTarget = GetTargetForName(buildContext.NameOfBlockingTarget);
-                                if (blockingTarget.ExecutionState != null &&
-                                    blockingTarget.ExecutionState.BuildingRequiredTargets)
+                                if (blockingTarget.ExecutionState?.BuildingRequiredTargets == true)
                                 {
                                     blockingTarget.ContinueBuild(buildContext, null);
                                 }
@@ -3359,8 +3355,7 @@ namespace Microsoft.Build.BuildEngine
                                 buildContext.RemoveBlockingTarget();
                             }
                             Target inprogressTarget = GetTargetForName(buildContext.NameOfTargetInProgress);
-                            if (inprogressTarget.ExecutionState != null &&
-                                inprogressTarget.ExecutionState.BuildingRequiredTargets)
+                            if (inprogressTarget.ExecutionState?.BuildingRequiredTargets == true)
                             {
                                 inprogressTarget.ContinueBuild(buildContext, null);
                             }
@@ -3572,7 +3567,7 @@ namespace Microsoft.Build.BuildEngine
                 if (!ParentEngine.LoggingServices.OnlyLogCriticalEvents && buildRequest.FireProjectStartedFinishedEvents)
                 {
                     string joinedTargetNamesToBuild = null;
-                    if (targetNamesToBuild != null && targetNamesToBuild.Length > 0)
+                    if (targetNamesToBuild?.Length > 0)
                     {
                         joinedTargetNamesToBuild = EscapingUtilities.UnescapeAll(String.Join(";", targetNamesToBuild));
                     }
@@ -3594,7 +3589,7 @@ namespace Microsoft.Build.BuildEngine
 
                         // Get the list of properties to serialize to the parent node
                         string[] propertyListToSerialize = parentEngine.PropertyListToSerialize;
-                        if (propertyListToSerialize != null && propertyListToSerialize.Length > 0)
+                        if (propertyListToSerialize?.Length > 0)
                         {
                             foreach (string propertyToGet in propertyListToSerialize)
                             {
@@ -4190,7 +4185,7 @@ namespace Microsoft.Build.BuildEngine
                         ImportedProject previouslyImportedProject = (ImportedProject)ParentEngine.ImportedProjectsCache[import.EvaluatedProjectPath];
 
                         // if this project hasn't been imported before, or if it has changed on disk, we need to load it
-                        if ((previouslyImportedProject == null) || previouslyImportedProject.HasChangedOnDisk(import.EvaluatedProjectPath))
+                        if ((previouslyImportedProject?.HasChangedOnDisk(import.EvaluatedProjectPath) != false))
                         {
                             try
                             {
