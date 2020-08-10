@@ -3,6 +3,11 @@ trigger:
 - exp/*
 - vs*
 
+pr:
+- master
+- exp/*
+- vs*
+
 jobs:
 - job: BootstrapMSBuildOnFullFrameworkWindows
   displayName: "Windows Full"
