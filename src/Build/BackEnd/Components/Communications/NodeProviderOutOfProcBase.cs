@@ -76,7 +76,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         protected void SendData(NodeContext context, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, "packet");
+            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
             context.SendData(packet);
         }
 
@@ -92,10 +92,7 @@ namespace Microsoft.Build.BackEnd
 
             foreach (NodeContext nodeContext in contextsToShutDown)
             {
-                if (nodeContext != null)
-                {
-                    nodeContext.SendData(new NodeBuildComplete(enableReuse));
-                }
+                nodeContext?.SendData(new NodeBuildComplete(enableReuse));
             }
         }
 
@@ -380,10 +377,7 @@ namespace Microsoft.Build.BackEnd
                 CommunicationsUtilities.Trace("Failed to connect to pipe {0}. {1}", pipeName, e.Message.TrimEnd());
 
                 // If we don't close any stream, we might hang up the child
-                if (nodeStream != null)
-                {
-                    nodeStream.Dispose();
-                }
+                nodeStream?.Dispose();
             }
 
             return null;
@@ -395,7 +389,7 @@ namespace Microsoft.Build.BackEnd
         private int LaunchNode(string msbuildLocation, string commandLineArgs)
         {
             // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, "msbuildLocation");
+            ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
 
             if (!FileSystems.Default.FileExists(msbuildLocation))
             {
@@ -827,7 +821,7 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
                         Process childProcess = Process.GetProcessById(_processId);
-                        if (childProcess == null || childProcess.HasExited)
+                        if (childProcess?.HasExited != false)
                         {
                             CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} has exited.", _processId);
                         }

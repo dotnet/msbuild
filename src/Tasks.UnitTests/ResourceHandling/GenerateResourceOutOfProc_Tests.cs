@@ -626,8 +626,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             {
                 if (resxFile != null) File.Delete(resxFile);
                 if (resourcesFile != null) File.Delete(resourcesFile);
-                if (additionalInputs != null && additionalInputs[0] != null && File.Exists(additionalInputs[0].ItemSpec)) File.Delete(additionalInputs[0].ItemSpec);
-                if (additionalInputs != null && additionalInputs[1] != null && File.Exists(additionalInputs[1].ItemSpec)) File.Delete(additionalInputs[1].ItemSpec);
+                if (additionalInputs?[0] != null && File.Exists(additionalInputs[0].ItemSpec)) File.Delete(additionalInputs[0].ItemSpec);
+                if (additionalInputs?[1] != null && File.Exists(additionalInputs[1].ItemSpec)) File.Delete(additionalInputs[1].ItemSpec);
             }
         }
 
@@ -1511,7 +1511,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Assert.False(result);
 
                 // Should have not written any files
-                Assert.True(t.FilesWritten != null && t.FilesWritten.Length == 0);
+                Assert.True(t.FilesWritten?.Length == 0);
                 Assert.False(File.Exists(resourcesFile));
             }
             finally

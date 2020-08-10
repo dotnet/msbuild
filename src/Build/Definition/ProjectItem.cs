@@ -127,12 +127,12 @@ namespace Microsoft.Build.Evaluation
                              List<ProjectItemDefinition> inheritedItemDefinitionsCloned
                             )
         {
-            ErrorUtilities.VerifyThrowInternalNull(project, "project");
-            ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
+            ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
+            ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
 
             // Orcas accidentally allowed empty includes if they resulted from expansion: we preserve that bug
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeEscaped, "evaluatedIncludeEscaped");
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeBeforeWildcardExpansionEscaped, "evaluatedIncludeBeforeWildcardExpansionEscaped");
+            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeEscaped, nameof(evaluatedIncludeEscaped));
+            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeBeforeWildcardExpansionEscaped, nameof(evaluatedIncludeBeforeWildcardExpansionEscaped));
 
             _xml = xml;
             _project = project;
@@ -400,7 +400,7 @@ namespace Microsoft.Build.Evaluation
                 return Link.GetMetadata(name);
             }
 
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
 
             ProjectMetadata result = null;
 
@@ -441,7 +441,7 @@ namespace Microsoft.Build.Evaluation
                 return Link.HasMetadata(name);
             }
 
-            if (_directMetadata != null && _directMetadata.Contains(name))
+            if (_directMetadata?.Contains(name) == true)
             {
                 return true;
             }
@@ -466,7 +466,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         string IItem.GetMetadataValueEscaped(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
 
             string value = null;
 
@@ -573,7 +573,7 @@ namespace Microsoft.Build.Evaluation
             XmlUtilities.VerifyThrowArgumentValidElementName(name);
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
             ErrorUtilities.VerifyThrowInvalidOperation(!XMakeElements.ReservedItemNames.Contains(name), "CannotModifyReservedItemMetadata", name);
-            ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent != null && _xml.Parent.Parent != null, "OM_ObjectIsNoLongerActive");
+            ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
 
             if (!propagateMetadataToSiblingItems)
             {
@@ -582,7 +582,7 @@ namespace Microsoft.Build.Evaluation
 
             ProjectMetadata metadatum;
 
-            if (_directMetadata != null && _directMetadata.Contains(name))
+            if (_directMetadata?.Contains(name) == true)
             {
                 metadatum = _directMetadata[name];
                 metadatum.UnevaluatedValue = unevaluatedValue;
@@ -628,10 +628,10 @@ namespace Microsoft.Build.Evaluation
                 return Link.RemoveMetadata(name);
             }
 
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
             Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
-            ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent != null && _xml.Parent.Parent != null, "OM_ObjectIsNoLongerActive");
+            ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
 
             ProjectMetadata metadatum = (_directMetadata == null) ? null : _directMetadata[name];
 
@@ -681,7 +681,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
-            ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent != null && _xml.Parent.Parent != null, "OM_ObjectIsNoLongerActive");
+            ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
 
             if (String.Equals(UnevaluatedInclude, name, StringComparison.Ordinal))
             {
@@ -777,7 +777,7 @@ namespace Microsoft.Build.Evaluation
         {
             ErrorUtilities.VerifyThrowArgumentLength(newItemType, "ItemType");
             Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
-            ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent != null && _xml.Parent.Parent != null, "OM_ObjectIsNoLongerActive");
+            ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
 
             if (String.Equals(ItemType, newItemType, StringComparison.Ordinal))
             {

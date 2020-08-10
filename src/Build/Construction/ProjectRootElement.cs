@@ -981,8 +981,8 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public ProjectItemElement AddItem(string itemType, string include, IEnumerable<KeyValuePair<string, string>> metadata)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, "itemType");
-            ErrorUtilities.VerifyThrowArgumentLength(include, "include");
+            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
+            ErrorUtilities.VerifyThrowArgumentLength(include, nameof(include));
 
             ProjectItemGroupElement itemGroupToAddTo = null;
 
@@ -1003,7 +1003,7 @@ namespace Microsoft.Build.Construction
                     itemGroupToAddTo = itemGroup;
                 }
 
-                if (itemGroupToAddTo != null && itemGroupToAddTo.Count > 0)
+                if (itemGroupToAddTo?.Count > 0)
                 {
                     break;
                 }

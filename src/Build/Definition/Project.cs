@@ -2878,12 +2878,11 @@ namespace Microsoft.Build.Evaluation
 
                 ProjectProperty property = _data.Properties[name];
 
-                ErrorUtilities.VerifyThrowInvalidOperation(property == null || !property.IsReservedProperty, "OM_ReservedName", name);
-                ErrorUtilities.VerifyThrowInvalidOperation(property == null || !property.IsGlobalProperty, "OM_GlobalProperty", name);
+                ErrorUtilities.VerifyThrowInvalidOperation(property?.IsReservedProperty != true, "OM_ReservedName", name);
+                ErrorUtilities.VerifyThrowInvalidOperation(property?.IsGlobalProperty != true, "OM_GlobalProperty", name);
 
                 // If there's an existing regular property, we can reuse it, unless it's not attached to its XML any more
-                if (property != null &&
-                    !property.IsEnvironmentProperty &&
+                if (property?.IsEnvironmentProperty == false &&
                     property.Xml.Parent?.Parent != null &&
                     ReferenceEquals(property.Xml.ContainingProject, Xml))
                 {
@@ -3386,7 +3385,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if ((metadata != null && metadata.Any()) || candidateExistingItemXml.Count > 0)
+                if ((metadata?.Any() == true) || candidateExistingItemXml.Count > 0)
                 {
                     // Don't try to make sure the metadata are the same.
                     return false;
@@ -3771,7 +3770,7 @@ namespace Microsoft.Build.Evaluation
                     return null;
                 }
 
-                if (metadata != null && metadata.Any())
+                if (metadata?.Any() == true)
                 {
                     // Don't bother trying to match up metadata
                     return null;

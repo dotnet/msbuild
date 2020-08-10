@@ -156,16 +156,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             _nodesShutdown = true;
-
-            if (_inProcNodeProvider != null)
-            {
-                _inProcNodeProvider.ShutdownConnectedNodes(enableReuse);
-            }
-
-            if (_outOfProcNodeProvider != null)
-            {
-                _outOfProcNodeProvider.ShutdownConnectedNodes(enableReuse);
-            }
+            _inProcNodeProvider?.ShutdownConnectedNodes(enableReuse);
+            _outOfProcNodeProvider?.ShutdownConnectedNodes(enableReuse);
         }
 
         /// <summary>
@@ -174,10 +166,7 @@ namespace Microsoft.Build.BackEnd
         public void ShutdownAllNodes()
         {
             // don't worry about inProc
-            if (_outOfProcNodeProvider != null)
-            {
-                _outOfProcNodeProvider.ShutdownAllNodes();
-            }
+            _outOfProcNodeProvider?.ShutdownAllNodes();
         }
 
         #endregion

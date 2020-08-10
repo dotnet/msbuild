@@ -81,8 +81,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         string value = valueFragment.TextFragment;
 
-                        if (excludeTester == null ||
-                            !excludeTester.Value(EscapingUtilities.UnescapeAll(value)))
+                        if (excludeTester?.Value(EscapingUtilities.UnescapeAll(value)) != true)
                         {
                             var item = _itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath);
                             itemsToAdd.Add(item);

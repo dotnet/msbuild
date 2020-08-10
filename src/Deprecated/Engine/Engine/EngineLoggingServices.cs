@@ -75,7 +75,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="e"></param>
         internal void PostLoggingEvent(BuildEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             if (paused)
             {
@@ -106,7 +106,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="eventArray"></param>
         internal void PostLoggingEvents(BuildEventArgs[] eventArray)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventArray, "eventArray");
+            ErrorUtilities.VerifyThrowArgumentNull(eventArray, nameof(eventArray));
 
             if (paused)
             {
@@ -139,7 +139,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="e"></param>
         internal void PostLoggingEvent(NodeLoggingEvent e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             if (paused)
             {
@@ -163,7 +163,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="eventArray"></param>
         internal void PostLoggingEvents(NodeLoggingEvent[] eventArray)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventArray, "eventArray");
+            ErrorUtilities.VerifyThrowArgumentNull(eventArray, nameof(eventArray));
 
             if (paused)
             {
@@ -240,7 +240,7 @@ namespace Microsoft.Build.BuildEngine
             // issue, and it apparently will also cause us problems if we adopt the
             // new Longhorn Add-In Programming Model.  
 
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             PostLoggingEvent(e);
         }
 
@@ -260,7 +260,7 @@ namespace Microsoft.Build.BuildEngine
                 // issue, and it apparently will also cause us problems if we adopt the
                 // new Longhorn Add-In Programming Model.
 
-                ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+                ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
                 PostLoggingEvent(e);
             }
         }
@@ -279,7 +279,7 @@ namespace Microsoft.Build.BuildEngine
             // issue, and it apparently will also cause us problems if we adopt the
             // new Longhorn Add-In Programming Model.
 
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             PostLoggingEvent(e);
         }
 
@@ -297,7 +297,7 @@ namespace Microsoft.Build.BuildEngine
             // issue, and it apparently will also cause us problems if we adopt the
             // new Longhorn Add-In Programming Model.
 
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             PostLoggingEvent(e);
         }
         #endregion

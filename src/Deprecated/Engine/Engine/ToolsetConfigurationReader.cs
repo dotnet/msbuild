@@ -33,7 +33,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="readApplicationConfiguration"></param>
         internal ToolsetConfigurationReader(ReadApplicationConfiguration readApplicationConfiguration)
         {
-            error.VerifyThrowArgumentNull(readApplicationConfiguration, "readApplicationConfiguration");
+            error.VerifyThrowArgumentNull(readApplicationConfiguration, nameof(readApplicationConfiguration));
             this.readApplicationConfiguration = readApplicationConfiguration;
         }
 
@@ -55,7 +55,7 @@ namespace Microsoft.Build.BuildEngine
                                               toolset.ElementInformation.LineNumber
                                           );
 
-                        if (toolset.toolsVersion != null && toolset.toolsVersion.Length == 0)
+                        if (toolset.toolsVersion?.Length == 0)
                         {
                             InvalidToolsetDefinitionException.Throw("InvalidToolsetValueInConfigFileValue", location);
                         }
@@ -104,7 +104,7 @@ namespace Microsoft.Build.BuildEngine
                                       propertyElement.ElementInformation.LineNumber
                                   );
 
-                if (propertyElement.Name != null && propertyElement.Name.Length == 0)
+                if (propertyElement.Name?.Length == 0)
                 {
                     InvalidToolsetDefinitionException.Throw("InvalidToolsetValueInConfigFileValue", location);
                 }
@@ -387,7 +387,7 @@ namespace Microsoft.Build.BuildEngine
             }
             set
             {
-                base["toolsVersion"] = value;
+                base[nameof(toolsVersion)] = value;
             }
         }
 

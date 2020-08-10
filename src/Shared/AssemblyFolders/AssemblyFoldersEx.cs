@@ -234,7 +234,7 @@ namespace Microsoft.Build.Shared
                     {
                         using (RegistryKey keyPlatform = baseKey.OpenSubKey(directoryKey.RegistryKey, false))
                         {
-                            if (keyPlatform != null && keyPlatform.ValueCount > 0)
+                            if (keyPlatform?.ValueCount > 0)
                             {
                                 if (!string.IsNullOrEmpty(platform))
                                 {

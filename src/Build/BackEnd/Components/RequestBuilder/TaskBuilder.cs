@@ -205,10 +205,7 @@ namespace Microsoft.Build.BackEnd
                 _componentHost = null;
 
                 IDisposable disposable = _taskExecutionHost as IDisposable;
-                if (disposable != null)
-                {
-                    disposable.Dispose();
-                }
+                disposable?.Dispose();
 
                 _taskExecutionHost = null;
             }
@@ -289,7 +286,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>true, if successful</returns>
         private async Task<WorkUnitResult> ExecuteTask(TaskExecutionMode mode, Lookup lookup)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(lookup, "lookup");
+            ErrorUtilities.VerifyThrowArgumentNull(lookup, nameof(lookup));
 
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
             TaskHost taskHost = null;
@@ -342,10 +339,7 @@ namespace Microsoft.Build.BackEnd
                 _taskExecutionHost.CleanupForTask();
 
 #if FEATURE_APPDOMAIN
-                if (taskHost != null)
-                {
-                    taskHost.MarkAsInactive();
-                }
+                taskHost?.MarkAsInactive();
 #endif
 
                 // Now all task batches are done, apply all item adds to the outer 
@@ -596,10 +590,7 @@ namespace Microsoft.Build.BackEnd
                 taskRunnerFinished = null;
             }
 
-            if (exceptionFromExecution != null)
-            {
-                exceptionFromExecution.Throw();
-            }
+            exceptionFromExecution?.Throw();
 
             return taskResult;
         }

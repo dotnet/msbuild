@@ -113,27 +113,14 @@ namespace Microsoft.Build.Shared.FileSystem
                 {
                     int hr = Marshal.GetLastWin32Error();
                     Debug.Assert(hr != WindowsNative.ErrorFileNotFound);
-
-                    WindowsNative.EnumerateDirectoryStatus findHandleOpenStatus;
-                    switch (hr)
+                    WindowsNative.EnumerateDirectoryStatus findHandleOpenStatus = hr switch
                     {
-                        case WindowsNative.ErrorFileNotFound:
-                            findHandleOpenStatus = WindowsNative.EnumerateDirectoryStatus.SearchDirectoryNotFound;
-                            break;
-                        case WindowsNative.ErrorPathNotFound:
-                            findHandleOpenStatus = WindowsNative.EnumerateDirectoryStatus.SearchDirectoryNotFound;
-                            break;
-                        case WindowsNative.ErrorDirectory:
-                            findHandleOpenStatus = WindowsNative.EnumerateDirectoryStatus.CannotEnumerateFile;
-                            break;
-                        case WindowsNative.ErrorAccessDenied:
-                            findHandleOpenStatus = WindowsNative.EnumerateDirectoryStatus.AccessDenied;
-                            break;
-                        default:
-                            findHandleOpenStatus = WindowsNative.EnumerateDirectoryStatus.UnknownError;
-                            break;
-                    }
-
+                        WindowsNative.ErrorFileNotFound => WindowsNative.EnumerateDirectoryStatus.SearchDirectoryNotFound,
+                        WindowsNative.ErrorPathNotFound => WindowsNative.EnumerateDirectoryStatus.SearchDirectoryNotFound,
+                        WindowsNative.ErrorDirectory => WindowsNative.EnumerateDirectoryStatus.CannotEnumerateFile,
+                        WindowsNative.ErrorAccessDenied => WindowsNative.EnumerateDirectoryStatus.AccessDenied,
+                        _ => WindowsNative.EnumerateDirectoryStatus.UnknownError,
+                    };
                     return new WindowsNative.EnumerateDirectoryResult(directoryPath, findHandleOpenStatus, hr);
                 }
 

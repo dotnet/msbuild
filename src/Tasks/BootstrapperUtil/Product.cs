@@ -213,7 +213,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return ValidationResults?.PackageResults(culture);
         }
 
-        internal bool ValidationPassed => ValidationResults == null || ValidationResults.ValidationPassed;
+        internal bool ValidationPassed => ValidationResults?.ValidationPassed != false;
 
         internal ProductValidationResults ValidationResults { get; }
     }
