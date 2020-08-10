@@ -2,11 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -19,6 +17,30 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
     {
         public GivenDotnetListPackage(ITestOutputHelper output) : base(output)
         {
+        }
+
+        [Fact]
+        public void ItShowsCoreOutputOnMinimalVerbosity()
+        {
+            var testAssetName = "NewtonSoftDependentProject";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(testAssetName)
+                .WithSource();
+            var projectDirectory = testAsset.Path;
+
+            new RestoreCommand(testAsset)
+                .Execute()
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr();
+
+            new ListPackageCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("--verbosity", "quiet")
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("NewtonSoft.Json");
         }
 
         [Fact]
