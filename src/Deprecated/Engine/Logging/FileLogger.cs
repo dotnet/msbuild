@@ -46,7 +46,7 @@ namespace Microsoft.Build.BuildEngine
         public override void Initialize(IEventSource eventSource)
         {
             ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
-            eventSource.BuildFinished += new BuildFinishedEventHandler(FileLoggerBuildFinished);
+            eventSource.BuildFinished += FileLoggerBuildFinished;
             InitializeFileLogger(eventSource, 1);
         }
 

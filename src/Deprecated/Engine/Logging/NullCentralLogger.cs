@@ -49,7 +49,7 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
         public void Initialize(IEventSource eventSource, int nodeCount)
         {
-            eventSource.AnyEventRaised += new AnyEventHandler(AnyEventRaisedHandler);
+            eventSource.AnyEventRaised += AnyEventRaisedHandler;
         }
 
         public void AnyEventRaisedHandler(object sender, BuildEventArgs e)

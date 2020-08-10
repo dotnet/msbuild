@@ -115,7 +115,7 @@ namespace Microsoft.Build.Shared
 
 #if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
                         // Hook up last minute dumping of any exceptions 
-                        taskAppDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandling.UnhandledExceptionHandler);
+                        taskAppDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
 #endif
                     }
                 }
