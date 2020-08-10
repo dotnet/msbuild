@@ -291,7 +291,7 @@ namespace Microsoft.Build.Evaluation
         private static bool ProjectHasMatchingGlobalProperty(Project project, string propertyName)
         {
             ProjectProperty property = project.GetProperty(propertyName);
-            if (property != null && property.IsGlobalProperty && !project.GlobalPropertiesToTreatAsLocal.Contains(propertyName))
+            if (property?.IsGlobalProperty == true && !project.GlobalPropertiesToTreatAsLocal.Contains(propertyName))
             {
                 return true;
             }
@@ -362,7 +362,7 @@ namespace Microsoft.Build.Evaluation
                 set
                 {
                     Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
-                    ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent != null && _xml.Parent.Parent != null, "OM_ObjectIsNoLongerActive");
+                    ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
 
                     _xml.Value = value;
 

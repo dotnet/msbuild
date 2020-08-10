@@ -174,12 +174,12 @@ namespace Microsoft.Build.Execution
         {
             if (projectFullPath != null)
             {
-                if (_hostObjectMap != null && _hostObjectMap.ContainsKey(projectFullPath))
+                if (_hostObjectMap?.ContainsKey(projectFullPath) == true)
                 {
                     _hostObjectMap.Remove(projectFullPath);
                 }
 
-                if (_projectAffinities != null && _projectAffinities.ContainsKey(projectFullPath))
+                if (_projectAffinities?.ContainsKey(projectFullPath) == true)
                 {
                     _projectAffinities.Remove(projectFullPath);
                 }

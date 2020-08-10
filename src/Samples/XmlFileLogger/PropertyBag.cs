@@ -134,7 +134,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
                 return true;
             }
 
-            return _parent != null && _parent.TryGetValue(key, out value);
+            return _parent?.TryGetValue(key, out value) == true;
         }
     }
 }

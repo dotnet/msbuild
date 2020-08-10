@@ -731,11 +731,11 @@ namespace Microsoft.Build.BuildEngine
             (
             )
         {
-            if (this.ParentProject != null)
-            {
+               
+            
                 // This is a change to the contents of the project file.
-                this.ParentProject.MarkProjectAsDirty();
-            }
+                this.ParentProject?.MarkProjectAsDirty();
+            
         }
 
         /// <summary>

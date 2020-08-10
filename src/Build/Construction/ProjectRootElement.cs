@@ -1003,7 +1003,7 @@ namespace Microsoft.Build.Construction
                     itemGroupToAddTo = itemGroup;
                 }
 
-                if (itemGroupToAddTo != null && itemGroupToAddTo.Count > 0)
+                if (itemGroupToAddTo?.Count > 0)
                 {
                     break;
                 }

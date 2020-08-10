@@ -1841,8 +1841,8 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                if ((sdkResult.PropertiesToAdd != null && sdkResult.PropertiesToAdd.Any()) ||
-                    (sdkResult.ItemsToAdd != null && sdkResult.ItemsToAdd.Any()))
+                if ((sdkResult.PropertiesToAdd?.Any() == true) ||
+                    (sdkResult.ItemsToAdd?.Any() == true))
                 {
                     //  Inserting at the beginning will mean that the properties or items from the SdkResult will be evaluated before
                     //  any projects from paths returned by the SDK Resolver.
@@ -1907,7 +1907,7 @@ namespace Microsoft.Build.Evaluation
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.FullPath = projectPath;
 
-                if (sdkResult.PropertiesToAdd != null && sdkResult.PropertiesToAdd.Any())
+                if (sdkResult.PropertiesToAdd?.Any() == true)
                 {
                     var propertyGroup = project.AddPropertyGroup();
                     foreach (var propertyNameAndValue in sdkResult.PropertiesToAdd)
@@ -1916,7 +1916,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                if (sdkResult.ItemsToAdd != null && sdkResult.ItemsToAdd.Any())
+                if (sdkResult.ItemsToAdd?.Any() == true)
                 {
                     var itemGroup = project.AddItemGroup();
                     foreach (var item in sdkResult.ItemsToAdd)

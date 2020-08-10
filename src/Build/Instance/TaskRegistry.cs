@@ -477,7 +477,7 @@ namespace Microsoft.Build.Execution
             }
 
             // Try the current task registry
-            if (taskRecord == null && _taskRegistrations != null && _taskRegistrations.Count > 0)
+            if (taskRecord == null && _taskRegistrations?.Count > 0)
             {
                 if (exactMatchRequired)
                 {

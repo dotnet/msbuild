@@ -311,7 +311,7 @@ namespace Microsoft.Build.BackEnd
                 IDictionary customMetadata = copyFrom.CloneCustomMetadata();
                 escapedMetadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                if (customMetadata != null && customMetadata.Count > 0)
+                if (customMetadata?.Count > 0)
                 {
                     foreach (string key in customMetadata.Keys)
                     {

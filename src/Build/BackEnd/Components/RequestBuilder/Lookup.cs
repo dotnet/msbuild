@@ -930,7 +930,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void MustNotBeInTable(ItemDictionary<ProjectItemInstance> table, ProjectItemInstance item)
         {
-            if (table != null && table.ItemTypes.Contains(item.ItemType))
+            if (table?.ItemTypes.Contains(item.ItemType) == true)
             {
                 ICollection<ProjectItemInstance> tableOfItemsOfSameType = table[item.ItemType];
                 if (tableOfItemsOfSameType != null)
@@ -945,7 +945,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void MustNotBeInTable(ItemTypeToItemsMetadataUpdateDictionary table, ProjectItemInstance item)
         {
-            if (table != null && table.ContainsKey(item.ItemType))
+            if (table?.ContainsKey(item.ItemType) == true)
             {
                 ItemsMetadataUpdateDictionary tableOfItemsOfSameType = table[item.ItemType];
                 if (tableOfItemsOfSameType != null)

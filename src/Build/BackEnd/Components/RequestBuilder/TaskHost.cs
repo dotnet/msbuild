@@ -811,10 +811,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     ILease lease = (ILease)RemotingServices.GetLifetimeService(this);
 
-                    if (lease != null)
-                    {
-                        lease.Unregister(_sponsor);
-                    }
+                    lease?.Unregister(_sponsor);
 
                     _sponsor.Close();
                     _sponsor = null;
@@ -934,10 +931,7 @@ namespace Microsoft.Build.BackEnd
                     // Now walk through the results, and report that subset which was asked for.
                     for (int i = 0; i < results.Length; i++)
                     {
-                        if (targetOutputsPerProject != null)
-                        {
-                            targetOutputsPerProject.Add(new Dictionary<string, ITaskItem[]>(StringComparer.OrdinalIgnoreCase));
-                        }
+                        targetOutputsPerProject?.Add(new Dictionary<string, ITaskItem[]>(StringComparer.OrdinalIgnoreCase));
 
                         foreach (KeyValuePair<string, TargetResult> resultEntry in results[i].ResultsByTarget)
                         {

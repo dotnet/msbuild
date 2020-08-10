@@ -741,8 +741,7 @@ namespace Microsoft.Build.BuildEngine
             if (!OnlyLogCriticalEvents)
             {
                 ProjectStartedEventArgs e;
-
-               
+              
                 if (!string.IsNullOrEmpty(targetNames))
                 {
                     e = new ProjectStartedEventArgs

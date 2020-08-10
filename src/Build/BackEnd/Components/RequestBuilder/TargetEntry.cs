@@ -432,7 +432,7 @@ namespace Microsoft.Build.BackEnd
                 string projectFullPath = requestEntry.RequestConfiguration.ProjectFullPath;
 
                 string parentTargetName = null;
-                if (ParentEntry != null && ParentEntry.Target != null)
+                if (ParentEntry?.Target != null)
                 {
                     parentTargetName = ParentEntry.Target.Name;
                 }
@@ -531,7 +531,7 @@ namespace Microsoft.Build.BackEnd
                                 entryForInference = null;
                                 entryForExecution.LeaveScope();
                                 entryForExecution = null;
-                                targetSuccess = (bucketResult != null) && (bucketResult.ResultCode == WorkUnitResultCode.Success);
+                                targetSuccess = (bucketResult?.ResultCode == WorkUnitResultCode.Success);
                                 break;
 
                             case DependencyAnalysisResult.SkipNoInputs:
@@ -547,15 +547,9 @@ namespace Microsoft.Build.BackEnd
                         // the log is confusing.
                         targetLoggingContext.LogInvalidProjectFileError(e);
 
-                        if (null != entryForInference)
-                        {
-                            entryForInference.LeaveScope();
-                        }
+                        entryForInference?.LeaveScope();
 
-                        if (null != entryForExecution)
-                        {
-                            entryForExecution.LeaveScope();
-                        }
+                        entryForExecution?.LeaveScope();
 
                         aggregateResult = aggregateResult.AggregateResult(new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
                     }
@@ -653,11 +647,11 @@ namespace Microsoft.Build.BackEnd
                 }
                 finally
                 {
-                    if (targetLoggingContext != null)
-                    {
+                       
+                    
                         // log the last target finished since we now have the target outputs. 
-                        targetLoggingContext.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems != null && targetOutputItems.Count > 0 ? targetOutputItems : null);
-                    }
+                        targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems?.Count > 0 ? targetOutputItems : null);
+                    
                 }
 
                 _targetResult = new TargetResult(targetOutputItems.ToArray(), aggregateResult);

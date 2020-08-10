@@ -259,7 +259,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     //  keep the default null value which means we will not create one in the
                     //  output document)
                     //
-                    if (previousNode != null && previousNode.NodeType == XmlNodeType.Comment)
+                    if (previousNode?.NodeType == XmlNodeType.Comment)
                     {
                         commentString = ((XmlComment)previousNode).Data;
                     }

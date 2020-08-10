@@ -332,7 +332,7 @@ namespace Microsoft.Build.BackEnd
             // the task factory parameters if we have any to calculate; otherwise even if we 
             // still launch the task factory, it will be with parameters corresponding to the 
             // current process. 
-            if ((_factoryIdentityParameters != null && _factoryIdentityParameters.Count > 0) || (taskIdentityParameters != null && taskIdentityParameters.Count > 0))
+            if ((_factoryIdentityParameters?.Count > 0) || (taskIdentityParameters?.Count > 0))
             {
                 VerifyThrowIdentityParametersValid(taskIdentityParameters, taskLocation, _taskName, "MSBuildRuntime", "MSBuildArchitecture");
 
@@ -475,7 +475,7 @@ namespace Microsoft.Build.BackEnd
         private static void VerifyThrowIdentityParametersValid(IDictionary<string, string> identityParameters, IElementLocation errorLocation, string taskName, string runtimeName, string architectureName)
         {
             // validate the task factory parameters
-            if (identityParameters != null && identityParameters.Count > 0)
+            if (identityParameters?.Count > 0)
             {
                 string runtime = null;
                 if (identityParameters.TryGetValue(XMakeAttributes.runtime, out runtime))

@@ -196,10 +196,7 @@ namespace Microsoft.Build.Evaluation
             }
             finally
             {
-                if (toolsVersionWrapper != null)
-                {
-                    toolsVersionWrapper.Dispose();
-                }
+                toolsVersionWrapper?.Dispose();
             }
         }
 
@@ -227,10 +224,7 @@ namespace Microsoft.Build.Evaluation
             }
             finally
             {
-                if (toolsVersionWrapper != null)
-                {
-                    toolsVersionWrapper.Dispose();
-                }
+                toolsVersionWrapper?.Dispose();
             }
         }
 
@@ -275,15 +269,9 @@ namespace Microsoft.Build.Evaluation
             }
             finally
             {
-                if (toolsVersionWrapper != null)
-                {
-                    toolsVersionWrapper.Dispose();
-                }
+                toolsVersionWrapper?.Dispose();
 
-                if (subToolsetWrapper != null)
-                {
-                    subToolsetWrapper.Dispose();
-                }
+                subToolsetWrapper?.Dispose();
             }
         }
 
@@ -305,7 +293,7 @@ namespace Microsoft.Build.Evaluation
         {
             string propertyValue = null;
 
-            if (propertyName != null && propertyName.Length == 0)
+            if (propertyName?.Length == 0)
             {
                 InvalidToolsetDefinitionException.Throw("PropertyNameInRegistryHasZeroLength", toolsetWrapper.Name);
             }

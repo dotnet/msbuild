@@ -996,7 +996,7 @@ namespace Microsoft.Build.Utilities
         private static string GetPlatformVersion(TargetPlatformSDK targetSdk, string targetPlatformIdentifier, string targetPlatformVersion)
         {
             string platformKey = TargetPlatformSDK.GetSdkKey(targetPlatformIdentifier, targetPlatformVersion);
-            if (TryGetPlatformManifest(targetSdk, platformKey, out var manifest) && manifest != null && manifest.VersionedContent)
+            if (TryGetPlatformManifest(targetSdk, platformKey, out var manifest) && manifest?.VersionedContent == true)
             {
                 return manifest.PlatformVersion;
             }
@@ -1379,7 +1379,7 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            if (availablePlatformVersions != null && availablePlatformVersions.Count > 0)
+            if (availablePlatformVersions?.Count > 0)
             {
                 return availablePlatformVersions.OrderByDescending(x => x).FirstOrDefault().ToString();
             }
@@ -2952,7 +2952,7 @@ namespace Microsoft.Build.Utilities
             ExtractSdkDiskRootsFromEnvironment(sdkDiskRoots, sdkDirectoryRootsFromEnvironment);
             if (sdkDiskRoots.Count == 0)
             {
-                if (diskRoots != null && diskRoots.Length > 0)
+                if (diskRoots?.Length > 0)
                 {
                     ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerDiskRoots", "Passed in DiskRoots '{0}'", string.Join(";", diskRoots));
                     sdkDiskRoots.AddRange(diskRoots);
@@ -2977,7 +2977,7 @@ namespace Microsoft.Build.Utilities
             var sdkDiskRoots = new List<string>();
             string sdkDirectoryRootsFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDMULTIPLATFORMSDKREFERENCEDIRECTORY");
             ExtractSdkDiskRootsFromEnvironment(sdkDiskRoots, sdkDirectoryRootsFromEnvironment);
-            if (sdkDiskRoots.Count == 0 && diskRoots != null && diskRoots.Length > 0)
+            if (sdkDiskRoots.Count == 0 && diskRoots?.Length > 0)
             {
                 ErrorUtilities.DebugTraceMessage("GetMultiPlatformSdkDiskRoots", "Passed in DiskRoots '{0}'", string.Join(";", diskRoots));
                 sdkDiskRoots.AddRange(diskRoots);
@@ -3946,7 +3946,7 @@ namespace Microsoft.Build.Utilities
                     Version ver = VersionUtilities.ConvertToVersion(frameworkVersion);
                     // check if profile is installed correctly
                     IList<string> refAssemblyPaths = GetPathToReferenceAssemblies(new FrameworkNameVersioning(frameworkIdentifier, ver, subType.Name));
-                    if (refAssemblyPaths != null && refAssemblyPaths.Count > 0)
+                    if (refAssemblyPaths?.Count > 0)
                     {
                         frameworkProfiles.Add(subType.Name);
                     }

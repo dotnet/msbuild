@@ -321,10 +321,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ILease lease = (ILease)RemotingServices.GetLifetimeService(this);
 
-                if (lease != null)
-                {
-                    lease.Unregister(_sponsor);
-                }
+                lease?.Unregister(_sponsor);
 
                 _sponsor.Close();
                 _sponsor = null;
