@@ -5,7 +5,6 @@
 # the repo. Unless a later match takes precedence,
 # @dotnet/dotnet-cli  will be requested for
 # review when someone opens a pull request.
-*       @dotnet/dotnet-cli
 
 /src/WebSdk/ @vijayrkn
 /src/Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests/ @vijayrkn
