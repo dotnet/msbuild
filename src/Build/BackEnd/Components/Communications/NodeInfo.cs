@@ -87,19 +87,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool CanServiceRequestWithAffinity(NodeAffinity nodeAffinity)
         {
-            switch (nodeAffinity)
+            return nodeAffinity switch
             {
-                case NodeAffinity.Any:
-                    return true;
-
-                case NodeAffinity.InProc:
-                    return _providerType == NodeProviderType.InProc;
-
-                case NodeAffinity.OutOfProc:
-                    return _providerType != NodeProviderType.InProc;
-            }
-
-            return true;
+                NodeAffinity.Any => true,
+                NodeAffinity.InProc => _providerType == NodeProviderType.InProc,
+                NodeAffinity.OutOfProc => _providerType != NodeProviderType.InProc,
+                _ => true,
+            };
         }
     }
 }

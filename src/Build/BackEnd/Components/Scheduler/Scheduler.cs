@@ -1287,21 +1287,12 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            int limit = 0;
-            switch (_componentHost.BuildParameters.MaxNodeCount)
+            int limit = _componentHost.BuildParameters.MaxNodeCount switch
             {
-                case 1:
-                    limit = 1;
-                    break;
-
-                case 2:
-                    limit = _componentHost.BuildParameters.MaxNodeCount + 1 + _nodeLimitOffset;
-                    break;
-
-                default:
-                    limit = _componentHost.BuildParameters.MaxNodeCount + 2 + _nodeLimitOffset;
-                    break;
-            }
+                1 => 1,
+                2 => _componentHost.BuildParameters.MaxNodeCount + 1 + _nodeLimitOffset,
+                _ => _componentHost.BuildParameters.MaxNodeCount + 2 + _nodeLimitOffset,
+            };
 
             // We're at our limit of schedulable requests if: 
             // (1) MaxNodeCount requests are currently executing
