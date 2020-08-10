@@ -89,8 +89,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal Lookup(ItemDictionary<ProjectItemInstance> projectItems, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectItems, "projectItems");
-            ErrorUtilities.VerifyThrowInternalNull(properties, "properties");
+            ErrorUtilities.VerifyThrowInternalNull(projectItems, nameof(projectItems));
+            ErrorUtilities.VerifyThrowInternalNull(properties, nameof(properties));
 
             Lookup.Scope scope = new Lookup.Scope(this, "Lookup()", projectItems, properties);
             _lookupScopes.AddFirst(scope);
@@ -450,7 +450,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ProjectPropertyInstance GetProperty(string name)
         {
-            ErrorUtilities.VerifyThrowInternalLength(name, "name");
+            ErrorUtilities.VerifyThrowInternalLength(name, nameof(name));
 
             return GetProperty(name, 0, name.Length - 1);
         }

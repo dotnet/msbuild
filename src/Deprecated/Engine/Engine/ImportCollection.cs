@@ -171,7 +171,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="condition">Condition. If null, no condition is added.</param>
         public void AddNewImport(string projectFile, string condition)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(projectFile, "projectFile");
+            ErrorUtilities.VerifyThrowArgumentLength(projectFile, nameof(projectFile));
 
             XmlElement projectElement = this.parentProject.ProjectElement;
             XmlElement newImportElement = projectElement.OwnerDocument.CreateElement(XMakeElements.import, XMakeAttributes.defaultXmlNamespace);
@@ -198,7 +198,7 @@ namespace Microsoft.Build.BuildEngine
             Import importToRemove
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(importToRemove, "importToRemove");
+            ErrorUtilities.VerifyThrowArgumentNull(importToRemove, nameof(importToRemove));
 
             // Confirm that it's not an imported import.
             ErrorUtilities.VerifyThrowInvalidOperation(!importToRemove.IsImported,

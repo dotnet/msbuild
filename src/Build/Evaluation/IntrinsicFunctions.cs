@@ -570,7 +570,7 @@ namespace Microsoft.Build.Evaluation
         {
             if (keyName == null)
             {
-                throw new ArgumentNullException("keyName");
+                throw new ArgumentNullException(nameof(keyName));
             }
 
             string basekeyName;

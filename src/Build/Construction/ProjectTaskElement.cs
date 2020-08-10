@@ -48,7 +48,7 @@ namespace Microsoft.Build.Construction
         internal ProjectTaskElement(XmlElementWithLocation xmlElement, ProjectTargetElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>

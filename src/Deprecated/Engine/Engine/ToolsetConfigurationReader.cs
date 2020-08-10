@@ -33,7 +33,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="readApplicationConfiguration"></param>
         internal ToolsetConfigurationReader(ReadApplicationConfiguration readApplicationConfiguration)
         {
-            error.VerifyThrowArgumentNull(readApplicationConfiguration, "readApplicationConfiguration");
+            error.VerifyThrowArgumentNull(readApplicationConfiguration, nameof(readApplicationConfiguration));
             this.readApplicationConfiguration = readApplicationConfiguration;
         }
 
@@ -387,7 +387,7 @@ namespace Microsoft.Build.BuildEngine
             }
             set
             {
-                base["toolsVersion"] = value;
+                base[nameof(toolsVersion)] = value;
             }
         }
 

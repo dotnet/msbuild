@@ -778,7 +778,7 @@ namespace Microsoft.Build.BuildEngine
             )
         {
             error.VerifyThrow(this.taskElementList != null, "Arraylist not initialized!");
-            error.VerifyThrowArgumentLength(taskName, "taskName");
+            error.VerifyThrowArgumentLength(taskName, nameof(taskName));
 
             // Confirm that it's not an imported target.
             error.VerifyThrowInvalidOperation(!this.IsImported, "CannotModifyImportedProjects");
@@ -811,7 +811,7 @@ namespace Microsoft.Build.BuildEngine
             error.VerifyThrowInvalidOperation(!this.IsImported, "CannotModifyImportedProjects");
 
             error.VerifyThrow(this.taskElementList != null, "Arraylist not initialized!");
-            error.VerifyThrowArgumentNull(taskElement, "taskElement");
+            error.VerifyThrowArgumentNull(taskElement, nameof(taskElement));
 
             // Confirm that the BuildTask belongs to this Target.
             error.VerifyThrowInvalidOperation(taskElement.ParentTarget == this,

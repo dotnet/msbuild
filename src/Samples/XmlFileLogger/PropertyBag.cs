@@ -60,7 +60,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
         {
             if (newProperties == null)
             {
-                throw new ArgumentNullException("newProperties");
+                throw new ArgumentNullException(nameof(newProperties));
             }
 
             foreach (var property in newProperties)
@@ -79,7 +79,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
         {
             if (newProperties == null)
             {
-                throw new ArgumentNullException("newProperties");
+                throw new ArgumentNullException(nameof(newProperties));
             }
 
             foreach (var property in newProperties)

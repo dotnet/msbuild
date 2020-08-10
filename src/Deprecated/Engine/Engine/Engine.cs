@@ -905,7 +905,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="toolset">the Toolset</param>
         internal void AddToolset(Toolset toolset)
         {
-            error.VerifyThrowArgumentNull(toolset, "toolset");
+            error.VerifyThrowArgumentNull(toolset, nameof(toolset));
 
             if (toolsetStateMap.ContainsKey(toolset.ToolsVersion))
             {
@@ -1042,7 +1042,7 @@ namespace Microsoft.Build.BuildEngine
         /// <exception cref="InternalLoggerException">Logger threw arbitrary exception</exception>
         public void RegisterLogger(ILogger logger)
         {
-            error.VerifyThrowArgumentNull(logger, "logger");
+            error.VerifyThrowArgumentNull(logger, nameof(logger));
 
             // Since we are registering a central logger - need to make sure central logging is enabled for all nodes
             if (!enabledCentralLogging)
@@ -1111,7 +1111,7 @@ namespace Microsoft.Build.BuildEngine
         /// <exception cref="InternalLoggerException">Logger threw arbitrary exception</exception>
         public void RegisterDistributedLogger(ILogger centralLogger, LoggerDescription forwardingLogger)
         {
-            error.VerifyThrowArgumentNull(forwardingLogger, "forwardingLogger");
+            error.VerifyThrowArgumentNull(forwardingLogger, nameof(forwardingLogger));
             if (centralLogger == null)
             {
                 centralLogger = new NullCentralLogger();
@@ -1351,7 +1351,7 @@ namespace Microsoft.Build.BuildEngine
             string projectFullFileName
             )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFullFileName, "projectFullFileName");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFullFileName, nameof(projectFullFileName));
             return (Project)this.projectsLoadedByHost[projectFullFileName];
         }
 
@@ -1372,7 +1372,7 @@ namespace Microsoft.Build.BuildEngine
             Project project
             )
         {
-            error.VerifyThrowArgumentNull(project, "project");
+            error.VerifyThrowArgumentNull(project, nameof(project));
 
             ErrorUtilities.VerifyThrow(project.IsLoadedByHost, "How did the caller get a reference to this Project object if it's not marked as loaded?");
             // Make sure this project object is associated with this engine object.

@@ -51,7 +51,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="msbuildRegistryWrapper"></param>
         internal ToolsetRegistryReader(RegistryKeyWrapper msbuildRegistryWrapper)
         {
-            error.VerifyThrowArgumentNull(msbuildRegistryWrapper, "msbuildRegistryWrapper");
+            error.VerifyThrowArgumentNull(msbuildRegistryWrapper, nameof(msbuildRegistryWrapper));
        
             this.msbuildRegistryWrapper = msbuildRegistryWrapper;
         }

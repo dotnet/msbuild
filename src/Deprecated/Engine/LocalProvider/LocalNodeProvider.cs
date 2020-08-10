@@ -122,7 +122,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public void ApplyParameter(string parameterName, string parameterValue)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameterName, "parameterName");
+            ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
 
             if (String.Equals(parameterName, "MAXCPUCOUNT", StringComparison.OrdinalIgnoreCase))
             {

@@ -163,11 +163,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="stopProcessingOnCompletion">True if the target builder should stop processing the current target stack when this target is complete.</param>
         internal TargetEntry(BuildRequestEntry requestEntry, ITargetBuilderCallback targetBuilderCallback, TargetSpecification targetSpecification, Lookup baseLookup, TargetEntry parentTarget, TargetBuiltReason buildReason, IBuildComponentHost host, bool stopProcessingOnCompletion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, "requestEntry");
-            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback, "targetBuilderCallback");
+            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, nameof(requestEntry));
+            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback, nameof(targetBuilderCallback));
             ErrorUtilities.VerifyThrowArgumentNull(targetSpecification, "targetName");
             ErrorUtilities.VerifyThrowArgumentNull(baseLookup, "lookup");
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
 
             _requestEntry = requestEntry;
             _targetBuilderCallback = targetBuilderCallback;

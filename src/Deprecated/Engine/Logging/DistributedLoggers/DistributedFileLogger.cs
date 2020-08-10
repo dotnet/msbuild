@@ -90,7 +90,7 @@ namespace Microsoft.Build.BuildEngine
 
         public void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventSource, "eventSource");
+            ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
             ParseFileLoggerParameters();
             string fileName = logFile;
             try

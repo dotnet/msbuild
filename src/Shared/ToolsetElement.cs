@@ -100,7 +100,7 @@ namespace Microsoft.Build.Evaluation
 
             set
             {
-                base["toolsVersion"] = value;
+                base[nameof(toolsVersion)] = value;
             }
         }
 
@@ -707,7 +707,7 @@ namespace Microsoft.Build.Evaluation
 
             set
             {
-                base["DefaultOverrideToolsVersion"] = value;
+                base[nameof(DefaultOverrideToolsVersion)] = value;
             }
         }
     }
