@@ -138,7 +138,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if ((indexOfTargetInProgress + 1) < targetNamesToBuild.Count)
             {
-                indexOfTargetInProgress += 1;
+                indexOfTargetInProgress++;
                 return (string)targetNamesToBuild[indexOfTargetInProgress];
             }
             else

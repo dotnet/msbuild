@@ -55,7 +55,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // allocate a new key for it and save it away
                     if (!_projectKey.ContainsKey(e.ProjectFile))
                     {
-                        _projectIncrementKey += 1;
+                        _projectIncrementKey++;
 
                         _projectKey[e.ProjectFile] = _projectIncrementKey;
                         projectIncrementKeyLocal = _projectIncrementKey;
