@@ -23,8 +23,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         internal virtual IList<SdkResolver> LoadResolvers(LoggingContext loggingContext,
             ElementLocation location)
         {
-            // Always add the default resolver
-            var resolvers = new List<SdkResolver> {new DefaultSdkResolver()};
+            var resolvers = Environment.GetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER")?.ToLowerInvariant() != "false" ? 
+                new List<SdkResolver> {new DefaultSdkResolver()}
+                : new List<SdkResolver>();
 
             var potentialResolvers = FindPotentialSdkResolvers(
                 Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, "SdkResolvers"), location);
@@ -51,14 +52,18 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <returns></returns>
         internal virtual IList<string> FindPotentialSdkResolvers(string rootFolder, ElementLocation location)
         {
+            var additionalResolversFolder = Environment.GetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER");
+
             var assembliesList = new List<string>();
 
-            if (string.IsNullOrEmpty(rootFolder) || !FileUtilities.DirectoryExistsNoThrow(rootFolder))
+            if ((string.IsNullOrEmpty(rootFolder) || !FileUtilities.DirectoryExistsNoThrow(rootFolder)) && additionalResolversFolder == null)
             {
                 return assembliesList;
             }
 
-            foreach (var subfolder in new DirectoryInfo(rootFolder).GetDirectories())
+            var subfolders = GetSubfolders(rootFolder, additionalResolversFolder);
+
+            foreach (var subfolder in subfolders)
             {
                 var assembly = Path.Combine(subfolder.FullName, $"{subfolder.Name}.dll");
                 var manifest = Path.Combine(subfolder.FullName, $"{subfolder.Name}.xml");
@@ -76,6 +81,29 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             }
 
             return assembliesList;
+        }
+
+        private DirectoryInfo[] GetSubfolders(string rootFolder, string additionalResolversFolder)
+        {
+            DirectoryInfo[] subfolders = null;
+            var rootFolderInfo = new DirectoryInfo(rootFolder);
+            if (rootFolderInfo.Exists)
+            {
+                subfolders = rootFolderInfo.GetDirectories();
+            }
+
+            if (additionalResolversFolder != null)
+            {
+                var resolversDirInfo = new DirectoryInfo(additionalResolversFolder);
+                if (resolversDirInfo.Exists)
+                {
+                    var overrideFolders = resolversDirInfo.GetDirectories();
+                    var overriddenFolders = subfolders.Where(subfolder => overrideFolders.Any(overrideFolder => overrideFolder.Name.Equals(subfolder.Name)));
+                    return subfolders.Except(overriddenFolders).Concat(overrideFolders).ToArray();
+                }
+            }
+
+            return subfolders;
         }
 
         private bool TryAddAssemblyFromManifest(string pathToManifest, string manifestFolder, List<string> assembliesList, ElementLocation location)
