@@ -3,6 +3,11 @@ trigger:
 - vs*
 - exp/*
 
+pr:
+- master
+- vs*
+- exp/*
+
 # If defined here, these values are not overrideable
 # Once they exist, we should define these as "runtime parameters"
 # https://github.com/Microsoft/azure-pipelines-yaml/pull/129
