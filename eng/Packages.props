@@ -35,9 +35,12 @@
     <PackageReference Update="System.Reflection.TypeExtensions" Version="4.1.0" />
     <PackageReference Update="System.Resources.Extensions" Version="4.6.0" />
     <PackageReference Update="System.Resources.Writer" Version="4.0.0" />
+    <PackageReference Update="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Update="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <PackageReference Update="System.Runtime.Loader" Version="4.0.0" />
     <PackageReference Update="System.Runtime.Serialization.Primitives" Version="4.1.1" />
+    <PackageReference Update="System.Security.Cryptography.Pkcs" Version="4.7.0" />
+    <PackageReference Update="System.Security.Cryptography.Xml" Version="4.7.0" />
     <PackageReference Update="System.Security.Permissions" Version="4.7.0" />
     <PackageReference Update="System.Security.Principal.Windows" Version="4.7.0" />
     <PackageReference Update="System.Text.Encoding.CodePages" Version="4.0.1" />

@@ -13,7 +13,11 @@ namespace System.Deployment.Internal.CodeSigning
         public RSAPKCS1SHA256SignatureDescription()
         {
             KeyAlgorithm = typeof(RSACryptoServiceProvider).FullName;
+#if RUNTIME_TYPE_NETCORE
+            DigestAlgorithm = typeof(SHA256).FullName;
+#else
             DigestAlgorithm = typeof(SHA256Cng).FullName;
+#endif
             FormatterAlgorithm = typeof(RSAPKCS1SignatureFormatter).FullName;
             DeformatterAlgorithm = typeof(RSAPKCS1SignatureDeformatter).FullName;
         }
