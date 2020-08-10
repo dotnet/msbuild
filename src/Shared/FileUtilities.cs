@@ -463,7 +463,7 @@ namespace Microsoft.Build.Shared
 
             // Find the part of the name we want to check, that is remove quotes, if present
             bool shouldAdjust = newValue.IndexOf('/') != -1 && LooksLikeUnixFilePath(RemoveQuotes(newValue), baseDirectory);
-            return shouldAdjust ? newValue : value;
+            return shouldAdjust ? newValue.ToString() : value;
         }
 
 #if !FEATURE_SPAN
