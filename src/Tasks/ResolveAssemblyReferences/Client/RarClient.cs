@@ -26,8 +26,8 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
 
         internal bool Connect()
         {
-            var pipeName = _rarBuildEngine.GetRarPipeName();
-            var stream = _rarBuildEngine.GetRarClientStream(pipeName, ConnectionTimeout);
+            string pipeName = _rarBuildEngine.GetRarPipeName();
+            NamedPipeClientStream stream = _rarBuildEngine.GetRarClientStream(pipeName, ConnectionTimeout);
 
             if (stream == null)
                 return false; // We couldn't connect
@@ -43,7 +43,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
 
         internal int GetNumber(int parameter)
         {
-            using var client = GetRpcClient();
+            using IResolveAssemblyReferenceTaskHandler client = GetRpcClient();
             // TODO: Find out if there is any possibility of awaiting it.
             return client.GetNumber(parameter).GetAwaiter().GetResult();
         }
@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
         {
             ErrorUtilities.VerifyThrowArgumentNull(_clientStream, nameof(_clientStream));
 
-            var handler = RpcUtils.GetRarMessageHandler(_clientStream);
+            IJsonRpcMessageHandler handler = RpcUtils.GetRarMessageHandler(_clientStream);
             return JsonRpc.Attach<IResolveAssemblyReferenceTaskHandler>(handler);
         }
 

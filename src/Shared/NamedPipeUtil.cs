@@ -29,51 +29,6 @@ namespace Microsoft.Build.Shared
                 return pipeName;
             }
         }
-        internal static NamedPipeClientStream GetClientStream(string pipeName, int timeout)
-        {
-            // Try and connect to the process.
-            var nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
-#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                                                                         | PipeOptions.CurrentUserOnly
-#endif
-                                                                         );
-            try
-            {
-                nodeStream.Connect(timeout);
-
-#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                if (NativeMethodsShared.IsWindows && !NativeMethodsShared.IsMono)
-                {
-                    // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
-                    // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
-                    // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
-                    // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
-                    // remote node could set the owner to something else would also let it change owners on other objects, so
-                    // this would be a security flaw upstream of us.
-                    ValidateRemotePipeSecurityOnWindows(nodeStream);
-
-                }
-
-                return nodeStream;
-#endif
-            }
-            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-            {
-                // Can be:
-                // UnauthorizedAccessException -- Couldn't connect, might not be a node.
-                // IOException -- Couldn't connect, already in use.
-                // TimeoutException -- Couldn't connect, might not be a node.
-                // InvalidOperationException – Couldn’t connect, probably a different build
-
-                // If we don't close any stream, we might hang up the child
-                if (nodeStream != null)
-                {
-                    nodeStream.Dispose();
-                }
-            }
-
-            return null;
-        }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         //  This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
@@ -95,5 +50,98 @@ namespace Microsoft.Build.Shared
             }
         }
 #endif
+        /// <summary>
+        /// Attempts to connect to the specified process.
+        /// </summary>
+        internal static NamedPipeClientStream TryConnectToProcess(int nodeProcessId, int timeout, Handshake? handshake)
+        {
+            string pipeName = GetPipeNameOrPath("MSBuild" + nodeProcessId);
+            return TryConnectToProcess(pipeName, timeout, timeout, handshake);
+        }
+
+        /// <summary>
+        /// Attempts to connect to the specified process.
+        /// </summary>
+        internal static NamedPipeClientStream TryConnectToProcess(string pipeName, int timeout, Handshake? handshake)
+        {
+            return TryConnectToProcess(pipeName, null, timeout, handshake);
+        }
+
+        private static NamedPipeClientStream TryConnectToProcess(string pipeName, int? nodeProcessId, int timeout, Handshake? handshake)
+        {
+            // Try and connect to the process.
+            NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+                                                                         | PipeOptions.CurrentUserOnly
+#endif
+                                                                         );
+            if (nodeProcessId.HasValue)
+            {
+                CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId.Value, pipeName, timeout);
+            }
+            else
+            {
+                CommunicationsUtilities.Trace("Attempting connect to process {0} with pipe {1} with timeout {2} ms", pipeName, pipeName, timeout);
+            }
+
+            try
+            {
+                nodeStream.Connect(timeout);
+
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+                if (NativeMethodsShared.IsWindows && !NativeMethodsShared.IsMono)
+                {
+                    // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
+                    // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
+                    // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
+                    // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
+                    // remote node could set the owner to something else would also let it change owners on other objects, so
+                    // this would be a security flaw upstream of us.
+                    ValidateRemotePipeSecurityOnWindows(nodeStream);
+                }
+#endif
+                if (handshake.HasValue)
+                {
+                    int[] handshakeComponents = handshake.Value.RetrieveHandshakeComponents();
+                    for (int i = 0; i < handshakeComponents.Length; i++)
+                    {
+                        CommunicationsUtilities.Trace("Writing handshake part {0} to pipe {1}", i, pipeName);
+                        nodeStream.WriteIntForHandshake(handshakeComponents[i]);
+                    }
+
+                    // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
+                    nodeStream.WriteEndOfHandshakeSignal();
+
+                    CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
+
+#if NETCOREAPP2_1 || MONO
+                nodeStream.ReadEndOfHandshakeSignal(true, timeout);
+#else
+                    nodeStream.ReadEndOfHandshakeSignal(true);
+#endif
+                }
+
+                // We got a connection.
+                CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
+                return nodeStream;
+            }
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+            {
+                // Can be:
+                // UnauthorizedAccessException -- Couldn't connect, might not be a node.
+                // IOException -- Couldn't connect, already in use.
+                // TimeoutException -- Couldn't connect, might not be a node.
+                // InvalidOperationException – Couldn’t connect, probably a different build
+                CommunicationsUtilities.Trace("Failed to connect to pipe {0}. {1}", pipeName, e.Message.TrimEnd());
+
+                // If we don't close any stream, we might hang up the child
+                if (nodeStream != null)
+                {
+                    nodeStream.Dispose();
+                }
+            }
+
+            return null;
+        }
     }
 }

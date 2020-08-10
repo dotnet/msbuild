@@ -57,7 +57,12 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Building with administrator privileges
         /// </summary>
-        Administrator = 32
+        Administrator = 32,
+
+        /// <summary>
+        /// Is worker node. Worker node can accept normal build requests.
+        /// </summary>
+        Worker = 64
     }
 
     internal readonly struct Handshake
@@ -527,6 +532,10 @@ namespace Microsoft.Build.Internal
                 context |= HandshakeOptions.Administrator;
             }
 #endif
+            if (workerNode)
+            {
+                context |= HandshakeOptions.Worker;
+            }
             return context;
         }
 
@@ -648,28 +657,8 @@ namespace Microsoft.Build.Internal
 
         internal static string GetRarPipeName(bool nodeReuse, bool lowPriority)
         {
-            var context = HandshakeOptions.None;
+            var context = GetHandshakeOptions(true);
             var userName = $"{Environment.UserDomainName}.{Environment.UserName}";
-            var clrVersion = ClrVersion;
-            var is64Bit = XMakeAttributes.GetCurrentMSBuildArchitecture().Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
-
-            if (is64Bit)
-            {
-                context |= HandshakeOptions.X64;
-            }
-            if (clrVersion == 2)
-            {
-                context |= HandshakeOptions.CLR2;
-            }
-            if (nodeReuse)
-            {
-                context |= HandshakeOptions.NodeReuse;
-            }
-            if (lowPriority)
-            {
-                context |= HandshakeOptions.LowPriority;
-            }
-
             return $"MSBuild.RAR.{userName}.{(int)context}";
         }
     }

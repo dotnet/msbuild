@@ -1090,7 +1090,6 @@ namespace Microsoft.Build.Execution
         Any = 2,
         InProc = 0,
         OutOfProc = 1,
-        RarNode = 3,
     }
     public enum NodeEngineShutdownReason
     {

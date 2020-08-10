@@ -997,21 +997,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         bool IRarBuildEngine.CreateRarNode()
         {
-            var nodeManager = _host.GetComponent(BuildComponentType.NodeManager) as INodeManager;
-
-            var configuration = new NodeConfiguration
-            (
-                -1, /* must be assigned by the NodeManager */
-                _host.BuildParameters,
-                null
-    #if FEATURE_APPDOMAIN
-                , AppDomain.CurrentDomain.SetupInformation
-    #endif
-                , new LoggingNodeConfiguration(_host.LoggingService.IncludeEvaluationMetaprojects, _host.LoggingService.IncludeEvaluationProfile, _host.LoggingService.IncludeTaskInputs)
-            );
-
-            var nodeInfo = nodeManager.CreateNode(configuration, NodeAffinity.RarNode);
-
+            NodeInfo nodeInfo = BuildManager.DefaultBuildManager.CreateRarNode();
             return nodeInfo != null;
         }
 
@@ -1020,7 +1006,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         string IRarBuildEngine.GetRarPipeName()
         {
-            var parameters = _host.BuildParameters;
+            BuildParameters parameters = _host.BuildParameters;
             return CommunicationsUtilities.GetRarPipeName(parameters.EnableNodeReuse, parameters.LowPriority);
         }
 
@@ -1029,7 +1015,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         NamedPipeClientStream IRarBuildEngine.GetRarClientStream(string pipeName, int timeout)
         {
-            return NamedPipeUtil.GetClientStream(pipeName, timeout);
+            return NamedPipeUtil.TryConnectToProcess(pipeName, timeout, null);
         }
     }
 }

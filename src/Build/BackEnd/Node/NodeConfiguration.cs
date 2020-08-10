@@ -39,6 +39,7 @@ namespace Microsoft.Build.BackEnd
         /// The logging configuration for the node.
         /// </summary>
         private LoggingNodeConfiguration _loggingNodeConfiguration;
+        private bool _rarNode;
 
 #if FEATURE_APPDOMAIN
         /// <summary>
@@ -153,6 +154,11 @@ namespace Microsoft.Build.BackEnd
             { return _loggingNodeConfiguration; }
         }
 
+        /// <summary>
+        /// Indicates if the node is RAR node or not (executes only one task)
+        /// </summary>
+        public bool RarNode { get => _rarNode; set => _rarNode = value; }
+
 #region INodePacket Members
 
         /// <summary>
@@ -165,14 +171,9 @@ namespace Microsoft.Build.BackEnd
             { return NodePacketType.NodeConfiguration; }
         }
 
-        /// <summary>
-        /// Indicates if the node is RAR node or not (executes only one task)
-        /// </summary>
-        public bool RarNode { get; }
+#endregion
 
-        #endregion
-
-        #region INodePacketTranslatable Members
+#region INodePacketTranslatable Members
 
         /// <summary>
         /// Translates the packet to/from binary form.
@@ -187,6 +188,7 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDotNet(ref _appDomainSetup);
 #endif
             translator.Translate(ref _loggingNodeConfiguration);
+            translator.Translate(ref _rarNode);
         }
 
         /// <summary>

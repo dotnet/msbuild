@@ -2021,6 +2021,13 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        internal NodeInfo CreateRarNode()
+        {
+            NodeConfiguration configuration = GetNodeConfiguration();
+            configuration.RarNode = true;
+            return _nodeManager.CreateNode(configuration, NodeAffinity.OutOfProc);
+        }
+
         /// <summary>
         /// Completes a submission using the specified overall results.
         /// </summary>

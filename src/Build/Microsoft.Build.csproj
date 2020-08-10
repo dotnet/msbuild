@@ -157,7 +157,6 @@
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
-    <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcRar.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="BackEnd\Node\RarNode.cs" />
     <Compile Include="Utilities\NuGetFrameworkWrapper.cs" />

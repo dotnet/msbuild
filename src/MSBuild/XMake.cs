@@ -2651,7 +2651,8 @@ namespace Microsoft.Build.CommandLine
                         var node = new RarNode(); 
                         // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                         bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                        bool lowPriority = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority][0].Equals("true");
+                        string[] lowPriorityInput = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority];
+                        bool lowPriority = lowPriorityInput.Length > 0 ? lowPriorityInput[0].Equals("true") : false;
 
                         shutdownReason = node.Run(nodeReuse, lowPriority, out nodeException);
                     }

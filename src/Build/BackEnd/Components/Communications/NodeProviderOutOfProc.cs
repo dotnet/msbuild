@@ -18,9 +18,14 @@ namespace Microsoft.Build.BackEnd
     internal class NodeProviderOutOfProc : NodeProviderOutOfProcBase, INodeProvider
     {
         /// <summary>
-        /// A mapping of all the nodes managed by this provider.
+        /// A mapping of all normal nodes managed by this provider.
         /// </summary>
         private Dictionary<int, NodeContext> _nodeContexts;
+
+        /// <summary>
+        /// A mapping of all RAR nodes managed by this provider.
+        /// </summary>
+        private Dictionary<int, NodeContext> _rarNodeContexts;
 
         /// <summary>
         /// Constructor.
@@ -87,7 +92,7 @@ namespace Microsoft.Build.BackEnd
             // want to start up just a standard MSBuild out-of-proc node.
             // Note: We need to always pass /nodeReuse to ensure the value for /nodeReuse from msbuild.rsp
             // (next to msbuild.exe) is ignored.
-            string commandLineArgs = $"/nologo /nodemode:1 /nodeReuse:{ComponentHost.BuildParameters.EnableNodeReuse.ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()}";
+            string commandLineArgs = $"/nologo /nodemode:{(configuration.RarNode ? 3 : 1)} /nodeReuse:{ComponentHost.BuildParameters.EnableNodeReuse.ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()}";
 
             // Make it here.
             CommunicationsUtilities.Trace("Starting to acquire a new or existing node to establish node ID {0}...", nodeId);
@@ -97,7 +102,14 @@ namespace Microsoft.Build.BackEnd
 
             if (null != context)
             {
-                _nodeContexts[nodeId] = context;
+                if (configuration.RarNode)
+                {
+                    _rarNodeContexts[nodeId] = context;
+                }
+                else
+                {
+                    _nodeContexts[nodeId] = context;
+                }
 
                 // Start the asynchronous read.
                 context.BeginAsyncPacketRead();
@@ -118,9 +130,18 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         public void SendData(int nodeId, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrow(_nodeContexts.ContainsKey(nodeId), "Invalid node id specified: {0}.", nodeId);
-
-            SendData(_nodeContexts[nodeId], packet);
+            if (_nodeContexts.ContainsKey(nodeId))
+            {
+                SendData(_nodeContexts[nodeId], packet);
+            }
+            else if (_rarNodeContexts.ContainsKey(nodeId))
+            {
+                SendData(_rarNodeContexts[nodeId], packet);
+            }
+            else
+            {
+                ErrorUtilities.ThrowInternalError("Invalid node id specified: {0}.", nodeId);
+            }
         }
 
         /// <summary>
@@ -135,8 +156,9 @@ namespace Microsoft.Build.BackEnd
             lock (_nodeContexts)
             {
                 contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
+                contextsToShutDown.AddRange(_rarNodeContexts.Values);
             }
-
+           
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
         }
 
@@ -170,6 +192,7 @@ namespace Microsoft.Build.BackEnd
         {
             this.ComponentHost = host;
             _nodeContexts = new Dictionary<int, NodeContext>();
+            _rarNodeContexts = new Dictionary<int, NodeContext>();
         }
 
         /// <summary>
@@ -197,7 +220,10 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_nodeContexts)
             {
-                _nodeContexts.Remove(nodeId);
+                if (!_nodeContexts.Remove(nodeId))
+                {
+                    _rarNodeContexts.Remove(nodeId);
+                }
             }
         }
     }
