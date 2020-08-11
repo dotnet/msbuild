@@ -1,6 +1,6 @@
 <!--
 ***********************************************************************************************
-Microsoft.NET.WindowsSupportedTargetPlatforms.props
+Microsoft.NET.WindowsSdkSupportedTargetPlatforms.props
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
@@ -13,14 +13,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 <!-- This file contains a list of the windows target platform versions that are supported by this SDK for .NET. -->
 <Project>
     <ItemGroup>
-        <WindowsSupportedTargetPlatform Include="10.0.19041" />
-        <WindowsSupportedTargetPlatform Include="10.0.18362" />
-        <WindowsSupportedTargetPlatform Include="10.0.17763" />
-        <WindowsSupportedTargetPlatform Include="8.0" />
-        <WindowsSupportedTargetPlatform Include="7.0" />
+        <WindowsSdkSupportedTargetPlatform Include="10.0.19041" />
+        <WindowsSdkSupportedTargetPlatform Include="10.0.18362" />
+        <WindowsSdkSupportedTargetPlatform Include="10.0.17763" />
+        <WindowsSdkSupportedTargetPlatform Include="8.0" />
+        <WindowsSdkSupportedTargetPlatform Include="7.0" />
     </ItemGroup>
   
     <ItemGroup>
-        <SupportedTargetPlatform Condition="'$(TargetPlatformIdentifier)' == 'Windows'" Include="@(WindowsSupportedTargetPlatform)" />
+        <SdkSupportedTargetPlatform Condition="'$(TargetPlatformIdentifier)' == 'Windows'" Include="@(WindowsSdkSupportedTargetPlatform)" />
     </ItemGroup>
 </Project>

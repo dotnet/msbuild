@@ -16,7 +16,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ImportGroup Condition="'$(UsingNETSdkDefaults)' != 'true'">
     <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
     <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />
-    <Import Project="Microsoft.NET.WindowsSupportedTargetPlatforms.props" />
+    <Import Project="Microsoft.NET.SupportedTargetPlatforms.props" />
+    <Import Project="Microsoft.NET.WindowsSdkSupportedTargetPlatforms.props" />
   </ImportGroup>
 
   <!--
@@ -213,7 +214,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GeneratePlatformCompatibleDefineConstants"
           Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) " >
     <ItemGroup>
-      <_SupportedPlatformCompatibleVersions Include="@(SupportedTargetPlatform)" Condition=" %(Identity) != '' and $([MSBuild]::VersionLessThan(%(Identity), $(TargetPlatformVersion))) " />
+      <_SupportedPlatformCompatibleVersions Include="@(SdkSupportedTargetPlatform)" Condition=" %(Identity) != '' and $([MSBuild]::VersionLessThan(%(Identity), $(TargetPlatformVersion))) " />
       <_ImplicitDefineConstant Include="@(_SupportedPlatformCompatibleVersions->'$(TargetPlatformIdentifier.ToUpper())%(Identity)'->Replace('.', '_'))" />
     </ItemGroup>
   </Target>
