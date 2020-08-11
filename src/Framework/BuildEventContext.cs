@@ -246,7 +246,7 @@ namespace Microsoft.Build.Framework
                 return true;
             }
 
-            if (ReferenceEquals(obj, null))
+            if (obj is null)
             {
                 return false;
             }
@@ -273,7 +273,7 @@ namespace Microsoft.Build.Framework
                 return true;
             }
 
-            if (ReferenceEquals(left, null))
+            if (left is null)
             {
                 return false;
             }

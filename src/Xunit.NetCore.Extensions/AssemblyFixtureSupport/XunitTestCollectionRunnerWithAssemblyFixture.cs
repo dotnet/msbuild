@@ -24,13 +24,8 @@ namespace Xunit.NetCore.Extensions
                                                             CancellationTokenSource cancellationTokenSource)
             : base(testCollection, testCases, diagnosticMessageSink, messageBus, testCaseOrderer, aggregator, cancellationTokenSource)
         {
-            if (assemblyFixtureAttributes == null)
-            {
-                throw new ArgumentNullException(nameof(assemblyFixtureAttributes));
-            }
-
             this.assemblyFixtureMappings = assemblyFixtureMappings;
-            this.assemblyFixtureAttributes = assemblyFixtureAttributes;
+            this.assemblyFixtureAttributes = assemblyFixtureAttributes ?? throw new ArgumentNullException(nameof(assemblyFixtureAttributes));
             this.diagnosticMessageSink = diagnosticMessageSink;
         }
 

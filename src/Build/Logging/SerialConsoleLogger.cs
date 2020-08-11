@@ -543,7 +543,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 else
                 {
                     // null messages are ok -- treat as blank line
-                    nonNullMessage = (e.Message == null) ? String.Empty : e.Message;
+                    nonNullMessage = e.Message ?? String.Empty;
                 }
 
                 WriteLinePretty(nonNullMessage);

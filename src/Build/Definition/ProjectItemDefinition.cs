@@ -119,7 +119,7 @@ namespace Microsoft.Build.Evaluation
         [DebuggerStepThrough]
         public ProjectMetadata GetMetadata(string name)
         {
-            return Link != null ? Link.GetMetadata(name) : (_metadata == null) ? null : _metadata[name];
+            return Link != null ? Link.GetMetadata(name) : _metadata?[name];
         }
 
         /// <summary>

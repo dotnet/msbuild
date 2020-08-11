@@ -762,7 +762,7 @@ namespace Microsoft.Build.Graph
 
             public override bool Equals(object obj)
             {
-                return !ReferenceEquals(null, obj) && obj is ProjectGraphBuildRequest graphNodeWithTargets && Equals(graphNodeWithTargets);
+                return obj is object && obj is ProjectGraphBuildRequest graphNodeWithTargets && Equals(graphNodeWithTargets);
             }
 
             public override int GetHashCode()

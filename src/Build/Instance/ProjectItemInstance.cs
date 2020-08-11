@@ -708,7 +708,7 @@ namespace Microsoft.Build.Execution
             _taskItem = new TaskItem(
                                         includeEscaped,
                                         includeBeforeWildcardExpansionEscaped,
-                                        (directMetadata == null) ? null : directMetadata.DeepClone(), // copy on write!
+                                        directMetadata?.DeepClone(), // copy on write!
                                         inheritedItemDefinitions,
                                         _project.Directory,
                                         _project.IsImmutable,
@@ -1127,11 +1127,11 @@ namespace Microsoft.Build.Execution
             /// <returns>True if the items are equivalent, false otherwise.</returns>
             public static bool operator ==(TaskItem left, TaskItem right)
             {
-                if (!Object.ReferenceEquals(left, null))
+                if (left is object)
                 {
                     return left.Equals(right);
                 }
-                else if (!Object.ReferenceEquals(right, null))
+                else if (right is object)
                 {
                     return right.Equals(left);
                 }
@@ -1495,7 +1495,7 @@ namespace Microsoft.Build.Execution
             /// <returns>True if the items are equivalent, false otherwise.</returns>
             public bool Equals(TaskItem other)
             {
-                if (Object.ReferenceEquals(other, null))
+                if (other is null)
                 {
                     return false;
                 }
