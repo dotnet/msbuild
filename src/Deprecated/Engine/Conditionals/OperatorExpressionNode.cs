@@ -72,15 +72,9 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal override void ResetState()
         {
-            if (leftChild != null)
-            {
-                leftChild.ResetState();
-            }
+            leftChild?.ResetState();
 
-            if (rightChild != null)
-            {
-                rightChild.ResetState();
-            }
+            rightChild?.ResetState();
         }
 
         /// <summary>

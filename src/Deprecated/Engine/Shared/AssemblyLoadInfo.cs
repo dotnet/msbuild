@@ -115,7 +115,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 return false;
             }
 
-            return ((this.AssemblyName == otherAssemblyInfo.AssemblyName) && (this.AssemblyFile == otherAssemblyInfo.AssemblyFile));
+            return (this.AssemblyName == otherAssemblyInfo.AssemblyName) && (this.AssemblyFile == otherAssemblyInfo.AssemblyFile);
         }
 
         #endregion

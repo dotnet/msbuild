@@ -240,7 +240,7 @@ namespace Microsoft.Build.Tasks
             {
                 // Filter out all references tagged as RuntimeReferenceOnly 
                 IEnumerable<ITaskItem> filteredResolvedSDKReferences = ResolvedSDKReferences.Where(
-                    sdkReference => !(MetadataConversionUtilities.TryConvertItemMetadataToBool(sdkReference, "RuntimeReferenceOnly"))
+                    sdkReference => !MetadataConversionUtilities.TryConvertItemMetadataToBool(sdkReference, "RuntimeReferenceOnly")
                 );
 
                 PopulateReferencesForSDK(filteredResolvedSDKReferences);
@@ -367,7 +367,7 @@ namespace Microsoft.Build.Tasks
                 // If the SDK is manifest driven we want to grab them from the ApiContracts in the manifest if possible- will only happen if TargetSdk is identified
                 string[] manifestReferencePaths = GetReferencePathsFromManifest(resolvedSDKReference);
 
-                if (manifestReferencePaths != null && manifestReferencePaths.Length > 0)
+                if (manifestReferencePaths?.Length > 0)
                 {
                     // Found ApiContract references, use those
                     foreach (string manifestReferencePath in manifestReferencePaths)
@@ -481,7 +481,7 @@ namespace Microsoft.Build.Tasks
                             outputItem.SetMetadata(ItemMetadataNames.imageRuntime, referenceInfo.ImageRuntime);
                         }
 
-                        if (referenceInfo != null && referenceInfo.IsWinMD)
+                        if (referenceInfo?.IsWinMD == true)
                         {
                             outputItem.SetMetadata(ItemMetadataNames.winMDFile, "true");
 
@@ -1011,7 +1011,7 @@ namespace Microsoft.Build.Tasks
                 directoriesToHash.AddRange(referenceDirectories);
                 directoriesToHash.AddRange(redistDirectories);
 
-                if (sdkManifestReferences != null && sdkManifestReferences.Length > 0)
+                if (sdkManifestReferences?.Length > 0)
                 {
                     // Manifest driven- get the info from the known list
                     PopulateReferencesDictionaryFromManifestPaths(directoryToFileList, references, sdkManifestReferences);

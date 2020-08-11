@@ -157,7 +157,7 @@ namespace Microsoft.Build.BuildEngine
                 cachedTaskClasses[taskName] = taskClass;
             }
 
-            return (taskClass != null);
+            return taskClass != null;
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
 
-            return (registeredTasksFound.Count > 0);
+            return registeredTasksFound.Count > 0;
         }
 
         /// <summary>
@@ -365,9 +365,9 @@ namespace Microsoft.Build.BuildEngine
         /// <returns>true, if specified type is a task</returns>
         private static bool IsTaskClass(Type type, object unused)
         {
-            return (type.IsClass &&
+            return type.IsClass &&
                 !type.IsAbstract &&
-                (type.GetInterface("ITask") != null));
+                (type.GetInterface("ITask") != null);
         }
         #endregion
 

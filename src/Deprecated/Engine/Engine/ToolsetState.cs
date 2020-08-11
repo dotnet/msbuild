@@ -55,7 +55,7 @@ namespace Microsoft.Build.BuildEngine
             this.parentEngine = engine;
             this.loggingServices = engine.LoggingServices;
 
-            ErrorUtilities.VerifyThrowArgumentNull(toolset, "toolset");
+            ErrorUtilities.VerifyThrowArgumentNull(toolset, nameof(toolset));
             this.toolset = toolset;
 
             this.getFiles = getFiles;
@@ -145,7 +145,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="taskRegistry"></param>
         internal void SetTaskRegistry(ITaskRegistry taskRegistry)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskRegistry, "taskRegistry");
+            ErrorUtilities.VerifyThrowArgumentNull(taskRegistry, nameof(taskRegistry));
             defaultTasksRegistrationAttempted = true;
             defaultTaskRegistry = taskRegistry;
         }

@@ -294,7 +294,7 @@ namespace Microsoft.Build.CommandLine
 
             if (!initializeOnly)
             {
-                Console.WriteLine("\n{0}{1}{0}", new String('=', 41 - "Process".Length / 2), "Process");
+                Console.WriteLine("\n{0}{1}{0}", new String('=', 41 - ("Process".Length / 2)), "Process");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Peak Working Set", currentProcess.PeakWorkingSet64, "bytes");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Peak Paged Memory", currentProcess.PeakPagedMemorySize64, "bytes"); // Not very useful one
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Peak Virtual Memory", currentProcess.PeakVirtualMemorySize64, "bytes"); // Not very useful one
@@ -364,7 +364,7 @@ namespace Microsoft.Build.CommandLine
 
             if (!initializeOnly)
             {
-                Console.WriteLine("\n{0}{1}{0}", new String('=', 41 - category.CategoryName.Length / 2), category.CategoryName);
+                Console.WriteLine("\n{0}{1}{0}", new String('=', 41 - (category.CategoryName.Length / 2)), category.CategoryName);
             }
 
             foreach (PerformanceCounter counter in counters)
@@ -510,7 +510,7 @@ namespace Microsoft.Build.CommandLine
             }
 
 #if FEATURE_GET_COMMANDLINE
-            ErrorUtilities.VerifyThrowArgumentLength(commandLine, "commandLine");
+            ErrorUtilities.VerifyThrowArgumentLength(commandLine, nameof(commandLine));
 #endif
 
 #if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
@@ -1323,10 +1323,7 @@ namespace Microsoft.Build.CommandLine
             finally
             {
                 FileUtilities.ClearCacheDirectory();
-                if (projectCollection != null)
-                {
-                    projectCollection.Dispose();
-                }
+                projectCollection?.Dispose();
 
                 BuildManager.DefaultBuildManager.Dispose();
             }
@@ -2799,13 +2796,13 @@ namespace Microsoft.Build.CommandLine
                 if (extensionsToIgnoreDictionary.Count > 0)
                 {
                     // No point removing extensions if we have no project files
-                    if (potentialProjectFiles != null && potentialProjectFiles.Length > 0)
+                    if (potentialProjectFiles?.Length > 0)
                     {
                         potentialProjectFiles = RemoveFilesWithExtensionsToIgnore(potentialProjectFiles, extensionsToIgnoreDictionary);
                     }
 
                     // No point removing extensions if we have no solutions
-                    if (potentialSolutionFiles != null && potentialSolutionFiles.Length > 0)
+                    if (potentialSolutionFiles?.Length > 0)
                     {
                         potentialSolutionFiles = RemoveFilesWithExtensionsToIgnore(potentialSolutionFiles, extensionsToIgnoreDictionary);
                     }
@@ -2886,7 +2883,7 @@ namespace Microsoft.Build.CommandLine
             Dictionary<string, object> extensionsToIgnoreDictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
             // Go through each of the extensions to ignore and add them as a key in the dictionary
-            if (projectsExtensionsToIgnore != null && projectsExtensionsToIgnore.Length > 0)
+            if (projectsExtensionsToIgnore?.Length > 0)
             {
                 string extension = null;
 
@@ -2945,8 +2942,8 @@ namespace Microsoft.Build.CommandLine
                                 )
         {
             // If we got to this method we should have to possible projects or solutions and some extensions to ignore
-            ErrorUtilities.VerifyThrow(((potentialProjectOrSolutionFiles != null) && (potentialProjectOrSolutionFiles.Length > 0)), "There should be some potential project or solution files");
-            ErrorUtilities.VerifyThrow(((extensionsToIgnoreDictionary != null) && (extensionsToIgnoreDictionary.Count > 0)), "There should be some extensions to Ignore");
+            ErrorUtilities.VerifyThrow(potentialProjectOrSolutionFiles?.Length > 0, "There should be some potential project or solution files");
+            ErrorUtilities.VerifyThrow(extensionsToIgnoreDictionary?.Count > 0, "There should be some extensions to Ignore");
 
             List<string> filesToKeep = new List<string>();
             foreach (string projectOrSolutionFile in potentialProjectOrSolutionFiles)
@@ -3202,7 +3199,7 @@ namespace Microsoft.Build.CommandLine
                 ConsoleLogger logger = new ConsoleLogger(verbosity);
                 string consoleParameters = "SHOWPROJECTFILE=TRUE;";
 
-                if ((consoleLoggerParameters != null) && (consoleLoggerParameters.Length > 0))
+                if ((consoleLoggerParameters?.Length > 0))
                 {
                     consoleParameters = AggregateParameters(consoleParameters, consoleLoggerParameters);
                 }
@@ -3269,7 +3266,7 @@ namespace Microsoft.Build.CommandLine
             if (distributedFileLogger)
             {
                 string fileParameters = string.Empty;
-                if ((fileLoggerParameters != null) && (fileLoggerParameters.Length > 0))
+                if ((fileLoggerParameters?.Length > 0))
                 {
                     // Join the file logger parameters into one string seperated by semicolons
                     fileParameters = AggregateParameters(null, fileLoggerParameters);

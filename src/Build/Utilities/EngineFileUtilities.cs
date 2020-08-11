@@ -142,7 +142,7 @@ namespace Microsoft.Build.Internal
             IEnumerable<string> excludeSpecsEscaped = null
             )
         {
-            ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, "filespecEscaped");
+            ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, nameof(filespecEscaped));
 
             if (excludeSpecsEscaped == null)
             {

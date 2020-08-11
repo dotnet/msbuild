@@ -57,7 +57,7 @@ namespace Microsoft.Build.Tasks
 
                 // See if this is a valid culture name.
                 bool validCulture = false;
-                if ((cultureName != null) && (cultureName.Length > 1))
+                if ((cultureName?.Length > 1))
                 {
                     // ... strip the "." to make "en-US"
                     cultureName = cultureName.Substring(1);

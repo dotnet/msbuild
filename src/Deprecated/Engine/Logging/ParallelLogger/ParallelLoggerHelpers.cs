@@ -55,7 +55,7 @@ namespace Microsoft.Build.BuildEngine
                     // allocate a new key for it and save it away
                     if (!projectKey.ContainsKey(e.ProjectFile))
                     {
-                        projectIncrementKey += 1;
+                        projectIncrementKey++;
 
                         projectKey[e.ProjectFile] = projectIncrementKey;
                         projectIncrementKeyLocal = projectIncrementKey;
@@ -214,7 +214,7 @@ namespace Microsoft.Build.BuildEngine
         {
             ProjectStartedEventMinimumFields startedEvent = GetProjectStartedEvent(e);
             // Only remove the project from the event list if it is in the list, and no errors have occurred in the project
-            if (startedEvent != null && !startedEvent.ErrorInProject)
+            if (startedEvent?.ErrorInProject == false)
             {
                 projectStartedEvents.Remove(e);
             }
@@ -227,7 +227,7 @@ namespace Microsoft.Build.BuildEngine
         {
             TargetStartedEventMinimumFields startedEvent = GetTargetStartedEvent(e);
             // Only remove the project from the event list if it is in the list, and no errors have occurred in the project
-            if (startedEvent != null && !startedEvent.ErrorInTarget)
+            if (startedEvent?.ErrorInTarget == false)
             {
                 targetStartedEvents.Remove(e);
             }
@@ -259,7 +259,7 @@ namespace Microsoft.Build.BuildEngine
         public int GetHashCode(T x)
         {
             BuildEventContext context = x as BuildEventContext;
-            return (context.ProjectContextId + (context.NodeId << 24));
+            return context.ProjectContextId + (context.NodeId << 24);
         }
         #endregion
     }
@@ -289,7 +289,7 @@ namespace Microsoft.Build.BuildEngine
         public int GetHashCode(T x)
         {
             BuildEventContext context = x as BuildEventContext;
-            return (context.ProjectContextId + (context.NodeId << 24));
+            return context.ProjectContextId + (context.NodeId << 24);
         }
 
         #endregion
@@ -570,7 +570,7 @@ namespace Microsoft.Build.BuildEngine
 
         public override int GetHashCode()
         {
-            return (entryPointContext.GetHashCode() + targetName.GetHashCode());
+            return entryPointContext.GetHashCode() + targetName.GetHashCode();
         }
         #endregion
 
@@ -656,7 +656,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectFullKey compareKey = obj as ProjectFullKey;
             if (compareKey != null)
             {
-                return ((compareKey.projectKey == this.projectKey) && (compareKey.entryPointKey == this.entryPointKey));
+                return (compareKey.projectKey == this.projectKey) && (compareKey.entryPointKey == this.entryPointKey);
             }
             else
             {
@@ -666,7 +666,7 @@ namespace Microsoft.Build.BuildEngine
 
         public override int GetHashCode()
         {
-            return (this.projectKey + (this.entryPointKey << 16));
+            return this.projectKey + (this.entryPointKey << 16);
         }
         #endregion
     }

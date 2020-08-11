@@ -44,9 +44,9 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>true, if specified node can be a child of a task element</returns>
         internal static bool IsValidTaskChildNode(XmlNode childNode)
         {
-            return ((childNode.Name == output) ||
+            return (childNode.Name == output) ||
                     (childNode.NodeType == XmlNodeType.Comment) ||
-                    (childNode.NodeType == XmlNodeType.Whitespace));
+                    (childNode.NodeType == XmlNodeType.Whitespace);
         }
 
         internal static readonly char[] illegalTargetNameCharacters = new char[] { '$', '@', '(', ')', '%', '*', '?', '.' };

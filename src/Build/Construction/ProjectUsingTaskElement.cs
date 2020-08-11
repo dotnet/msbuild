@@ -214,7 +214,7 @@ namespace Microsoft.Build.Construction
         internal static ProjectUsingTaskElement CreateDisconnected(string taskName, string assemblyFile, string assemblyName, string runtime, string architecture, ProjectRootElement containingProject)
         {
             ErrorUtilities.VerifyThrowArgument(
-                (String.IsNullOrEmpty(assemblyFile) ^ String.IsNullOrEmpty(assemblyName)),
+                String.IsNullOrEmpty(assemblyFile) ^ String.IsNullOrEmpty(assemblyName),
                 "OM_EitherAttributeButNotBoth",
                 XMakeElements.usingTask,
                 XMakeAttributes.assemblyFile,

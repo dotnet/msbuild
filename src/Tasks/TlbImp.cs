@@ -303,18 +303,14 @@ namespace Microsoft.Build.Tasks
             private bool ValidateTransformFlags()
             {
                 // Any flag on its own is fine ...
-                switch (Transform)
+                return Transform switch
                 {
-                    case TlbImpTransformFlags.None:
-                        return true;
-                    case TlbImpTransformFlags.SerializableValueClasses:
-                        return true;
-                    case TlbImpTransformFlags.TransformDispRetVals:
-                        return true;
-                }
-
-                // ... But any and all other combinations of flags are disallowed.
-                return false;
+                    TlbImpTransformFlags.None => true,
+                    TlbImpTransformFlags.SerializableValueClasses => true,
+                    TlbImpTransformFlags.TransformDispRetVals => true,
+                    // ... But any and all other combinations of flags are disallowed.
+                    _ => false,
+                };
             }
 
             /// <summary>
@@ -325,17 +321,13 @@ namespace Microsoft.Build.Tasks
             /// <returns>A string that can be passed to /transform: on the command line</returns>
             private static string ConvertTransformFlagsToCommandLineCommand(TlbImpTransformFlags flags)
             {
-                switch (flags)
+                return flags switch
                 {
-                    case TlbImpTransformFlags.None:
-                        return null;
-                    case TlbImpTransformFlags.SerializableValueClasses:
-                        return "SerializableValueClasses";
-                    case TlbImpTransformFlags.TransformDispRetVals:
-                        return "DispRet";
-                }
-
-                return null;
+                    TlbImpTransformFlags.None => null,
+                    TlbImpTransformFlags.SerializableValueClasses => "SerializableValueClasses",
+                    TlbImpTransformFlags.TransformDispRetVals => "DispRet",
+                    _ => null,
+                };
             }
 
             #endregion // ToolTask Members

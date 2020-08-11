@@ -60,7 +60,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>The MSBuild F1-help keyword string.</returns>
         private static string GetHelpKeyword(string resourceName)
         {
-            return ("MSBuild." + resourceName);
+            return "MSBuild." + resourceName;
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             string formatted = unformatted;
 
             // NOTE: String.Format() does not allow a null arguments array
-            if ((args != null) && (args.Length > 0))
+            if ((args?.Length > 0))
             {
 #if DEBUG
 

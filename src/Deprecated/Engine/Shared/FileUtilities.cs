@@ -576,7 +576,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>true, if slash</returns>
         internal static bool IsSlash(char c)
         {
-            return ((c == Path.DirectorySeparatorChar) || (c == Path.AltDirectorySeparatorChar));
+            return (c == Path.DirectorySeparatorChar) || (c == Path.AltDirectorySeparatorChar);
         }
 
         /// <summary>
@@ -774,7 +774,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// </summary>
         internal static bool IsVCProjFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".vcproj", StringComparison.OrdinalIgnoreCase));
+            return String.Equals(Path.GetExtension(filename), ".vcproj", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -793,8 +793,8 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>relative path (can be the full path)</returns>
         internal static string MakeRelative(string basePath, string path)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(basePath, "basePath");
-            ErrorUtilities.VerifyThrowArgumentLength(path, "path");
+            ErrorUtilities.VerifyThrowArgumentNull(basePath, nameof(basePath));
+            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
 
             if (basePath.Length == 0)
             {
@@ -826,7 +826,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>uri object</returns>
         private static Uri CreateUriFromPath(string path)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, "path");
+            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
 
             Uri pathUri = null;
 

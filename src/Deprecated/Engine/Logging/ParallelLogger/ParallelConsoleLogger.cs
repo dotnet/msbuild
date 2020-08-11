@@ -1112,7 +1112,7 @@ namespace Microsoft.Build.BuildEngine
         {
             bool prefixAlreadyWritten = true;
             ProjectFullKey currentProjectFullKey = GetFullProjectKey(e.BuildEventContext);
-            if (!(lastProjectFullKey.Equals(currentProjectFullKey)))
+            if (!lastProjectFullKey.Equals(currentProjectFullKey))
             {
                 // Write the prefix information about the target for the message
                 WriteLinePrefix(context, timeStamp, false);
@@ -1174,7 +1174,7 @@ namespace Microsoft.Build.BuildEngine
                         {
                             // Calculate how many chars will fit on the console buffer
                             amountToCopy = (messageLength - index) < (bufferWidthMinusNewLine - adjustedPrefixWidth) ? (messageLength - index) : (bufferWidthMinusNewLine - adjustedPrefixWidth);
-                            WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), (prefixAlreadyWritten && index == 0 && i == 0), adjustedPrefixWidth);
+                            WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), prefixAlreadyWritten && index == 0 && i == 0, adjustedPrefixWidth);
                             index += amountToCopy;
                         }
                     }
@@ -1217,7 +1217,7 @@ namespace Microsoft.Build.BuildEngine
             TargetStartedEventMinimumFields targetStartedEvent = buildEventManager.GetTargetStartedEvent(e);
 
             //Make sure we have not shown the event before
-            if (targetStartedEvent != null && !targetStartedEvent.ShowTargetFinishedEvent)
+            if (targetStartedEvent?.ShowTargetFinishedEvent == false)
             {
                 //Since the target started event has been shows, the target finished event should also be shown
                 targetStartedEvent.ShowTargetFinishedEvent = true;
@@ -1270,7 +1270,7 @@ namespace Microsoft.Build.BuildEngine
                 ProjectStartedEventMinimumFields projectStartedEvent = buildEventManager.GetProjectStartedEvent(e);
 
                 // Make sure the project started event has not been show yet
-                if (projectStartedEvent != null && !projectStartedEvent.ShowProjectFinishedEvent)
+                if (projectStartedEvent?.ShowProjectFinishedEvent == false)
                 {
                     projectStartedEvent.ShowProjectFinishedEvent = true;
 
@@ -1548,7 +1548,7 @@ namespace Microsoft.Build.BuildEngine
                                "{0,3}", calls)
                    );
 
-                if (internalPerformanceCounters != null && internalPerformanceCounters.Count > 0)
+                if (internalPerformanceCounters?.Count > 0)
                 {
                     // For each of the entry points in the project print out the performance numbers for them
                     foreach (MPPerformanceCounter counter in internalPerformanceCounters.Values)

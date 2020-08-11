@@ -611,7 +611,7 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TLog", Justification = "Has now shipped as public API; plus it's unclear whether 'Tlog' or 'TLog' is the preferred casing")]
         public void SaveTlog(DependencyFilter includeInTLog)
         {
-            if (TlogFiles != null && TlogFiles.Length > 0)
+            if (TlogFiles?.Length > 0)
             {
                 string tLogRootingMarker = DependencyTableCache.FormatNormalizedTlogRootingMarker(TlogFiles);
 
@@ -868,7 +868,7 @@ namespace Microsoft.Build.Utilities
 
                 // In addition to temporary file removal, an optional set of files to remove may be been supplied
 
-                if (trackedFilesToRemoveFromTLogs != null && trackedFilesToRemoveFromTLogs.Length > 0)
+                if (trackedFilesToRemoveFromTLogs?.Length > 0)
                 {
                     IDictionary<string, ITaskItem> trackedFilesToRemove = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
 

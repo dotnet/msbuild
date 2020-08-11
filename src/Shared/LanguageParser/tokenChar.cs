@@ -168,7 +168,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         {
             if
             (
-                (c >= '0' && c <= '7')
+                c >= '0' && c <= '7'
             )
             {
                 return true;

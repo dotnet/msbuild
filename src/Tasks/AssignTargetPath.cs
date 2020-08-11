@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks
                     (String.Compare(
                         fullRootPath, 0,
                         currentDirectory, 0,
-                        (fullRootPath.Length - 1) /* don't compare trailing slash */,
+                        fullRootPath.Length - 1 /* don't compare trailing slash */,
                         StringComparison.OrdinalIgnoreCase) == 0);
 
                 for (int i = 0; i < Files.Length; ++i)

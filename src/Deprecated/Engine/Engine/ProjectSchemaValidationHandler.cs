@@ -113,7 +113,7 @@ namespace Microsoft.Build.BuildEngine
             XmlReaderSettings validatorSettings = new XmlReaderSettings();
             validatorSettings.ValidationType = ValidationType.Schema;
             validatorSettings.XmlResolver = null;
-            validatorSettings.ValidationEventHandler += new ValidationEventHandler(this.OnSchemaValidationError);
+            validatorSettings.ValidationEventHandler += this.OnSchemaValidationError;
             
             if (string.IsNullOrEmpty(schemaFile))
             {

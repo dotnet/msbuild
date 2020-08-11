@@ -63,7 +63,7 @@ namespace Microsoft.Build.CommandLine
             base(info, context)
 
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, "info");
+            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
 
             invalidSwitch = info.GetString("invalidSwitch");
         }
@@ -152,7 +152,7 @@ namespace Microsoft.Build.CommandLine
             else
             {
                 // the exception message can contain a format item i.e. "{0}" to hold the given exception's message
-                errorMessage = ResourceUtilities.FormatString(errorMessage, ((e == null) ? String.Empty : e.Message));
+                errorMessage = ResourceUtilities.FormatString(errorMessage, (e == null) ? String.Empty : e.Message);
             }
 
             InitializationException.Throw(errorMessage, invalidSwitch);

@@ -137,7 +137,7 @@ namespace Microsoft.Build.BuildEngine
         ) : 
             base(message)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(message, "message");
+            ErrorUtilities.VerifyThrowArgumentLength(message, nameof(message));
 
             if (xmlNode != null)
             {
@@ -178,8 +178,8 @@ namespace Microsoft.Build.BuildEngine
         ) : 
             base(message)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
-            ErrorUtilities.VerifyThrowArgumentLength(message, "message");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
+            ErrorUtilities.VerifyThrowArgumentLength(message, nameof(message));
 
             this.projectFile = projectFile;
             this.lineNumber = lineNumber;

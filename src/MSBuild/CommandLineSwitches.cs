@@ -307,7 +307,7 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-            return (parameterlessSwitch != ParameterlessSwitch.Invalid);
+            return parameterlessSwitch != ParameterlessSwitch.Invalid;
         }
 
         /// <summary>
@@ -368,7 +368,7 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-            return (parameterizedSwitch != ParameterizedSwitch.Invalid);
+            return parameterizedSwitch != ParameterizedSwitch.Invalid;
         }
 
         /// <summary>
@@ -558,7 +558,7 @@ namespace Microsoft.Build.CommandLine
         /// <returns>true, if switch has been seen before</returns>
         internal bool IsParameterlessSwitchSet(ParameterlessSwitch parameterlessSwitch)
         {
-            return (_parameterlessSwitches[(int)parameterlessSwitch].commandLineArg != null);
+            return _parameterlessSwitches[(int)parameterlessSwitch].commandLineArg != null;
         }
 
         /// <summary>
@@ -573,7 +573,7 @@ namespace Microsoft.Build.CommandLine
         {
             get
             {
-                return (_parameterlessSwitches[(int)parameterlessSwitch].commandLineArg != null);
+                return _parameterlessSwitches[(int)parameterlessSwitch].commandLineArg != null;
             }
         }
 
@@ -595,7 +595,7 @@ namespace Microsoft.Build.CommandLine
         /// <returns>true, if switch has been seen before</returns>
         internal bool IsParameterizedSwitchSet(ParameterizedSwitch parameterizedSwitch)
         {
-            return (_parameterizedSwitches[(int)parameterizedSwitch].commandLineArg != null);
+            return _parameterizedSwitches[(int)parameterizedSwitch].commandLineArg != null;
         }
 
         // used to indicate a null parameter list for a switch
@@ -790,7 +790,7 @@ namespace Microsoft.Build.CommandLine
         /// <returns>true, if any errors were found</returns>
         internal bool HaveErrors()
         {
-            return (_errorMessage != null);
+            return _errorMessage != null;
         }
 
         /// <summary>

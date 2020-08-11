@@ -131,7 +131,7 @@ namespace Microsoft.Build.BackEnd
 #endif
             )
         {
-            ErrorUtilities.VerifyThrowInternalNull(taskType, "taskType");
+            ErrorUtilities.VerifyThrowInternalNull(taskType, nameof(taskType));
 
             _taskLocation = taskLocation;
             _taskLoggingContext = taskLoggingContext;

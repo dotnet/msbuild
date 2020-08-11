@@ -229,7 +229,7 @@ namespace Microsoft.Build.BuildEngine
 
         public override int GetHashCode()
         {
-            return (handleId + (requestId << 24));
+            return handleId + (requestId << 24);
         }
         #endregion
 

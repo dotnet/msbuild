@@ -451,8 +451,8 @@ namespace Microsoft.Build.UnitTests
                 string destinationContent2 = File.ReadAllText(destination2);
                 Assert.Equal("This is a source file2.", destinationContent2);
 
-                Assert.NotEqual(FileAttributes.ReadOnly, (File.GetAttributes(destination1) & FileAttributes.ReadOnly));
-                Assert.NotEqual(FileAttributes.ReadOnly, (File.GetAttributes(destination2) & FileAttributes.ReadOnly));
+                Assert.NotEqual(FileAttributes.ReadOnly, File.GetAttributes(destination1) & FileAttributes.ReadOnly);
+                Assert.NotEqual(FileAttributes.ReadOnly, File.GetAttributes(destination2) & FileAttributes.ReadOnly);
 
                 ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
             }

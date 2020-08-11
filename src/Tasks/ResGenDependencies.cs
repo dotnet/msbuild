@@ -132,7 +132,7 @@ namespace Microsoft.Build.Tasks
 
             // The file is in our cache.  Make sure it's up to date.  If not, discard
             // this entry from the cache and rebuild all the state at a later point.
-            if (retVal != null && retVal.HasFileChanged())
+            if (retVal?.HasFileChanged() == true)
             {
                 portableLibraries.RemoveDependencyFile(libraryPath);
                 _isDirty = true;

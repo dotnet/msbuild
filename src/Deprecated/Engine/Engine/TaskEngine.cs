@@ -190,7 +190,7 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
 
-            return (TaskClass != null);
+            return TaskClass != null;
         }
 
         /// <summary>
@@ -293,15 +293,9 @@ namespace Microsoft.Build.BuildEngine
             finally
             {
                 // Remove the AssemblyResolve handler in the default AppDomain, we are done with the task.
-                if (resolver != null)
-                {
-                    resolver.RemoveHandler();
-                }
+                resolver?.RemoveHandler();
 
-                if (engineProxy != null)
-                {
-                    engineProxy.MarkAsInActive();
-                }
+                engineProxy?.MarkAsInActive();
 
                 // Now all task batches are done, apply all item adds to the outer 
                 // target batch; we do this even if the task wasn't found (in that case,
@@ -1129,7 +1123,6 @@ namespace Microsoft.Build.BuildEngine
                 if (taskOutputSpecification.IsItemVector)
                 {
                     // This is an output item.
-
                     ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(itemName), "Need item type.");
 
                     // Expand only with properties first, so that expressions like Include="@(foo)" will transfer the metadata of the "foo" items as well, not just their item specs.
@@ -1163,7 +1156,6 @@ namespace Microsoft.Build.BuildEngine
                 else
                 {
                     // This is an output property.
-
                     Debug.Assert(taskOutputSpecification.IsProperty);
                     ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(propertyName), "Need property name.");
 
@@ -1492,7 +1484,7 @@ namespace Microsoft.Build.BuildEngine
                 // to avoid project authors having to add Conditions on all their tasks to avoid calling them
                 // when a particular item list is empty.  This way, we just call the task with an empty list,
                 // the task will loop over an empty list, and return quickly.
-                if ((finalTaskInputs.Count > 0) || (isRequired))
+                if ((finalTaskInputs.Count > 0) || isRequired)
                 {
                     // Send the array into the task parameter.
                     success = SetTaskParameter(task, parameter, finalTaskInputs.ToArray(parameterType.GetElementType()));

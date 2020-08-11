@@ -517,11 +517,11 @@ namespace Microsoft.Build.BuildEngine
             (
             )
         {
-            if (this.ParentTarget != null)
-            {
+               
+            
                 // This is a change to the contents of the target.
-                this.ParentTarget.MarkTargetAsDirty();
-            }
+                this.ParentTarget?.MarkTargetAsDirty();
+            
         }
 
         #endregion

@@ -387,7 +387,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 propertyToAdd.Arguments.Add(arg);
             }
 
-            if (argumentDependencyLookup != null && !argumentDependencyLookup.ContainsKey(propertyToAdd.Name))
+            if (argumentDependencyLookup?.ContainsKey(propertyToAdd.Name) == false)
             {
                 argumentDependencyLookup.Add(propertyToAdd.Name, propertyToAdd);
             }
