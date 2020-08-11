@@ -547,10 +547,7 @@ namespace Microsoft.Build.BuildEngine
                         // In the project finished message the targets which were built and the project which was built
                         // should be shown
                         string targets = startedEvent.TargetNames;
-
-                        string projectName = string.Empty;
-
-                        projectName = startedEvent.ProjectFile == null ? string.Empty : startedEvent.ProjectFile;
+                        string projectName = startedEvent.ProjectFile == null ? string.Empty : startedEvent.ProjectFile;
                         // Show which targets were built as part of this project
                         if (string.IsNullOrEmpty(targets))
                         {
@@ -966,7 +963,7 @@ namespace Microsoft.Build.BuildEngine
                        && IsVerbosityAtLeast(LoggerVerbosity.Normal)
                     )
                 {
-                    List<BuildMessageEventArgs> messageList = null;
+                    List<BuildMessageEventArgs> messageList;
                     if (deferredMessages.ContainsKey(e.BuildEventContext))
                     {
                         messageList = deferredMessages[e.BuildEventContext];
@@ -1233,7 +1230,7 @@ namespace Microsoft.Build.BuildEngine
                 ErrorUtilities.VerifyThrow(startedEvent != null, "Project Started should not be null in deferred target started");
                 string currentProjectFile = startedEvent.ProjectFile == null ? string.Empty : startedEvent.ProjectFile;
 
-                string targetName = null;
+                string targetName;
                 if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic) || showEventId)
                 {
                    targetName = ResourceUtilities.FormatResourceString("TargetMessageWithId", targetStartedEvent.TargetName, targetStartedEvent.ProjectBuildEventContext.TargetId);
@@ -1292,7 +1289,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         WriteLinePrefix(projectStartedEvent.FullProjectKey, projectStartedEvent.TimeStamp, false);
                         setColor(ConsoleColor.Cyan);
-                        string message = string.Empty;
+                        string message;
                         if (string.IsNullOrEmpty(targetNames))
                         {
                             message = ResourceUtilities.FormatResourceString("ProjectStartedTopLevelProjectWithDefaultTargets", current, currentProjectNodeId);
@@ -1371,8 +1368,7 @@ namespace Microsoft.Build.BuildEngine
                 context = LogFormatter.FormatLogTimeStamp(eventTimeStamp);
             }
 
-            string prefixString = string.Empty;
-
+            string prefixString;
             if (!isMessagePrefix || IsVerbosityAtLeast(LoggerVerbosity.Detailed))
             {
                 prefixString = ResourceUtilities.FormatResourceString("BuildEventContext", context, key) + ">";

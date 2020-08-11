@@ -1093,7 +1093,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (activeTargets.ContainsKey(unescapedBeforeTarget))
                 {
-                    List<TargetSpecification> beforeTargetsForTarget = null;
+                    List<TargetSpecification> beforeTargetsForTarget;
                     if (!targetsWhichRunBeforeByTarget.TryGetValue(unescapedBeforeTarget, out beforeTargetsForTarget))
                     {
                         beforeTargetsForTarget = new List<TargetSpecification>();
@@ -1116,7 +1116,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (activeTargets.ContainsKey(unescapedAfterTarget))
                 {
-                    List<TargetSpecification> afterTargetsForTarget = null;
+                    List<TargetSpecification> afterTargetsForTarget;
                     if (!targetsWhichRunAfterByTarget.TryGetValue(unescapedAfterTarget, out afterTargetsForTarget))
                     {
                         afterTargetsForTarget = new List<TargetSpecification>();
@@ -1251,7 +1251,6 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                SubToolset subToolset = null;
 
                 // Make the subtoolset version itself available as a property -- but only if it's not already set. 
                 // Because some people may be depending on this value even if there isn't a matching sub-toolset,
@@ -1262,6 +1261,7 @@ namespace Microsoft.Build.Evaluation
                     toolsetProperties.Add(subToolsetVersionProperty);
                 }
 
+                SubToolset subToolset;
                 if (_data.Toolset.SubToolsets.TryGetValue(_data.SubToolsetVersion, out subToolset))
                 {
                     foreach (ProjectPropertyInstance subToolsetProperty in subToolset.Properties.Values)
@@ -1343,7 +1343,7 @@ namespace Microsoft.Build.Evaluation
                 if (evaluatedValue.Length > 0 && _expander.WarnForUninitializedProperties)
                 {
                     // Is the property we are currently setting in the list of properties which have been used but not initialized
-                    IElementLocation elementWhichUsedProperty = null;
+                    IElementLocation elementWhichUsedProperty;
                     bool isPropertyInList = _expander.UsedUninitializedProperties.Properties.TryGetValue(propertyElement.Name, out elementWhichUsedProperty);
 
                     if (isPropertyInList)

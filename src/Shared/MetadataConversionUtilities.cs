@@ -63,7 +63,7 @@ namespace Microsoft.Build.Shared
                 string itemMetadataName
             )
         {
-            bool metadataFound = false;
+            bool metadataFound;
             return TryConvertItemMetadataToBool(item, itemMetadataName, out metadataFound);
         }
     }

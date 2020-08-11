@@ -3414,7 +3414,7 @@ namespace Microsoft.Build.BuildEngine
                 recalculateAction = false;
 
                 // Check if there is a dependent target
-                Target currentTarget = null;
+                Target currentTarget;
                 if (buildContext.NameOfBlockingTarget != null)
                 {
                     currentTarget = GetTargetForName(buildContext.NameOfBlockingTarget);
@@ -3477,7 +3477,7 @@ namespace Microsoft.Build.BuildEngine
 
         private void ExecuteNextActionForProjectContext(ProjectBuildState buildContext, bool initialCall)
         {
-            Target nextTarget = null;
+            Target nextTarget;
             if (buildContext.NameOfBlockingTarget != null)
             {
                 // Notify the next target in depends on/on error stack

@@ -1959,12 +1959,10 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "mono-osx-failing")]
         public void GetPathToReferenceAssembliesDefaultLocation45()
         {
-            FrameworkNameVersioning frameworkName = null;
-            IList<string> directories = null;
             if (ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45) != null)
             {
-                frameworkName = new FrameworkNameVersioning(".NETFramework", new Version("4.5"));
-                directories = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName);
+                FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(".NETFramework", new Version("4.5"));
+                IList<string> directories = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName);
                 directories.Count.ShouldBe(1); // "Expected the method to return one path."
 
                 string referenceAssemblyPath = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45);
@@ -2780,7 +2778,7 @@ namespace Microsoft.Build.UnitTests
 
         private static string CreateNewFrameworkAndGetAssembliesPath(TestEnvironment env, string frameworkName, string frameworkVersion, string rootDir)
         {
-            string frameworkListXml = null;
+            string frameworkListXml;
             if (NativeMethodsShared.IsMono)
             {
                 // Mono uses an extra attribute to point to the location of the corresponding

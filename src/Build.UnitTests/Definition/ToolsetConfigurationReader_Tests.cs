@@ -572,8 +572,8 @@ namespace Microsoft.Build.UnitTests.Definition
 
             var reader = GetStandardConfigurationReader();
             Dictionary<string, Toolset> toolsets = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             reader.ReadToolsets(toolsets, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Dictionary<string, ProjectImportPathMatch> pathsTable = toolsets["2.0"].ImportPropertySearchPathsTable;

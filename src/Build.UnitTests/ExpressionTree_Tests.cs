@@ -344,15 +344,12 @@ namespace Microsoft.Build.UnitTests
                                        ElementLocation.EmptyLocation,
                                        FileSystems.Default
                                    );
-
-            List<string> properties = null;
-
             AssertParseEvaluate(p, "'0' == '1'", expander, false, state);
             Assert.Empty(conditionedProperties);
 
             AssertParseEvaluate(p, "$(foo) == foo", expander, false, state);
             Assert.Single(conditionedProperties);
-            properties = conditionedProperties["foo"];
+            List<string> properties = conditionedProperties["foo"];
             Assert.Single(properties);
 
             AssertParseEvaluate(p, "'$(foo)' != 'bar'", expander, true, state);

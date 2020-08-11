@@ -698,8 +698,6 @@ namespace Microsoft.Build.BuildEngine
         /// <returns>true, if successful</returns>
         internal bool ExecuteOneTask(XmlElement taskNode, ITaskHost hostObject)
         {
-            bool taskExecutedSuccessfully = false;
-
             string projectFileOfTaskNode = XmlUtilities.GetXmlNodeFile(taskNode, parentProject.FullFileName);
             BuildEventContext targetBuildEventContext = new BuildEventContext
                                 (
@@ -747,7 +745,6 @@ namespace Microsoft.Build.BuildEngine
             string attributeValue
             )
         {
-            XmlAttribute updatedAttribute = null;
             // If this Target object is not actually represented by a 
             // <Target> element in the parentProject.file, then do not allow
             // the caller to set the condition.
@@ -756,7 +753,7 @@ namespace Microsoft.Build.BuildEngine
             // If this item was imported from another parentProject. we don't allow modifying it.
             error.VerifyThrowInvalidOperation(!this.importedFromAnotherProject, "CannotModifyImportedProjects");
 
-            updatedAttribute = ProjectXmlUtilities.SetOrRemoveAttribute(this.targetElement, attributeName, attributeValue);
+            XmlAttribute updatedAttribute = ProjectXmlUtilities.SetOrRemoveAttribute(targetElement, attributeName, attributeValue);
 
             // Mark the project dirty after an attribute has been updated
             this.MarkTargetAsDirty();

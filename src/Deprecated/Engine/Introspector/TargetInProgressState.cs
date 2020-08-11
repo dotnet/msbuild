@@ -59,7 +59,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void ProcessBuildContext(EngineCallback engineCallback, ProjectBuildState buildContext, Target target)
         {
-            BuildRequest parentRequest = null;
+            BuildRequest parentRequest;
             TargetIdWrapper parentName = FindParentTarget(engineCallback, buildContext, target, out parentRequest);
 
             if (parentName != null)
@@ -266,7 +266,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectBuildState projectBuildState
         )
         {
-            BuildRequest parentRequest = null;
+            BuildRequest parentRequest;
             TargetInProgessState.TargetIdWrapper parentName =
                 FindParentTarget(engineCallback, projectBuildState, target, out parentRequest);
 

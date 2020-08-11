@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests
          */
         private static string[] Parse(string cl)
         {
-            int emptySplits = 0;
+            int emptySplits;
             string[] pieces = (string[])QuotingUtilities.SplitUnquoted(cl, int.MaxValue, false, true, out emptySplits, ' ', '\n').ToArray(typeof(string));
             return pieces;
         }

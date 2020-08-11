@@ -58,7 +58,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal bool GenerateWrapper(out ComReferenceWrapperInfo wrapperInfo)
         {
-            wrapperInfo = null;
 
             // The tool gets the public key for itself, but we get it here anyway to
             // give nice messages in errors cases.

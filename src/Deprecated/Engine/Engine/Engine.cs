@@ -452,7 +452,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 LocalNodeProvider localNodeProvider = new LocalNodeProvider();
 
-                string configuration = string.Empty;
+                string configuration;
                 if (localNodeProviderParameters.EndsWith(";", StringComparison.OrdinalIgnoreCase))
                 {
                     configuration = localNodeProviderParameters + "maxcpucount=" + Convert.ToString(numberOfCpus, CultureInfo.InvariantCulture);
@@ -581,8 +581,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 if (engineVersion == null)
                 {
-                    string msbuildPath = null;
-
+                    string msbuildPath;
                     try
                     {
                         // Get the file version from the currently executing assembly.
@@ -1634,7 +1633,7 @@ namespace Microsoft.Build.BuildEngine
                     (terminatingBuildRequest == null || !terminatingBuildRequest.BuildCompleted)
                   )
             {
-                int eventType = 0;
+                int eventType;
 
                 // See if we have anything to do without waiting on the handles which is expensive 
                 // for kernel mode objects.

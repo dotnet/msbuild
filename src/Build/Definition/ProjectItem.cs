@@ -321,7 +321,7 @@ namespace Microsoft.Build.Evaluation
                 RetrievableEntryHashSet<ProjectMetadata> allMetadata = new RetrievableEntryHashSet<ProjectMetadata>(MSBuildNameIgnoreCaseComparer.Default);
 
                 // Lowest priority: regular item definitions
-                ProjectItemDefinition itemDefinition = null;
+                ProjectItemDefinition itemDefinition;
                 if (_project.ItemDefinitions.TryGetValue(ItemType, out itemDefinition))
                 {
                     foreach (ProjectMetadata metadataFromDefinition in itemDefinition.Metadata)

@@ -395,10 +395,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var expectedPath2 = "Second/Path/To/Return/From/Resolver";
 
             var sdk = new SdkReference("foo", "1.0", null);
-
-            Dictionary<string, string> propertiesToAdd = null;
-            Dictionary<string, SdkResultItem> itemsToAdd = null;
-            
+            Dictionary<string, string> propertiesToAdd;
+            Dictionary<string, SdkResultItem> itemsToAdd;
             CreateMockSdkResultPropertiesAndItems(out propertiesToAdd, out itemsToAdd);
 
             var resolver = new SdkUtilities.ConfigurableMockSdkResolver(

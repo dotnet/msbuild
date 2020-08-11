@@ -764,11 +764,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal string GenerateSubToolsetVersion(PropertyDictionary<ProjectPropertyInstance> overrideGlobalProperties)
         {
-            ProjectPropertyInstance subToolsetProperty = null;
-            string visualStudioVersion = null;
             if (overrideGlobalProperties != null)
             {
-                subToolsetProperty = overrideGlobalProperties[Constants.SubToolsetVersionPropertyName];
+                ProjectPropertyInstance subToolsetProperty = overrideGlobalProperties[Constants.SubToolsetVersionPropertyName];
 
                 if (subToolsetProperty != null)
                 {
@@ -850,7 +848,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal string GenerateSubToolsetVersionUsingVisualStudioVersion(IDictionary<string, string> overrideGlobalProperties, int visualStudioVersionFromSolution)
         {
-            string visualStudioVersion = null;
+            string visualStudioVersion;
             if (overrideGlobalProperties != null && overrideGlobalProperties.TryGetValue(Constants.SubToolsetVersionPropertyName, out visualStudioVersion))
             {
                 return visualStudioVersion;

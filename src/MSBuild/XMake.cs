@@ -1775,7 +1775,6 @@ namespace Microsoft.Build.CommandLine
             int switchParameterIndicator
         )
         {
-            string switchParameters = null;
 
             // find the parameter indicator again using the quoted arg
             // NOTE: since the parameter indicator cannot be part of a switch name, quoting around it is not relevant, because a
@@ -1792,6 +1791,7 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(doubleQuotesRemovedFromArg >= doubleQuotesRemovedFromSwitchIndicatorAndName,
                 "The name portion of the switch cannot contain more quoting than the arg itself.");
 
+            string switchParameters;
             // if quoting in the name portion of the switch was terminated
             if ((doubleQuotesRemovedFromSwitchIndicatorAndName % 2) == 0)
             {

@@ -263,9 +263,8 @@ namespace Microsoft.Build.BuildEngine.Shared
 
             string[] parts = path.Split(directorySeparatorCharacters);
             string pathRoot;
-            int startingElement=0;
-
             bool isUnc = path.StartsWith(directorySeparator + directorySeparator, StringComparison.Ordinal);
+            int startingElement;
             if (isUnc)
             {
                 pathRoot = directorySeparator + directorySeparator;
@@ -278,7 +277,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             else
             {
                 // Is it relative?
-                if (path.Length>2 && path[1] == ':')
+                if (path.Length > 2 && path[1] == ':')
                 {
                     // Not relative
                     pathRoot = parts[0] + directorySeparator;

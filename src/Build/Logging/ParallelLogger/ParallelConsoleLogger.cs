@@ -602,10 +602,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         // In the project finished message the targets which were built and the project which was built
                         // should be shown
                         string targets = startedEvent.TargetNames;
-
-                        string projectName = string.Empty;
-
-                        projectName = startedEvent.ProjectFile == null ? string.Empty : startedEvent.ProjectFile;
+                        string projectName = startedEvent.ProjectFile == null ? string.Empty : startedEvent.ProjectFile;
                         // Show which targets were built as part of this project
                         if (string.IsNullOrEmpty(targets))
                         {
@@ -1103,7 +1100,7 @@ namespace Microsoft.Build.BackEnd.Logging
                        && IsVerbosityAtLeast(LoggerVerbosity.Normal)
                     )
                 {
-                    List<BuildMessageEventArgs> messageList = null;
+                    List<BuildMessageEventArgs> messageList;
                     if (_deferredMessages.ContainsKey(e.BuildEventContext))
                     {
                         messageList = _deferredMessages[e.BuildEventContext];

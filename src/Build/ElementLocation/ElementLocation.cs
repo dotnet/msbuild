@@ -209,7 +209,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static string GetLocationString(string file, int line, int column)
         {
-            string locationString = String.Empty;
+            string locationString;
             if (line != 0 && column != 0)
             {
                 locationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("FileLocation", file, line, column);

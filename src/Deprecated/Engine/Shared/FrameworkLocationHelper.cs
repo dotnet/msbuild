@@ -425,8 +425,6 @@ namespace Microsoft.Build.BuildEngine.Shared
             string registryKeyName
         )
         {
-            string keyValueAsString = String.Empty;
-
             Microsoft.Win32.RegistryKey baseKey = Microsoft.Win32.Registry
                 .LocalMachine
                 .OpenSubKey(registryBaseKeyName);

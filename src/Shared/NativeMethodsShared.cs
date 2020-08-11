@@ -1074,7 +1074,7 @@ namespace Microsoft.Build.Shared
             // Only when you create the process using the Process object
             // does the Process object retain the original handle.
 
-            Process thisProcess = null;
+            Process thisProcess;
             try
             {
                 thisProcess = Process.GetProcessById(processIdToKill);

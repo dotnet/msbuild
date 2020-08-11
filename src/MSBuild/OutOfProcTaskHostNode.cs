@@ -1044,8 +1044,8 @@ namespace Microsoft.Build.CommandLine
 
                 foreach (string variable in _savedEnvironment.Keys)
                 {
-                    string newValue = null;
                     string oldValue = _savedEnvironment[variable];
+                    string newValue;
                     if (!environment.TryGetValue(variable, out newValue))
                     {
                         s_mismatchedEnvironmentValues[variable] = new KeyValuePair<string, string>(null, oldValue);
@@ -1062,7 +1062,7 @@ namespace Microsoft.Build.CommandLine
                 foreach (string variable in environment.Keys)
                 {
                     string newValue = environment[variable];
-                    string oldValue = null;
+                    string oldValue;
                     if (!_savedEnvironment.TryGetValue(variable, out oldValue))
                     {
                         s_mismatchedEnvironmentValues[variable] = new KeyValuePair<string, string>(newValue, null);

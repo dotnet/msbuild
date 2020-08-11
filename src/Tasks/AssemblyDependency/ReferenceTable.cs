@@ -565,8 +565,7 @@ namespace Microsoft.Build.Tasks
             AssemblyNameExtension assemblyName = null;
             string fusionName = referenceAssemblyName.GetMetadata(ItemMetadataNames.fusionName);
             bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool(referenceAssemblyName, ItemMetadataNames.IgnoreVersionForFrameworkReference, out bool metadataFound);
-            bool ignoreVersionForFrameworkReference = false;
-
+            bool ignoreVersionForFrameworkReference;
             if (metadataFound)
             {
                 ignoreVersionForFrameworkReference = result;

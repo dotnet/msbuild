@@ -53,16 +53,14 @@ namespace Microsoft.Build.Internal
         // todo: glob rooting knowledge partially duplicated with MSBuildGlob.Parse and FileMatcher.ComputeFileEnumerationCacheKey
         private static Regex CreateRegex(string unescapedFileSpec, string currentDirectory)
         {
-            Regex regex = null;
-            string fixedDirPart = null;
-            string wildcardDirectoryPart = null;
-            string filenamePart = null;
-
+            string fixedDirPart;
+            string wildcardDirectoryPart;
+            string filenamePart;
             FileMatcher.Default.SplitFileSpec(
-                unescapedFileSpec,
-                out fixedDirPart,
-                out wildcardDirectoryPart,
-                out filenamePart);
+unescapedFileSpec,
+out fixedDirPart,
+out wildcardDirectoryPart,
+out filenamePart);
 
             if (FileUtilities.PathIsInvalid(fixedDirPart))
             {
@@ -82,6 +80,7 @@ namespace Microsoft.Build.Internal
             bool isRecursive;
             bool isLegal;
 
+            Regex regex;
             FileMatcher.Default.GetFileSpecInfoWithRegexObject(
                 recombinedFileSpec,
                 out regex,

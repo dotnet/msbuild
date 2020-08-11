@@ -533,7 +533,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     setColor(ConsoleColor.DarkGray);
                 }
 
-                string nonNullMessage = null;
+                string nonNullMessage;
 
                 // Include file information if present.
                 if (e.File != null)

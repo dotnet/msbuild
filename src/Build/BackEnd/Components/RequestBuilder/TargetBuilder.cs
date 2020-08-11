@@ -665,7 +665,7 @@ namespace Microsoft.Build.BackEnd
                 ElementLocation targetLocation = targetSpecification.ReferenceLocation;
 
                 // See if this target is already building under a different build request.  If so, we need to wait.
-                int idOfAlreadyBuildingRequest = BuildRequest.InvalidGlobalRequestId;
+                int idOfAlreadyBuildingRequest;
                 if (_requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryGetValue(targetSpecification.TargetName, out idOfAlreadyBuildingRequest))
                 {
                     if (idOfAlreadyBuildingRequest != _requestEntry.Request.GlobalRequestId)
@@ -751,7 +751,7 @@ namespace Microsoft.Build.BackEnd
         private async Task<bool> CompleteOutstandingActiveRequests(string targetName)
         {
             // See if this target is already building under a different build request.  If so, we need to wait.
-            int idOfAlreadyBuildingRequest = BuildRequest.InvalidGlobalRequestId;
+            int idOfAlreadyBuildingRequest;
             if (_requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryGetValue(targetName, out idOfAlreadyBuildingRequest))
             {
                 if (idOfAlreadyBuildingRequest != _requestEntry.Request.GlobalRequestId)

@@ -381,9 +381,9 @@ namespace Microsoft.Build.Utilities
             // now that we have our dependencies, we need to check if any of them are newer than the outputs.
             DateTime newestSourceDependencyTime;
             DateTime oldestOutputTime;
-            string newestSourceDependencyFile = string.Empty;
             string oldestOutputFile = string.Empty;
 
+            string newestSourceDependencyFile;
             if (
                 CanonicalTrackedFilesHelper.FilesExistAndRecordNewestWriteTime(sourcesNeedingCompilationList, _log, out newestSourceDependencyTime, out newestSourceDependencyFile) &&
                 CanonicalTrackedFilesHelper.FilesExistAndRecordOldestWriteTime(_outputFileGroup, _log, out oldestOutputTime, out oldestOutputFile)

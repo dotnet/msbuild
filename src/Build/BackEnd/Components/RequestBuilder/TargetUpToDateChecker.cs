@@ -168,9 +168,6 @@ namespace Microsoft.Build.BackEnd
                     out itemVectorsInTargetOutputs,
                     out discreteItemsInTargetOutputs,
                     out targetOutputItemSpecs);
-
-                List<string> itemVectorsReferencedInBothTargetInputsAndOutputs = null;
-                List<string> itemVectorsReferencedOnlyInTargetInputs = null;
                 List<string> itemVectorsReferencedOnlyInTargetOutputs = null;
 
                 // if the target has no outputs because the output specification evaluated to empty
@@ -181,6 +178,9 @@ namespace Microsoft.Build.BackEnd
                 // if there are no discrete output items...
                 else if (discreteItemsInTargetOutputs.Count == 0)
                 {
+
+                    List<string> itemVectorsReferencedInBothTargetInputsAndOutputs;
+                    List<string> itemVectorsReferencedOnlyInTargetInputs;
                     // try to correlate inputs and outputs by checking:
                     // 1) which item vectors are referenced by both input and output items
                     // 2) which item vectors are referenced only by input items
@@ -741,8 +741,6 @@ namespace Microsoft.Build.BackEnd
             List<string> targetOutputItemSpecs
         )
         {
-            DependencyAnalysisResult result = DependencyAnalysisResult.SkipUpToDate;
-
             List<string> targetInputItemSpecs = GetItemSpecsFromItemVectors(itemVectorsInTargetInputs);
             targetInputItemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectorTransformsInTargetInputs));
             targetInputItemSpecs.AddRange(discreteItemsInTargetInputs.Values);
@@ -764,6 +762,7 @@ namespace Microsoft.Build.BackEnd
             DependencyAnalysisLogDetail dependencyAnalysisDetailEntry;
             bool someOutOfDate = IsAnyOutOfDate(out dependencyAnalysisDetailEntry, _project.Directory, inputs, outputs);
 
+            DependencyAnalysisResult result;
             if (someOutOfDate)
             {
                 _dependencyAnalysisDetail.Add(dependencyAnalysisDetailEntry);
@@ -828,11 +827,11 @@ namespace Microsoft.Build.BackEnd
 
                     if (itemVectorContents.Count > 0)
                     {
-                        ItemVectorPartitionCollection itemVectorCollection = null;
 
                         // Expander set the item type it found
                         string itemVectorType = itemFactory.ItemType;
 
+                        ItemVectorPartitionCollection itemVectorCollection;
                         if (itemVectorTransforms == null || !isTransformExpression)
                         {
                             // We either don't want transforms separated out, or this was not a transform.
@@ -979,7 +978,7 @@ namespace Microsoft.Build.BackEnd
             string oldestOutput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(outputs[0].ToString()));
             ErrorUtilities.ThrowIfTypeDoesNotImplementToString(outputs[0]);
 
-            DateTime oldestOutputFileTime = DateTime.MinValue;
+            DateTime oldestOutputFileTime;
             try
             {
                 string oldestOutputFullPath = Path.Combine(projectDirectory, oldestOutput);
@@ -1004,7 +1003,7 @@ namespace Microsoft.Build.BackEnd
             {
                 string candidateOutput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(outputs[i].ToString()));
                 ErrorUtilities.ThrowIfTypeDoesNotImplementToString(outputs[i]);
-                DateTime candidateOutputFileTime = DateTime.MinValue;
+                DateTime candidateOutputFileTime;
                 try
                 {
                     string candidateOutputFullPath = Path.Combine(projectDirectory, candidateOutput);

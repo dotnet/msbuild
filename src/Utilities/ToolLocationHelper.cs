@@ -3882,7 +3882,7 @@ namespace Microsoft.Build.Utilities
                     //only add if the version folder name is of the right format
                     if (folder.Name.Length >= 4 && folder.Name.StartsWith("v", StringComparison.OrdinalIgnoreCase))
                     {
-                        Version ver = null;
+                        Version ver;
                         if (Version.TryParse(folder.Name.Substring(1), out ver))
                         {
                             frameworkVersions.Add(folder.Name);

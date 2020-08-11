@@ -129,7 +129,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private static string Intern(string stringToIntern)
         {
-            string value = stringToIntern;
+            string value;
             if (!customInternTable.TryGetValue(stringToIntern, out value))
             {
                 customInternTable.Add(stringToIntern, stringToIntern);

@@ -162,8 +162,6 @@ namespace Microsoft.Build.BackEnd
             _forceAffinityOutOfProc = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
             _debugDumpPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
             _schedulingUnlimitedVariable = Environment.GetEnvironmentVariable("MSBUILDSCHEDULINGUNLIMITED");
-            string strNodeLimitOffset = null;
-
             _nodeLimitOffset = 0;
 
             if (!String.IsNullOrEmpty(_schedulingUnlimitedVariable))
@@ -174,8 +172,7 @@ namespace Microsoft.Build.BackEnd
             {
                 _schedulingUnlimited = false;
 
-                strNodeLimitOffset = Environment.GetEnvironmentVariable("MSBUILDNODELIMITOFFSET");
-
+                string strNodeLimitOffset = Environment.GetEnvironmentVariable("MSBUILDNODELIMITOFFSET");
                 if (!String.IsNullOrEmpty(strNodeLimitOffset))
                 {
                     _nodeLimitOffset = Int16.Parse(strNodeLimitOffset, CultureInfo.InvariantCulture);
@@ -603,8 +600,6 @@ namespace Microsoft.Build.BackEnd
 
             // Resume any work available which has already been assigned to specific nodes.
             ResumeRequiredWork(responses);
-
-            int nodesFreeToDoWorkPriorToScheduling = 0;
             HashSet<int> idleNodes = new HashSet<int>();
             foreach (int availableNodeId in _availableNodes.Keys)
             {
@@ -614,7 +609,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            nodesFreeToDoWorkPriorToScheduling = idleNodes.Count;
+            int nodesFreeToDoWorkPriorToScheduling = idleNodes.Count;
 
             // Assign requests to any nodes which are currently idle.
             if (idleNodes.Count > 0 && _schedulingData.UnscheduledRequestsCount > 0)

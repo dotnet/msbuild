@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
 
         private void AssertReference(ITaskItem item, bool valid, string attribute)
         {
-            string missingOrInvalidAttribute = null;
+            string missingOrInvalidAttribute;
             Assert.Equal(ResolveComReference.VerifyReferenceMetadataForNameItem(item, out missingOrInvalidAttribute), valid);
             Assert.Equal(missingOrInvalidAttribute, attribute);
         }

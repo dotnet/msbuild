@@ -3340,8 +3340,7 @@ namespace Microsoft.Build.Conversion
                 return false;
             }
 
-            long length = 0;
-
+            long length;
             try
             {
                 FileInfo fi = new FileInfo(path);
