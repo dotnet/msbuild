@@ -44,7 +44,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// </summary>
         internal static bool CanConvertStringToBool(string parameterValue)
         {
-            return (ValidBooleanTrue(parameterValue) || ValidBooleanFalse(parameterValue));
+            return ValidBooleanTrue(parameterValue) || ValidBooleanFalse(parameterValue);
         }
 
         /// <summary>
@@ -53,12 +53,12 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// </summary>
         private static bool ValidBooleanTrue(string parameterValue)
         {
-            return ((String.Equals(parameterValue, "true", StringComparison.OrdinalIgnoreCase)) ||
+            return (String.Equals(parameterValue, "true", StringComparison.OrdinalIgnoreCase)) ||
                     (String.Equals(parameterValue, "on", StringComparison.OrdinalIgnoreCase)) ||
                     (String.Equals(parameterValue, "yes", StringComparison.OrdinalIgnoreCase)) ||
                     (String.Equals(parameterValue, "!false", StringComparison.OrdinalIgnoreCase)) ||
                     (String.Equals(parameterValue, "!off", StringComparison.OrdinalIgnoreCase)) ||
-                    (String.Equals(parameterValue, "!no", StringComparison.OrdinalIgnoreCase)));
+                    (String.Equals(parameterValue, "!no", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -67,12 +67,12 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// </summary>
         private static bool ValidBooleanFalse(string parameterValue)
         {
-            return ((String.Equals(parameterValue, "false", StringComparison.OrdinalIgnoreCase)) ||
+            return (String.Equals(parameterValue, "false", StringComparison.OrdinalIgnoreCase)) ||
                     (String.Equals(parameterValue, "off", StringComparison.OrdinalIgnoreCase)) ||
                     (String.Equals(parameterValue, "no", StringComparison.OrdinalIgnoreCase)) ||
                     (String.Equals(parameterValue, "!true", StringComparison.OrdinalIgnoreCase)) ||
                     (String.Equals(parameterValue, "!on", StringComparison.OrdinalIgnoreCase)) ||
-                    (String.Equals(parameterValue, "!yes", StringComparison.OrdinalIgnoreCase)));
+                    (String.Equals(parameterValue, "!yes", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>

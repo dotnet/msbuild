@@ -576,7 +576,7 @@ namespace Microsoft.Build.BackEnd
                 get
                 {
                     int count = (_customEscapedMetadata == null) ? 0 : _customEscapedMetadata.Count;
-                    return (count + FileUtilities.ItemSpecModifiers.All.Length);
+                    return count + FileUtilities.ItemSpecModifiers.All.Length;
                 }
             }
 

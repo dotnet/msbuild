@@ -278,7 +278,7 @@ namespace Microsoft.Build.BuildEngine
 
                         if (eventType == 0 || /* nice shutdown due to shutdownEvent */
                             eventType == 1 || /* error shutdown due to globalNodeErrorShutdown */
-                            eventType == WaitHandle.WaitTimeout && !localNode.IsParentProcessAlive())
+                            (eventType == WaitHandle.WaitTimeout && !localNode.IsParentProcessAlive()))
                         {
                             continueRunning = false;
                             // If the exit is not triggered by running of shutdown method

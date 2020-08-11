@@ -1039,7 +1039,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         public static bool HResultSucceeded(int hr)
         {
-            return (hr >= 0);
+            return hr >= 0;
         }
 
         /// <summary>
@@ -1047,7 +1047,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         public static bool HResultFailed(int hr)
         {
-            return (hr < 0);
+            return hr < 0;
         }
 
         /// <summary>
@@ -1212,7 +1212,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            return (ParentID);
+            return ParentID;
         }
 
         /// <summary>

@@ -71,7 +71,7 @@ namespace Microsoft.Build.BuildEngine
                 return false;
             }
 
-            return (this.Value == otherEntry.Value);
+            return this.Value == otherEntry.Value;
         }
 
         #region CustomSerializationToStream

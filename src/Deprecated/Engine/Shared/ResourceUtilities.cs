@@ -60,7 +60,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>The MSBuild F1-help keyword string.</returns>
         private static string GetHelpKeyword(string resourceName)
         {
-            return ("MSBuild." + resourceName);
+            return "MSBuild." + resourceName;
         }
 
         /// <summary>

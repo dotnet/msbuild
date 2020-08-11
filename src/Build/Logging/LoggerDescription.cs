@@ -280,12 +280,12 @@ namespace Microsoft.Build.Logging
         /// <returns>true, if specified type is a logger</returns>
         private static bool IsForwardingLoggerClass(Type type, object unused)
         {
-            return (type.GetTypeInfo().IsClass &&
+            return type.GetTypeInfo().IsClass &&
                 !type.GetTypeInfo().IsAbstract &&
 #if FEATURE_TYPE_GETINTERFACE
-                (type.GetTypeInfo().GetInterface("IForwardingLogger") != null));
+                (type.GetTypeInfo().GetInterface("IForwardingLogger") != null);
 #else
-                (type.GetInterfaces().Any(interfaceType => interfaceType.Name == "IForwardingLogger")));
+                (type.GetInterfaces().Any(interfaceType => interfaceType.Name == "IForwardingLogger"));
 #endif
         }
 
@@ -296,12 +296,12 @@ namespace Microsoft.Build.Logging
         /// <returns>true, if specified type is a logger</returns>
         private static bool IsLoggerClass(Type type, object unused)
         {
-            return (type.GetTypeInfo().IsClass &&
+            return type.GetTypeInfo().IsClass &&
                 !type.GetTypeInfo().IsAbstract &&
 #if FEATURE_TYPE_GETINTERFACE
-                (type.GetTypeInfo().GetInterface("ILogger") != null));
+                (type.GetTypeInfo().GetInterface("ILogger") != null);
 #else
-                (type.GetInterfaces().Any(interfaceType => interfaceType.Name == "ILogger")));
+                (type.GetInterfaces().Any(interfaceType => interfaceType.Name == "ILogger"));
 #endif
         }
 

@@ -61,7 +61,7 @@ namespace Microsoft.Build.BuildEngine
         {
             FileInfo projectFileInfo = new FileInfo(projectFile);
 
-            return ((lastWriteTime != projectFileInfo.LastWriteTime) || (fileSize != projectFileInfo.Length));
+            return (lastWriteTime != projectFileInfo.LastWriteTime) || (fileSize != projectFileInfo.Length);
         }
 
         // the XML for the imported project

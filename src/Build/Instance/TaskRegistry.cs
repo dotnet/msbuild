@@ -380,8 +380,8 @@ namespace Microsoft.Build.Execution
             {
                 taskFactoryParameters = CreateTaskFactoryParametersDictionary();
 
-                taskFactoryParameters.Add(XMakeAttributes.runtime, (runtime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : runtime));
-                taskFactoryParameters.Add(XMakeAttributes.architecture, (architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture));
+                taskFactoryParameters.Add(XMakeAttributes.runtime, runtime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : runtime);
+                taskFactoryParameters.Add(XMakeAttributes.architecture, architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
             taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord);
@@ -591,9 +591,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private static bool IsTaskFactoryClass(Type type, object unused)
         {
-            return (type.GetTypeInfo().IsClass &&
+            return type.GetTypeInfo().IsClass &&
                 !type.GetTypeInfo().IsAbstract &&
-                typeof(Microsoft.Build.Framework.ITaskFactory).IsAssignableFrom(type));
+                typeof(Microsoft.Build.Framework.ITaskFactory).IsAssignableFrom(type);
         }
 
         /// <summary>
@@ -1661,7 +1661,7 @@ namespace Microsoft.Build.Execution
 
                         if (
                             (!output && (!TaskParameterTypeVerifier.IsValidInputParameter(paramType))) ||
-                            (output && !(TaskParameterTypeVerifier.IsValidOutputParameter(paramType)))
+                            (output && !TaskParameterTypeVerifier.IsValidOutputParameter(paramType))
                            )
                         {
                             ProjectErrorUtilities.ThrowInvalidProject

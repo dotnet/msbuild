@@ -62,7 +62,7 @@ namespace Microsoft.Build.BuildEngine
         static internal void Generate(SolutionParser solution, Project msbuildProject, string toolsVersionOverride, BuildEventContext projectBuildEventContext)
         {
             // Validate against our minimum for upgradable projects
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile((solution.Version >= SolutionParser.slnFileMinVersion),
+            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(solution.Version >= SolutionParser.slnFileMinVersion,
                 "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo(solution.SolutionFile), "SolutionParseUpgradeNeeded");
 
             // Although we only return an XmlDocument back, we need to make decisions about tools versions because

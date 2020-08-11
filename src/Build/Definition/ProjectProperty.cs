@@ -572,7 +572,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public override bool IsEnvironmentProperty
             {
-                get { return (!IsGlobalProperty && !IsReservedProperty); }
+                get { return !IsGlobalProperty && !IsReservedProperty; }
             }
 
             /// <summary>

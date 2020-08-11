@@ -240,7 +240,7 @@ namespace Microsoft.Build.Tasks
             {
                 // Filter out all references tagged as RuntimeReferenceOnly 
                 IEnumerable<ITaskItem> filteredResolvedSDKReferences = ResolvedSDKReferences.Where(
-                    sdkReference => !(MetadataConversionUtilities.TryConvertItemMetadataToBool(sdkReference, "RuntimeReferenceOnly"))
+                    sdkReference => !MetadataConversionUtilities.TryConvertItemMetadataToBool(sdkReference, "RuntimeReferenceOnly")
                 );
 
                 PopulateReferencesForSDK(filteredResolvedSDKReferences);

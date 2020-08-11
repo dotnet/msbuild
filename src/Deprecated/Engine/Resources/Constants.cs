@@ -43,8 +43,8 @@ namespace Microsoft.Build.BuildEngine
         /// <returns>true, if specified property is reserved</returns>
         internal static bool IsReservedProperty(string property)
         {
-            return 
-                (
+            return
+
                     (String.Equals(property, projectDirectory, StringComparison.OrdinalIgnoreCase)) ||
                     (String.Equals(property, projectFile, StringComparison.OrdinalIgnoreCase)) ||
                     (String.Equals(property, projectExtension, StringComparison.OrdinalIgnoreCase)) ||
@@ -55,8 +55,8 @@ namespace Microsoft.Build.BuildEngine
                     (String.Equals(property, projectDefaultTargets, StringComparison.OrdinalIgnoreCase)) ||
                     (String.Equals(property, programFiles32, StringComparison.OrdinalIgnoreCase)) ||
                     (String.Equals(property, assemblyVersion, StringComparison.OrdinalIgnoreCase))
-                    // Intentionally do not include MSBuildExtensionsPath or MSBuildExtensionsPath32 in this list.  We need tasks to be able to override those.
-                );
+                // Intentionally do not include MSBuildExtensionsPath or MSBuildExtensionsPath32 in this list.  We need tasks to be able to override those.
+                ;
         }
     }
 

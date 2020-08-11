@@ -704,7 +704,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (GetCustomMetadataCount() + FileUtilities.ItemSpecModifiers.All.Length);
+                return GetCustomMetadataCount() + FileUtilities.ItemSpecModifiers.All.Length;
             }
         }
 
@@ -741,7 +741,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal XmlAttribute IncludeAttribute
         {
-            get { return (IsBackedByXml ? xml.IncludeAttribute : null); }
+            get { return IsBackedByXml ? xml.IncludeAttribute : null; }
         }
 
         /// <summary>
@@ -750,7 +750,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         public string Exclude
         {
-            get { return (IsBackedByXml ? xml.Exclude : String.Empty); }
+            get { return IsBackedByXml ? xml.Exclude : String.Empty; }
 
             set
             {
@@ -772,7 +772,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         internal XmlAttribute ExcludeAttribute
         {
-            get { return (IsBackedByXml ? xml.ExcludeAttribute : null); }
+            get { return IsBackedByXml ? xml.ExcludeAttribute : null; }
         }
 
         /// <summary>
@@ -781,7 +781,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         public string Condition
         {
-            get { return (IsBackedByXml ? xml.Condition : String.Empty); }
+            get { return IsBackedByXml ? xml.Condition : String.Empty; }
 
             set
             {
@@ -806,7 +806,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         internal XmlAttribute ConditionAttribute
         {
-            get { return (IsBackedByXml ? xml.ConditionAttribute : null); }
+            get { return IsBackedByXml ? xml.ConditionAttribute : null; }
         }
 
         /// <summary>
@@ -816,7 +816,7 @@ namespace Microsoft.Build.BuildEngine
         /// <value>The item XmlElement, or null if item is virtual.</value>
         internal XmlElement ItemElement
         {
-            get { return (IsBackedByXml ? xml.Element : null); }
+            get { return IsBackedByXml ? xml.Element : null; }
         }
 
         /// <summary>
@@ -910,7 +910,7 @@ namespace Microsoft.Build.BuildEngine
 
         internal bool IsUninitializedItem
         {
-            get { return (this.name == null); }
+            get { return this.name == null; }
         }
 
         /// <summary>
@@ -935,7 +935,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal bool IsBackedUp
         {
-            get { return (unevaluatedCustomMetadataBackup != null); }
+            get { return unevaluatedCustomMetadataBackup != null; }
         }
 
         #endregion

@@ -115,8 +115,8 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (inProgressBuildState == InProgressBuildState.BuildingDependencies ||
-                        inProgressBuildState == InProgressBuildState.BuildingErrorClause);
+                return inProgressBuildState == InProgressBuildState.BuildingDependencies ||
+                        inProgressBuildState == InProgressBuildState.BuildingErrorClause;
             }
         }
 
@@ -220,8 +220,8 @@ namespace Microsoft.Build.BuildEngine
             string nameDependentTarget = dependsOnTargetNames[currentDependentTarget];
 
             ErrorUtilities.VerifyThrow(
-                parentProject.Targets[nameDependentTarget].TargetBuildState != Target.BuildState.InProgress &&
-                parentProject.Targets[nameDependentTarget].TargetBuildState != Target.BuildState.NotStarted ||
+                (parentProject.Targets[nameDependentTarget].TargetBuildState != Target.BuildState.InProgress &&
+                parentProject.Targets[nameDependentTarget].TargetBuildState != Target.BuildState.NotStarted) ||
                 buildContext.CurrentBuildContextState == ProjectBuildState.BuildContextState.ExceptionThrown,
                 "This target should only be updated once the dependent target is completed");
 
@@ -291,8 +291,8 @@ namespace Microsoft.Build.BuildEngine
             string nameErrorTarget = onErrorTargets[currentErrorTarget];
 
             ErrorUtilities.VerifyThrow(
-                parentProject.Targets[nameErrorTarget].TargetBuildState != Target.BuildState.InProgress &&
-                parentProject.Targets[nameErrorTarget].TargetBuildState != Target.BuildState.NotStarted ||
+                (parentProject.Targets[nameErrorTarget].TargetBuildState != Target.BuildState.InProgress &&
+                parentProject.Targets[nameErrorTarget].TargetBuildState != Target.BuildState.NotStarted) ||
                 buildContext.CurrentBuildContextState == ProjectBuildState.BuildContextState.ExceptionThrown,
                 "This target should only be updated once the error target is completed");
 
@@ -690,7 +690,7 @@ namespace Microsoft.Build.BuildEngine
             // Send the task for execution 
             SubmitNonIntrinsicTask(
                 (XmlElement)targetChildNode,
-                ((BuildTask)taskElementList[(currentTask - skippedNodeCount)]).HostObject,
+                ((BuildTask)taskElementList[currentTask - skippedNodeCount]).HostObject,
                 buildContext);
 
             return;
@@ -876,7 +876,7 @@ namespace Microsoft.Build.BuildEngine
                 targetClass.Name,
                 this.parentProject.FullFileName,
                 targetClass.ProjectFileOfTargetElement,
-                (overallSuccess && targetBuildSuccessful));
+                overallSuccess && targetBuildSuccessful);
             loggedTargetStart = false;
 
             // Get the next bucket

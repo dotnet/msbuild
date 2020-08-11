@@ -327,7 +327,7 @@ namespace Microsoft.Build.BuildEngine
                 // Eat the exception.  If anything fails, we simply don't surface the line/column number.
             }
 
-            return ((foundColumnNumber != 0) && (foundLineNumber != 0));
+            return (foundColumnNumber != 0) && (foundLineNumber != 0);
         }
     }
 }

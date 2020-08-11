@@ -249,7 +249,7 @@ namespace Microsoft.Build.BackEnd
                     WaitForResult(request, false);
                 }
 
-                return (_unresolvedConfigurations == null);
+                return _unresolvedConfigurations == null;
             }
         }
 

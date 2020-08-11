@@ -276,7 +276,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WritePretty(int indentLevel, string formattedString)
         {
-            StringBuilder result = new StringBuilder(indentLevel * tabWidth + formattedString.Length);
+            StringBuilder result = new StringBuilder((indentLevel * tabWidth) + formattedString.Length);
             result.Append(' ', indentLevel * tabWidth).Append(formattedString);
             WriteHandler(result.ToString());
         }
@@ -552,7 +552,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     setColor(ConsoleColor.Gray);
                     WritePretty(String.Format(CultureInfo.CurrentCulture, "{0,-30} = ", entry.Key));
                     setColor(ConsoleColor.DarkGray);
-                    WriteLinePretty((entry.Value));
+                    WriteLinePretty(entry.Value);
                 }
             }
 

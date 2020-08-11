@@ -1927,8 +1927,8 @@ namespace Microsoft.Build.Evaluation
                     hash.Add(property.Key);
                     hash.Add(property.Value);
 #else
-                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + property.Key.GetHashCode();
-                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + property.Value.GetHashCode();
+                    propertiesAndItemsHash = (propertiesAndItemsHash * -1521134295) + property.Key.GetHashCode();
+                    propertiesAndItemsHash = (propertiesAndItemsHash * -1521134295) + property.Value.GetHashCode();
 #endif
                 }
             }
@@ -1940,8 +1940,8 @@ namespace Microsoft.Build.Evaluation
                     hash.Add(item.Key);
                     hash.Add(item.Value);
 #else
-                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + item.Key.GetHashCode();
-                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + item.Value.GetHashCode();
+                    propertiesAndItemsHash = (propertiesAndItemsHash * -1521134295) + item.Key.GetHashCode();
+                    propertiesAndItemsHash = (propertiesAndItemsHash * -1521134295) + item.Value.GetHashCode();
 #endif
 
                 }

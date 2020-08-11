@@ -3393,7 +3393,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// </summary>
         public static bool FileUpdated(string fileName, DateTime previousWriteTime)
         {
-            return (File.GetLastWriteTime(fileName) > previousWriteTime);
+            return File.GetLastWriteTime(fileName) > previousWriteTime;
         }
 
         /// <summary>

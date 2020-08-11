@@ -511,7 +511,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns></returns>
         internal static bool IsDirectorySeparator(char c)
         {
-            return (c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar);
+            return c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar;
         }
         /// <summary>
         /// Removes the current directory converting the file back to relative path 
@@ -1255,9 +1255,9 @@ namespace Microsoft.Build.BuildEngine.Shared
              */
             GetFilesRecursive(listOfFiles, fixedDirectoryPart, wildcardDirectoryPart,
                 // if using the regular expression, ignore the file pattern
-                (matchWithRegex ? null : filenamePart), (needToEnforceExtensionLength ? extensionPart.Length : 0),
+                matchWithRegex ? null : filenamePart, needToEnforceExtensionLength ? extensionPart.Length : 0,
                 // if using the file pattern, ignore the regular expression
-                (matchWithRegex ? new Regex(matchFileExpression, RegexOptions.IgnoreCase) : null),
+                matchWithRegex ? new Regex(matchFileExpression, RegexOptions.IgnoreCase) : null,
                 needsRecursion, projectDirectory, stripProjectDirectory, getFileSystemEntries);
 
             /*

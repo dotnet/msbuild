@@ -687,7 +687,7 @@ namespace Microsoft.Build.Construction
 
             ProjectErrorUtilities.VerifyThrowInvalidProject
             (
-                String.IsNullOrWhiteSpace(itemNameAttribute?.Value) && !String.IsNullOrWhiteSpace(propertyNameAttribute?.Value) || !String.IsNullOrWhiteSpace(itemNameAttribute?.Value) && String.IsNullOrWhiteSpace(propertyNameAttribute?.Value),
+                (String.IsNullOrWhiteSpace(itemNameAttribute?.Value) && !String.IsNullOrWhiteSpace(propertyNameAttribute?.Value)) || (!String.IsNullOrWhiteSpace(itemNameAttribute?.Value) && String.IsNullOrWhiteSpace(propertyNameAttribute?.Value)),
                 element.Location,
                 "InvalidTaskOutputSpecification",
                 parent.Name

@@ -450,7 +450,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private bool IsVerbosityAtLeast(LoggerVerbosity checkVerbosity)
         {
-            return (this.verbosity >= checkVerbosity);
+            return this.verbosity >= checkVerbosity;
         }
         #endregion
 
