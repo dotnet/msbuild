@@ -1379,14 +1379,7 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            if (availablePlatformVersions?.Count > 0)
-            {
-                return availablePlatformVersions.OrderByDescending(x => x).FirstOrDefault()?.ToString();
-            }
-            else
-            {
-                return string.Empty;
-            }
+            return availablePlatformVersions?.Count > 0 ? availablePlatformVersions?.OrderByDescending(x => x).FirstOrDefault()?.ToString() : string.Empty;
         }
 
         /// <summary>
