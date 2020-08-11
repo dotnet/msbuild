@@ -1651,6 +1651,14 @@ elementFormDefault="qualified">
       <xs:annotation>
         <xs:documentation><!-- _locID_text="Nullable" _locComment="" -->Set the nullable annotations and warnings context for the C# project. Possible values are enable, disable, warnings and annotations.</xs:documentation>
       </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="enable" />
+          <xs:enumeration value="disable" />
+          <xs:enumeration value="warnings" />
+          <xs:enumeration value="annotations" />
+        </xs:restriction>
+      </xs:simpleType>
     </xs:element>
     <xs:element name="Platform" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="PlatformName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
