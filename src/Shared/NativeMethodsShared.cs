@@ -136,32 +136,29 @@ namespace Microsoft.Build.Shared
             PROCESS_QUERY_INFORMATION = 0x0400,
             PROCESS_ALL_ACCESS = SYNCHRONIZE | 0xFFF
         }
-
+#pragma warning disable 0649, 0169
         internal enum LOGICAL_PROCESSOR_RELATIONSHIP
-		{
-			RelationProcessorCore,
-			RelationNumaNode,
-			RelationCache,
-			RelationProcessorPackage,
-			RelationGroup,
-			RelationAll = 0xffff
-		}
-
+        {
+            RelationProcessorCore,
+            RelationNumaNode,
+            RelationCache,
+            RelationProcessorPackage,
+            RelationGroup,
+            RelationAll = 0xffff
+        }
         internal struct SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX
         {
             public LOGICAL_PROCESSOR_RELATIONSHIP Relationship;
             public uint Size;
             public GROUP_RELATIONSHIP Group;
         }
-
         internal unsafe struct GROUP_RELATIONSHIP
         {
-            private byte MaximumGroupCount;
+            private ushort MaximumGroupCount;
             public ushort ActiveGroupCount;
             private fixed byte Reserved[20];
             public PROCESSOR_GROUP_INFO GroupInfo;
         }
-
         internal unsafe struct PROCESSOR_GROUP_INFO
         {
             public byte MaximumProcessorCount;
@@ -169,6 +166,7 @@ namespace Microsoft.Build.Shared
             public fixed byte Reserved[38];
             public IntPtr ActiveProcessorMask;
         }
+#pragma warning restore 0169, 0149
 
         /// <summary>
         /// Flags for CoWaitForMultipleHandles
@@ -497,6 +495,11 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        /// <summary>
+        /// Get the exact physical core count on Windows
+        /// Useful for getting the exact core count in 32 bits processes,
+        /// as Environment.ProcessorCount has a 32-core limit in that case. 
+        /// </summary>
         public unsafe static int GetPhysicalCoreCount()
         {
             uint len = 0;
