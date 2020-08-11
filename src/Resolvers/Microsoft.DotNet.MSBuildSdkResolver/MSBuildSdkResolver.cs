@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         }
 
         // Test constructor
-        internal DotNetMSBuildSdkResolver(Func<string, string> getEnvironmentVariable, VSSettings vsSettings)
+        public DotNetMSBuildSdkResolver(Func<string, string> getEnvironmentVariable, VSSettings vsSettings)
         {
             _getEnvironmentVariable = getEnvironmentVariable;
             _netCoreSdkResolver = new NETCoreSdkResolver(getEnvironmentVariable, vsSettings);

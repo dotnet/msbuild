@@ -252,6 +252,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resolvers", "Resolvers", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MSBuildSdkResolver", "src\Resolvers\Microsoft.DotNet.MSBuildSdkResolver\Microsoft.DotNet.MSBuildSdkResolver.csproj", "{2207EE89-63BC-4498-A5BE-F285FBCC8FD9}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.SdkResolver", "src\Resolvers\Microsoft.DotNet.SdkResolver\Microsoft.DotNet.SdkResolver.csproj", "{29D14D1A-F236-4D11-8E2A-8DCEBC4FAEC0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -446,6 +448,10 @@ Global
 		{2207EE89-63BC-4498-A5BE-F285FBCC8FD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2207EE89-63BC-4498-A5BE-F285FBCC8FD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2207EE89-63BC-4498-A5BE-F285FBCC8FD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29D14D1A-F236-4D11-8E2A-8DCEBC4FAEC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29D14D1A-F236-4D11-8E2A-8DCEBC4FAEC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29D14D1A-F236-4D11-8E2A-8DCEBC4FAEC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29D14D1A-F236-4D11-8E2A-8DCEBC4FAEC0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -529,6 +535,7 @@ Global
 		{360F049F-D501-478A-98BD-A2BA4DB000B9} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{8F22FBD6-BDC8-431E-8402-B7460D3A9724} = {22AB674F-ED91-4FBC-BFEE-8A1E82F9F05E}
 		{2207EE89-63BC-4498-A5BE-F285FBCC8FD9} = {8F22FBD6-BDC8-431E-8402-B7460D3A9724}
+		{29D14D1A-F236-4D11-8E2A-8DCEBC4FAEC0} = {8F22FBD6-BDC8-431E-8402-B7460D3A9724}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}
