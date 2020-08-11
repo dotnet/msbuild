@@ -1833,7 +1833,7 @@ namespace Microsoft.Build.Tasks
                                             (
                                                 MessageImportance.Low,
                                                 "GenerateResource.SeparateAppDomainBecauseOfType",
-name ?? String.Empty,
+                                                name ?? String.Empty,
                                                 typeName,
                                                 source.ItemSpec,
                                                 ((IXmlLineInfo)reader).LineNumber
@@ -1879,7 +1879,7 @@ name ?? String.Empty,
                                             (
                                                 MessageImportance.Low,
                                                 "GenerateResource.SeparateAppDomainBecauseOfMimeType",
-name ?? String.Empty,
+                                                name ?? String.Empty,
                                                 mimeType,
                                                 source.ItemSpec,
                                                 ((IXmlLineInfo)reader).LineNumber
@@ -1925,7 +1925,7 @@ name ?? String.Empty,
                                         MessageImportance.Low,
                                         "GenerateResource.SeparateAppDomainBecauseOfErrorDeserializingLineNumber",
                                         source.ItemSpec,
-name ?? String.Empty,
+                                        name ?? String.Empty,
                                         ((IXmlLineInfo)reader).LineNumber,
                                         e.Message
                                     );
