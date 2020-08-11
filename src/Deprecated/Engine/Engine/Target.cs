@@ -589,7 +589,7 @@ namespace Microsoft.Build.BuildEngine
                     // cache the individual target IDs for unloaded projects and it's not really worth the trouble.
                     // Just use the parent event context.
                     parentEngine.LoggingServices.LogComment(buildContext.ProjectBuildEventContext,
-                        ((buildState == BuildState.CompletedSuccessfully) ? "TargetAlreadyCompleteSuccess" : "TargetAlreadyCompleteFailure"),
+                        (buildState == BuildState.CompletedSuccessfully) ? "TargetAlreadyCompleteSuccess" : "TargetAlreadyCompleteFailure",
                         this.targetName);
 
                     // Only contexts which are generated from an MSBuild task could need 

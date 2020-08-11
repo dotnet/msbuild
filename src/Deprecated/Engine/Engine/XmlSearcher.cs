@@ -282,7 +282,7 @@ namespace Microsoft.Build.BuildEngine
                                         // letter of the tag name, whereas we would prefer to point at the opening
                                         // left-angle-bracket.  (Whitespace between the left-angle-bracket and
                                         // the tag name is not allowed in XML, so this is safe.)
-                                        foundColumnNumber -= 1;
+                                        foundColumnNumber--;
                                     }
                                 }
                                 else if (reader.MoveToFirstAttribute()) 
@@ -327,7 +327,7 @@ namespace Microsoft.Build.BuildEngine
                 // Eat the exception.  If anything fails, we simply don't surface the line/column number.
             }
 
-            return ((foundColumnNumber != 0) && (foundLineNumber != 0));
+            return (foundColumnNumber != 0) && (foundLineNumber != 0);
         }
     }
 }

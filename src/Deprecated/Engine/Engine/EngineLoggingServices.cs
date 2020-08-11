@@ -220,7 +220,7 @@ namespace Microsoft.Build.BuildEngine
                 currentTickCount = DateTime.Now.Ticks;
             }
 
-            return ((currentTickCount - lastFlushTime) > flushTimeoutInTicks);
+            return (currentTickCount - lastFlushTime) > flushTimeoutInTicks;
         }
 
         #endregion
@@ -787,7 +787,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (!OnlyLogCriticalEvents)
             {
-                string message = ResourceUtilities.FormatResourceString((success ? "ProjectFinishedSuccess" : "ProjectFinishedFailure"), Path.GetFileName(projectFile));
+                string message = ResourceUtilities.FormatResourceString(success ? "ProjectFinishedSuccess" : "ProjectFinishedFailure", Path.GetFileName(projectFile));
 
                 ProjectFinishedEventArgs e = new ProjectFinishedEventArgs
                     (
@@ -837,7 +837,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (!OnlyLogCriticalEvents)
             {
-                string message = ResourceUtilities.FormatResourceString((success ? "TargetFinishedSuccess" : "TargetFinishedFailure"), targetName, Path.GetFileName(projectFile));
+                string message = ResourceUtilities.FormatResourceString(success ? "TargetFinishedSuccess" : "TargetFinishedFailure", targetName, Path.GetFileName(projectFile));
 
                 TargetFinishedEventArgs e = new TargetFinishedEventArgs
                     (
@@ -890,7 +890,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (!OnlyLogCriticalEvents)
             {
-                string message = ResourceUtilities.FormatResourceString((success ? "TaskFinishedSuccess" : "TaskFinishedFailure"), taskName);
+                string message = ResourceUtilities.FormatResourceString(success ? "TaskFinishedSuccess" : "TaskFinishedFailure", taskName);
 
                 TaskFinishedEventArgs e = new TaskFinishedEventArgs
                     (

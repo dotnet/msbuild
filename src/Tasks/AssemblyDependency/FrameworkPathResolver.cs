@@ -88,7 +88,7 @@ namespace Microsoft.Build.Tasks
         {
             AssemblyNameExtension assemblyNameToUse = assemblyName;
 
-            if ((assemblyNameToUse.Version == null && installedAssemblies != null))
+            if (assemblyNameToUse.Version == null && installedAssemblies != null)
             {
                 // If there are multiple entries in the redist list for this assembly, let's
                 // pick the one with the highest version and resolve it.

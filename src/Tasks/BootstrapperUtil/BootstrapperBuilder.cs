@@ -597,7 +597,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         int nStartIndex = packagePath.Length;
                         if ((strSubDirectory.ToCharArray())[nStartIndex] == System.IO.Path.DirectorySeparatorChar)
                         {
-                            nStartIndex += 1;
+                            nStartIndex++;
                         }
 
                         ExploreDirectory(strSubDirectory.Substring(nStartIndex), rootElement, packagePath);

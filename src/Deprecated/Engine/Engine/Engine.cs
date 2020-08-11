@@ -2693,7 +2693,7 @@ namespace Microsoft.Build.BuildEngine
                 buildRequest.ResultByTarget[builtTargetName] = buildState;
 
                 primaryLoggingServices.LogComment(currentContext,
-                    ((buildState == Target.BuildState.CompletedSuccessfully) ? "TargetAlreadyCompleteSuccess" : "TargetAlreadyCompleteFailure"),
+                    (buildState == Target.BuildState.CompletedSuccessfully) ? "TargetAlreadyCompleteSuccess" : "TargetAlreadyCompleteFailure",
                     builtTargetName);
 
                 if (buildState == Target.BuildState.CompletedUnsuccessfully)

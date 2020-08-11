@@ -318,7 +318,7 @@ namespace Microsoft.Build.Collections
         {
             value = this[key];
 
-            return (value != null);
+            return value != null;
         }
 
         #endregion

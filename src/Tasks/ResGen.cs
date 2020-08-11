@@ -457,7 +457,7 @@ namespace Microsoft.Build.Tasks
             /// <returns>True if the array is null or has length zero</returns>
             private static bool IsNullOrEmpty(ITaskItem[] value)
             {
-                return (value == null || value.Length == 0);
+                return value == null || value.Length == 0;
             }
 
             /// <summary>

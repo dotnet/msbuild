@@ -72,7 +72,7 @@ namespace Microsoft.Build.BuildEngine
                 return false;
             }
 
-            return (this.BuildResult == ((BuildResultCacheEntry)other).BuildResult);
+            return this.BuildResult == ((BuildResultCacheEntry)other).BuildResult;
         }
         #endregion
 

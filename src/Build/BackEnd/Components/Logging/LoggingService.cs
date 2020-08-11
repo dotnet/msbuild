@@ -1125,8 +1125,8 @@ namespace Microsoft.Build.BackEnd.Logging
         private static int GetWarningsAsErrorOrMessageKey(BuildEventContext buildEventContext)
         {
             var hash = 17;
-            hash = hash * 31 + buildEventContext.ProjectInstanceId;
-            hash = hash * 31 + buildEventContext.ProjectContextId;
+            hash = (hash * 31) + buildEventContext.ProjectInstanceId;
+            hash = (hash * 31) + buildEventContext.ProjectContextId;
             return hash;
         }
 

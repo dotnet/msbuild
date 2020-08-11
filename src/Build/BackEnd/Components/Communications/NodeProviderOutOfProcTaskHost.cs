@@ -456,7 +456,7 @@ namespace Microsoft.Build.BackEnd
             NodeContext context = null;
             bool nodeCreationSucceeded = false;
 
-            if (!(_nodeContexts.TryGetValue(hostContext, out context)))
+            if (!_nodeContexts.TryGetValue(hostContext, out context))
             {
                 nodeCreationSucceeded = CreateNode(hostContext, factory, handler, configuration);
             }

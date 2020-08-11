@@ -594,7 +594,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 setColor(ConsoleColor.Cyan);
 
-                this.VerifyStack((current != null), "Unexpected null project stack");
+                this.VerifyStack(current != null, "Unexpected null project stack");
 
                 WriteLinePretty(projectSeparatorLine);
 
@@ -962,7 +962,7 @@ namespace Microsoft.Build.BuildEngine
             /// <owner>t-jeffv, sumedhk</owner>
             internal bool IsEmpty()
             {
-                return (frames.Count == 0);
+                return frames.Count == 0;
             }
         }
         #endregion

@@ -34,11 +34,11 @@ namespace Microsoft.Build.Shared
         /// <returns>true, if specified type is a task</returns>
         internal static bool IsTaskClass(Type type, object unused)
         {
-            return (type.GetTypeInfo().IsClass && !type.GetTypeInfo().IsAbstract && (
+            return type.GetTypeInfo().IsClass && !type.GetTypeInfo().IsAbstract && (
 #if FEATURE_TYPE_GETINTERFACE
-                type.GetTypeInfo().GetInterface("Microsoft.Build.Framework.ITask") != null));
+                type.GetTypeInfo().GetInterface("Microsoft.Build.Framework.ITask") != null);
 #else
-                type.GetInterfaces().Any(interfaceType => interfaceType.FullName == "Microsoft.Build.Framework.ITask")));
+                type.GetInterfaces().Any(interfaceType => interfaceType.FullName == "Microsoft.Build.Framework.ITask"));
 #endif
         }
 
@@ -115,7 +115,7 @@ namespace Microsoft.Build.Shared
 
 #if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
                         // Hook up last minute dumping of any exceptions 
-                        taskAppDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandling.UnhandledExceptionHandler);
+                        taskAppDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
 #endif
                     }
                 }

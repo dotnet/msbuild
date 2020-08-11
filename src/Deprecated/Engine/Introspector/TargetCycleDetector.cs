@@ -164,7 +164,7 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
 
-            return (cycleParent != null);
+            return cycleParent != null;
         }
 
         /// <summary>

@@ -516,8 +516,8 @@ namespace Microsoft.Build.Utilities
                     (
                         string.IsNullOrEmpty(platform.TargetPlatformIdentifier)
                         ||
-                        platform.TargetPlatformIdentifier.Equals(targetPlatformIdentifier, StringComparison.OrdinalIgnoreCase)
-                        && platform.TargetPlatformVersion <= targetPlatformVersion
+                        (platform.TargetPlatformIdentifier.Equals(targetPlatformIdentifier, StringComparison.OrdinalIgnoreCase)
+                        && platform.TargetPlatformVersion <= targetPlatformVersion)
                     )
                     && platform.ExtensionSDKs.ContainsKey(sdkMoniker))
                 .OrderByDescending<TargetPlatformSDK, Version>(platform => platform.TargetPlatformVersion)
@@ -965,8 +965,8 @@ namespace Microsoft.Build.Utilities
 
                     if (matchingSdk.ExtensionSDKs.TryGetValue(extensionSdkMoniker, out string extensionSdkPath)
                         ||
-                        s_cachedExtensionSdks.TryGetValue(extensionDiskRoots, out matchingSdk)
-                        && matchingSdk.ExtensionSDKs.TryGetValue(extensionSdkMoniker, out extensionSdkPath))
+                        (s_cachedExtensionSdks.TryGetValue(extensionDiskRoots, out matchingSdk)
+                        && matchingSdk.ExtensionSDKs.TryGetValue(extensionSdkMoniker, out extensionSdkPath)))
                     {
                         ExtensionSDK extensionSdk = new ExtensionSDK(extensionSdkMoniker, extensionSdkPath);
                         if (extensionSdk.SDKType == SDKType.Framework || extensionSdk.SDKType == SDKType.Platform)

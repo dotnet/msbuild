@@ -64,10 +64,10 @@ namespace TaskUsageLogger
         {
             ProcessParameters();
 
-            eventSource.ProjectStarted += new ProjectStartedEventHandler(HandleProjectStarted);
-            eventSource.TargetStarted += new TargetStartedEventHandler(HandleTargetStarted);
-            eventSource.TaskStarted += new TaskStartedEventHandler(HandleTaskStarted);
-            eventSource.BuildFinished += new BuildFinishedEventHandler(HandleBuildFinished);
+            eventSource.ProjectStarted += HandleProjectStarted;
+            eventSource.TargetStarted += HandleTargetStarted;
+            eventSource.TaskStarted += HandleTaskStarted;
+            eventSource.BuildFinished += HandleBuildFinished;
 
             _targetIdsToNames = new Dictionary<int, string>();
             _tasks = new HashSet<TaskData>();

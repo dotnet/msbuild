@@ -424,7 +424,7 @@ namespace Microsoft.Build.BackEnd
                         try
                         {
                             if (
-                                ((requirements.Value & TaskRequirements.RequireSTAThread) == TaskRequirements.RequireSTAThread)
+                                (requirements.Value & TaskRequirements.RequireSTAThread) == TaskRequirements.RequireSTAThread
 #if FEATURE_APARTMENT_STATE
                                 && (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
 #endif
@@ -863,7 +863,7 @@ namespace Microsoft.Build.BackEnd
                         _continueOnError = ContinueOnError.ErrorAndStop;
 
                         // Rethrow wrapped in order to avoid losing the callstack
-                        throw new BuildAbortedException(taskException.Message, ((BuildAbortedException)taskException));
+                        throw new BuildAbortedException(taskException.Message, (BuildAbortedException)taskException);
                     }
                     else if (type == typeof(CircularDependencyException))
                     {

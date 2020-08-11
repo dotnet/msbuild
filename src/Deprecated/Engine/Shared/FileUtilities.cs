@@ -576,7 +576,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>true, if slash</returns>
         internal static bool IsSlash(char c)
         {
-            return ((c == Path.DirectorySeparatorChar) || (c == Path.AltDirectorySeparatorChar));
+            return (c == Path.DirectorySeparatorChar) || (c == Path.AltDirectorySeparatorChar);
         }
 
         /// <summary>
@@ -774,7 +774,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// </summary>
         internal static bool IsVCProjFilename(string filename)
         {
-            return (String.Equals(Path.GetExtension(filename), ".vcproj", StringComparison.OrdinalIgnoreCase));
+            return String.Equals(Path.GetExtension(filename), ".vcproj", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

@@ -89,8 +89,8 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (requiredTargets?.Count > 0 ?
-                        this.requiredTargets.Peek() : null);
+                return requiredTargets?.Count > 0 ?
+                        this.requiredTargets.Peek() : null;
             }
         }
 
@@ -138,7 +138,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if ((indexOfTargetInProgress + 1) < targetNamesToBuild.Count)
             {
-                indexOfTargetInProgress += 1;
+                indexOfTargetInProgress++;
                 return (string)targetNamesToBuild[indexOfTargetInProgress];
             }
             else

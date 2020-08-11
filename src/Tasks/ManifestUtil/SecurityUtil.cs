@@ -144,15 +144,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             if (majorVersion == Fx2MajorVersion)
             {
-                return XmlToPermissionSet((GetXmlElement(targetZone, majorVersion)));
+                return XmlToPermissionSet(GetXmlElement(targetZone, majorVersion));
             }
             else if (majorVersion == Fx3MajorVersion)
             {
-                return XmlToPermissionSet((GetXmlElement(targetZone, majorVersion)));
+                return XmlToPermissionSet(GetXmlElement(targetZone, majorVersion));
             }
             else
             {
-                return XmlToPermissionSet((GetXmlElement(targetZone, fn)));
+                return XmlToPermissionSet(GetXmlElement(targetZone, fn));
             }
         }
 

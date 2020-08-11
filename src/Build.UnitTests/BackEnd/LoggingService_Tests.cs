@@ -1343,7 +1343,7 @@ namespace Microsoft.Build.UnitTests.Logging
             public void Initialize(IEventSource eventSource)
             {
                 eventSource.AnyEventRaised +=
-                        new AnyEventHandler(LoggerEventHandler);
+                         LoggerEventHandler;
             }
 
             /// <summary>

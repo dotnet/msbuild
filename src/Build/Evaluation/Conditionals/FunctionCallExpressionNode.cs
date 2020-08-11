@@ -80,7 +80,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     char lastCharacter = expandedValue[expandedValue.Length - 1];
                     // Either back or forward slashes satisfy the function: this is useful for URL's
-                    return (lastCharacter == Path.DirectorySeparatorChar || lastCharacter == Path.AltDirectorySeparatorChar || lastCharacter == '\\');
+                    return lastCharacter == Path.DirectorySeparatorChar || lastCharacter == Path.AltDirectorySeparatorChar || lastCharacter == '\\';
                 }
                 else
                 {

@@ -294,7 +294,7 @@ namespace Microsoft.Build.CommandLine
 
             if (!initializeOnly)
             {
-                Console.WriteLine("\n{0}{1}{0}", new String('=', 41 - "Process".Length / 2), "Process");
+                Console.WriteLine("\n{0}{1}{0}", new String('=', 41 - ("Process".Length / 2)), "Process");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Peak Working Set", currentProcess.PeakWorkingSet64, "bytes");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Peak Paged Memory", currentProcess.PeakPagedMemorySize64, "bytes"); // Not very useful one
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Peak Virtual Memory", currentProcess.PeakVirtualMemorySize64, "bytes"); // Not very useful one
@@ -364,7 +364,7 @@ namespace Microsoft.Build.CommandLine
 
             if (!initializeOnly)
             {
-                Console.WriteLine("\n{0}{1}{0}", new String('=', 41 - category.CategoryName.Length / 2), category.CategoryName);
+                Console.WriteLine("\n{0}{1}{0}", new String('=', 41 - (category.CategoryName.Length / 2)), category.CategoryName);
             }
 
             foreach (PerformanceCounter counter in counters)
@@ -2942,8 +2942,8 @@ namespace Microsoft.Build.CommandLine
                                 )
         {
             // If we got to this method we should have to possible projects or solutions and some extensions to ignore
-            ErrorUtilities.VerifyThrow(((potentialProjectOrSolutionFiles?.Length > 0)), "There should be some potential project or solution files");
-            ErrorUtilities.VerifyThrow(((extensionsToIgnoreDictionary?.Count > 0)), "There should be some extensions to Ignore");
+            ErrorUtilities.VerifyThrow(potentialProjectOrSolutionFiles?.Length > 0, "There should be some potential project or solution files");
+            ErrorUtilities.VerifyThrow(extensionsToIgnoreDictionary?.Count > 0, "There should be some extensions to Ignore");
 
             List<string> filesToKeep = new List<string>();
             foreach (string projectOrSolutionFile in potentialProjectOrSolutionFiles)

@@ -2511,8 +2511,8 @@ namespace Microsoft.Build.Conversion
 
             // Before we go any further, we must special-case some assemblies for VSD projects.
 
-            if ( ( ( this.language == VSProjectElements.ECSharp ) ||
-                   ( this.language == VSProjectElements.EVisualBasic ) ) )
+            if ((this.language == VSProjectElements.ECSharp) ||
+                   (this.language == VSProjectElements.EVisualBasic))
             {
                 if ( ( this.frameworkVersionForVSD == XMakeProjectStrings.vTwo ) &&
                      ( String.Equals ( referenceName, VSProjectElements.SystemDataCommon, StringComparison.OrdinalIgnoreCase ) ) )
@@ -3291,8 +3291,8 @@ namespace Microsoft.Build.Conversion
 
                 // If this is a VSD(devices) project and we're dealing with a content file,
                 // mark it to copy if newer.
-                if ( ( ( ( this.language == VSProjectElements.ECSharp ) ||
-                         ( this.language == VSProjectElements.EVisualBasic ) ) ) &&
+                if ( ((this.language == VSProjectElements.ECSharp) ||
+                         (this.language == VSProjectElements.EVisualBasic)) &&
                      ( String.Equals ( buildAction, XMakeProjectStrings.content, StringComparison.OrdinalIgnoreCase ) ) )
                 {
                     newFileItem.AddMetadata ( XMakeProjectStrings.copytooutput,
@@ -3360,7 +3360,7 @@ namespace Microsoft.Build.Conversion
                 return false;
             }
 
-            return (length == 0);
+            return length == 0;
         }
 
         /// <summary>

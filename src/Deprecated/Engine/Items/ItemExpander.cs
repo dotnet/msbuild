@@ -288,7 +288,7 @@ namespace Microsoft.Build.BuildEngine
             }
             else
             {
-                items = items.Clone((transform != null) /* deep clone on transforms because we're actually creating new items */);
+                items = items.Clone(transform != null /* deep clone on transforms because we're actually creating new items */);
             }
 
             if (transform != null)

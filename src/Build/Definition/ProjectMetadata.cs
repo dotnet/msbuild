@@ -286,8 +286,8 @@ namespace Microsoft.Build.Evaluation
                 return false;
             }
 
-            return (_xml == other._xml &&
-                    EvaluatedValueEscaped == other.EvaluatedValueEscaped);
+            return _xml == other._xml &&
+                    EvaluatedValueEscaped == other.EvaluatedValueEscaped;
         }
 
         #endregion

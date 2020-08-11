@@ -392,11 +392,11 @@ namespace Microsoft.Build.UnitTests
             {
                 ELEMDESC elemDesc = new ELEMDESC();
                 elemDesc.tdesc = _definedFunctions[index].parameters[i].CreateTypeDesc(
-                    new IntPtr(index * s_HREF_FUNCSPARAM_OFFSET_PERFUNC + i + s_HREF_FUNCSPARAM_OFFSET), _memoryHelper);
+                    new IntPtr((index * s_HREF_FUNCSPARAM_OFFSET_PERFUNC) + i + s_HREF_FUNCSPARAM_OFFSET), _memoryHelper);
 
                 Marshal.StructureToPtr(
                     elemDesc,
-                    new IntPtr(funcDesc.lprgelemdescParam.ToInt64() + i * Marshal.SizeOf<ELEMDESC>()),
+                    new IntPtr(funcDesc.lprgelemdescParam.ToInt64() + (i * Marshal.SizeOf<ELEMDESC>())),
                     false);
             }
 
