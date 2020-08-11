@@ -51,7 +51,11 @@ namespace Microsoft.DotNet.Cli
                 Create.Option("--interactive",
                               CommonLocalizableStrings.CommandInteractiveOptionDescription,
                               Accept.NoArguments()
-                                    .ForwardAs("--interactive")));
+                                    .ForwardAs("--interactive")),
+                Create.Option("--prerelease",
+                              CommonLocalizableStrings.CommandPrereleaseOptionDescription,
+                              Accept.NoArguments()
+                                    .ForwardAs("--prerelease")));
         }
 
         public static IEnumerable<string> QueryNuGet(string match)
