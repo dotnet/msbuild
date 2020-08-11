@@ -253,4 +253,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectCapability Include="GenerateDocumentationFile" />
   </ItemGroup>
 
+  <!--Workaround for https://github.com/dotnet/sdk/issues/12856-->
+  <PropertyGroup Condition="'$(ReferringTargetFrameworkForProjectReferences)' == ''">
+    <ReferringTargetFrameworkForProjectReferences>$(TargetFramework)</ReferringTargetFrameworkForProjectReferences>
+  </PropertyGroup>
+
 </Project>
