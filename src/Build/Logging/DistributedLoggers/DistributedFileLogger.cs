@@ -43,9 +43,7 @@ namespace Microsoft.Build.Logging
         {
             if (this.Parameters != null)
             {
-                string[] parameterComponents;
-
-                parameterComponents = this.Parameters.Split(s_fileLoggerParameterDelimiters);
+                string[] parameterComponents = this.Parameters.Split(s_fileLoggerParameterDelimiters);
                 for (int param = 0; param < parameterComponents.Length; param++)
                 {
                     if (parameterComponents[param].Length > 0)

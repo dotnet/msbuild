@@ -443,9 +443,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 return null;
             }
 
-            keyValueAsString = keyValue.ToString();
-
-            return keyValueAsString;
+            return keyValue.ToString();
         }
 
         /// <summary>

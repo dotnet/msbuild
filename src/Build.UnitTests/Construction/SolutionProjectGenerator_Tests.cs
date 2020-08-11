@@ -1730,9 +1730,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = null;
-
-            solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
             // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
             Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);

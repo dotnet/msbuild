@@ -395,12 +395,11 @@ namespace Microsoft.Build.CommandLine
                 if (!initializeOnly)
                 {
                     string friendlyCounterType = GetFriendlyCounterType(counter.CounterType, counter.CounterName);
-                    string valueFormat;
-
+                    
                     // At least some (such as % in GC; maybe all) "%" counters are already multiplied by 100. So we don't do that here.
 
                     // Show decimal places if meaningful
-                    valueFormat = value < 10 ? "{0,20:N2}" : "{0,20:N0}";
+                    string valueFormat = value < 10 ? "{0,20:N2}" : "{0,20:N0}";
 
                     string valueString = String.Format(CultureInfo.CurrentCulture, valueFormat, value);
 

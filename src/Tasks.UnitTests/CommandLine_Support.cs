@@ -262,8 +262,7 @@ namespace Microsoft.Build.UnitTests
                 t.AddCommandLineCommands(b);
 
             string cl = b.ToString();
-            string msg;
-            msg = String.Format("Command-line = [{0}]\r\n", cl);
+            string msg = String.Format("Command-line = [{0}]\r\n", cl);
             msg += String.Format("Expected     = [{0}]\r\n", lookFor);
 
             if (cl != lookFor)

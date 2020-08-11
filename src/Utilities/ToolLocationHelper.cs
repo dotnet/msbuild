@@ -3924,8 +3924,7 @@ namespace Microsoft.Build.Utilities
 
             var frameworkProfiles = new List<string>();
 
-            string frameworkProfilePath = null;
-            frameworkProfilePath = Path.Combine(frameworkReferenceRoot, frameworkIdentifier);
+            string frameworkProfilePath = Path.Combine(frameworkReferenceRoot, frameworkIdentifier);
             frameworkProfilePath = Path.Combine(frameworkProfilePath, frameworkVersion);
             frameworkProfilePath = Path.Combine(frameworkProfilePath, "Profiles");
 
@@ -3958,8 +3957,7 @@ namespace Microsoft.Build.Utilities
             IList<string> versions = new List<string>();
 
             // only return v35 and earlier versions if .NetFx35 is installed
-            string dotNetFx35Path = null;
-            dotNetFx35Path = GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35);
+            string dotNetFx35Path = GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35);
 
             if (dotNetFx35Path != null)
             {

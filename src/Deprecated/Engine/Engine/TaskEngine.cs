@@ -503,9 +503,8 @@ namespace Microsoft.Build.BuildEngine
 
                     task = (ITask)taskAppDomain.CreateInstanceFromAndUnwrap(TaskClass.Assembly.AssemblyFile, TaskClass.Type.FullName);
 
-                    Type taskType = null;
-                    // this will force evaluation of the task class type and try to load the task assembly
-                    taskType = task.GetType();
+                                        // this will force evaluation of the task class type and try to load the task assembly
+                    Type taskType = task.GetType();
 
                     // If the types don't match, we have a problem. It means that our AppDomain was able to load
                     // a task assembly using Load, and loaded a different one. I don't see any other choice than

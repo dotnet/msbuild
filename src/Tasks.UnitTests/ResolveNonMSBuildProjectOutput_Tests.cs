@@ -208,9 +208,7 @@ namespace Microsoft.Build.UnitTests
             Hashtable unresolvedOutputs = null;
             Hashtable resolvedOutputs = null;
             Hashtable projectOutputs = null;
-            ArrayList projectRefs = null;
-
-            projectRefs = new ArrayList();
+            ArrayList projectRefs = new ArrayList();
             projectRefs.Add(CreateReferenceItem("MCDep1.vcproj", "{2F6BBCC3-7111-4116-A68B-000000000000}",
                 "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}", "MCDep1"));
             projectRefs.Add(CreateReferenceItem("MCDep2.vcproj", "{2F6BBCC3-7111-4116-A68B-34CFC76F37C5}",
@@ -240,9 +238,7 @@ namespace Microsoft.Build.UnitTests
             Hashtable unresolvedOutputs = null;
             Hashtable resolvedOutputs = null;
             Hashtable projectOutputs = null;
-            ArrayList projectRefs = null;
-
-            projectRefs = new ArrayList();
+            ArrayList projectRefs = new ArrayList();
             projectRefs.Add(CreateReferenceItem("MCDep1.vcproj", "{2F6BBCC3-7111-4116-A68B-000000000000}",
                 "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}", "MCDep1"));
             projectRefs.Add(CreateReferenceItem("MCDep2.vcproj", "{2F6BBCC3-7111-4116-A68B-34CFC76F37C5}",

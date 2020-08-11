@@ -1436,9 +1436,7 @@ namespace Microsoft.Build.BuildEngine
                 // We will work our way up the namespace looking for an assembly that matches
                 while (assemblyNameEnd > 0)
                 {
-                    string candidateAssemblyName = null;
-
-                    candidateAssemblyName = baseName.Substring(0, assemblyNameEnd);
+                    string candidateAssemblyName = baseName.Substring(0, assemblyNameEnd);
 
                     // Try to load the assembly with the computed name
                     foundType = GetTypeFromAssembly(typeName, candidateAssemblyName);

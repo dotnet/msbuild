@@ -772,13 +772,12 @@ namespace Microsoft.Build.Evaluation
 
                 if (subToolsetProperty != null)
                 {
-                    visualStudioVersion = subToolsetProperty.EvaluatedValue;
-                    return visualStudioVersion;
+                    return subToolsetProperty.EvaluatedValue;
                 }
             }
 
-            visualStudioVersion = GenerateSubToolsetVersion(0 /* don't care about solution version */);
-            return visualStudioVersion;
+            /* don't care about solution version */
+            return GenerateSubToolsetVersion(0 /* don't care about solution version */);
         }
 
         /// <summary>
@@ -857,8 +856,7 @@ namespace Microsoft.Build.Evaluation
                 return visualStudioVersion;
             }
 
-            visualStudioVersion = GenerateSubToolsetVersion(visualStudioVersionFromSolution);
-            return visualStudioVersion;
+            return GenerateSubToolsetVersion(visualStudioVersionFromSolution);
         }
 
         /// <summary>

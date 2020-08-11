@@ -713,14 +713,11 @@ namespace Microsoft.Build.BuildEngine
             TaskExecutionModule taskExecutionModule = parentEngine.NodeManager.TaskExecutionModule;
             TaskEngine taskEngine = new TaskEngine(taskNode, hostObject, parentProject.FullFileName, projectFileOfTaskNode, parentEngine.LoggingServices, handleId, taskExecutionModule, targetBuildEventContext);
 
-            taskExecutedSuccessfully =
-                taskEngine.ExecuteTask
+            return taskEngine.ExecuteTask
                 (
                     TaskExecutionMode.ExecuteTaskAndGatherOutputs,
                     new Lookup(parentProject.evaluatedItemsByName, parentProject.evaluatedProperties, ParentProject.ItemDefinitionLibrary)
                 );
-
-            return taskExecutedSuccessfully;
         }
 
         /// <summary>

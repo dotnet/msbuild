@@ -437,8 +437,7 @@ namespace Microsoft.Build.Construction
             string line = SolutionReader.ReadLine();
             _currentLineNumber++;
 
-            line = line?.Trim();
-            return line;
+            return line?.Trim();
         }
 
         /// <summary>

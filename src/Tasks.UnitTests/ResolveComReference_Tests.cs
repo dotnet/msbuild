@@ -610,10 +610,9 @@ namespace Microsoft.Build.UnitTests
             Assert.True(rcr.CheckForConflictingReferences());
             Assert.Equal(3, rcr.allProjectRefs.Count);
 
-            ComReferenceInfo referenceInfo;
-
+            
             // duplicate refs should not be treated as conflicts
-            referenceInfo = new ComReferenceInfo(tlbRefInfo);
+            ComReferenceInfo referenceInfo = new ComReferenceInfo(tlbRefInfo);
             rcr.allProjectRefs.Add(referenceInfo);
             referenceInfo = new ComReferenceInfo(axRefInfo);
             rcr.allProjectRefs.Add(referenceInfo);

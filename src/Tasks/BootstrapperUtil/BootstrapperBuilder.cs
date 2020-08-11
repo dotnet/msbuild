@@ -1945,8 +1945,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         {
                             // HACKHACK
                             string str = r.ReadToEnd();
-                            str = str.Replace("%NEWLINE%", Environment.NewLine);
-                            return str;
+                            return str.Replace("%NEWLINE%", Environment.NewLine);
                         }
                     }
                 }

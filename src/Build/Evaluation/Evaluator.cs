@@ -1053,10 +1053,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void ReadTargetElement(ProjectTargetElement targetElement, LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder, Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets)
         {
-            ProjectTargetInstance targetInstance = null;
-
+            
             // If we already have read a target instance for this element, use that. 
-            targetInstance = targetElement.TargetInstance;
+            ProjectTargetInstance targetInstance = targetElement.TargetInstance;
 
             if (targetInstance == null)
             {

@@ -953,9 +953,7 @@ namespace Microsoft.Build.BuildEngine
         internal IDictionary CloneCustomMetadata() 
         {
             IDictionary result = (IDictionary)this.evaluatedCustomMetadata.Clone();
-            result = MergeDefaultMetadata(result);
-
-            return result; 
+            return MergeDefaultMetadata(result);
         }
 
         /// <summary>

@@ -2525,11 +2525,10 @@ namespace Microsoft.Build.BuildEngine
                 {
                     // There's no cached result: we have to build it. Figure out which node to build it on.
                     Project matchingProjectCurrentlyLoaded = null;
-                    Project projectCurrentlyLoaded = null;
-
+                    
                     // See if we have a project loaded by the host already that matches the full path, in the
                     // list of projects which were loaded at the beginning of the build.
-                    projectCurrentlyLoaded = (Project)this.projectsLoadedByHost[projectFileInfo.FullName];
+                    Project projectCurrentlyLoaded = (Project)this.projectsLoadedByHost[projectFileInfo.FullName];
 
                     if (projectCurrentlyLoaded != null)
                     {

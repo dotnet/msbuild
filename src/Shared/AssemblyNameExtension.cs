@@ -496,8 +496,7 @@ namespace Microsoft.Build.Shared
                 }
 
                 // Will not return 0 as the this != that check above takes care of the case where they are equal.
-                result = this.Version.CompareTo(that.Version);
-                return result;
+                return this.Version.CompareTo(that.Version);
             }
 
             // We need some final collating order for these, alphabetical by FullName seems as good as any.

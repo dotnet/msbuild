@@ -248,9 +248,7 @@ namespace Microsoft.Build.Evaluation
         {
             string result = ExpandIntoStringLeaveEscaped(expression, options, elementLocation);
 
-            result = (result == null) ? null : EscapingUtilities.UnescapeAll(result);
-
-            return result;
+            return (result == null) ? null : EscapingUtilities.UnescapeAll(result);
         }
 
         /// <summary>

@@ -944,8 +944,7 @@ namespace Microsoft.Build.Shared
                     path = Path.Combine(path, frameworkName.Profile);
                 }
 
-                path = Path.GetFullPath(path);
-                return path;
+                return Path.GetFullPath(path);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
@@ -1661,8 +1660,7 @@ namespace Microsoft.Build.Shared
             public override string GetPathToDotNetFrameworkSdk(VisualStudioSpec visualStudioSpec)
             {
                 string pathToBinRoot = this.GetPathToDotNetFrameworkSdkTools(visualStudioSpec);
-                pathToBinRoot = RemoveDirectories(pathToBinRoot, 1);
-                return pathToBinRoot;
+                return RemoveDirectories(pathToBinRoot, 1);
             }
 
             /// <summary>

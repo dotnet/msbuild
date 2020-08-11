@@ -1260,9 +1260,7 @@ namespace Microsoft.Build.Execution
                     Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
 
                     // We don't have a location to use, but this is very unlikely to error
-                    value = expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
-
-                    return value;
+                    return expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
                 }
                 else if (null != metadatum)
                 {

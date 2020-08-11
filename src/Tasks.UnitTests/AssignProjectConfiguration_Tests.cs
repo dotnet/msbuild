@@ -295,9 +295,7 @@ namespace Microsoft.Build.UnitTests
             Hashtable unresolvedProjects = null;
             Hashtable resolvedProjects = null;
             Hashtable projectConfigurations = null;
-            ArrayList projectRefs = null;
-
-            projectRefs = new ArrayList();
+            ArrayList projectRefs = new ArrayList();
             projectRefs.Add(ResolveNonMSBuildProjectOutput_Tests.CreateReferenceItem("MCDep1.vcproj", "{2F6BBCC3-7111-4116-A68B-000000000000}",
                 "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}", "MCDep1"));
             projectRefs.Add(ResolveNonMSBuildProjectOutput_Tests.CreateReferenceItem("MCDep2.vcproj", "{2F6BBCC3-7111-4116-A68B-34CFC76F37C5}",

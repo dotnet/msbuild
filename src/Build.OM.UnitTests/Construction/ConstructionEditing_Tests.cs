@@ -3190,9 +3190,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>";
             expectedItem = AdjustSpacesForItem(expectedItem);
 
-            expected = ObjectModelHelpers.CleanupFileContents(string.Format(expected, expectedItem));
-
-            return expected;
+            return ObjectModelHelpers.CleanupFileContents(string.Format(expected, expectedItem));
         }
 
         /// <summary>
@@ -3269,8 +3267,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 sb.Append(itemSpace + splits[splits.Length -1]);
             }
 
-            expectedItem = sb.ToString();
-            return expectedItem;
+            return sb.ToString();
         }
     }
 }

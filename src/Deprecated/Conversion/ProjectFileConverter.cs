@@ -2615,8 +2615,7 @@ namespace Microsoft.Build.Conversion
             referenceElement.RemoveAttribute(VSProjectAttributes.name);
 
             // Add a new item to XMake of type "COMReference".
-            newReferenceItem = referencesItemGroup.AddItem(XMakeProjectStrings.comReference, ProjectCollection.Escape(referenceName));
-            return newReferenceItem;
+            return referencesItemGroup.AddItem(XMakeProjectStrings.comReference, ProjectCollection.Escape(referenceName));
         }
 
         /// <summary>
@@ -2688,8 +2687,7 @@ namespace Microsoft.Build.Conversion
             // the relative path to the project, use it for the "Include", otherwise just use
             // the project name.
             string value = (pathToReferencedProject != null) ? pathToReferencedProject : referenceName;
-            newReferenceItem = referencesItemGroup.AddItem(XMakeProjectStrings.projectReference, ProjectCollection.Escape(value));
-            return newReferenceItem;
+            return referencesItemGroup.AddItem(XMakeProjectStrings.projectReference, ProjectCollection.Escape(value));
         }
 
         /// <summary>
@@ -2758,8 +2756,7 @@ namespace Microsoft.Build.Conversion
                 }
             }
 
-            newReferenceItem = referencesItemGroup.AddItem(XMakeProjectStrings.reference, ProjectCollection.Escape(assemblyName));
-            return newReferenceItem;
+            return referencesItemGroup.AddItem(XMakeProjectStrings.reference, ProjectCollection.Escape(assemblyName));
         }
 
         /// <summary>
@@ -2850,9 +2847,7 @@ namespace Microsoft.Build.Conversion
 
             // The URI class returns forward slashes instead of backslashes.  Replace
             // them now, and return the final path.
-            result = result.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-
-            return result;
+            return result.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
         }
 
         /// <summary>

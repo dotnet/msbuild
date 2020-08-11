@@ -8021,8 +8021,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Trait("Category", "mono-osx-failing")]
         public void TargetFrameworkFiltering()
         {
-            int resultSet = 0;
-            resultSet = RunTargetFrameworkFilteringTest("3.0");
+            int resultSet = RunTargetFrameworkFilteringTest("3.0");
             Assert.Equal(0x3, resultSet); // "Expected assemblies A & B to be found."
 
             resultSet = RunTargetFrameworkFilteringTest("3.5");

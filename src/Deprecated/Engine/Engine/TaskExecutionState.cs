@@ -158,10 +158,7 @@ namespace Microsoft.Build.BuildEngine
                 // been built by the task
                 if ((howToExecuteTask & TaskExecutionMode.InferOutputsOnly) != TaskExecutionMode.Invalid)
                 {
-                    bool targetInferenceSuccessful = false;
-
-                    targetInferenceSuccessful =
-                       TaskEngineExecuteTask
+                    bool targetInferenceSuccessful =                        TaskEngineExecuteTask
                         (   taskEngine,
                             TaskExecutionMode.InferOutputsOnly,
                             lookupForInference
