@@ -1127,11 +1127,11 @@ namespace Microsoft.Build.Execution
             /// <returns>True if the items are equivalent, false otherwise.</returns>
             public static bool operator ==(TaskItem left, TaskItem right)
             {
-                if (left is object)
+                if (!(left is null))
                 {
                     return left.Equals(right);
                 }
-                else if (right is object)
+                else if (!(right is null))
                 {
                     return right.Equals(left);
                 }

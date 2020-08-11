@@ -79,7 +79,7 @@ namespace Microsoft.Build.BackEnd
                 return right is null;
             }
 
-            return right is object && left.InternalEquals(right);
+            return !(right is null) && left.InternalEquals(right);
         }
 
         /// <summary>
