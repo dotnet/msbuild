@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Cli
 
             try
             {
-                var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 var response = httpClient.GetAsync($"https://api-v2v3search-0.nuget.org/autocomplete?q={match}&skip=0&take=100", cancellation.Token)
                                          .Result;
 
