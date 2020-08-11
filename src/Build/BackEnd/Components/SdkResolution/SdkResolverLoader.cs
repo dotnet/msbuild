@@ -20,10 +20,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         private readonly CoreClrAssemblyLoader _loader = new CoreClrAssemblyLoader();
 #endif
 
+        private readonly string IncludeDefaultResolver = Environment.GetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER");
+
+        private readonly string AdditionalResolversFolder = Environment.GetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER");
+
         internal virtual IList<SdkResolver> LoadResolvers(LoggingContext loggingContext,
             ElementLocation location)
         {
-            var resolvers = Environment.GetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER")?.ToLowerInvariant() != "false" ? 
+            var resolvers = !String.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ? 
                 new List<SdkResolver> {new DefaultSdkResolver()}
                 : new List<SdkResolver>();
 
@@ -52,16 +56,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <returns></returns>
         internal virtual IList<string> FindPotentialSdkResolvers(string rootFolder, ElementLocation location)
         {
-            var additionalResolversFolder = Environment.GetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER");
-
             var assembliesList = new List<string>();
 
-            if ((string.IsNullOrEmpty(rootFolder) || !FileUtilities.DirectoryExistsNoThrow(rootFolder)) && additionalResolversFolder == null)
+            if ((string.IsNullOrEmpty(rootFolder) || !FileUtilities.DirectoryExistsNoThrow(rootFolder)) && AdditionalResolversFolder == null)
             {
                 return assembliesList;
             }
 
-            var subfolders = GetSubfolders(rootFolder, additionalResolversFolder);
+            var subfolders = GetSubfolders(rootFolder, AdditionalResolversFolder);
 
             foreach (var subfolder in subfolders)
             {
@@ -86,10 +88,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         private DirectoryInfo[] GetSubfolders(string rootFolder, string additionalResolversFolder)
         {
             DirectoryInfo[] subfolders = null;
-            var rootFolderInfo = new DirectoryInfo(rootFolder);
-            if (rootFolderInfo.Exists)
+            if (!string.IsNullOrEmpty(rootFolder) && FileUtilities.DirectoryExistsNoThrow(rootFolder))
             {
-                subfolders = rootFolderInfo.GetDirectories();
+                subfolders = new DirectoryInfo(rootFolder).GetDirectories();
             }
 
             if (additionalResolversFolder != null)
@@ -98,12 +99,25 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 if (resolversDirInfo.Exists)
                 {
                     var overrideFolders = resolversDirInfo.GetDirectories();
-                    var overriddenFolders = subfolders.Where(subfolder => overrideFolders.Any(overrideFolder => overrideFolder.Name.Equals(subfolder.Name)));
-                    return subfolders.Except(overriddenFolders).Concat(overrideFolders).ToArray();
+                    var foldersSet = overrideFolders.ToHashSet(new DirInfoNameComparer());
+                    return overrideFolders.Concat(subfolders.Where(subfolder => foldersSet.Add(subfolder))).ToArray();
                 }
             }
 
             return subfolders;
+        }
+
+        private class DirInfoNameComparer : IEqualityComparer<DirectoryInfo>
+        {
+            public bool Equals(DirectoryInfo first, DirectoryInfo second)
+            {
+                return string.Equals(first.Name, second.Name, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public int GetHashCode(DirectoryInfo value)
+            {
+                return value.Name.GetHashCode();
+            }
         }
 
         private bool TryAddAssemblyFromManifest(string pathToManifest, string manifestFolder, List<string> assembliesList, ElementLocation location)
