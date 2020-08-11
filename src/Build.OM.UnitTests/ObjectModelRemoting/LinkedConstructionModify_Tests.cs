@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             // Items
             xmlPair.Add2NewChildrenWithVerify<ProjectItemElement>(newItem, (p, i) => p.AddItem("cpp", i), (pi, i) => pi.Include == i, out var item1, out var item2);
             xmlPair.Add2NewChildrenWithVerify<ProjectItemElement>(newItemWithMetadata, (p, i) => p.AddItem("cpp", i, itemMetadata), (pi, i) => pi.Include == i, out var itemWithMetadata1, out var itemWithMetadata2);
-            ViewValidation.VerifyMetadata(itemMetadata, (k) => itemWithMetadata1.View.Metadata.Where((md) => md.Name == k).FirstOrDefault().Value);
+            ViewValidation.VerifyMetadata(itemMetadata, (k) => itemWithMetadata1.View.Metadata.Where((md) => md.Name == k).FirstOrDefault()?.Value);
             xmlPair.Add2NewLabeledChildrenWithVerify<ProjectItemGroupElement>("ItemGroup", (p, l) => p.AddItemGroup(), out var itemGroup1, out var itemGroup2);
 
             // ItemDefs
@@ -712,8 +712,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             };
             itemGrp.Add2NewChildrenWithVerify<ProjectItemElement>("file.cs", (ig, inc) => ig.AddItem("cs", inc, itemMetadata), (i, inc) => i.Include == inc, out var itemWithMetadata1, out var itemWithMetadata2);
             Assert.Equal(4, itemGrp.View.Items.Count);
-            ViewValidation.VerifyMetadata(itemMetadata, (k) => itemWithMetadata1.View.Metadata.Where((md) => md.Name == k).FirstOrDefault().Value);
-            ViewValidation.VerifyMetadata(itemMetadata, (k) => itemWithMetadata2.View.Metadata.Where((md) => md.Name == k).FirstOrDefault().Value);
+            ViewValidation.VerifyMetadata(itemMetadata, (k) => itemWithMetadata1.View.Metadata.Where((md) => md.Name == k).FirstOrDefault()?.Value);
+            ViewValidation.VerifyMetadata(itemMetadata, (k) => itemWithMetadata2.View.Metadata.Where((md) => md.Name == k).FirstOrDefault()?.Value);
         }
 
         [Fact]

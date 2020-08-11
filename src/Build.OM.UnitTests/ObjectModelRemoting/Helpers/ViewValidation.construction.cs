@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Assert.True(this.View is ProjectElementContainer);
             Assert.True(this.Real is ProjectElementContainer);
 
-            return QueryChildrenWithValidation((t) => (t as ProjectElementContainer).AllChildren, matcher);
+            return QueryChildrenWithValidation((t) => (t as ProjectElementContainer)?.AllChildren, matcher);
         }
 
         public ElementLinkPair<CT> QuerySingleChildrenWithValidation<CT>(Func<CT, bool> matcher)

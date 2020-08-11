@@ -1381,7 +1381,7 @@ namespace Microsoft.Build.Utilities
 
             if (availablePlatformVersions?.Count > 0)
             {
-                return availablePlatformVersions.OrderByDescending(x => x).FirstOrDefault().ToString();
+                return availablePlatformVersions.OrderByDescending(x => x).FirstOrDefault()?.ToString();
             }
             else
             {

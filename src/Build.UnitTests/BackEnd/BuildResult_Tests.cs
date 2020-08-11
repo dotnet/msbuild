@@ -324,7 +324,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.AddResultsForTarget("alpha", new TargetResult(new TaskItem[] { fooTaskItem }, BuildResultUtilities.GetSuccessResult()));
             result.AddResultsForTarget("omega", new TargetResult(new TaskItem[] { }, BuildResultUtilities.GetStopWithErrorResult(new ArgumentException("The argument was invalid"))));
 
-            Assert.Equal(NodePacketType.BuildResult, (result as INodePacket).Type);
+            Assert.Equal(NodePacketType.BuildResult, (result as INodePacket)?.Type);
             ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = BuildResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 

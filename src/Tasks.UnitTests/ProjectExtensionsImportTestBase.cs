@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests
 
             project.Build("_CheckForInvalidConfigurationAndPlatform", new[] {logger}).ShouldBeFalse();
 
-            logger.Errors.Select(i => i.Code).FirstOrDefault().ShouldBe("MSB3540");
+            logger.Errors.Select(i => i.Code).FirstOrDefault()?.ShouldBe("MSB3540");
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace Microsoft.Build.UnitTests
 
             project.Build("_CheckForInvalidConfigurationAndPlatform", new[] { logger }).ShouldBeTrue();
 
-            logger.Warnings.Select(i => i.Code).FirstOrDefault().ShouldBe("MSB3539");
+            logger.Warnings.Select(i => i.Code).FirstOrDefault()?.ShouldBe("MSB3539");
         }
     }
 }

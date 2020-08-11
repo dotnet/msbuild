@@ -966,9 +966,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestCleanupForTask()
         {
             _host.CleanupForBatch();
-            Assert.NotNull((_host as TaskExecutionHost)._UNITTESTONLY_TaskFactoryWrapper);
+            Assert.NotNull((_host as TaskExecutionHost)?._UNITTESTONLY_TaskFactoryWrapper);
             _host.CleanupForTask();
-            Assert.Null((_host as TaskExecutionHost)._UNITTESTONLY_TaskFactoryWrapper);
+            Assert.Null((_host as TaskExecutionHost)?._UNITTESTONLY_TaskFactoryWrapper);
         }
 
         /// <summary>

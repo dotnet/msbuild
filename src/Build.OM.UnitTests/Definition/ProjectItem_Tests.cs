@@ -1904,7 +1904,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 var project = ObjectModelHelpers.CreateInMemoryProject(env.CreateProjectCollection().Collection, projectContents, null, null);
 
-                var metadata = project.GetItems("I").FirstOrDefault().SetMetadataValue("M", "$(P);@(Foo)", true);
+                var metadata = project.GetItems("I").FirstOrDefault()?.SetMetadataValue("M", "$(P);@(Foo)", true);
 
                 Assert.Equal("p;f1;f2", metadata.EvaluatedValue);
                 Assert.Equal("$(P);@(Foo)", metadata.Xml.Value);

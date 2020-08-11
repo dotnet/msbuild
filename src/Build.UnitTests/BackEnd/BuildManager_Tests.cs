@@ -183,7 +183,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var result = _buildManager.Build(
                 buildParameters,
                 new BuildRequestData(
-                    graph.GraphRoots.FirstOrDefault()
+                    graph.GraphRoots.FirstOrDefault()?
                         .ProjectInstance.FullPath,
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,

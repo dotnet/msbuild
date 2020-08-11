@@ -685,7 +685,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             config.ProjectInitialTargets = new List<string>();
             config.ProjectDefaultTargets = new List<string>();
 
-            (_host.GetComponent(BuildComponentType.ConfigCache) as IConfigCache).AddConfiguration(config);
+            (_host.GetComponent(BuildComponentType.ConfigCache) as IConfigCache)?.AddConfiguration(config);
         }
 
         /// <summary>
