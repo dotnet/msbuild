@@ -92,7 +92,6 @@ Copyright (c) .NET Foundation. All rights reserved.
             RemoveSymbols="$(TrimmerRemoveSymbols)"
             FeatureSettings="@(_TrimmerFeatureSettings)"
             CustomData="@(_TrimmerCustomData)"
-            NoWarn="$(NoWarn)"
 
             BeforeFieldInit="$(_TrimmerBeforeFieldInit)"
             OverrideRemoval="$(_TrimmerOverrideRemoval)"
@@ -100,6 +99,12 @@ Copyright (c) .NET Foundation. All rights reserved.
             UnusedInterfaces="$(_TrimmerUnusedInterfaces)"
             IPConstProp="$(_TrimmerIPConstProp)"
             Sealer="$(_TrimmerSealer)"
+
+            Warn="$(ILLinkWarningLevel)"
+            NoWarn="$(NoWarn)"
+            TreatWarningsAsErrors="$(ILLinkTreatWarningsAsErrors)"
+            WarningsAsErrors="$(WarningsAsErrors)"
+            WarningsNotAsErrors="$(WarningsNotAsErrors)"
 
             CustomSteps="@(_TrimmerCustomSteps)"
             RootDescriptorFiles="@(TrimmerRootDescriptor)"
@@ -138,9 +143,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(SelfContained)' != 'true'" ResourceName="ILLinkNotSupportedError" />
 
     <PropertyGroup>
+      <ILLinkWarningLevel Condition=" '$(ILLinkWarningLevel)' == '' And
+                                      '$(AnalysisLevel)' != '' And
+                                       $([MSBuild]::VersionGreaterThanOrEquals($(AnalysisLevel), '5.0')) ">5</ILLinkWarningLevel>
+      <ILLinkWarningLevel Condition=" '$(ILLinkWarningLevel)' == '' ">0</ILLinkWarningLevel>
+      <ILLinkTreatWarningsAsErrors Condition=" '$(ILLinkTreatWarningsAsErrors)' == '' ">$(TreatWarningsAsErrors)</ILLinkTreatWarningsAsErrors>
+      <SuppressTrimAnalysisWarnings Condition=" '$(SuppressTrimAnalysisWarnings)' == '' ">true</SuppressTrimAnalysisWarnings>
       <_ExtraTrimmerArgs>--skip-unresolved true $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
       <TrimMode Condition=" '$(TrimMode)' == '' ">copyused</TrimMode>
-      <SuppressTrimAnalysisWarnings Condition=" '$(SuppressTrimAnalysisWarnings)' == '' ">true</SuppressTrimAnalysisWarnings>
     </PropertyGroup>
     
     <!-- These warning codes need to be updated https://github.com/mono/linker/pull/1385 is finished. -->

@@ -642,6 +642,112 @@ namespace Microsoft.NET.Publish.Tests
             publishPdbSize.Should().Be(linkedPdbSize);
         }
 
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        public void ILLink_can_treat_warnings_as_errors(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+                                    "/p:WarningsAsErrors=IL2006")
+                .Should().Fail()
+                .And.HaveStdOutContaining("error IL2006")
+                .And.HaveStdOutContaining("warning IL2026");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        public void ILLink_can_treat_warnings_not_as_errors(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+                                    "/p:TreatWarningsAsErrors=true", "/p:WarningsNotAsErrors=IL2006")
+                .Should().Fail()
+                .And.HaveStdOutContaining("error IL2026")
+                .And.HaveStdOutContaining("warning IL2006");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        public void ILLink_can_ignore_warnings(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+                                    "/p:NoWarn=IL2006", "/p:WarnAsError=IL2006")
+                .Should().Pass()
+                .And.NotHaveStdOutContaining("warning IL2006")
+                .And.NotHaveStdOutContaining("error IL2006")
+                .And.HaveStdOutContaining("warning IL2026");
+        }
+
+        [Theory]
+        [InlineData("net5.0")]
+        public void ILLink_respects_analysis_level(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+                                    "/p:AnalysisLevel=0.0")
+                .Should().Pass()
+                .And.NotHaveStdOutMatching(@"warning IL\d\d\d\d");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        public void ILLink_respects_warning_level_independently(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+                                    "/p:ILLinkWarningLevel=0")
+                .Should().Pass()
+                .And.NotHaveStdOutContaining("warning IL2006");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        public void ILLink_can_treat_warnings_as_errors_independently(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+                                    "/p:TreatWarningsAsErrors=true", "/p:ILLinkTreatWarningsAsErrors=false")
+                .Should().Pass()
+                .And.HaveStdOutContaining("warning IL2006");
+        }
+
         [Theory]
         [InlineData("netcoreapp3.0")]
         public void ILLink_error_on_portable_app(string targetFramework)
