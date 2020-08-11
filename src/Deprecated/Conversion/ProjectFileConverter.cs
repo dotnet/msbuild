@@ -2582,7 +2582,6 @@ namespace Microsoft.Build.Conversion
         /// <returns></returns>
         private static ProjectItemElement ConvertClassicComReference(XmlElementWithLocation referenceElement, ProjectItemGroupElement referencesItemGroup, string referenceName)
         {
-            ProjectItemElement newReferenceItem;
             // This is a classic COM reference.
 
             // This gets added as a new XMake item of type "COMReference".
@@ -2628,7 +2627,6 @@ namespace Microsoft.Build.Conversion
         /// <returns></returns>
         private ProjectItemElement ConvertProjectToProjectReference(XmlElementWithLocation referenceElement, ProjectItemGroupElement referencesItemGroup, string referenceName, ref string referencedProjectGuid)
         {
-            ProjectItemElement newReferenceItem;
             // This is a project-to-project reference.
 
             // This gets added as a new XMake item of type "ProjectReference".
@@ -2699,7 +2697,6 @@ namespace Microsoft.Build.Conversion
         /// <returns></returns>
         private ProjectItemElement ConvertAssemblyReference(XmlElementWithLocation referenceElement, ProjectItemGroupElement referencesItemGroup, string referenceName)
         {
-            ProjectItemElement newReferenceItem;
             // This is a regular .NET assembly reference.
 
             // This gets added as a new XMake item of type "Reference".  The "Include"
