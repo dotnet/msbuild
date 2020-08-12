@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.CmdServiceableDescription,
                     Accept.NoArguments().ForwardAs("-property:Serviceable=true")),
                 Create.Option(
-                    "--nologo|/nologo",
+                    "--nologo",
                     LocalizableStrings.CmdNoLogo,
                     Accept.NoArguments()
                           .ForwardAs("-nologo")),

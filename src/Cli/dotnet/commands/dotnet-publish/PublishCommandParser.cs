@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.NoSelfContainedOptionDescription,
                     Accept.NoArguments().ForwardAs("-property:SelfContained=false")),
                 Create.Option(
-                    "--nologo|/nologo",
+                    "--nologo",
                     LocalizableStrings.CmdNoLogo,
                     Accept.NoArguments()
                           .ForwardAs("-nologo")),
