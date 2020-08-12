@@ -14,17 +14,18 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Analysis level is a single property that can be used to control both the compiler warning waves
          and enable .NET analyzers. Valid values are 'none', 'latest', 'preview', or a version number  -->
-         
+
+    <!-- Automatically set AnalysisLevel if not specified -->
+    <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
+                              '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
+                              $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">latest</AnalysisLevel>
+
     <!-- EffectiveAnalysisLevel is used to differentiate from user specified strings (such as 'none')
          and an implied numerical option (such as '4')-->
     <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'none'">4.0</EffectiveAnalysisLevel>
     <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'latest'">5.0</EffectiveAnalysisLevel>
     <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview'">6.0</EffectiveAnalysisLevel>
-    
-    <!-- Automatically set AnalysisLevel if not specified -->
-    <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
-                              '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
-                              $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">5.0</AnalysisLevel>
+
     <!-- Set EffectiveAnalysisLevel to the value of AnalysisLevel if it is a version number -->
     <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And 
                                        '$(AnalysisLevel)' != ''">$(AnalysisLevel)</EffectiveAnalysisLevel>
