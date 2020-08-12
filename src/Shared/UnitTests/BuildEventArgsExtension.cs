@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests
                 return true;
             }
 
-            if (Object.ReferenceEquals(other, null) || Object.ReferenceEquals(args, null))
+            if (other is null || args is null)
             {
                 return false;
             }

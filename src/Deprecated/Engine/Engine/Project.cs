@@ -1416,7 +1416,7 @@ namespace Microsoft.Build.BuildEngine
 
             // Project system needs to know the difference between a property not existing,
             // a property that is set to empty string.
-            return (property == null) ? null : property.FinalValue;
+            return property?.FinalValue;
         }
 
         /// <summary>

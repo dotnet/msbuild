@@ -569,7 +569,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal ErrorWarningSummaryDictionaryKey(BuildEventContext entryPoint, string targetName)
         {
             _entryPointContext = entryPoint;
-            _targetName = targetName == null ? string.Empty : targetName;
+            _targetName = targetName ?? string.Empty;
         }
         #endregion
 

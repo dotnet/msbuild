@@ -633,7 +633,7 @@ namespace Microsoft.Build.Evaluation
             Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
             ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
 
-            ProjectMetadata metadatum = (_directMetadata == null) ? null : _directMetadata[name];
+            ProjectMetadata metadatum = _directMetadata?[name];
 
             if (metadatum == null)
             {
