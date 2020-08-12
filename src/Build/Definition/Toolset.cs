@@ -775,7 +775,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             /* don't care about solution version */
-            return GenerateSubToolsetVersion(0 /* don't care about solution version */);
+            return GenerateSubToolsetVersion(0);
         }
 
         /// <summary>

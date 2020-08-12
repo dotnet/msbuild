@@ -1128,12 +1128,10 @@ namespace Microsoft.Build.UnitTests
             TypeBuilder typeBldr = modBldr.DefineType(CompiledQueryName, TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit);
             try
             {
-                using (XmlReader reader = XmlReader.Create(sourceUri, readerSettings))
-                {
-                    CompilerErrorCollection errors = XslCompiledTransform.CompileToType(
-            reader, xsltSettings, xmlResolver, false, typeBldr, scriptAsmPath
-        );
-                }
+                using XmlReader reader = XmlReader.Create(sourceUri, readerSettings);
+                CompilerErrorCollection errors = XslCompiledTransform.CompileToType(reader, xsltSettings,
+                                                                                    xmlResolver, false, typeBldr,
+                                                                                    scriptAsmPath);
             }
             catch (Exception e)
             {

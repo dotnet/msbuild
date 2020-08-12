@@ -1053,14 +1053,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void ReadTargetElement(ProjectTargetElement targetElement, LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder, Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets)
         {
-            
             // If we already have read a target instance for this element, use that. 
-            ProjectTargetInstance targetInstance = targetElement.TargetInstance;
-
-            if (targetInstance == null)
-            {
-                targetInstance = ReadNewTargetElement(targetElement, _projectSupportsReturnsAttribute[(ProjectRootElement)targetElement.Parent], _evaluationProfiler);
-            }
+            ProjectTargetInstance targetInstance = targetElement.TargetInstance ?? ReadNewTargetElement(targetElement, _projectSupportsReturnsAttribute[(ProjectRootElement)targetElement.Parent], _evaluationProfiler);
 
             string targetName = targetElement.Name;
             ProjectTargetInstance otherTarget = _data.GetTarget(targetName);
@@ -1069,8 +1063,7 @@ namespace Microsoft.Build.Evaluation
                 _evaluationLoggingContext.LogComment(MessageImportance.Low, "OverridingTarget", otherTarget.Name, otherTarget.Location.File, targetName, targetElement.Location.File);
             }
 
-            LinkedListNode<ProjectTargetElement> node;
-            if (activeTargets.TryGetValue(targetName, out node))
+            if (activeTargets.TryGetValue(targetName, out LinkedListNode<ProjectTargetElement> node))
             {
                 activeTargetsByEvaluationOrder.Remove(node);
             }

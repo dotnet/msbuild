@@ -8,6 +8,7 @@ using System.Linq;
 
 using Microsoft.Build.BackEnd;
 using Xunit;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -35,6 +36,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ((ITranslatable)cancelled).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostTaskCancelled.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            packet.ShouldBeOfType<TaskHostTaskCancelled>();
         }
     }
 }

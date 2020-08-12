@@ -702,7 +702,6 @@ namespace Microsoft.Build.BuildEngine
         {
             StringBuilder referenceGuids = new StringBuilder();
 
-
             // Suffix for the reference item name. Since we need to attach additional (different) metadata to every
             // reference item, we need to have helper item lists each with only one item
             int outputReferenceItemNameSuffix = 0;
@@ -721,7 +720,6 @@ namespace Microsoft.Build.BuildEngine
                         outputReferenceItemName, outputReferenceItemNameSuffix);
 
                     bool addCreateItem = false;
-
 
                     string message;
                     if ((referencedProject.ProjectType == SolutionProjectType.ManagedProject) ||
@@ -753,11 +751,8 @@ namespace Microsoft.Build.BuildEngine
                             vcbuildTask = AddResolveVCProjectOutputTaskElement(target, Path.Combine(solution.SolutionFileDirectory, Path.GetFileName(solution.SolutionFile)),
                                 referencedProject.AbsolutePath, referencedProjectConfiguration.FullName);
                         }
-                        catch (Exception e)
+                        catch (Exception e) when (!ExceptionHandling.NotExpectedException(e))
                         {
-                            if (ExceptionHandling.NotExpectedException(e))
-                                throw;
-
                             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false,
                                 "SubCategoryForSolutionParsingErrors",
                                 new BuildEventFileInfo(solution.SolutionFile),
@@ -2009,7 +2004,6 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>LukaszG</owner>
         static private void ScanProjectDependencies(SolutionParser solution, Engine parentEngine, string childProjectToolsVersion, string fullSolutionConfigurationName, BuildEventContext projectBuildEventContext)
         {
-
             // Don't bother with all this if the solution configuration doesn't even exist.
             if (fullSolutionConfigurationName == null)
             {

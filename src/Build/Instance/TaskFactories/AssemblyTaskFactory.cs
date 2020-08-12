@@ -417,15 +417,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, "TaskName");
                 // Parameters match, so now we check to see if the task exists. 
-                LoadedType taskClass = _typeLoader.ReflectionOnlyLoad(taskName, _loadedType.Assembly);
-                if (taskClass != null)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return _typeLoader.ReflectionOnlyLoad(taskName, _loadedType.Assembly) != null;
             }
             catch (TargetInvocationException e)
             {

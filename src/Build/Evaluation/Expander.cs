@@ -4638,8 +4638,6 @@ namespace Microsoft.Build.Evaluation
                 // There are arguments that need to be passed to the function
                 if (argumentStartIndex > -1 && !expressionSubstringAsSpan.Contains(".".AsSpan(), StringComparison.OrdinalIgnoreCase))
                 {
-                    string argumentsContent;
-
                     // separate the function and the arguments
                     functionName = expressionSubstringAsSpan.Trim();
 
@@ -4665,10 +4663,10 @@ namespace Microsoft.Build.Evaluation
                     else
                     {
                         // we have content within the '()' so let's extract and deal with it
-                        argumentsContent = expressionFunction.Substring(argumentStartIndex, argumentsEndIndex - argumentStartIndex);
+                        string argumentsContent = expressionFunction.Substring(argumentStartIndex, argumentsEndIndex - argumentStartIndex);
 
                         // If there are no arguments, then just create an empty array
-                        if (String.IsNullOrEmpty(argumentsContent))
+                        if (string.IsNullOrEmpty(argumentsContent))
                         {
                             functionArguments = Array.Empty<string>();
                         }

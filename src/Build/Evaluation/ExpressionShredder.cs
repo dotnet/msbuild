@@ -233,8 +233,7 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         separatorStart = i - startPoint;
-                        int separatorLength = closingQuote - i;
-                        separator = expression.Substring(i, separatorLength);
+                        separator = expression.Substring(i, closingQuote - i);
 
                         i = closingQuote + 1;
                     }
