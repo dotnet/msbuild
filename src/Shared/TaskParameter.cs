@@ -734,7 +734,7 @@ namespace Microsoft.Build.BackEnd
                     _customEscapedMetadata.TryGetValue(metadataName, out metadataValue);
                 }
 
-                return (metadataValue == null) ? String.Empty : metadataValue;
+                return metadataValue ?? String.Empty;
             }
 
             /// <summary>

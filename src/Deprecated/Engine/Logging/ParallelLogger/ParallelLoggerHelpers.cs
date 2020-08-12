@@ -533,7 +533,7 @@ namespace Microsoft.Build.BuildEngine
         internal ErrorWarningSummaryDictionaryKey(BuildEventContext entryPoint, string targetName)
         {
             this.entryPointContext = entryPoint;
-            this.targetName = targetName == null ? string.Empty : targetName;
+            this.targetName = targetName ?? string.Empty;
         }
         #endregion
 

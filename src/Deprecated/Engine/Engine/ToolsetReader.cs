@@ -134,7 +134,7 @@ namespace Microsoft.Build.BuildEngine
             string defaultToolsVersionFromRegistry = null;
             if ((locations & ToolsetDefinitionLocations.Registry) == ToolsetDefinitionLocations.Registry)
             {
-                ToolsetRegistryReader registryReaderToUse = registryReader == null ? new ToolsetRegistryReader() : registryReader;
+                ToolsetRegistryReader registryReaderToUse = registryReader ?? new ToolsetRegistryReader();
                 // We do not accumulate properties when reading them from the registry, because the order
                 // in which values are returned to us is essentially random: so we disallow one property
                 // in the registry to refer to another also in the registry
@@ -155,7 +155,7 @@ namespace Microsoft.Build.BuildEngine
 
                 if (configurationReader != null)
                 {
-                    ToolsetConfigurationReader configurationReaderToUse = configurationReader == null ? new ToolsetConfigurationReader() : configurationReader;
+                    ToolsetConfigurationReader configurationReaderToUse = configurationReader ?? new ToolsetConfigurationReader();
                     // Accumulation of properties is okay in the config file because it's deterministically ordered
                     defaultToolsVersionFromConfiguration =
                         configurationReaderToUse.ReadToolsets(toolsets, globalProperties, initialProperties, true /* accumulate properties */);
@@ -387,7 +387,7 @@ namespace Microsoft.Build.BuildEngine
 
             try
             {
-                toolset = new Toolset(toolsVersion.Name, toolsPath == null ? binPath : toolsPath, properties);
+                toolset = new Toolset(toolsVersion.Name, toolsPath ?? binPath, properties);
             }
             catch (ArgumentException e)
             {

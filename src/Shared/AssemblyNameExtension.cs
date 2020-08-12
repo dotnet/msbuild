@@ -712,7 +712,7 @@ namespace Microsoft.Build.Shared
             }
 
             // If that is null then this and that are not equal. Also, this would cause a crash on the next line.
-            if (object.ReferenceEquals(that, null))
+            if (that is null)
             {
                 return false;
             }
@@ -922,7 +922,7 @@ namespace Microsoft.Build.Shared
             }
 
             // If that is null then this and that are not equal. Also, this would cause a crash on the next line.
-            if (object.ReferenceEquals(that, null))
+            if (that is null)
             {
                 return false;
             }

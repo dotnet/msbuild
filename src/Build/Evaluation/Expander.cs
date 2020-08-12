@@ -82,6 +82,11 @@ namespace Microsoft.Build.Evaluation
         LeavePropertiesUnexpandedOnError = 0x20,
 
         /// <summary>
+        /// When an expansion occurs, truncate it to Expander.DefaultTruncationCharacterLimit or Expander.DefaultTruncationItemLimit.
+        /// </summary>
+        Truncate = 0x40,
+
+        /// <summary>
         /// Expand only properties and then item lists
         /// </summary>
         ExpandPropertiesAndItems = ExpandProperties | ExpandItems,
@@ -119,6 +124,16 @@ namespace Microsoft.Build.Evaluation
         where P : class, IProperty
         where I : class, IItem
     {
+        /// <summary>
+        /// A limit for truncating string expansions within an evaluated Condition. Properties, item metadata, or item groups will be truncated to N characters such as 'N...'.
+        /// Enabled by ExpanderOptions.Truncate.
+        /// </summary>
+        private const int CharacterLimitPerExpansion = 1024;
+        /// <summary>
+        /// A limit for truncating string expansions for item groups within an evaluated Condition. N items will be evaluated such as 'A;B;C;...'.
+        /// Enabled by ExpanderOptions.Truncate.
+        /// </summary>
+        private const int ItemLimitPerExpansion = 3;
         private static readonly char[] s_singleQuoteChar = { '\'' };
         private static readonly char[] s_backtickChar = { '`' };
         private static readonly char[] s_doubleQuoteChar = { '"' };
@@ -459,6 +474,14 @@ namespace Microsoft.Build.Evaluation
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Returns true if ExpanderOptions.Truncate is set and EscapeHatches.DoNotTruncateConditions is not set
+        /// </summary>
+        private static bool IsTruncationEnabled(ExpanderOptions options)
+        {
+            return (options & ExpanderOptions.Truncate) != 0 && !Traits.Instance.EscapeHatches.DoNotTruncateConditions;
         }
 
         /// <summary>
@@ -840,7 +863,7 @@ namespace Microsoft.Build.Evaluation
                 internal MetadataMatchEvaluator(IMetadataTable metadata, ExpanderOptions options)
                 {
                     _metadata = metadata;
-                    _options = (options & ExpanderOptions.ExpandMetadata);
+                    _options = options & (ExpanderOptions.ExpandMetadata | ExpanderOptions.Truncate);
 
                     ErrorUtilities.VerifyThrow(options != ExpanderOptions.Invalid, "Must be expanding metadata of some kind");
                 }
@@ -872,6 +895,10 @@ namespace Microsoft.Build.Evaluation
                         )
                     {
                         metadataValue = _metadata.GetEscapedValue(itemType, metadataName);
+                        if (IsTruncationEnabled(_options) && metadataValue.Length > CharacterLimitPerExpansion)
+                        {
+                            metadataValue = metadataValue.Substring(0, CharacterLimitPerExpansion - 3) + "...";
+                        }
                     }
 
                     return metadataValue;
@@ -1084,6 +1111,15 @@ namespace Microsoft.Build.Evaluation
                         else // This is a regular property
                         {
                             propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, usedUninitializedProperties);
+                        }
+
+                        if (IsTruncationEnabled(options) && propertyValue != null)
+                        {
+                            var value = propertyValue.ToString();
+                            if (value.Length > CharacterLimitPerExpansion)
+                            {
+                                propertyValue = value.Substring(0, CharacterLimitPerExpansion - 3) + "...";
+                            }
                         }
 
                         // Record our result, and advance
@@ -2017,9 +2053,32 @@ namespace Microsoft.Build.Evaluation
                     return true;
                 }
 
+                int startLength = builder.Length;
+                bool truncate = IsTruncationEnabled(options);
+
                 // if the capture.Separator is not null, then ExpandExpressionCapture would have joined the items using that separator itself
-                foreach (var item in itemsFromCapture)
+                for (int i = 0; i < itemsFromCapture.Count; i++)
                 {
+                    var item = itemsFromCapture[i];
+                    if (truncate)
+                    {
+                        if (i >= ItemLimitPerExpansion)
+                        {
+                            builder.Append("...");
+                            return false;
+                        }
+                        int currentLength = builder.Length - startLength;
+                        if (currentLength + item.Key.Length > CharacterLimitPerExpansion)
+                        {
+                            int truncateIndex = CharacterLimitPerExpansion - currentLength - 3;
+                            if (truncateIndex > 0)
+                            {
+                                builder.Append(item.Key, 0, truncateIndex);
+                            }
+                            builder.Append("...");
+                            return false;
+                        }
+                    }
                     builder.Append(item.Key);
                     builder.Append(';');
                 }

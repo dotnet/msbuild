@@ -249,11 +249,11 @@ namespace Microsoft.Build.BuildEngine
                     ErrorUtilities.VerifyThrow(!buildResult.EvaluationResult || (buildResult.InitialTargets != null 
                                                && buildResult.DefaultTargets != null), 
                                                "Expect initial targets to be non-null for successful builds");
-                    string defaultTargets = buildResult.DefaultTargets == null ? String.Empty : buildResult.DefaultTargets;
+                    string defaultTargets = buildResult.DefaultTargets ?? String.Empty;
                     PropertyCacheEntry defaultTargetsCacheEntry = new PropertyCacheEntry(Constants.defaultTargetCacheName, defaultTargets);
                     AddCacheEntryInternal(defaultTargetsCacheEntry);
 
-                    string initialTargets = buildResult.InitialTargets == null ? String.Empty : buildResult.InitialTargets;
+                    string initialTargets = buildResult.InitialTargets ?? String.Empty;
                     PropertyCacheEntry initialTargetsCacheEntry = new PropertyCacheEntry(Constants.initialTargetCacheName, initialTargets );
                     AddCacheEntryInternal(initialTargetsCacheEntry);
                 }

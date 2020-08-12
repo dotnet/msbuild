@@ -370,7 +370,7 @@ namespace Microsoft.Build.BuildEngine
             // task element.
             string attributeValue = taskElement.GetAttribute(attributeName);
 
-            return (attributeValue == null) ? String.Empty : attributeValue;
+            return attributeValue ?? String.Empty;
         }
 
         /// <summary>
