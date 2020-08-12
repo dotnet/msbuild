@@ -132,4 +132,7 @@
   <data name="UnableToLocateNETCoreSdk" xml:space="preserve">
     <value>Unable to locate the .NET SDK. Check that it is installed and that the version specified in global.json (if any) matches the installed version.</value>
   </data>
+  <data name="GlobalJsonResolutionFailed" xml:space="preserve">
+    <value>Unable to locate the .NET SDK as specified by global.json, please check that the specified version is installed.</value>
+  </data>
 </root>

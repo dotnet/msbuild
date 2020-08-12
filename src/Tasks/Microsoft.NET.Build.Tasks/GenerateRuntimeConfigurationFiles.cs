@@ -10,6 +10,7 @@ using Microsoft.Build.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using NuGet.Frameworks;
 using NuGet.ProjectModel;
 
 namespace Microsoft.NET.Build.Tasks
@@ -21,9 +22,6 @@ namespace Microsoft.NET.Build.Tasks
     public class GenerateRuntimeConfigurationFiles : TaskBase
     {
         public string AssetsFilePath { get; set; }
-
-        [Required]
-        public string TargetFramework { get; set; }
 
         [Required]
         public string TargetFrameworkMoniker { get; set; }
@@ -179,7 +177,7 @@ namespace Microsoft.NET.Build.Tasks
                                    LockFileTargetLibrary lockFilePlatformLibrary,
                                    bool isFrameworkDependent)
         {
-            runtimeOptions.Tfm = TargetFramework;
+            runtimeOptions.Tfm = NuGetFramework.Parse(TargetFrameworkMoniker).GetShortFolderName();
 
             var frameworks = new List<RuntimeConfigFramework>();
             if (runtimeFrameworks == null || runtimeFrameworks.Length == 0)

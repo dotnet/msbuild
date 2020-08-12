@@ -38,7 +38,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_ContentIncludedByDefault Include="@(Content)" />
   </ItemGroup>
 
-  <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="../Targets/Microsoft.NET.Sdk.Web.DefaultItems.props" />
+  <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="../targets/Microsoft.NET.Sdk.Web.DefaultItems.props" />
 
 </Project>
 

@@ -94,6 +94,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="CannotHaveSingleFileWithoutExecutable" />
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' And '$(_IsExecutable)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETCoreApp'"
                  ResourceName="CanOnlyHaveSingleFileWithNetCoreApp" />
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' And
+                            '$(IncludeSymbolsInSingleFile)' == 'true' And
+                            '$(_TargetFrameworkVersionWithoutV)' >= '5.0' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+                 ResourceName="CannotIncludeSymbolsInSingleFile" />
 
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->
@@ -998,22 +1002,25 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <TraceSingleFileBundler Condition="'$(TraceSingleFileBundler)' == ''">false</TraceSingleFileBundler>
       <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
-      <IncludeNativeLibrariesInSingleFile Condition="'$(IncludeNativeLibrariesInSingleFile)' == ''">false</IncludeNativeLibrariesInSingleFile>
-      <IncludeAllContentInSingleFile Condition="'$(IncludeAllContentInSingleFile)' == ''">false</IncludeAllContentInSingleFile>
-    </PropertyGroup>    
+      <IncludeAllContentForSelfExtract Condition="'$(IncludeAllContentForSelfExtract)' == ''">false</IncludeAllContentForSelfExtract>
+      <IncludeNativeLibrariesForSelfExtract Condition="'$(IncludeNativeLibrariesForSelfExtract)' == ''">$(IncludeAllContentForSelfExtract)</IncludeNativeLibrariesForSelfExtract>
+    </PropertyGroup>
+
+    <NETSdkError Condition="'$(IncludeAllContentForSelfExtract)' == 'true' And '$(IncludeNativeLibrariesForSelfExtract)' != 'true'"
+                 ResourceName="CannotIncludeAllContentButNotNativeLibrariesInSingleFile" />
 
     <GenerateBundle FilesToBundle="@(_FilesToBundle)"
                     AppHostName="$(PublishedSingleFileName)"
                     IncludeSymbols="$(IncludeSymbolsInSingleFile)"
-                    IncludeNativeLibraries="$(IncludeNativeLibrariesInSingleFile)"
-                    IncludeAllContent="$(IncludeAllContentInSingleFile)"                    
+                    IncludeNativeLibraries="$(IncludeNativeLibrariesForSelfExtract)"
+                    IncludeAllContent="$(IncludeAllContentForSelfExtract)"
                     TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
                     RuntimeIdentifier="$(RuntimeIdentifier)"
                     OutputDir="$(PublishDir)"
                     ShowDiagnosticOutput="$(TraceSingleFileBundler)">
       <Output TaskParameter="ExcludedFiles" ItemName="_FilesExcludedFromBundle"/>
     </GenerateBundle>
-  
+
     <ItemGroup>
       <ResolvedFileToPublish Include="@(_FilesExcludedFromBundle)"/>
       <!-- ResolvedFileToPublish shouldn't include PublishedSingleFilePath, since the single-file bundle is written directly to the publish directory -->

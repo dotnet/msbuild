@@ -289,7 +289,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
                                        TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
-                                       TargetFramework="$(TargetFramework)"
                                        RuntimeConfigPath="$(ProjectRuntimeConfigFilePath)"
                                        RuntimeConfigDevPath="$(ProjectRuntimeConfigDevFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
