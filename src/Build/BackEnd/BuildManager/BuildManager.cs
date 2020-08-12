@@ -2020,9 +2020,7 @@ namespace Microsoft.Build.Execution
 
         internal NodeInfo CreateRarNode()
         {
-            NodeConfiguration configuration = GetNodeConfiguration();
-            configuration.RarNode = true;
-            return _nodeManager.CreateNode(configuration, NodeAffinity.OutOfProc);
+            return null;
         }
 
         /// <summary>

@@ -98,18 +98,18 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private SharedReadBuffer _sharedReadBuffer;
 
-#endregion
+        #endregion
 
-#region INodeEndpoint Events
+        #region INodeEndpoint Events
 
         /// <summary>
         /// Raised when the link status has changed.
         /// </summary>
         public event LinkStatusChangedDelegate OnLinkStatusChanged;
 
-#endregion
+        #endregion
 
-#region INodeEndpoint Properties
+        #region INodeEndpoint Properties
 
         /// <summary>
         /// Returns the link status of this node.
@@ -119,13 +119,13 @@ namespace Microsoft.Build.BackEnd
             get { return _status; }
         }
 
-#endregion
+        #endregion
 
-#region Properties
+        #region Properties
 
-#endregion
+        #endregion
 
-#region INodeEndpoint Methods
+        #region INodeEndpoint Methods
 
         /// <summary>
         /// Causes this endpoint to wait for the remote endpoint to connect
@@ -170,9 +170,9 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-#endregion
+        #endregion
 
-#region Construction
+        #region Construction
 
         /// <summary>
         /// Instantiates an endpoint to act as a client
@@ -187,52 +187,10 @@ namespace Microsoft.Build.BackEnd
             _status = LinkStatus.Inactive;
             _asyncDataMonitor = new object();
             _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
-
-#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
-            if (!NativeMethodsShared.IsMono)
-            {
-                SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
-                PipeSecurity security = new PipeSecurity();
-
-                // Restrict access to just this account.  We set the owner specifically here, and on the
-                // pipe client side they will check the owner against this one - they must have identical
-                // SIDs or the client will reject this server.  This is used to avoid attacks where a
-                // hacked server creates a less restricted pipe in an attempt to lure us into using it and 
-                // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
-                PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
-                security.AddAccessRule(rule);
-                security.SetOwner(identifier);
-
-                _pipeServer = new NamedPipeServerStream
-                    (
-                    pipeName,
-                    PipeDirection.InOut,
-                    1, // Only allow one connection at a time.
-                    PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
-                    PipeBufferSize, // Default input buffer
-                    PipeBufferSize,  // Default output buffer
-                    security,
-                    HandleInheritability.None
-                );
-            }
-            else
-#endif
-            {
-                _pipeServer = new NamedPipeServerStream
-                    (
-                    pipeName,
-                    PipeDirection.InOut,
-                    1, // Only allow one connection at a time.
-                    PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
-                    PipeBufferSize, // Default input buffer
-                    PipeBufferSize  // Default output buffer
-                );
-             }
+            _pipeServer = NamedPipeUtil.CreateNamedPipeServer(pipeName, PipeBufferSize, PipeBufferSize);
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Returns the host handshake for this node endpoint
@@ -260,7 +218,7 @@ namespace Microsoft.Build.BackEnd
             OnLinkStatusChanged?.Invoke(this, newStatus);
         }
 
-#region Private Methods
+        #region Private Methods
 
         /// <summary>
         /// This does the actual work of changing the status and shutting down any threads we may have for
@@ -281,7 +239,7 @@ namespace Microsoft.Build.BackEnd
             ChangeLinkStatus(LinkStatus.Inactive);
         }
 
-#region Asynchronous Mode Methods
+        #region Asynchronous Mode Methods
 
         /// <summary>
         /// Adds a packet to the packet queue when asynchronous mode is enabled.
@@ -561,8 +519,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-#endregion
+        #endregion
 
-#endregion
+        #endregion
     }
 }

@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.IO.Pipes;
+using System.Security.AccessControl;
 using System.Security.Principal;
 
 using Microsoft.Build.Internal;
@@ -12,6 +13,11 @@ namespace Microsoft.Build.Shared
 {
     internal static class NamedPipeUtil
     {
+        /// <summary>
+        /// The size of the buffers to use for named pipes
+        /// </summary>
+        private const int PipeBufferSize = 131072;
+
         internal static string GetPipeNameOrPath(string pipeName)
         {
             if (NativeMethodsShared.IsUnixLike)
@@ -56,7 +62,8 @@ namespace Microsoft.Build.Shared
         internal static NamedPipeClientStream TryConnectToProcess(int nodeProcessId, int timeout, Handshake? handshake)
         {
             string pipeName = GetPipeNameOrPath("MSBuild" + nodeProcessId);
-            return TryConnectToProcess(pipeName, timeout, timeout, handshake);
+            Console.WriteLine(handshake);
+            return TryConnectToProcess(pipeName, nodeProcessId, timeout, handshake);
         }
 
         /// <summary>
@@ -221,6 +228,52 @@ namespace Microsoft.Build.Shared
             }
 
             return true;
+        }
+
+        internal static NamedPipeServerStream CreateNamedPipeServer(string pipeName, int? inputBufferSize = null, int? outputBufferSize = null, int maxNumberOfServerInstances = 1)
+        {
+            inputBufferSize ??= PipeBufferSize;
+            outputBufferSize ??= PipeBufferSize;
+
+#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
+            if (!NativeMethodsShared.IsMono)
+            {
+                SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
+                PipeSecurity security = new PipeSecurity();
+
+                // Restrict access to just this account.  We set the owner specifically here, and on the
+                // pipe client side they will check the owner against this one - they must have identical
+                // SIDs or the client will reject this server.  This is used to avoid attacks where a
+                // hacked server creates a less restricted pipe in an attempt to lure us into using it and 
+                // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
+                PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
+                security.AddAccessRule(rule);
+                security.SetOwner(identifier);
+
+                return new NamedPipeServerStream
+                    (
+                    pipeName,
+                    PipeDirection.InOut,
+                    maxNumberOfServerInstances, // Only allow one connection at a time.
+                    PipeTransmissionMode.Byte,
+                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    inputBufferSize.Value, // Default input buffer
+                    outputBufferSize.Value,  // Default output buffer
+                    security,
+                    HandleInheritability.None
+                );
+            }
+#endif
+            return new NamedPipeServerStream
+            (
+                pipeName,
+                PipeDirection.InOut,
+                maxNumberOfServerInstances, // Only allow one connection at a time.
+                PipeTransmissionMode.Byte,
+                PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                inputBufferSize.Value, // Default input buffer
+                outputBufferSize.Value  // Default output buffer
+            );
         }
     }
 }

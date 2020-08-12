@@ -102,7 +102,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="nodeReuse">Whether to reuse the node</param>
         /// <param name="terminateNode">Delegate used to tell the node provider that a context has terminated</param>
-        protected void ShutdownAllNodes(bool nodeReuse, NodeContextTerminateDelegate terminateNode)
+        /// <param name="onlySpecialNode">Shutdown only special nodes (RAR node, ...)</param>
+        protected void ShutdownAllNodes(bool nodeReuse, NodeContextTerminateDelegate terminateNode, bool onlySpecialNode = false)
         {
             // INodePacketFactory
             INodePacketFactory factory = new NodePacketFactory();
@@ -121,11 +122,15 @@ namespace Microsoft.Build.BackEnd
                 // A 2013 comment suggested some nodes take this long to respond, so a smaller timeout would miss nodes.
                 int timeout = 30;
 
-                // Attempt to connect to the process with the handshake without low priority.
-                Stream nodeStream = NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: false, specialNode: false));
+                Stream nodeStream = null;
+                if (!onlySpecialNode)
+                {
+                    // Attempt to connect to the process with the handshake without low priority.
+                    nodeStream = NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: false, specialNode: false));
 
-                // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                nodeStream ??= NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: true, specialNode: false));
+                    // If we couldn't connect attempt to connect to the process with the handshake including low priority.
+                    nodeStream ??= NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: true, specialNode: false));
+                }
 
                 // Attempt to connect to the non-worker process
                 // Attempt to connect to the process with the handshake without low priority.
