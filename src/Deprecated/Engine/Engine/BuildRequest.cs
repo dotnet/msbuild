@@ -364,7 +364,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (handleId != EngineCallback.invalidEngineHandle);
+                return handleId != EngineCallback.invalidEngineHandle;
             }
         }
 

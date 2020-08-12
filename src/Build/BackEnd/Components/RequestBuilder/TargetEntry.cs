@@ -163,11 +163,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="stopProcessingOnCompletion">True if the target builder should stop processing the current target stack when this target is complete.</param>
         internal TargetEntry(BuildRequestEntry requestEntry, ITargetBuilderCallback targetBuilderCallback, TargetSpecification targetSpecification, Lookup baseLookup, TargetEntry parentTarget, TargetBuiltReason buildReason, IBuildComponentHost host, bool stopProcessingOnCompletion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, "requestEntry");
-            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback, "targetBuilderCallback");
+            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, nameof(requestEntry));
+            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback, nameof(targetBuilderCallback));
             ErrorUtilities.VerifyThrowArgumentNull(targetSpecification, "targetName");
             ErrorUtilities.VerifyThrowArgumentNull(baseLookup, "lookup");
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
 
             _requestEntry = requestEntry;
             _targetBuilderCallback = targetBuilderCallback;
@@ -432,7 +432,7 @@ namespace Microsoft.Build.BackEnd
                 string projectFullPath = requestEntry.RequestConfiguration.ProjectFullPath;
 
                 string parentTargetName = null;
-                if (ParentEntry != null && ParentEntry.Target != null)
+                if (ParentEntry?.Target != null)
                 {
                     parentTargetName = ParentEntry.Target.Name;
                 }
@@ -531,7 +531,7 @@ namespace Microsoft.Build.BackEnd
                                 entryForInference = null;
                                 entryForExecution.LeaveScope();
                                 entryForExecution = null;
-                                targetSuccess = (bucketResult != null) && (bucketResult.ResultCode == WorkUnitResultCode.Success);
+                                targetSuccess = (bucketResult?.ResultCode == WorkUnitResultCode.Success);
                                 break;
 
                             case DependencyAnalysisResult.SkipNoInputs:
@@ -547,15 +547,9 @@ namespace Microsoft.Build.BackEnd
                         // the log is confusing.
                         targetLoggingContext.LogInvalidProjectFileError(e);
 
-                        if (null != entryForInference)
-                        {
-                            entryForInference.LeaveScope();
-                        }
+                        entryForInference?.LeaveScope();
 
-                        if (null != entryForExecution)
-                        {
-                            entryForExecution.LeaveScope();
-                        }
+                        entryForExecution?.LeaveScope();
 
                         aggregateResult = aggregateResult.AggregateResult(new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
                     }
@@ -653,11 +647,11 @@ namespace Microsoft.Build.BackEnd
                 }
                 finally
                 {
-                    if (targetLoggingContext != null)
-                    {
+                       
+                    
                         // log the last target finished since we now have the target outputs. 
-                        targetLoggingContext.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems != null && targetOutputItems.Count > 0 ? targetOutputItems : null);
-                    }
+                        targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems?.Count > 0 ? targetOutputItems : null);
+                    
                 }
 
                 _targetResult = new TargetResult(targetOutputItems.ToArray(), aggregateResult);

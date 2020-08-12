@@ -42,7 +42,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
-            if (ItemsToHash != null && ItemsToHash.Length > 0)
+            if (ItemsToHash?.Length > 0)
             {
                 using (var sha1 = SHA1.Create())
                 {

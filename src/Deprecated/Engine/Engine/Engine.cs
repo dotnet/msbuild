@@ -905,7 +905,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="toolset">the Toolset</param>
         internal void AddToolset(Toolset toolset)
         {
-            error.VerifyThrowArgumentNull(toolset, "toolset");
+            error.VerifyThrowArgumentNull(toolset, nameof(toolset));
 
             if (toolsetStateMap.ContainsKey(toolset.ToolsVersion))
             {
@@ -1042,7 +1042,7 @@ namespace Microsoft.Build.BuildEngine
         /// <exception cref="InternalLoggerException">Logger threw arbitrary exception</exception>
         public void RegisterLogger(ILogger logger)
         {
-            error.VerifyThrowArgumentNull(logger, "logger");
+            error.VerifyThrowArgumentNull(logger, nameof(logger));
 
             // Since we are registering a central logger - need to make sure central logging is enabled for all nodes
             if (!enabledCentralLogging)
@@ -1111,7 +1111,7 @@ namespace Microsoft.Build.BuildEngine
         /// <exception cref="InternalLoggerException">Logger threw arbitrary exception</exception>
         public void RegisterDistributedLogger(ILogger centralLogger, LoggerDescription forwardingLogger)
         {
-            error.VerifyThrowArgumentNull(forwardingLogger, "forwardingLogger");
+            error.VerifyThrowArgumentNull(forwardingLogger, nameof(forwardingLogger));
             if (centralLogger == null)
             {
                 centralLogger = new NullCentralLogger();
@@ -1204,7 +1204,7 @@ namespace Microsoft.Build.BuildEngine
         /// <exception cref="InternalLoggerException">Logger threw arbitrary exception</exception>
         public void UnregisterAllLoggers()
         {
-            if (forwardingLoggers != null && forwardingLoggers.Count > 0)
+            if (forwardingLoggers?.Count > 0)
             {
                 // Disconnect forwarding loggers from the event source
                 ((EngineLoggingServicesInProc)primaryLoggingServices).UnregisterEventSource
@@ -1263,7 +1263,7 @@ namespace Microsoft.Build.BuildEngine
                 // parent node, so post the event directly to the forwarding loggers.
                 if (Router.ChildMode)
                 {
-                    if (loggers != null && loggers.Count > 0)
+                    if (loggers?.Count > 0)
                     {
                         // Flush all the events currently in the queue
                         LoggingServices.ProcessPostedLoggingEvents();
@@ -1351,7 +1351,7 @@ namespace Microsoft.Build.BuildEngine
             string projectFullFileName
             )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFullFileName, "projectFullFileName");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFullFileName, nameof(projectFullFileName));
             return (Project)this.projectsLoadedByHost[projectFullFileName];
         }
 
@@ -1372,7 +1372,7 @@ namespace Microsoft.Build.BuildEngine
             Project project
             )
         {
-            error.VerifyThrowArgumentNull(project, "project");
+            error.VerifyThrowArgumentNull(project, nameof(project));
 
             ErrorUtilities.VerifyThrow(project.IsLoadedByHost, "How did the caller get a reference to this Project object if it's not marked as loaded?");
             // Make sure this project object is associated with this engine object.
@@ -1943,7 +1943,7 @@ namespace Microsoft.Build.BuildEngine
                 // Flush out all the logging messages, which may have been posted outside target execution
                 primaryLoggingServices.ProcessPostedLoggingEvents();
 
-                if (buildRequest != null && buildRequest.BuildCompleted || exitedDueToError)
+                if (buildRequest?.BuildCompleted == true || exitedDueToError)
                 {
 #if (!STANDALONEBUILD)
                     CodeMarkers.Instance.CodeMarker(CodeMarkerEvent.perfMSBuildEngineBuildProjectEnd);
@@ -2030,8 +2030,8 @@ namespace Microsoft.Build.BuildEngine
                 buildRequest.ProcessingTotalTime += DateTime.Now.Ticks - buildRequest.ProcessingStartTime;
             }
 
-            if (buildRequest != null && buildRequest.BuildCompleted ||
-                buildContext != null && buildContext.BuildComplete )
+            if (buildRequest?.BuildCompleted == true ||
+                buildContext?.BuildComplete == true)
             {
                 DecrementProjectsInProgress();
             }
@@ -2319,7 +2319,7 @@ namespace Microsoft.Build.BuildEngine
             BuildEventContext buildEventContext;
 
             // Already have an instantiated project in the OM and it has not fired a project started event for itself yet
-            if (project != null && !project.HaveUsedInitialProjectContextId)
+            if (project?.HaveUsedInitialProjectContextId == false)
             {
                 buildEventContext = project.ProjectBuildEventContext;
             }
@@ -2693,7 +2693,7 @@ namespace Microsoft.Build.BuildEngine
                 buildRequest.ResultByTarget[builtTargetName] = buildState;
 
                 primaryLoggingServices.LogComment(currentContext,
-                    ((buildState == Target.BuildState.CompletedSuccessfully) ? "TargetAlreadyCompleteSuccess" : "TargetAlreadyCompleteFailure"),
+                    (buildState == Target.BuildState.CompletedSuccessfully) ? "TargetAlreadyCompleteSuccess" : "TargetAlreadyCompleteFailure",
                     builtTargetName);
 
                 if (buildState == Target.BuildState.CompletedUnsuccessfully)
@@ -2794,7 +2794,7 @@ namespace Microsoft.Build.BuildEngine
                 if (this.cacheOfBuildingProjects.HasProjectBeenLoaded(projectFullPath, globalPropertiesToUse, toolsVersionToUse))
                 {
                     string joinedNames = ResourceUtilities.FormatResourceString("DefaultTargets");
-                    if (targetNames != null && targetNames.Length > 0)
+                    if (targetNames?.Length > 0)
                     {
                         joinedNames = EscapingUtilities.UnescapeAll(String.Join(";", targetNames));
                     }
@@ -2993,7 +2993,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 foreach (Target target in project.Targets)
                 {
-                    if (target.ExecutionState != null && target.ExecutionState.BuildingRequiredTargets)
+                    if (target.ExecutionState?.BuildingRequiredTargets == true)
                     {
                         inProgressTargets.Add(target);
                     }

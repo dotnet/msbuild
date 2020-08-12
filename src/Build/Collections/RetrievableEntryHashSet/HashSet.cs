@@ -170,7 +170,7 @@ namespace Microsoft.Build.Collections
         {
             if (collection == null)
             {
-                throw new ArgumentNullException("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
 
             Contract.EndContractBlock();
@@ -285,18 +285,18 @@ namespace Microsoft.Build.Collections
         // Convenience
         internal bool Contains(string key)
         {
-            return (Get(key) != null);
+            return Get(key) != null;
         }
 
         bool ICollection<KeyValuePair<string, T>>.Contains(KeyValuePair<string, T> entry)
         {
             Debug.Assert(String.Equals(entry.Key, entry.Value.Key, StringComparison.Ordinal));
-            return (Get(entry.Value.Key) != null);
+            return Get(entry.Value.Key) != null;
         }
 
         public bool ContainsKey(string key)
         {
-            return (Get(key) != null);
+            return Get(key) != null;
         }
 
         T IDictionary<string, T>.this[string name]
@@ -312,14 +312,14 @@ namespace Microsoft.Build.Collections
         /// <returns>true if item contained; false if not</returns>
         public bool Contains(T item)
         {
-            return (Get(item.Key) != null);
+            return Get(item.Key) != null;
         }
 
         // Convenience to minimise change to callers used to dictionaries
         public bool TryGetValue(string key, out T item)
         {
             item = Get(key);
-            return (item != null);
+            return item != null;
         }
 
         /// <summary>
@@ -342,10 +342,10 @@ namespace Microsoft.Build.Collections
         public T Get(string key, int index, int length)
         {
             if (length < 0)
-                throw new ArgumentOutOfRangeException("length");
+                throw new ArgumentOutOfRangeException(nameof(length));
 
             if (index < 0 || index > (key == null ? 0 : key.Length) - length)
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
 
             if (_constrainedComparer == null)
                 throw new InvalidOperationException("Cannot do a constrained lookup on this collection.");
@@ -517,7 +517,7 @@ namespace Microsoft.Build.Collections
         {
             if (info == null)
             {
-                throw new ArgumentNullException("info");
+                throw new ArgumentNullException(nameof(info));
             }
 
             // need to serialize version to avoid problems with serializing while enumerating
@@ -619,7 +619,7 @@ namespace Microsoft.Build.Collections
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw new ArgumentNullException(nameof(other));
             }
             Contract.EndContractBlock();
 
@@ -1005,20 +1005,20 @@ namespace Microsoft.Build.Collections
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             }
             Contract.EndContractBlock();
 
             // check array index valid index into array
             if (arrayIndex < 0)
             {
-                throw new ArgumentOutOfRangeException("arrayIndex");
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex));
             }
 
             // also throw if count less than 0
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
             // will array, starting at arrayIndex, be able to hold elements? Note: not

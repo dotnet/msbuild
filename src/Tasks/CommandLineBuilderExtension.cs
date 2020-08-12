@@ -70,7 +70,7 @@ namespace Microsoft.Build.Tasks
             {
                 bool value = (bool)obj;
                 // Do not quote - or + as they are part of the switch
-                AppendSwitchUnquotedIfNotNull(switchName, (value ? "+" : "-"));
+                AppendSwitchUnquotedIfNotNull(switchName, value ? "+" : "-");
             }
         }
 
@@ -107,7 +107,7 @@ namespace Microsoft.Build.Tasks
             if (obj != null)
             {
                 bool value = (bool)obj;
-                AppendSwitchUnquotedIfNotNull(switchName, (value ? choice1 : choice2));
+                AppendSwitchUnquotedIfNotNull(switchName, value ? choice1 : choice2);
             }
         }
 

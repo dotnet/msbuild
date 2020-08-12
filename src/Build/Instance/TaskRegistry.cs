@@ -153,7 +153,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal TaskRegistry(ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
+            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
 
             RootElementCache = projectRootElementCache;
         }
@@ -173,8 +173,8 @@ namespace Microsoft.Build.Execution
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         internal TaskRegistry(Toolset toolset, ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
-            ErrorUtilities.VerifyThrowInternalNull(toolset, "toolset");
+            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowInternalNull(toolset, nameof(toolset));
 
             RootElementCache = projectRootElementCache;
             _toolset = toolset;
@@ -228,7 +228,7 @@ namespace Microsoft.Build.Execution
             where P : class, IProperty
             where I : class, IItem
         {
-            ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile, "directoryOfImportingFile");
+            ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile, nameof(directoryOfImportingFile));
 
             if (!ConditionEvaluator.EvaluateCondition
                 (
@@ -380,8 +380,8 @@ namespace Microsoft.Build.Execution
             {
                 taskFactoryParameters = CreateTaskFactoryParametersDictionary();
 
-                taskFactoryParameters.Add(XMakeAttributes.runtime, (runtime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : runtime));
-                taskFactoryParameters.Add(XMakeAttributes.architecture, (architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture));
+                taskFactoryParameters.Add(XMakeAttributes.runtime, runtime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : runtime);
+                taskFactoryParameters.Add(XMakeAttributes.architecture, architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
             taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord);
@@ -477,7 +477,7 @@ namespace Microsoft.Build.Execution
             }
 
             // Try the current task registry
-            if (taskRecord == null && _taskRegistrations != null && _taskRegistrations.Count > 0)
+            if (taskRecord == null && _taskRegistrations?.Count > 0)
             {
                 if (exactMatchRequired)
                 {
@@ -591,9 +591,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private static bool IsTaskFactoryClass(Type type, object unused)
         {
-            return (type.GetTypeInfo().IsClass &&
+            return type.GetTypeInfo().IsClass &&
                 !type.GetTypeInfo().IsAbstract &&
-                typeof(Microsoft.Build.Framework.ITaskFactory).IsAssignableFrom(type));
+                typeof(Microsoft.Build.Framework.ITaskFactory).IsAssignableFrom(type);
         }
 
         /// <summary>
@@ -639,8 +639,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void RegisterTask(string taskName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, Dictionary<string, string> taskFactoryParameters, RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord)
         {
-            ErrorUtilities.VerifyThrowInternalLength(taskName, "taskName");
-            ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo, "assemblyLoadInfo");
+            ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
+            ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo, nameof(assemblyLoadInfo));
 
             // Lazily allocate the hashtable
             if (_taskRegistrations == null)
@@ -1539,8 +1539,8 @@ namespace Microsoft.Build.Execution
                     where P : class, IProperty
                     where I : class, IItem
                 {
-                    ErrorUtilities.VerifyThrowArgumentNull(projectUsingTaskXml, "projectUsingTaskXml");
-                    ErrorUtilities.VerifyThrowArgumentNull(expander, "expander");
+                    ErrorUtilities.VerifyThrowArgumentNull(projectUsingTaskXml, nameof(projectUsingTaskXml));
+                    ErrorUtilities.VerifyThrowArgumentNull(expander, nameof(expander));
 
                     ProjectUsingTaskBodyElement taskElement = projectUsingTaskXml.TaskBody;
                     if (taskElement != null)
@@ -1661,7 +1661,7 @@ namespace Microsoft.Build.Execution
 
                         if (
                             (!output && (!TaskParameterTypeVerifier.IsValidInputParameter(paramType))) ||
-                            (output && !(TaskParameterTypeVerifier.IsValidOutputParameter(paramType)))
+                            (output && !TaskParameterTypeVerifier.IsValidOutputParameter(paramType))
                            )
                         {
                             ProjectErrorUtilities.ThrowInvalidProject

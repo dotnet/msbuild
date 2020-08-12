@@ -116,9 +116,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="targetBuilderCallback">An <see cref="ITargetBuilderCallback"/> to use to invoke targets and build projects.</param>
         public TaskHost(IBuildComponentHost host, BuildRequestEntry requestEntry, ElementLocation taskLocation, ITargetBuilderCallback targetBuilderCallback)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
-            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, "requestEntry");
-            ErrorUtilities.VerifyThrowInternalNull(taskLocation, "taskLocation");
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, nameof(requestEntry));
+            ErrorUtilities.VerifyThrowInternalNull(taskLocation, nameof(taskLocation));
 
             _host = host;
             _requestEntry = requestEntry;
@@ -390,7 +390,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+                ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
                 if (!_activeProxy)
                 {
@@ -461,7 +461,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+                ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
                 if (!_activeProxy)
                 {
@@ -502,7 +502,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+                ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
                 if (!_activeProxy)
                 {
@@ -543,7 +543,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+                ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
                 if (!_activeProxy)
                 {
@@ -634,7 +634,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(eventName, "eventName");
+                ErrorUtilities.VerifyThrowArgumentNull(eventName, nameof(eventName));
 
                 if (!_activeProxy)
                 {
@@ -685,8 +685,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public async Task<BuildEngineResult> InternalBuildProjects(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, "projectFileNames");
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, "globalProperties");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, nameof(projectFileNames));
+            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
             VerifyActiveProxy();
 
             BuildEngineResult result;
@@ -813,10 +813,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     ILease lease = (ILease)RemotingServices.GetLifetimeService(this);
 
-                    if (lease != null)
-                    {
-                        lease.Unregister(_sponsor);
-                    }
+                    lease?.Unregister(_sponsor);
 
                     _sponsor.Close();
                     _sponsor = null;
@@ -853,8 +850,8 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A Task returning a structure containing the result of the build, success or failure and the list of target outputs per project</returns>
         private async Task<BuildEngineResult> BuildProjectFilesInParallelAsync(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, "projectFileNames");
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, "globalProperties");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, nameof(projectFileNames));
+            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
             VerifyActiveProxy();
 
             List<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = null;
@@ -936,10 +933,7 @@ namespace Microsoft.Build.BackEnd
                     // Now walk through the results, and report that subset which was asked for.
                     for (int i = 0; i < results.Length; i++)
                     {
-                        if (targetOutputsPerProject != null)
-                        {
-                            targetOutputsPerProject.Add(new Dictionary<string, ITaskItem[]>(StringComparer.OrdinalIgnoreCase));
-                        }
+                        targetOutputsPerProject?.Add(new Dictionary<string, ITaskItem[]>(StringComparer.OrdinalIgnoreCase));
 
                         foreach (KeyValuePair<string, TargetResult> resultEntry in results[i].ResultsByTarget)
                         {

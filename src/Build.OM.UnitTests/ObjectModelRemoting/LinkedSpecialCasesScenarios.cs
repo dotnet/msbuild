@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
 
             // var existingItemGroup1 = sourceProject.QuerySingleChildrenWithValidation<ProjectItemGroupElement>((ig) => ig.Label == "Group1");
-            var existingItemGroupList = sourceProject.AllChildren.OfType<ProjectItemGroupElement>().Where(((ig) => ig.Label == "Group1")).ToList();
+            var existingItemGroupList = sourceProject.AllChildren.OfType<ProjectItemGroupElement>().Where((ig) => ig.Label == "Group1").ToList();
             Assert.Single(existingItemGroupList);
             var existingItemGroup = existingItemGroupList[0];
 
@@ -164,7 +164,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             sourceProject ??= xmlPair.View;
 
-            var existingItemGroupList = sourceProject.AllChildren.OfType<ProjectItemGroupElement>().Where(((ig) => ig.Label == "Group1")).ToList();
+            var existingItemGroupList = sourceProject.AllChildren.OfType<ProjectItemGroupElement>().Where((ig) => ig.Label == "Group1").ToList();
             Assert.Single(existingItemGroupList);
             var existingItemGroup = existingItemGroupList[0];
             Assert.NotNull(existingItemGroup);

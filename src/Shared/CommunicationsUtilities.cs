@@ -481,7 +481,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Given the appropriate information, return the equivalent HandshakeOptions.
         /// </summary>
-        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, bool is64Bit = false, bool nodeReuse = false, bool lowPriority = false, bool specialNode = true, IDictionary<string, string> taskHostParameters = null)
+        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, bool is64Bit = false, bool nodeReuse = false, bool lowPriority = false, bool specialNode = false, IDictionary<string, string> taskHostParameters = null)
         {
             HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
 

@@ -96,7 +96,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <TargetPlatformWinMDLocation Condition="'$(TargetPlatformWinMDLocation)' == '' and Exists('$(TargetPlatformSdkMetadataLocation)')">$(TargetPlatformSdkMetadataLocation)</TargetPlatformWinMDLocation>
     <UseOSWinMdReferences Condition="'$(UseOSWinMdReferences)' == '' and ('$(TargetPlatformWinMDLocation)' == '' and '$(TargetPlatformIdentifier)' == 'Windows' and '$(TargetPlatformVersion)' &gt; '7.0')">true</UseOSWinMdReferences>
     <TargetPlatformWinMDLocation Condition="'$(UseOsWinMdReferences)' == 'true'">$(WinDir)\System32\WinMetadata</TargetPlatformWinMDLocation>
-    <TargetPlatformMoniker Condition="'$(TargetPlatformMoniker)' == ''">$(TargetPlatformIdentifier),Version=$(TargetPlatformVersion)</TargetPlatformMoniker>
+    <TargetPlatformMoniker Condition="'$(TargetPlatformMoniker)' == '' and '$(TargetPlatformIdentifier)' != '' and '$(TargetPlatformVersion)' != ''">$(TargetPlatformIdentifier),Version=$(TargetPlatformVersion)</TargetPlatformMoniker>
     <TargetPlatformDisplayName Condition="'$(TargetPlatformDisplayName)' == ''">$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKDisplayName($(TargetPlatformIdentifier), $(TargetPlatformVersion)))</TargetPlatformDisplayName>
   </PropertyGroup>
 

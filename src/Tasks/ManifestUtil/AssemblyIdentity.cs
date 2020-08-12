@@ -404,7 +404,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             string fullName = GetFullName(FullNameFlags.Default);
             foreach (RedistList list in redistDictionary.Values)
             {
-                if (list != null && list.IsFrameworkAssembly(fullName))
+                if (list?.IsFrameworkAssembly(fullName) == true)
                 {
                     return true;
                 }

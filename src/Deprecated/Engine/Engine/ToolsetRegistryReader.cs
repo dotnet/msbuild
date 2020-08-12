@@ -51,7 +51,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="msbuildRegistryWrapper"></param>
         internal ToolsetRegistryReader(RegistryKeyWrapper msbuildRegistryWrapper)
         {
-            error.VerifyThrowArgumentNull(msbuildRegistryWrapper, "msbuildRegistryWrapper");
+            error.VerifyThrowArgumentNull(msbuildRegistryWrapper, nameof(msbuildRegistryWrapper));
        
             this.msbuildRegistryWrapper = msbuildRegistryWrapper;
         }
@@ -125,7 +125,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 string propertyValue = null;
 
-                if (propertyName != null && propertyName.Length == 0)
+                if (propertyName?.Length == 0)
                 {
                     InvalidToolsetDefinitionException.Throw("PropertyNameInRegistryHasZeroLength", toolsVersionWrapper.Name);
                 }

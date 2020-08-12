@@ -76,7 +76,7 @@ namespace Microsoft.Build.BuildEngine
             // first one returns false
             bool detectOr = DetectOr();
             bool detectAnd = DetectAnd();
-            return (detectOr && detectAnd);
+            return detectOr && detectAnd;
         }
 
         internal abstract bool DetectOr();

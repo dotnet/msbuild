@@ -55,36 +55,16 @@ namespace Microsoft.Build.Utilities
         /// <returns>null if unknown architecture or error, one of the known architectures otherwise</returns>
         private static string GetCurrentProcessArchitecture()
         {
-            string architecture;
-
-            switch (NativeMethodsShared.ProcessorArchitecture)
+            string architecture = NativeMethodsShared.ProcessorArchitecture switch
             {
-                case NativeMethodsShared.ProcessorArchitectures.X86:
-                    architecture = X86;
-                    break;
-
-                case NativeMethodsShared.ProcessorArchitectures.X64:
-                    architecture = AMD64;
-                    break;
-
-                case NativeMethodsShared.ProcessorArchitectures.IA64:
-                    architecture = IA64;
-                    break;
-
-                case NativeMethodsShared.ProcessorArchitectures.ARM:
-                    architecture = ARM;
-                    break;
-
-                case NativeMethodsShared.ProcessorArchitectures.ARM64:
-                    architecture = ARM64;
-                    break;
-
+                NativeMethodsShared.ProcessorArchitectures.X86 => X86,
+                NativeMethodsShared.ProcessorArchitectures.X64 => AMD64,
+                NativeMethodsShared.ProcessorArchitectures.IA64 => IA64,
+                NativeMethodsShared.ProcessorArchitectures.ARM => ARM,
+                NativeMethodsShared.ProcessorArchitectures.ARM64 => ARM64,
                 // unknown architecture? return null
-                default:
-                    architecture = null;
-                    break;
-            }
-
+                _ => null,
+            };
             return architecture;
         }
     }

@@ -420,8 +420,8 @@ namespace Microsoft.Build.BuildEngine
                         workerThread.ActivateThread();
                     }
                 }
-                else if (eventType == 1 && executionMode == NodeLoopExecutionMode.WaitingPassiveThread ||
-                         eventType == 2 && executionMode == NodeLoopExecutionMode.WaitingActiveThread)
+                else if ((eventType == 1 && executionMode == NodeLoopExecutionMode.WaitingPassiveThread) ||
+                         (eventType == 2 && executionMode == NodeLoopExecutionMode.WaitingActiveThread))
                 {
                     // There maybe multiple results in the list so we need to loop over it 
                     // and store the results

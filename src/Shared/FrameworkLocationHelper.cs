@@ -977,7 +977,7 @@ namespace Microsoft.Build.Shared
                 DirectoryInfo fixedPathInfo = new DirectoryInfo(path);
                 for (int i = 0; i < numberOfLevelsToRemove; i++)
                 {
-                    if (fixedPathInfo != null && fixedPathInfo.Parent != null)
+                    if (fixedPathInfo?.Parent != null)
                     {
                         fixedPathInfo = fixedPathInfo.Parent;
                     }
@@ -1002,15 +1002,12 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static string GetPathToBuildToolsFromEnvironment(DotNetFrameworkArchitecture architecture)
         {
-            switch (architecture)
+            return architecture switch
             {
-                case DotNetFrameworkArchitecture.Bitness64:
-                    return BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
-                case DotNetFrameworkArchitecture.Bitness32:
-                    return BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
-                default:
-                    return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
-            }
+                DotNetFrameworkArchitecture.Bitness64 => BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64,
+                DotNetFrameworkArchitecture.Bitness32 => BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32,
+                _ => BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
+            };
         }
 
 #if FEATURE_WIN32_REGISTRY

@@ -135,7 +135,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (activeThreadCount == 0 && workerThread.WorkItemCount == 0);
+                return activeThreadCount == 0 && workerThread.WorkItemCount == 0;
             }
         }
 
@@ -427,7 +427,7 @@ namespace Microsoft.Build.BuildEngine
 
         internal bool RethrowTaskExceptions()
         {
-            return (moduleMode == TaskExecutionModuleMode.SingleProcMode);
+            return moduleMode == TaskExecutionModuleMode.SingleProcMode;
         }
 
         #endregion

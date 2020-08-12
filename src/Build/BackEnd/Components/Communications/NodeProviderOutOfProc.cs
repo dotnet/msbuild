@@ -80,7 +80,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool CreateNode(int nodeId, INodePacketFactory factory, NodeConfiguration configuration)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(factory, "factory");
+            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
 
             if (_nodeContexts.Count == ComponentHost.BuildParameters.MaxNodeCount)
             {

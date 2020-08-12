@@ -29,7 +29,6 @@ namespace Microsoft.Build.Shared
                 return pipeName;
             }
         }
-
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         //  This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
         //  on non-Windows operating systems
@@ -50,6 +49,7 @@ namespace Microsoft.Build.Shared
             }
         }
 #endif
+
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
@@ -69,7 +69,6 @@ namespace Microsoft.Build.Shared
 
         private static NamedPipeClientStream TryConnectToProcess(string pipeName, int? nodeProcessId, int timeout, Handshake? handshake)
         {
-            // Try and connect to the process.
             NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
                                                                          | PipeOptions.CurrentUserOnly
@@ -102,6 +101,7 @@ namespace Microsoft.Build.Shared
 #endif
                 if (handshake.HasValue)
                 {
+
                     int[] handshakeComponents = handshake.Value.RetrieveHandshakeComponents();
                     for (int i = 0; i < handshakeComponents.Length; i++)
                     {
@@ -115,9 +115,9 @@ namespace Microsoft.Build.Shared
                     CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
 
 #if NETCOREAPP2_1 || MONO
-                nodeStream.ReadEndOfHandshakeSignal(true, timeout);
+                    nodeStream.ReadEndOfHandshakeSignal(true, timeout);
 #else
-                    nodeStream.ReadEndOfHandshakeSignal(true);
+                nodeStream.ReadEndOfHandshakeSignal(true);
 #endif
                 }
 
@@ -131,14 +131,11 @@ namespace Microsoft.Build.Shared
                 // UnauthorizedAccessException -- Couldn't connect, might not be a node.
                 // IOException -- Couldn't connect, already in use.
                 // TimeoutException -- Couldn't connect, might not be a node.
-                // InvalidOperationException – Couldn’t connect, probably a different build
+                // InvalidOperationException â€“ Couldnâ€™t connect, probably a different build
                 CommunicationsUtilities.Trace("Failed to connect to pipe {0}. {1}", pipeName, e.Message.TrimEnd());
 
                 // If we don't close any stream, we might hang up the child
-                if (nodeStream != null)
-                {
-                    nodeStream.Dispose();
-                }
+                nodeStream?.Dispose();
             }
 
             return null;

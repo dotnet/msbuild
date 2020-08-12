@@ -119,10 +119,7 @@ namespace Microsoft.Build.BuildEngine
             }
 
             // Check if it necessary to forward the event to another logging service
-            if (forwardingService != null)
-            {
-                forwardingService.PostLoggingEvent(buildEventArgs);
-            }
+            forwardingService?.PostLoggingEvent(buildEventArgs);
         }
 
         internal void RegisterEventSource(int loggerId, EventSource eventSource)

@@ -284,43 +284,21 @@ namespace Microsoft.Build.Tasks
 
         private static Exception GetException(int res, string apiName, string message)
         {
-            string reason;
-            switch (res)
+            string reason = res switch
             {
-                case ERROR_ACCESS_DENIED:
-                    reason = "Access is denied.";
-                    break;
-                case ERROR_SEM_TIMEOUT:
-                    reason = "A Restart Manager function could not obtain a Registry write mutex in the allotted time. " +
-                             "A system restart is recommended because further use of the Restart Manager is likely to fail.";
-                    break;
-                case ERROR_BAD_ARGUMENTS:
-                    reason = "One or more arguments are not correct. This error value is returned by the Restart Manager " +
-                             "function if a NULL pointer or 0 is passed in a parameter that requires a non-null and non-zero value.";
-                    break;
-                case ERROR_MAX_SESSIONS_REACHED:
-                    reason = "The maximum number of sessions has been reached.";
-                    break;
-                case ERROR_WRITE_FAULT:
-                    reason = "An operation was unable to read or write to the registry.";
-                    break;
-                case ERROR_OUTOFMEMORY:
-                    reason = "A Restart Manager operation could not complete because not enough memory was available.";
-                    break;
-                case ERROR_CANCELLED:
-                    reason = "The current operation is canceled by user.";
-                    break;
-                case ERROR_MORE_DATA:
-                    reason = "More data is available.";
-                    break;
-                case ERROR_INVALID_HANDLE:
-                    reason = "No Restart Manager session exists for the handle supplied.";
-                    break;
-                default:
-                    reason = $"0x{res:x8}";
-                    break;
-            }
-
+                ERROR_ACCESS_DENIED => "Access is denied.",
+                ERROR_SEM_TIMEOUT => "A Restart Manager function could not obtain a Registry write mutex in the allotted time. " +
+   "A system restart is recommended because further use of the Restart Manager is likely to fail.",
+                ERROR_BAD_ARGUMENTS => "One or more arguments are not correct. This error value is returned by the Restart Manager " +
+"function if a NULL pointer or 0 is passed in a parameter that requires a non-null and non-zero value.",
+                ERROR_MAX_SESSIONS_REACHED => "The maximum number of sessions has been reached.",
+                ERROR_WRITE_FAULT => "An operation was unable to read or write to the registry.",
+                ERROR_OUTOFMEMORY => "A Restart Manager operation could not complete because not enough memory was available.",
+                ERROR_CANCELLED => "The current operation is canceled by user.",
+                ERROR_MORE_DATA => "More data is available.",
+                ERROR_INVALID_HANDLE => "No Restart Manager session exists for the handle supplied.",
+                _ => $"0x{res:x8}",
+            };
             throw new Win32Exception(res, $"{message} ({apiName}() error {res}: {reason})");
         }
     }

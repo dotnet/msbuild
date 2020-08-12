@@ -142,8 +142,8 @@ namespace Microsoft.Build.BackEnd
                 Dictionary<string, string> globalParameters
             )
         {
-            ErrorUtilities.VerifyThrowInternalLength(taskName, "taskName");
-            ErrorUtilities.VerifyThrowInternalLength(taskLocation, "taskLocation");
+            ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
+            ErrorUtilities.VerifyThrowInternalLength(taskLocation, nameof(taskLocation));
 
             _nodeId = nodeId;
             _startupDirectory = startupDirectory;

@@ -90,7 +90,7 @@ namespace Microsoft.Build.BuildEngine
 
         public void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventSource, "eventSource");
+            ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
             ParseFileLoggerParameters();
             string fileName = logFile;
             try
@@ -112,10 +112,7 @@ namespace Microsoft.Build.BuildEngine
             }
             catch (ArgumentException e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
-                if(nodeFileLogger != null)
-                {
-                    nodeFileLogger.Shutdown();
-                }
+                nodeFileLogger?.Shutdown();
 
                 string errorCode;
                 string helpKeyword;
@@ -129,10 +126,7 @@ namespace Microsoft.Build.BuildEngine
 
         public void Shutdown()
         {
-            if (nodeFileLogger != null)
-            {
-                nodeFileLogger.Shutdown();
-            }
+            nodeFileLogger?.Shutdown();
         }
         #endregion
 

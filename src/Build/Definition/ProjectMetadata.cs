@@ -56,8 +56,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ProjectMetadata(object parent, ProjectMetadataElement xml)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
-            ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
 
             _parent = (IProjectMetadataParent)parent;
             _xml = xml;
@@ -69,9 +69,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ProjectMetadata(IProjectMetadataParent parent, ProjectMetadataElement xml, string evaluatedValueEscaped, ProjectMetadata predecessor)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
-            ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedValueEscaped, "evaluatedValueEscaped");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
+            ErrorUtilities.VerifyThrowArgumentNull(evaluatedValueEscaped, nameof(evaluatedValueEscaped));
 
             _parent = parent;
             _xml = xml;
@@ -132,7 +132,7 @@ namespace Microsoft.Build.Evaluation
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "value");
                 Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
-                ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent != null && _xml.Parent.Parent != null && _xml.Parent.Parent.Parent != null, "OM_ObjectIsNoLongerActive");
+                ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
 
                 if (String.Equals(_xml.Value, value, StringComparison.Ordinal))
                 {
@@ -286,8 +286,8 @@ namespace Microsoft.Build.Evaluation
                 return false;
             }
 
-            return (_xml == other._xml &&
-                    EvaluatedValueEscaped == other.EvaluatedValueEscaped);
+            return _xml == other._xml &&
+                    EvaluatedValueEscaped == other.EvaluatedValueEscaped;
         }
 
         #endregion

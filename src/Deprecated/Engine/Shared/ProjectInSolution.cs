@@ -249,7 +249,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     }
                 }
 
-                if (mainProjectElement != null && mainProjectElement.LocalName == "Project")
+                if (mainProjectElement?.LocalName == "Project")
                 {
                     if (String.Equals(mainProjectElement.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase))
                     {

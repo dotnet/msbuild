@@ -195,7 +195,7 @@ namespace Microsoft.Build.BuildEngine
         /// be imported
         /// </summary>
         internal BuildPropertyGroup(Project parentProject, XmlElement propertyGroupElement, bool isImported)
-            : this(parentProject, propertyGroupElement, (isImported ? PropertyType.ImportedProperty : PropertyType.NormalProperty))
+            : this(parentProject, propertyGroupElement, isImported ? PropertyType.ImportedProperty : PropertyType.NormalProperty)
         {
         }
 
@@ -812,7 +812,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     // Allow properties to be "set" to the same value during a build. This is because Visual Studio unfortunately does this often,
                     // and it is safe to do this, because we won't actually change any state.
-                    ErrorUtilities.VerifyThrowInvalidOperation(parentProject == null || !parentProject.IsBuilding, "CannotSetPropertyDuringBuild");
+                    ErrorUtilities.VerifyThrowInvalidOperation(parentProject?.IsBuilding != true, "CannotSetPropertyDuringBuild");
                 }
             }
 
@@ -1025,7 +1025,7 @@ namespace Microsoft.Build.BuildEngine
             BuildProperty property
         )
         {
-            error.VerifyThrowArgumentNull(property, "property");
+            error.VerifyThrowArgumentNull(property, nameof(property));
 
             // If this is a persisted <PropertyGroup>, then remove the property element from 
             // the XML and from the array list.
@@ -1109,10 +1109,7 @@ namespace Microsoft.Build.BuildEngine
                 this.propertyTableByName.Remove(propertyName);
 
                 // if the property was overridden by an output property, we also want to remove the original
-                if (propertiesOverriddenByOutputProperties != null)
-                {
-                    propertiesOverriddenByOutputProperties.Remove(propertyName);
-                }
+                propertiesOverriddenByOutputProperties?.Remove(propertyName);
             }
 
             this.MarkPropertyGroupAsDirty();
@@ -1215,19 +1212,13 @@ namespace Microsoft.Build.BuildEngine
             this.conditionAttribute = null;
 
             // Clear the contents of the hash table, if one exists.
-            if (this.propertyTableByName != null)
-            {
-                this.propertyTableByName.Clear();
-            }
+            this.propertyTableByName?.Clear();
 
             // clear out saved properties
             propertiesOverriddenByOutputProperties = null;
 
             // Clear the contents of the arraylist, if one exists.
-            if (this.propertyList != null)
-            {
-                this.propertyList.Clear();
-            }
+            this.propertyList?.Clear();
 
             this.MarkPropertyGroupAsDirty();
         }
@@ -1464,7 +1455,7 @@ namespace Microsoft.Build.BuildEngine
         /// <returns></returns>
         private bool IsPersisted
         {
-            get { return (this.propertyGroupElement != null); }
+            get { return this.propertyGroupElement != null; }
         }
 
         /// <summary>

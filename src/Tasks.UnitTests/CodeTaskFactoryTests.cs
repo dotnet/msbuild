@@ -508,7 +508,7 @@ namespace Microsoft.Build.UnitTests
                     </Project>";
 
             MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
-            string linqString = System.Linq.Expressions.ExpressionType.Add.ToString();
+            string linqString = nameof(System.Linq.Expressions.ExpressionType.Add);
             mockLogger.AssertLogContains(linqString + ":Hello, World!");
         }
 

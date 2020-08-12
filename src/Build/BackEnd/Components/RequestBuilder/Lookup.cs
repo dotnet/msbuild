@@ -89,8 +89,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal Lookup(ItemDictionary<ProjectItemInstance> projectItems, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectItems, "projectItems");
-            ErrorUtilities.VerifyThrowInternalNull(properties, "properties");
+            ErrorUtilities.VerifyThrowInternalNull(projectItems, nameof(projectItems));
+            ErrorUtilities.VerifyThrowInternalNull(properties, nameof(properties));
 
             Lookup.Scope scope = new Lookup.Scope(this, "Lookup()", projectItems, properties);
             _lookupScopes.AddFirst(scope);
@@ -450,7 +450,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ProjectPropertyInstance GetProperty(string name)
         {
-            ErrorUtilities.VerifyThrowInternalLength(name, "name");
+            ErrorUtilities.VerifyThrowInternalLength(name, nameof(name));
 
             return GetProperty(name, 0, name.Length - 1);
         }
@@ -662,7 +662,7 @@ namespace Microsoft.Build.BackEnd
                 var existingItems = GetItems(itemType);
                 if (existingItems.Count > 0)
                 {
-                    itemsToAdd = itemsToAdd.Where(item => !(existingItems.Contains(item, ProjectItemInstance.EqualityComparer)));
+                    itemsToAdd = itemsToAdd.Where(item => !existingItems.Contains(item, ProjectItemInstance.EqualityComparer));
                 }
             }
 
@@ -930,7 +930,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void MustNotBeInTable(ItemDictionary<ProjectItemInstance> table, ProjectItemInstance item)
         {
-            if (table != null && table.ItemTypes.Contains(item.ItemType))
+            if (table?.ItemTypes.Contains(item.ItemType) == true)
             {
                 ICollection<ProjectItemInstance> tableOfItemsOfSameType = table[item.ItemType];
                 if (tableOfItemsOfSameType != null)
@@ -945,7 +945,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void MustNotBeInTable(ItemTypeToItemsMetadataUpdateDictionary table, ProjectItemInstance item)
         {
-            if (table != null && table.ContainsKey(item.ItemType))
+            if (table?.ContainsKey(item.ItemType) == true)
             {
                 ItemsMetadataUpdateDictionary tableOfItemsOfSameType = table[item.ItemType];
                 if (tableOfItemsOfSameType != null)
@@ -1271,7 +1271,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public bool KeepValue
             {
-                get { return (!_remove && _newValue == null); }
+                get { return !_remove && _newValue == null; }
             }
 
             /// <summary>

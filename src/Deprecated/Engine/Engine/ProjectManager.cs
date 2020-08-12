@@ -156,7 +156,7 @@ namespace Microsoft.Build.BuildEngine
             // Get the list of projects that have this full path.
             ArrayList projectsWithThisFullPath = (ArrayList) this.projects[projectFileFullPath];
 
-            if ((projectsWithThisFullPath != null) && (projectsWithThisFullPath.Count > 0))
+            if ((projectsWithThisFullPath?.Count > 0))
             {
                 return (Project) projectsWithThisFullPath[0];
             }

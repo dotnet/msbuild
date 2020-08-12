@@ -44,11 +44,11 @@ namespace Microsoft.Build.BuildEngine.Shared
                 newElement.AppendChild(newChildNode);
             }
 
-            if (oldElement.ParentNode != null)
-            {
+               
+            
                 // Add the new element in the same place the old element was.
-                oldElement.ParentNode.ReplaceChild(newElement, oldElement);
-            }
+                oldElement.ParentNode?.ReplaceChild(newElement, oldElement);
+            
 
             return newElement;
         }
@@ -89,13 +89,13 @@ namespace Microsoft.Build.BuildEngine.Shared
         {
             // "A Document node can have the following child node types: XmlDeclaration,
             // Element (maximum of one), ProcessingInstruction, Comment, and DocumentType."
-            return (
+            return
                    (node.NodeType != XmlNodeType.Comment) &&
                    (node.NodeType != XmlNodeType.Whitespace) &&
                    (node.NodeType != XmlNodeType.XmlDeclaration) &&
                    (node.NodeType != XmlNodeType.ProcessingInstruction) &&
                    (node.NodeType != XmlNodeType.DocumentType)
-                   );
+                   ;
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>true, if name is valid</returns>
         internal static bool IsValidElementName(string name)
         {
-            return (LocateFirstInvalidElementNameCharacter(name) == -1);
+            return LocateFirstInvalidElementNameCharacter(name) == -1;
         }
 
         /// <summary>
