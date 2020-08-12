@@ -36,5 +36,10 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             return _environment.GetEnvironmentVariableAsBool(name, defaultValue);
         }
+
+        public static string GetEnvironmentVariable(string name)
+        {
+            return _environment.GetEnvironmentVariable(name);
+        }
     }
 }

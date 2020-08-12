@@ -27,6 +27,8 @@ namespace Microsoft.DotNet.Tools.Build
 
         public static BuildCommand FromArgs(string[] args, string msbuildPath = null)
         {
+            PerformanceLogEventSource.Log.CreateBuildCommandStart();
+
             var msbuildArgs = new List<string>();
 
             var parser = Parser.Instance;
@@ -50,12 +52,16 @@ namespace Microsoft.DotNet.Tools.Build
 
             bool noRestore = appliedBuildOptions.HasOption("--no-restore");
 
-            return new BuildCommand(
+            BuildCommand command = new BuildCommand(
                 msbuildArgs,
                 appliedBuildOptions.OptionValuesToBeForwarded(),
                 appliedBuildOptions.Arguments,
                 noRestore,
                 msbuildPath);
+
+            PerformanceLogEventSource.Log.CreateBuildCommandStop();
+
+            return command;
         }
 
         public static int Run(string[] args)
