@@ -608,7 +608,7 @@ namespace Microsoft.Build.Construction
                 // Detect collision caused by unique name's normalization
                 if (projectsByUniqueName.ContainsKey(uniqueName))
                 {
-                    // Is normalization occured in the current project?
+                    // Did normalization occur in the current project?
                     if (uniqueName != proj.ProjectName)
                     {
                         // Generates a new unique name
@@ -616,7 +616,7 @@ namespace Microsoft.Build.Construction
                         proj.UpdateUniqueProjectName(tempUniqueName);
                         uniqueName = tempUniqueName;
                     }
-                    // Is normalization occured in a previous project?
+                    // Did normalization occur in a previous project?
                     else if (uniqueName != projectsByUniqueName[uniqueName].ProjectName)
                     {
                         var projTemp = projectsByUniqueName[uniqueName];
@@ -632,7 +632,7 @@ namespace Microsoft.Build.Construction
 
                 bool uniqueNameExists = projectsByUniqueName.ContainsKey(uniqueName);
 
-                // Add the unique name (if it not exists) to the hash table 
+                // Add the unique name (if it does not exist) to the hash table 
                 if (!uniqueNameExists)
                 {
                     projectsByUniqueName.Add(uniqueName, proj);
