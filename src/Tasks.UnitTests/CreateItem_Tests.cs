@@ -183,8 +183,6 @@ namespace Microsoft.Build.UnitTests
 
             ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine("Subdir", "Bar.txt"), "bar");
 
-            env.SetEnvironmentVariable("MSBUILDTARGETRESULTCOMPRESSIONTHRESHOLD", "0");
-
             BuildRequestData data = new BuildRequestData(projectFileFullPath, new Dictionary<string, string>(), null, new string[] { "Repro" }, null);
             BuildParameters parameters = new BuildParameters
             {
