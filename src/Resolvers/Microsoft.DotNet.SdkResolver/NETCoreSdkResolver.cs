@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.DotNet.MSBuildSdkResolver
+namespace Microsoft.DotNet.DotNetSdkResolver
 {
     public class NETCoreSdkResolver
     {

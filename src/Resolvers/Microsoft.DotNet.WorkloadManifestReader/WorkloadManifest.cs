@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
-namespace Microsoft.NET.Sdk.WorkloadResolver
+namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     class WorkloadManifest
     {

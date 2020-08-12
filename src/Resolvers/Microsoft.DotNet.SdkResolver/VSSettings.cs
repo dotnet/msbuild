@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Setup.Configuration;
 #endif
 
-namespace Microsoft.DotNet.MSBuildSdkResolver
+namespace Microsoft.DotNet.DotNetSdkResolver
 {
     public sealed class VSSettings
     {

@@ -8,6 +8,7 @@
     <WarningsAsErrors>true</WarningsAsErrors>
     <!-- Create FileDefinitions items for ResolveHostfxrCopyLocalContent target -->
     <EmitLegacyAssetsFileItems>true</EmitLegacyAssetsFileItems>
+    <RootNamespace>Microsoft.DotNet.DotNetSdkResolver</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
