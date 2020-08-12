@@ -535,13 +535,13 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     List<InstallationRequest> owInstallationRequests = new List<InstallationRequest>();
                     Dictionary<string, string> owInstalledPkgs = new Dictionary<string, string>();  // packageId -> packageVersion
+                    HashSet<string> owSyncRequestsPackageIds = new HashSet<string>();
                     TemplateLocator optionalWorkloadLocator = new TemplateLocator();
 
                     IReadOnlyCollection<IOptionalSdkTemplatePackageInfo> owPkgsToSync = optionalWorkloadLocator.GetDotnetSdkTemplatePackages(sdkVersion);
 
                     foreach (IInstallUnitDescriptor descriptor in _settingsLoader.InstallUnitDescriptorCache.Descriptors.Values)
                     {
-
                         if (descriptor.IsPartOfAnOptionalWorkload)
                         {
                             if (!descriptor.Details.TryGetValue("Version", out string pkgVersion))
@@ -554,6 +554,8 @@ namespace Microsoft.TemplateEngine.Cli
 
                     foreach (IOptionalSdkTemplatePackageInfo packageInfo in owPkgsToSync)
                     {
+                        owSyncRequestsPackageIds.Add(packageInfo.TemplatePackageId);
+
                         if (!owInstalledPkgs.TryGetValue(packageInfo.TemplatePackageId, out string version) ||
                             version != packageInfo.TemplateVersion)
                         {
@@ -567,10 +569,25 @@ namespace Microsoft.TemplateEngine.Cli
                         Installer.InstallPackages(owInstallationRequests);
                     }
 
-                    /* TODO: add comparison of Optional SDK Workload templates from Hive and returned by TemplateLocator
-                     * implement templates removal if they are not returned by API anymore
-                     */
+                    // remove uninstalled Optional SDK Workload packages
+                    List<string> owRemovalRequestsPackageIds = new List<string>();
+                    foreach (string descriptorIdentifier in owInstalledPkgs.Keys)
+                    {
+                        if (!owSyncRequestsPackageIds.Contains(descriptorIdentifier))
+                        {
+                            owRemovalRequestsPackageIds.Add(descriptorIdentifier);
+                        }
+                    }
 
+                    if (owRemovalRequestsPackageIds.Count != 0)
+                    {
+                        isHiveUpdated = true;
+                        IEnumerable<string> failures = Installer.Uninstall(owRemovalRequestsPackageIds);
+                        foreach (string failure in failures)
+                        {
+                            Reporter.Output.WriteLine(string.Format(LocalizableStrings.CouldntUninstall, failure));
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
