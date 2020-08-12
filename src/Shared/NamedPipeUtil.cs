@@ -117,7 +117,7 @@ namespace Microsoft.Build.Shared
 #if NETCOREAPP2_1 || MONO
                     nodeStream.ReadEndOfHandshakeSignal(true, timeout);
 #else
-                nodeStream.ReadEndOfHandshakeSignal(true);
+                    nodeStream.ReadEndOfHandshakeSignal(true);
 #endif
                 }
 
@@ -139,6 +139,88 @@ namespace Microsoft.Build.Shared
             }
 
             return null;
+        }
+
+        internal static bool ValidateHandshake(Handshake handshake, NamedPipeServerStream serverStream, int clientConnectTimeout)
+        {
+            // The handshake protocol is a series of int exchanges.  The host sends us a each component, and we
+            // verify it. Afterwards, the host sends an "End of Handshake" signal, to which we respond in kind.
+            // Once the handshake is complete, both sides can be assured the other is ready to accept data.
+
+            bool gotValidConnection = true;
+            try
+            {
+                int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
+                for (int i = 0; i < handshakeComponents.Length; i++)
+                {
+                    int handshakePart = serverStream.ReadIntForHandshake(i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+#if NETCOREAPP2_1 || MONO
+                            , clientConnectTimeout /* wait a long time for the handshake from this side */
+#endif
+                            );
+
+                    if (handshakePart != handshakeComponents[i])
+                    {
+                        CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, handshakeComponents[i]);
+                        serverStream.WriteIntForHandshake(i + 1);
+                        gotValidConnection = false;
+                        break;
+                    }
+                }
+
+                if (gotValidConnection)
+                {
+                    // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
+#if NETCOREAPP2_1 || MONO
+                    serverStream.ReadEndOfHandshakeSignal(false, clientConnectTimeout); /* wait a long time for the handshake from this side */
+#else
+                    serverStream.ReadEndOfHandshakeSignal(false);
+#endif
+                    CommunicationsUtilities.Trace("Successfully connected to parent.");
+                    serverStream.WriteEndOfHandshakeSignal();
+
+#if FEATURE_SECURITY_PERMISSIONS
+                    // We will only talk to a host that was started by the same user as us.  Even though the pipe access is set to only allow this user, we want to ensure they
+                    // haven't attempted to change those permissions out from under us.  This ensures that the only way they can truly gain access is to be impersonating the
+                    // user we were started by.
+                    WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
+                    WindowsIdentity clientIdentity = null;
+                    serverStream.RunAsClient(delegate () { clientIdentity = WindowsIdentity.GetCurrent(true); });
+
+                    if (clientIdentity == null || !string.Equals(clientIdentity.Name, currentIdentity.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        CommunicationsUtilities.Trace("Handshake failed. Host user is {0} but we were created by {1}.", (clientIdentity == null) ? "<unknown>" : clientIdentity.Name, currentIdentity.Name);
+                        return false;
+                    }
+#endif
+                }
+            }
+            catch (IOException e)
+            {
+                // We will get here when:
+                // 1. The host (OOP main node) connects to us, it immediately checks for user privileges
+                //    and if they don't match it disconnects immediately leaving us still trying to read the blank handshake
+                // 2. The host is too old sending us bits we automatically reject in the handshake
+                // 3. We expected to read the EndOfHandshake signal, but we received something else
+                CommunicationsUtilities.Trace("Client connection failed but we will wait for another connection. Exception: {0}", e.Message);
+
+                gotValidConnection = false;
+            }
+            catch (InvalidOperationException)
+            {
+                gotValidConnection = false;
+            }
+
+            if (!gotValidConnection)
+            {
+                if (serverStream.IsConnected)
+                {
+                    serverStream.Disconnect();
+                }
+                return false;
+            }
+
+            return true;
         }
     }
 }

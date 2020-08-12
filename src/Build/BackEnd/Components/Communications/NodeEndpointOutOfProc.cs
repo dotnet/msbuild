@@ -65,7 +65,7 @@ namespace Microsoft.Build.BackEnd
                 is64Bit: EnvironmentUtilities.Is64BitProcess,
                 nodeReuse: _enableReuse,
                 lowPriority: _lowPriority,
-                _specialNode));
+                specialNode: _specialNode));
         }
 
         #region Structs
