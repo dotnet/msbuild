@@ -118,7 +118,7 @@ namespace Microsoft.Build.Collections
                 int bitArrayIndex = bitPosition / IntSize;
                 if (bitArrayIndex < _length && bitArrayIndex >= 0)
                 {
-                    return ((_arrayPtr[bitArrayIndex] & (MarkedBitFlag << (bitPosition % IntSize))) != 0);
+                    return (_arrayPtr[bitArrayIndex] & (MarkedBitFlag << (bitPosition % IntSize))) != 0;
                 }
                 return false;
             }
@@ -127,7 +127,7 @@ namespace Microsoft.Build.Collections
                 int bitArrayIndex = bitPosition / IntSize;
                 if (bitArrayIndex < _length && bitArrayIndex >= 0)
                 {
-                    return ((_array[bitArrayIndex] & (MarkedBitFlag << (bitPosition % IntSize))) != 0);
+                    return (_array[bitArrayIndex] & (MarkedBitFlag << (bitPosition % IntSize))) != 0;
                 }
                 return false;
             }
@@ -141,7 +141,7 @@ namespace Microsoft.Build.Collections
         /// <returns></returns>
         internal static int ToIntArrayLength(int n)
         {
-            return n > 0 ? ((n - 1) / IntSize + 1) : 0;
+            return n > 0 ? (((n - 1) / IntSize) + 1) : 0;
         }
     }
 }

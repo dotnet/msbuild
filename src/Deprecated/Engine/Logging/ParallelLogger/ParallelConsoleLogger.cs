@@ -102,22 +102,22 @@ namespace Microsoft.Build.BuildEngine
             {
                 return true;
             }
-            if (0 == String.Compare(parameterName, "SHOWCOMMANDLINE", StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(parameterName, "SHOWCOMMANDLINE", StringComparison.OrdinalIgnoreCase))
             {
                 showCommandline = true;
                 return true;
             }
-            else if (0 == String.Compare(parameterName, "SHOWTIMESTAMP", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, "SHOWTIMESTAMP", StringComparison.OrdinalIgnoreCase))
             {
                 showTimeStamp = true;
                 return true;
             }
-            else if (0 == String.Compare(parameterName, "SHOWEVENTID", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, "SHOWEVENTID", StringComparison.OrdinalIgnoreCase))
             {
                 showEventId = true;
                 return true;
             }
-            else if (0 == String.Compare(parameterName, "FORCENOALIGN", StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(parameterName, "FORCENOALIGN", StringComparison.OrdinalIgnoreCase))
             {
                 forceNoAlign = true;
                 alignMessages = false;
@@ -376,7 +376,6 @@ namespace Microsoft.Build.BuildEngine
             // Loop through each of the warnings and put them into the correct buckets
             for (int listCount = 0; listCount < listToProcess.Count; listCount++)
             {
-
                 T errorWarningEventArgs = (T)listToProcess[listCount];
 
                 // Target event may be null for a couple of reasons:
@@ -431,7 +430,7 @@ namespace Microsoft.Build.BuildEngine
 
                 //If the target where the error occurred is the same as the previous message do not print the location
                 // where the error occurred again
-                if (String.Compare(previousTarget, valuePair.Key.TargetName, StringComparison.OrdinalIgnoreCase) != 0)
+                if (!String.Equals(previousTarget, valuePair.Key.TargetName, StringComparison.OrdinalIgnoreCase))
                 {
                     //If no targetName was specified then do not show the target where the error occurred
                     if (! string.IsNullOrEmpty(valuePair.Key.TargetName))
@@ -551,7 +550,7 @@ namespace Microsoft.Build.BuildEngine
 
                         string projectName = string.Empty;
 
-                        projectName = startedEvent.ProjectFile == null ? string.Empty : startedEvent.ProjectFile;
+                        projectName = startedEvent.ProjectFile ?? string.Empty;
                         // Show which targets were built as part of this project
                         if (string.IsNullOrEmpty(targets))
                         {
@@ -1013,7 +1012,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void PrintMessage(BuildMessageEventArgs e, bool lightenText)
         {
-            string nonNullMessage = (e.Message == null) ? String.Empty : e.Message;
+            string nonNullMessage = e.Message ?? String.Empty;
             int prefixAdjustment = 0;
 
             if (e.BuildEventContext.TaskId != BuildEventContext.InvalidTaskId)
@@ -1064,7 +1063,7 @@ namespace Microsoft.Build.BuildEngine
                 string targetName = string.Empty;
 
                 // Does the context (Project, Node, Context, Target, NOT task) of the previous event match the current message
-                bool contextAreEqual = compareContextNodeIdTargetId.Equals(currentBuildEventContext, lastDisplayedBuildEventContext == null ? null : lastDisplayedBuildEventContext);
+                bool contextAreEqual = compareContextNodeIdTargetId.Equals(currentBuildEventContext, lastDisplayedBuildEventContext ?? null);
 
                 TargetStartedEventMinimumFields targetStartedEvent = null;
                 // If the previous event does not have the same target context information, the target name needs to be printed to the console
@@ -1113,7 +1112,7 @@ namespace Microsoft.Build.BuildEngine
         {
             bool prefixAlreadyWritten = true;
             ProjectFullKey currentProjectFullKey = GetFullProjectKey(e.BuildEventContext);
-            if (!(lastProjectFullKey.Equals(currentProjectFullKey)))
+            if (!lastProjectFullKey.Equals(currentProjectFullKey))
             {
                 // Write the prefix information about the target for the message
                 WriteLinePrefix(context, timeStamp, false);
@@ -1175,8 +1174,8 @@ namespace Microsoft.Build.BuildEngine
                         {
                             // Calculate how many chars will fit on the console buffer
                             amountToCopy = (messageLength - index) < (bufferWidthMinusNewLine - adjustedPrefixWidth) ? (messageLength - index) : (bufferWidthMinusNewLine - adjustedPrefixWidth);
-                            WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), (prefixAlreadyWritten && index == 0 && i == 0), adjustedPrefixWidth);
-                            index = index + amountToCopy;
+                            WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), prefixAlreadyWritten && index == 0 && i == 0, adjustedPrefixWidth);
+                            index += amountToCopy;
                         }
                     }
                     else
@@ -1218,7 +1217,7 @@ namespace Microsoft.Build.BuildEngine
             TargetStartedEventMinimumFields targetStartedEvent = buildEventManager.GetTargetStartedEvent(e);
 
             //Make sure we have not shown the event before
-            if (targetStartedEvent != null && !targetStartedEvent.ShowTargetFinishedEvent)
+            if (targetStartedEvent?.ShowTargetFinishedEvent == false)
             {
                 //Since the target started event has been shows, the target finished event should also be shown
                 targetStartedEvent.ShowTargetFinishedEvent = true;
@@ -1232,7 +1231,7 @@ namespace Microsoft.Build.BuildEngine
                
                 ProjectStartedEventMinimumFields startedEvent = buildEventManager.GetProjectStartedEvent(e);
                 ErrorUtilities.VerifyThrow(startedEvent != null, "Project Started should not be null in deferred target started");
-                string currentProjectFile = startedEvent.ProjectFile == null ? string.Empty : startedEvent.ProjectFile;
+                string currentProjectFile = startedEvent.ProjectFile ?? string.Empty;
 
                 string targetName = null;
                 if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic) || showEventId)
@@ -1271,7 +1270,7 @@ namespace Microsoft.Build.BuildEngine
                 ProjectStartedEventMinimumFields projectStartedEvent = buildEventManager.GetProjectStartedEvent(e);
 
                 // Make sure the project started event has not been show yet
-                if (projectStartedEvent != null && !projectStartedEvent.ShowProjectFinishedEvent)
+                if (projectStartedEvent?.ShowProjectFinishedEvent == false)
                 {
                     projectStartedEvent.ShowProjectFinishedEvent = true;
 
@@ -1282,8 +1281,8 @@ namespace Microsoft.Build.BuildEngine
                         DisplayDeferredStartedEvents(parentStartedEvent.ProjectBuildEventContext);
                     }
 
-                    string current = projectStartedEvent.ProjectFile == null ? string.Empty : projectStartedEvent.ProjectFile;
-                    string previous = parentStartedEvent == null ? null : parentStartedEvent.ProjectFile;
+                    string current = projectStartedEvent.ProjectFile ?? string.Empty;
+                    string previous = parentStartedEvent?.ProjectFile;
                     string targetNames = projectStartedEvent.TargetNames;
 
                     // Log 0-based node id's, where 0 is the parent. This is a little unnatural for the reader,
@@ -1294,7 +1293,7 @@ namespace Microsoft.Build.BuildEngine
                         WriteLinePrefix(projectStartedEvent.FullProjectKey, projectStartedEvent.TimeStamp, false);
                         setColor(ConsoleColor.Cyan);
                         string message = string.Empty;
-                        if ((targetNames == null) || (targetNames.Length == 0))
+                        if (string.IsNullOrEmpty(targetNames))
                         {
                             message = ResourceUtilities.FormatResourceString("ProjectStartedTopLevelProjectWithDefaultTargets", current, currentProjectNodeId);
                         }
@@ -1310,7 +1309,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         WriteLinePrefix(parentStartedEvent.FullProjectKey, parentStartedEvent.TimeStamp, false);
                         setColor(ConsoleColor.Cyan);
-                        if ((targetNames == null) || (targetNames.Length == 0))
+                        if (string.IsNullOrEmpty(targetNames))
                         {
                             WriteMessageAligned(ResourceUtilities.FormatResourceString("ProjectStartedWithDefaultTargetsMultiProc", previous, parentStartedEvent.FullProjectKey, current, projectStartedEvent.FullProjectKey, currentProjectNodeId), true);
                         }
@@ -1509,7 +1508,6 @@ namespace Microsoft.Build.BuildEngine
             /// </summary>
             internal void AddEventFinished(string projectTargetNames, BuildEventContext buildEventContext, DateTime eventTimeStamp)
             {
-
                 if (!string.IsNullOrEmpty(projectTargetNames))
                 {
                     MPPerformanceCounter entryPoint = GetPerformanceCounter(projectTargetNames, ref internalPerformanceCounters);
@@ -1550,7 +1548,7 @@ namespace Microsoft.Build.BuildEngine
                                "{0,3}", calls)
                    );
 
-                if (internalPerformanceCounters != null && internalPerformanceCounters.Count > 0)
+                if (internalPerformanceCounters?.Count > 0)
                 {
                     // For each of the entry points in the project print out the performance numbers for them
                     foreach (MPPerformanceCounter counter in internalPerformanceCounters.Values)

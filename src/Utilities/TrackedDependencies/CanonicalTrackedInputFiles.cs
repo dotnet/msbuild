@@ -424,7 +424,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         private void SourceDependenciesForOutputRoot(Dictionary<string, ITaskItem> sourceDependencies, string sourceKey, ITaskItem[] filesToIgnore)
         {
-            bool thereAreFilesToIgnore = filesToIgnore != null && filesToIgnore.Length > 0;
+            bool thereAreFilesToIgnore = filesToIgnore?.Length > 0;
 
             if (DependencyTable.TryGetValue(sourceKey, out Dictionary<string, string> dependencies))
             {
@@ -797,7 +797,6 @@ namespace Microsoft.Build.Utilities
                                                 break;
                                             }
 
-
                                             tlogEntry = tlog.ReadLine();
                                         }
                                     }
@@ -867,7 +866,7 @@ namespace Microsoft.Build.Utilities
         {
             // If there are no tlog files, then this will be a clean build
             // so there is no need to write a new tlog
-            if (_tlogFiles != null && _tlogFiles.Length > 0)
+            if (_tlogFiles?.Length > 0)
             {
                 string tLogRootingMarker = DependencyTableCache.FormatNormalizedTlogRootingMarker(_tlogFiles);
 

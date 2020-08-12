@@ -29,7 +29,7 @@ namespace Microsoft.Build.Shared
     internal enum DotNetFrameworkArchitecture
     {
         /// <summary>
-        /// Indicates the .NET Framework that is currently being run under.  
+        /// Indicates the .NET Framework that is currently being run under.
         /// </summary>
         Current = 0,
 
@@ -217,7 +217,7 @@ namespace Microsoft.Build.Shared
 
             // v4.7.1
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion471, visualStudioVersion150),
-            
+
             // v4.7.2
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion472, visualStudioVersion150),
 
@@ -428,13 +428,13 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Because there is no longer a strong 1:1 mapping between FX versions and SDK
-        /// versions, if we're unable to locate the desired SDK version, we will try to 
+        /// versions, if we're unable to locate the desired SDK version, we will try to
         /// use whichever SDK version is installed by looking at the key pointing to the
         /// "latest" version.
         ///
-        /// This isn't ideal, but it will allow our tasks to function on any of several 
+        /// This isn't ideal, but it will allow our tasks to function on any of several
         /// related SDKs even if they don't have exactly the same versions.
-        /// 
+        ///
         /// NOTE:  This returns the path to the root of the fallback SDK
         /// </summary>
         private static string FallbackDotNetFrameworkSdkInstallPath
@@ -476,15 +476,15 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Because there is no longer a strong 1:1 mapping between FX versions and SDK
-        /// versions, if we're unable to locate the desired SDK version, we will try to 
+        /// versions, if we're unable to locate the desired SDK version, we will try to
         /// use whichever SDK version is installed by looking at the key pointing to the
         /// "latest" version.
         ///
-        /// This isn't ideal, but it will allow our tasks to function on any of several 
+        /// This isn't ideal, but it will allow our tasks to function on any of several
         /// related SDKs even if they don't have exactly the same versions.
-        /// 
+        ///
         /// NOTE:  This explicitly returns the path to the 3.5 tools (bin) under the fallback
-        /// SDK, to match the data we're pulling from the registry now.  
+        /// SDK, to match the data we're pulling from the registry now.
         /// </summary>
         private static string PathToV35ToolsInFallbackDotNetFrameworkSdk
         {
@@ -507,8 +507,7 @@ namespace Microsoft.Build.Shared
                             // Path.Combine leaves no trailing slash, so if we had one before, be sure to add it back in
                             if (endsWithASlash)
                             {
-                                s_pathToV35ToolsInFallbackDotNetFrameworkSdk = s_pathToV35ToolsInFallbackDotNetFrameworkSdk
-                                                                             + Path.DirectorySeparatorChar;
+                                s_pathToV35ToolsInFallbackDotNetFrameworkSdk += Path.DirectorySeparatorChar;
                             }
                         }
                         else
@@ -524,15 +523,15 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Because there is no longer a strong 1:1 mapping between FX versions and SDK
-        /// versions, if we're unable to locate the desired SDK version, we will try to 
+        /// versions, if we're unable to locate the desired SDK version, we will try to
         /// use whichever SDK version is installed by looking at the key pointing to the
         /// "latest" version.
         ///
-        /// This isn't ideal, but it will allow our tasks to function on any of several 
+        /// This isn't ideal, but it will allow our tasks to function on any of several
         /// related SDKs even if they don't have exactly the same versions.
-        /// 
-        /// NOTE:  This explicitly returns the path to the 4.X tools (bin\NetFX 4.0 Tools) 
-        /// under the fallback SDK, to match the data we're pulling from the registry now.  
+        ///
+        /// NOTE:  This explicitly returns the path to the 4.X tools (bin\NetFX 4.0 Tools)
+        /// under the fallback SDK, to match the data we're pulling from the registry now.
         /// </summary>
         private static string PathToV4ToolsInFallbackDotNetFrameworkSdk
         {
@@ -553,7 +552,7 @@ namespace Microsoft.Build.Shared
                             // Path.Combine leaves no trailing slash, so if we had one before, be sure to add it back in
                             if (endsWithASlash)
                             {
-                                s_pathToV4ToolsInFallbackDotNetFrameworkSdk = s_pathToV4ToolsInFallbackDotNetFrameworkSdk + "\\";
+                                s_pathToV4ToolsInFallbackDotNetFrameworkSdk += "\\";
                             }
                         }
                         else
@@ -686,7 +685,7 @@ namespace Microsoft.Build.Shared
                 if (NativeMethodsShared.IsWindows)
                 {
                     // If the registry entry is 1 then the framework is installed. Go ahead and find the directory. If it is not 1 then the framework is not installed, return null.
-                    return String.Compare("1", FindRegistryValueUnderKey(registryEntryToCheckInstall, registryValueToCheckInstall), StringComparison.OrdinalIgnoreCase) == 0;
+                    return String.Equals("1", FindRegistryValueUnderKey(registryEntryToCheckInstall, registryValueToCheckInstall), StringComparison.OrdinalIgnoreCase);
                 }
                 // False for non-windows since there is nothing in the registry
                 else
@@ -766,7 +765,7 @@ namespace Microsoft.Build.Shared
             else if (indexOfFramework64 == -1 && architecture == DotNetFrameworkArchitecture.Bitness64)
             {
                 // need to add 64 -- since this is a heuristic, we assume that we just need to append.  
-                baseLocation = baseLocation + "64";
+                baseLocation += "64";
             }
             // we don't need to do anything if it's DotNetFrameworkArchitecture.Current.  
 
@@ -869,7 +868,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Generate the path to the program files reference assembly location by taking in the program files special folder and then 
+        /// Generate the path to the program files reference assembly location by taking in the program files special folder and then
         /// using that path to generate the path to the reference assemblies location.
         /// </summary>
         internal static string GenerateProgramFilesReferenceAssemblyRoot()
@@ -892,15 +891,15 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Given a ToolsVersion, find the path to the build tools folder for that ToolsVersion. 
+        /// Given a ToolsVersion, find the path to the build tools folder for that ToolsVersion.
         /// </summary>
         /// <param name="toolsVersion">The ToolsVersion to look up</param>
         /// <param name="architecture">Target build tools architecture.</param>
-        /// <returns>The path to the build tools folder for that ToolsVersion, if it exists, or 
+        /// <returns>The path to the build tools folder for that ToolsVersion, if it exists, or
         /// null otherwise</returns>
         internal static string GeneratePathToBuildToolsForToolsVersion(string toolsVersion, DotNetFrameworkArchitecture architecture)
         {
-            if (string.Compare(toolsVersion, MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal) == 0)
+            if (string.Equals(toolsVersion, MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal))
             {
                 return GetPathToBuildToolsFromEnvironment(architecture);
             }
@@ -916,7 +915,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Take the parts of the Target framework moniker and formulate the reference assembly path based on the the following pattern:
+        /// Take the parts of the Target framework moniker and formulate the reference assembly path based on the following pattern:
         /// For a framework and version:
         ///     $(TargetFrameworkRootPath)\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)
         /// For a subtype:
@@ -978,7 +977,7 @@ namespace Microsoft.Build.Shared
                 DirectoryInfo fixedPathInfo = new DirectoryInfo(path);
                 for (int i = 0; i < numberOfLevelsToRemove; i++)
                 {
-                    if (fixedPathInfo != null && fixedPathInfo.Parent != null)
+                    if (fixedPathInfo?.Parent != null)
                     {
                         fixedPathInfo = fixedPathInfo.Parent;
                     }
@@ -991,7 +990,7 @@ namespace Microsoft.Build.Shared
 
                 if (fixedPath != null && endedWithASlash)
                 {
-                    fixedPath = fixedPath + Path.DirectorySeparatorChar;
+                    fixedPath += Path.DirectorySeparatorChar;
                 }
             }
 
@@ -999,24 +998,21 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Look up the path to the build tools directory for the requested ToolsVersion in the .exe.config file of this executable 
+        /// Look up the path to the build tools directory for the requested ToolsVersion in the .exe.config file of this executable
         /// </summary>
         private static string GetPathToBuildToolsFromEnvironment(DotNetFrameworkArchitecture architecture)
         {
-            switch (architecture)
+            return architecture switch
             {
-                case DotNetFrameworkArchitecture.Bitness64:
-                    return BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
-                case DotNetFrameworkArchitecture.Bitness32:
-                    return BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
-                default:
-                    return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
-            }
+                DotNetFrameworkArchitecture.Bitness64 => BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64,
+                DotNetFrameworkArchitecture.Bitness32 => BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32,
+                _ => BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
+            };
         }
 
 #if FEATURE_WIN32_REGISTRY
         /// <summary>
-        /// Look up the path to the build tools directory in the registry for the requested ToolsVersion and requested architecture  
+        /// Look up the path to the build tools directory in the registry for the requested ToolsVersion and requested architecture
         /// </summary>
         private static string GetPathToBuildToolsFromRegistry(string toolsVersion, DotNetFrameworkArchitecture architecture)
         {

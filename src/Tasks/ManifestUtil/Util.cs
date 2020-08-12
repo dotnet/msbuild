@@ -29,6 +29,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static StreamWriter s_logFileWriter;
         // Major, Minor, Build and Revision of CLR v2.0
         private static readonly int[] s_clrVersion2 = { 2, 0, 50727, 0 };
+#if RUNTIME_TYPE_NETCORE
+        // Major, Minor, Build and Revision of CLR v4.0
+        private static readonly int[] s_clrVersion4 = { 4, 0, 30319, 0 };
+#endif
 
         #region " Platform <-> ProcessorArchitecture mapping "
         // Note: These two arrays are parallel and must correspond to one another.
@@ -110,7 +114,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string GetClrVersion()
         {
             Version v = Environment.Version;
+#if RUNTIME_TYPE_NETCORE
+            // This is a version of ClickOnce .NET FX target runtime, which cannot be obtained in .NET (Core) process.
+            // Set to .NET FX v4 runtime as the ony one supported for manifest generation in .NET (Core) process.
+            v = new Version(s_clrVersion4[0], s_clrVersion4[1], s_clrVersion4[2], s_clrVersion4[3]);
+#else
             v = new Version(v.Major, v.Minor, v.Build, 0);
+#endif
             return v.ToString();
         }
 
@@ -125,7 +135,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return GetClrVersion();
 
             Version clrVersion;
+#if RUNTIME_TYPE_NETCORE
+            // This is a version of ClickOnce .NET FX target runtime, which cannot be obtained in .NET (Core) process.
+            // Set to .NET FX v4 runtime as the ony one supported for manifest generation in .NET (Core) process.
+            Version currentVersion = new Version(s_clrVersion4[0], s_clrVersion4[1], s_clrVersion4[2], s_clrVersion4[3]);
+#else
             Version currentVersion = Environment.Version;
+#endif
             Version frameworkVersion = GetTargetFrameworkVersion(targetFrameworkVersion);
 
             // for FX 4.0 or above use the current version.
@@ -135,7 +151,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             else
             {
+#if RUNTIME_TYPE_NETCORE
+                // Set to .NET FX v4 runtime as the ony one supported for manifest generation in .NET (Core) process.
+                clrVersion = new Version(s_clrVersion4[0], s_clrVersion4[1], s_clrVersion4[2], s_clrVersion4[3]);
+#else
                 clrVersion = new Version(s_clrVersion2[0], s_clrVersion2[1], s_clrVersion2[2], s_clrVersion2[3]);
+#endif
             }
             return clrVersion.ToString();
         }
@@ -314,7 +335,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string PlatformToProcessorArchitecture(string platform)
         {
             for (int i = 0; i < s_platforms.Length; ++i)
-                if (String.Compare(platform, s_platforms[i], StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(platform, s_platforms[i], StringComparison.OrdinalIgnoreCase))
                     return s_processorArchitectures[i];
             return null;
         }
@@ -509,7 +530,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
         #endregion
-
 
         public static Version ConvertFrameworkVersionToString(string version)
         {

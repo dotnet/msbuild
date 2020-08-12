@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-                t.SearchPaths = new string[] { s_myApp_V10Path, @"C:\Framework\Everett" }; ;
+                t.SearchPaths = new string[] { s_myApp_V10Path, @"C:\Framework\Everett" }; 
 
             bool succeeded = Execute(t);
 

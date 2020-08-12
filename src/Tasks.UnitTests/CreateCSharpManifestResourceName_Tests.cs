@@ -16,7 +16,6 @@ namespace Microsoft.Build.UnitTests
 {
     sealed public class CreateCSharpManifestResourceName_Tests
     {
-
         private readonly ITestOutputHelper _testOutput;
 
         public CreateCSharpManifestResourceName_Tests(ITestOutputHelper output)
@@ -82,7 +81,6 @@ namespace Microsoft.Build.UnitTests
                     null
                 );
 
-
             MemoryStream m = new MemoryStream();
             m.Write(new byte[] { 0x64, 0xc3, 0x61, 0x2e, 0x43, 0x6c, 0x61, 0x73, 0x73 }, 0, 9); // dÃa.Class in ANSI
             m.Flush();
@@ -96,8 +94,6 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(className, result);
         }
-
-
 
         /// <summary>
         /// Test for a namespace that has UTF8 characters but there's no BOM at the start.
@@ -456,7 +452,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-
         /// <summary>
         /// Opt into DependentUpon convention and load the expected file properly when the file is in a subfolder.
         /// </summary>
@@ -796,7 +791,7 @@ namespace ClassLibrary3
         /// <returns>The Stream</returns>
         private Stream CreateFileStream(string path, FileMode mode, FileAccess access)
         {
-            if (String.Compare(path, "SR1.strings", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, "SR1.strings", StringComparison.OrdinalIgnoreCase))
             {
                 return StreamHelpers.StringToStream("namespace MyStuff.Namespace { class Class {} }");
             }

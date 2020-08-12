@@ -1324,10 +1324,10 @@ typedef enum _tagAssemblyComparisonResult
         #region Methods
 #if FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS
         /// <summary>
-        /// Given a pointer to a metadata blob, read the string parameter from it.  Returns true if 
-        /// a valid string was constructed and false otherwise.  
-        /// 
-        /// Adapted from bizapps\server\designers\models\packagemodel\nativemethods.cs (TryReadStringArgument) and 
+        /// Given a pointer to a metadata blob, read the string parameter from it.  Returns true if
+        /// a valid string was constructed and false otherwise.
+        ///
+        /// Adapted from bizapps\server\designers\models\packagemodel\nativemethods.cs (TryReadStringArgument) and
         /// the original ARD implementation in vsproject\compsvcspkg\enumcomplus.cpp (GetStringCustomAttribute)
         /// This code was taken from the vsproject\ReferenceManager\Providers\NativeMethods.cs
         /// </summary>
@@ -1398,14 +1398,14 @@ typedef enum _tagAssemblyComparisonResult
                 return false;
             }
 
-            return (strValue != null);
+            return strValue != null;
         }
 #endif
         /// <summary>
-        /// Returns the number of bytes that compressed data -- the length of the uncompressed 
-        /// data -- takes up, and has an out value of the length of the string.  
-        /// 
-        /// Decompression algorithm stolen from ndp\clr\src\toolbox\mdbg\corapi\metadata\cormetadata.cs, which 
+        /// Returns the number of bytes that compressed data -- the length of the uncompressed
+        /// data -- takes up, and has an out value of the length of the string.
+        ///
+        /// Decompression algorithm stolen from ndp\clr\src\toolbox\mdbg\corapi\metadata\cormetadata.cs, which
         /// was translated from the base implementation in ndp\clr\src\inc\cor.h
         /// This code was taken from the vsproject\ReferenceManager\Providers\NativeMethods.cs
         /// </summary>
@@ -1432,12 +1432,12 @@ typedef enum _tagAssemblyComparisonResult
             // Medium.  
             else if ((*bytes & 0xC0) == 0x80)  // 10?? ????    
             {
-                uncompressedDataLength = (int)(((*bytes & 0x3f) << 8 | *(bytes + 1)));
+                uncompressedDataLength = (int)((*bytes & 0x3f) << 8 | *(bytes + 1));
                 count = 2;
             }
             else if ((*bytes & 0xE0) == 0xC0)      // 110? ????    
             {
-                uncompressedDataLength = (int)(((*bytes & 0x1f) << 24 | *(bytes + 1) << 16 | *(bytes + 2) << 8 | *(bytes + 3)));
+                uncompressedDataLength = (int)((*bytes & 0x1f) << 24 | *(bytes + 1) << 16 | *(bytes + 2) << 8 | *(bytes + 3));
                 count = 4;
             }
 

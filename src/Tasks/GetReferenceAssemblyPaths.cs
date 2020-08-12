@@ -192,7 +192,7 @@ namespace Microsoft.Build.Tasks
             {
                 _tfmPaths = GetPaths(RootPath, TargetFrameworkFallbackSearchPaths, moniker);
 
-                if (_tfmPaths != null && _tfmPaths.Count > 0)
+                if (_tfmPaths?.Count > 0)
                 {
                     TargetFrameworkMonikerDisplayName = ToolLocationHelper.GetDisplayNameForTargetFrameworkDirectory(_tfmPaths[0], moniker);
                 }

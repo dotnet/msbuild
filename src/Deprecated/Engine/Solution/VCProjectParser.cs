@@ -58,8 +58,8 @@ namespace Microsoft.Build.BuildEngine
                         XmlElement element = (XmlElement)configurationNode;
 
                         // Look for configuration that matches our name
-                        if ((string.Compare(element.Name, "Configuration", StringComparison.OrdinalIgnoreCase) == 0) &&
-                            (string.Compare(element.GetAttribute("Name"), configurationName, StringComparison.OrdinalIgnoreCase) == 0))
+                        if ((string.Equals(element.Name, "Configuration", StringComparison.OrdinalIgnoreCase)) &&
+                            (string.Equals(element.GetAttribute("Name"), configurationName, StringComparison.OrdinalIgnoreCase)))
                         {
                             configurationElement = element;
 

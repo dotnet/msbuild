@@ -62,8 +62,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal TaskFactoryWrapper(ITaskFactory taskFactory, LoadedType taskFactoryLoadInfo, string taskName, IDictionary<string, string> factoryIdentityParameters)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskFactory, "taskFactory");
-            ErrorUtilities.VerifyThrowArgumentLength(taskName, "taskName");
+            ErrorUtilities.VerifyThrowArgumentNull(taskFactory, nameof(taskFactory));
+            ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
             _taskFactory = taskFactory;
             _taskName = taskName;
             TaskFactoryLoadedType = taskFactoryLoadInfo;
@@ -182,8 +182,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void SetPropertyValue(ITask task, TaskPropertyInfo property, object value)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, "task");
-            ErrorUtilities.VerifyThrowArgumentNull(property, "property");
+            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
+            ErrorUtilities.VerifyThrowArgumentNull(property, nameof(property));
 
             IGeneratedTask generatedTask = task as IGeneratedTask;
             if (generatedTask != null)
@@ -202,8 +202,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal object GetPropertyValue(ITask task, TaskPropertyInfo property)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, "task");
-            ErrorUtilities.VerifyThrowArgumentNull(property, "property");
+            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
+            ErrorUtilities.VerifyThrowArgumentNull(property, nameof(property));
 
             IGeneratedTask generatedTask = task as IGeneratedTask;
             if (generatedTask != null)
@@ -305,11 +305,11 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                _propertyInfoCache = _propertyInfoCache ?? ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance;
+                _propertyInfoCache ??= ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance;
 
-                _namesOfPropertiesWithRequiredAttribute = _namesOfPropertiesWithRequiredAttribute ?? ReadOnlyEmptyDictionary<string, string>.Instance;
-                _namesOfPropertiesWithOutputAttribute = _namesOfPropertiesWithOutputAttribute ?? ReadOnlyEmptyDictionary<string, string>.Instance;
-                _namesOfPropertiesWithAmbiguousMatches = _namesOfPropertiesWithAmbiguousMatches ?? ReadOnlyEmptyDictionary<string, string>.Instance;
+                _namesOfPropertiesWithRequiredAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
+                _namesOfPropertiesWithOutputAttribute ??= ReadOnlyEmptyDictionary<string, string>.Instance;
+                _namesOfPropertiesWithAmbiguousMatches ??= ReadOnlyEmptyDictionary<string, string>.Instance;
             }
         }
         #endregion

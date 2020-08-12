@@ -110,7 +110,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Extensions which should be considered reference files, we will look for 
+        /// Extensions which should be considered reference files, we will look for
         /// the files in the order they are specified in the array.
         /// </summary>
         public string[] ReferenceExtensions
@@ -240,7 +240,7 @@ namespace Microsoft.Build.Tasks
             {
                 // Filter out all references tagged as RuntimeReferenceOnly 
                 IEnumerable<ITaskItem> filteredResolvedSDKReferences = ResolvedSDKReferences.Where(
-                    sdkReference => !(MetadataConversionUtilities.TryConvertItemMetadataToBool(sdkReference, "RuntimeReferenceOnly"))
+                    sdkReference => !MetadataConversionUtilities.TryConvertItemMetadataToBool(sdkReference, "RuntimeReferenceOnly")
                 );
 
                 PopulateReferencesForSDK(filteredResolvedSDKReferences);
@@ -367,7 +367,7 @@ namespace Microsoft.Build.Tasks
                 // If the SDK is manifest driven we want to grab them from the ApiContracts in the manifest if possible- will only happen if TargetSdk is identified
                 string[] manifestReferencePaths = GetReferencePathsFromManifest(resolvedSDKReference);
 
-                if (manifestReferencePaths != null && manifestReferencePaths.Length > 0)
+                if (manifestReferencePaths?.Length > 0)
                 {
                     // Found ApiContract references, use those
                     foreach (string manifestReferencePath in manifestReferencePaths)
@@ -481,7 +481,7 @@ namespace Microsoft.Build.Tasks
                             outputItem.SetMetadata(ItemMetadataNames.imageRuntime, referenceInfo.ImageRuntime);
                         }
 
-                        if (referenceInfo != null && referenceInfo.IsWinMD)
+                        if (referenceInfo?.IsWinMD == true)
                         {
                             outputItem.SetMetadata(ItemMetadataNames.winMDFile, "true");
 
@@ -606,7 +606,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Gather the redist files from from the redist directory.
+        /// Gather the redist files from the redist directory.
         /// </summary>
         private void GatherRedistFiles(HashSet<ResolvedRedistFile> resolvedRedistFiles, ITaskItem sdkReference, string redistFilePath, SDKInfo info)
         {
@@ -1011,7 +1011,7 @@ namespace Microsoft.Build.Tasks
                 directoriesToHash.AddRange(referenceDirectories);
                 directoriesToHash.AddRange(redistDirectories);
 
-                if (sdkManifestReferences != null && sdkManifestReferences.Length > 0)
+                if (sdkManifestReferences?.Length > 0)
                 {
                     // Manifest driven- get the info from the known list
                     PopulateReferencesDictionaryFromManifestPaths(directoryToFileList, references, sdkManifestReferences);
@@ -1078,7 +1078,7 @@ namespace Microsoft.Build.Tasks
             }
 
             /// <summary>
-            /// Is the assembly list cache file up to date. 
+            /// Is the assembly list cache file up to date.
             /// This is done by comparing the last write time of the cache file to the last write time of the code.
             /// If our code is newer than the last write time of the cache file then there may be some different serialization used so we should say it is out of date and just regenerate it.
             /// </summary>

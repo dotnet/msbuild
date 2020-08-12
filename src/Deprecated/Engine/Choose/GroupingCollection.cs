@@ -9,7 +9,6 @@ using System.Globalization;
 
 using Microsoft.Build.BuildEngine.Shared;
 
-
 using error = Microsoft.Build.BuildEngine.Shared.ErrorUtilities;
 
 namespace Microsoft.Build.BuildEngine
@@ -65,10 +64,7 @@ namespace Microsoft.Build.BuildEngine
             this.propertyGroupCount += delta;
             ErrorUtilities.VerifyThrow(this.propertyGroupCount >= 0, "The property group count should never be negative");
 
-            if (parentGroupingCollection != null)
-            {
-                parentGroupingCollection.ChangePropertyGroupCount(delta);
-            }
+            parentGroupingCollection?.ChangePropertyGroupCount(delta);
         }
 
         /// <summary>
@@ -156,10 +152,7 @@ namespace Microsoft.Build.BuildEngine
             this.itemGroupCount += delta;
             ErrorUtilities.VerifyThrow(this.itemGroupCount >= 0, "The item group count should never be negative");
 
-            if (parentGroupingCollection != null)
-            {
-                parentGroupingCollection.ChangeItemGroupCount(delta);
-            }
+            parentGroupingCollection?.ChangeItemGroupCount(delta);
         }
 
         /// <summary>
@@ -426,7 +419,6 @@ namespace Microsoft.Build.BuildEngine
 
             ChangeItemGroupCount(-1);
             error.VerifyThrow(this.itemGroupCount >= 0, "Too many calls to RemoveItemGroup().");
-
         }
 
         /// <summary>
@@ -570,7 +562,7 @@ namespace Microsoft.Build.BuildEngine
             ArrayList propertiesToRemove = new ArrayList();
             foreach (BuildPropertyGroup propertyGroup in this.PropertyGroupsAll)
             {
-                if (0 == String.Compare(condition.Trim(), propertyGroup.Condition.Trim(), StringComparison.OrdinalIgnoreCase) 
+                if (String.Equals(condition.Trim(), propertyGroup.Condition.Trim(), StringComparison.OrdinalIgnoreCase) 
                     && (!propertyGroup.IsImported || includeImportedPropertyGroups))
                 {
                     propertiesToRemove.Add(propertyGroup);
@@ -630,7 +622,7 @@ namespace Microsoft.Build.BuildEngine
 
             foreach (BuildItemGroup itemGroup in this.ItemGroupsAll)
             {
-                if (0 == String.Compare(condition.Trim(), itemGroup.Condition.Trim(), StringComparison.OrdinalIgnoreCase) 
+                if (String.Equals(condition.Trim(), itemGroup.Condition.Trim(), StringComparison.OrdinalIgnoreCase) 
                     && !itemGroup.IsImported)
                 {
                     itemsToRemove.Add(itemGroup);
@@ -660,7 +652,7 @@ namespace Microsoft.Build.BuildEngine
                 // ones that are of the requested item type.
                 foreach (BuildItem item in itemGroup)
                 {
-                    if ((0 == String.Compare(item.Name, itemName, StringComparison.OrdinalIgnoreCase)) &&
+                    if ((String.Equals(item.Name, itemName, StringComparison.OrdinalIgnoreCase)) &&
                             !item.IsImported
                         )
                     {

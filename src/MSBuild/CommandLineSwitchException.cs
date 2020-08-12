@@ -46,7 +46,6 @@ namespace Microsoft.Build.CommandLine
             this.commandLineArg = commandLineArg;
         }
 
-
         /// <summary>
         /// Serialization constructor
         /// </summary>
@@ -58,7 +57,7 @@ namespace Microsoft.Build.CommandLine
             base(info, context)
 
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, "info");
+            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
 
             commandLineArg = info.GetString("commandLineArg");
         }

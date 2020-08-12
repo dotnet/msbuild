@@ -82,6 +82,11 @@ namespace Microsoft.Build.Evaluation
         LeavePropertiesUnexpandedOnError = 0x20,
 
         /// <summary>
+        /// When an expansion occurs, truncate it to Expander.DefaultTruncationCharacterLimit or Expander.DefaultTruncationItemLimit.
+        /// </summary>
+        Truncate = 0x40,
+
+        /// <summary>
         /// Expand only properties and then item lists
         /// </summary>
         ExpandPropertiesAndItems = ExpandProperties | ExpandItems,
@@ -119,6 +124,16 @@ namespace Microsoft.Build.Evaluation
         where P : class, IProperty
         where I : class, IItem
     {
+        /// <summary>
+        /// A limit for truncating string expansions within an evaluated Condition. Properties, item metadata, or item groups will be truncated to N characters such as 'N...'.
+        /// Enabled by ExpanderOptions.Truncate.
+        /// </summary>
+        private const int CharacterLimitPerExpansion = 1024;
+        /// <summary>
+        /// A limit for truncating string expansions for item groups within an evaluated Condition. N items will be evaluated such as 'A;B;C;...'.
+        /// Enabled by ExpanderOptions.Truncate.
+        /// </summary>
+        private const int ItemLimitPerExpansion = 3;
         private static readonly char[] s_singleQuoteChar = { '\'' };
         private static readonly char[] s_backtickChar = { '`' };
         private static readonly char[] s_doubleQuoteChar = { '"' };
@@ -235,7 +250,7 @@ namespace Microsoft.Build.Evaluation
         {
             List<ExpressionShredder.ItemExpressionCapture> transforms = ExpressionShredder.GetReferencedItemExpressions(expression);
 
-            return (transforms != null);
+            return transforms != null;
         }
 
         /// <summary>
@@ -267,7 +282,7 @@ namespace Microsoft.Build.Evaluation
                 return String.Empty;
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem);
@@ -288,7 +303,7 @@ namespace Microsoft.Build.Evaluation
                 return String.Empty;
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 
             string metaExpanded = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             return PropertyExpander<P>.ExpandPropertiesLeaveTypedAndEscaped(metaExpanded, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem);
@@ -336,7 +351,7 @@ namespace Microsoft.Build.Evaluation
                 return Array.Empty<T>();
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 
             expression = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             expression = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem);
@@ -410,7 +425,7 @@ namespace Microsoft.Build.Evaluation
                 return Array.Empty<T>();
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 
             return ItemExpander.ExpandSingleItemVectorExpressionIntoItems(this, expression, _items, itemFactory, options, includeNullItems, out isTransformExpression, elementLocation);
         }
@@ -461,6 +476,14 @@ namespace Microsoft.Build.Evaluation
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Returns true if ExpanderOptions.Truncate is set and EscapeHatches.DoNotTruncateConditions is not set
+        /// </summary>
+        private static bool IsTruncationEnabled(ExpanderOptions options)
+        {
+            return (options & ExpanderOptions.Truncate) != 0 && !Traits.Instance.EscapeHatches.DoNotTruncateConditions;
         }
 
         /// <summary>
@@ -573,14 +596,14 @@ namespace Microsoft.Build.Evaluation
             // If we don't have something that can be treated as an argument
             // then we should treat it as a null so that passing nulls
             // becomes possible through an empty argument between commas.
-            ErrorUtilities.VerifyThrowArgumentNull(argumentBuilder, "argumentBuilder");
+            ErrorUtilities.VerifyThrowArgumentNull(argumentBuilder, nameof(argumentBuilder));
 
             // we reached the end of an argument, add the builder's final result
             // to our arguments. 
             string argValue = OpportunisticIntern.InternableToString(argumentBuilder).Trim();
 
             // We support passing of null through the argument constant value null
-            if (String.Compare("null", argValue, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
             {
                 arguments.Add(null);
             }
@@ -654,7 +677,7 @@ namespace Microsoft.Build.Evaluation
                             else if (argumentsContent[n] == '`' || argumentsContent[n] == '"' || argumentsContent[n] == '\'')
                             {
                                 int quoteStart = n;
-                                n += 1; // skip over the opening quote
+                                n++; // skip over the opening quote
 
                                 n = ScanForClosingQuote(argumentsString[quoteStart], argumentsString, n);
 
@@ -706,12 +729,13 @@ namespace Microsoft.Build.Evaluation
             /// <param name="expression">The expression containing item metadata references</param>
             /// <param name="metadata"></param>
             /// <param name="options"></param>
+            /// <param name="elementLocation"></param>
             /// <returns>The string with item metadata expanded in-place, escaped.</returns>
             internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation)
             {
                 try
                 {
-                    if (((options & ExpanderOptions.ExpandMetadata) == 0))
+                    if ((options & ExpanderOptions.ExpandMetadata) == 0)
                     {
                         return expression;
                     }
@@ -746,7 +770,7 @@ namespace Microsoft.Build.Evaluation
                         // The most common case is where the transform is the whole expression
                         // Also if there were no valid item vector expressions found, then go ahead and do the replacement on
                         // the whole expression (which is what Orcas did).
-                        if (itemVectorExpressions != null && itemVectorExpressions.Count == 1 && itemVectorExpressions[0].Value == expression && itemVectorExpressions[0].Separator == null)
+                        if (itemVectorExpressions?.Count == 1 && itemVectorExpressions[0].Value == expression && itemVectorExpressions[0].Separator == null)
                         {
                             return expression;
                         }
@@ -841,7 +865,7 @@ namespace Microsoft.Build.Evaluation
                 internal MetadataMatchEvaluator(IMetadataTable metadata, ExpanderOptions options)
                 {
                     _metadata = metadata;
-                    _options = (options & ExpanderOptions.ExpandMetadata);
+                    _options = options & (ExpanderOptions.ExpandMetadata | ExpanderOptions.Truncate);
 
                     ErrorUtilities.VerifyThrow(options != ExpanderOptions.Invalid, "Must be expanding metadata of some kind");
                 }
@@ -873,6 +897,10 @@ namespace Microsoft.Build.Evaluation
                         )
                     {
                         metadataValue = _metadata.GetEscapedValue(itemType, metadataName);
+                        if (IsTruncationEnabled(_options) && metadataValue.Length > CharacterLimitPerExpansion)
+                        {
+                            metadataValue = metadataValue.Substring(0, CharacterLimitPerExpansion - 3) + "...";
+                        }
                     }
 
                     return metadataValue;
@@ -1087,6 +1115,15 @@ namespace Microsoft.Build.Evaluation
                         else // This is a regular property
                         {
                             propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, usedUninitializedProperties);
+                        }
+
+                        if (IsTruncationEnabled(options) && propertyValue != null)
+                        {
+                            var value = propertyValue.ToString();
+                            if (value.Length > CharacterLimitPerExpansion)
+                            {
+                                propertyValue = value.Substring(0, CharacterLimitPerExpansion - 3) + "...";
+                            }
                         }
 
                         // Record our result, and advance
@@ -1844,8 +1881,7 @@ namespace Microsoft.Build.Evaluation
                 if (itemsOfType.Count == 0)
                 {
                     // .. but only if there isn't a function "Count()", since that will want to return something (zero) for an empty list
-                    if (expressionCapture.Captures == null ||
-                        !expressionCapture.Captures.Any(capture => string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)))
+                    if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)) != true)
                     {
                         itemsFromCapture = new List<Pair<string, S>>();
                         return false;
@@ -2022,9 +2058,32 @@ namespace Microsoft.Build.Evaluation
                     return true;
                 }
 
+                int startLength = builder.Length;
+                bool truncate = IsTruncationEnabled(options);
+
                 // if the capture.Separator is not null, then ExpandExpressionCapture would have joined the items using that separator itself
-                foreach (var item in itemsFromCapture)
+                for (int i = 0; i < itemsFromCapture.Count; i++)
                 {
+                    var item = itemsFromCapture[i];
+                    if (truncate)
+                    {
+                        if (i >= ItemLimitPerExpansion)
+                        {
+                            builder.Append("...");
+                            return false;
+                        }
+                        int currentLength = builder.Length - startLength;
+                        if (currentLength + item.Key.Length > CharacterLimitPerExpansion)
+                        {
+                            int truncateIndex = CharacterLimitPerExpansion - currentLength - 3;
+                            if (truncateIndex > 0)
+                            {
+                                builder.Append(item.Key, 0, truncateIndex);
+                            }
+                            builder.Append("...");
+                            return false;
+                        }
+                    }
                     builder.Append(item.Key);
                     builder.Append(';');
                 }
@@ -2153,7 +2212,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 internal static IEnumerable<Pair<string, S>> ItemSpecModifierFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     foreach (Pair<string, S> item in itemsOfType)
                     {
@@ -2206,7 +2265,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 internal static IEnumerable<Pair<string, S>> Exists(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     foreach (Pair<string, S> item in itemsOfType)
                     {
@@ -2253,7 +2312,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 internal static IEnumerable<Pair<string, S>> Combine(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments != null && arguments.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     string relativePath = arguments[0];
 
@@ -2277,7 +2336,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 internal static IEnumerable<Pair<string, S>> GetPathsOfAllDirectoriesAbove(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     // Phase 1: find all the applicable directories.
 
@@ -2353,7 +2412,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 internal static IEnumerable<Pair<string, S>> DirectoryName(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     Dictionary<string, string> directoryNameTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -2421,7 +2480,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 internal static IEnumerable<Pair<string, S>> Metadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments != null && arguments.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     string metadataName = arguments[0];
 
@@ -2496,7 +2555,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 internal static IEnumerable<Pair<string, S>> DistinctWithComparer(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments, StringComparer comparer)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     // This dictionary will ensure that we only return one result per unique itemspec
                     Dictionary<string, S> seenItems = new Dictionary<string, S>(comparer);
@@ -2517,7 +2576,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 internal static IEnumerable<Pair<string, S>> Reverse(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
                     foreach (Pair<String, S> item in itemsOfType.Reverse())
                     {
                         yield return new Pair<string, S>(item.Key, item.Value);
@@ -2529,7 +2588,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 internal static IEnumerable<Pair<string, S>> ExpandQuotedExpressionFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments != null && arguments.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     foreach (Pair<string, S> item in itemsOfType)
                     {
@@ -2552,7 +2611,7 @@ namespace Microsoft.Build.Evaluation
                         // the caller to possibly do correlation.
 
                         // We pass in the existing item so we can copy over its metadata
-                        if (include != null && include.Length > 0)
+                        if (!string.IsNullOrEmpty(include))
                         {
                             yield return new Pair<string, S>(include, item.Value);
                         }
@@ -2611,7 +2670,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 internal static IEnumerable<Pair<string, S>> ClearMetadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     foreach (Pair<string, S> item in itemsOfType)
                     {
@@ -2628,7 +2687,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 internal static IEnumerable<Pair<string, S>> HasMetadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments != null && arguments.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     string metadataName = arguments[0];
 
@@ -2651,7 +2710,7 @@ namespace Microsoft.Build.Evaluation
 
                         // GetMetadataValueEscaped returns empty string for missing metadata,
                         // but IItem specifies it should return null
-                        if (metadataValue != null && metadataValue.Length > 0)
+                        if (!string.IsNullOrEmpty(metadataValue))
                         {
                             // return a result through the enumerator
                             yield return new Pair<string, S>(item.Key, item.Value);
@@ -2665,7 +2724,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 internal static IEnumerable<Pair<string, S>> WithMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments != null && arguments.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     string metadataName = arguments[0];
                     string metadataValueToFind = arguments[1];
@@ -2701,7 +2760,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 internal static IEnumerable<Pair<string, S>> AnyHaveMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments != null && arguments.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     string metadataName = arguments[0];
                     string metadataValueToFind = arguments[1];
@@ -3134,7 +3193,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // In case we ended up with something we don't understand
-                ProjectErrorUtilities.VerifyThrowInvalidProject(!(expressionRoot.IsEmpty), elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
+                ProjectErrorUtilities.VerifyThrowInvalidProject(!expressionRoot.IsEmpty, elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
                 functionBuilder.Expression = expressionFunction;
                 functionBuilder.UsedUninitializedProperties = usedUnInitializedProperties;

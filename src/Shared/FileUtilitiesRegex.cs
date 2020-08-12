@@ -20,10 +20,10 @@ namespace Microsoft.Build.Shared
         private static readonly char _forwardSlash = '/';
 
         /// <summary>
-        /// Indicates whether the specified string follows the pattern drive pattern: "<drive letter>:"
+        /// Indicates whether the specified string follows the pattern drive pattern (e.g. "C:", "D:")
         /// </summary>
-        /// <param name="pattern"></param>
-        /// <returns></returns>
+        /// <param name="pattern">input to check for drive pattern</param>
+        /// <returns>true if follows the drive pattern, false otherwise</returns>
         internal static bool IsDrivePattern(string pattern)
         {
             // Format must be two characters long: "<drive letter>:"
@@ -32,10 +32,10 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Indicates whether the specified string follows the pattern drive pattern: "<drive letter>:/" or "<drive letter>:\"
+        /// Indicates whether the specified string follows the pattern drive pattern (e.g. "C:/" or "C:\")
         /// </summary>
-        /// <param name="pattern"></param>
-        /// <returns></returns>
+        /// <param name="pattern">input to check for drive pattern with slash</param>
+        /// <returns>true if follows the drive pattern with slash, false otherwise</returns>
         internal static bool IsDrivePatternWithSlash(string pattern)
         {
             return pattern.Length == 3 &&
@@ -43,10 +43,10 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Indicates whether the specified string starts with the drive pattern: "<drive letter>:".
+        /// Indicates whether the specified string starts with the drive pattern (e.g. "C:")
         /// </summary>
-        /// <param name="pattern"></param>
-        /// <returns></returns>
+        /// <param name="pattern">input to check for drive pattern</param>
+        /// <returns>true if starts with drive pattern, false otherwise</returns>
         internal static bool StartsWithDrivePattern(string pattern)
         {
             // Format dictates a length of at least 2,
@@ -58,10 +58,10 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Indicates whether the specified string starts with the drive pattern: "<drive letter>:/" or "<drive letter>:\".
+        /// Indicates whether the specified string starts with the drive pattern (e.g. "C:/" or "C:\")
         /// </summary>
-        /// <param name="pattern"></param>
-        /// <returns></returns>
+        /// <param name="pattern">input to check for drive pattern</param>
+        /// <returns>true if starts with drive pattern with slash, false otherwise</returns>
         internal static bool StartsWithDrivePatternWithSlash(string pattern)
         {
             // Format dictates a length of at least 3,
@@ -74,10 +74,10 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Indicates whether the specified file-spec comprises exactly "\\<server>\<share>" (with no trailing characters).
+        /// Indicates whether the specified file-spec comprises exactly "\\server\share" (with no trailing characters).
         /// </summary>
-        /// <param name="pattern"></param>
-        /// <returns></returns>
+        /// <param name="pattern">input to check for Unc pattern</param>
+        /// <returns>true if comprises Unc pattern</returns>
         internal static bool IsUncPattern(string pattern)
         {
             //Return value == pattern.length means:
@@ -88,10 +88,10 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Indicates whether the specified file-spec begins with "\\<server>\<share>".
+        /// Indicates whether the specified file-spec begins with "\\server\share".
         /// </summary>
-        /// <param name="pattern"></param>
-        /// <returns></returns>
+        /// <param name="pattern">input to check for Unc pattern</param>
+        /// <returns>true if starts with Unc pattern</returns>
         internal static bool StartsWithUncPattern(string pattern)
         {
             //Any non -1 value returned means there was a match, therefore is begins with the pattern.
@@ -99,10 +99,10 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Indicates whether the file-spec begins with a UNC pattern and how long the match is. -1 indicates no match.
+        /// Indicates whether the file-spec begins with a UNC pattern and how long the match is.
         /// </summary>
-        /// <param name="pattern"></param>
-        /// <returns></returns>
+        /// <param name="pattern">input to check for Unc pattern</param>
+        /// <returns>length of the match, -1 if no match</returns>
         internal static int StartsWithUncPatternMatchLength(string pattern)
         {
             if (!MeetsUncPatternMinimumRequirements(pattern))
@@ -150,10 +150,9 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Indicates whether or not the file-spec meets the minimum requirements of a UNC pattern.
-        /// UNC pattern requires a minimum length of 5 and first two characters must be a slash.
         /// </summary>
-        /// <param name="pattern"></param>
-        /// <returns></returns>
+        /// <param name="pattern">input to check for Unc pattern minimum requirements</param>
+        /// <returns>true if the UNC pattern is a minimum length of 5 and the first two characters are be a slash, false otherwise.</returns>
 #if !NET35
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
@@ -165,6 +164,5 @@ namespace Microsoft.Build.Shared
                 (pattern[1] == _backSlash ||
                 pattern[1] == _forwardSlash);
        }
-
     }
 }

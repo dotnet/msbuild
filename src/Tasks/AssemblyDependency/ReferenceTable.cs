@@ -145,9 +145,9 @@ namespace Microsoft.Build.Tasks
         private readonly ConcurrentDictionary<string, AssemblyMetadata> _assemblyMetadataCache;
 
         /// <summary>
-        /// When we exclude an assembly from resolution because it is part of out exclusion list we need to let the user know why this is. 
-        /// There can be a number of reasons each for un-resolving a reference, these reasons are encapsulated by a different black list. We need to log a specific message 
-        /// depending on which black list we have found the offending assembly in. This delegate allows one to tie a set of logging messages to a black list so that when we 
+        /// When we exclude an assembly from resolution because it is part of out exclusion list we need to let the user know why this is.
+        /// There can be a number of reasons each for un-resolving a reference, these reasons are encapsulated by a different black list. We need to log a specific message
+        /// depending on which black list we have found the offending assembly in. This delegate allows one to tie a set of logging messages to a black list so that when we
         /// discover an assembly in the black list we can log the correct message.
         /// </summary>
         internal delegate void LogExclusionReason(bool displayPrimaryReferenceMessage, AssemblyNameExtension assemblyName, Reference reference, ITaskItem referenceItem, string targetedFramework);
@@ -158,6 +158,7 @@ namespace Microsoft.Build.Tasks
         // PEHeader
         private const int PEHEADER = 0x00004550;
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Construct.
         /// </summary>
@@ -180,10 +181,10 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyMetadata">Delegate used for finding dependencies of a file.</param>
         /// <param name="getRegistrySubKeyNames">Used to get registry subkey names.</param>
         /// <param name="getRegistrySubKeyDefaultValue">Used to get registry default values.</param>
+        /// <param name="openBaseKey"></param>
         /// <param name="unresolveFrameworkAssembliesFromHigherFrameworks"></param>
         /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
         /// <param name="allowedAssemblyExtensions"></param>
-        /// <param name="openBaseKey"></param>
         /// <param name="getRuntimeVersion"></param>
         /// <param name="targetedRuntimeVersion"></param>
         /// <param name="projectTargetFramework"></param>
@@ -198,6 +199,45 @@ namespace Microsoft.Build.Tasks
         /// <param name="readMachineTypeFromPEHeader"></param>
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
+#else
+        /// <summary>
+        /// Construct.
+        /// </summary>
+        /// <param name="buildEngine"></param>
+        /// <param name="findDependencies">If true, then search for dependencies.</param>
+        /// <param name="findSatellites">If true, then search for satellite files.</param>
+        /// <param name="findSerializationAssemblies">If true, then search for serialization assembly files.</param>
+        /// <param name="findRelatedFiles">If true, then search for related files.</param>
+        /// <param name="searchPaths">Paths to search for dependent assemblies on.</param>
+        /// <param name="relatedFileExtensions"></param>
+        /// <param name="candidateAssemblyFiles">List of literal assembly file names to be considered when SearchPaths has {CandidateAssemblyFiles}.</param>
+        /// <param name="resolvedSDKItems">Resolved sdk items</param>
+        /// <param name="frameworkPaths">Path to the FX.</param>
+        /// <param name="installedAssemblies">Installed assembly XML tables.</param>
+        /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64, the processor architecture being targetted.</param>
+        /// <param name="fileExists">Delegate used for checking for the existence of a file.</param>
+        /// <param name="directoryExists">Delegate used for files.</param>
+        /// <param name="getDirectories">Delegate used for getting directories.</param>
+        /// <param name="getAssemblyName">Delegate used for getting assembly names.</param>
+        /// <param name="getAssemblyMetadata">Delegate used for finding dependencies of a file.</param>
+        /// <param name="unresolveFrameworkAssembliesFromHigherFrameworks"></param>
+        /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
+        /// <param name="allowedAssemblyExtensions"></param>
+        /// <param name="getRuntimeVersion"></param>
+        /// <param name="targetedRuntimeVersion"></param>
+        /// <param name="projectTargetFramework"></param>
+        /// <param name="targetFrameworkMoniker"></param>
+        /// <param name="log"></param>
+        /// <param name="latestTargetFrameworkDirectories"></param>
+        /// <param name="copyLocalDependenciesWhenParentReferenceInGac"></param>
+        /// <param name="doNotCopyLocalIfInGac"></param>
+        /// <param name="getAssemblyPathInGac"></param>
+        /// <param name="isWinMDFile"></param>
+        /// <param name="ignoreVersionForFrameworkReferences"></param>
+        /// <param name="readMachineTypeFromPEHeader"></param>
+        /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
+        /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
+#endif
         internal ReferenceTable
         (
             IBuildEngine buildEngine,
@@ -378,7 +418,6 @@ namespace Microsoft.Build.Tasks
             References[assemblyName] = reference;
         }
 
-
         /// <summary>
         /// Find the reference that corresponds to the given path.
         /// </summary>
@@ -542,7 +581,7 @@ namespace Microsoft.Build.Tasks
             // Figure out the specific version value.
             bool wantSpecificVersion = MetadataConversionUtilities.TryConvertItemMetadataToBool(referenceAssemblyName, ItemMetadataNames.specificVersion, out bool foundSpecificVersionMetadata);
 
-            bool isSimpleName = (assemblyName != null && assemblyName.IsSimpleName);
+            bool isSimpleName = (assemblyName?.IsSimpleName == true);
 
             // Create the reference.
             var reference = new Reference(_isWinMDFile, _fileExists, _getRuntimeVersion);
@@ -587,7 +626,6 @@ namespace Microsoft.Build.Tasks
                     assemblyName = remappedExtension;
                 }
             }
-
 
             // Embed Interop Types aka "NOPIAs" support is not available for Fx < 4.0
             // So, we just ignore this setting on down-level platforms
@@ -1008,7 +1046,7 @@ namespace Microsoft.Build.Tasks
 
             var dependencies = new List<AssemblyNameExtension>(dependentAssemblies?.Length ?? 0);
 
-            if (dependentAssemblies != null && dependentAssemblies.Length > 0)
+            if (dependentAssemblies?.Length > 0)
             {
                 // Re-map immediately so that to the sytem we actually got the remapped version when reading the manifest.
                 for (int i = 0; i < dependentAssemblies.Length; i++)
@@ -1048,7 +1086,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Given an enumerator of pre-unified assembly names, return an enumerator of unified 
+        /// Given an enumerator of pre-unified assembly names, return an enumerator of unified
         /// assembly names.
         /// </summary>
         private IEnumerable<UnifiedAssemblyName> GetUnifiedAssemblyNames
@@ -1195,10 +1233,10 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Based on the set of parent assemblies we want to add their directories to the list of resolvers so that 
+        /// Based on the set of parent assemblies we want to add their directories to the list of resolvers so that
         /// if the dependency is sitting beside the assembly which requires it then we will resolve the assembly from that location first.
-        /// 
-        /// The only time we do not want to do this is if the parent assembly came from the GAC or AssemblyFoldersEx then we want the assembly 
+        ///
+        /// The only time we do not want to do this is if the parent assembly came from the GAC or AssemblyFoldersEx then we want the assembly
         /// to be found using those resolvers so that our GAC and AssemblyFolders checks later on will work on those assemblies.
         /// </summary>
         internal static void CalculateParentAssemblyDirectories(List<string> parentReferenceFolders, Reference parentReference)
@@ -1226,7 +1264,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Given an unresolved reference (one that we don't know the full name for yet), figure out the 
+        /// Given an unresolved reference (one that we don't know the full name for yet), figure out the
         /// full name. Should only be called on references that haven't been resolved yet--otherwise, its
         /// a perf problem.
         /// </summary>
@@ -1390,7 +1428,7 @@ namespace Microsoft.Build.Tasks
                     ICollection<ITaskItem> dependees = assemblyReference.GetSourceItems();
 
                     // Need to deal with dependencies, this can also include primary references who are dependencies themselves and are in the black list
-                    if (!assemblyReference.IsPrimary || (assemblyReference.IsPrimary && isMarkedForExclusion && (dependees != null && dependees.Count > 1)))
+                    if (!assemblyReference.IsPrimary || (assemblyReference.IsPrimary && isMarkedForExclusion && (dependees?.Count > 1)))
                     {
                         // Does the assembly have specific version true, or does any of its primary parent references have specific version true.
                         // This is checked because, if an assembly is in the black list, the only way it can possibly be allowed is if
@@ -1433,7 +1471,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// References usually only contains who they depend on, they do not know who depends on them. Given a reference
-        /// A we cannot inspect A to find out that B,C,D depend on it. This method will traverse the references and build up this other direction of the graph, 
+        /// A we cannot inspect A to find out that B,C,D depend on it. This method will traverse the references and build up this other direction of the graph,
         /// therefore we will be able to know given reference A, that B,C,D depend on it.
         /// </summary>
         private static void AddToDependencyGraph(Dictionary<Reference, List<ReferenceAssemblyExtensionPair>> dependencyGraph, AssemblyNameExtension assemblyName, Reference assemblyReference)
@@ -1534,7 +1572,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Go through the dependency graph and make sure that for a reference to remove that we get rid of all dependency assemblies which are not referenced by any other 
+        /// Go through the dependency graph and make sure that for a reference to remove that we get rid of all dependency assemblies which are not referenced by any other
         /// assembly. The remove reference list should contain ALL primary references which should be removed because they, or one of their dependencies is in the black list.
         /// </summary>
         /// <param name="removedReference">Reference to remove dependencies for</param>
@@ -1579,7 +1617,7 @@ namespace Microsoft.Build.Tasks
         /// Searches the table for references that haven't been resolved to their full file names and
         /// for dependencies that haven't yet been found.
         ///
-        /// If any are found, they're resolved and then dependencies are found. Then the process is repeated 
+        /// If any are found, they're resolved and then dependencies are found. Then the process is repeated
         /// until nothing is left unresolved.
         /// </summary>
         /// <param name="remappedAssembliesValue">The table of remapped assemblies.</param>
@@ -1633,7 +1671,6 @@ namespace Microsoft.Build.Tasks
                     ++dependencyIterations;
                     ErrorUtilities.VerifyThrow(dependencyIterations < maxIterations, "Maximum iterations exceeded while looking for dependencies.");
                 } while (moreDependencies);
-
 
                 // If everything is either resolved or unresolvable, then we can quit.
                 // Otherwise, loop again.
@@ -1773,7 +1810,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// This methods looks for conflicts between assemblies and attempts to 
+        /// This methods looks for conflicts between assemblies and attempts to
         /// resolve them.
         /// </summary>
         private void ResolveConflictsBetweenReferences(Dictionary<string, List<AssemblyNameReference>> baseNameToReferences)
@@ -1812,7 +1849,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Based on the closure, get a table of ideal remappings needed to 
+        /// Based on the closure, get a table of ideal remappings needed to
         /// produce zero conflicts.
         /// </summary>
         internal void ResolveConflicts
@@ -1865,7 +1902,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     byte[] pkt = assemblyName.GetPublicKeyToken();
-                    if (pkt != null && pkt.Length > 0)
+                    if (pkt?.Length > 0)
                     {
                         AssemblyName baseKey = assemblyName.AssemblyName.CloneIfPossible();
                         Version version = baseKey.Version;
@@ -1923,8 +1960,8 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// If a reference is a higher version than what exists in the redist list of the target framework then 
-        /// this reference needs to be marked as excluded so that it is not not allowed to be referenced. 
+        /// If a reference is a higher version than what exists in the redist list of the target framework then
+        /// this reference needs to be marked as excluded so that it is not allowed to be referenced.
         /// 
         /// If the user needs this reference then they need to set specific version to true.
         /// </summary>
@@ -1981,12 +2018,12 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Get the redist list which corresponds to the highest target framework for a given target framework moniker.
-        /// 
+        ///
         /// This is done in two ways:
         ///  First, if the latestTargetFrameworkDirectories parameter is passed into RAR those directories will be used to get the redist list
-        ///  regardless of the target framework moniker. 
-        ///  
-        /// Second, if latest Target Framework Directories is not passed in then we ask the ToollocationHelper for the highest target framework which has 
+        ///  regardless of the target framework moniker.
+        ///
+        /// Second, if latest Target Framework Directories is not passed in then we ask the ToollocationHelper for the highest target framework which has
         /// a TargetFrameworkIdentifier which matches the passed in TargetFrameworkMoniker.
         /// </summary>
         private Tuple<RedistList, string> GetHighestVersionFullFrameworkForTFM(FrameworkNameVersioning targetFrameworkMoniker)
@@ -2005,7 +2042,7 @@ namespace Microsoft.Build.Tasks
 
                         // The latestTargetFrameworkDirectories can be passed into RAR, if they are then use those directories rather than 
                         // getting a list by looking at the file system.
-                        if (_latestTargetFrameworkDirectories != null && _latestTargetFrameworkDirectories.Length > 0)
+                        if (_latestTargetFrameworkDirectories?.Length > 0)
                         {
                             referenceAssemblyDirectories = new List<string>(_latestTargetFrameworkDirectories);
                             otherFrameworkName = String.Join(";", _latestTargetFrameworkDirectories);
@@ -2019,7 +2056,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        if (referenceAssemblyDirectories != null && referenceAssemblyDirectories.Count > 0)
+                        if (referenceAssemblyDirectories?.Count > 0)
                         {
                             var seenFrameworkDirectories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                             var assemblyTableInfos = new List<AssemblyTableInfo>();
@@ -2050,7 +2087,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Based on a target framework moniker, get the set of reference assembly directories which 
+        /// Based on a target framework moniker, get the set of reference assembly directories which
         /// correspond to the highest version of the target framework identifier property on the target framework moniker.
         /// </summary>
         private static IList<string> GetHighestVersionReferenceAssemblyDirectories(FrameworkNameVersioning targetFrameworkMoniker, out FrameworkNameVersioning highestVersionMoniker)
@@ -2069,7 +2106,7 @@ namespace Microsoft.Build.Tasks
             }
             return referenceAssemblyDirectories;
         }
-        
+
         /// <summary>
         /// Is the assemblyName in the current redist list and does it have a version number which is higher than what is in the current redist list.
         /// This may happen if someone passes in a p2p reference whcih is a framework assembly which is a higher version than what is in the redist list.
@@ -2105,7 +2142,7 @@ namespace Microsoft.Build.Tasks
                 // Check assemblies versions when target framework version is less than 4.5
 
                 // Make sure the version is higher than the version in the redist. 
-                bool higherThanCurrentRedistList = (reference.ReferenceVersion != null && reference.ExclusionListLoggingProperties.HighestVersionInRedist != null)
+                bool higherThanCurrentRedistList = reference.ReferenceVersion != null && reference.ExclusionListLoggingProperties.HighestVersionInRedist != null
                                                    && reference.ReferenceVersion.CompareTo(reference.ExclusionListLoggingProperties.HighestVersionInRedist) > 0;
 
                 if (higherThanCurrentRedistList)
@@ -2150,7 +2187,7 @@ namespace Microsoft.Build.Tasks
 
             return haveMarkedReference;
         }
-        
+
         /// <summary>
         /// Build a table of simple names mapped to assemblyname+reference.
         /// </summary>
@@ -2196,7 +2233,6 @@ namespace Microsoft.Build.Tasks
                 if (baseNameToReferences[baseName].Count == 1)
                 {
                     baseNameToReferences.Remove(baseName);
-
                 }
             }
         }
@@ -2298,7 +2334,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            
+
             // Remove the one chosen.
             int victor = 1 - victim;
 
@@ -2339,12 +2375,14 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Get unification information for the given assembly name. 
+        /// Get unification information for the given assembly name.
         /// </summary>
         /// <param name="assemblyName">The assembly name.</param>
         /// <param name="unifiedVersion">The new version of the assembly to use.</param>
         /// <param name="unificationReason">The reason this reference was unified.</param>
         /// <param name="isPrerequisite">True if this is a prereq assembly.</param>
+        /// <param name="isRedistRoot">May be true, false or null. Null means there was no IsRedistRoot in the redist list.</param>
+        /// <param name="redistName">Name of the corresponding Resist specified in the redist list.</param>
         /// <returns>True if there was a unification.</returns>
         private bool UnifyAssemblyNameVersions
         (
@@ -2414,7 +2452,6 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-
             return false;
         }
 
@@ -2456,6 +2493,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="dependencyFiles">Dependent references fully resolved.</param>
         /// <param name="relatedFiles">Related files like .xmls and .pdbs.</param>
         /// <param name="satelliteFiles">Satellite files.</param>
+        /// <param name="serializationAssemblyFiles">Serialization assembly files.</param>
+        /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
         /// <param name="copyLocalFiles">All copy-local files out of primaryFiles+dependencyFiles+relatedFiles+satelliteFiles.</param>
         internal void GetReferenceItems
         (
@@ -2586,7 +2625,7 @@ namespace Microsoft.Build.Tasks
                 referenceItem.SetMetadata(ItemMetadataNames.redist, reference.RedistName);
             }
 
-            if (Reference.IsFrameworkFile(reference.FullPath, _frameworkPaths) || (_installedAssemblies != null && _installedAssemblies.FrameworkAssemblyEntryInRedist(assemblyName)))
+            if (Reference.IsFrameworkFile(reference.FullPath, _frameworkPaths) || (_installedAssemblies?.FrameworkAssemblyEntryInRedist(assemblyName) == true))
             {
                 if (!IsAssemblyRemovedFromDotNetFramework(assemblyName, reference.FullPath, _frameworkPaths, _installedAssemblies))
                 {

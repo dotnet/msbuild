@@ -6,7 +6,6 @@ using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.ObjectModelRemoting
 {
-
     /// <summary>
     /// External projects support.
     /// Allow for creating a local representation to external object of type <see cref="ProjectMetadata"/>
@@ -46,6 +45,7 @@ namespace Microsoft.Build.ObjectModelRemoting
 
         /// <summary>
         /// Helper utility for External projects provider implementation to get access of the EvaluatedValueEscaped
+        /// </summary>
         public static string GetEvaluatedValueEscaped(ProjectMetadata metadata)
         {
             return metadata.EvaluatedValueEscaped;

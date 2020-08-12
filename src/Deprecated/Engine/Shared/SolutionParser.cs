@@ -312,7 +312,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <owner>RGoel</owner>
         internal void ParseSolutionFile()
         {
-            error.VerifyThrow((solutionFile != null) && (solutionFile.Length != 0), "ParseSolutionFile() got a null solution file!");
+            error.VerifyThrow(!string.IsNullOrEmpty(solutionFile), "ParseSolutionFile() got a null solution file!");
 
             FileStream fileStream = null;
             reader = null;
@@ -328,15 +328,9 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
             finally
             {
-                if (fileStream != null)
-                {
-                    fileStream.Close();
-                }
+                fileStream?.Close();
 
-                if (reader != null)
-                {
-                    reader.Close();
-                }
+                reader?.Close();
             }
         }
 
@@ -412,7 +406,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                 // Update the hash table with this unique name
                 projectsByUniqueName[uniqueName] = proj;
             }
-
         } // ParseSolutionFile()
 
         /// <summary>
@@ -501,7 +494,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                 "SolutionParseVersionMismatchError", 
                 slnFileMinUpgradableVersion, slnFileMaxVersion);
 
-
             // If the solution file version is greater than the maximum one we will create a comment rather than warn
             // as users such as blend opening a dev10 project cannot do anything about it.
             if (this.slnFileActualVersion > slnFileMaxVersion)
@@ -531,7 +523,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <owner>RGoel</owner>
         private void ParseProject(string firstLine)
         {
-            error.VerifyThrow((firstLine != null) && (firstLine.Length != 0), "ParseProject() got a null firstLine!");
+            error.VerifyThrow(!string.IsNullOrEmpty(firstLine), "ParseProject() got a null firstLine!");
             error.VerifyThrow(reader != null, "ParseProject() got a null reader!");
 
             ProjectInSolution proj = new ProjectInSolution(this);
@@ -555,7 +547,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     // We have a ProjectDependencies section.  Each subsequent line should identify
                     // a dependency.
                     line = ReadLine();
-                    while ((line != null) && (!line.StartsWith("EndProjectSection", StringComparison.Ordinal)))
+                    while ((line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false))
                     {
                         // This should be a dependency.  The GUID identifying the parent project should
                         // be both the property name and the property value.
@@ -575,7 +567,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     // projects, and contains properties that we'll need in order to call the 
                     // AspNetCompiler task.
                     line = ReadLine();
-                    while ((line != null) && (!line.StartsWith("EndProjectSection", StringComparison.Ordinal)))
+                    while ((line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false))
                     {
                         Match match = crackPropertyLine.Match(line);
                         ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
@@ -942,7 +934,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             else
             {
                 // ProjectReferences = "{FD705688-88D1-4C22-9BFF-86235D89C2FC}|CSClassLibrary1.dll;{F0726D09-042B-4A7A-8A01-6BED2422BD5D}|VCClassLibrary1.dll;" 
-                if (string.Compare(propertyName, "ProjectReferences", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Equals(propertyName, "ProjectReferences", StringComparison.OrdinalIgnoreCase))
                 {
                     string[] projectReferenceEntries = propertyValue.Split(new char[] { ';' });
 
@@ -984,7 +976,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             )
         {
             // If the incoming string starts and ends with a double-quote, strip the double-quotes.
-            if ((property != null) && (property.Length > 0) && (property[0] == '"') && (property[property.Length - 1] == '"'))
+            if (!string.IsNullOrEmpty(property) && (property[0] == '"') && (property[property.Length - 1] == '"'))
             {
                 return property.Substring(1, property.Length - 2);
             }
@@ -1022,21 +1014,21 @@ namespace Microsoft.Build.BuildEngine.Shared
             ValidateProjectRelativePath(proj);
             
             // Figure out what type of project this is.
-            if ((String.Compare(projectTypeGuid, vbProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(projectTypeGuid, csProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(projectTypeGuid, vjProjectGuid, StringComparison.OrdinalIgnoreCase) == 0))
+            if ((String.Equals(projectTypeGuid, vbProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(projectTypeGuid, csProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(projectTypeGuid, vjProjectGuid, StringComparison.OrdinalIgnoreCase)))
             {
                 proj.ProjectType = SolutionProjectType.ManagedProject;
             }
-            else if (String.Compare(projectTypeGuid, solutionFolderGuid, StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(projectTypeGuid, solutionFolderGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.SolutionFolder;
             }
-            else if (String.Compare(projectTypeGuid, vcProjectGuid, StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(projectTypeGuid, vcProjectGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.VCProject;
             }
-            else if (String.Compare(projectTypeGuid, webProjectGuid, StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(projectTypeGuid, webProjectGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.WebProject;
                 solutionContainsWebProjects = true;
@@ -1116,7 +1108,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 string fullConfigurationName = configurationNames[0].Trim();
 
                 //Fixing bug 555577: Solution file can have description information, in which case we ignore.
-                if (0 == String.Compare(fullConfigurationName, "DESCRIPTION", StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(fullConfigurationName, "DESCRIPTION", StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 // Both names must be identical
@@ -1258,7 +1250,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // Pick the Debug configuration as default if present
             foreach (ConfigurationInSolution solutionConfiguration in this.SolutionConfigurations)
             {
-                if (string.Compare(solutionConfiguration.ConfigurationName, "Debug", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Equals(solutionConfiguration.ConfigurationName, "Debug", StringComparison.OrdinalIgnoreCase))
                 {
                     defaultConfigurationName = solutionConfiguration.ConfigurationName;
                     break;
@@ -1293,7 +1285,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // Pick the Mixed Platforms platform as default if present
             foreach (ConfigurationInSolution solutionConfiguration in this.SolutionConfigurations)
             {
-                if (string.Compare(solutionConfiguration.PlatformName, "Mixed Platforms", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Equals(solutionConfiguration.PlatformName, "Mixed Platforms", StringComparison.OrdinalIgnoreCase))
                 {
                     defaultPlatformName = solutionConfiguration.PlatformName;
                     break;
@@ -1319,7 +1311,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal string GetProjectUniqueNameByGuid(string projectGuid)
         {
             ProjectInSolution proj = (ProjectInSolution) projects[projectGuid];
-            return (proj == null) ? null : proj.GetUniqueProjectName();
+            return proj?.GetUniqueProjectName();
         }
 
         /// <summary>
@@ -1332,10 +1324,9 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal string GetProjectRelativePathByGuid(string projectGuid)
         {
             ProjectInSolution proj = (ProjectInSolution) projects[projectGuid];
-            return (proj == null) ? null : proj.RelativePath;
+            return proj?.RelativePath;
         }
 
         #endregion
     } // class SolutionParser
-
 } // namespace Microsoft.Build.BuildEngine

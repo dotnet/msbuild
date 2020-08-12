@@ -49,15 +49,14 @@ namespace Microsoft.Build.Shared
                 newElement.AppendChild(oldElement.FirstChild);
             }
 
-            if (oldElement.ParentNode != null)
-            {
+               
+            
                 // Add the new element in the same place the old element was.
-                oldElement.ParentNode.ReplaceChild(newElement, oldElement);
-            }
+                oldElement.ParentNode?.ReplaceChild(newElement, oldElement);
+            
 
             return newElement;
         }
-
 
         /// <summary>
         /// Verifies that a name is valid for the name of an item, property, or piece of metadata.
@@ -70,7 +69,7 @@ namespace Microsoft.Build.Shared
         /// <param name="name">name to validate</param>
         internal static void VerifyThrowArgumentValidElementName(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
 
             int firstInvalidCharLocation = LocateFirstInvalidElementNameCharacter(name);
 
@@ -89,7 +88,7 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static void VerifyThrowProjectValidElementName(string name, IElementLocation location)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
             int firstInvalidCharLocation = LocateFirstInvalidElementNameCharacter(name);
 
             if (-1 != firstInvalidCharLocation)
@@ -126,7 +125,7 @@ namespace Microsoft.Build.Shared
         /// <returns>true, if name is valid</returns>
         internal static bool IsValidElementName(string name)
         {
-            return (LocateFirstInvalidElementNameCharacter(name) == -1);
+            return LocateFirstInvalidElementNameCharacter(name) == -1;
         }
 
         /// <summary>

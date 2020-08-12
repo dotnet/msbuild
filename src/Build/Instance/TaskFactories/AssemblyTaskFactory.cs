@@ -205,7 +205,7 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, "task");
+            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
 #if FEATURE_APPDOMAIN
             AppDomain appDomain;
             if (_tasksAndAppDomains.TryGetValue(task, out appDomain))
@@ -261,7 +261,7 @@ namespace Microsoft.Build.BackEnd
                 string taskProjectFile
             )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loadInfo, "loadInfo");
+            ErrorUtilities.VerifyThrowArgumentNull(loadInfo, nameof(loadInfo));
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
 
             if (taskFactoryIdentityParameters != null)
@@ -273,7 +273,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                ErrorUtilities.VerifyThrowArgumentLength(taskName, "taskName");
+                ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
                 _taskName = taskName;
                 _loadedType = _typeLoader.Load(taskName, loadInfo);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
@@ -332,7 +332,7 @@ namespace Microsoft.Build.BackEnd
             // the task factory parameters if we have any to calculate; otherwise even if we 
             // still launch the task factory, it will be with parameters corresponding to the 
             // current process. 
-            if ((_factoryIdentityParameters != null && _factoryIdentityParameters.Count > 0) || (taskIdentityParameters != null && taskIdentityParameters.Count > 0))
+            if ((_factoryIdentityParameters?.Count > 0) || (taskIdentityParameters?.Count > 0))
             {
                 VerifyThrowIdentityParametersValid(taskIdentityParameters, taskLocation, _taskName, "MSBuildRuntime", "MSBuildArchitecture");
 
@@ -351,9 +351,9 @@ namespace Microsoft.Build.BackEnd
 
             if (useTaskFactory)
             {
-                ErrorUtilities.VerifyThrowInternalNull(buildComponentHost, "buildComponentHost");
+                ErrorUtilities.VerifyThrowInternalNull(buildComponentHost, nameof(buildComponentHost));
 
-                mergedParameters = mergedParameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                mergedParameters ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 string runtime = null;
                 string architecture = null;
@@ -475,7 +475,7 @@ namespace Microsoft.Build.BackEnd
         private static void VerifyThrowIdentityParametersValid(IDictionary<string, string> identityParameters, IElementLocation errorLocation, string taskName, string runtimeName, string architectureName)
         {
             // validate the task factory parameters
-            if (identityParameters != null && identityParameters.Count > 0)
+            if (identityParameters?.Count > 0)
             {
                 string runtime = null;
                 if (identityParameters.TryGetValue(XMakeAttributes.runtime, out runtime))

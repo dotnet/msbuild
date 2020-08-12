@@ -342,7 +342,7 @@ namespace Microsoft.Build.UnitTests
         public void ExistsButDirectory()
         {
             Assert.Equal(new FileInfo(Path.GetTempPath()).Exists, new FileState(Path.GetTempPath()).FileExists);
-            Assert.True((new FileState(Path.GetTempPath()).IsDirectory));
+            Assert.True(new FileState(Path.GetTempPath()).IsDirectory);
         }
 
         [Fact]

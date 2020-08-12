@@ -26,7 +26,7 @@ namespace Microsoft.Build.Evaluation
 
         public NuGetFrameworkWrapper()
         {
-            /// Resolve the location of the NuGet.Frameworks assembly
+            // Resolve the location of the NuGet.Frameworks assembly
             var assemblyDirectory = BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio ?
                 Path.Combine(BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory, "Common7", "IDE", "CommonExtensions", "Microsoft", "NuGet") :
                 BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
@@ -60,9 +60,10 @@ namespace Microsoft.Build.Evaluation
             return FrameworkProperty.GetValue(Parse(tfm)) as string;
         }
 
-        public string GetTargetFrameworkVersion(string tfm, int versionPartCount)
+        public string GetTargetFrameworkVersion(string tfm, int minVersionPartCount)
         {
-            return (VersionProperty.GetValue(Parse(tfm)) as Version).ToString(versionPartCount);
+            var version = VersionProperty.GetValue(Parse(tfm)) as Version;
+            return GetNonZeroVersionParts(version, minVersionPartCount);
         }
 
         public string GetTargetPlatformIdentifier(string tfm)
@@ -70,14 +71,21 @@ namespace Microsoft.Build.Evaluation
             return PlatformProperty.GetValue(Parse(tfm)) as string;
         }
 
-        public string GetTargetPlatformVersion(string tfm, int versionPartCount)
+        public string GetTargetPlatformVersion(string tfm, int minVersionPartCount)
         {
-            return (PlatformVersionProperty.GetValue(Parse(tfm)) as Version).ToString(versionPartCount);
+            var version = PlatformVersionProperty.GetValue(Parse(tfm)) as Version;
+            return GetNonZeroVersionParts(version, minVersionPartCount);
         }
 
         public bool IsCompatible(string target, string candidate)
         {
             return Convert.ToBoolean(IsCompatibleMethod.Invoke(DefaultCompatibilityProvider, new object[] { Parse(target), Parse(candidate) }));
+        }
+
+        private string GetNonZeroVersionParts(Version version, int minVersionPartCount)
+        {
+            var nonZeroVersionParts = version.Revision == 0 ? version.Build == 0 ? version.Minor == 0 ? 1 : 2 : 3: 4;
+            return version.ToString(Math.Max(nonZeroVersionParts, minVersionPartCount));
         }
     }
 }

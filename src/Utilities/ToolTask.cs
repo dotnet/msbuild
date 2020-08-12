@@ -458,7 +458,7 @@ namespace Microsoft.Build.Utilities
                 pathToTool = Path.Combine(ToolPath, ToolExe);
             }
 
-            if (string.IsNullOrWhiteSpace(pathToTool) || ToolPath == null && !FileSystems.Default.FileExists(pathToTool))
+            if (string.IsNullOrWhiteSpace(pathToTool) || (ToolPath == null && !FileSystems.Default.FileExists(pathToTool)))
             {
                 // Otherwise, try to find the tool ourselves.
                 pathToTool = GenerateFullPathToTool();
@@ -1307,7 +1307,7 @@ namespace Microsoft.Build.Utilities
                 {
                     string[] nameValuePair = entry.Split(s_equalsSplitter, 2);
 
-                    if (nameValuePair.Length == 1 || nameValuePair.Length == 2 && nameValuePair[0].Length == 0)
+                    if (nameValuePair.Length == 1 || (nameValuePair.Length == 2 && nameValuePair[0].Length == 0))
                     {
                         LogPrivate.LogErrorWithCodeFromResources("ToolTask.InvalidEnvironmentParameter", nameValuePair[0]);
                         return false;
@@ -1367,7 +1367,6 @@ namespace Microsoft.Build.Utilities
                     }
                     else
                     {
-
                         Encoding encoding;
 
                         if (Traits.Instance.EscapeHatches.AvoidUnicodeWhenWritingToolTaskBatch)

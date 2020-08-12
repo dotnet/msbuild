@@ -21,7 +21,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Relevant file if any.
-        /// If none is provided, the file containing the Warning 
+        /// If none is provided, the file containing the Warning
         /// task will be used.
         /// </summary>
         public string File { get; set; }
@@ -32,12 +32,17 @@ namespace Microsoft.Build.Tasks
         public string HelpKeyword { get; set; }
 
         /// <summary>
+        /// A link pointing to more information about the warning
+        /// </summary>
+        public string HelpLink { get; set; }
+
+        /// <summary>
         /// Main task method
         /// </summary>
         /// <returns></returns>
         public override bool Execute()
         {
-            Log.LogWarning(null, Code, HelpKeyword, File, 0, 0, 0, 0, Text ?? TaskResources.GetString("ErrorAndWarning.EmptyMessage"));
+            Log.LogWarning(null, Code, HelpKeyword, HelpLink, File, 0, 0, 0, 0, Text ?? TaskResources.GetString("ErrorAndWarning.EmptyMessage"));
 
             return true;
         }

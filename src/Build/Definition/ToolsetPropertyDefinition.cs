@@ -40,11 +40,11 @@ namespace Microsoft.Build.Evaluation
         /// <param name="source">The property source</param>
         public ToolsetPropertyDefinition(string name, string value, IElementLocation source)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
-            ErrorUtilities.VerifyThrowArgumentNull(source, "source");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentNull(source, nameof(source));
 
             // value can be the empty string but not null
-            ErrorUtilities.VerifyThrowArgumentNull(value, "value");
+            ErrorUtilities.VerifyThrowArgumentNull(value, nameof(value));
 
             _name = name;
             _value = value;

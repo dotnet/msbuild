@@ -34,7 +34,7 @@ namespace Microsoft.Build.Execution
         internal ReflectableTaskPropertyInfo(TaskPropertyInfo taskPropertyInfo, Type taskType)
             : base(taskPropertyInfo.Name, taskPropertyInfo.PropertyType, taskPropertyInfo.Output, taskPropertyInfo.Required)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskType, "taskType");
+            ErrorUtilities.VerifyThrowArgumentNull(taskType, nameof(taskType));
             _taskType = taskType;
         }
 

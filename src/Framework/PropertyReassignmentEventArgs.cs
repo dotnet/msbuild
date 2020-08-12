@@ -25,6 +25,10 @@ namespace Microsoft.Build.Framework
         /// <param name="previousValue">The previous value of the reassigned property.</param>
         /// <param name="newValue">The new value of the reassigned property.</param>
         /// <param name="location">The location of the reassignment.</param>
+        /// <param name="message">The message of the reassignment event.</param>
+        /// <param name="helpKeyword">The help keyword of the reassignment.</param>
+        /// <param name="senderName">The sender name of the reassignment event.</param>
+        /// <param name="importance">The importance of the message.</param>
         public PropertyReassignmentEventArgs(
             string propertyName,
             string previousValue,

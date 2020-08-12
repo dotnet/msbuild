@@ -48,7 +48,7 @@ namespace Microsoft.Build.Shared
 
             using (RegistryKey key = baseKey.OpenSubKey(subkey))
             {
-                if (key != null && key.ValueCount > 0)
+                if (key?.ValueCount > 0)
                 {
                     value = (string)key.GetValue("");
                 }

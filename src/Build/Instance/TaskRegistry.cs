@@ -37,7 +37,7 @@ namespace Microsoft.Build.Execution
     /// <example>
     /// &lt;UsingTask TaskName="Microsoft.Build.Tasks.Csc"                     ==> look for the "Csc" task in the
     ///            AssemblyName="Microsoft.Build.Tasks"/&gt;                       weakly-named "Microsoft.Build.Tasks" assembly
-    /// 
+    ///
     /// &lt;UsingTask TaskName="t1"                                            ==> look for the "t1" task in the
     ///            AssemblyName="mytasks, Culture=en, Version=1.0.0.0"/&gt;        strongly-named "mytasks" assembly
     ///
@@ -58,64 +58,64 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// If true, we will force all tasks to run in the MSBuild task host EXCEPT
         /// a small well-known set of tasks that are known to depend on IBuildEngine
-        /// callbacks; as forcing those out of proc would be just setting them up for 
-        /// known failure.  
+        /// callbacks; as forcing those out of proc would be just setting them up for
+        /// known failure.
         /// </summary>
         private static bool s_forceTaskHostLaunch = (Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1");
 
         /// <summary>
-        /// Simple name for the MSBuild tasks (v4), used for shimming in loading 
+        /// Simple name for the MSBuild tasks (v4), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
         private static string s_tasksV4SimpleName = "Microsoft.Build.Tasks.v4.0";
 
         /// <summary>
-        /// Filename for the MSBuild tasks (v4), used for shimming in loading 
+        /// Filename for the MSBuild tasks (v4), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
         private static string s_tasksV4Filename = s_tasksV4SimpleName + ".dll";
 
         /// <summary>
-        /// Expected location that MSBuild tasks (v4) is picked up from if the user 
-        /// references it with just a simple name, used for shimming in loading 
+        /// Expected location that MSBuild tasks (v4) is picked up from if the user
+        /// references it with just a simple name, used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
         private static string s_potentialTasksV4Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV4Filename);
 
         /// <summary>
-        /// Simple name for the MSBuild tasks (v12), used for shimming in loading 
+        /// Simple name for the MSBuild tasks (v12), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
         private static string s_tasksV12SimpleName = "Microsoft.Build.Tasks.v12.0";
 
         /// <summary>
-        /// Filename for the MSBuild tasks (v12), used for shimming in loading 
+        /// Filename for the MSBuild tasks (v12), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
         private static string s_tasksV12Filename = s_tasksV12SimpleName + ".dll";
 
         /// <summary>
-        /// Expected location that MSBuild tasks (v12) is picked up from if the user 
-        /// references it with just a simple name, used for shimming in loading 
+        /// Expected location that MSBuild tasks (v12) is picked up from if the user
+        /// references it with just a simple name, used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
         private static string s_potentialTasksV12Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV12Filename);
 
         /// <summary>
-        /// Simple name for the MSBuild tasks (v14+), used for shimming in loading 
+        /// Simple name for the MSBuild tasks (v14+), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
         private static string s_tasksCoreSimpleName = "Microsoft.Build.Tasks.Core";
 
         /// <summary>
-        /// Filename for the MSBuild tasks (v14+), used for shimming in loading 
+        /// Filename for the MSBuild tasks (v14+), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
         private static string s_tasksCoreFilename = s_tasksCoreSimpleName + ".dll";
 
         /// <summary>
-        /// Expected location that MSBuild tasks (v14+) is picked up from if the user 
-        /// references it with just a simple name, used for shimming in loading 
+        /// Expected location that MSBuild tasks (v14+) is picked up from if the user
+        /// references it with just a simple name, used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
         private static string s_potentialTasksCoreLocation = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksCoreFilename);
@@ -129,7 +129,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Cache of tasks already found using fuzzy matching,
         /// keyed by the task name requested.
-        /// Value is a dictionary of all possible matches for that 
+        /// Value is a dictionary of all possible matches for that
         /// task name, by unique identity.
         /// </summary>
         private Dictionary<string, Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>> _cachedTaskRecordsWithFuzzyMatch;
@@ -153,7 +153,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal TaskRegistry(ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
+            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
 
             RootElementCache = projectRootElementCache;
         }
@@ -163,7 +163,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Creates a task registry that defers to the specified toolset's registry for those tasks it cannot resolve.        
+        /// Creates a task registry that defers to the specified toolset's registry for those tasks it cannot resolve.
         /// UNDONE: (Logging.) We can't pass the base task registry from the Toolset because we can't call GetTaskRegistry
         /// without logging context information.  When the Project load code is altered to contain logging service
         /// references, we can load the toolset task registry at the time this registry is created and pass it to
@@ -173,8 +173,8 @@ namespace Microsoft.Build.Execution
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         internal TaskRegistry(Toolset toolset, ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
-            ErrorUtilities.VerifyThrowInternalNull(toolset, "toolset");
+            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowInternalNull(toolset, nameof(toolset));
 
             RootElementCache = projectRootElementCache;
             _toolset = toolset;
@@ -228,7 +228,7 @@ namespace Microsoft.Build.Execution
             where P : class, IProperty
             where I : class, IItem
         {
-            ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile, "directoryOfImportingFile");
+            ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile, nameof(directoryOfImportingFile));
 
             if (!ConditionEvaluator.EvaluateCondition
                 (
@@ -380,8 +380,8 @@ namespace Microsoft.Build.Execution
             {
                 taskFactoryParameters = CreateTaskFactoryParametersDictionary();
 
-                taskFactoryParameters.Add(XMakeAttributes.runtime, (runtime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : runtime));
-                taskFactoryParameters.Add(XMakeAttributes.architecture, (architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture));
+                taskFactoryParameters.Add(XMakeAttributes.runtime, runtime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : runtime);
+                taskFactoryParameters.Add(XMakeAttributes.architecture, architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
             taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord);
@@ -447,7 +447,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="taskName">The name of the task to retrieve.</param>
         /// <param name="taskProjectFile">The task's project file.</param>
-        /// <param name="taskIdentityParameters">The set of task identity parameters to be used to identify the 
+        /// <param name="taskIdentityParameters">The set of task identity parameters to be used to identify the
         /// correct task record match.</param>
         /// <param name="exactMatchRequired">True if an exact name match is required.</param>
         /// <param name="targetLoggingContext">The logging context.</param>
@@ -477,7 +477,7 @@ namespace Microsoft.Build.Execution
             }
 
             // Try the current task registry
-            if (taskRecord == null && _taskRegistrations != null && _taskRegistrations.Count > 0)
+            if (taskRecord == null && _taskRegistrations?.Count > 0)
             {
                 if (exactMatchRequired)
                 {
@@ -552,12 +552,12 @@ namespace Microsoft.Build.Execution
             // Cache the result, even if it is null.  We should never again do the work we just did, for this task name.
             if (exactMatchRequired)
             {
-                _cachedTaskRecordsWithExactMatch = _cachedTaskRecordsWithExactMatch ?? new Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                _cachedTaskRecordsWithExactMatch ??= new Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
                 _cachedTaskRecordsWithExactMatch[taskIdentity] = taskRecord;
             }
             else
             {
-                _cachedTaskRecordsWithFuzzyMatch = _cachedTaskRecordsWithFuzzyMatch ?? new Dictionary<string, Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>>(StringComparer.OrdinalIgnoreCase);
+                _cachedTaskRecordsWithFuzzyMatch ??= new Dictionary<string, Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>>(StringComparer.OrdinalIgnoreCase);
 
                 // Since this is a fuzzy match, we could conceivably have several sets of task identity parameters that match
                 // each other ... but might be mutually exclusive themselves.  E.g. CLR4|x86 and CLR2|x64 both match *|*.  
@@ -591,9 +591,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private static bool IsTaskFactoryClass(Type type, object unused)
         {
-            return (type.GetTypeInfo().IsClass &&
+            return type.GetTypeInfo().IsClass &&
                 !type.GetTypeInfo().IsAbstract &&
-                typeof(Microsoft.Build.Framework.ITaskFactory).IsAssignableFrom(type));
+                typeof(Microsoft.Build.Framework.ITaskFactory).IsAssignableFrom(type);
         }
 
         /// <summary>
@@ -634,13 +634,13 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Registers an evaluated using task tag for future 
+        /// Registers an evaluated using task tag for future
         /// consultation
         /// </summary>
         private void RegisterTask(string taskName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, Dictionary<string, string> taskFactoryParameters, RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord)
         {
-            ErrorUtilities.VerifyThrowInternalLength(taskName, "taskName");
-            ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo, "assemblyLoadInfo");
+            ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
+            ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo, nameof(assemblyLoadInfo));
 
             // Lazily allocate the hashtable
             if (_taskRegistrations == null)
@@ -663,14 +663,13 @@ namespace Microsoft.Build.Execution
 
         private static Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> CreateRegisteredTaskDictionary(int? capacity = null)
         {
-
             return capacity != null
                 ? new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(capacity.Value, RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact)
                 : new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
         }
 
         /// <summary>
-        /// Given a task name and a list of records which may contain the task, this helper method will ask the records to see if the task name 
+        /// Given a task name and a list of records which may contain the task, this helper method will ask the records to see if the task name
         /// can be created by the factories which are wrapped by the records. (this is done by instantiating the task factory and asking it).
         /// </summary>
         private RegisteredTaskRecord GetMatchingRegistration
@@ -696,7 +695,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// An object representing the identity of a task -- not just task name, but also 
+        /// An object representing the identity of a task -- not just task name, but also
         /// the set of identity parameters
         /// </summary>
         [DebuggerDisplay("{Name} ParameterCount = {TaskIdentityParameters.Count}")]
@@ -754,7 +753,7 @@ namespace Microsoft.Build.Execution
             }
 
             /// <summary>
-            /// Comparer used to figure out whether two RegisteredTaskIdentities are equal or not. 
+            /// Comparer used to figure out whether two RegisteredTaskIdentities are equal or not.
             /// </summary>
             internal class RegisteredTaskIdentityComparer : IEqualityComparer<RegisteredTaskIdentity>
             {
@@ -764,8 +763,8 @@ namespace Microsoft.Build.Execution
                 private static RegisteredTaskIdentityComparer s_exact = new RegisteredTaskIdentityComparer(true /* exact match */);
 
                 /// <summary>
-                /// The singleton comparer to use when a fuzzy match is desired.  Note that this still does an exact match on the 
-                /// name, but does a fuzzy match on the task identity parameters. 
+                /// The singleton comparer to use when a fuzzy match is desired.  Note that this still does an exact match on the
+                /// name, but does a fuzzy match on the task identity parameters.
                 /// </summary>
                 private static RegisteredTaskIdentityComparer s_fuzzy = new RegisteredTaskIdentityComparer(false /* fuzzy match */);
 
@@ -783,7 +782,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 /// <summary>
-                /// The singleton comparer to use for when an exact match is desired 
+                /// The singleton comparer to use for when an exact match is desired
                 /// </summary>
                 public static RegisteredTaskIdentityComparer Exact
                 {
@@ -791,7 +790,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 /// <summary>
-                /// The singleton comparer to use for when a fuzzy match is desired 
+                /// The singleton comparer to use for when a fuzzy match is desired
                 /// </summary>
                 public static RegisteredTaskIdentityComparer Fuzzy
                 {
@@ -799,9 +798,9 @@ namespace Microsoft.Build.Execution
                 }
 
                 /// <summary>
-                /// Returns true if these two identities match "fuzzily" -- if the names pass a partial type name 
-                /// match and the task identity parameters would constitute a valid merge (e.g. "don't care" and 
-                /// something explicit).  Otherwise returns false. 
+                /// Returns true if these two identities match "fuzzily" -- if the names pass a partial type name
+                /// match and the task identity parameters would constitute a valid merge (e.g. "don't care" and
+                /// something explicit).  Otherwise returns false.
                 /// </summary>
                 public static bool IsPartialMatch(RegisteredTaskIdentity x, RegisteredTaskIdentity y)
                 {
@@ -816,7 +815,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 /// <summary>
-                /// Returns true if the two task identities are equal; false otherwise. 
+                /// Returns true if the two task identities are equal; false otherwise.
                 /// </summary>
                 public bool Equals(RegisteredTaskIdentity x, RegisteredTaskIdentity y)
                 {
@@ -889,8 +888,8 @@ namespace Microsoft.Build.Execution
 
                 /// <summary>
                 /// Returns true if the two dictionaries representing sets of task identity parameters match; false otherwise.
-                /// Internal so that RegisteredTaskRecord can use this function in its determination of whether the task factory 
-                /// supports a certain task identity.  
+                /// Internal so that RegisteredTaskRecord can use this function in its determination of whether the task factory
+                /// supports a certain task identity.
                 /// </summary>
                 private static bool IdentityParametersMatch(IDictionary<string, string> x, IDictionary<string, string> y, bool exactMatchRequired)
                 {
@@ -997,16 +996,15 @@ namespace Microsoft.Build.Execution
 
             /// <summary>
             /// Task factory used to create CodeDom-based inline tasks.  Special-cased as one of two officially
-            /// supported task factories in Microsoft.Build.Tasks.vX.Y.dll to deal with versioning issue. 
+            /// supported task factories in Microsoft.Build.Tasks.vX.Y.dll to deal with versioning issue.
             /// </summary>
             internal const string CodeTaskFactory = "CodeTaskFactory";
 
             /// <summary>
             /// Task factory used to create CodeDom-based inline tasks.  Special-cased as one of two officially
-            /// supported task factories in Microsoft.Build.Tasks.vX.Y.dll to deal with versioning issue. 
+            /// supported task factories in Microsoft.Build.Tasks.vX.Y.dll to deal with versioning issue.
             /// </summary>
             internal const string XamlTaskFactory = "XamlTaskFactory";
-
 
             /// <summary>
             /// Lock for the taskFactoryTypeLoader
@@ -1057,14 +1055,14 @@ namespace Microsoft.Build.Execution
             private TaskFactoryWrapper _taskFactoryWrapperInstance;
 
             /// <summary>
-            /// Cache of task names which can be created by the factory. 
-            /// When ever a taskName is checked against the factory we cache the result so we do not have to 
+            /// Cache of task names which can be created by the factory.
+            /// When ever a taskName is checked against the factory we cache the result so we do not have to
             /// make possibly expensive calls over and over again.
             /// </summary>
             private Dictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
 
             /// <summary>
-            /// Set of parameters that can be used by the task factory specifically.  
+            /// Set of parameters that can be used by the task factory specifically.
             /// </summary>
             private Dictionary<string, string> _taskFactoryParameters;
 
@@ -1160,14 +1158,14 @@ namespace Microsoft.Build.Execution
             }
 
             /// <summary>
-            /// Identity of this task. 
+            /// Identity of this task.
             /// </summary>
             internal RegisteredTaskIdentity TaskIdentity => _taskIdentity;
 
             /// <summary>
-            /// Ask the question, whether or not the task name can be created by the task factory. 
-            /// To answer this question we need to instantiate and initialize the task factory and ask it if it can create the given task name. 
-            /// This question is useful for assembly tasks where the task may or may not be in an assembly, this can also be useful if the task factory 
+            /// Ask the question, whether or not the task name can be created by the task factory.
+            /// To answer this question we need to instantiate and initialize the task factory and ask it if it can create the given task name.
+            /// This question is useful for assembly tasks where the task may or may not be in an assembly, this can also be useful if the task factory
             /// loads an external file and uses that to generate the tasks.
             /// </summary>
             /// <returns>true if the task can be created by the factory, false if it cannot be created</returns>
@@ -1263,7 +1261,7 @@ namespace Microsoft.Build.Execution
             }
 
             /// <summary>
-            /// Given a Registered task record and a task name. Check create an instance of the task factory using the record. 
+            /// Given a Registered task record and a task name. Check create an instance of the task factory using the record.
             /// If the factory is a assembly task factory see if the assemblyFile has the correct task inside of it.
             /// </summary>
             internal TaskFactoryWrapper GetTaskFactoryFromRegistrationRecord(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
@@ -1289,7 +1287,6 @@ namespace Microsoft.Build.Execution
                     ErrorUtilities.VerifyThrow(taskFactoryLoadInfo != null, "TaskFactoryLoadInfo should never be null");
                     ITaskFactory factory = null;
                     LoadedType loadedType = null;
-
 
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
@@ -1475,7 +1472,6 @@ namespace Microsoft.Build.Execution
                         }
                     }
 
-
                     _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters);
                 }
 
@@ -1543,8 +1539,8 @@ namespace Microsoft.Build.Execution
                     where P : class, IProperty
                     where I : class, IItem
                 {
-                    ErrorUtilities.VerifyThrowArgumentNull(projectUsingTaskXml, "projectUsingTaskXml");
-                    ErrorUtilities.VerifyThrowArgumentNull(expander, "expander");
+                    ErrorUtilities.VerifyThrowArgumentNull(projectUsingTaskXml, nameof(projectUsingTaskXml));
+                    ErrorUtilities.VerifyThrowArgumentNull(expander, nameof(expander));
 
                     ProjectUsingTaskBodyElement taskElement = projectUsingTaskXml.TaskBody;
                     if (taskElement != null)
@@ -1607,7 +1603,7 @@ namespace Microsoft.Build.Execution
                     where P : class, IProperty
                     where I : class, IItem
                 {
-                    _usingTaskParameters = _usingTaskParameters ?? new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase);
+                    _usingTaskParameters ??= new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase);
 
                     // Go through each of the parameters and create new ParameterInfo objects from them
                     foreach (ProjectUsingTaskParameterElement parameter in usingTaskParameterGroup.Parameters)
@@ -1665,7 +1661,7 @@ namespace Microsoft.Build.Execution
 
                         if (
                             (!output && (!TaskParameterTypeVerifier.IsValidInputParameter(paramType))) ||
-                            (output && !(TaskParameterTypeVerifier.IsValidOutputParameter(paramType)))
+                            (output && !TaskParameterTypeVerifier.IsValidOutputParameter(paramType))
                            )
                         {
                             ProjectErrorUtilities.ThrowInvalidProject

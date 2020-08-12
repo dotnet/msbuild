@@ -9,17 +9,16 @@ using System.Diagnostics;       // for debugger display attribute
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 
-
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
     /// This class is used to construct and analyze the graph of inprogress targets in order to find
-    /// cycles inside the graph. To find cycles a post order traversal is used to assign a post order 
+    /// cycles inside the graph. To find cycles a post order traversal is used to assign a post order
     /// traversal to each node. Back edges indicate cycles in the graph and they can indentified by
-    /// a link from lower index node to a higher index node. 
-    /// 
+    /// a link from lower index node to a higher index node.
+    ///
     /// The graph arrives in pieces from individual nodes and needs to be stiched together by identifying
-    /// the parent and child for each cross node link. To do that it is necessary to match up parent 
+    /// the parent and child for each cross node link. To do that it is necessary to match up parent
     /// build request for a child with and outstanding request from the parent (see LinkCrossNodeBuildRequests)
     /// </summary>
     internal class TargetCycleDetector
@@ -138,7 +137,7 @@ namespace Microsoft.Build.BuildEngine
             // First try to perform the traversal from the roots (i.e nodes that are due to host requests)
             foreach (GraphNode node in dependencyGraph.Values)
             {
-                if (node.isRoot == true && node.traversalIndex == GraphNode.InvalidIndex)
+                if (node.isRoot && node.traversalIndex == GraphNode.InvalidIndex)
                 {
                     BreadthFirstTraversal(node);
                 }
@@ -165,7 +164,7 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
 
-            return (cycleParent != null);
+            return cycleParent != null;
         }
 
         /// <summary>
@@ -177,7 +176,7 @@ namespace Microsoft.Build.BuildEngine
         {
             foreach (GraphNode node in dependencyGraph.Values)
             {
-                TargetInProgessState.TargetIdWrapper[] parentsForBuildRequests = 
+                TargetInProgessState.TargetIdWrapper[] parentsForBuildRequests =
                     new TargetInProgessState.TargetIdWrapper[node.targetState.ParentBuildRequests.Count];
 
                 for (int j = 0; j < node.targetState.ParentBuildRequests.Count; j++ )
@@ -236,7 +235,7 @@ namespace Microsoft.Build.BuildEngine
                             {
                                 // Verify that the project name is the same
                                 ErrorUtilities.VerifyThrow(
-                                    String.Compare(buildRequest.ProjectFileName, externalRequests[i].ProjectFileName, StringComparison.OrdinalIgnoreCase) == 0,
+                                    String.Equals(buildRequest.ProjectFileName, externalRequests[i].ProjectFileName, StringComparison.OrdinalIgnoreCase),
                                     "The two requests should have the same project name");
 
                                 // Link the two graph nodes together
@@ -317,10 +316,10 @@ namespace Microsoft.Build.BuildEngine
             {
                 node.traversalIndex = GraphNode.InvalidIndex;
             }
-            BuildEventContext buildEventContext = 
+            BuildEventContext buildEventContext =
                 new BuildEventContext(child.targetState.TargetId.nodeId,
-                                 child.targetState.TargetId.id, 
-                                 BuildEventContext.InvalidProjectContextId, 
+                                 child.targetState.TargetId.id,
+                                 BuildEventContext.InvalidProjectContextId,
                                  BuildEventContext.InvalidTaskId
                                 );
             DumpCycleSequenceOutput(parent, child, buildEventContext);

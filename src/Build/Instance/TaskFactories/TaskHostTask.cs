@@ -131,7 +131,7 @@ namespace Microsoft.Build.BackEnd
 #endif
             )
         {
-            ErrorUtilities.VerifyThrowInternalNull(taskType, "taskType");
+            ErrorUtilities.VerifyThrowInternalNull(taskType, nameof(taskType));
 
             _taskLocation = taskLocation;
             _taskLoggingContext = taskLoggingContext;
@@ -206,7 +206,7 @@ namespace Microsoft.Build.BackEnd
 
                 // If we returned an exception, then we want to throw it when we 
                 // do the get.  
-                if (value != null && (value as Exception) != null)
+                if (value is Exception)
                 {
                     throw (Exception)value;
                 }

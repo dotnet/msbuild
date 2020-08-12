@@ -22,6 +22,10 @@ namespace Microsoft.Build.Framework
         /// Initializes an instance of the EnvironmentVariableReadEventArgs class.
         /// </summary>
         /// <param name="environmentVariableName">The name of the environment variable that was read.</param>
+        /// <param name="message">The value of the environment variable that was read.</param>
+        /// <param name="helpKeyword">Help keyword.</param>
+        /// <param name="senderName">The name of the sender of the event.</param>
+        /// <param name="importance">The importance of the message.</param>
         public EnvironmentVariableReadEventArgs(
             string environmentVariableName,
             string message,

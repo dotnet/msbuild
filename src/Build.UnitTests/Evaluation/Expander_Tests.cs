@@ -1490,6 +1490,59 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// Exercises ExpandIntoStringAndUnescape and ExpanderOptions.Truncate
+        /// </summary>
+        [Fact]
+        public void ExpandAllIntoStringTruncated()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            var manySpaces = "".PadLeft(2000);
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            pg.Set(ProjectPropertyInstance.Create("ManySpacesProperty", manySpaces));
+            var itemMetadataTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "ManySpacesMetadata", manySpaces }
+            };
+            var itemMetadata = new StringMetadataTable(itemMetadataTable);
+            var projectItemGroups = new ItemDictionary<ProjectItemInstance>();
+            var itemGroup = new List<ProjectItemInstance>();
+            for (int i = 0; i < 50; i++)
+            {
+                var item = new ProjectItemInstance(project, "ManyItems", $"ThisIsAFairlyLongFileName_{i}.bmp", project.FullPath);
+                item.SetMetadata("Foo", $"ThisIsAFairlyLongMetadataValue_{i}");
+                itemGroup.Add(item);
+            }
+            var lookup = new Lookup(projectItemGroups, pg);
+            lookup.EnterScope("x");
+            lookup.PopulateWithItems("ManySpacesItem", new []
+            {
+                new ProjectItemInstance (project, "ManySpacesItem", "Foo", project.FullPath),
+                new ProjectItemInstance (project, "ManySpacesItem", manySpaces, project.FullPath),
+                new ProjectItemInstance (project, "ManySpacesItem", "Bar", project.FullPath),
+            });
+            lookup.PopulateWithItems("Exactly1024", new[]
+            {
+                new ProjectItemInstance (project, "Exactly1024", "".PadLeft(1024), project.FullPath),
+                new ProjectItemInstance (project, "Exactly1024", "Foo", project.FullPath),
+            });
+            lookup.PopulateWithItems("ManyItems", itemGroup);
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(lookup, lookup, itemMetadata, FileSystems.Default);
+
+            XmlAttribute xmlattribute = (new XmlDocument()).CreateAttribute("dummy");
+            xmlattribute.Value = "'%(ManySpacesMetadata)' != '' and '$(ManySpacesProperty)' != '' and '@(ManySpacesItem)' != '' and '@(Exactly1024)' != '' and '@(ManyItems)' != '' and '@(ManyItems->'%(Foo)')' != ''";
+
+            var expected =
+                $"'{"",1021}...' != '' and " +
+                $"'{"",1021}...' != '' and " +
+                $"'Foo;{"",1017}...' != '' and " +
+                $"'{"",1024};...' != '' and " +
+                "'ThisIsAFairlyLongFileName_0.bmp;ThisIsAFairlyLongFileName_1.bmp;ThisIsAFairlyLongFileName_2.bmp;...' != '' and " +
+                "'ThisIsAFairlyLongMetadataValue_0;ThisIsAFairlyLongMetadataValue_1;ThisIsAFairlyLongMetadataValue_2;...' != ''";
+            Assert.Equal(expected, expander.ExpandIntoStringAndUnescape(xmlattribute.Value, ExpanderOptions.ExpandAll | ExpanderOptions.Truncate, MockElementLocation.Instance));
+        }
+
+        /// <summary>
         /// Exercises ExpandAllIntoString with a string that does not need expanding.
         /// In this case the expanded string should be reference identical to the passed in string.
         /// </summary>
@@ -2880,6 +2933,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [InlineData("net45", 2, "4.5")]
         [InlineData("net45", 3, "4.5.0")]
         [InlineData("net472", 3, "4.7.2")]
+        [InlineData("net472", 2, "4.7.2")]
         public void PropertyFunctionTargetFrameworkVersionMultipartParsing(string tfm, int versionPartCount, string expectedVersion)
         {
             var pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -2890,7 +2944,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [Theory]
         [InlineData("net5.0-windows10.1.2.3", 4, "10.1.2.3")]
-        [InlineData("net5.0-windows10.1.2.3", 2, "10.1")]
+        [InlineData("net5.0-windows10.1.2.3", 2, "10.1.2.3")]
+        [InlineData("net5.0-windows10.0.0.3", 2, "10.0.0.3")]
+        [InlineData("net5.0-windows0.0.0.3", 2, "0.0.0.3")]
         public void PropertyFunctionTargetPlatformVersionMultipartParsing(string tfm, int versionPartCount, string expectedVersion)
         {
             var pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -3818,7 +3874,7 @@ $(
                     caughtException = true;
                 }
                 Assert.True(
-                        (success == false || caughtException == true),
+                        !success || caughtException,
                         "FAILURE: Expected '" + errorTests[i] + "' to not parse or not be evaluated but it evaluated to '" + result + "'"
                     );
             }
@@ -3935,7 +3991,7 @@ $(
         {
             string vsInstallRoot = EscapingUtilities.Escape(IntrinsicFunctions.GetVsInstallRoot());
 
-            vsInstallRoot = (vsInstallRoot == null) ? "" : vsInstallRoot;
+            vsInstallRoot ??= "";
 
             TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetVsInstallRoot())", "X", "_", vsInstallRoot);
         }

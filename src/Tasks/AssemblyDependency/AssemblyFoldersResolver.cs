@@ -18,6 +18,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="searchPathElement"></param>
         /// <param name="getAssemblyName"></param>
         /// <param name="fileExists"></param>
+        /// <param name="getRuntimeVersion"></param>
+        /// <param name="targetedRuntimeVesion"></param>
         public AssemblyFoldersResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
             : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false)
         {
@@ -27,6 +29,7 @@ namespace Microsoft.Build.Tasks
         /// Resolve a reference to a specific file name.
         /// </summary>
         /// <param name="assemblyName">The assemblyname of the reference.</param>
+        /// <param name="sdkName">The sdk name of the reference.</param>
         /// <param name="rawFileNameCandidate">The reference's 'include' treated as a raw file name.</param>
         /// <param name="isPrimaryProjectReference">Whether or not this reference was directly from the project file (and therefore not a dependency)</param>
         /// <param name="wantSpecificVersion">Whether an exact version match is requested.</param>

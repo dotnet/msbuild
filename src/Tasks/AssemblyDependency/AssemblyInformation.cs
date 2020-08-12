@@ -558,7 +558,7 @@ namespace Microsoft.Build.Tasks
                 {
                     runtimeVersion = new StringBuilder(bufferLength);
                     hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out _);
-                    bufferLength = bufferLength * 2;
+                    bufferLength *= 2;
                 } while (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
 
                 if (hresult == NativeMethodsShared.S_OK)

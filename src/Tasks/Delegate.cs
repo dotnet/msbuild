@@ -22,6 +22,7 @@ namespace Microsoft.Build.Tasks
     /// File SetAttributes delegate
     /// </summary>
     /// <param name="path">The path to set attributes for.</param>
+    /// <param name="attributes">The actual file attributes.</param>
     internal delegate void SetAttributes(string path, FileAttributes attributes);
 
     /// <summary>
@@ -82,8 +83,10 @@ namespace Microsoft.Build.Tasks
     /// assemblies and  the list of scatter files.
     /// </summary>
     /// <param name="path">Path to the assembly.</param>
+    /// <param name="assemblyMetadataCache">Assembly metadata cache.</param>
     /// <param name="dependencies">Receives the list of dependencies.</param>
     /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
+    /// <param name="frameworkNameAttribute">The framework name</param>
     internal delegate void GetAssemblyMetadata
     (
         string path,

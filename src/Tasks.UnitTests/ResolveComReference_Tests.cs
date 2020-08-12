@@ -218,7 +218,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Helper function for creating a ComReferenceInfo object using an existing TaskInfo object and 
+        /// Helper function for creating a ComReferenceInfo object using an existing TaskInfo object and
         /// typelib name/path. The type lib pointer will obviously not be initialized, so this object cannot
         /// be used in any code that uses it.
         /// </summary>
@@ -293,45 +293,45 @@ namespace Microsoft.Build.UnitTests
 
             // find the Ax ref, matching with any type of reference - should NOT find it
             bool retValue = rcr.IsExistingProjectReference(axAttr, null, out ComReferenceInfo referenceInfo);
-            Assert.True(retValue == false && referenceInfo == null); // "ActiveX ref should NOT be found for any type of ref"
+            Assert.True(!retValue && referenceInfo == null); // "ActiveX ref should NOT be found for any type of ref"
 
             // find the Ax ref, matching with aximp types - should find it
             retValue = rcr.IsExistingProjectReference(axAttr, ComReferenceTypes.aximp, out referenceInfo);
-            Assert.True(retValue == true && referenceInfo == axRefInfo); // "ActiveX ref should be found for aximp ref types"
+            Assert.True(retValue && referenceInfo == axRefInfo); // "ActiveX ref should be found for aximp ref types"
 
             // find the Ax ref, matching with tlbimp types - should NOT find it
             retValue = rcr.IsExistingProjectReference(axAttr, ComReferenceTypes.tlbimp, out referenceInfo);
-            Assert.True(retValue == false && referenceInfo == null); // "ActiveX ref should NOT be found for tlbimp ref types"
+            Assert.True(!retValue && referenceInfo == null); // "ActiveX ref should NOT be found for tlbimp ref types"
 
 
             // find the Tlb ref, matching with any type of reference - should find it
             retValue = rcr.IsExistingProjectReference(tlbAttr, null, out referenceInfo);
-            Assert.True(retValue == true && referenceInfo == tlbRefInfo); // "Tlb ref should be found for any type of ref"
+            Assert.True(retValue && referenceInfo == tlbRefInfo); // "Tlb ref should be found for any type of ref"
 
             // find the Tlb ref, matching with tlbimp types - should find it
             retValue = rcr.IsExistingProjectReference(tlbAttr, ComReferenceTypes.tlbimp, out referenceInfo);
-            Assert.True(retValue == true && referenceInfo == tlbRefInfo); // "Tlb ref should be found for tlbimp ref types"
+            Assert.True(retValue && referenceInfo == tlbRefInfo); // "Tlb ref should be found for tlbimp ref types"
 
             // find the Tlb ref, matching with pia types - should NOT find it
             retValue = rcr.IsExistingProjectReference(tlbAttr, ComReferenceTypes.primary, out referenceInfo);
-            Assert.True(retValue == false && referenceInfo == null); // "Tlb ref should NOT be found for primary ref types"
+            Assert.True(!retValue && referenceInfo == null); // "Tlb ref should NOT be found for primary ref types"
 
 
             // find the Pia ref, matching with any type of reference - should find it
             retValue = rcr.IsExistingProjectReference(piaAttr, null, out referenceInfo);
-            Assert.True(retValue == true && referenceInfo == piaRefInfo); // "Pia ref should be found for any type of ref"
+            Assert.True(retValue && referenceInfo == piaRefInfo); // "Pia ref should be found for any type of ref"
 
             // find the Pia ref, matching with pia types - should find it
             retValue = rcr.IsExistingProjectReference(piaAttr, ComReferenceTypes.primary, out referenceInfo);
-            Assert.True(retValue == true && referenceInfo == piaRefInfo); // "Pia ref should be found for pia ref types"
+            Assert.True(retValue && referenceInfo == piaRefInfo); // "Pia ref should be found for pia ref types"
 
             // find the Pia ref, matching with pia types - should NOT find it
             retValue = rcr.IsExistingProjectReference(piaAttr, ComReferenceTypes.aximp, out referenceInfo);
-            Assert.True(retValue == false && referenceInfo == null); // "Pia ref should NOT be found for aximp ref types"
+            Assert.True(!retValue && referenceInfo == null); // "Pia ref should NOT be found for aximp ref types"
 
             // try to find a non existing reference
             retValue = rcr.IsExistingProjectReference(notInProjectAttr, null, out referenceInfo);
-            Assert.True(retValue == false && referenceInfo == null); // "not in project ref should not be found"
+            Assert.True(!retValue && referenceInfo == null); // "not in project ref should not be found"
         }
 
         /// <summary>
@@ -356,19 +356,19 @@ namespace Microsoft.Build.UnitTests
 
             // find the Ax ref - should find it
             bool retValue = rcr.IsExistingDependencyReference(axAttr, out ComReferenceInfo referenceInfo);
-            Assert.True(retValue == true && referenceInfo == axRefInfo); // "ActiveX ref should be found"
+            Assert.True(retValue && referenceInfo == axRefInfo); // "ActiveX ref should be found"
 
             // find the Tlb ref - should find it
             retValue = rcr.IsExistingDependencyReference(tlbAttr, out referenceInfo);
-            Assert.True(retValue == true && referenceInfo == tlbRefInfo); // "Tlb ref should be found"
+            Assert.True(retValue && referenceInfo == tlbRefInfo); // "Tlb ref should be found"
 
             // find the Pia ref - should find it
             retValue = rcr.IsExistingDependencyReference(piaAttr, out referenceInfo);
-            Assert.True(retValue == true && referenceInfo == piaRefInfo); // "Pia ref should be found"
+            Assert.True(retValue && referenceInfo == piaRefInfo); // "Pia ref should be found"
 
             // try to find a non existing reference - should not find it
             retValue = rcr.IsExistingDependencyReference(notInProjectAttr, out referenceInfo);
-            Assert.True(retValue == false && referenceInfo == null); // "not in project ref should not be found"
+            Assert.True(!retValue && referenceInfo == null); // "not in project ref should not be found"
 
             // Now, try to resolve a non-existent ComAssemblyReference. 
             string path;
@@ -378,7 +378,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// ResolveComReference automatically adds missing tlbimp references for aximp references. 
+        /// ResolveComReference automatically adds missing tlbimp references for aximp references.
         /// This test verifies we actually create the missing references.
         /// </summary>
         [Fact]
@@ -518,18 +518,18 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 // if Private is missing, by default GAC items are CopyLocal=false, non GAC CopyLocal=true
-                Assert.Equal(nonGacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal), (enabledNoPIA ? "false" : "true"));
+                Assert.Equal(nonGacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "true");
 
-                Assert.Equal(gacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal), (enabledNoPIA ? "false" : "false"));
+                Assert.Equal(gacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "false");
 
                 // if Private is set, it takes precedence
-                Assert.Equal(nonGacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal), (enabledNoPIA ? "false" : "false"));
+                Assert.Equal(nonGacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "false");
 
-                Assert.Equal(gacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal), (enabledNoPIA ? "false" : "false"));
+                Assert.Equal(gacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "false");
 
-                Assert.Equal(nonGacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal), (enabledNoPIA ? "false" : "true"));
+                Assert.Equal(nonGacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "true");
 
-                Assert.Equal(gacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal), (enabledNoPIA ? "false" : "true"));
+                Assert.Equal(gacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "true");
             }
         }
 
@@ -646,10 +646,10 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// In order to make ResolveComReferences multitargetable, two properties, ExecuteAsTool
-        /// and SdkToolsPath were added.  In order to have correct behavior when using pre-4.0 
+        /// and SdkToolsPath were added.  In order to have correct behavior when using pre-4.0
         /// toolsversions, ExecuteAsTool must default to true, and the paths to the tools will be the
-        /// v3.5 path.  It is difficult to verify the tool paths in a unit test, however, so 
-        /// this was done by ad hoc testing and will be maintained by the dev suites.  
+        /// v3.5 path.  It is difficult to verify the tool paths in a unit test, however, so
+        /// this was done by ad hoc testing and will be maintained by the dev suites.
         /// </summary>
         [Fact]
         public void MultiTargetingDefaultSetCorrectly()
@@ -662,7 +662,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When calling AxImp.exe directly, the runtime-callable wrapper needs to be
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
-        /// its corresponding TLB wrapper. 
+        /// its corresponding TLB wrapper.
         /// </summary>
         [Fact]
         public void AxReferenceKnowsItsRCWCreateTlb()
@@ -673,7 +673,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When calling AxImp.exe directly, the runtime-callable wrapper needs to be
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
-        /// its corresponding TLB wrapper. 
+        /// its corresponding TLB wrapper.
         /// </summary>
         [Fact]
         public void AxReferenceKnowsItsRCWCreateTlb_IncludeVersion()
@@ -684,7 +684,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When calling AxImp.exe directly, the runtime-callable wrapper needs to be
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
-        /// its corresponding TLB wrapper. 
+        /// its corresponding TLB wrapper.
         /// </summary>
         [Fact]
         public void AxReferenceKnowsItsRCWTlbExists()
@@ -695,7 +695,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When calling AxImp.exe directly, the runtime-callable wrapper needs to be
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
-        /// its corresponding TLB wrapper. 
+        /// its corresponding TLB wrapper.
         ///
         /// Tests that still works when IncludeVersionInInteropName = true
         /// </summary>
@@ -708,7 +708,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When calling AxImp.exe directly, the runtime-callable wrapper needs to be
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
-        /// its corresponding TLB wrapper. 
+        /// its corresponding TLB wrapper.
         /// </summary>
         [Fact]
         public void AxReferenceKnowsItsRCWPiaExists()
@@ -719,7 +719,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When calling AxImp.exe directly, the runtime-callable wrapper needs to be
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
-        /// its corresponding TLB wrapper. 
+        /// its corresponding TLB wrapper.
         ///
         /// Tests that still works when IncludeVersionInInteropName = true
         /// </summary>
@@ -732,8 +732,8 @@ namespace Microsoft.Build.UnitTests
         private enum RcwStyle { GenerateTlb, PreexistingTlb, PreexistingPia };
 
         /// <summary>
-        /// Helper method that will new up an AX and matching TLB reference, and verify that the AX reference 
-        /// sets its RCW appropriately. 
+        /// Helper method that will new up an AX and matching TLB reference, and verify that the AX reference
+        /// sets its RCW appropriately.
         /// </summary>
         private void CheckAxReferenceRCWTlbExists(RcwStyle rcwStyle, bool includeVersionInInteropName)
         {

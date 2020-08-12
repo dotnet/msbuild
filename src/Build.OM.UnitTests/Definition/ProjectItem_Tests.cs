@@ -900,7 +900,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var testFiles = env.CreateTestProjectWithFiles(projectContents, files,relativePathFromRootToProject);
                 ObjectModelHelpers.AssertItems(expectedInclude, new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection).Items.ToList());
             }
-
         }
 
         [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1576")]
@@ -921,7 +920,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var testFiles = env.CreateTestProjectWithFiles(projectContents, files, relativePathFromRootToProject);
                 ObjectModelHelpers.AssertItems(expectedInclude, new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection).Items.ToList());
             }
-
         }
 
         /// <summary>
@@ -959,7 +957,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Expression like @(x) should not clone metadata, even if the item type is different.
         /// It's obvious that it shouldn't clone it if the item type is the same.
         /// If it is different, it doesn't clone it for performance; even if the item definition metadata
-        /// changes later (this is design time), the inheritors of that item definition type 
+        /// changes later (this is design time), the inheritors of that item definition type
         /// (even those that have subsequently been transformed to a different itemtype) should see
         /// the changes, by design.
         /// Just to make sure we don't change that behavior, we test it here.
@@ -1342,7 +1340,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Metadata condition should work correctly with built-in metadata 
+        /// Metadata condition should work correctly with built-in metadata
         /// </summary>
         [Fact]
         public void BuiltInMetadataInMetadataCondition()
@@ -2080,7 +2078,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 );
 
             Assert.Equal(2, items.Count);
-            Assert.Equal(@"a.txt;b.cs", string.Join(";", items.Select(i => i.EvaluatedInclude))); ;
+            Assert.Equal(@"a.txt;b.cs", string.Join(";", items.Select(i => i.EvaluatedInclude))); 
         }
 
         [Fact]
@@ -2093,7 +2091,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 );
 
             Assert.Equal(2, items.Count);
-            Assert.Equal(@"a;c", string.Join(";", items.Select(i => i.EvaluatedInclude))); ;
+            Assert.Equal(@"a;c", string.Join(";", items.Select(i => i.EvaluatedInclude))); 
         }
 
         [Theory]
@@ -2274,7 +2272,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemoveWithPropertyReferenceInMatchOnMetadata()
         {
-            string content = 
+            string content =
                 @"<Project>
                     <PropertyGroup>
                         <Meta1>v0</Meta1>
@@ -2495,7 +2493,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                               <i Update='c'>
                                   <m1 Condition='1 == 0'>from_false_metadata</m1>
                               </i>";
-            
+
             var project = ObjectModelHelpers.CreateInMemoryProject(ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(projectContents));
 
             var expectedInitial = new Dictionary<string, string>
@@ -2557,7 +2555,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedInitial, itemsIgnoringCondition[2]);
             ObjectModelHelpers.AssertItemHasMetadata(expectedUpdateFromUnconditionedElement, itemsIgnoringCondition[3]);
         }
-
 
         [Fact]
         public void LastUpdateWins()
@@ -3354,7 +3351,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         /// <summary>
         /// Get the item of type "i" using the item Xml fragment provided.
-        /// If there is more than one, fail. 
+        /// If there is more than one, fail.
         /// </summary>
         private static ProjectItem GetOneItemFromFragment(string fragment)
         {
@@ -3366,7 +3363,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         /// <summary>
         /// Get the item of type "i" in the project provided.
-        /// If there is more than one, fail. 
+        /// If there is more than one, fail.
         /// </summary>
         private static ProjectItem GetOneItem(string content)
         {

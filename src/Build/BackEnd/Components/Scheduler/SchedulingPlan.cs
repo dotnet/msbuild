@@ -660,7 +660,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // Count our time, plus the amount of time all of our children take.  Multiply this by the total number
                 // of referrers to weight us higher the more configurations depend on us.
-                get { return (AccumulatedTime + AccumulatedTimeOfReferences); }
+                get { return AccumulatedTime + AccumulatedTimeOfReferences; }
             }
 
             /// <summary>

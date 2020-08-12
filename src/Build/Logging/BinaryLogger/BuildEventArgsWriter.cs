@@ -670,7 +670,7 @@ namespace Microsoft.Build.Logging
 
         private void Write<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> keyValuePairs)
         {
-            if (keyValuePairs != null && keyValuePairs.Any())
+            if (keyValuePairs?.Any() == true)
             {
                 Write(keyValuePairs.Count());
                 foreach (var kvp in keyValuePairs)

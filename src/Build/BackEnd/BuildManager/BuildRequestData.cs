@@ -291,7 +291,7 @@ namespace Microsoft.Build.Execution
         /// Whether the tools version used originated from an explicit specification,
         /// for example from an MSBuild task or /tv switch.
         /// </summary>
-        internal bool ExplicitToolsVersionSpecified => (ExplicitlySpecifiedToolsVersion != null);
+        internal bool ExplicitToolsVersionSpecified => ExplicitlySpecifiedToolsVersion != null;
 
         /// <summary>
         /// Returns the global properties as a dictionary.

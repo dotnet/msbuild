@@ -177,7 +177,6 @@ namespace Microsoft.Build.Graph
         ///     If a null reference is returned from <paramref name="projectInstanceFactory" />, the InnerException contains
         ///     <see cref="InvalidOperationException" />
         /// </exception>
-        /// </exception>
         public ProjectGraph(string entryProjectFile, ProjectCollection projectCollection, ProjectInstanceFactoryFunc projectInstanceFactory)
             : this(new ProjectGraphEntryPoint(entryProjectFile).AsEnumerable(), projectCollection, projectInstanceFactory)
         {
@@ -763,7 +762,7 @@ namespace Microsoft.Build.Graph
 
             public override bool Equals(object obj)
             {
-                return !ReferenceEquals(null, obj) && obj is ProjectGraphBuildRequest graphNodeWithTargets && Equals(graphNodeWithTargets);
+                return !(obj is null) && obj is ProjectGraphBuildRequest graphNodeWithTargets && Equals(graphNodeWithTargets);
             }
 
             public override int GetHashCode()
