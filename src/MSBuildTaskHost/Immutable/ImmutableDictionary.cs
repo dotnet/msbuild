@@ -129,6 +129,11 @@ namespace System.Collections.Immutable
 
         internal ImmutableDictionary<K, V> SetItem(K key, V value)
         {
+            if (TryGetValue(key, out V existingValue) && Object.Equals(existingValue, value))
+            {
+                return this;
+            }
+
             var clone = new ImmutableDictionary<K, V>(_backing);
             clone._backing[key] = value;
 
@@ -137,6 +142,11 @@ namespace System.Collections.Immutable
 
         internal ImmutableDictionary<K, V> Remove(K key)
         {
+            if (!ContainsKey(key))
+            {
+                return this;
+            }
+
             var clone = new ImmutableDictionary<K, V>(_backing);
             clone._backing.Remove(key);
 
@@ -158,15 +168,15 @@ namespace System.Collections.Immutable
             _backing = new Dictionary<K, V>(comparer);
         }
 
-        internal ImmutableDictionary(IDictionary<K, V> source)
+        internal ImmutableDictionary(IDictionary<K, V> source, IEqualityComparer<K> keyComparer = null)
         {
             if (source is ImmutableDictionary<K, V> imm)
             {
-                _backing = new Dictionary<K, V>(imm._backing, imm._backing.Comparer);
+                _backing = new Dictionary<K, V>(imm._backing, keyComparer ?? imm._backing.Comparer);
             }
             else
             {
-                _backing = new Dictionary<K, V>(source);
+                _backing = new Dictionary<K, V>(source, keyComparer);
             }
         }
 
@@ -199,8 +209,7 @@ namespace System.Collections.Immutable
 
         internal ImmutableDictionary<K, V> WithComparers(IEqualityComparer<K> keyComparer)
         {
-            var n = new Dictionary<K, V>(_backing, keyComparer);
-            return new ImmutableDictionary<K, V>(n);
+            return new ImmutableDictionary<K, V>(_backing, keyComparer);
         }
 
         #endregion
@@ -209,7 +218,7 @@ namespace System.Collections.Immutable
 
         object IDictionary.this[object key]
         {
-            get { return ((IDictionary)this)[key]; }
+            get { return _backing[(K)key]; }
             set { throw new NotSupportedException(); }
         }
 
@@ -230,7 +239,7 @@ namespace System.Collections.Immutable
 
         V IDictionary<K, V>.this[K key]
         {
-            get { return this[key]; }
+            get { return _backing[key]; }
             set { throw new NotSupportedException(); }
         }
 
