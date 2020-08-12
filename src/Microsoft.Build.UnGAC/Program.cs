@@ -49,13 +49,10 @@ namespace Microsoft.Build.UnGAC
 
                 // Throw away the first line - it's the command we just used
                 output.ReadLine();
-                string s = output.ReadLine();
 
-                // Store all instances of gacutil for now.
-                while (!String.IsNullOrEmpty(s))
+                for(string gacInstance = output.ReadLine(); !string.IsNullOrEmpty(gacInstance); gacInstance = output.ReadLine())
                 {
-                    allInstancesOfGACUtil.Add(s);
-                    s = output.ReadLine();
+                    allInstancesOfGACUtil.Add(gacInstance);
                 }
 
                 if (allInstancesOfGACUtil.Count == 0)
@@ -89,13 +86,10 @@ namespace Microsoft.Build.UnGAC
                 input.Flush();
                 input.Close();
 
-                s = output.ReadLine();
-
                 // Output everything gacutil returned.
-                while (s != null)
+                for (string s = output.ReadLine(); s != null; s = output.ReadLine())
                 {
                     Console.WriteLine(s);
-                    s = output.ReadLine();
                 }
 
                 proc.Close();
