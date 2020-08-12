@@ -5,7 +5,6 @@ package name=Microsoft.Build.UnGAC
         vs.package.type=exe
         vs.package.chip=neutral
         vs.package.language=neutral
-        vs.package.internalRevision=$(PackageInternalRevision)
 
 vs.installCommand fileName=[Payload]
 
