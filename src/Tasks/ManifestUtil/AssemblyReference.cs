@@ -85,7 +85,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 if (AssemblyIdentity == null)
                     return false;
-                if (String.Compare(AssemblyIdentity.Name, Constants.CLRPlatformAssemblyName, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(AssemblyIdentity.Name, Constants.CLRPlatformAssemblyName, StringComparison.OrdinalIgnoreCase))
                     return true;
                 else
                     return false;
@@ -101,7 +101,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             get { return _referenceType; }
             set { _referenceType = value; }
         }
-
 
         /// <summary>
         /// True if the reference is specified in the project file, false if it is added to the manifest as a result

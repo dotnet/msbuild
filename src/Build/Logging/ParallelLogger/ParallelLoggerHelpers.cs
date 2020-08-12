@@ -55,7 +55,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // allocate a new key for it and save it away
                     if (!_projectKey.ContainsKey(e.ProjectFile))
                     {
-                        _projectIncrementKey += 1;
+                        _projectIncrementKey++;
 
                         _projectKey[e.ProjectFile] = _projectIncrementKey;
                         projectIncrementKeyLocal = _projectIncrementKey;
@@ -214,7 +214,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ProjectStartedEventMinimumFields startedEvent = GetProjectStartedEvent(e);
             // Only remove the project from the event list if it is in the list, and no errors have occurred in the project
-            if (startedEvent != null && !startedEvent.ErrorInProject)
+            if (startedEvent?.ErrorInProject == false)
             {
                 _projectStartedEvents.Remove(e);
             }
@@ -227,7 +227,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             TargetStartedEventMinimumFields startedEvent = GetTargetStartedEvent(e);
             // Only remove the project from the event list if it is in the list, and no errors have occurred in the project
-            if (startedEvent != null && !startedEvent.ErrorInTarget)
+            if (startedEvent?.ErrorInTarget == false)
             {
                 _targetStartedEvents.Remove(e);
             }
@@ -259,7 +259,7 @@ namespace Microsoft.Build.BackEnd.Logging
         public int GetHashCode(T x)
         {
             BuildEventContext context = x as BuildEventContext;
-            return (context.ProjectContextId + (context.NodeId << 24));
+            return context.ProjectContextId + (context.NodeId << 24);
         }
         #endregion
     }
@@ -289,7 +289,7 @@ namespace Microsoft.Build.BackEnd.Logging
         public int GetHashCode(T x)
         {
             BuildEventContext context = x as BuildEventContext;
-            return (context.ProjectContextId + (context.NodeId << 24));
+            return context.ProjectContextId + (context.NodeId << 24);
         }
 
         #endregion
@@ -601,12 +601,12 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 return false;
             }
-            return s_eventComparer.Equals(_entryPointContext, key.EntryPointContext) && (String.Compare(_targetName, key.TargetName, StringComparison.OrdinalIgnoreCase) == 0);
+            return s_eventComparer.Equals(_entryPointContext, key.EntryPointContext) && (String.Equals(_targetName, key.TargetName, StringComparison.OrdinalIgnoreCase));
         }
 
         public override int GetHashCode()
         {
-            return (_entryPointContext.GetHashCode() + _targetName.GetHashCode());
+            return _entryPointContext.GetHashCode() + _targetName.GetHashCode();
         }
         #endregion
 
@@ -648,7 +648,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Output the projectKey or the projectKey and the entrypointKey depending on the verbosity level of the logger
         /// </summary>
-
         public string ToString(LoggerVerbosity verbosity)
         {
             string fullProjectKey;
@@ -692,7 +691,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ProjectFullKey compareKey = obj as ProjectFullKey;
             if (compareKey != null)
             {
-                return ((compareKey._projectKey == _projectKey) && (compareKey._entryPointKey == _entryPointKey));
+                return (compareKey._projectKey == _projectKey) && (compareKey._entryPointKey == _entryPointKey);
             }
             else
             {
@@ -702,7 +701,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         public override int GetHashCode()
         {
-            return (_projectKey + (_entryPointKey << 16));
+            return _projectKey + (_entryPointKey << 16);
         }
         #endregion
     }

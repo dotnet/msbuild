@@ -419,7 +419,7 @@ namespace Microsoft.Build.BuildEngine
             // Only check for null. It's legal to make BuildItems with empty
             // item specs -- this is to be consistent with how we shipped TaskItem.
             // See #567058.
-            ErrorUtilities.VerifyThrowArgumentNull(itemInclude, "itemInclude");
+            ErrorUtilities.VerifyThrowArgumentNull(itemInclude, nameof(itemInclude));
 
             // Validate that the item name doesn't contain any illegal characters.
             if (itemName != null)
@@ -505,7 +505,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public BuildItem(string itemName, ITaskItem taskItem) 
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskItem, "taskItem");
+            ErrorUtilities.VerifyThrowArgumentNull(taskItem, nameof(taskItem));
 
             string itemInclude = EscapingUtilities.Escape(taskItem.ItemSpec);
 
@@ -647,7 +647,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     // If this is an evaluated item that originated from the project file, and the original
                     // item is declared using a wildcard that still matches the new item spec ...
-                    if ((ParentPersistedItem != null) && (ParentPersistedItem.NewItemSpecMatchesExistingWildcard(value)))
+                    if ((ParentPersistedItem?.NewItemSpecMatchesExistingWildcard(value) == true))
                     {
                         // Don't need to touch the project file since the original wildcard still matches
                         // the new item spec.  But it still should be reevaluated the next time around.
@@ -704,7 +704,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (GetCustomMetadataCount() + FileUtilities.ItemSpecModifiers.All.Length);
+                return GetCustomMetadataCount() + FileUtilities.ItemSpecModifiers.All.Length;
             }
         }
 
@@ -741,7 +741,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal XmlAttribute IncludeAttribute
         {
-            get { return (IsBackedByXml ? xml.IncludeAttribute : null); }
+            get { return IsBackedByXml ? xml.IncludeAttribute : null; }
         }
 
         /// <summary>
@@ -750,7 +750,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         public string Exclude
         {
-            get { return (IsBackedByXml ? xml.Exclude : String.Empty); }
+            get { return IsBackedByXml ? xml.Exclude : String.Empty; }
 
             set
             {
@@ -772,7 +772,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         internal XmlAttribute ExcludeAttribute
         {
-            get { return (IsBackedByXml ? xml.ExcludeAttribute : null); }
+            get { return IsBackedByXml ? xml.ExcludeAttribute : null; }
         }
 
         /// <summary>
@@ -781,7 +781,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         public string Condition
         {
-            get { return (IsBackedByXml ? xml.Condition : String.Empty); }
+            get { return IsBackedByXml ? xml.Condition : String.Empty; }
 
             set
             {
@@ -806,7 +806,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         internal XmlAttribute ConditionAttribute
         {
-            get { return (IsBackedByXml ? xml.ConditionAttribute : null); }
+            get { return IsBackedByXml ? xml.ConditionAttribute : null; }
         }
 
         /// <summary>
@@ -816,7 +816,7 @@ namespace Microsoft.Build.BuildEngine
         /// <value>The item XmlElement, or null if item is virtual.</value>
         internal XmlElement ItemElement
         {
-            get { return (IsBackedByXml ? xml.Element : null); }
+            get { return IsBackedByXml ? xml.Element : null; }
         }
 
         /// <summary>
@@ -910,7 +910,7 @@ namespace Microsoft.Build.BuildEngine
 
         internal bool IsUninitializedItem
         {
-            get { return (this.name == null); }
+            get { return this.name == null; }
         }
 
         /// <summary>
@@ -935,7 +935,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal bool IsBackedUp
         {
-            get { return (unevaluatedCustomMetadataBackup != null); }
+            get { return unevaluatedCustomMetadataBackup != null; }
         }
 
         #endregion
@@ -1196,7 +1196,6 @@ namespace Microsoft.Build.BuildEngine
 
                         // Add this metadata to the running table we're using, so that one piece of metadata can refer to another one above
                         expander.SetMetadataInMetadataTable(name, metadataElement.Name, evaluatedMetadataValue);
-
                     }
                 }
             }
@@ -1208,7 +1207,7 @@ namespace Microsoft.Build.BuildEngine
         /// <remarks>BuildItem-spec modifiers are treated as metadata.</remarks>
         public bool HasMetadata(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(metadataName, "metadataName");
+            ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
             ErrorUtilities.VerifyThrow(this.unevaluatedCustomMetadata != null, "Item not initialized properly. unevaluatedCustomAttributes is null.");
 #if DEBUG
             // The hashtable of metadata (this.unevaluatedCustomMetadata) should never contain 
@@ -1381,7 +1380,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="destinationItem">BuildItem to copy custom attributes to</param>
         public void CopyCustomMetadataTo(BuildItem destinationItem)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(destinationItem, "destinationItem");
+            ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
 
             if (IsBackedByXml)
             {
@@ -1523,8 +1522,8 @@ namespace Microsoft.Build.BuildEngine
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.IsDerivableItemSpecModifier(metadataName),
                 "Shared.CannotChangeItemSpecModifiers", metadataName);
 
-            ErrorUtilities.VerifyThrowArgumentLength(metadataName, "metadataName");
-            ErrorUtilities.VerifyThrowArgumentNull(metadataValue, "metadataValue");
+            ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
+            ErrorUtilities.VerifyThrowArgumentNull(metadataValue, nameof(metadataValue));
 
             // Make sure the metadata doesn't use any special characters in the name.
             XmlUtilities.VerifyThrowValidElementName(metadataName);
@@ -1662,7 +1661,7 @@ namespace Microsoft.Build.BuildEngine
 
             if (modifiedItemSpec.Length == 0)
             {
-                if (String.Compare(modifier, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(modifier, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase))
                 {
                     modifiedItemSpec = ExtractRecursivePortionOfFinalItemSpecDirectory();
 
@@ -1776,10 +1775,7 @@ namespace Microsoft.Build.BuildEngine
         private void MarkItemAsDirty()
         {
             Project parentProject = GetParentProject();
-            if (parentProject != null)
-            {
-                parentProject.MarkProjectAsDirty();
-            }
+            parentProject?.MarkProjectAsDirty();
         }
 
         /// <summary>
@@ -1789,10 +1785,7 @@ namespace Microsoft.Build.BuildEngine
         private void MarkItemAsDirtyForReevaluation()
         {
             Project parentProject = GetParentProject();
-            if (parentProject != null)
-            {
-                parentProject.MarkProjectAsDirtyForReevaluation();
-            }
+            parentProject?.MarkProjectAsDirtyForReevaluation();
         }
 
         /// <summary>
@@ -1877,10 +1870,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>rgoel</owner>
         internal void SplitChildItemIfNecessary()
         {
-            if (this.ParentPersistedItem != null)
-            {
-                this.ParentPersistedItem.SplitItem();
-            }
+            this.ParentPersistedItem?.SplitItem();
         }
 
         /// <summary>

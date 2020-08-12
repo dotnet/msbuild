@@ -389,7 +389,7 @@ namespace Microsoft.Build.Shared
             params object[] args
         )
         {
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 #if DEBUG
             if (errorSubCategoryResourceName != null)
             {

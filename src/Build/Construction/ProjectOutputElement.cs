@@ -140,7 +140,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowArgument
                 (
-                (String.IsNullOrEmpty(itemType) ^ String.IsNullOrEmpty(propertyName)),
+                String.IsNullOrEmpty(itemType) ^ String.IsNullOrEmpty(propertyName),
                 "OM_EitherAttributeButNotBoth",
                 XMakeElements.output,
                 XMakeAttributes.propertyName,

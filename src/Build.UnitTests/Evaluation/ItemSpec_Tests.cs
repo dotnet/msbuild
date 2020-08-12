@@ -76,7 +76,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
 
         private ProjectInstanceItemSpec CreateItemSpecFrom(string itemSpec, ProjectInstanceExpander expander, IElementLocation location = null)
         {
-            location = location ?? MockElementLocation.Instance;
+            location ??= MockElementLocation.Instance;
 
             return new ProjectInstanceItemSpec(itemSpec, expander, location, Path.GetDirectoryName(location.File));
         }

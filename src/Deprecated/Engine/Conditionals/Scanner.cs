@@ -148,7 +148,7 @@ namespace Microsoft.Build.BuildEngine
             if (errorState)
                 return false;
 
-            if (lookahead != null && lookahead.IsToken(Token.TokenType.EndOfInput))
+            if (lookahead?.IsToken(Token.TokenType.EndOfInput) == true)
                 return true;          
 
             SkipWhiteSpace();
@@ -437,7 +437,6 @@ namespace Microsoft.Build.BuildEngine
             }
             if (parsePoint >= expression.Length)
             {
-                
                 errorPosition = start + 1;
                 if (fInReplacement)
                 {
@@ -554,11 +553,11 @@ namespace Microsoft.Build.BuildEngine
         private bool ParseSimpleStringOrFunction( int start )
         {
             SkipSimpleStringChars();
-            if (0 == string.Compare(expression.Substring(start, parsePoint - start), "and", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(expression.Substring(start, parsePoint - start), "and", StringComparison.OrdinalIgnoreCase))
             {
                 lookahead = new Token(Token.TokenType.And, expression.Substring(start, parsePoint - start));
             }
-            else if (0 == string.Compare(expression.Substring(start, parsePoint - start), "or", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(expression.Substring(start, parsePoint - start), "or", StringComparison.OrdinalIgnoreCase))
             {
                 lookahead = new Token(Token.TokenType.Or, expression.Substring(start, parsePoint - start));
             }

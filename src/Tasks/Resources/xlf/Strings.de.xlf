@@ -1273,7 +1273,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.MainAssemblyMissingNeutralResourcesLanguage">
         <source>MSB3817: The assembly "{0}" does not have a NeutralResourcesLanguageAttribute on it. To be used in an app package, portable libraries must define a NeutralResourcesLanguageAttribute on their main assembly (ie, the one containing code, not a satellite assembly).</source>
-        <target state="translated">MSB3817: Für die Assembly "{0}" ist kein NeutralResourcesLanguageAttribute angegeben. Für die Verwendung in einem App-Paket müssen portable Bibliotheken ein NeutralResourcesLanguageAttribute für ihre Hauptassembly (die Assembly mit Code, keine Satellitenassembly) angeben.</target>
+        <target state="translated">MSB3817: Für die Assembly "{0}" ist kein NeutralResourcesLanguageAttribute angegeben. Für die Verwendung in einem App-Paket müssen portierbare Bibliotheken ein NeutralResourcesLanguageAttribute für ihre Hauptassembly (die Assembly mit Code, keine Satellitenassembly) angeben.</target>
         <note>{StrBegin="MSB3817: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ExecuteAsToolAndExtractResWNotSupported">

@@ -98,7 +98,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (statusTimeStamp - lastTaskActivityTimeStamp);
+                return statusTimeStamp - lastTaskActivityTimeStamp;
             }
         }
 
@@ -110,7 +110,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (statusTimeStamp - lastEngineActivityTimeStamp);
+                return statusTimeStamp - lastEngineActivityTimeStamp;
             }
         }
 

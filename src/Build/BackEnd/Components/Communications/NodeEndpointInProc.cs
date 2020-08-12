@@ -100,7 +100,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         private NodeEndpointInProc(EndpointMode commMode, IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
 
             _status = LinkStatus.Inactive;
             _mode = commMode;
@@ -161,7 +161,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">Unused</param>
         public void Listen(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrowInternalNull(factory, "factory");
+            ErrorUtilities.VerifyThrowInternalNull(factory, nameof(factory));
             _packetFactory = factory;
 
             // Initialize our thread in async mode so we are ready when the Node-side endpoint "connects".
@@ -179,7 +179,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">Unused</param>
         public void Connect(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrowInternalNull(factory, "factory");
+            ErrorUtilities.VerifyThrowInternalNull(factory, nameof(factory));
             _packetFactory = factory;
 
             // Set up asynchronous packet pump, if necessary.
@@ -324,7 +324,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to be transmitted.</param>
         private void EnqueuePacket(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, "packet");
+            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
             ErrorUtilities.VerifyThrow(_mode == EndpointMode.Asynchronous, "EndPoint mode is synchronous, should be asynchronous");
             ErrorUtilities.VerifyThrow(null != _packetQueue, "packetQueue is null");
             ErrorUtilities.VerifyThrow(null != _packetAvailable, "packetAvailable is null");

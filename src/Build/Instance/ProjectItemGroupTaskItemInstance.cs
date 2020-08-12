@@ -50,6 +50,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private string _matchOnMetadataOptions;
 
+        /// <summary>
         /// The list of metadata to keep.
         /// </summary>
         private string _keepMetadata;
@@ -161,15 +162,15 @@ namespace Microsoft.Build.Execution
             List<ProjectItemGroupTaskMetadataInstance> metadata
             )
         {
-            ErrorUtilities.VerifyThrowInternalNull(itemType, "itemType");
-            ErrorUtilities.VerifyThrowInternalNull(include, "include");
-            ErrorUtilities.VerifyThrowInternalNull(exclude, "exclude");
-            ErrorUtilities.VerifyThrowInternalNull(remove, "remove");
-            ErrorUtilities.VerifyThrowInternalNull(keepMetadata, "keepMetadata");
-            ErrorUtilities.VerifyThrowInternalNull(removeMetadata, "removeMetadata");
-            ErrorUtilities.VerifyThrowInternalNull(keepDuplicates, "keepDuplicates");
-            ErrorUtilities.VerifyThrowInternalNull(condition, "condition");
-            ErrorUtilities.VerifyThrowInternalNull(location, "location");
+            ErrorUtilities.VerifyThrowInternalNull(itemType, nameof(itemType));
+            ErrorUtilities.VerifyThrowInternalNull(include, nameof(include));
+            ErrorUtilities.VerifyThrowInternalNull(exclude, nameof(exclude));
+            ErrorUtilities.VerifyThrowInternalNull(remove, nameof(remove));
+            ErrorUtilities.VerifyThrowInternalNull(keepMetadata, nameof(keepMetadata));
+            ErrorUtilities.VerifyThrowInternalNull(removeMetadata, nameof(removeMetadata));
+            ErrorUtilities.VerifyThrowInternalNull(keepDuplicates, nameof(keepDuplicates));
+            ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));
+            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
 
             _itemType = itemType;
             _include = include;
@@ -196,7 +197,7 @@ namespace Microsoft.Build.Execution
 
         private ProjectItemGroupTaskItemInstance()
         {
-            
+
         }
 
         /// <summary>

@@ -101,7 +101,7 @@ namespace Microsoft.Build.Construction
         private readonly SolutionFile _solutionFile;
 
         /// <summary>
-        /// The global properties passed under which the project should be opened. 
+        /// The global properties passed under which the project should be opened.
         /// </summary>
         private readonly IDictionary<string, string> _globalProperties;
 
@@ -111,7 +111,7 @@ namespace Microsoft.Build.Construction
         private readonly string _toolsVersionOverride;
 
         /// <summary>
-        /// The context of this build (used for logging purposes). 
+        /// The context of this build (used for logging purposes).
         /// </summary>
         private readonly BuildEventContext _projectBuildEventContext;
 
@@ -168,7 +168,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// This method generates an MSBuild project file from the list of projects and project dependencies 
+        /// This method generates an MSBuild project file from the list of projects and project dependencies
         /// that have been collected from the solution file.
         /// </summary>
         /// <param name="solution">The parser which contains the solution file.</param>
@@ -321,7 +321,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Normally the active solution configuration/platform is determined when we build the solution
         /// wrapper project, not when we create it. However, we need to know them to scan project references
-        /// for the right project configuration/platform. It's unlikely that references would be conditional, 
+        /// for the right project configuration/platform. It's unlikely that references would be conditional,
         /// but still possible and we want to get that case right.
         /// </summary>
         internal static string PredictActiveSolutionConfigurationName(SolutionFile solutionFile, IDictionary<string, string> globalProperties)
@@ -376,7 +376,7 @@ namespace Microsoft.Build.Construction
 
 #if FEATURE_ASPNET_COMPILER
         /// <summary>
-        /// Add a call to the ResolveAssemblyReference task to crack the pre-resolved referenced 
+        /// Add a call to the ResolveAssemblyReference task to crack the pre-resolved referenced
         /// assemblies for the complete list of dependencies, PDBs, satellites, etc.  The invoke
         /// the Copy task to copy all these files (or at least the ones that RAR determined should
         /// be copied local) into the web project's bin directory.
@@ -439,10 +439,10 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// This code handles the *.REFRESH files that are in the "bin" subdirectory of 
-        /// a web project.  These .REFRESH files are just text files that contain absolute or 
-        /// relative paths to the referenced assemblies.  The goal of these tasks is to 
-        /// search all *.REFRESH files and extract fully-qualified absolute paths for 
+        /// This code handles the *.REFRESH files that are in the "bin" subdirectory of
+        /// a web project.  These .REFRESH files are just text files that contain absolute or
+        /// relative paths to the referenced assemblies.  The goal of these tasks is to
+        /// search all *.REFRESH files and extract fully-qualified absolute paths for
         /// each of the references.
         /// </summary>
         private static void AddTasksToResolveAutoRefreshFileReferences
@@ -681,7 +681,7 @@ namespace Microsoft.Build.Construction
             // Validate against our minimum for upgradable projects
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
                 (
-                (_solutionFile.Version >= SolutionFile.slnFileMinVersion),
+                _solutionFile.Version >= SolutionFile.slnFileMinVersion,
                 "SubCategoryForSolutionParsingErrors",
                 new BuildEventFileInfo(_solutionFile.FullPath),
                 "SolutionParseUpgradeNeeded"
@@ -853,7 +853,6 @@ namespace Microsoft.Build.Construction
             ProjectImportElement importAfter = traversalProject.CreateImportElement(@"$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportAfter\*");
             importAfter.Condition = @"'$(ImportByWildcardBeforeSolution)' != 'false' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportAfter')"; // Avoids wildcard perf problem
 
-
             /* The code below adds the following XML:
 
             - TOP -
@@ -995,7 +994,7 @@ namespace Microsoft.Build.Construction
             {
                 metaproject.Save(path);
             }
-            if (_loggingService.IncludeEvaluationMetaprojects == true)
+            if (_loggingService.IncludeEvaluationMetaprojects)
             {
                 var xml = new StringBuilder();
                 using (var writer = new StringWriter(xml))
@@ -1141,35 +1140,35 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Produces a set of targets which allows the MSBuild scheduler to schedule projects in the order automatically by 
+        /// Produces a set of targets which allows the MSBuild scheduler to schedule projects in the order automatically by
         /// following their dependencies without enforcing build levels.
         /// </summary>
         /// <remarks>
         /// We want MSBuild to be able to parallelize the builds of these projects where possible and still honor references.
         /// Since the project files referenced by the solution do not (necessarily) themselves contain actual project references
         /// to the projects they depend on, we need to synthesize this relationship ourselves.  This is done by creating a target
-        /// which first invokes the project's dependencies, then invokes the actual project itself.  However, invoking the 
-        /// dependencies must also invoke their dependencies and so on down the line.  
-        /// 
+        /// which first invokes the project's dependencies, then invokes the actual project itself.  However, invoking the
+        /// dependencies must also invoke their dependencies and so on down the line.
+        ///
         /// Additionally, we do not wish to create a separate MSBuild project to contain this target yet we want to parallelize
         /// calls to these targets.  The way to do this is to pass in different global properties to the same project in the same
         /// MSBuild call.  MSBuild easily allows this using the AdditionalProperties metadata which can be specified on an Item.
-        /// 
+        ///
         /// Assuming the solution project we are generating is called "foo.proj", we can accomplish this parallelism as follows:
         /// <ItemGroup>
         ///     <ProjectReference Include="Project0"/>
         ///     <ProjectReference Include="Project1"/>
         ///     <ProjectReference Include="Project2"/>
         /// </ItemGroup>
-        /// 
+        ///
         /// We now have expressed the top level reference to all projects as @(SolutionReference) and each project's
         /// set of references as @(PROJECTNAMEReference).  We construct our target as:
-        /// 
+        ///
         /// <Target Name="Build">
         ///     <MSBuild Projects="@(ProjectReference)" Targets="Build" />
         ///     <MSBuild Projects="actualProjectName" Targets="Build" />
         /// </Target>
-        /// 
+        ///
         /// The first MSBuild call re-invokes the solution project instructing it to build the reference projects for the
         /// current project.  The second MSBuild call invokes the actual project itself.  Because all reference projects have
         /// the same additional properties, MSBuild will only build the first one it comes across and the rest will be
@@ -1740,7 +1739,7 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// When adding a target to build a web project, we want to put a Condition on the Target node that
-        /// effectively says "Only build this target if the web project is active (marked for building) in the 
+        /// effectively says "Only build this target if the web project is active (marked for building) in the
         /// current solution configuration.
         /// </summary>
         private string ComputeTargetConditionForWebProject(ProjectInSolution project)
@@ -1764,8 +1763,8 @@ namespace Microsoft.Build.Construction
                         condition.Append(")");
                     }
                 }
-                else if (String.Compare(solutionConfiguration.ConfigurationName, "Release", StringComparison.OrdinalIgnoreCase) == 0 ||
-                         String.Compare(solutionConfiguration.ConfigurationName, "Debug", StringComparison.OrdinalIgnoreCase) == 0)
+                else if (String.Equals(solutionConfiguration.ConfigurationName, "Release", StringComparison.OrdinalIgnoreCase) ||
+                         String.Equals(solutionConfiguration.ConfigurationName, "Debug", StringComparison.OrdinalIgnoreCase))
                 {
                     // we don't have a project configuration that matches the solution configuration but
                     // the solution configuration is called "Release" or "Debug" which are standard AspNetConfigurations
@@ -2105,7 +2104,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Normally the active solution configuration/platform is determined when we build the solution
         /// wrapper project, not when we create it. However, we need to know them to scan project references
-        /// for the right project configuration/platform. It's unlikely that references would be conditional, 
+        /// for the right project configuration/platform. It's unlikely that references would be conditional,
         /// but still possible and we want to get that case right.
         /// </summary>
         private string PredictActiveSolutionConfigurationName()
@@ -2115,7 +2114,7 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// Loads each MSBuild project in this solution and looks for its project-to-project references so that
-        /// we know what build order we should use when building the solution. 
+        /// we know what build order we should use when building the solution.
         /// </summary>
         private void ScanProjectDependencies(string childProjectToolsVersion, string fullSolutionConfigurationName)
         {
@@ -2255,12 +2254,12 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Creates the default Venus configuration property based on the selected solution configuration.
         /// Unfortunately, Venus projects only expose one project configuration in the IDE (Debug) although
-        /// they allow building Debug and Release from command line. This means that if we wanted to use 
+        /// they allow building Debug and Release from command line. This means that if we wanted to use
         /// the project configuration from the active solution configuration for Venus projects, we'd always
         /// end up with Debug and there'd be no way to build the Release configuration. To work around this,
         /// we use a special mechanism for choosing ASP.NET project configuration: we set it to Release if
-        /// we're building a Release solution configuration, and to Debug if we're building a Debug solution 
-        /// configuration. The property is also settable from the command line, in which case it takes 
+        /// we're building a Release solution configuration, and to Debug if we're building a Debug solution
+        /// configuration. The property is also settable from the command line, in which case it takes
         /// precedence over this algorithm.
         /// </summary>
         private static void AddVenusConfigurationDefaults(ProjectRootElement traversalProject)
@@ -2312,7 +2311,7 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// Special hack for web projects. It can happen that there is no Release configuration for solutions
-        /// containing web projects, yet we still want to be able to build the Release configuration for 
+        /// containing web projects, yet we still want to be able to build the Release configuration for
         /// those projects. Since the ASP.NET project configuration defaults to the solution configuration,
         /// we allow Release even if it doesn't actually exist in the solution.
         /// </summary>
@@ -2323,7 +2322,7 @@ namespace Microsoft.Build.Construction
                 bool solutionHasReleaseConfiguration = false;
                 foreach (SolutionConfigurationInSolution solutionConfiguration in _solutionFile.SolutionConfigurations)
                 {
-                    if (string.Compare(solutionConfiguration.ConfigurationName, "Release", StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Equals(solutionConfiguration.ConfigurationName, "Release", StringComparison.OrdinalIgnoreCase))
                     {
                         solutionHasReleaseConfiguration = true;
                         break;

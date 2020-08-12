@@ -263,7 +263,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// When reset caches is false we need to only keep around the configurations which are being asked for during the design time build.
-        /// Other configurations need to be cleared. If this configuration is marked as ExplicitlyLoadedConfiguration then it should not be cleared when 
+        /// Other configurations need to be cleared. If this configuration is marked as ExplicitlyLoadedConfiguration then it should not be cleared when
         /// Reset Caches is false.
         /// </summary>
         public bool ExplicitlyLoaded { get; set; }
@@ -276,7 +276,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag indicating whether or not the configuration has been loaded before.
         /// </summary>
-        public bool IsLoaded => _project != null && _project.IsLoaded;
+        public bool IsLoaded => _project?.IsLoaded == true;
 
         /// <summary>
         /// Flag indicating if the configuration is cached or not.

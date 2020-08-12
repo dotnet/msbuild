@@ -15,8 +15,8 @@ namespace Microsoft.Build.Shared
     internal static partial class FileUtilities
     {
         /// <summary>
-        /// Generates a unique directory name in the temporary folder.  
-        /// Caller must delete when finished. 
+        /// Generates a unique directory name in the temporary folder.
+        /// Caller must delete when finished.
         /// </summary>
         /// <param name="createDirectory"></param>
         internal static string GetTemporaryDirectory(bool createDirectory = true)
@@ -86,7 +86,7 @@ namespace Microsoft.Build.Shared
 
             try
             {
-                directory = directory ?? Path.GetTempPath();
+                directory ??= Path.GetTempPath();
 
                 Directory.CreateDirectory(directory);
 
@@ -147,6 +147,5 @@ namespace Microsoft.Build.Shared
                 Directory.Delete(Path, true);
             }
         }
-
     }
 }

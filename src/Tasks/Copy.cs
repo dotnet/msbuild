@@ -695,7 +695,7 @@ namespace Microsoft.Build.Tasks
                 // We only do the cheap check for identicalness here, we try the more expensive check
                 // of comparing the fullpaths of source and destination to see if they are identical,
                 // in the exception handler lower down.
-                else if (0 != String.Compare(
+                else if (!String.Equals(
                              sourceFileState.Name,
                              destinationFileState.Name,
                              StringComparison.OrdinalIgnoreCase))
@@ -892,7 +892,7 @@ namespace Microsoft.Build.Tasks
             string fullSourcePath = Path.GetFullPath(source);
             string fullDestinationPath = Path.GetFullPath(destination);
             StringComparison filenameComparison = NativeMethodsShared.IsWindows ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-            return (0 == String.Compare(fullSourcePath, fullDestinationPath, filenameComparison));
+            return String.Equals(fullSourcePath, fullDestinationPath, filenameComparison);
         }
 
     	private static int GetParallelismFromEnvironment()

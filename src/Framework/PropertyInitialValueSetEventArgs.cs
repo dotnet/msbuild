@@ -22,6 +22,10 @@ namespace Microsoft.Build.Framework
         /// <param name="propertyName">The name of the property.</param>
         /// <param name="propertyValue">The value of the property.</param>
         /// <param name="propertySource">The source of the property.</param>
+        /// <param name="message">The message of the property.</param>
+        /// <param name="helpKeyword">The help keyword.</param>
+        /// <param name="senderName">The sender name of the event.</param>
+        /// <param name="importance">The importance of the message.</param>
         public PropertyInitialValueSetEventArgs(
             string propertyName,
             string propertyValue,

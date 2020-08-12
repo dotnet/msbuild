@@ -54,9 +54,9 @@ namespace Microsoft.Build.BuildEngine
     }
 
     /// <summary>
-    /// This class holds an MSBuild property.  This may be a property that is 
+    /// This class holds an MSBuild property.  This may be a property that is
     /// represented in the MSBuild project file by an XML element, or it
-    /// may not be represented in any real XML file (e.g., global properties, 
+    /// may not be represented in any real XML file (e.g., global properties,
     /// environment properties, etc.)
     /// </summary>
     /// <owner>rgoel</owner>
@@ -135,7 +135,7 @@ namespace Microsoft.Build.BuildEngine
                 customInternTable.Add(stringToIntern, stringToIntern);
                 value = stringToIntern;
             }
-            
+
             return value;
         }
 
@@ -186,7 +186,7 @@ namespace Microsoft.Build.BuildEngine
             XmlElement      propertyElement,
             PropertyType    propertyType
         ) :
-            this(propertyElement, 
+            this(propertyElement,
                  propertyElement != null ? Utilities.GetXmlNodeInnerContents(propertyElement) : null,
                  propertyType)
         {
@@ -231,7 +231,7 @@ namespace Microsoft.Build.BuildEngine
                         break;
 
                     default:
-                        ProjectXmlUtilities.ThrowProjectInvalidAttribute(propertyAttribute); 
+                        ProjectXmlUtilities.ThrowProjectInvalidAttribute(propertyAttribute);
                         break;
                 }
             }
@@ -239,7 +239,6 @@ namespace Microsoft.Build.BuildEngine
             this.propertyValue = propertyValue;
             this.finalValueEscaped = propertyValue;
             this.type = propertyType;
-
         }
 
         /// <summary>
@@ -257,12 +256,12 @@ namespace Microsoft.Build.BuildEngine
         (
             XmlDocument ownerDocument,
             string propertyName,
-            string propertyValue, 
+            string propertyValue,
             PropertyType propertyType
         )
         {
-            ErrorUtilities.VerifyThrowArgumentLength(propertyName, "propertyName");
-            ErrorUtilities.VerifyThrowArgumentNull(propertyValue, "propertyValue");
+            ErrorUtilities.VerifyThrowArgumentLength(propertyName, nameof(propertyName));
+            ErrorUtilities.VerifyThrowArgumentNull(propertyValue, nameof(propertyValue));
 
             // Validate that the property name doesn't contain any illegal characters.
             XmlUtilities.VerifyThrowValidElementName(propertyName);
@@ -306,7 +305,6 @@ namespace Microsoft.Build.BuildEngine
 
             // Assign the property type.
             this.type = propertyType;
-
         }
 
         /// <summary>
@@ -324,7 +322,7 @@ namespace Microsoft.Build.BuildEngine
         internal BuildProperty
         (
             string propertyName,
-            string propertyValue, 
+            string propertyValue,
             PropertyType propertyType
         ) :
             this(null, propertyName, propertyValue, propertyType)
@@ -332,8 +330,8 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Constructor, which initializes the property from just the property 
-        /// name and value, creating it as a "normal" property.  This ends up 
+        /// Constructor, which initializes the property from just the property
+        /// name and value, creating it as a "normal" property.  This ends up
         /// creating a new XML element for the property under a dummy XML document.
         /// </summary>
         /// <param name="propertyName"></param>
@@ -349,7 +347,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Default constructor.  This is not allowed because it leaves the 
+        /// Default constructor.  This is not allowed because it leaves the
         /// property in a bad state -- without a name or value.  But we have to
         /// have it, otherwise FXCop complains.
         /// </summary>
@@ -367,16 +365,16 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Accessor for the property name.  This is read-only, so one cannot
-        /// change the property name once it's set ... your only option is 
+        /// change the property name once it's set ... your only option is
         /// to create a new BuildProperty object.  The reason is that BuildProperty objects
-        /// are often stored in hash tables where the hash function is based 
+        /// are often stored in hash tables where the hash function is based
         /// on the property name.  Modifying the property name of an existing
         /// BuildProperty object would make the hash table incorrect.
         /// </summary>
         /// <owner>RGoel</owner>
         public string Name
         {
-            get 
+            get
             {
                 if (propertyElement != null)
                 {
@@ -386,7 +384,7 @@ namespace Microsoft.Build.BuildEngine
                 else
                 {
                     // If we are not persisted, propertyName and propertyValue must not be null.
-                    ErrorUtilities.VerifyThrow((this.propertyName != null) && (this.propertyName.Length > 0) && (this.propertyValue != null),
+                    ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(this.propertyName) && (this.propertyValue != null),
                         "BuildProperty object doesn't have a name/value pair.");
 
                     // Get the property name from the string variable
@@ -405,13 +403,13 @@ namespace Microsoft.Build.BuildEngine
             get
             {
                 // If we are not persisted, propertyName and propertyValue must not be null.
-                ErrorUtilities.VerifyThrow(this.propertyValue != null, 
+                ErrorUtilities.VerifyThrow(this.propertyValue != null,
                     "BuildProperty object doesn't have a name/value pair.");
 
                 return this.propertyValue;
             }
 
-            set 
+            set
             {
                 ErrorUtilities.VerifyThrowInvalidOperation(this.type != PropertyType.ImportedProperty,
                     "CannotModifyImportedProjects", this.Name);
@@ -493,7 +491,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Accessor for the property type.  This is internal, so that nobody 
+        /// Accessor for the property type.  This is internal, so that nobody
         /// calling the OM can modify the type.  We actually need to modify
         /// it in certain cases internally.  C# doesn't allow a different
         /// access mode for the "get" vs. the "set", so we've made them both
@@ -502,12 +500,12 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         internal PropertyType Type
         {
-            get 
+            get
             {
                 return this.type;
             }
 
-            set 
+            set
             {
                 this.type = value;
             }
@@ -521,7 +519,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (this.type == PropertyType.ImportedProperty);
+                return this.type == PropertyType.ImportedProperty;
             }
         }
 
@@ -606,7 +604,7 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
 
         /// <summary>
-        /// Given a property bag, this method evaluates the current property, 
+        /// Given a property bag, this method evaluates the current property,
         /// expanding any property references contained within.  It stores this
         /// evaluated value in the "finalValue" member.
         /// </summary>
@@ -633,16 +631,16 @@ namespace Microsoft.Build.BuildEngine
             {
                 ErrorUtilities.VerifyThrow(this.ParentPersistedPropertyGroup.ParentProject != null, "Persisted BuildPropertyGroup doesn't have parent project.");
                 this.ParentPersistedPropertyGroup.MarkPropertyGroupAsDirty();
-            };
+            }
         }
 
         /// <summary>
         /// Creates a shallow or deep clone of this BuildProperty object.
-        /// 
-        /// A shallow clone points at the same XML element as the original, so 
-        /// that modifications to the name or value will be reflected in both 
+        ///
+        /// A shallow clone points at the same XML element as the original, so
+        /// that modifications to the name or value will be reflected in both
         /// copies.  However, the two copies could have different a finalValue.
-        /// 
+        ///
         /// A deep clone actually clones the XML element as well, so that the
         /// two copies are completely independent of each other.
         /// </summary>
@@ -711,9 +709,9 @@ namespace Microsoft.Build.BuildEngine
             // just a back-pointer, and doesn't really contribute to the "identity" of
             // the property.
 
-            return 
+            return
                 (compareToProperty != null) &&
-                (0 == String.Compare(compareToProperty.propertyName, this.propertyName, StringComparison.OrdinalIgnoreCase)) &&
+                (String.Equals(compareToProperty.propertyName, this.propertyName, StringComparison.OrdinalIgnoreCase)) &&
                 (compareToProperty.propertyValue                == this.propertyValue) &&
                 (compareToProperty.FinalValue                   == this.FinalValue) &&
                 (compareToProperty.type                         == this.type);
@@ -744,7 +742,7 @@ namespace Microsoft.Build.BuildEngine
         public static explicit operator string
         (
             BuildProperty propertyToCast
-        ) 
+        )
         {
             if (propertyToCast == null)
             {

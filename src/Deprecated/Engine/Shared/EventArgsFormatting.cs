@@ -51,7 +51,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildErrorEventArgs e, bool removeCarriageReturn)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             // "error" should not be localized
             return FormatEventMessage("error", e.Subcategory, removeCarriageReturn ? EscapeCarriageReturn(e.Message) : e.Message,
@@ -80,7 +80,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildWarningEventArgs e, bool removeCarriageReturn)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             // "warning" should not be localized
             return FormatEventMessage("warning", e.Subcategory, removeCarriageReturn ? EscapeCarriageReturn(e.Message) : e.Message,
@@ -129,7 +129,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
             */
 
-            if ((file == null) || (file.Length == 0))
+            if (string.IsNullOrEmpty(file))
             {
                 format.Append("MSBUILD : ");    // Should not be localized.
             }
@@ -182,7 +182,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 }
             }
 
-            if ((subcategory != null) && (subcategory.Length != 0))
+            if (!string.IsNullOrEmpty(subcategory))
             {
                 format.Append("{9} ");
             }
@@ -235,7 +235,6 @@ namespace Microsoft.Build.BuildEngine.Shared
 
             return formattedMessage.ToString();
         }
-
 
         /// <summary>
         /// Splits strings on 'newLines' with tolerance for Everett and Dogfood builds.

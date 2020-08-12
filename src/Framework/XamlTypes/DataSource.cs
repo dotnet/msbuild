@@ -27,8 +27,8 @@ namespace Microsoft.Build.Framework.XamlTypes
     /// <summary>
     /// Represents the location and grouping for a <see cref="BaseProperty"/>.
     /// </summary>
-    /// <remarks> 
-    /// Those who manually 
+    /// <remarks>
+    /// Those who manually
     /// instantiate this class should remember to call <see cref="BeginInit"/> before setting the first
     /// property and <see cref="EndInit"/> after setting the last property of the object.
     /// </remarks>
@@ -52,12 +52,12 @@ namespace Microsoft.Build.Framework.XamlTypes
         #region Properties
 
         /// <summary>
-        /// The storage location for this data source. 
+        /// The storage location for this data source.
         /// </summary>
         /// <remarks>
-        /// This field is mandatory unless <see cref="PersistenceStyle"/> is set. In that case, the parent 
-        /// <see cref="DataSource"/> will be used with the specified style. Example values are <c>ProjectFile</c> and 
-        /// <c>UserFile</c>. <c>ProjectFile</c> causes the property value to be written to and read from the project 
+        /// This field is mandatory unless <see cref="PersistenceStyle"/> is set. In that case, the parent
+        /// <see cref="DataSource"/> will be used with the specified style. Example values are <c>ProjectFile</c> and
+        /// <c>UserFile</c>. <c>ProjectFile</c> causes the property value to be written to and read from the project
         /// manifest file or the property sheet (depending on which node in the solution explorer/property manager window
         /// is used to spawn the property pages UI). <c>UserFile</c> causes the property value to be written to and read
         /// from the .user file.
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// The storage style for this data source.
         /// </summary>
         /// <remarks>
-        /// For example, with <see cref="Persistence"/> of <c>ProjectFile</c>, this field can be <c>Element</c> (default) to 
+        /// For example, with <see cref="Persistence"/> of <c>ProjectFile</c>, this field can be <c>Element</c> (default) to
         /// save as a child XML Element, or <c>Attribute</c> to save properties as an XML attribute.
         /// </remarks>
         public string PersistenceStyle
@@ -146,7 +146,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// Among other things this governs how the data is treated during build.
         /// </summary>
         /// <example>
-        /// A value of <c>Item</c> for this property indicates that this property is actually 
+        /// A value of <c>Item</c> for this property indicates that this property is actually
         /// an item array - the list of all items with the item type specified by <see cref="ItemType"/>.
         /// </example>
         public string SourceType

@@ -372,9 +372,9 @@ namespace Microsoft.Build.Conversion
         {
             // Make sure we were passed in non-empty source and destination project
             // file names.
-            error.VerifyThrowArgument((this.oldProjectFile != null) && (this.oldProjectFile.Length > 0),
+            error.VerifyThrowArgument(!string.IsNullOrEmpty(this.oldProjectFile),
                 "MissingOldProjectFile");
-            error.VerifyThrowArgument((this.newProjectFile != null) && (this.newProjectFile.Length > 0),
+            error.VerifyThrowArgument(!string.IsNullOrEmpty(this.newProjectFile),
                 "MissingNewProjectFile");
 
             ConvertInMemoryToMSBuildProject();
@@ -425,7 +425,7 @@ namespace Microsoft.Build.Conversion
         {
             // Make sure we were passed in non-empty source and destination project
             // file names.
-            error.VerifyThrowArgument((this.oldProjectFile != null) && (this.oldProjectFile.Length > 0),
+            error.VerifyThrowArgument(!string.IsNullOrEmpty(this.oldProjectFile),
                 "MissingOldProjectFile");
 
             // Make sure the source project file exists.
@@ -516,7 +516,7 @@ namespace Microsoft.Build.Conversion
                 // Find matching imports but don't delete whilst enumerating else it will throw an error
                 foreach (ProjectImportElement nextImport in xmakeProject.Imports)
                 {
-                    if (String.Compare(nextImport.Project, @"$(MSBuildBinPath)\Microsoft.WinFX.targets", StringComparison.OrdinalIgnoreCase) == 0)
+                    if (String.Equals(nextImport.Project, @"$(MSBuildBinPath)\Microsoft.WinFX.targets", StringComparison.OrdinalIgnoreCase))
                     {
                         listOfImportsToBeDeleted.Add(nextImport);
                     }
@@ -532,7 +532,6 @@ namespace Microsoft.Build.Conversion
                         listOfWFImportsToBeDeleted.Add(nextImport);
                         workflowImportsToAdd.Add(nextImport.Project.Replace(workflowOldOrcasTargetsPath, workflowNewTargetsPath));
                     }
-
                 }
 
                 // Now delete any matching imports
@@ -564,7 +563,6 @@ namespace Microsoft.Build.Conversion
                     changedProject = true;
                 }
 
-
                 // Re-add the workflow imports with the v4.0 targets.
                 foreach (string workflowImportToAdd in workflowImportsToAdd)
                 {
@@ -585,7 +583,7 @@ namespace Microsoft.Build.Conversion
                 {
                     if ((!nextItem.ItemType.Equals("Reference", StringComparison.OrdinalIgnoreCase)) &&
                         (nextItem.Include.Trim().EndsWith(".xaml", StringComparison.OrdinalIgnoreCase)))
-                        
+
                     {
                         if (!nextItem.Metadata.Any(m => String.Equals(m.Name, "Generator", StringComparison.OrdinalIgnoreCase)))
                         {
@@ -634,15 +632,15 @@ namespace Microsoft.Build.Conversion
 
                 // Fix up TargetFrameworkSubset
                 changedProject = FixTargetFrameworkSubset() || changedProject;
-                
+
                 var hasFSharpSpecificConversions = FSharpSpecificConversions(true);
-                
+
                 changedProject = hasFSharpSpecificConversions || changedProject;
                 changedProject = VBSpecificConversions() || changedProject;
 
                 // Do asset compat repair for any project that was previously a TV < 12.0
                 if (
-                        String.IsNullOrEmpty(oldToolsVersion) || 
+                        String.IsNullOrEmpty(oldToolsVersion) ||
                         String.Equals(oldToolsVersion, "3.5", StringComparison.OrdinalIgnoreCase) ||
                         String.Equals(oldToolsVersion, "4.0", StringComparison.OrdinalIgnoreCase)
                     )
@@ -710,7 +708,7 @@ namespace Microsoft.Build.Conversion
             var toRepairImports = RequiresRepairForAssetCompat();
 
             if (toRepairImports == null || toRepairImports.Count() == 0)
-            { 
+            {
                 // no need to repair
                 return false;
             }
@@ -719,7 +717,7 @@ namespace Microsoft.Build.Conversion
             {
                 RepairImportForAssetCompat(toRepairImport);
             }
-            
+
             //
             // Add PropertyGroup with Conditions right before where the Imports occur
             //   <PropertyGroup>
@@ -754,7 +752,7 @@ namespace Microsoft.Build.Conversion
 
         /// <summary>
         /// Repairs the given import element
-        /// Change Import to use $(VSToolsPath), with Condition using $(VSToolsPath) 
+        /// Change Import to use $(VSToolsPath), with Condition using $(VSToolsPath)
         /// e.g. From: Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets"
         ///        To: Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false"
         ///            Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets"
@@ -764,7 +762,7 @@ namespace Microsoft.Build.Conversion
         private void RepairImportForAssetCompat(ProjectImportElement toRepairImport)
         {
             // We shouldn't have this happen but check anyway:
-            ErrorUtilities.VerifyThrowInternalNull(toRepairImport, "toRepairImport");
+            ErrorUtilities.VerifyThrowInternalNull(toRepairImport, nameof(toRepairImport));
             ErrorUtilities.VerifyThrow(!toRepairImport.Condition.Equals("false", StringComparison.OrdinalIgnoreCase), "RepairImportForAssetCompat should not receive imports with condition=false already");
 
             var newImportElement = this.xmakeProject.CreateImportElement(toRepairImport.Project);
@@ -816,14 +814,13 @@ namespace Microsoft.Build.Conversion
         /// </summary>
         /// <returns>bool</returns>
         private IEnumerable<ProjectImportElement> RequiresRepairForAssetCompat()
-        { 
+        {
             // check if the project has the to-repair pattern in the Imports
             // pattern: $(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\
             var toRepairImports =  from import in xmakeProject.Imports
                                    where HasRepairPattern(import)
                                    select import;
 
-            
             return toRepairImports;
         }
 
@@ -896,7 +893,7 @@ namespace Microsoft.Build.Conversion
                         parentGroup.SetProperty(XMakeProjectStrings.TargetFrameworkProfile, XMakeProjectStrings.ClientProfile);
                         changedProject = true;
                     }
-            
+
                     // In all cases, <TargetFrameworkSubset/> is no longer supported.  If it comes from the project
                     // that we're converting, then we forcibly remove it.  If it comes from some import... the user is
                     // on their own.  
@@ -915,13 +912,13 @@ namespace Microsoft.Build.Conversion
 
         /// <summary>
         /// Performs conversions specific to F# projects (VS2008 CTP -> VS2012) and (VS2010 -> VS2012).
-        /// This involves: changing the location of FSharp targets, 
+        /// This involves: changing the location of FSharp targets,
         /// and for 2008CTP, adding explicit mscorlib and FSharp.Core references.
         /// </summary>
         /// <param name="actuallyMakeChanges">if true, make the changes, otherwise, don't actually make any changes, but do report the return boolean as to whether you would make changes</param>
         /// <returns>true if anything was (would be) changed, false otherwise</returns>
         public bool FSharpSpecificConversions(bool actuallyMakeChanges)
-        {           
+        {
             // For FSharp projects, should import different location of FSharp targets
             const string fsharpFS10TargetsPath = @"$(MSBuildExtensionsPath)\FSharp\1.0\Microsoft.FSharp.Targets";
             const string fsharpFS10TargetsPath32 = @"$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets";
@@ -945,7 +942,7 @@ namespace Microsoft.Build.Conversion
             ProjectImportElement fsharpTargetsDev12PlusImport = null;
             ProjectImportElement fsharpTargetsDev11PortableImport = null;
 
-            if (actuallyMakeChanges == false && this.xmakeProject == null)
+            if (!actuallyMakeChanges && this.xmakeProject == null)
             {
                 // when coming down the actuallyMakeChanges==false code path (from the F# project system's UpgradeProject_CheckOnly method), we may not have loaded the Xml yet, so do that now
                 this.xmakeProject = ProjectRootElement.Open(oldProjectFile);
@@ -953,10 +950,10 @@ namespace Microsoft.Build.Conversion
 
             // local function: string equality check using OrdinalIgnoreCase comparison
             Func<string, string, bool> equals = (s1, s2) => String.Equals(s1, s2, StringComparison.OrdinalIgnoreCase);
-            
+
             // local function: wraps specified string value into Exists('value')
             Func<string, string> exists = s => string.Format(CultureInfo.InvariantCulture, "Exists('{0}')", s);
-            
+
             // local function: 
             // Creates property group element containing one property fsharpDev12PlusProperty with value 'path'. 
             // If addCondition is true, property group will have Exists(path) condition
@@ -967,7 +964,7 @@ namespace Microsoft.Build.Conversion
                     parent.AppendChild(propGroup);
                     var prop = xmakeProject.CreatePropertyElement(fsharpDev12PlusProperty);
                     prop.Value = path;
-                    propGroup.AppendChild(prop);                    
+                    propGroup.AppendChild(prop);
                 };
 
             foreach (ProjectImportElement importElement in xmakeProject.Imports)
@@ -1014,11 +1011,11 @@ namespace Microsoft.Build.Conversion
                 return false;
 
             if (!actuallyMakeChanges)
-                return true;            
+                return true;
 
             // both branches adds this elements to the project
             var chooseElement = xmakeProject.CreateChooseElement(); // (1)
-            
+
             if (fsharpTargetsDev11PortableImport != null)
             {
                 // Dev11 portable library
@@ -1041,7 +1038,7 @@ namespace Microsoft.Build.Conversion
                 // portable libraries are supported since Dev11
                 var whenVsVersionIsDev11 = xmakeProject.CreateWhenElement("'$(VisualStudioVersion)' == '11.0'"); // (2)
                 chooseElement.AppendChild(whenVsVersionIsDev11);
-                
+
                 appendPropertyGroupForDev12PlusTargetsPath(fsharpPortableDev11TargetsPath, whenVsVersionIsDev11);
 
                 var otherwiseIfVsVersionIsDev12Plus = xmakeProject.CreateOtherwiseElement(); // (3)
@@ -1071,7 +1068,6 @@ namespace Microsoft.Build.Conversion
                 //  </Otherwise>
                 //</Choose>
                 //<Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />           
-
 
                 var whenVsVersionIsDev11 = xmakeProject.CreateWhenElement("'$(VisualStudioVersion)' == '11.0'");
                 chooseElement.AppendChild(whenVsVersionIsDev11);
@@ -1132,7 +1128,7 @@ namespace Microsoft.Build.Conversion
                 {
                     referencesItemGroup.AddItem(ReferenceItemType, "mscorlib");
                 }
-            }            
+            }
 
             // try to find reference to FSharp.Core 
             ProjectItemElement fsharpCoreItem = null;
@@ -1190,15 +1186,11 @@ namespace Microsoft.Build.Conversion
                 }
             }
 
-            if (newFSharpCoreItem != null)
-            {
-                newFSharpCoreItem.AddMetadata("Private", "True");
-            }
+            newFSharpCoreItem?.AddMetadata("Private", "True");
 
-            
             const string MinimumVisualStudioVersionProperty = "MinimumVisualStudioVersion";
             var hasMinimumVSVersion = xmakeProject.Properties.Any(prop => prop.Name == MinimumVisualStudioVersionProperty);
-            
+
             foreach(var group in xmakeProject.PropertyGroups)
             {
                 // find first non-conditional property group to add TargetFSharpCoreVersion property
@@ -1224,7 +1216,6 @@ namespace Microsoft.Build.Conversion
             {
                 fsharpCoreItem.Parent.RemoveChild(fsharpCoreItem);
             }
-
 
             return true;
         }
@@ -1433,8 +1424,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <VisualStudioProject> element.
-            error.VerifyThrow((visualStudioProjectElement != null) &&
-                (visualStudioProjectElement.Name == VSProjectElements.visualStudioProject),
+            error.VerifyThrow((visualStudioProjectElement?.Name == VSProjectElements.visualStudioProject),
                 "Expected <VisualStudioProject> element.");
 
             // Make sure the caller has given us a valid xmakeProject object.
@@ -1444,7 +1434,7 @@ namespace Microsoft.Build.Conversion
             // to convert a VC++ or some other type of project, and give a more friendly
             // error message.
             string projectType = visualStudioProjectElement.GetAttribute(VSProjectAttributes.projectType);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((projectType == null) || (projectType.Length == 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(string.IsNullOrEmpty(projectType),
                 visualStudioProjectElement.Location, "ProjectTypeCannotBeConverted", projectType);
 
             // Make sure the <VisualStudioProject> tag doesn't have any attributes.
@@ -1518,13 +1508,13 @@ namespace Microsoft.Build.Conversion
             // Get the project instance GUID for this project file.  It is required for
             // the main project file, but not for the .USER file.
             this.projectGuid = languageElement.GetAttribute(VSProjectAttributes.projectGuid);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((this.projectGuid != null) || (this.isUserFile == true),
+            ProjectErrorUtilities.VerifyThrowInvalidProject((this.projectGuid != null) || (this.isUserFile),
                 languageElement.Location, "MissingAttribute", languageElement.Name, VSProjectAttributes.projectGuid);
 
             // Get the project type for this project file.  We only support "Local".  We do not
             // convert web projects -- that's Venus's job.
             string projectType = languageElement.GetAttribute(VSProjectAttributes.projectType);
-            ProjectErrorUtilities.VerifyThrowInvalidProject(projectType == null || projectType.Length == 0 ||
+            ProjectErrorUtilities.VerifyThrowInvalidProject(string.IsNullOrEmpty(projectType) ||
                 (String.Compare(projectType, VSProjectAttributes.local, StringComparison.OrdinalIgnoreCase) == 0),
                 languageElement.Location, "ProjectTypeCannotBeConverted", projectType);
 
@@ -1563,7 +1553,7 @@ namespace Microsoft.Build.Conversion
             // -----------------------------------------------------------------------
 
             string originalMyType = languageElement.GetAttribute(XMakeProjectStrings.myType);
-            if ((originalMyType != null) && (originalMyType.Length != 0))
+            if (!string.IsNullOrEmpty(originalMyType))
             {
                 // Flag the fact that the Everett project already had a MyType property in there,
                 // so we don't try to override it later.
@@ -1629,7 +1619,6 @@ namespace Microsoft.Build.Conversion
                     SetProjectExtensionsString(XMakeProjectStrings.visualStudio, visualStudioProjectExtensions);
                 }
             }
-
 
             // Loop through all the direct child elements of the language element.
             foreach(XmlNode languageChildNode in languageElement)
@@ -1717,9 +1706,9 @@ namespace Microsoft.Build.Conversion
                     !isTriumphProject        // Doesn't apply to Triumph->Trinity conversions.
                 )
                 {
-                    if (this.outputType != null && this.outputType.Length > 0)
+                    if (!string.IsNullOrEmpty(this.outputType))
                     {
-                        if (String.Compare(this.outputType, XMakeProjectStrings.winExe, StringComparison.OrdinalIgnoreCase) == 0)
+                        if (String.Equals(this.outputType, XMakeProjectStrings.winExe, StringComparison.OrdinalIgnoreCase))
                         {
                             if (this.hasWindowsFormsReference)
                             {
@@ -1731,11 +1720,11 @@ namespace Microsoft.Build.Conversion
                                 this.globalPropertyGroup.AddProperty(XMakeProjectStrings.myType, XMakeProjectStrings.console);
                             }
                         }
-                        else if (String.Compare(this.outputType, XMakeProjectStrings.exe, StringComparison.OrdinalIgnoreCase) == 0)
+                        else if (String.Equals(this.outputType, XMakeProjectStrings.exe, StringComparison.OrdinalIgnoreCase))
                         {
                             this.globalPropertyGroup.AddProperty(XMakeProjectStrings.myType, XMakeProjectStrings.console);
                         }
-                        else if (String.Compare(this.outputType, XMakeProjectStrings.library, StringComparison.OrdinalIgnoreCase) == 0)
+                        else if (String.Equals(this.outputType, XMakeProjectStrings.library, StringComparison.OrdinalIgnoreCase))
                         {
                             this.globalPropertyGroup.AddProperty(XMakeProjectStrings.myType, XMakeProjectStrings.windows);
                         }
@@ -1825,8 +1814,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Build> element.
-            error.VerifyThrow((buildElement != null) &&
-                (buildElement.Name == VSProjectElements.build), "Expected <Build> element.");
+            error.VerifyThrow((buildElement?.Name == VSProjectElements.build), "Expected <Build> element.");
 
             // Make sure the caller has given us a valid xmakeProject object.
             error.VerifyThrow(xmakeProject != null, "Expected valid XMake project object.");
@@ -1893,8 +1881,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Settings> element.
-            error.VerifyThrow((settingsElement != null) &&
-                (settingsElement.Name == VSProjectElements.settings),
+            error.VerifyThrow((settingsElement?.Name == VSProjectElements.settings),
                 "Expected <Settings> element.");
 
             // Make sure the caller has given us a valid xmakeProject object.
@@ -2019,8 +2006,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Config> element.
-            error.VerifyThrow((configElement != null) &&
-                (configElement.Name == VSProjectElements.config),
+            error.VerifyThrow((configElement?.Name == VSProjectElements.config),
                 "Expected <Config> element.");
 
             // Make sure the caller has given us a valid xmakeProject object.
@@ -2077,7 +2063,7 @@ namespace Microsoft.Build.Conversion
 
             // Get the "Name" attribute of the <Config> element.
             string configName = configElement.GetAttribute(VSProjectAttributes.name);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((configName != null) && (configName.Length > 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(configName),
                 configElement.Location, "MissingAttribute", VSProjectElements.config, VSProjectAttributes.name);
 
             // In the case of VSD projects, the "Name" attribute will have a pipe in it,
@@ -2115,7 +2101,7 @@ namespace Microsoft.Build.Conversion
 
             // Process OutputPath attribute separately to ensure it contains trailing backslash
             string outputPath = configElement.GetAttribute(VSProjectAttributes.outputPath);
-            if (outputPath != null && outputPath.Length > 0)
+            if (!string.IsNullOrEmpty(outputPath))
             {
                 if (outputPath[outputPath.Length-1] != Path.DirectorySeparatorChar)
                     outputPath += Path.DirectorySeparatorChar;
@@ -2127,20 +2113,20 @@ namespace Microsoft.Build.Conversion
             // If the "SelectedDevice" or "DeploymentPlatform" attributes exist in the per-user
             //   project file, we should get rid of them.
             string selectedDevice = configElement.GetAttribute ( VSProjectAttributes.selectedDevice );
-            if ( isUserFile && ( selectedDevice != null ) && ( selectedDevice.Length > 0 ) )
+            if (isUserFile && (selectedDevice?.Length > 0))
             {
                 configElement.RemoveAttribute ( VSProjectAttributes.selectedDevice );
             }
 
             string deploymentPlatform = configElement.GetAttribute ( VSProjectAttributes.deploymentPlatform );
-            if ( isUserFile && ( deploymentPlatform != null ) && ( deploymentPlatform.Length > 0 ) )
+            if (isUserFile && (deploymentPlatform?.Length > 0))
             {
                 configElement.RemoveAttribute ( VSProjectAttributes.deploymentPlatform );
             }
 
             // Get rid of the "IncrementalBuild" attribute
             string incrementalBuild = configElement.GetAttribute ( VSProjectAttributes.incrementalBuild );
-            if (incrementalBuild != null && incrementalBuild.Length > 0)
+            if (!string.IsNullOrEmpty(incrementalBuild))
             {
                 configElement.RemoveAttribute ( VSProjectAttributes.incrementalBuild );
             }
@@ -2185,11 +2171,11 @@ namespace Microsoft.Build.Conversion
                 if (String.IsNullOrEmpty(debugType))
                 {
                     string debugSymbols = configElement.GetAttribute(XMakeProjectStrings.debugSymbols);
-                    if (  0 == String.Compare ( debugSymbols, "true", StringComparison.OrdinalIgnoreCase ) )
+                    if (  String.Equals ( debugSymbols, "true", StringComparison.OrdinalIgnoreCase ) )
                     {
                         configPropertyGroup.AddProperty(VSProjectAttributes.debugType, VSProjectAttributes.debugTypeFull);
                     }
-                    else if ( 0 == String.Compare(debugSymbols, "false", StringComparison.OrdinalIgnoreCase) )
+                    else if ( String.Equals(debugSymbols, "false", StringComparison.OrdinalIgnoreCase) )
                     {
                         configPropertyGroup.AddProperty(VSProjectAttributes.debugType, VSProjectAttributes.debugTypeNone);
                     }
@@ -2261,8 +2247,7 @@ namespace Microsoft.Build.Conversion
             if ( !IsUserFile )
             {
                 // Make sure this is the <Platform> element.
-                error.VerifyThrow((platformElement != null) &&
-                    (platformElement.Name == VSProjectElements.platform),
+                error.VerifyThrow((platformElement?.Name == VSProjectElements.platform),
                     "Expected <Platform> element.");
 
                 // Make sure the caller has given us a valid xmakeProject object.
@@ -2285,7 +2270,7 @@ namespace Microsoft.Build.Conversion
 
                 // Get the "Name" attribute of the <Platform> element.
                 platformForVSD = platformElement.GetAttribute(VSProjectAttributes.name);
-                ProjectErrorUtilities.VerifyThrowInvalidProject((platformForVSD != null) && (platformForVSD.Length > 0),
+                ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(platformForVSD),
                     platformElement.Location, "MissingAttribute", VSProjectElements.platform, VSProjectAttributes.name);
 
                 // Create a new property group, and add all of the XML attributes as XMake
@@ -2354,8 +2339,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <InteropRegistration> element.
-            error.VerifyThrow((interopRegistrationElement != null) &&
-                (interopRegistrationElement.Name == VSProjectElements.interopRegistration),
+            error.VerifyThrow((interopRegistrationElement?.Name == VSProjectElements.interopRegistration),
                 "Expected <InteropRegistration> element.");
 
             // Make sure we've been given a valid configuration property group.
@@ -2411,8 +2395,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <References> element.
-            error.VerifyThrow((referencesElement != null) &&
-                (referencesElement.Name == VSProjectElements.references),
+            error.VerifyThrow((referencesElement?.Name == VSProjectElements.references),
                 "Expected <References> element.");
 
             // Make sure the caller has given us a valid xmakeProject object.
@@ -2496,8 +2479,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Reference> element.
-            error.VerifyThrow((referenceElement != null) &&
-                (referenceElement.Name == VSProjectElements.reference),
+            error.VerifyThrow((referenceElement?.Name == VSProjectElements.reference),
                 "Expected <Reference> element.");
 
             // Make sure the caller has already created an ProjectItemGroupElement for us to
@@ -2509,7 +2491,7 @@ namespace Microsoft.Build.Conversion
             //   "-Designer", we need to disregard this reference entirely.
 
             string platform = referenceElement.GetAttribute(VSProjectAttributes.platform);
-            if ((platform != null) && (platform.Length > 0))
+            if (!string.IsNullOrEmpty(platform))
             {
                 if (platform.IndexOf("-Designer", 0, platform.Length, StringComparison.Ordinal) != -1)
                 {
@@ -2524,23 +2506,23 @@ namespace Microsoft.Build.Conversion
             // Get the "Name" attribute.  This is a required attribute in the VS7/
             // Everett format.
             string referenceName = referenceElement.GetAttribute(VSProjectAttributes.name);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((referenceName != null) && (referenceName.Length > 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(referenceName),
                 referenceElement.Location, "MissingAttribute", VSProjectAttributes.name, VSProjectElements.reference);
 
             // Before we go any further, we must special-case some assemblies for VSD projects.
 
-            if ( ( ( this.language == VSProjectElements.ECSharp ) ||
-                   ( this.language == VSProjectElements.EVisualBasic ) ) )
+            if ((this.language == VSProjectElements.ECSharp) ||
+                   (this.language == VSProjectElements.EVisualBasic))
             {
                 if ( ( this.frameworkVersionForVSD == XMakeProjectStrings.vTwo ) &&
-                     ( 0 == String.Compare ( referenceName, VSProjectElements.SystemDataCommon, StringComparison.OrdinalIgnoreCase ) ) )
+                     ( String.Equals ( referenceName, VSProjectElements.SystemDataCommon, StringComparison.OrdinalIgnoreCase ) ) )
                 {
                     // We need to remove all references to "System.Data.Common" for VSD projects only.
                     //   Note : We only want to do this for projects that will be updated to v2.0
                     //          System.Data.Common is still valid for v1.0 upgraded projects.
                     return;
                 }
-                else if ( 0 == String.Compare ( referenceName, VSProjectElements.SystemSR, StringComparison.OrdinalIgnoreCase ) )
+                else if ( String.Equals ( referenceName, VSProjectElements.SystemSR, StringComparison.OrdinalIgnoreCase ) )
                 {
                     // We always want to remove all references to "System.SR"
                     return;
@@ -2548,7 +2530,7 @@ namespace Microsoft.Build.Conversion
             }
 
             if ( ( this.language == VSProjectElements.EVisualBasic ) &&
-                 ( 0 == String.Compare ( referenceName, VSProjectElements.MSCorLib, StringComparison.OrdinalIgnoreCase ) ) )
+                 ( String.Equals ( referenceName, VSProjectElements.MSCorLib, StringComparison.OrdinalIgnoreCase ) ) )
             {
                 // We also want to get rid of all 'mscorlib' references for VB projects only.
                 return;
@@ -2566,12 +2548,12 @@ namespace Microsoft.Build.Conversion
             // reference.
             string referencedProjectGuid = referenceElement.GetAttribute(VSProjectAttributes.project);
 
-            if ((comReferenceGuid != null) && (comReferenceGuid.Length > 0) &&
+            if (!string.IsNullOrEmpty(comReferenceGuid) &&
                 (comReferenceGuid != "{00000000-0000-0000-0000-000000000000}"))
             {
                 newReferenceItem = ConvertClassicComReference(referenceElement, referencesItemGroup, referenceName);
             }
-            else if ((referencedProjectGuid != null) && (referencedProjectGuid.Length > 0))
+            else if (!string.IsNullOrEmpty(referencedProjectGuid))
             {
                 newReferenceItem = ConvertProjectToProjectReference(referenceElement, referencesItemGroup, referenceName, ref referencedProjectGuid);
             }
@@ -2688,13 +2670,13 @@ namespace Microsoft.Build.Conversion
             {
                 // For VSD Projects, we want to transform all Everett ( .csdproj & .vbdproj ) project 2 project references into
                 // Whidbey ( .csproj & .vbproj ) references.
-                if (0 == String.Compare(Path.GetExtension(pathToReferencedProject),
+                if (String.Equals(Path.GetExtension(pathToReferencedProject),
                                         XMakeProjectStrings.csdprojFileExtension,
                                         StringComparison.OrdinalIgnoreCase))
                 {
                     pathToReferencedProject = Path.ChangeExtension(pathToReferencedProject, XMakeProjectStrings.csprojFileExtension);
                 }
-                else if (0 == String.Compare(Path.GetExtension(pathToReferencedProject),
+                else if (String.Equals(Path.GetExtension(pathToReferencedProject),
                                              XMakeProjectStrings.vbdprojFileExtension,
                                              StringComparison.OrdinalIgnoreCase))
                 {
@@ -2745,7 +2727,7 @@ namespace Microsoft.Build.Conversion
             // Get the "AssemblyName" attribute.  If not found, just use the value from the
             // "Name" attribute.  This is what the project loading code does in VS.
             string assemblyName = referenceElement.GetAttribute(VSProjectAttributes.assemblyName);
-            if ((assemblyName == null) || (assemblyName.Length == 0))
+            if (string.IsNullOrEmpty(assemblyName))
             {
                 assemblyName = referenceName;
             }
@@ -2758,7 +2740,7 @@ namespace Microsoft.Build.Conversion
 
             // MyType should only be added when System.Windows.Forms is present. If this
             // reference is seen, then set a flag so we can later add MyType.
-            if (0 == String.Compare("System.Windows.Forms", assemblyName, StringComparison.OrdinalIgnoreCase))
+            if (String.Equals("System.Windows.Forms", assemblyName, StringComparison.OrdinalIgnoreCase))
             {
                 hasWindowsFormsReference = true;
             }
@@ -2808,7 +2790,7 @@ namespace Microsoft.Build.Conversion
                 {
                     // Check that the extension really is ".SLN", because the above call to
                     // GetFiles will also return files such as blah.SLN1 and bloo.SLN2.
-                    if (0 == String.Compare(".sln", slnFile.Extension, StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals(".sln", slnFile.Extension, StringComparison.OrdinalIgnoreCase))
                     {
                         // Parse the .SLN file.
                         SolutionFile solutionParser = new SolutionFile();
@@ -2954,8 +2936,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Imports> element.
-            error.VerifyThrow((importsElement != null) &&
-                (importsElement.Name == VSProjectElements.imports),
+            error.VerifyThrow((importsElement?.Name == VSProjectElements.imports),
                 "Expected <Imports> element.");
 
             // Make sure the caller gave us a valid xmakeProject to stuff
@@ -3004,7 +2985,6 @@ namespace Microsoft.Build.Conversion
                 {
                     ProjectXmlUtilities.ThrowProjectInvalidChildElement(importsChildNode.Name, importsElement.Name, importsElement.Location);
                 }
-
             }
         }
 
@@ -3020,8 +3000,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Import> element.
-            error.VerifyThrow((importElement != null) &&
-                (importElement.Name == VSProjectElements.import),
+            error.VerifyThrow((importElement?.Name == VSProjectElements.import),
                 "Expected <Import> element.");
 
             // Make sure the caller has already created an ProjectItemGroupElement for us to
@@ -3030,7 +3009,7 @@ namespace Microsoft.Build.Conversion
 
             // Get the required "Namespace" attribute.
             string importNamespace = importElement.GetAttribute(VSProjectAttributes.importNamespace);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((importNamespace != null) && (importNamespace.Length > 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(importNamespace),
                 importElement.Location, "MissingAttribute", VSProjectAttributes.importNamespace, VSProjectElements.import);
             // Remove the "Namespace" attribute, so it doesn't show up in our loop later.
             importElement.RemoveAttribute(VSProjectAttributes.importNamespace);
@@ -3073,8 +3052,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Files> element.
-            error.VerifyThrow((filesElement != null) &&
-                (filesElement.Name == VSProjectElements.files),
+            error.VerifyThrow((filesElement?.Name == VSProjectElements.files),
                 "Expected <Files> element.");
 
             // Make sure the caller gave us a valid xmakeProject to stuff
@@ -3140,8 +3118,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Include> element.
-            error.VerifyThrow((includeElement != null) &&
-                (includeElement.Name == VSProjectElements.include),
+            error.VerifyThrow((includeElement?.Name == VSProjectElements.include),
                 "Expected <Include> element.");
 
             // Make sure the caller gave us a valid xmakeProject to stuff
@@ -3210,8 +3187,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <File> element.
-            error.VerifyThrow((fileElement != null) &&
-                (fileElement.Name == VSProjectElements.file),
+            error.VerifyThrow((fileElement?.Name == VSProjectElements.file),
                 "Expected <File> element.");
 
             // Make sure the caller has already created an ProjectItemGroupElement for us to
@@ -3220,7 +3196,7 @@ namespace Microsoft.Build.Conversion
 
             // Get the required "RelPath" attribute.
             string relPath = fileElement.GetAttribute(VSProjectAttributes.relPath);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((relPath != null) && (relPath.Length > 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(relPath),
                 fileElement.Location, "MissingAttribute", VSProjectAttributes.relPath, VSProjectElements.file);
             // Remove the "RelPath" attribute, so we don't end up adding it twice.
             fileElement.RemoveAttribute(VSProjectAttributes.relPath);
@@ -3234,7 +3210,7 @@ namespace Microsoft.Build.Conversion
             // what the build action is based on the file extension.  This is
             // what the project loading code does in VS.
             string buildAction = fileElement.GetAttribute(VSProjectAttributes.buildAction);
-            if ((buildAction == null) || (buildAction.Length == 0))
+            if (string.IsNullOrEmpty(buildAction))
             {
                 buildAction = VSProjectAttributes.buildActionNone;
             }
@@ -3246,13 +3222,12 @@ namespace Microsoft.Build.Conversion
             // Bug Whidbey #248965. If a .resx file is completely empty, do not include a reference
             // to it in the upgraded project file.
             if (!
-                (0 == String.Compare(Path.GetExtension(relPath), ".resx", StringComparison.OrdinalIgnoreCase)
+                (String.Equals(Path.GetExtension(relPath), ".resx", StringComparison.OrdinalIgnoreCase)
                  && IsFilePresentButEmpty(relPath, linkPath))
                )
             {
-
                 // Add the new item to XMake.
-                if ((linkPath == null) || (linkPath.Length == 0))
+                if (string.IsNullOrEmpty(linkPath))
                 {
                     // Normal item.
 
@@ -3316,9 +3291,9 @@ namespace Microsoft.Build.Conversion
 
                 // If this is a VSD(devices) project and we're dealing with a content file,
                 // mark it to copy if newer.
-                if ( ( ( ( this.language == VSProjectElements.ECSharp ) ||
-                         ( this.language == VSProjectElements.EVisualBasic ) ) ) &&
-                     ( 0 == String.Compare ( buildAction, XMakeProjectStrings.content, StringComparison.OrdinalIgnoreCase ) ) )
+                if ( ((this.language == VSProjectElements.ECSharp) ||
+                         (this.language == VSProjectElements.EVisualBasic)) &&
+                     ( String.Equals ( buildAction, XMakeProjectStrings.content, StringComparison.OrdinalIgnoreCase ) ) )
                 {
                     newFileItem.AddMetadata ( XMakeProjectStrings.copytooutput,
                                               XMakeProjectStrings.preservenewest );
@@ -3347,7 +3322,7 @@ namespace Microsoft.Build.Conversion
             // relpath is the filename
             // linkPath, if it exists, is the relative path from the project, or the absolute full path
             string path;
-            if (linkPath == null || linkPath.Length == 0)
+            if (string.IsNullOrEmpty(linkPath))
             {
                 path = Path.Combine(Path.GetDirectoryName(oldProjectFile), relPath);
             }
@@ -3385,7 +3360,7 @@ namespace Microsoft.Build.Conversion
                 return false;
             }
 
-            return (length == 0);
+            return length == 0;
         }
 
         /// <summary>
@@ -3400,8 +3375,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Folder> element.
-            error.VerifyThrow((folderElement != null) &&
-                (folderElement.Name == VSProjectElements.folder),
+            error.VerifyThrow((folderElement?.Name == VSProjectElements.folder),
                 "Expected <Folder> element.");
 
             // Make sure the caller has already created an ProjectItemGroupElement for us to
@@ -3410,7 +3384,7 @@ namespace Microsoft.Build.Conversion
 
             // Get the required "RelPath" attribute.
             string relPath = folderElement.GetAttribute(VSProjectAttributes.relPath);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((relPath != null) && (relPath.Length > 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(relPath),
                 folderElement.Location, "MissingAttribute", VSProjectAttributes.relPath, VSProjectElements.folder);
             // Remove the "RelPath" attribute, so we don't end up adding it twice.
             folderElement.RemoveAttribute(VSProjectAttributes.relPath);
@@ -3432,7 +3406,7 @@ namespace Microsoft.Build.Conversion
 
             ProjectItemElement newFolderItem;
 
-            if ((webReferences != null) && (0 == String.Compare(webReferences, "true", StringComparison.OrdinalIgnoreCase)))
+            if ((webReferences != null) && (String.Equals(webReferences, "true", StringComparison.OrdinalIgnoreCase)))
             {
                 // This is a web reference folder.
 
@@ -3454,7 +3428,7 @@ namespace Microsoft.Build.Conversion
                 newFolderItem = filesItemGroup.AddItem(XMakeProjectStrings.webReferences,
                     ProjectCollection.Escape(relPath));
             }
-            else if ((webReferenceUrl != null) && (webReferenceUrl.Length > 0))
+            else if (!string.IsNullOrEmpty(webReferenceUrl))
             {
                 // This is an actual web reference URL.
 
@@ -3549,8 +3523,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <StartupServices> element.
-            error.VerifyThrow((startupServicesElement != null) &&
-                (startupServicesElement.Name == VSProjectElements.startupServices),
+            error.VerifyThrow((startupServicesElement?.Name == VSProjectElements.startupServices),
                 "Expected <StartupServices> element.");
 
             // Make sure the caller gave us a valid xmakeProject to stuff
@@ -3614,8 +3587,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Service> element.
-            error.VerifyThrow((serviceElement != null) &&
-                (serviceElement.Name == VSProjectElements.service),
+            error.VerifyThrow((serviceElement?.Name == VSProjectElements.service),
                 "Expected <Service> element.");
 
             // Make sure the caller has already created an ProjectItemGroupElement for us to
@@ -3624,7 +3596,7 @@ namespace Microsoft.Build.Conversion
 
             // Get the required "ID" attribute.
             string id = serviceElement.GetAttribute(VSProjectAttributes.id);
-            ProjectErrorUtilities.VerifyThrowInvalidProject((id != null) && (id.Length > 0), serviceElement.Location,
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(id), serviceElement.Location,
                 "MissingAttribute", VSProjectAttributes.id, VSProjectElements.service);
             // Remove the "ID" attribute, so it doesn't show up in our loop later.
             serviceElement.RemoveAttribute(VSProjectAttributes.id);
@@ -3667,8 +3639,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <OtherProjectSettings> element.
-            error.VerifyThrow((otherProjectSettingsElement != null) &&
-                (otherProjectSettingsElement.Name == VSProjectElements.otherProjectSettings),
+            error.VerifyThrow((otherProjectSettingsElement?.Name == VSProjectElements.otherProjectSettings),
                 "Expected <Settings> element.");
 
             // Make sure the caller gave us a valid globalPropertyGroup to stuff
@@ -3724,8 +3695,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <UserProperties> element.
-            error.VerifyThrow((userPropertiesElement != null) &&
-                (userPropertiesElement.Name == VSProjectElements.userProperties),
+            error.VerifyThrow((userPropertiesElement?.Name == VSProjectElements.userProperties),
                 "Expected <UserProperties> element.");
 
             isTriumphProject = false;
@@ -3823,13 +3793,13 @@ namespace Microsoft.Build.Conversion
                 if (officeDocumentPathAttribute != null)
                 {
                     string officeDocumentPath = officeDocumentPathAttribute.Value;
-                    if ((officeDocumentPath != null) && (officeDocumentPath.Length > 0))
+                    if (!string.IsNullOrEmpty(officeDocumentPath))
                     {
                         string projectFileDirectory = Path.GetDirectoryName(Path.GetFullPath(this.oldProjectFile));
                         string officeDocumentFullPath = Path.GetFullPath(Path.Combine(projectFileDirectory, officeDocumentPath));
 
                         // If the office document is in the project directory ...
-                        if (0 == String.Compare(projectFileDirectory, Path.GetDirectoryName(officeDocumentFullPath), StringComparison.OrdinalIgnoreCase))
+                        if (String.Equals(projectFileDirectory, Path.GetDirectoryName(officeDocumentFullPath), StringComparison.OrdinalIgnoreCase))
                         {
                             // If the office document actually exists on disk ...
                             if (File.Exists(officeDocumentFullPath))

@@ -10,7 +10,7 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// Base class for task that determines the appropriate manifest resource name to 
+    /// Base class for task that determines the appropriate manifest resource name to
     /// assign to a given resx or other resource.
     /// </summary>
     public class CreateVisualBasicManifestResourceName : CreateManifestResourceName
@@ -18,8 +18,8 @@ namespace Microsoft.Build.Tasks
         protected override string SourceFileExtension => ".vb";
 
         /// <summary>
-        /// Utility function for creating a VB-style manifest name from 
-        /// a resource name. 
+        /// Utility function for creating a VB-style manifest name from
+        /// a resource name.
         /// </summary>
         /// <param name="fileName">The file name of the dependent (usually a .resx)</param>
         /// <param name="linkFileName">The file name of the dependent (usually a .resx)</param>
@@ -62,7 +62,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Utility function for creating a VB-style manifest name from 
+        /// Utility function for creating a VB-style manifest name from
         /// a resource name. Note that this function attempts to emulate the
         /// Everret implementation of this code which can be found by searching for
         /// ComputeNonWFCResourceName() or ComputeWFCResourceName() in
@@ -99,7 +99,7 @@ namespace Microsoft.Build.Tasks
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName);
 
             // If the item has a culture override, respect that. 
-            if (!String.IsNullOrEmpty(culture))
+            if (!string.IsNullOrEmpty(culture))
             {
                 info.culture = culture;
             }
@@ -120,17 +120,16 @@ namespace Microsoft.Build.Tasks
                 {
                     if (!string.IsNullOrEmpty(rootNamespace))
                     {
-                        manifestName.Append(rootNamespace).Append(".").Append(result.Name);
+                        manifestName.Append(rootNamespace).Append('.');
                     }
-                    else
-                    {
-                        manifestName.Append(result.Name);
-                    }
+
+                    manifestName.Append(result.Name);
+
 
                     // Append the culture if there is one.        
                     if (!string.IsNullOrEmpty(info.culture))
                     {
-                        manifestName.Append(".").Append(info.culture);
+                        manifestName.Append('.').Append(info.culture);
                     }
                 }
             }
@@ -143,17 +142,17 @@ namespace Microsoft.Build.Tasks
                 // Empty namespaces are allowed.
                 if (!string.IsNullOrEmpty(rootNamespace))
                 {
-                    manifestName.Append(rootNamespace).Append(".");
+                    manifestName.Append(rootNamespace).Append('.');
                 }
 
                 // only strip extension for .resx and .restext files
                 string sourceExtension = Path.GetExtension(info.cultureNeutralFilename);
                 if (
-                        (0 == String.Compare(sourceExtension, ".resx", StringComparison.OrdinalIgnoreCase))
+                        string.Equals(sourceExtension, resxFileExtension, StringComparison.OrdinalIgnoreCase)
                         ||
-                        (0 == String.Compare(sourceExtension, ".restext", StringComparison.OrdinalIgnoreCase))
+                        string.Equals(sourceExtension, restextFileExtension, StringComparison.OrdinalIgnoreCase)
                         ||
-                        (0 == String.Compare(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
+                        string.Equals(sourceExtension, resourcesFileExtension, StringComparison.OrdinalIgnoreCase)
                     )
                 {
                     manifestName.Append(Path.GetFileNameWithoutExtension(info.cultureNeutralFilename));
@@ -161,11 +160,11 @@ namespace Microsoft.Build.Tasks
                     // Append the culture if there is one.        
                     if (!string.IsNullOrEmpty(info.culture))
                     {
-                        manifestName.Append(".").Append(info.culture);
+                        manifestName.Append('.').Append(info.culture);
                     }
 
                     // If the original extension was .resources, add it back
-                    if (String.Equals(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(sourceExtension, resourcesFileExtension, StringComparison.OrdinalIgnoreCase))
                     {
                         manifestName.Append(sourceExtension);
                     }
@@ -197,8 +196,7 @@ namespace Microsoft.Build.Tasks
         protected override bool IsSourceFile(string fileName)
         {
             string extension = Path.GetExtension(fileName);
-
-            return (String.Compare(extension, ".vb", StringComparison.OrdinalIgnoreCase) == 0);
+            return string.Equals(extension, SourceFileExtension, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

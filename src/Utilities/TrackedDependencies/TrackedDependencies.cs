@@ -71,7 +71,7 @@ namespace Microsoft.Build.Utilities
         {
             bool allExist = true;
 
-            if (files != null && files.Length > 0)
+            if (files?.Length > 0)
             {
                 foreach (ITaskItem item in files)
                 {

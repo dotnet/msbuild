@@ -53,9 +53,9 @@ namespace Microsoft.Build.Execution
             List<ProjectItemGroupTaskItemInstance> items
             )
         {
-            ErrorUtilities.VerifyThrowInternalNull(condition, "condition");
-            ErrorUtilities.VerifyThrowInternalNull(location, "location");
-            ErrorUtilities.VerifyThrowInternalNull(items, "items");
+            ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));
+            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
+            ErrorUtilities.VerifyThrowInternalNull(items, nameof(items));
 
             _condition = condition;
             _location = location;

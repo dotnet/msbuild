@@ -114,7 +114,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
                 ErrorUtilities.VerifyThrowArgumentNull(value, "value");
 
                 if (Link != null)

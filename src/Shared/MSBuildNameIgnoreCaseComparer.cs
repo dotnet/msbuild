@@ -93,8 +93,8 @@ namespace Microsoft.Build.Collections
                             {
                                 int chx = px[i];
                                 int chy = py[i + start];
-                                chx = chx & 0x00DF; // Extract the uppercase character
-                                chy = chy & 0x00DF; // Extract the uppercase character
+                                chx &= 0x00DF; // Extract the uppercase character
+                                chy &= 0x00DF; // Extract the uppercase character
 
                                 if (chx != chy)
                                 {
@@ -149,7 +149,7 @@ namespace Microsoft.Build.Collections
                             // the string, and not the null terminator etc.
                             if (length == 1)
                             {
-                                val = val & 0xFFFF;
+                                val &= 0xFFFF;
                             }
 
                             hash1 = ((hash1 << 5) + hash1 + (hash1 >> 27)) ^ val;
@@ -162,7 +162,7 @@ namespace Microsoft.Build.Collections
                             val = pint[1] & 0x00DF00DF;
                             if (length == 3)
                             {
-                                val = val & 0xFFFF;
+                                val &= 0xFFFF;
                             }
 
                             hash2 = ((hash2 << 5) + hash2 + (hash2 >> 27)) ^ val;

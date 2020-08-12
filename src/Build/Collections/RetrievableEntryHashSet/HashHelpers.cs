@@ -46,7 +46,7 @@ namespace Microsoft.Build.Collections
                 }
                 return true;
             }
-            return (candidate == 2);
+            return candidate == 2;
         }
 
 #if !SILVERLIGHT

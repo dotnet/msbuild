@@ -15,7 +15,6 @@ namespace Microsoft.Build.BuildEngine
     /// <owner>SumedhK</owner>
     internal sealed class ImportedProject
     {
-
         /// <summary>
         /// Creates an instance of this class for the specified project file.
         /// </summary>
@@ -62,7 +61,7 @@ namespace Microsoft.Build.BuildEngine
         {
             FileInfo projectFileInfo = new FileInfo(projectFile);
 
-            return ((lastWriteTime != projectFileInfo.LastWriteTime) || (fileSize != projectFileInfo.Length));
+            return (lastWriteTime != projectFileInfo.LastWriteTime) || (fileSize != projectFileInfo.Length);
         }
 
         // the XML for the imported project

@@ -424,21 +424,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             if (a.AssemblyIdentity == null)
             {
-                switch (a.ReferenceType)
+                a.AssemblyIdentity = a.ReferenceType switch
                 {
-                    case AssemblyReferenceType.ClickOnceManifest:
-                        a.AssemblyIdentity = AssemblyIdentity.FromManifest(a.ResolvedPath);
-                        break;
-                    case AssemblyReferenceType.ManagedAssembly:
-                        a.AssemblyIdentity = AssemblyIdentity.FromManagedAssembly(a.ResolvedPath);
-                        break;
-                    case AssemblyReferenceType.NativeAssembly:
-                        a.AssemblyIdentity = AssemblyIdentity.FromNativeAssembly(a.ResolvedPath);
-                        break;
-                    default:
-                        a.AssemblyIdentity = AssemblyIdentity.FromFile(a.ResolvedPath);
-                        break;
-                }
+                    AssemblyReferenceType.ClickOnceManifest => AssemblyIdentity.FromManifest(a.ResolvedPath),
+                    AssemblyReferenceType.ManagedAssembly => AssemblyIdentity.FromManagedAssembly(a.ResolvedPath),
+                    AssemblyReferenceType.NativeAssembly => AssemblyIdentity.FromNativeAssembly(a.ResolvedPath),
+                    _ => AssemblyIdentity.FromFile(a.ResolvedPath),
+                };
             }
 
             if (!a.IsPrerequisite)
@@ -597,7 +589,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     {
                         identityList.Add(key, false);
                     }
-                    else if (identityList[key] == false)
+                    else if (!identityList[key])
                     {
                         OutputMessages.AddWarningMessage("GenerateManifest.DuplicateAssemblyIdentity", identity);
                         identityList[key] = true; // only warn once per identity

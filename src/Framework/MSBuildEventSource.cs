@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.Runtime.InteropServices;
-using System.Threading;
+﻿using System.Diagnostics.Tracing;
 
 namespace Microsoft.Build.Eventing
 {
-
     /// <summary>
     /// This captures information of how various key methods of building with MSBuild ran.
     /// </summary>
@@ -281,7 +276,6 @@ namespace Microsoft.Build.Eventing
         [Event(33)]
         public void ParseStart(string projectFileName)
         {
-
             WriteEvent(33, projectFileName);
         }
 
@@ -333,7 +327,7 @@ namespace Microsoft.Build.Eventing
             WriteEvent(40, fileLocation);
         }
 
-        /// <param name="targetName"/>The name of the target being executed.</param>
+        /// <param name="targetName">The name of the target being executed.</param>
         [Event(43)]
         public void TargetStart(string targetName)
         {
@@ -410,6 +404,12 @@ namespace Microsoft.Build.Eventing
         public void ProjectGraphConstructionStop(string graphEntryPoints)
         {
             WriteEvent(54, graphEntryPoints);
+        }
+
+        [Event(55)]
+        public void PacketReadSize(int size)
+        {
+            WriteEvent(55, size);
         }
         #endregion
     }

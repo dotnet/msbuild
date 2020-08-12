@@ -416,20 +416,20 @@ namespace Microsoft.Build.UnitTests.Logging
             internal EventHandlerHelper(IEventSource source, Exception exceptionToThrow)
             {
                 _exceptionInHandlers = exceptionToThrow;
-                source.AnyEventRaised += new AnyEventHandler(Source_AnyEventRaised);
-                source.BuildFinished += new BuildFinishedEventHandler(Source_BuildFinished);
-                source.BuildStarted += new BuildStartedEventHandler(Source_BuildStarted);
-                source.CustomEventRaised += new CustomBuildEventHandler(Source_CustomEventRaised);
-                source.ErrorRaised += new BuildErrorEventHandler(Source_ErrorRaised);
-                source.MessageRaised += new BuildMessageEventHandler(Source_MessageRaised);
-                source.ProjectFinished += new ProjectFinishedEventHandler(Source_ProjectFinished);
-                source.ProjectStarted += new ProjectStartedEventHandler(Source_ProjectStarted);
-                source.StatusEventRaised += new BuildStatusEventHandler(Source_StatusEventRaised);
-                source.TargetFinished += new TargetFinishedEventHandler(Source_TargetFinished);
-                source.TargetStarted += new TargetStartedEventHandler(Source_TargetStarted);
-                source.TaskFinished += new TaskFinishedEventHandler(Source_TaskFinished);
-                source.TaskStarted += new TaskStartedEventHandler(Source_TaskStarted);
-                source.WarningRaised += new BuildWarningEventHandler(Source_WarningRaised);
+                source.AnyEventRaised += Source_AnyEventRaised;
+                source.BuildFinished += Source_BuildFinished;
+                source.BuildStarted += Source_BuildStarted;
+                source.CustomEventRaised += Source_CustomEventRaised;
+                source.ErrorRaised += Source_ErrorRaised;
+                source.MessageRaised += Source_MessageRaised;
+                source.ProjectFinished += Source_ProjectFinished;
+                source.ProjectStarted += Source_ProjectStarted;
+                source.StatusEventRaised += Source_StatusEventRaised;
+                source.TargetFinished += Source_TargetFinished;
+                source.TargetStarted += Source_TargetStarted;
+                source.TaskFinished += Source_TaskFinished;
+                source.TaskStarted += Source_TaskStarted;
+                source.WarningRaised += Source_WarningRaised;
             }
             #endregion
 

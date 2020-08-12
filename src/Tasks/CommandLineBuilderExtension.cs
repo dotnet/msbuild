@@ -70,7 +70,7 @@ namespace Microsoft.Build.Tasks
             {
                 bool value = (bool)obj;
                 // Do not quote - or + as they are part of the switch
-                AppendSwitchUnquotedIfNotNull(switchName, (value ? "+" : "-"));
+                AppendSwitchUnquotedIfNotNull(switchName, value ? "+" : "-");
             }
         }
 
@@ -107,7 +107,7 @@ namespace Microsoft.Build.Tasks
             if (obj != null)
             {
                 bool value = (bool)obj;
-                AppendSwitchUnquotedIfNotNull(switchName, (value ? choice1 : choice2));
+                AppendSwitchUnquotedIfNotNull(switchName, value ? choice1 : choice2);
             }
         }
 
@@ -267,7 +267,7 @@ namespace Microsoft.Build.Tasks
                             if (!string.IsNullOrEmpty(metadataValue))
                             {
                                 // Treat attribute as a boolean flag?
-                                if (treatAsFlags == null || treatAsFlags[i] == false)
+                                if (treatAsFlags == null || !treatAsFlags[i])
                                 {
                                     // Not a boolean flag.
                                     CommandLine.Append(',');
@@ -286,7 +286,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                if (treatAsFlags == null || treatAsFlags[i] == false)
+                                if (treatAsFlags == null || !treatAsFlags[i])
                                 {
                                     // If the caller of this method asked us to add metadata
                                     // A, B, and C, and metadata A doesn't exist on the item,

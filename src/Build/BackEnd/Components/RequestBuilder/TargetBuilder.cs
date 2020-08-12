@@ -26,11 +26,11 @@ namespace Microsoft.Build.BackEnd
     /// pushed onto the stack.  The main loop for the Target Builder simply evaluates the top item on the stack to determine
     /// which action to take.  These actions comprise the target state machine, as represented by the states of the
     /// TargetEntry object.
-    /// 
+    ///
     /// When a target completes, all of its outputs are available in the Lookup contained in the TargetEntry.  In fact, everything that it changed
     /// in the global state is available by virtue of its Lookup being merged with the current Target's lookup.
-    /// 
-    /// For CallTarget tasks, this behavior is not the same.  Rather the Lookup from a CallTarget call does not get merged until the calling 
+    ///
+    /// For CallTarget tasks, this behavior is not the same.  Rather the Lookup from a CallTarget call does not get merged until the calling
     /// Target has completed.  This is considered erroneous behavior and 'normal' version of CallTarget will be implemented which does not exhibit
     /// this.
     /// </remarks>
@@ -100,10 +100,10 @@ namespace Microsoft.Build.BackEnd
         public async Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, string[] targetNames, Lookup baseLookup, CancellationToken cancellationToken)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "projectLoggingContext");
-            ErrorUtilities.VerifyThrowArgumentNull(entry, "entry");
+            ErrorUtilities.VerifyThrowArgumentNull(entry, nameof(entry));
             ErrorUtilities.VerifyThrowArgumentNull(callback, "requestBuilderCallback");
-            ErrorUtilities.VerifyThrowArgumentNull(targetNames, "targetNames");
-            ErrorUtilities.VerifyThrowArgumentNull(baseLookup, "baseLookup");
+            ErrorUtilities.VerifyThrowArgumentNull(targetNames, nameof(targetNames));
+            ErrorUtilities.VerifyThrowArgumentNull(baseLookup, nameof(baseLookup));
             ErrorUtilities.VerifyThrow(targetNames.Length > 0, "List of targets must be non-empty");
             ErrorUtilities.VerifyThrow(_componentHost != null, "InitializeComponent must be called before building targets.");
 
@@ -201,7 +201,6 @@ namespace Microsoft.Build.BackEnd
             return resultsToReport;
         }
 
-
         #region IBuildComponent Members
 
         /// <summary>
@@ -210,7 +209,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
             _componentHost = host;
         }
 
@@ -589,9 +588,9 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// When a target build fails, we don't just stop building that target; we also pop all of the other dependency targets of its 
-        /// parent target off the stack. Extract that logic into a standalone method so that it can be used when dealing with targets that 
-        /// are skipped-unsuccessful as well as first-time failures. 
+        /// When a target build fails, we don't just stop building that target; we also pop all of the other dependency targets of its
+        /// parent target off the stack. Extract that logic into a standalone method so that it can be used when dealing with targets that
+        /// are skipped-unsuccessful as well as first-time failures.
         /// </summary>
         private void PopDependencyTargetsOnTargetFailure(TargetEntry topEntry, TargetResult targetResult, ref bool stopProcessingStack)
         {

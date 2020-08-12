@@ -288,16 +288,16 @@ namespace Microsoft.Build.UnitTests
 
         private static bool IsLoggerClass(Type type, object unused)
         {
-            return (type.IsClass &&
+            return type.IsClass &&
                 !type.IsAbstract &&
-                (type.GetInterface("ILogger") != null));
+                (type.GetInterface("ILogger") != null);
         }
 
         private static bool IsForwardingLoggerClass(Type type, object unused)
         {
-            return (type.IsClass &&
+            return type.IsClass &&
                 !type.IsAbstract &&
-                (type.GetInterface("IForwardingLogger") != null));
+                (type.GetInterface("IForwardingLogger") != null);
         }
 #endif
     }

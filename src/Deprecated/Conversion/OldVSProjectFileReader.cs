@@ -143,7 +143,7 @@ namespace Microsoft.Build.Conversion
             if ((startIndexIntoBuffer + charactersToRead) > bufferToReadInto.Length)
             {
                 // End-user should never see this message, so it doesn't need to be localized.
-                throw new ArgumentException("Cannot write past end of user's buffer.", "charactersToRead");
+                throw new ArgumentException("Cannot write past end of user's buffer.", nameof(charactersToRead));
             }
 
             int charactersCopied = 0;
@@ -463,7 +463,7 @@ namespace Microsoft.Build.Conversion
                         // Case-sensitive comparison to see if the entity name matches any of
                         // the well-known ones that were emitted by the XML writer in the VS.NET
                         // 2002/2003 project system.
-                        if (0 == String.Compare(entityName, entities[i], StringComparison.Ordinal))
+                        if (String.Equals(entityName, entities[i], StringComparison.Ordinal))
                         {
                             foundEntity = true;
                             break;

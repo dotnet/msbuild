@@ -235,7 +235,7 @@ namespace Microsoft.Build.BackEnd
                 // 1) they do not reference any item vector
                 // 2) they reference item vectors that are not referenced by any input item
                 if ((discreteItemsInTargetOutputs.Count > 0) ||
-                    ((itemVectorsReferencedOnlyInTargetOutputs != null) && (itemVectorsReferencedOnlyInTargetOutputs.Count > 0)))
+                    ((itemVectorsReferencedOnlyInTargetOutputs?.Count > 0)))
                 {
                     result = PerformDependencyAnalysisIfDiscreteOutputs(
                                 itemVectorsInTargetInputs, itemVectorTransformsInTargetInputs, discreteItemsInTargetInputs,
@@ -459,7 +459,6 @@ namespace Microsoft.Build.BackEnd
                 // There were no inputs specified, so build completely
                 _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "BuildTargetCompletely", _targetToAnalyze.Name);
                 _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "BuildTargetCompletelyNoInputsSpecified");
-
 
                 // otherwise, do a full build
                 result = DependencyAnalysisResult.FullBuild;
@@ -1073,7 +1072,6 @@ namespace Microsoft.Build.BackEnd
             dependencyAnalysisDetailEntry = null;
             return false;
         }
-
 
         /// <summary>
         /// Record the unique input and output files so that the "up to date" message

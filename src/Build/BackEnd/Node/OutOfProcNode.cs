@@ -140,10 +140,6 @@ namespace Microsoft.Build.Execution
         {
             s_isOutOfProcNode = true;
 
-#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
-            AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
-#endif
-
             _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
             _receivedPackets = new ConcurrentQueue<INodePacket>();
@@ -165,7 +161,7 @@ namespace Microsoft.Build.Execution
             ((IBuildComponentHost) this).RegisterFactory(BuildComponentType.SdkResolverService, sdkResolverServiceFactory.CreateInstance);
 
             _sdkResolverService = (this as IBuildComponentHost).GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
-            
+
             if (s_projectRootElementCacheBase == null)
             {
                 s_projectRootElementCacheBase = new ProjectRootElementCache(true /* automatically reload any changes from disk */);
@@ -733,7 +729,7 @@ namespace Microsoft.Build.Execution
             try
             {
                 // If there are no node loggers to initialize dont do anything
-                if (configuration.LoggerDescriptions != null && configuration.LoggerDescriptions.Length > 0)
+                if (configuration.LoggerDescriptions?.Length > 0)
                 {
                     _loggingService.InitializeNodeLoggers(configuration.LoggerDescriptions, sink, configuration.NodeId);
                 }

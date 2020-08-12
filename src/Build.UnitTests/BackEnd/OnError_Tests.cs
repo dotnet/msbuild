@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True((l.FullLog.IndexOf("CleanUp-was-called") != -1)); // "The CleanUp target should have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp-was-called") != -1); // "The CleanUp target should have been called."
         }
 
 #if FEATURE_TASK_GENERATERESOURCES
@@ -205,8 +205,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True((l.FullLog.IndexOf("CleanUp-was-called") != -1)); // "The CleanUp target should have been called."
-            Assert.True((l.FullLog.IndexOf("CleanUp2-was-called") != -1)); // "The CleanUp2 target should have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp-was-called") != -1); // "The CleanUp target should have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp2-was-called") != -1); // "The CleanUp2 target should have been called."
         }
 
         /*
@@ -237,8 +237,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True((l.FullLog.IndexOf("CleanUp-was-called") != -1)); // "The CleanUp target should have been called."
-            Assert.True((l.FullLog.IndexOf("CleanUp2-was-called") != -1)); // "The CleanUp2 target should have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp-was-called") != -1); // "The CleanUp target should have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp2-was-called") != -1); // "The CleanUp2 target should have been called."
         }
 
         /*
@@ -269,8 +269,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True((l.FullLog.IndexOf("CleanUp-was-called") != -1)); // "The CleanUp target should have been called."
-            Assert.True((l.FullLog.IndexOf("CleanUp2-was-called") != -1)); // "The CleanUp2 target should have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp-was-called") != -1); // "The CleanUp target should have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp2-was-called") != -1); // "The CleanUp2 target should have been called."
         }
 
         /*
@@ -300,8 +300,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(1, l.ErrorCount); // "Expected one error because 'BuildStep1' failed."
-            Assert.True((l.FullLog.IndexOf("CleanUp-was-called") != -1)); // "The CleanUp target should have been called."
-            Assert.True((l.FullLog.IndexOf("Error-in-build-step-1") != -1)); // "The BuildStep1 target should have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp-was-called") != -1); // "The CleanUp target should have been called."
+            Assert.True(l.FullLog.IndexOf("Error-in-build-step-1") != -1); // "The BuildStep1 target should have been called."
         }
 
 
@@ -326,7 +326,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(2, l.ErrorCount); // "Expected at least one error because 'Build' failed and one error because 'CleanUp' didn't exist."
-            Assert.True((l.FullLog.IndexOf("CleanUp-was-called") == -1)); // "The CleanUp target should not have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp-was-called") == -1); // "The CleanUp target should not have been called."
         }
 
         /*
@@ -353,7 +353,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True((l.FullLog.IndexOf("CleanUp-was-called") != -1)); // "The CleanUp target should have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp-was-called") != -1); // "The CleanUp target should have been called."
         }
 
         /*
@@ -381,7 +381,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True((l.FullLog.IndexOf("CleanUp-was-called") == -1)); // "The CleanUp target should not have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp-was-called") == -1); // "The CleanUp target should not have been called."
         }
 
         /*
@@ -412,7 +412,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True((l.FullLog.IndexOf("CleanUp-was-called") != -1)); // "The CleanUp target should have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp-was-called") != -1); // "The CleanUp target should have been called."
         }
 
         /*
@@ -452,9 +452,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(4, l.ErrorCount); // "Four build errors expect: One from CoreBuild and on each from the error handlers."
-            Assert.True((l.FullLog.IndexOf("CleanUp1-was-called") != -1)); // "The CleanUp1 target should have been called."
-            Assert.True((l.FullLog.IndexOf("CleanUp2-was-called") != -1)); // "The CleanUp2 target should have been called."
-            Assert.True((l.FullLog.IndexOf("CleanUp3-was-called") != -1)); // "The CleanUp3 target should have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp1-was-called") != -1); // "The CleanUp1 target should have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp2-was-called") != -1); // "The CleanUp2 target should have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp3-was-called") != -1); // "The CleanUp3 target should have been called."
         }
 
         /*
@@ -507,7 +507,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True((l.FullLog.IndexOf("CleanUp-was-called") != -1)); // "The CleanUp target should have been called."
+            Assert.True(l.FullLog.IndexOf("CleanUp-was-called") != -1); // "The CleanUp target should have been called."
         }
 
         /*
@@ -604,10 +604,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(0, l.ErrorCount); // "Expected no error because 'Build' succeeded."
-            Assert.True((l.FullLog.IndexOf("ResGen-was-called") != -1)); // "The ResGen target should have been called."
-            Assert.True((l.FullLog.IndexOf("Compile-was-called") != -1)); // "The Compile target should have been called."
-            Assert.True((l.FullLog.IndexOf("GenerateSatellites-was-called") != -1)); // "The GenerateSatellites target should have been called."
-            Assert.True((l.FullLog.IndexOf("PostBuild-was-called") != -1)); // "The PostBuild target should have been called."
+            Assert.True(l.FullLog.IndexOf("ResGen-was-called") != -1); // "The ResGen target should have been called."
+            Assert.True(l.FullLog.IndexOf("Compile-was-called") != -1); // "The Compile target should have been called."
+            Assert.True(l.FullLog.IndexOf("GenerateSatellites-was-called") != -1); // "The GenerateSatellites target should have been called."
+            Assert.True(l.FullLog.IndexOf("PostBuild-was-called") != -1); // "The PostBuild target should have been called."
         }
 
         /*
@@ -628,11 +628,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True((l.FullLog.IndexOf("ResGen-was-called") != -1)); // "The ResGen target should have been called."
-            Assert.True((l.FullLog.IndexOf("Compile-was-called") != -1)); // "The Compile target should have been called."
-            Assert.True((l.FullLog.IndexOf("Compile-step-failed") != -1)); // "The Compile target should have failed."
-            Assert.True((l.FullLog.IndexOf("GenerateSatellites-was-called") == -1)); // "The GenerateSatellites target should not have been called."
-            Assert.True((l.FullLog.IndexOf("PostBuild-was-called") == -1)); // "The PostBuild target should not have been called."
+            Assert.True(l.FullLog.IndexOf("ResGen-was-called") != -1); // "The ResGen target should have been called."
+            Assert.True(l.FullLog.IndexOf("Compile-was-called") != -1); // "The Compile target should have been called."
+            Assert.True(l.FullLog.IndexOf("Compile-step-failed") != -1); // "The Compile target should have failed."
+            Assert.True(l.FullLog.IndexOf("GenerateSatellites-was-called") == -1); // "The GenerateSatellites target should not have been called."
+            Assert.True(l.FullLog.IndexOf("PostBuild-was-called") == -1); // "The PostBuild target should not have been called."
         }
 
         /*
@@ -653,11 +653,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True((l.FullLog.IndexOf("ResGen-was-called") != -1)); // "The ResGen target should have been called."
-            Assert.True((l.FullLog.IndexOf("Compile-was-called") != -1)); // "The Compile target should have been called."
-            Assert.True((l.FullLog.IndexOf("GenerateSatellites-was-called") != -1)); // "The GenerateSatellites target should have been called."
-            Assert.True((l.FullLog.IndexOf("GenerateSatellites-step-failed") != -1)); // "The GenerateSatellites target should have failed."
-            Assert.True((l.FullLog.IndexOf("PostBuild-was-called") == -1)); // "The PostBuild target should not have been called."
+            Assert.True(l.FullLog.IndexOf("ResGen-was-called") != -1); // "The ResGen target should have been called."
+            Assert.True(l.FullLog.IndexOf("Compile-was-called") != -1); // "The Compile target should have been called."
+            Assert.True(l.FullLog.IndexOf("GenerateSatellites-was-called") != -1); // "The GenerateSatellites target should have been called."
+            Assert.True(l.FullLog.IndexOf("GenerateSatellites-step-failed") != -1); // "The GenerateSatellites target should have failed."
+            Assert.True(l.FullLog.IndexOf("PostBuild-was-called") == -1); // "The PostBuild target should not have been called."
         }
 
         /*
@@ -678,11 +678,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True((l.FullLog.IndexOf("ResGen-was-called") != -1)); // "The ResGen target should have been called."
-            Assert.True((l.FullLog.IndexOf("Compile-was-called") != -1)); // "The Compile target should have been called."
-            Assert.True((l.FullLog.IndexOf("Compile-step-failed") != -1)); // "The Compile target should have failed."
-            Assert.True((l.FullLog.IndexOf("GenerateSatellites-was-called") == -1)); // "The GenerateSatellites target should not have been called."
-            Assert.True((l.FullLog.IndexOf("PostBuild-was-called") != -1)); // "The PostBuild target should have been called."
+            Assert.True(l.FullLog.IndexOf("ResGen-was-called") != -1); // "The ResGen target should have been called."
+            Assert.True(l.FullLog.IndexOf("Compile-was-called") != -1); // "The Compile target should have been called."
+            Assert.True(l.FullLog.IndexOf("Compile-step-failed") != -1); // "The Compile target should have failed."
+            Assert.True(l.FullLog.IndexOf("GenerateSatellites-was-called") == -1); // "The GenerateSatellites target should not have been called."
+            Assert.True(l.FullLog.IndexOf("PostBuild-was-called") != -1); // "The PostBuild target should have been called."
         }
 
         /*
@@ -703,11 +703,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True((l.FullLog.IndexOf("ResGen-was-called") != -1)); // "The ResGen target should have been called."
-            Assert.True((l.FullLog.IndexOf("Compile-was-called") != -1)); // "The Compile target should have been called."
-            Assert.True((l.FullLog.IndexOf("Compile-step-failed") != -1)); // "The Compile target should have failed."
-            Assert.True((l.FullLog.IndexOf("GenerateSatellites-was-called") == -1)); // "The GenerateSatellites target should not have been called."
-            Assert.True((l.FullLog.IndexOf("PostBuild-was-called") == -1)); // "The PostBuild target should not have been called."
+            Assert.True(l.FullLog.IndexOf("ResGen-was-called") != -1); // "The ResGen target should have been called."
+            Assert.True(l.FullLog.IndexOf("Compile-was-called") != -1); // "The Compile target should have been called."
+            Assert.True(l.FullLog.IndexOf("Compile-step-failed") != -1); // "The Compile target should have failed."
+            Assert.True(l.FullLog.IndexOf("GenerateSatellites-was-called") == -1); // "The GenerateSatellites target should not have been called."
+            Assert.True(l.FullLog.IndexOf("PostBuild-was-called") == -1); // "The PostBuild target should not have been called."
         }
 
         /*
@@ -728,11 +728,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
             Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True((l.FullLog.IndexOf("ResGen-was-called") != -1)); // "The ResGen target should have been called."
-            Assert.True((l.FullLog.IndexOf("Compile-was-called") != -1)); // "The Compile target should have been called."
-            Assert.True((l.FullLog.IndexOf("GenerateSatellites-was-called") != -1)); // "The GenerateSatellites target should have been called."
-            Assert.True((l.FullLog.IndexOf("GenerateSatellites-step-failed") != -1)); // "The GenerateSatellites target should have failed."
-            Assert.True((l.FullLog.IndexOf("PostBuild-was-called") != -1)); // "The PostBuild target should have been called."
+            Assert.True(l.FullLog.IndexOf("ResGen-was-called") != -1); // "The ResGen target should have been called."
+            Assert.True(l.FullLog.IndexOf("Compile-was-called") != -1); // "The Compile target should have been called."
+            Assert.True(l.FullLog.IndexOf("GenerateSatellites-was-called") != -1); // "The GenerateSatellites target should have been called."
+            Assert.True(l.FullLog.IndexOf("GenerateSatellites-step-failed") != -1); // "The GenerateSatellites target should have failed."
+            Assert.True(l.FullLog.IndexOf("PostBuild-was-called") != -1); // "The PostBuild target should have been called."
         }
 
 

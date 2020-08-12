@@ -66,7 +66,6 @@ namespace System.Deployment.Internal.CodeSigning
         internal const int TRUST_E_EXPLICIT_DISTRUST = unchecked((int)0x800B0111);
         internal const int CERT_E_CHAINING = unchecked((int)0x800B010A);
 
-
         // Values for dwFlags of CertVerifyAuthenticodeLicense.
         internal const int AXL_REVOCATION_NO_CHECK = unchecked((int)0x00000001);
         internal const int AXL_REVOCATION_CHECK_END_CERT_ONLY = unchecked((int)0x00000002);
@@ -275,8 +274,13 @@ namespace System.Deployment.Internal.CodeSigning
             CryptoConfig.AddAlgorithm(typeof(RSAPKCS1SHA256SignatureDescription),
                                Sha256SignatureMethodUri);
 
+#if RUNTIME_TYPE_NETCORE
+            CryptoConfig.AddAlgorithm(typeof(SHA256Managed),
+                               Sha256DigestMethod);
+#else
             CryptoConfig.AddAlgorithm(typeof(System.Security.Cryptography.SHA256Cng),
                                Sha256DigestMethod);
+#endif
         }
 
         private static XmlElement FindIdElement(XmlElement context, string idValue)
@@ -326,7 +330,7 @@ namespace System.Deployment.Internal.CodeSigning
         internal SignedCmiManifest2(XmlDocument manifestDom, bool useSha256)
         {
             if (manifestDom == null)
-                throw new ArgumentNullException("manifestDom");
+                throw new ArgumentNullException(nameof(manifestDom));
             _manifestDom = manifestDom;
             _useSha256 = useSha256;
         }
@@ -345,7 +349,7 @@ namespace System.Deployment.Internal.CodeSigning
             // Signer cannot be null.
             if (signer == null || signer.StrongNameKey == null)
             {
-                throw new ArgumentNullException("signer");
+                throw new ArgumentNullException(nameof(signer));
             }
 
             // Remove existing SN signature.
@@ -465,6 +469,7 @@ namespace System.Deployment.Internal.CodeSigning
         /// As for official guidance – I’m not sure of any.    For workarounds though, if you’re using the Microsoft software CSPs, they share the underlying key store.  You can get the key container name from your RSA object, then open up a new RSA object with the same key container name but with PROV_RSA_AES.   At that point, you should be able to use SHA-2 algorithms.
         /// </summary>
         /// <param name="oldCsp"></param>
+        /// <param name="useSha256">Whether to use sha256</param>
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Cryptographic.Standard", "CA5358:RSAProviderNeeds2048bitKey", Justification = "SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.")]
         internal static RSACryptoServiceProvider GetFixedRSACryptoServiceProvider(RSACryptoServiceProvider oldCsp, bool useSha256)
@@ -514,7 +519,7 @@ namespace System.Deployment.Internal.CodeSigning
             byte[] cspPublicKeyBlob;
 
             if(snKey is RSACryptoServiceProvider){
-                cspPublicKeyBlob = (GetFixedRSACryptoServiceProvider((RSACryptoServiceProvider)snKey, useSha256)).ExportCspBlob(false);            
+                cspPublicKeyBlob = (GetFixedRSACryptoServiceProvider((RSACryptoServiceProvider)snKey, useSha256)).ExportCspBlob(false);
                 if (cspPublicKeyBlob == null || cspPublicKeyBlob.Length == 0)
                 {
                     throw new CryptographicException(Win32.NTE_BAD_KEY);
@@ -694,7 +699,11 @@ namespace System.Deployment.Internal.CodeSigning
         private static void AuthenticodeSignLicenseDom(XmlDocument licenseDom, CmiManifestSigner2 signer, string timeStampUrl, bool useSha256)
         {
             // Make sure it is RSA, as this is the only one Fusion will support.
+#if RUNTIME_TYPE_NETCORE
+            RSA rsaPrivateKey = signer.Certificate.GetRSAPrivateKey();
+#else
             RSA rsaPrivateKey = CngLightup.GetRSAPrivateKey(signer.Certificate);
+#endif
             if (rsaPrivateKey == null)
             {
                 throw new NotSupportedException();
@@ -756,7 +765,7 @@ namespace System.Deployment.Internal.CodeSigning
             issuerNode.AppendChild(licenseDom.ImportNode(xmlDigitalSignature, true));
 
             // Time stamp it if requested.
-            if (timeStampUrl != null && timeStampUrl.Length != 0)
+            if (!string.IsNullOrEmpty(timeStampUrl))
             {
                 TimestampSignedLicenseDom(licenseDom, timeStampUrl, useSha256);
             }
@@ -1049,12 +1058,12 @@ namespace System.Deployment.Internal.CodeSigning
         internal CmiManifestSigner2(AsymmetricAlgorithm strongNameKey, X509Certificate2 certificate, bool useSha256)
         {
             if (strongNameKey == null)
-                throw new ArgumentNullException("strongNameKey");
+                throw new ArgumentNullException(nameof(strongNameKey));
 
 #if (true) // BUGBUG: Fusion only supports RSA. Do we throw if not RSA???
             RSA rsa = strongNameKey as RSA;
             if (rsa == null)
-                throw new ArgumentNullException("strongNameKey");
+                throw new ArgumentNullException(nameof(strongNameKey));
 #endif
             _strongNameKey = strongNameKey;
             _certificate = certificate;

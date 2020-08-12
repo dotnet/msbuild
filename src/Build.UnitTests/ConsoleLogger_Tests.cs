@@ -20,6 +20,7 @@ using Microsoft.Build.Evaluation;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -185,6 +186,134 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void WarningMessage()
+        {
+            using var env = TestEnvironment.Create(_output);
+
+            var pc = env.CreateProjectCollection();
+
+            var project = env.CreateTestProjectWithFiles(@"
+         <Project>
+            <ItemGroup>
+                <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=1' />
+                <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=2' />
+
+                <ProjectConfigurationDescription Include='Number=$(Number)' />
+            </ItemGroup>
+            <Target Name='Spawn'>
+                <MSBuild Projects='@(P)' BuildInParallel='true' Targets='Inner' />
+            </Target>
+            <Target Name='Inner'>
+                <Warning Text='Hello from project $(Number)'
+                         File='source_of_warning' />
+            </Target>
+        </Project>");
+
+            SimulatedConsole sc = new SimulatedConsole();
+            ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
+            logger.Parameters = "EnableMPLogging;ShowProjectFile";
+
+            pc.Collection.RegisterLogger(logger);
+            var p = pc.Collection.LoadProject(project.ProjectFile);
+
+            BuildManager.DefaultBuildManager.Build(
+                new BuildParameters(pc.Collection),
+                new BuildRequestData(p.CreateProjectInstance(), new[] { "Spawn" }));
+
+            p.Build().ShouldBeTrue();
+            sc.ToString().ShouldContain("source_of_warning : warning : Hello from project 1 [" + project.ProjectFile + ":: Number=1]");
+            sc.ToString().ShouldContain("source_of_warning : warning : Hello from project 2 [" + project.ProjectFile + ":: Number=2]");
+        }
+
+        [Fact]
+        public void ErrorMessage()
+        {
+            using var env = TestEnvironment.Create(_output);
+
+            var pc = env.CreateProjectCollection();
+
+            var project = env.CreateTestProjectWithFiles(@"
+         <Project>
+            <ItemGroup>
+                <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=1' />
+                <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=2' />
+
+                <ProjectConfigurationDescription Include='Number=$(Number)' />
+            </ItemGroup>
+            <Target Name='Spawn'>
+                <MSBuild Projects='@(P)' BuildInParallel='true' Targets='Inner' />
+            </Target>
+            <Target Name='Inner'>
+                <Error Text='Hello from project $(Number)'
+                         File='source_of_error' />
+            </Target>
+        </Project>");
+
+            SimulatedConsole sc = new SimulatedConsole();
+            ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
+            logger.Parameters = "EnableMPLogging;ShowProjectFile";
+
+            pc.Collection.RegisterLogger(logger);
+
+
+            var p = pc.Collection.LoadProject(project.ProjectFile);
+
+            BuildManager.DefaultBuildManager.Build(
+                new BuildParameters(pc.Collection),
+                new BuildRequestData(p.CreateProjectInstance(), new[] { "Spawn" }));
+
+            p.Build().ShouldBeFalse();
+            sc.ToString().ShouldContain("source_of_error : error : Hello from project 1 [" + project.ProjectFile + ":: Number=1]");
+            sc.ToString().ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + ":: Number=2]");
+        }
+
+        [Fact]
+        public void ErrorMessageWithMultiplePropertiesInMessage()
+        {
+            using var env = TestEnvironment.Create(_output);
+
+            var pc = env.CreateProjectCollection();
+
+            var project = env.CreateTestProjectWithFiles(@"
+         <Project>
+            <PropertyGroup>
+            <TargetFramework>netcoreapp2.1</TargetFramework>
+            </PropertyGroup>
+            <ItemGroup>
+                <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=1' />
+                <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=2' />
+    
+                <ProjectConfigurationDescription Include='Number=$(Number)' />
+                <ProjectConfigurationDescription Include='TargetFramework=$(TargetFramework)' />
+            </ItemGroup>
+            <Target Name='Spawn'>
+                <MSBuild Projects='@(P)' BuildInParallel='true' Targets='Inner' />
+            </Target>
+            <Target Name='Inner'>
+                <Error Text='Hello from project $(Number)'
+                         File='source_of_error' />
+            </Target>
+        </Project>");
+
+            SimulatedConsole sc = new SimulatedConsole();
+            ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
+            logger.Parameters = "EnableMPLogging;ShowProjectFile";
+
+            pc.Collection.RegisterLogger(logger);
+
+
+            var p = pc.Collection.LoadProject(project.ProjectFile);
+
+            BuildManager.DefaultBuildManager.Build(
+                new BuildParameters(pc.Collection),
+                new BuildRequestData(p.CreateProjectInstance(), new[] { "Spawn" }));
+
+            p.Build().ShouldBeFalse();
+            sc.ToString().ShouldContain("source_of_error : error : Hello from project 1 [" + project.ProjectFile + ":: Number=1 TargetFramework=netcoreapp2.1]");
+            sc.ToString().ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + ":: Number=2 TargetFramework=netcoreapp2.1]");
+        }
+
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Minimal path validation in Core allows expanding path containing quoted slashes.")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "Minimal path validation in Mono allows expanding path containing quoted slashes.")]
         public void TestItemsWithUnexpandableMetadata()
@@ -205,7 +334,6 @@ namespace Microsoft.Build.UnitTests
 </Project>", logger);
 
             sc.ToString().ShouldContain("\"a\\b\\%(Filename).c\"");
-
         }
 
         /// <summary>

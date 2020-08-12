@@ -48,7 +48,7 @@ namespace Microsoft.Build.BackEnd
 
     /// <summary>
     /// The TaskBuilder is one of two components related to building tasks, the other being the TaskExecutionHost.  The TaskBuilder is
-    /// responsible for all parts dealing with the XML/task declaration.  It determines if the task is intrinsic or extrinsic, 
+    /// responsible for all parts dealing with the XML/task declaration.  It determines if the task is intrinsic or extrinsic,
     /// looks up the task in the task registry, determines the task parameters and requests them to be set, and requests outputs
     /// when task execution has been completed.  It is not responsible for reflection over the task instance or anything which
     /// requires dealing with the task instance directly - those actions are handled by the TaskExecutionHost.
@@ -77,7 +77,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// The task instance for extrinsic tasks
-        /// </summary> 
+        /// </summary>
         private ProjectTaskInstance _taskNode;
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// indicates whether to ignore task execution failures
-        /// </summary> 
+        /// </summary>
         private ContinueOnError _continueOnError;
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> to use when executing the task.</param>
         /// <returns>The result of running the task batch.</returns>
         /// <remarks>
-        /// The ExecuteTask method takes a task as specified by XML and executes it.  This procedure is comprised 
+        /// The ExecuteTask method takes a task as specified by XML and executes it.  This procedure is comprised
         /// of the following steps:
         /// 1. Loading the Task from its containing assembly by looking it up in the task registry
         /// 2. Determining if the task is batched.  If it is, create the batches and execute each as if it were a non-batched task
@@ -205,10 +205,7 @@ namespace Microsoft.Build.BackEnd
                 _componentHost = null;
 
                 IDisposable disposable = _taskExecutionHost as IDisposable;
-                if (disposable != null)
-                {
-                    disposable.Dispose();
-                }
+                disposable?.Dispose();
 
                 _taskExecutionHost = null;
             }
@@ -284,12 +281,12 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it. 
+        /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it.
         /// </summary>
         /// <returns>true, if successful</returns>
         private async Task<WorkUnitResult> ExecuteTask(TaskExecutionMode mode, Lookup lookup)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(lookup, "lookup");
+            ErrorUtilities.VerifyThrowArgumentNull(lookup, nameof(lookup));
 
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
             TaskHost taskHost = null;
@@ -334,7 +331,7 @@ namespace Microsoft.Build.BackEnd
                         break;
                     }
                 }
-                
+
                 taskResult = aggregateResult;
             }
             finally
@@ -342,10 +339,7 @@ namespace Microsoft.Build.BackEnd
                 _taskExecutionHost.CleanupForTask();
 
 #if FEATURE_APPDOMAIN
-                if (taskHost != null)
-                {
-                    taskHost.MarkAsInactive();
-                }
+                taskHost?.MarkAsInactive();
 #endif
 
                 // Now all task batches are done, apply all item adds to the outer 
@@ -366,7 +360,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Execute a single bucket
         /// </summary>
-        /// <returns>true if execution succeeded</returns>        
+        /// <returns>true if execution succeeded</returns>
         private async Task<WorkUnitResult> ExecuteBucket(TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask, Dictionary<string, string> lookupHash)
         {
             // On Intrinsic tasks, we do not allow batchable params, therefore metadata is excluded.
@@ -430,7 +424,7 @@ namespace Microsoft.Build.BackEnd
                         try
                         {
                             if (
-                                ((requirements.Value & TaskRequirements.RequireSTAThread) == TaskRequirements.RequireSTAThread)
+                                (requirements.Value & TaskRequirements.RequireSTAThread) == TaskRequirements.RequireSTAThread
 #if FEATURE_APARTMENT_STATE
                                 && (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
 #endif
@@ -518,7 +512,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Returns the set of parameters that can contribute to a task's identity, and their values for this particular task.  
+        /// Returns the set of parameters that can contribute to a task's identity, and their values for this particular task.
         /// </summary>
         private IDictionary<string, string> GatherTaskIdentityParameters(Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
@@ -545,14 +539,13 @@ namespace Microsoft.Build.BackEnd
             return taskIdentityParameters;
         }
 
-
 #if FEATURE_APARTMENT_STATE
         /// <summary>
         /// Executes the task using an STA thread.
         /// </summary>
         /// <comment>
-        /// STA thread launching also being used in XMakeCommandLine\OutOfProcTaskAppDomainWrapperBase.cs, InstantiateAndExecuteTaskInSTAThread method.  
-        /// Any bug fixes made to this code, please ensure that you also fix that code.  
+        /// STA thread launching also being used in XMakeCommandLine\OutOfProcTaskAppDomainWrapperBase.cs, InstantiateAndExecuteTaskInSTAThread method.
+        /// Any bug fixes made to this code, please ensure that you also fix that code.
         /// </comment>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is caught and rethrown in the correct thread.")]
         private WorkUnitResult ExecuteTaskInSTAThread(ItemBucket bucket, TaskLoggingContext taskLoggingContext, IDictionary<string, string> taskIdentityParameters, TaskHost taskHost, TaskExecutionMode howToExecuteTask)
@@ -597,10 +590,7 @@ namespace Microsoft.Build.BackEnd
                 taskRunnerFinished = null;
             }
 
-            if (exceptionFromExecution != null)
-            {
-                exceptionFromExecution.Throw();
-            }
+            exceptionFromExecution?.Throw();
 
             return taskResult;
         }
@@ -873,7 +863,7 @@ namespace Microsoft.Build.BackEnd
                         _continueOnError = ContinueOnError.ErrorAndStop;
 
                         // Rethrow wrapped in order to avoid losing the callstack
-                        throw new BuildAbortedException(taskException.Message, ((BuildAbortedException)taskException));
+                        throw new BuildAbortedException(taskException.Message, (BuildAbortedException)taskException);
                     }
                     else if (type == typeof(CircularDependencyException))
                     {

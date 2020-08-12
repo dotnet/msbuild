@@ -630,13 +630,13 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 setColor(ConsoleColor.Cyan);
 
-                this.VerifyStack((current != null), "Unexpected null project stack");
+                this.VerifyStack(current != null, "Unexpected null project stack");
 
                 WriteLinePretty(projectSeparatorLine);
 
                 if (previous == null)
                 {
-                    if ((targetNames == null) || (targetNames.Length == 0))
+                    if (string.IsNullOrEmpty(targetNames))
                     {
                         WriteLinePrettyFromResource(indentLevel, "ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", current);
                     }
@@ -647,7 +647,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
                 else
                 {
-                    if ((targetNames == null) || (targetNames.Length == 0))
+                    if (string.IsNullOrEmpty(targetNames))
                     {
                         WriteLinePrettyFromResource(indentLevel, "ProjectStartedPrefixForNestedProjectWithDefaultTargets", previous, current);
                     }
@@ -971,7 +971,7 @@ namespace Microsoft.Build.BackEnd.Logging
             /// </summary>
             internal bool IsEmpty()
             {
-                return (_frames.Count == 0);
+                return _frames.Count == 0;
             }
         }
         #endregion

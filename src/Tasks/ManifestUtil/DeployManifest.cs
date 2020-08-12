@@ -137,7 +137,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             IList<string> referenceAssemblyPaths = GetPathToReferenceAssemblies(frameworkName);
 
-            if (referenceAssemblyPaths != null && referenceAssemblyPaths.Count > 0)
+            if (referenceAssemblyPaths?.Count > 0)
             {
                 // the first one in the list is the reference assembly path for the requested TFM
                 string referenceAssemblyPath = referenceAssemblyPaths[0];
@@ -231,7 +231,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             return installableFramework;
         }
-
 
         private static CompatibleFramework GetSubsetCompatFramework(FrameworkNameVersioning frameworkName)
         {
@@ -411,7 +410,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal override void OnAfterLoad()
         {
             base.OnAfterLoad();
-            if (_entryPoint == null && AssemblyReferences != null && AssemblyReferences.Count > 0)
+            if (_entryPoint == null && AssemblyReferences?.Count > 0)
             {
                 _entryPoint = AssemblyReferences[0];
                 _entryPoint.ReferenceType = AssemblyReferenceType.ClickOnceManifest;
@@ -594,8 +593,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         }
                         else
                         {
-                            if (entryPointManifest.FileAssociations != null &&
-                                entryPointManifest.FileAssociations.Count > 0)
+                            if (entryPointManifest.FileAssociations?.Count > 0)
                             {
                                 OutputMessages.AddErrorMessage("GenerateManifest.FileAssociationsNotInstalled");
                             }

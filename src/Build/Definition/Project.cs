@@ -90,9 +90,9 @@ namespace Microsoft.Build.Evaluation
         /// - <see cref="ProjectItem.RemoveMetadata"/>
         /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
         /// - <see cref="ProjectItem.SetMetadataValue(string,string, bool)"/>
-        /// 
+        ///
         /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
-        /// instead of expanding the item element. 
+        /// instead of expanding the item element.
         /// </summary>
         public bool ThrowInsteadOfSplittingItemElement
         {
@@ -390,7 +390,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Construct over an existing project file, evaluating with the specified global properties and 
+        /// Construct over an existing project file, evaluating with the specified global properties and
         /// using the tools version provided, either or both of which may be null.
         /// Project is added to the global project collection.
         /// Throws InvalidProjectFileException if the evaluation fails.
@@ -407,7 +407,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Construct over an existing project file, evaluating with the specified global properties and 
+        /// Construct over an existing project file, evaluating with the specified global properties and
         /// using the tools version provided, either or both of which may be null.
         /// Project is added to the global project collection.
         /// Throws InvalidProjectFileException if the evaluation fails.
@@ -425,7 +425,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Construct over an existing project file, evaluating with the specified global properties and 
+        /// Construct over an existing project file, evaluating with the specified global properties and
         /// using the tools version provided, either or both of which may be null.
         /// Project is added to the global project collection.
         /// Throws InvalidProjectFileException if the evaluation fails.
@@ -572,7 +572,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Whether this project is dirty such that it needs reevaluation.
         /// This may be because its underlying XML has changed (either through this project or another)
-        /// either the XML of the main project or an imported file; 
+        /// either the XML of the main project or an imported file;
         /// or because its toolset may have changed.
         /// </summary>
         public bool IsDirty => implementation.IsDirty;
@@ -583,8 +583,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <remarks>
         /// This is the publicly exposed getter, that translates into a read-only dead IDictionary&lt;string, string&gt;.
-        /// 
-        /// In order to easily tell when we're dirtied, setting and removing global properties is done with 
+        ///
+        /// In order to easily tell when we're dirtied, setting and removing global properties is done with
         /// <see cref="SetGlobalProperty">SetGlobalProperty</see> and <see cref="RemoveGlobalProperty">RemoveGlobalProperty</see>.
         /// </remarks>
         public IDictionary<string, string> GlobalProperties => implementation.GlobalProperties;
@@ -594,7 +594,7 @@ namespace Microsoft.Build.Evaluation
         /// This is an ordered collection.
         /// </summary>
         /// <comments>
-        /// data.ItemTypes is a KeyCollection, so it doesn't need any 
+        /// data.ItemTypes is a KeyCollection, so it doesn't need any
         /// additional read-only protection
         /// </comments>
         public ICollection<string> ItemTypes => implementation.ItemTypes;
@@ -608,17 +608,17 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Collection of possible values implied for properties contained in the conditions found on properties,
         /// property groups, imports, and whens.
-        /// 
+        ///
         /// For example, if the following conditions existed on properties in a project:
-        /// 
+        ///
         /// Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'"
         /// Condition="'$(Configuration)' == 'Release'"
-        /// 
+        ///
         /// the table would be populated with
-        /// 
+        ///
         /// { "Configuration", { "Debug", "Release" }}
         /// { "Platform", { "x86" }}
-        /// 
+        ///
         /// This is used by Visual Studio to determine the configurations defined in the project.
         /// </summary>
         public IDictionary<string, List<string>> ConditionedProperties => implementation.ConditionedProperties;
@@ -639,7 +639,7 @@ namespace Microsoft.Build.Evaluation
         /// Items in this project, ordered within groups of item types,
         /// including items whose conditions evaluated to false, or that were
         /// contained within item groups who themselves had conditioned evaluated to false.
-        /// This is useful for hosts that wish to display all items, even if they might not be part 
+        /// This is useful for hosts that wish to display all items, even if they might not be part
         /// of the build in the current configuration.
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "This is a reasonable choice. API review approved")]
@@ -672,7 +672,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Properties encountered during evaluation. These are read during the first evaluation pass.
         /// Unlike those returned by the Properties property, these are ordered, and includes any properties that
-        /// were subsequently overridden by others with the same name. It does not include any 
+        /// were subsequently overridden by others with the same name. It does not include any
         /// properties whose conditions did not evaluate to true.
         /// It does not include any properties added since the last evaluation.
         /// </summary>
@@ -681,7 +681,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Item definition metadata encountered during evaluation. These are read during the second evaluation pass.
         /// Unlike those returned by the ItemDefinitions property, these are ordered, and include any metadata that
-        /// were subsequently overridden by others with the same name and item type. It does not include any 
+        /// were subsequently overridden by others with the same name and item type. It does not include any
         /// elements whose conditions did not evaluate to true.
         /// It does not include any item definition metadata added since the last evaluation.
         /// </summary>
@@ -689,7 +689,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Items encountered during evaluation. These are read during the third evaluation pass.
-        /// Unlike those returned by the Items property, these are ordered with respect to all other items 
+        /// Unlike those returned by the Items property, these are ordered with respect to all other items
         /// encountered during evaluation, not just ordered with respect to items of the same item type.
         /// In some applications, like the F# language, this complete mutual ordering is significant, and such hosts
         /// can use this property.
@@ -712,7 +712,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// The sub-toolset version that, combined with the ToolsVersion, was used to determine
-        /// the toolset properties for this project.  
+        /// the toolset properties for this project.
         /// </summary>
         public string SubToolsetVersion => implementation.SubToolsetVersion;
 
@@ -737,7 +737,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Whether ReevaluateIfNecessary is temporarily disabled.
-        /// This is useful when the host expects to make a number of reads and writes 
+        /// This is useful when the host expects to make a number of reads and writes
         /// to the project, and wants to temporarily sacrifice correctness for performance.
         /// </summary>
         public bool SkipEvaluation
@@ -767,10 +767,10 @@ namespace Microsoft.Build.Evaluation
         /// control which projects it allows to run targets/tasks.  By default, for a newly
         /// created project, we will use whatever setting is in the parent project collection.
         /// When build is disabled, the Build method on this class will fail. However if
-        /// the host has already created a ProjectInstance, it can still build it. (It is 
+        /// the host has already created a ProjectInstance, it can still build it. (It is
         /// free to put a similar check around where it does this.)
         /// </summary>
-        public bool IsBuildEnabled 
+        public bool IsBuildEnabled
         {
             [DebuggerStepThrough]
             get => implementation.IsBuildEnabled;
@@ -794,19 +794,19 @@ namespace Microsoft.Build.Evaluation
         /// The ID of the last evaluation for this Project.
         /// A project is always evaluated upon construction and can subsequently get evaluated multiple times via
         /// <see cref="Project.ReevaluateIfNecessary()" />
-        /// 
+        ///
         /// It is an arbitrary number that changes when this project reevaluates.
         /// Hosts don't know whether an evaluation actually happened in an interval, but they can compare this number to
         /// their previously stored value to find out, and if so perhaps decide to update their own state.
         /// Note that the number may not increase monotonically.
-        /// 
+        ///
         /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationId"/> and can be used to connect
         /// evaluation logging events back to the Project instance.
         /// </summary>
         public int LastEvaluationId => implementation.LastEvaluationId;
 
         /// <summary>
-        /// List of names of the properties that, while global, are still treated as overridable 
+        /// List of names of the properties that, while global, are still treated as overridable
         /// </summary>
         internal ISet<string> GlobalPropertiesToTreatAsLocal => implementationInternal.GlobalPropertiesToTreatAsLocal;
 
@@ -840,21 +840,21 @@ namespace Microsoft.Build.Evaluation
         /// Finds all the globs specified in item includes.
         /// </summary>
         /// <example>
-        /// 
+        ///
         /// <code>
         ///<P>*.txt</P>
-        /// 
+        ///
         ///<Bar Include="bar"/> (both outside and inside project cone)
         ///<Zar Include="C:\**\*.foo"/> (both outside and inside project cone)
         ///<Foo Include="*.a;*.b" Exclude="3.a"/>
         ///<Foo Remove="2.a" />
         ///<Foo Include="**\*.b" Exclude="1.b;**\obj\*.b;**\bar\*.b"/>
-        ///<Foo Include="$(P)"/> 
+        ///<Foo Include="$(P)"/>
         ///<Foo Include="*.a;@(Bar);3.a"/> (If Bar has globs, they will have been included when querying Bar ProjectItems for globs)
         ///<Foo Include="*.cs" Exclude="@(Bar)"/>
         ///</code>
-        /// 
-        ///Example result: 
+        ///
+        ///Example result:
         ///[
         ///GlobResult(glob: "C:\**\*.foo", exclude: []),
         ///GlobResult(glob: ["*.a", "*.b"], exclude=["3.a"], remove=["2.a"]),
@@ -867,13 +867,13 @@ namespace Microsoft.Build.Evaluation
         /// <remarks>
         /// <see cref="GlobResult.MsBuildGlob"/> is a <see cref="IMSBuildGlob"/> that combines all globs in the include element and ignores
         /// all the fragments in the exclude attribute and all the fragments in all Remove elements that apply to the include element.
-        /// 
+        ///
         /// Users can construct a composite glob that incorporates all the globs in the Project:
         /// <code>
         /// var uberGlob = new CompositeGlob(project.GetAllGlobs().Select(r => r.MSBuildGlob).ToArray());
         /// uberGlob.IsMatch("foo.cs");
         /// </code>
-        /// 
+        ///
         /// </remarks>
         /// <returns>
         /// List of <see cref="GlobResult"/>.
@@ -907,6 +907,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// See <see cref="GetAllGlobs(string)"/>
         /// </summary>
+        /// <param name="itemType">type of the item</param>
         /// <param name="evaluationContext">
         ///     The evaluation context to use in case reevaluation is required.
         ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -922,7 +923,7 @@ namespace Microsoft.Build.Evaluation
         /// - elements that would update the string (not yet implemented)
         /// - elements that would remove the string (not yet implemented)
         /// </summary>
-        /// 
+        ///
         /// <example>
         /// The following snippet shows what <c>GetItemProvenance("a.cs")</c> returns for various item elements
         /// <code>
@@ -935,28 +936,28 @@ namespace Microsoft.Build.Evaluation
         ///     <P>a.cs;*.cs;@(A)</P>
         /// </PropertyGroup>
         /// </code>
-        /// 
+        ///
         /// </example>
-        /// 
+        ///
         /// <remarks>
         /// This method and its overloads are useful for clients that need to inspect all the item elements
         /// that might refer to a specific item instance. For example, Visual Studio uses it to inspect
         /// projects with globs. Upon a file system or IDE file artifact change, VS calls this method to find all the items
         /// that might refer to the detected file change (e.g. 'which item elements refer to "Program.cs"?').
         /// It uses such information to know which elements it should edit to reflect the user or file system changes.
-        /// 
+        ///
         /// Literal string matching tries to first match the strings. If the check fails, it then tries to match
         /// the strings as if they represented files: it normalizes both strings as files relative to the current project directory
         ///
         /// GetItemProvenance suffers from some sources of inaccuracy:
         /// - it is performed after evaluation, thus is insensitive to item data flow when item references are present
         /// (it sees items as they are at the end of evaluation)
-        /// 
+        ///
         /// This API and its return types are prone to change.
         /// </remarks>
-        /// 
+        ///
         /// <param name="itemToMatch">The string to perform matching against</param>
-        /// 
+        ///
         /// <returns>
         /// A list of <see cref="ProvenanceResult"/>, sorted in project evaluation order.
         /// </returns>
@@ -968,6 +969,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// See <see cref="GetItemProvenance(string)"/>
         /// </summary>
+        /// <param name="itemToMatch">The string to perform matching against</param>
         /// <param name="evaluationContext">
         ///     The evaluation context to use in case reevaluation is required.
         ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -990,6 +992,8 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// See <see cref="GetItemProvenance(string, string)"/>
         /// </summary>
+        /// <param name="itemToMatch">The string to perform matching against</param>
+        /// <param name="itemType">The type of the item to perform matching against</param>
         /// <param name="evaluationContext">
         ///     The evaluation context to use in case reevaluation is required.
         ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -1002,7 +1006,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Overload of <see cref="GetItemProvenance(string)"/>
         /// </summary>
-        /// <param name="item"> 
+        /// <param name="item">
         /// The ProjectItem object that indicates: the itemspec to match and the item type to constrain the search in.
         /// The search is also constrained on item elements appearing before the item element that produced this <paramref name="item"/>.
         /// The element that produced this <paramref name="item"/> is included in the results.
@@ -1015,6 +1019,11 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// See <see cref="GetItemProvenance(ProjectItem)"/>
         /// </summary>
+        /// <param name="item">
+        /// The ProjectItem object that indicates: the itemspec to match and the item type to constrain the search in.
+        /// The search is also constrained on item elements appearing before the item element that produced this <paramref name="item"/>.
+        /// The element that produced this <paramref name="item"/> is included in the results.
+        /// </param>
         /// <param name="evaluationContext">
         ///     The evaluation context to use in case reevaluation is required.
         ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -1025,7 +1034,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Gets the escaped value of the provided metadatum. 
+        /// Gets the escaped value of the provided metadatum.
         /// </summary>
         public static string GetMetadataValueEscaped(ProjectMetadata metadatum)
         {
@@ -1035,7 +1044,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Gets the escaped value of the metadatum with the provided name on the provided item. 
+        /// Gets the escaped value of the metadatum with the provided name on the provided item.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "IItem is an internal interface; this is less confusing to outside customers. ")]
         public static string GetMetadataValueEscaped(ProjectItem item, string name)
@@ -1046,7 +1055,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Gets the escaped value of the metadatum with the provided name on the provided item definition. 
+        /// Gets the escaped value of the metadatum with the provided name on the provided item definition.
         /// </summary>
         public static string GetMetadataValueEscaped(ProjectItemDefinition item, string name)
         {
@@ -1068,7 +1077,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Returns an iterator over the "logical project". The logical project is defined as
-        /// the unevaluated project obtained from the single MSBuild file that is the result 
+        /// the unevaluated project obtained from the single MSBuild file that is the result
         /// of inlining the text of all imports of the original MSBuild project manifest file.
         /// </summary>
         public IEnumerable<ProjectElement> GetLogicalProject()
@@ -1087,7 +1096,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Get the unescaped value of a property in this project, or 
+        /// Get the unescaped value of a property in this project, or
         /// an empty string if it does not exist.
         /// </summary>
         /// <remarks>
@@ -1196,7 +1205,7 @@ namespace Microsoft.Build.Evaluation
         /// Use AddItem or RemoveItem to modify items in this project.
         /// </summary>
         /// <comments>
-        /// data.GetItems returns a read-only collection, so no need to re-wrap it here. 
+        /// data.GetItems returns a read-only collection, so no need to re-wrap it here.
         /// </comments>
         public ICollection<ProjectItem> GetItems(string itemType)
         {
@@ -1209,7 +1218,7 @@ namespace Microsoft.Build.Evaluation
         /// This is a read-only list: use AddItem or RemoveItem to modify items in this project.
         /// </summary>
         /// <comments>
-        /// ItemDictionary[] returns a read only collection, so no need to wrap it. 
+        /// ItemDictionary[] returns a read only collection, so no need to wrap it.
         /// </comments>
         public ICollection<ProjectItem> GetItemsIgnoringCondition(string itemType)
         {
@@ -1309,6 +1318,7 @@ namespace Microsoft.Build.Evaluation
         /// This instance can be used to build independently.
         /// Before creating the instance, this will reevaluate the project if necessary, so it will not be dirty.
         /// </summary>
+        /// <returns>the created project instance</returns>
         public ProjectInstance CreateProjectInstance()
         {
             return CreateProjectInstance(ProjectInstanceSettings.None, null);
@@ -1318,9 +1328,11 @@ namespace Microsoft.Build.Evaluation
         /// Returns an instance based on this project, but completely disconnected.
         /// This instance can be used to build independently.
         /// Before creating the instance, this will reevaluate the project if necessary, so it will not be dirty.
-        /// The instance is immutable; none of the objects that form it can be modified. This makes it safe to 
+        /// The instance is immutable; none of the objects that form it can be modified. This makes it safe to
         /// access concurrently from multiple threads.
         /// </summary>
+        /// <param name="settings">The project instance creation settings</param>
+        /// <returns>the created project instance</returns>
         public ProjectInstance CreateProjectInstance(ProjectInstanceSettings settings)
         {
             return CreateProjectInstance(settings, null);
@@ -1329,8 +1341,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// See <see cref="CreateProjectInstance(ProjectInstanceSettings)"/>
         /// </summary>
+        /// <param name="settings">The project instance creation settings</param>
         /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
-        /// <returns></returns>
+        /// <returns>the created project instance</returns>
         public ProjectInstance CreateProjectInstance(ProjectInstanceSettings settings, EvaluationContext evaluationContext)
         {
             return implementation.CreateProjectInstance(settings, evaluationContext);
@@ -1414,7 +1427,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Saves a "logical" or "preprocessed" project file, that includes all the imported 
+        /// Saves a "logical" or "preprocessed" project file, that includes all the imported
         /// files as if they formed a single file.
         /// </summary>
         public void SaveLogicalProject(TextWriter writer)
@@ -1551,6 +1564,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// See <see cref="Build(string[], IEnumerable&lt;ILogger&gt;, IEnumerable&lt;ForwardingLoggerRecord&gt;)"/>
         /// </summary>
+        /// <param name="targets"></param>
+        /// <param name="loggers"></param>
+        /// <param name="remoteLoggers"></param>
         /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
         public bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, EvaluationContext evaluationContext)
         {
@@ -1576,10 +1592,10 @@ namespace Microsoft.Build.Evaluation
         /// A ProjectItemElement could have resulted in several items if it contains wildcards or item or property expressions.
         /// Before any edit to a ProjectItem (remove, rename, set metadata, or remove metadata) this must be called to make
         /// sure that the edit does not affect any other ProjectItems originating in the same ProjectItemElement.
-        /// 
+        ///
         /// For example, an item xml with an include of "@(x)" could evaluate to items "a", "b", and "c". If "b" is removed, then the original
         /// item xml must be removed and replaced with three, then the one corresponding to "b" can be removed.
-        /// 
+        ///
         /// This is an unsophisticated approach; the best that can be said is that the result will likely be correct, if not ideal.
         /// For example, perhaps the user would rather remove the item from the original list "x" instead of expanding the list.
         /// Or, perhaps the user would rather the property in "$(p)\a;$(p)\b" not be expanded when "$(p)\b" is removed.
@@ -1622,7 +1638,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Examines the provided ProjectItemElement to see if it has a wildcard that would match the 
+        /// Examines the provided ProjectItemElement to see if it has a wildcard that would match the
         /// item we wish to add, and does not have a condition or an exclude.
         /// Works conservatively - if there is anything that might cause doubt, considers the candidate to not be suitable.
         /// Returns true if it is suitable, otherwise false.
@@ -1637,7 +1653,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Before an item changes its item type, it must be removed from
-        /// our datastructures, which key off item type. 
+        /// our datastructures, which key off item type.
         /// This should be called ONLY by ProjectItems, in this situation.
         /// </summary>
         internal void RemoveItemBeforeItemTypeChange(ProjectItem item)
@@ -1718,7 +1734,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Verify that the provided object location is in the same file as the project.
         /// If it is not, throws an InvalidOperationException indicating that imported evaluated objects should not be modified.
-        /// This prevents, for example, accidentally updating something like the OutputPath property, that you want be in the 
+        /// This prevents, for example, accidentally updating something like the OutputPath property, that you want be in the
         /// main project, but for some reason was actually read in from an imported targets file.
         /// </summary>
         internal void VerifyThrowInvalidOperationNotImported(ProjectRootElement otherXml)
@@ -1727,11 +1743,9 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowInvalidOperation(ReferenceEquals(Xml, otherXml), "OM_CannotModifyEvaluatedObjectInImportedFile", otherXml.Location.File);
         }
 
-
         /// <summary>
         /// Internal project evaluation implementation
         /// </summary>
-        /// <remarks>
         private class ProjectImpl : ProjectLink, IProjectLinkInternal
         {
             /// <summary>
@@ -1783,14 +1797,13 @@ namespace Microsoft.Build.Evaluation
             private RenameHandlerDelegate _renameHandler;
 
             /// <summary>
-            /// 
+            ///
             /// </summary>
             /// <param name="owner">The owning project object</param>
             /// <param name="xml">ProjectRootElement to use</param>
             /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
             /// <param name="toolsVersion">Tools version to evaluate with. May be null</param>
             /// <param name="subToolsetVersion">Sub-toolset version to explicitly evaluate the toolset with.  May be null.</param>
-            /// <param name="projectCollection">The <see cref="ProjectCollection"/> the project is added to.</param>
             /// <param name="loadSettings">The <see cref="ProjectLoadSettings"/> to use for evaluation.</param>
             /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
             public ProjectImpl(Project owner, ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
@@ -1815,7 +1828,6 @@ namespace Microsoft.Build.Evaluation
             /// <param name="globalProperties">Global properties to evaluate with. May be null in which case the containing project collection's global properties will be used.</param>
             /// <param name="toolsVersion">Tools version to evaluate with. May be null</param>
             /// <param name="subToolsetVersion">Sub-toolset version to explicitly evaluate the toolset with.  May be null.</param>
-            /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
             /// <param name="loadSettings">The load settings for this project.</param>
             /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
             public ProjectImpl(Project owner, XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
@@ -1839,7 +1851,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// Construct over an existing project file, evaluating with the specified global properties and 
+            /// Construct over an existing project file, evaluating with the specified global properties and
             /// using the tools version provided, either or both of which may be null.
             /// Project is added to the global project collection.
             /// Throws InvalidProjectFileException if the evaluation fails.
@@ -1851,7 +1863,6 @@ namespace Microsoft.Build.Evaluation
             /// <param name="globalProperties">The global properties. May be null.</param>
             /// <param name="toolsVersion">The tools version. May be null.</param>
             /// <param name="subToolsetVersion">Sub-toolset version to explicitly evaluate the toolset with.  May be null.</param>
-            /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
             /// <param name="loadSettings">The load settings for this project.</param>
             /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
             public ProjectImpl(Project owner, string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
@@ -1904,9 +1915,9 @@ namespace Microsoft.Build.Evaluation
             /// - <see cref="ProjectItem.RemoveMetadata"/>
             /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
             /// - <see cref="ProjectItem.SetMetadataValue(string,string, bool)"/>
-            /// 
+            ///
             /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
-            /// instead of expanding the item element. 
+            /// instead of expanding the item element.
             /// </summary>
             public override bool ThrowInsteadOfSplittingItemElement { get; set; }
 
@@ -1955,7 +1966,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Whether this project is dirty such that it needs reevaluation.
             /// This may be because its underlying XML has changed (either through this project or another)
-            /// either the XML of the main project or an imported file; 
+            /// either the XML of the main project or an imported file;
             /// or because its toolset may have changed.
             /// </summary>
             public override bool IsDirty
@@ -2005,7 +2016,7 @@ namespace Microsoft.Build.Evaluation
 
                                 if (reason != null)
                                 {
-                                    Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1} - {2}] [PC Hash {3}]", reason, FullPath, (import.ImportedProject.FullPath == FullPath ? String.Empty : import.ImportedProject.FullPath), ProjectCollection.GetHashCode()));
+                                    Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1} - {2}] [PC Hash {3}]", reason, FullPath, import.ImportedProject.FullPath == FullPath ? String.Empty : import.ImportedProject.FullPath, ProjectCollection.GetHashCode()));
                                 }
                             }
 
@@ -2023,8 +2034,8 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             /// <remarks>
             /// This is the publicly exposed getter, that translates into a read-only dead IDictionary&lt;string, string&gt;.
-            /// 
-            /// In order to easily tell when we're dirtied, setting and removing global properties is done with 
+            ///
+            /// In order to easily tell when we're dirtied, setting and removing global properties is done with
             /// <see cref="SetGlobalProperty">SetGlobalProperty</see> and <see cref="RemoveGlobalProperty">RemoveGlobalProperty</see>.
             /// </remarks>
             public override IDictionary<string, string> GlobalProperties
@@ -2052,7 +2063,7 @@ namespace Microsoft.Build.Evaluation
             /// This is an ordered collection.
             /// </summary>
             /// <comments>
-            /// data.ItemTypes is a KeyCollection, so it doesn't need any 
+            /// data.ItemTypes is a KeyCollection, so it doesn't need any
             /// additional read-only protection
             /// </comments>
             public override ICollection<string> ItemTypes => _data.ItemTypes;
@@ -2066,17 +2077,17 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Collection of possible values implied for properties contained in the conditions found on properties,
             /// property groups, imports, and whens.
-            /// 
+            ///
             /// For example, if the following conditions existed on properties in a project:
-            /// 
+            ///
             /// Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'"
             /// Condition="'$(Configuration)' == 'Release'"
-            /// 
+            ///
             /// the table would be populated with
-            /// 
+            ///
             /// { "Configuration", { "Debug", "Release" }}
             /// { "Platform", { "x86" }}
-            /// 
+            ///
             /// This is used by Visual Studio to determine the configurations defined in the project.
             /// </summary>
             public override IDictionary<string, List<string>> ConditionedProperties
@@ -2109,7 +2120,7 @@ namespace Microsoft.Build.Evaluation
             /// Items in this project, ordered within groups of item types,
             /// including items whose conditions evaluated to false, or that were
             /// contained within item groups who themselves had conditioned evaluated to false.
-            /// This is useful for hosts that wish to display all items, even if they might not be part 
+            /// This is useful for hosts that wish to display all items, even if they might not be part
             /// of the build in the current configuration.
             /// </summary>
             [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "This is a reasonable choice. API review approved")]
@@ -2200,7 +2211,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Properties encountered during evaluation. These are read during the first evaluation pass.
             /// Unlike those returned by the Properties property, these are ordered, and includes any properties that
-            /// were subsequently overridden by others with the same name. It does not include any 
+            /// were subsequently overridden by others with the same name. It does not include any
             /// properties whose conditions did not evaluate to true.
             /// It does not include any properties added since the last evaluation.
             /// </summary>
@@ -2222,7 +2233,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Item definition metadata encountered during evaluation. These are read during the second evaluation pass.
             /// Unlike those returned by the ItemDefinitions property, these are ordered, and include any metadata that
-            /// were subsequently overridden by others with the same name and item type. It does not include any 
+            /// were subsequently overridden by others with the same name and item type. It does not include any
             /// elements whose conditions did not evaluate to true.
             /// It does not include any item definition metadata added since the last evaluation.
             /// </summary>
@@ -2243,7 +2254,7 @@ namespace Microsoft.Build.Evaluation
 
             /// <summary>
             /// Items encountered during evaluation. These are read during the third evaluation pass.
-            /// Unlike those returned by the Items property, these are ordered with respect to all other items 
+            /// Unlike those returned by the Items property, these are ordered with respect to all other items
             /// encountered during evaluation, not just ordered with respect to items of the same item type.
             /// In some applications, like the F# language, this complete mutual ordering is significant, and such hosts
             /// can use this property.
@@ -2279,7 +2290,7 @@ namespace Microsoft.Build.Evaluation
 
             /// <summary>
             /// The sub-toolset version that, combined with the ToolsVersion, was used to determine
-            /// the toolset properties for this project.  
+            /// the toolset properties for this project.
             /// </summary>
             public override string SubToolsetVersion => _data.SubToolsetVersion;
 
@@ -2304,7 +2315,7 @@ namespace Microsoft.Build.Evaluation
 
             /// <summary>
             /// Whether ReevaluateIfNecessary is temporarily disabled.
-            /// This is useful when the host expects to make a number of reads and writes 
+            /// This is useful when the host expects to make a number of reads and writes
             /// to the project, and wants to temporarily sacrifice correctness for performance.
             /// </summary>
             public override bool SkipEvaluation { get; set; }
@@ -2322,7 +2333,7 @@ namespace Microsoft.Build.Evaluation
             /// control which projects it allows to run targets/tasks.  By default, for a newly
             /// created project, we will use whatever setting is in the parent project collection.
             /// When build is disabled, the Build method on this class will fail. However if
-            /// the host has already created a ProjectInstance, it can still build it. (It is 
+            /// the host has already created a ProjectInstance, it can still build it. (It is
             /// free to put a similar check around where it does this.)
             /// </summary>
             public override bool IsBuildEnabled
@@ -2365,19 +2376,19 @@ namespace Microsoft.Build.Evaluation
             /// The ID of the last evaluation for this Project.
             /// A project is always evaluated upon construction and can subsequently get evaluated multiple times via
             /// <see cref="ProjectLink.ReevaluateIfNecessary" />
-            /// 
+            ///
             /// It is an arbitrary number that changes when this project reevaluates.
             /// Hosts don't know whether an evaluation actually happened in an interval, but they can compare this number to
             /// their previously stored value to find out, and if so perhaps decide to update their own state.
             /// Note that the number may not increase monotonically.
-            /// 
+            ///
             /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationId"/> and can be used to connect
             /// evaluation logging events back to the Project instance.
             /// </summary>
             public override int LastEvaluationId => _data.EvaluationId;
 
             /// <summary>
-            /// List of names of the properties that, while global, are still treated as overridable 
+            /// List of names of the properties that, while global, are still treated as overridable
             /// </summary>
             public ISet<string> GlobalPropertiesToTreatAsLocal => _data.GlobalPropertiesToTreatAsLocal;
 
@@ -2385,7 +2396,6 @@ namespace Microsoft.Build.Evaluation
             /// The logging service used for evaluation errors
             /// </summary>
             internal ILoggingService LoggingService => ProjectCollection.LoggingService;
-
 
             /// <summary>
             /// See <see cref="ProjectLink.GetAllGlobs(EvaluationContext)"/>
@@ -2402,6 +2412,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// See <see cref="ProjectLink.GetAllGlobs(string, EvaluationContext)"/>
             /// </summary>
+            /// <param name="itemType">The type of items to return.</param>
             /// <param name="evaluationContext">
             ///     The evaluation context to use in case reevaluation is required.
             ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -2582,6 +2593,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// See <see cref="ProjectLink.GetItemProvenance(string, EvaluationContext)"/>
             /// </summary>
+            /// <param name="itemToMatch">The string to perform matching against</param>
             /// <param name="evaluationContext">
             ///     The evaluation context to use in case reevaluation is required.
             ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -2594,6 +2606,8 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// See <see cref="ProjectLink.GetItemProvenance(string, string, EvaluationContext)"/>
             /// </summary>
+            /// <param name="itemToMatch">The string to perform matching against</param>
+            /// <param name="itemType">The type of items to return.</param>
             /// <param name="evaluationContext">
             ///     The evaluation context to use in case reevaluation is required.
             ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -2606,6 +2620,11 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// See <see cref="ProjectLink.GetItemProvenance(ProjectItem, EvaluationContext)"/>
             /// </summary>
+            /// /// <param name="item"> 
+            /// The ProjectItem object that indicates: the itemspec to match and the item type to constrain the search in.
+            /// The search is also constrained on item elements appearing before the item element that produced this <paramref name="item"/>.
+            /// The element that produced this <paramref name="item"/> is included in the results.
+            /// </param>
             /// <param name="evaluationContext">
             ///     The evaluation context to use in case reevaluation is required.
             ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
@@ -2626,7 +2645,7 @@ namespace Microsoft.Build.Evaluation
             /// Some project APIs need to do analysis that requires the Evaluator to record more data than usual as it evaluates.
             /// This method checks if the Evaluator was run with the extra required settings and if not, does a re-evaluation.
             /// If a re-evaluation was necessary, it saves this information so a next call does not re-evaluate.
-            /// 
+            ///
             /// Using this method avoids storing extra data in memory when its not needed.
             /// </summary>
             /// <param name="evaluationContext"></param>
@@ -2634,7 +2653,7 @@ namespace Microsoft.Build.Evaluation
             {
                 if (!_loadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements))
                 {
-                    _loadSettings = _loadSettings | ProjectLoadSettings.RecordEvaluatedItemElements;
+                    _loadSettings |= ProjectLoadSettings.RecordEvaluatedItemElements;
                     Reevaluate(LoggingService, _loadSettings, evaluationContext);
                 }
 
@@ -2646,7 +2665,7 @@ namespace Microsoft.Build.Evaluation
                 IEnumerable<ProjectItemElement> relevantElementsAfterInclude = evaluatedItemElements
                     // Skip until we encounter the element that produced the item because
                     // there are no item operations that can affect future items
-                    .SkipWhile((i => i != item.Xml))
+                    .SkipWhile(i => i != item.Xml)
                     .Where(itemElement =>
                         // items operations of different item types cannot affect each other
                         itemElement.ItemType.Equals(item.ItemType) &&
@@ -2728,7 +2747,7 @@ namespace Microsoft.Build.Evaluation
             /// Since:
             ///     - we have no proper AST and interpreter for itemspecs that we can do analysis on
             ///     - GetItemProvenance needs to have correct counts for exclude strings (as correct as it can get while doing it after evaluation)
-            /// 
+            ///
             /// The temporary hack is to use the expander to expand the strings, and if any property or item references were encountered, return Provenance.Inconclusive
             /// </summary>
             private static int ItemMatchesInItemSpecString(string itemToMatch, string itemSpec, IElementLocation elementLocation, string projectDirectory, Expander<ProjectProperty, ProjectItem> expander, out Provenance provenance)
@@ -2782,7 +2801,7 @@ namespace Microsoft.Build.Evaluation
 
             /// <summary>
             /// Returns an iterator over the "logical project". The logical project is defined as
-            /// the unevaluated project obtained from the single MSBuild file that is the result 
+            /// the unevaluated project obtained from the single MSBuild file that is the result
             /// of inlining the text of all imports of the original MSBuild project manifest file.
             /// </summary>
             public override IEnumerable<ProjectElement> GetLogicalProject()
@@ -2824,7 +2843,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// Get the unescaped value of a property in this project, or 
+            /// Get the unescaped value of a property in this project, or
             /// an empty string if it does not exist.
             /// </summary>
             /// <remarks>
@@ -2859,12 +2878,11 @@ namespace Microsoft.Build.Evaluation
 
                 ProjectProperty property = _data.Properties[name];
 
-                ErrorUtilities.VerifyThrowInvalidOperation(property == null || !property.IsReservedProperty, "OM_ReservedName", name);
-                ErrorUtilities.VerifyThrowInvalidOperation(property == null || !property.IsGlobalProperty, "OM_GlobalProperty", name);
+                ErrorUtilities.VerifyThrowInvalidOperation(property?.IsReservedProperty != true, "OM_ReservedName", name);
+                ErrorUtilities.VerifyThrowInvalidOperation(property?.IsGlobalProperty != true, "OM_GlobalProperty", name);
 
                 // If there's an existing regular property, we can reuse it, unless it's not attached to its XML any more
-                if (property != null &&
-                    !property.IsEnvironmentProperty &&
+                if (property?.IsEnvironmentProperty == false &&
                     property.Xml.Parent?.Parent != null &&
                     ReferenceEquals(property.Xml.ContainingProject, Xml))
                 {
@@ -3032,7 +3050,7 @@ namespace Microsoft.Build.Evaluation
             /// Use AddItem or RemoveItem to modify items in this project.
             /// </summary>
             /// <comments>
-            /// data.GetItems returns a read-only collection, so no need to re-wrap it here. 
+            /// data.GetItems returns a read-only collection, so no need to re-wrap it here.
             /// </comments>
             public override ICollection<ProjectItem> GetItems(string itemType)
             {
@@ -3046,7 +3064,7 @@ namespace Microsoft.Build.Evaluation
             /// This is a read-only list: use AddItem or RemoveItem to modify items in this project.
             /// </summary>
             /// <comments>
-            /// ItemDictionary[] returns a read only collection, so no need to wrap it. 
+            /// ItemDictionary[] returns a read only collection, so no need to wrap it.
             /// </comments>
             public override ICollection<ProjectItem> GetItemsIgnoringCondition(string itemType)
             {
@@ -3195,10 +3213,10 @@ namespace Microsoft.Build.Evaluation
                 return result;
             }
 
-
             /// <summary>
             /// See <see cref="ProjectLink.CreateProjectInstance(ProjectInstanceSettings, EvaluationContext)"/>
             /// </summary>
+            /// <param name="settings">Project instance creation settings</param>
             /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
             /// <returns></returns>
             public override ProjectInstance CreateProjectInstance(ProjectInstanceSettings settings, EvaluationContext evaluationContext)
@@ -3236,7 +3254,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// Saves a "logical" or "preprocessed" project file, that includes all the imported 
+            /// Saves a "logical" or "preprocessed" project file, that includes all the imported
             /// files as if they formed a single file.
             /// </summary>
             public override void SaveLogicalProject(TextWriter writer)
@@ -3253,6 +3271,9 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// See <see cref="ProjectLink.Build"/>
             /// </summary>
+            /// <param name="targets">targets to build</param>
+            /// <param name="loggers">List of loggers</param>
+            /// <param name="remoteLoggers">remote loggers for multi proc logging</param>
             /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
             public override bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, EvaluationContext evaluationContext)
             {
@@ -3303,10 +3324,10 @@ namespace Microsoft.Build.Evaluation
             /// A ProjectItemElement could have resulted in several items if it contains wildcards or item or property expressions.
             /// Before any edit to a ProjectItem (remove, rename, set metadata, or remove metadata) this must be called to make
             /// sure that the edit does not affect any other ProjectItems originating in the same ProjectItemElement.
-            /// 
+            ///
             /// For example, an item xml with an include of "@(x)" could evaluate to items "a", "b", and "c". If "b" is removed, then the original
             /// item xml must be removed and replaced with three, then the one corresponding to "b" can be removed.
-            /// 
+            ///
             /// This is an unsophisticated approach; the best that can be said is that the result will likely be correct, if not ideal.
             /// For example, perhaps the user would rather remove the item from the original list "x" instead of expanding the list.
             /// Or, perhaps the user would rather the property in "$(p)\a;$(p)\b" not be expanded when "$(p)\b" is removed.
@@ -3349,7 +3370,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// Examines the provided ProjectItemElement to see if it has a wildcard that would match the 
+            /// Examines the provided ProjectItemElement to see if it has a wildcard that would match the
             /// item we wish to add, and does not have a condition or an exclude.
             /// Works conservatively - if there is anything that might cause doubt, considers the candidate to not be suitable.
             /// Returns true if it is suitable, otherwise false.
@@ -3364,7 +3385,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if ((metadata != null && metadata.Any()) || candidateExistingItemXml.Count > 0)
+                if ((metadata?.Any() == true) || candidateExistingItemXml.Count > 0)
                 {
                     // Don't try to make sure the metadata are the same.
                     return false;
@@ -3396,7 +3417,7 @@ namespace Microsoft.Build.Evaluation
 
             /// <summary>
             /// Before an item changes its item type, it must be removed from
-            /// our datastructures, which key off item type. 
+            /// our datastructures, which key off item type.
             /// This should be called ONLY by ProjectItems, in this situation.
             /// </summary>
             public void RemoveItemBeforeItemTypeChange(ProjectItem item)
@@ -3493,7 +3514,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Verify that the provided object location is in the same file as the project.
             /// If it is not, throws an InvalidOperationException indicating that imported evaluated objects should not be modified.
-            /// This prevents, for example, accidentally updating something like the OutputPath property, that you want be in the 
+            /// This prevents, for example, accidentally updating something like the OutputPath property, that you want be in the
             /// main project, but for some reason was actually read in from an imported targets file.
             /// </summary>
             internal void VerifyThrowInvalidOperationNotImported(ProjectRootElement otherXml)
@@ -3605,7 +3626,7 @@ namespace Microsoft.Build.Evaluation
 
             /// <summary>
             /// Creates a project instance based on this project using the specified logging service.
-            /// </summary>  
+            /// </summary>
             private ProjectInstance CreateProjectInstance(
                 ILoggingService loggingServiceForEvaluation,
                 ProjectInstanceSettings settings,
@@ -3732,12 +3753,12 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Tries to find a ProjectItemElement already in the project file XML that has a wildcard that would match the
             /// item we wish to add, does not have a condition or an exclude, and is within an itemgroup without a condition.
-            /// 
+            ///
             /// For perf reasons, this method does several jobs in one.
             /// If it finds a suitable existing item element, it returns that as the out parameter, otherwise the out parameter returns null.
             /// Otherwise, if it finds an item element suitable to be just below our new element, it returns that.
             /// Otherwise, if it finds an item group at least that's suitable to put our element in somewhere, it returns that.
-            /// 
+            ///
             /// Returns null if the include of the item being added itself has wildcards, or semicolons, as the case is too difficult.
             /// </summary>
             private ProjectElement GetAnySuitableExistingItemXml(string itemType, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata, out ProjectItemElement suitableExistingItemXml)
@@ -3749,7 +3770,7 @@ namespace Microsoft.Build.Evaluation
                     return null;
                 }
 
-                if (metadata != null && metadata.Any())
+                if (metadata?.Any() == true)
                 {
                     // Don't bother trying to match up metadata
                     return null;
@@ -3920,7 +3941,7 @@ namespace Microsoft.Build.Evaluation
             private static WeakReference<RetrievableEntryHashSet<ProjectTargetInstance>> s_typicalTargetsCollection;
 
             /// <summary>
-            /// List of names of the properties that, while global, are still treated as overridable 
+            /// List of names of the properties that, while global, are still treated as overridable
             /// </summary>
             private ISet<string> _globalPropertiesToTreatAsLocal;
 
@@ -3971,7 +3992,7 @@ namespace Microsoft.Build.Evaluation
             public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => this.Project.ProjectCollection.EnvironmentProperties;
 
             /// <summary>
-            /// List of names of the properties that, while global, are still treated as overridable 
+            /// List of names of the properties that, while global, are still treated as overridable
             /// </summary>
             public ISet<string> GlobalPropertiesToTreatAsLocal => _globalPropertiesToTreatAsLocal ?? (_globalPropertiesToTreatAsLocal =
                                                                       new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default));
@@ -4008,13 +4029,13 @@ namespace Microsoft.Build.Evaluation
 
             /// <summary>
             /// The externally specified sub-toolset version that, combined with the ToolsVersion, is used to determine
-            /// the toolset properties for this project.  
+            /// the toolset properties for this project.
             /// </summary>
             public string ExplicitSubToolsetVersion { get; }
 
             /// <summary>
             /// The sub-toolset version that, combined with the ToolsVersion, was used to determine
-            /// the toolset properties for this project.  
+            /// the toolset properties for this project.
             /// </summary>
             public string SubToolsetVersion { get; private set; }
 
@@ -4044,17 +4065,17 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Collection of possible values implied for properties contained in the conditions found on properties,
             /// property groups, imports, and whens.
-            /// 
+            ///
             /// For example, if the following conditions existed on properties in a project:
-            /// 
+            ///
             /// Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'"
             /// Condition="'$(Configuration)' == 'Release'"
-            /// 
+            ///
             /// the table would be populated with
-            /// 
+            ///
             /// { "Configuration", { "Debug", "Release" }}
             /// { "Platform", { "x86" }}
-            /// 
+            ///
             /// This is used by Visual Studio to determine the configurations defined in the project.
             /// </summary>
             public Dictionary<string, List<string>> ConditionedProperties { get; private set; }
@@ -4077,7 +4098,7 @@ namespace Microsoft.Build.Evaluation
             /// Read only collection.
             /// </summary>
             /// <comments>
-            /// item.ItemTypes is a KeyCollection, so it doesn't need any 
+            /// item.ItemTypes is a KeyCollection, so it doesn't need any
             /// additional read-only protection
             /// </comments>
             public ICollection<string> ItemTypes => Items.ItemTypes;
@@ -4085,7 +4106,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Properties encountered during evaluation. These are read during the first evaluation pass.
             /// Unlike those returned by the Properties property, these are ordered, and includes any properties that
-            /// were subsequently overridden by others with the same name. It does not include any 
+            /// were subsequently overridden by others with the same name. It does not include any
             /// properties whose conditions did not evaluate to true.
             /// It does not include any properties added since the last evaluation.
             /// </summary>
@@ -4094,7 +4115,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Item definition metadata encountered during evaluation. These are read during the second evaluation pass.
             /// Unlike those returned by the ItemDefinitions property, these are ordered, and include any metadata that
-            /// were subsequently overridden by others with the same name and item type. It does not include any 
+            /// were subsequently overridden by others with the same name and item type. It does not include any
             /// elements whose conditions did not evaluate to true.
             /// It does not include any item definition metadata added since the last evaluation.
             /// </summary>
@@ -4287,7 +4308,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Properties encountered during evaluation. These are read during the first evaluation pass.
             /// Unlike those returned by the Properties property, these are ordered, and includes any properties that
-            /// were subsequently overridden by others with the same name. It does not include any 
+            /// were subsequently overridden by others with the same name. It does not include any
             /// properties whose conditions did not evaluate to true.
             /// </summary>
             public void AddToAllEvaluatedPropertiesList(ProjectProperty property)
@@ -4299,7 +4320,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Item definition metadata encountered during evaluation. These are read during the second evaluation pass.
             /// Unlike those returned by the ItemDefinitions property, these are ordered, and include any metadata that
-            /// were subsequently overridden by others with the same name and item type. It does not include any 
+            /// were subsequently overridden by others with the same name and item type. It does not include any
             /// elements whose conditions did not evaluate to true.
             /// </summary>
             public void AddToAllEvaluatedItemDefinitionMetadataList(ProjectMetadata itemDefinitionMetadatum)
@@ -4392,7 +4413,7 @@ namespace Microsoft.Build.Evaluation
             /// <remarks>
             /// This may include imported files that ended up contributing nothing to the evaluated project.
             /// These might otherwise have no strong references to them at all.
-            /// If they are dirtied, though, they might affect the evaluated project; and that's why we record them. 
+            /// If they are dirtied, though, they might affect the evaluated project; and that's why we record them.
             /// Mostly these will be common imports, so they'll be shared anyway.
             /// </remarks>
             public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated, SdkResult sdkResult)
@@ -4518,7 +4539,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// Get the value of a property in this project, or 
+            /// Get the value of a property in this project, or
             /// an empty string if it does not exist.
             /// Returns the unescaped value.
             /// </summary>
@@ -4593,7 +4614,7 @@ namespace Microsoft.Build.Evaluation
     public enum Provenance
     {
         /// <summary>
-        /// Undefined is the bottom element and should not appear in actual results 
+        /// Undefined is the bottom element and should not appear in actual results
         /// </summary>
         Undefined = 0,
 

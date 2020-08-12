@@ -447,7 +447,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 IDictionary<string, string> environmentProperties = null;
 
-                if (_componentHost != null && _componentHost.BuildParameters != null)
+                if (_componentHost?.BuildParameters != null)
                 {
                     environmentProperties = _componentHost.BuildParameters.BuildProcessEnvironment;
                 }
@@ -619,7 +619,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 ErrorUtilities.VerifyThrow(projectBuildEventContext != null, "projectBuildEventContext");
 
-                string message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword((success ? "ProjectFinishedSuccess" : "ProjectFinishedFailure"), Path.GetFileName(projectFile));
+                string message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(success ? "ProjectFinishedSuccess" : "ProjectFinishedFailure", Path.GetFileName(projectFile));
 
                 ProjectFinishedEventArgs buildEvent = new ProjectFinishedEventArgs
                     (
@@ -730,7 +730,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     ErrorUtilities.VerifyThrow(targetBuildEventContext != null, "targetBuildEventContext is null");
 
-                    string message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword((success ? "TargetFinishedSuccess" : "TargetFinishedFailure"), targetName, Path.GetFileName(projectFile));
+                    string message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(success ? "TargetFinishedSuccess" : "TargetFinishedFailure", targetName, Path.GetFileName(projectFile));
 
                     TargetFinishedEventArgs buildEvent = new TargetFinishedEventArgs
                         (
@@ -836,7 +836,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 if (!OnlyLogCriticalEvents)
                 {
                     ErrorUtilities.VerifyThrow(taskBuildEventContext != null, "taskBuildEventContext is null");
-                    string message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword((success ? "TaskFinishedSuccess" : "TaskFinishedFailure"), taskName);
+                    string message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(success ? "TaskFinishedSuccess" : "TaskFinishedFailure", taskName);
 
                     TaskFinishedEventArgs buildEvent = new TaskFinishedEventArgs
                         (

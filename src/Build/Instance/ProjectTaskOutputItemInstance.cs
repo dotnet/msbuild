@@ -58,11 +58,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectTaskOutputItemInstance(string itemType, string taskParameter, string condition, ElementLocation location, ElementLocation itemTypeLocation, ElementLocation taskParameterLocation, ElementLocation conditionLocation)
         {
-            ErrorUtilities.VerifyThrowInternalLength(itemType, "itemType");
-            ErrorUtilities.VerifyThrowInternalLength(taskParameter, "taskParameter");
-            ErrorUtilities.VerifyThrowInternalNull(location, "location");
-            ErrorUtilities.VerifyThrowInternalNull(itemTypeLocation, "itemTypeLocation");
-            ErrorUtilities.VerifyThrowInternalNull(taskParameterLocation, "taskParameterLocation");
+            ErrorUtilities.VerifyThrowInternalLength(itemType, nameof(itemType));
+            ErrorUtilities.VerifyThrowInternalLength(taskParameter, nameof(taskParameter));
+            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
+            ErrorUtilities.VerifyThrowInternalNull(itemTypeLocation, nameof(itemTypeLocation));
+            ErrorUtilities.VerifyThrowInternalNull(taskParameterLocation, nameof(taskParameterLocation));
 
             _itemType = itemType;
             _taskParameter = taskParameter;

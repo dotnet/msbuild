@@ -88,7 +88,7 @@ namespace Microsoft.Build.Construction
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
                 if (_name != null) return _name;
                 string unescapedValue = EscapingUtilities.UnescapeAll(GetAttributeValue(XMakeAttributes.name));
-                return (_name = unescapedValue);
+                return _name = unescapedValue;
             }
 
             set
@@ -114,7 +114,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the Inputs value. 
+        /// Gets or sets the Inputs value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty.
         /// </summary>
@@ -134,7 +134,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the Outputs value. 
+        /// Gets or sets the Outputs value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty.
         /// </summary>
@@ -154,7 +154,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the TrimDuplicateOutputs value. 
+        /// Gets or sets the TrimDuplicateOutputs value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty.
         /// </summary>
@@ -182,7 +182,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the DependsOnTargets value. 
+        /// Gets or sets the DependsOnTargets value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty.
         /// </summary>
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the BeforeTargets value. 
+        /// Gets or sets the BeforeTargets value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty.
         /// </summary>
@@ -222,7 +222,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the AfterTargets value. 
+        /// Gets or sets the AfterTargets value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty.
         /// </summary>
@@ -242,10 +242,10 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the Returns value. 
-        /// Returns null if the attribute is not present -- empty string is an allowable 
-        /// value for both getting and setting. 
-        /// Removes the attribute only if the value is set to null. 
+        /// Gets or sets the Returns value.
+        /// Returns null if the attribute is not present -- empty string is an allowable
+        /// value for both getting and setting.
+        /// Removes the attribute only if the value is set to null.
         /// </summary>
         public string Returns
         {

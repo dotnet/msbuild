@@ -49,7 +49,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Whether this ToolTaskExtension has logged any errors
         /// </summary>
-        protected override bool HasLoggedErrors => (Log.HasLoggedErrors || base.HasLoggedErrors);
+        protected override bool HasLoggedErrors => Log.HasLoggedErrors || base.HasLoggedErrors;
 
         /// <summary>
         /// Gets the collection of parameters used by the derived task class.
@@ -91,7 +91,6 @@ namespace Microsoft.Build.Tasks
         /// Will only be called if the task returned a non empty string from GetResponseFileCommands
         /// Called after ValidateParameters, SkipTaskExecution and GetResponseFileCommands
         /// </summary>
-        /// <param name="responseFilePath">full path to the temporarily created response file</param>
         /// <returns></returns>
         protected override string GenerateResponseFileCommands()
         {

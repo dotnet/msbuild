@@ -45,17 +45,14 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="eventSource">Available events.</param>
         public override void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventSource, "eventSource");
-            eventSource.BuildFinished += new BuildFinishedEventHandler(FileLoggerBuildFinished);
+            ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
+            eventSource.BuildFinished += FileLoggerBuildFinished;
             InitializeFileLogger(eventSource, 1);
         }
 
         private void FileLoggerBuildFinished(object sender, BuildFinishedEventArgs e)
         {
-            if (fileWriter != null)
-            {
-                fileWriter.Flush();
-            }
+            fileWriter?.Flush();
         }
 
         /// <summary>
@@ -99,10 +96,7 @@ namespace Microsoft.Build.BuildEngine
                 string errorCode;
                 string helpKeyword;
                 string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", logFileName, e.Message);
-                if (fileWriter != null)
-                {
-                    fileWriter.Close();
-                }
+                fileWriter?.Close();
                 throw new LoggerException(message,e.InnerException,errorCode, helpKeyword);
             }
         }
@@ -133,10 +127,7 @@ namespace Microsoft.Build.BuildEngine
                 string errorCode;
                 string helpKeyword;
                 string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", logFileName, ex.Message);
-                if (fileWriter != null)
-                {
-                    fileWriter.Close();
-                }
+                fileWriter?.Close();
                 throw new LoggerException(message, ex.InnerException, errorCode, helpKeyword);
             }
         }
@@ -154,10 +145,7 @@ namespace Microsoft.Build.BuildEngine
             finally
             {
                 // Keep FxCop happy by closing in a Finally.
-                if (fileWriter != null)
-                {
-                    fileWriter.Close();
-                }
+                fileWriter?.Close();
             }
         }
 
@@ -262,7 +250,6 @@ namespace Microsoft.Build.BuildEngine
         /// File logger parameter value split character.
         /// </summary>
         private static readonly char[] fileLoggerParameterValueSplitCharacter = { '=' };
-
 
         #endregion
     }

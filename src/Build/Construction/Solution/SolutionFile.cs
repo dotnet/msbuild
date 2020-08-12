@@ -232,7 +232,7 @@ namespace Microsoft.Build.Construction
 
         internal bool ProjectShouldBuild(string projectFile)
         {
-            return _solutionFilter == null || _solutionFilter.Contains(projectFile);
+            return _solutionFilter?.Contains(projectFile) != false;
         }
 
         /// <summary>
@@ -255,7 +255,7 @@ namespace Microsoft.Build.Construction
         /// <returns>Whether the project is expected to be buildable</returns>
         internal static bool IsBuildableProject(ProjectInSolution project)
         {
-            return (project.ProjectType != SolutionProjectType.SolutionFolder && project.ProjectConfigurations.Count > 0);
+            return project.ProjectType != SolutionProjectType.SolutionFolder && project.ProjectConfigurations.Count > 0;
         }
 
         /// <summary>
@@ -609,7 +609,6 @@ namespace Microsoft.Build.Construction
                     new BuildEventFileInfo(FullPath),
                     "SolutionParseDuplicateProject",
                     uniqueName);
-
             }
         } // ParseSolutionFile()
 
@@ -757,7 +756,7 @@ namespace Microsoft.Build.Construction
                     // We have a ProjectDependencies section.  Each subsequent line should identify
                     // a dependency.
                     line = ReadLine();
-                    while ((line != null) && (!line.StartsWith("EndProjectSection", StringComparison.Ordinal)))
+                    while ((line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false))
                     {
                         // This should be a dependency.  The GUID identifying the parent project should
                         // be both the property name and the property value.
@@ -777,7 +776,7 @@ namespace Microsoft.Build.Construction
                     // projects, and contains properties that we'll need in order to call the 
                     // AspNetCompiler task.
                     line = ReadLine();
-                    while ((line != null) && (!line.StartsWith("EndProjectSection", StringComparison.Ordinal)))
+                    while ((line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false))
                     {
                         Match match = s_crackPropertyLine.Value.Match(line);
                         ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
@@ -1131,7 +1130,7 @@ namespace Microsoft.Build.Construction
             else
             {
                 // ProjectReferences = "{FD705688-88D1-4C22-9BFF-86235D89C2FC}|CSClassLibrary1.dll;{F0726D09-042B-4A7A-8A01-6BED2422BD5D}|VCClassLibrary1.dll;" 
-                if (string.Compare(propertyName, "ProjectReferences", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Equals(propertyName, "ProjectReferences", StringComparison.OrdinalIgnoreCase))
                 {
                     string[] projectReferenceEntries = propertyValue.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -1159,7 +1158,7 @@ namespace Microsoft.Build.Construction
                         }
                     }
                 }
-                else if (String.Compare(propertyName, "TargetFrameworkMoniker", StringComparison.OrdinalIgnoreCase) == 0)
+                else if (String.Equals(propertyName, "TargetFrameworkMoniker", StringComparison.OrdinalIgnoreCase))
                 {
                     //Website project need to back support 3.5 msbuild parser for the Blend (it is not move to .Net4.0 yet.)
                     //However, 3.5 version of Solution parser can't handle a equal sign in the value.  
@@ -1223,29 +1222,29 @@ namespace Microsoft.Build.Construction
             ValidateProjectRelativePath(proj);
 
             // Figure out what type of project this is.
-            if ((String.Compare(projectTypeGuid, vbProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(projectTypeGuid, csProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(projectTypeGuid, cpsProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(projectTypeGuid, cpsCsProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(projectTypeGuid, cpsVbProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(projectTypeGuid, cpsFsProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(projectTypeGuid, fsProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(projectTypeGuid, dbProjectGuid, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(projectTypeGuid, vjProjectGuid, StringComparison.OrdinalIgnoreCase) == 0))
+            if ((String.Equals(projectTypeGuid, vbProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(projectTypeGuid, csProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(projectTypeGuid, cpsProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(projectTypeGuid, cpsCsProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(projectTypeGuid, cpsVbProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(projectTypeGuid, cpsFsProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(projectTypeGuid, fsProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(projectTypeGuid, dbProjectGuid, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(projectTypeGuid, vjProjectGuid, StringComparison.OrdinalIgnoreCase)))
             {
                 proj.ProjectType = SolutionProjectType.KnownToBeMSBuildFormat;
             }
-            else if (String.Compare(projectTypeGuid, sharedProjectGuid, StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(projectTypeGuid, sharedProjectGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.SharedProject;
             }
-            else if (String.Compare(projectTypeGuid, solutionFolderGuid, StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(projectTypeGuid, solutionFolderGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.SolutionFolder;
             }
             // MSBuild format VC projects have the same project type guid as old style VC projects.
             // If it's not an old-style VC project, we'll assume it's MSBuild format
-            else if (String.Compare(projectTypeGuid, vcProjectGuid, StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(projectTypeGuid, vcProjectGuid, StringComparison.OrdinalIgnoreCase))
             {
                 if (String.Equals(proj.Extension, ".vcproj", StringComparison.OrdinalIgnoreCase))
                 {
@@ -1261,12 +1260,12 @@ namespace Microsoft.Build.Construction
                     proj.ProjectType = SolutionProjectType.KnownToBeMSBuildFormat;
                 }
             }
-            else if (String.Compare(projectTypeGuid, webProjectGuid, StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(projectTypeGuid, webProjectGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.WebProject;
                 ContainsWebProjects = true;
             }
-            else if (String.Compare(projectTypeGuid, wdProjectGuid, StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(projectTypeGuid, wdProjectGuid, StringComparison.OrdinalIgnoreCase))
             {
                 proj.ProjectType = SolutionProjectType.WebDeploymentProject;
                 ContainsWebDeploymentProjects = true;
@@ -1352,7 +1351,7 @@ namespace Microsoft.Build.Construction
                 string fullConfigurationName = configurationNames[0].Trim();
 
                 //Fixing bug 555577: Solution file can have description information, in which case we ignore.
-                if (0 == String.Compare(fullConfigurationName, "DESCRIPTION", StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(fullConfigurationName, "DESCRIPTION", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -1493,7 +1492,7 @@ namespace Microsoft.Build.Construction
             // Pick the Debug configuration as default if present
             foreach (SolutionConfigurationInSolution solutionConfiguration in SolutionConfigurations)
             {
-                if (string.Compare(solutionConfiguration.ConfigurationName, "Debug", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Equals(solutionConfiguration.ConfigurationName, "Debug", StringComparison.OrdinalIgnoreCase))
                 {
                     _defaultConfigurationName = solutionConfiguration.ConfigurationName;
                     break;
@@ -1526,13 +1525,13 @@ namespace Microsoft.Build.Construction
             // Pick the Mixed Platforms platform as default if present
             foreach (SolutionConfigurationInSolution solutionConfiguration in SolutionConfigurations)
             {
-                if (string.Compare(solutionConfiguration.PlatformName, "Mixed Platforms", StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Equals(solutionConfiguration.PlatformName, "Mixed Platforms", StringComparison.OrdinalIgnoreCase))
                 {
                     _defaultPlatformName = solutionConfiguration.PlatformName;
                     break;
                 }
                 // We would like this to be chosen if Mixed platforms does not exist.
-                else if (string.Compare(solutionConfiguration.PlatformName, "Any CPU", StringComparison.OrdinalIgnoreCase) == 0)
+                else if (string.Equals(solutionConfiguration.PlatformName, "Any CPU", StringComparison.OrdinalIgnoreCase))
                 {
                     _defaultPlatformName = solutionConfiguration.PlatformName;
                 }

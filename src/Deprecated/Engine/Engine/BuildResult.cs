@@ -126,7 +126,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return ((this.flags & 1) == 0 ? false : true) ;
+                return (this.flags & 1) == 0 ? false : true;
             }
         }
 
@@ -166,7 +166,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return ((this.flags & 2) == 0 ? false : true);
+                return (this.flags & 2) == 0 ? false : true;
             }
         }
 
@@ -342,7 +342,6 @@ namespace Microsoft.Build.BuildEngine
             writer.Write((Int32)taskTime);
             #endregion
         }
-
 
         internal static BuildResult CreateFromStream(BinaryReader reader)
         {

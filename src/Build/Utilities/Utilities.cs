@@ -254,7 +254,7 @@ namespace Microsoft.Build.Internal
                     {
                         // Found the start of a comment
                         insideComment = true;
-                        i = i + 3;
+                        i += 3;
                         continue;
                     }
                 }
@@ -278,7 +278,7 @@ namespace Microsoft.Build.Internal
                     {
                         // Found the end of a comment
                         insideComment = false;
-                        i = i + 2;
+                        i += 2;
                         continue;
                     }
                 }
@@ -450,9 +450,9 @@ namespace Microsoft.Build.Internal
 
         private static bool UsingDifferentToolsVersionFromProjectFile(string toolsVersionFromProject, string toolsVersionToUse, bool explicitToolsVersionSpecified)
         {
-            return (!explicitToolsVersionSpecified &&
+            return !explicitToolsVersionSpecified &&
                     !String.IsNullOrEmpty(toolsVersionFromProject) &&
-                    !String.Equals(toolsVersionFromProject, toolsVersionToUse, StringComparison.OrdinalIgnoreCase));
+                    !String.Equals(toolsVersionFromProject, toolsVersionToUse, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

@@ -16,7 +16,7 @@ namespace Microsoft.Build.BuildEngine.Shared
     {
         /// <summary>
         /// Replaces all instances of %XX in the input string with the character represented
-        /// by the hexadecimal number XX. 
+        /// by the hexadecimal number XX.
         /// </summary>
         /// <param name="escapedString"></param>
         /// <returns>unescaped string</returns>
@@ -31,7 +31,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
         /// <summary>
         /// Replaces all instances of %XX in the input string with the character represented
-        /// by the hexadecimal number XX. 
+        /// by the hexadecimal number XX.
         /// </summary>
         /// <param name="escapedString"></param>
         /// <param name="escapingWasNecessary"></param>
@@ -53,7 +53,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             {
                 return escapedString;
             }
-            
+
             // This is where we're going to build up the final string to return to the caller.
             StringBuilder unescapedString = new StringBuilder();
 
@@ -76,7 +76,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
                     // Convert the %XX to an actual real character.
                     string hexString = escapedString.Substring(indexOfPercent + 1, 2);
-                    char unescapedCharacter = (char) int.Parse(hexString, System.Globalization.NumberStyles.HexNumber, 
+                    char unescapedCharacter = (char) int.Parse(hexString, System.Globalization.NumberStyles.HexNumber,
                         CultureInfo.InvariantCulture);
 
                     // if the unescaped character is not on the exception list, append it
@@ -101,7 +101,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// Adds instances of %XX in the input string where the char char to be escaped appears
+        /// Adds instances of %XX in the input string where the char to be escaped appears
         /// XX is the hex value of the ASCII code for the char.
         /// </summary>
         /// <param name="unescapedString"></param>
@@ -147,7 +147,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             string unescapedString
             )
         {
-            return (-1 != unescapedString.IndexOfAny(charsToEscape));
+            return -1 != unescapedString.IndexOfAny(charsToEscape);
         }
 
         /// <summary>
@@ -170,13 +170,13 @@ namespace Microsoft.Build.BuildEngine.Shared
                     )
                 {
                     // It has either a '%2' or a '%3'.  This is looking very promising.
-                    return 
-                        (
+                    return
+
                             (-1 != escapedString.IndexOf("%2a", StringComparison.Ordinal)) ||
                             (-1 != escapedString.IndexOf("%2A", StringComparison.Ordinal)) ||
                             (-1 != escapedString.IndexOf("%3f", StringComparison.Ordinal)) ||
                             (-1 != escapedString.IndexOf("%3F", StringComparison.Ordinal))
-                        );
+                        ;
                 }
             }
             return false;
@@ -184,9 +184,9 @@ namespace Microsoft.Build.BuildEngine.Shared
 
         /// <summary>
         /// Special characters that need escaping.
-        /// It's VERY important that the percent character is the FIRST on the list - since it's both a character 
-        /// we escape and use in escape sequences, we can unintentionally escape other escape sequences if we 
-        /// don't process it first. Of course we'll have a similar problem if we ever decide to escape hex digits 
+        /// It's VERY important that the percent character is the FIRST on the list - since it's both a character
+        /// we escape and use in escape sequences, we can unintentionally escape other escape sequences if we
+        /// don't process it first. Of course we'll have a similar problem if we ever decide to escape hex digits
         /// (that would require rewriting the algorithm) but since it seems unlikely that we ever do, this should
         /// be good enough to avoid complicating the algorithm at this point.
         /// </summary>

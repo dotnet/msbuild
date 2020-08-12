@@ -215,7 +215,7 @@ namespace Microsoft.Build.BackEnd
                 LoggingContext.BuildEventContext,
                 FileSystems.Default);
 
-            if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd != null && itemsToAdd.Count > 0)
+            if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd?.Count > 0)
             {
                 var itemGroupText = ItemGroupLoggingHelper.GetParameterText(
                     ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix,
@@ -235,6 +235,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="child">The item specification to evaluate and remove.</param>
         /// <param name="bucket">The batching bucket.</param>
+        /// <param name="matchOnMetadata">Metadata matching.</param>
+        /// <param name="matchingOptions">Options matching.</param>
         private void ExecuteRemove(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, HashSet<string> matchOnMetadata, MatchOnMetadataOptions matchingOptions)
         {
             ICollection<ProjectItemInstance> group = bucket.Lookup.GetItems(child.ItemType);

@@ -134,7 +134,7 @@ namespace Microsoft.Build.Evaluation
             if (_errorState)
                 return false;
 
-            if (_lookahead != null && _lookahead.IsToken(Token.TokenType.EndOfInput))
+            if (_lookahead?.IsToken(Token.TokenType.EndOfInput) == true)
                 return true;
 
             SkipWhiteSpace();
@@ -538,7 +538,7 @@ namespace Microsoft.Build.Evaluation
                     // If it's %(a.b) the name is just 'b'
                     if (_parsePoint + 3 < _expression.Length)
                     {
-                        name = _expression.Substring(_parsePoint + 2, (endOfName - _parsePoint - 2 + 1));
+                        name = _expression.Substring(_parsePoint + 2, endOfName - _parsePoint - 2 + 1);
                     }
 
                     if (!CheckForUnexpectedMetadata(name))
@@ -627,11 +627,11 @@ namespace Microsoft.Build.Evaluation
         private bool ParseSimpleStringOrFunction(int start)
         {
             SkipSimpleStringChars();
-            if (0 == string.Compare(_expression.Substring(start, _parsePoint - start), "and", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(_expression.Substring(start, _parsePoint - start), "and", StringComparison.OrdinalIgnoreCase))
             {
                 _lookahead = Token.And;
             }
-            else if (0 == string.Compare(_expression.Substring(start, _parsePoint - start), "or", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(_expression.Substring(start, _parsePoint - start), "or", StringComparison.OrdinalIgnoreCase))
             {
                 _lookahead = Token.Or;
             }

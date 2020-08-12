@@ -29,7 +29,7 @@ namespace Microsoft.Build.Tasks
     /// Framework version dependencies to the current Framework version.
     /// This list is also used by the deployment system to exclude Framework
     /// dependencies from customer deployment packages.
-    /// </summary>    
+    /// </summary>
     internal sealed class RedistList
     {
         // List of cached RedistList objects, the key is a semi-colon delimited list of data file paths
@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks
 
         // List of cached BlackList RedistList objects, the key is a semi-colon delimited list of data file paths
         private readonly ConcurrentDictionary<string, Dictionary<string, string>> _cachedBlackList = new ConcurrentDictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
-        
+
         /***************Fields which are only set in the constructor and should not be modified by the class. **********************/
         // Array of errors encountered while reading files.
         private readonly ReadOnlyCollection<Exception> _errors;
@@ -165,12 +165,12 @@ namespace Microsoft.Build.Tasks
         public bool IsPrerequisiteAssembly(string assemblyName)
         {
             AssemblyEntry entry = GetUnifiedAssemblyEntry(assemblyName);
-            return entry != null && entry.InGAC;
+            return entry?.InGAC == true;
         }
 
         /// <summary>
-        /// If there was a remapping entry in the redist list list then remap the passed in assemblynameextension 
-        /// if not just return the original one. 
+        /// If there was a remapping entry in the redist list then remap the passed in assemblynameextension
+        /// if not just return the original one.
         /// </summary>
         public AssemblyNameExtension RemapAssembly(AssemblyNameExtension extensionToRemap)
         {
@@ -482,24 +482,26 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// This method will take a list of AssemblyTableInfo and generate a black list by subtracting the 
-        /// assemblies listed in the WhiteList from the RedistList. 
-        /// 
+        /// This method will take a list of AssemblyTableInfo and generate a black list by subtracting the
+        /// assemblies listed in the WhiteList from the RedistList.
+        ///
         /// 1) If there are assemblies in the redist list and one or more client subset files are read in with matching names then
         ///    the subtraction will take place. If there were no matching redist lists read in the black list will be empty.
-        ///    
+        ///
         /// 2) If the subset has a matching name but there are no files inside of it then the black list will contain ALL files in the redist list.
-        /// 
+        ///
         /// 3) If the redist list assembly has a null or empty redist name or the subset list has a null or empty subset name they will not be used for black list generation.
         ///
         /// When generating the blacklist, we will first see if the black list is in the appdomain wide cache
         /// so that we do not regenerate one for multiple calls using the same whiteListAssemblyTableInfo.
-        /// 
+        ///
         /// </summary>
         /// <param name="whiteListAssemblyTableInfo">List of paths to white list xml files</param>
-        /// <returns>A dictionary containing the full assembly names of black listed assemblies as the key, and null as the value. 
+        /// <param name="whiteListErrors">List of white listed errors</param>
+        /// <param name="whiteListErrorFileNames">List of white listed error file names</param>
+        /// <returns>A dictionary containing the full assembly names of black listed assemblies as the key, and null as the value.
         ///          If there is no assemblies in the redist list null is returned.
-        /// </returns> 
+        /// </returns>
         internal Dictionary<string, string> GenerateBlackList(AssemblyTableInfo[] whiteListAssemblyTableInfo, List<Exception> whiteListErrors, List<string> whiteListErrorFileNames)
         {
             // Return null if there are no assemblies in the redist list.
@@ -621,6 +623,10 @@ namespace Microsoft.Build.Tasks
         /// XML formatting issues will recorded in the 'errors' collection.
         /// </summary>
         /// <param name="assemblyTableInfo">Information about the redistlist file.</param>
+        /// <param name="assembliesList">List of assembly from installed assembly table.</param>
+        /// <param name="errorsList">Error list.</param>
+        /// <param name="errorFilenamesList">Error filename list.</param>
+        /// <param name="remapEntries">Assembly remaping.</param>
         /// <returns>Redist name of the redist list just read in</returns>
         internal static string ReadFile(AssemblyTableInfo assemblyTableInfo, List<AssemblyEntry> assembliesList, List<Exception> errorsList, List<string> errorFilenamesList, List<AssemblyRemapping> remapEntries)
         {
@@ -833,7 +839,7 @@ namespace Microsoft.Build.Tasks
             }
 
             bool isValidEntry = !string.IsNullOrEmpty(name) && (!fullFusionNameRequired || (fullFusionNameRequired && !string.IsNullOrEmpty(version) && !string.IsNullOrEmpty(publicKeyToken) && !string.IsNullOrEmpty(culture)));
-            Debug.Assert(isValidEntry, string.Format(CultureInfo.InvariantCulture, "Missing attribute in redist file: {0}, line #{1}", path, 
+            Debug.Assert(isValidEntry, string.Format(CultureInfo.InvariantCulture, "Missing attribute in redist file: {0}, line #{1}", path,
                 reader is IXmlLineInfo ? ((IXmlLineInfo)reader).LineNumber : 0));
             AssemblyEntry newEntry = null;
             if (isValidEntry)
@@ -928,7 +934,7 @@ namespace Microsoft.Build.Tasks
     }
 
     /// <summary>
-    /// Provide a mechanism to determine where the subset white lists are located by searching the target framework folders 
+    /// Provide a mechanism to determine where the subset white lists are located by searching the target framework folders
     /// for a list of provided subset list names.
     /// </summary>
     internal class SubsetListFinder
@@ -958,8 +964,8 @@ namespace Microsoft.Build.Tasks
         /// This class takes in a list of subset names to look for and provides a method to search the target framework directories to see if those
         /// files exist.
         /// </summary>
-        /// <param name="subsetToSearchFor">String array of subset names, ie  Client, Net, MySubset. This may be null or empty if no subsets were requested to be 
-        /// found in the target framework directories. This can happen if the the subsets are instead passed in as InstalledDefaultSubsetTables</param>
+        /// <param name="subsetToSearchFor">String array of subset names, ie  Client, Net, MySubset. This may be null or empty if no subsets were requested to be
+        /// found in the target framework directories. This can happen if the subsets are instead passed in as InstalledDefaultSubsetTables</param>
         internal SubsetListFinder(string[] subsetToSearchFor)
         {
             ErrorUtilities.VerifyThrowArgumentNull(subsetToSearchFor, nameof(subsetToSearchFor));

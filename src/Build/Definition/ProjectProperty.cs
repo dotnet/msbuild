@@ -14,7 +14,7 @@ using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
-    /// An evaluated design-time property 
+    /// An evaluated design-time property
     /// </summary>
     [DebuggerDisplay("{Name}={EvaluatedValue} [{UnevaluatedValue}]")]
     public abstract class ProjectProperty : IKeyed, IValued, IProperty, IEquatable<ProjectProperty>
@@ -33,7 +33,7 @@ namespace Microsoft.Build.Evaluation
 
         internal ProjectProperty(Project project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project, "project");
+            ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
             _project = project;
         }
 
@@ -42,8 +42,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ProjectProperty(Project project, string evaluatedValueEscaped)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project, "project");
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedValueEscaped, "evaluatedValueEscaped");
+            ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
+            ErrorUtilities.VerifyThrowArgumentNull(evaluatedValueEscaped, nameof(evaluatedValueEscaped));
 
             _project = project;
             _evaluatedValueEscaped = evaluatedValueEscaped;
@@ -57,7 +57,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <comment>
         /// If this could be set, it would be necessary to have a callback
-        /// so that the containing collections could be updated, as they use the name as 
+        /// so that the containing collections could be updated, as they use the name as
         /// their key.
         /// </comment>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -232,7 +232,7 @@ namespace Microsoft.Build.Evaluation
         #endregion
 
         /// <summary>
-        /// Creates a property without backing XML. 
+        /// Creates a property without backing XML.
         /// Property MAY BE global, and property MAY HAVE a reserved name (such as "MSBuildProjectDirectory") if indicated.
         /// This is ONLY to be used by the Evaluator (and Project.SetGlobalProperty) and ONLY for Global, Environment, and Built-in properties.
         /// All other properties originate in XML, and should have a backing XML object.
@@ -278,7 +278,7 @@ namespace Microsoft.Build.Evaluation
         /// <remarks>
         /// The reason we do this and not just look at project.GlobalProperties is
         /// that when the project is being loaded, the GlobalProperties collection is already populated.  When we do our
-        /// evaluation, we may attempt to add some properties, such as environment variables, to the master Properties 
+        /// evaluation, we may attempt to add some properties, such as environment variables, to the master Properties
         /// collection.  As GlobalProperties are supposed to override these and thus be added last, we can't check against
         /// the GlobalProperties collection as they are being added.  The correct behavior is to always check against the
         /// collection which is accumulating properties as we go, which is the Properties collection.  Once the project has
@@ -291,7 +291,7 @@ namespace Microsoft.Build.Evaluation
         private static bool ProjectHasMatchingGlobalProperty(Project project, string propertyName)
         {
             ProjectProperty property = project.GetProperty(propertyName);
-            if (property != null && property.IsGlobalProperty && !project.GlobalPropertiesToTreatAsLocal.Contains(propertyName))
+            if (property?.IsGlobalProperty == true && !project.GlobalPropertiesToTreatAsLocal.Contains(propertyName))
             {
                 return true;
             }
@@ -319,7 +319,7 @@ namespace Microsoft.Build.Evaluation
             internal ProjectPropertyXmlBacked(Project project, ProjectPropertyElement xml, string evaluatedValueEscaped)
                 : base(project, evaluatedValueEscaped)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
+                ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
                 ErrorUtilities.VerifyThrowInvalidOperation(!ProjectHasMatchingGlobalProperty(project, xml.Name), "OM_GlobalProperty", xml.Name);
 
                 _xml = xml;
@@ -331,7 +331,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             /// <comment>
             /// If this could be set, it would be necessary to have a callback
-            /// so that the containing collections could be updated, as they use the name as 
+            /// so that the containing collections could be updated, as they use the name as
             /// their key.
             /// </comment>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -348,7 +348,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             /// <remarks>
             /// The containing project will be dirtied by the XML modification.
-            /// If there is no XML backing, the evaluated value returned is the value of the property that has been 
+            /// If there is no XML backing, the evaluated value returned is the value of the property that has been
             /// escaped as necessary.
             /// </remarks>
             public override string UnevaluatedValue
@@ -362,7 +362,7 @@ namespace Microsoft.Build.Evaluation
                 set
                 {
                     Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
-                    ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent != null && _xml.Parent.Parent != null, "OM_ObjectIsNoLongerActive");
+                    ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
 
                     _xml.Value = value;
 
@@ -464,7 +464,7 @@ namespace Microsoft.Build.Evaluation
             internal ProjectPropertyXmlBackedWithPredecessor(Project project, ProjectPropertyElement xml, string evaluatedValueEscaped, ProjectProperty predecessor)
                 : base(project, xml, evaluatedValueEscaped)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(predecessor, "predecessor");
+                ErrorUtilities.VerifyThrowArgumentNull(predecessor, nameof(predecessor));
 
                 _predecessor = predecessor;
             }
@@ -496,7 +496,7 @@ namespace Microsoft.Build.Evaluation
             private readonly string _name;
 
             /// <summary>
-            /// Creates a property without backing XML. 
+            /// Creates a property without backing XML.
             /// Property MAY BE global, and property MAY HAVE a reserved name (such as "MSBuildProjectDirectory") if indicated.
             /// This is ONLY to be used by the Evaluator (and Project.SetGlobalProperty) and ONLY for Global, Environment, and Built-in properties.
             /// All other properties originate in XML, and should have a backing XML object.
@@ -504,7 +504,7 @@ namespace Microsoft.Build.Evaluation
             internal ProjectPropertyNotXmlBacked(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
                 : base(project, evaluatedValueEscaped)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
                 ErrorUtilities.VerifyThrowInvalidOperation(isGlobalProperty || !ProjectHasMatchingGlobalProperty(project, name), "OM_GlobalProperty", name);
                 ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(name), "OM_ReservedName", name);
                 ErrorUtilities.VerifyThrowArgument(mayBeReserved || !ReservedPropertyNames.IsReservedProperty(name), "OM_ReservedName", name);
@@ -518,7 +518,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             /// <comment>
             /// If this could be set, it would be necessary to have a callback
-            /// so that the containing collections could be updated, as they use the name as 
+            /// so that the containing collections could be updated, as they use the name as
             /// their key.
             /// </comment>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -535,7 +535,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             /// <remarks>
             /// The containing project will be dirtied.
-            /// As there is no XML backing, the evaluated value returned is the value of the property that has been 
+            /// As there is no XML backing, the evaluated value returned is the value of the property that has been
             /// escaped as necessary.
             /// </remarks>
             public override string UnevaluatedValue
@@ -572,7 +572,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public override bool IsEnvironmentProperty
             {
-                get { return (!IsGlobalProperty && !IsReservedProperty); }
+                get { return !IsGlobalProperty && !IsReservedProperty; }
             }
 
             /// <summary>
@@ -628,10 +628,5 @@ namespace Microsoft.Build.Evaluation
                 get { return false; }
             }
         }
-
-
-        /// <summary>
-        /// External projects support
-        /// </summary>
     }
 }

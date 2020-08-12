@@ -12,7 +12,6 @@ using System.Globalization;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 
-
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
@@ -22,7 +21,7 @@ namespace Microsoft.Build.BuildEngine
     {
         #region Constructors
         /// <summary>
-        /// Creates a callback class. There should only be one callback per engine under normal 
+        /// Creates a callback class. There should only be one callback per engine under normal
         /// circumstances.
         /// </summary>
         internal EngineCallback(Engine parentEngine)
@@ -87,7 +86,7 @@ namespace Microsoft.Build.BuildEngine
             buildRequest.NodeIndex = executionContext.NodeIndex;
 
             ErrorUtilities.VerifyThrow(buildRequest.ParentBuildEventContext != null, "Should not have a null parentBuildEventContext");
-            ErrorUtilities.VerifyThrow(buildRequest.IsGeneratedRequest == true, "Should not be sending a non generated request from the child node to the parent node");
+            ErrorUtilities.VerifyThrow(buildRequest.IsGeneratedRequest, "Should not be sending a non generated request from the child node to the parent node");
 
             // For buildRequests originating from the TEM  - additional initialization is necessary
             TaskExecutionContext taskExecutionContext = executionContext as TaskExecutionContext;
@@ -117,7 +116,7 @@ namespace Microsoft.Build.BuildEngine
                                                                    buildRequest.ProjectFileName,
                                                                    buildRequest.GlobalPropertiesPassedByTask);
                         }
-                        catch (ArgumentException e) 
+                        catch (ArgumentException e)
                         {
                             ConvertToInvalidProjectException(buildRequest, parentProject, e);
                         }
@@ -136,13 +135,11 @@ namespace Microsoft.Build.BuildEngine
                         // project.  This allows people to avoid passing in the Projects parameter on the MSBuild task.
                         Project projectToBuild = parentProject;
 
-
-
                         // If the parent project (the calling project) already has the same set of global properties
                         // as what is being requested, just re-use it.  Otherwise, we need to instantiate a new
                         // project object that has the same project contents but different global properties.
                         if (!projectToBuild.GlobalProperties.IsEquivalent(buildRequest.GlobalProperties) &&
-                            (String.Compare(parentProject.ToolsVersion, buildRequest.ToolsetVersion, StringComparison.OrdinalIgnoreCase) == 0))
+                            (String.Equals(parentProject.ToolsVersion, buildRequest.ToolsetVersion, StringComparison.OrdinalIgnoreCase)))
                         {
                             projectToBuild = parentEngine.GetMatchingProject(parentProject,
                                                  parentProject.FullFileName, buildRequest.GlobalProperties,
@@ -185,8 +182,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal void PostTaskOutputs
         (
-            int handleId, 
-            bool taskExecutedSuccessfully, 
+            int handleId,
+            bool taskExecutedSuccessfully,
             Exception thrownException,
             long executionTime
         )
@@ -211,7 +208,7 @@ namespace Microsoft.Build.BuildEngine
 
             // Cache the results
             routingContext.CacheScope.AddCacheEntryForBuildResults(buildResult);
-            
+
             if (Engine.debugMode)
             {
                 Console.WriteLine("Received result for HandleId " + buildResult.HandleId + ":" + buildResult.RequestId + " mapped to " + routingContext.ParentHandleId + ":" + routingContext.ParentRequestId);
@@ -219,7 +216,7 @@ namespace Microsoft.Build.BuildEngine
 
             // Update the results with the original handle id and request id, so that 
             buildResult.HandleId = routingContext.ParentHandleId;
-       
+
             // If the build result is created from a generated build request a done notice should be posted as other targets could be waiting for this target to finish
             if (buildResult.HandleId != invalidEngineHandle)
             {
@@ -233,7 +230,7 @@ namespace Microsoft.Build.BuildEngine
                 routingContext.TriggeringBuildRequest.BuildCompleted = true;
                 parentEngine.PostEngineCommand(new HostBuildRequestCompletionEngineCommand());
             }
-            
+
             // At this point the execution context we created for the execution of this build request can be deleted
             lock (freedContexts)
             {
@@ -246,7 +243,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public void SetCacheEntries
         (
-            int handleId, CacheEntry[] entries, 
+            int handleId, CacheEntry[] entries,
             string cacheScope, string cacheKey, string cacheVersion,
             CacheContentType cacheContentType, bool localNodeOnly
         )
@@ -293,13 +290,13 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
         }
-        
+
         /// <summary>
         /// Called either on the main or child node. This is the routing method for getting cache entries.
         /// </summary>
         public CacheEntry[] GetCacheEntries
         (
-            int handleId, string[] names, 
+            int handleId, string[] names,
             string cacheScope, string cacheKey, string cacheVersion,
             CacheContentType cacheContentType, bool localNodeOnly
         )
@@ -359,7 +356,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Submit the logging message to the engine queue. Note that we are currently not utilizing the 
+        /// Submit the logging message to the engine queue. Note that we are currently not utilizing the
         /// handleId, but plan to do so in the future to fill out the data structure passed to the engine
         /// </summary>
         public void PostLoggingMessagesToHost(int nodeId, NodeLoggingEvent[] nodeLoggingEventArray)
@@ -390,7 +387,7 @@ namespace Microsoft.Build.BuildEngine
         internal ITaskRegistry GetEngineTaskRegistry(int handleId)
         {
             TaskExecutionContext executionContext = GetTaskContextFromHandleId(handleId);
-            return parentEngine.GetTaskRegistry(executionContext.BuildEventContext, 
+            return parentEngine.GetTaskRegistry(executionContext.BuildEventContext,
                                     executionContext.ParentProject.ToolsVersion);
         }
 
@@ -495,16 +492,16 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal int CreateTaskContext
         (
-            Project parentProject, 
+            Project parentProject,
             Target  parentTarget,
             ProjectBuildState buildContext,
-            XmlElement taskNode, 
+            XmlElement taskNode,
             int nodeIndex,
             BuildEventContext taskContext
         )
         {
             int handleId = nextContextId;
-            nextContextId = nextContextId + 1;
+            nextContextId++;
 
             TaskExecutionContext executionContext =
                 new TaskExecutionContext(parentProject, parentTarget, taskNode, buildContext, handleId, nodeIndex, taskContext);
@@ -530,10 +527,10 @@ namespace Microsoft.Build.BuildEngine
         )
         {
             int handleId = nextContextId;
-            nextContextId = nextContextId + 1;
+            nextContextId++;
 
             RequestRoutingContext executionContext =
-                new RequestRoutingContext(handleId, nodeIndex, parentHandleId, parentNodeIndex, parentRequestId, 
+                new RequestRoutingContext(handleId, nodeIndex, parentHandleId, parentNodeIndex, parentRequestId,
                                           cacheScope, triggeringBuildRequest, buildEventContext);
 
             executionContexts.Add(handleId, executionContext);
@@ -570,7 +567,7 @@ namespace Microsoft.Build.BuildEngine
 
         #region Constants
         /// <summary>
-        /// Number assigned to an invalid engine handle, This handleId is used by Buildrequests 
+        /// Number assigned to an invalid engine handle, This handleId is used by Buildrequests
         /// to show they are a routing context
         /// </summary>
         internal const int invalidEngineHandle = -1;

@@ -313,14 +313,12 @@ namespace Microsoft.VisualStudio.Build.UnitTest
 
                     // This call should throw an InvalidOperationException
                     muxLogger.RegisterLogger(submission.SubmissionId, mockLogger);
-
                 }
                 finally
                 {
                     buildManager.EndBuild();
                 }
             });
-
         }
 
         /// <summary>

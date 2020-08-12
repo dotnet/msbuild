@@ -237,10 +237,7 @@ namespace Microsoft.Build.BuildEngine
             else
             {
                 ErrorUtilities.VerifyThrow(pass == ProcessingPass.Pass2, "ProcessingPass must be Pass1 or Pass2.");
-                if (whenLastTaken != null)
-                {
-                    whenLastTaken.Evaluate(parentPropertyBag, ignoreCondition, honorCondition, conditionedPropertiesTable, pass);
-                }
+                whenLastTaken?.Evaluate(parentPropertyBag, ignoreCondition, honorCondition, conditionedPropertiesTable, pass);
             }
         }
 

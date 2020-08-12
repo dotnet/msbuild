@@ -21,6 +21,9 @@ namespace Microsoft.Build.Tasks
     public abstract class CreateManifestResourceName : TaskExtension
     {
         #region Properties
+        internal const string resxFileExtension = ".resx";
+        internal const string restextFileExtension = ".restext";
+        internal const string resourcesFileExtension = ".resources";
 
         private ITaskItem[] _resourceFiles;
 
@@ -61,7 +64,6 @@ namespace Microsoft.Build.Tasks
         /// The resulting manifest names.
         /// </summary>
         /// <value></value>
-
         [Output]
         public ITaskItem[] ManifestResourceNames { get; private set; }
 
@@ -157,7 +159,7 @@ namespace Microsoft.Build.Tasks
                     // If not, fall back onto the extension.
                     if (string.IsNullOrEmpty(fileType))
                     {
-                        isResxFile = Path.GetExtension(fileName) == ".resx";
+                        isResxFile = Path.GetExtension(fileName) == resxFileExtension;
                     }
 
                     // If opted into convention and no DependentUpon metadata and is a resx file, reference "<filename>.<ext>" (.cs or .vb) if it exists.
@@ -234,8 +236,8 @@ namespace Microsoft.Build.Tasks
                     // Add a LogicalName metadata to Non-Resx resources
                     // LogicalName isn't used for Resx resources because the ManifestResourceName metadata determines the filename of the 
                     // .resources file which then is used as the embedded resource manifest name                    
-                    if (String.IsNullOrEmpty(ResourceFilesWithManifestResourceNames[i].GetMetadata("LogicalName")) &&
-                        String.Equals(ResourceFilesWithManifestResourceNames[i].GetMetadata("Type"), "Non-Resx", StringComparison.OrdinalIgnoreCase))
+                    if (string.IsNullOrEmpty(ResourceFilesWithManifestResourceNames[i].GetMetadata("LogicalName")) &&
+                        string.Equals(ResourceFilesWithManifestResourceNames[i].GetMetadata("Type"), "Non-Resx", StringComparison.OrdinalIgnoreCase))
                     {
                         ResourceFilesWithManifestResourceNames[i].SetMetadata("LogicalName", manifestName);
                     }
@@ -296,38 +298,25 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Make a folder subname into an Everett-compatible identifier 
         /// </summary>
-        private static string MakeValidEverettSubFolderIdentifier(string subName)
+        private static void MakeValidEverettSubFolderIdentifier(StringBuilder builder, string subName)
         {
             ErrorUtilities.VerifyThrowArgumentNull(subName, nameof(subName));
 
-            if (subName.Length == 0)
-            {
-                return subName;
-            }
-
-            // give string length to avoid reallocations; +1 since the resulting string may be one char longer than the
-            // original - if the first character is an invalid first identifier character but a valid subsequent one,
-            // we prepend an underscore to it.
-            var everettId = new StringBuilder(subName.Length + 1);
+            if (string.IsNullOrEmpty(subName)) { return; }
 
             // the first character has stronger restrictions than the rest
-            if (!IsValidEverettIdFirstChar(subName[0]))
+            if (IsValidEverettIdFirstChar(subName[0]))
             {
-                // if the first character is not even a valid subsequent character, replace it with an underscore
-                if (!IsValidEverettIdChar(subName[0]))
-                {
-                    everettId.Append('_');
-                }
-                // if it is a valid subsequent character, prepend an underscore to it
-                else
-                {
-                    everettId.Append('_');
-                    everettId.Append(subName[0]);
-                }
+                builder.Append(subName[0]);
             }
             else
             {
-                everettId.Append(subName[0]);
+                builder.Append('_');
+                if (IsValidEverettIdChar(subName[0]))
+                {
+                    // if it is a valid subsequent character, prepend an underscore to it
+                    builder.Append(subName[0]);
+                }
             }
 
             // process the rest of the subname
@@ -335,47 +324,44 @@ namespace Microsoft.Build.Tasks
             {
                 if (!IsValidEverettIdChar(subName[i]))
                 {
-                    everettId.Append('_');
+                    builder.Append('_');
                 }
                 else
                 {
-                    everettId.Append(subName[i]);
+                    builder.Append(subName[i]);
                 }
             }
-
-            return everettId.ToString();
         }
 
         /// <summary>
         /// Make a folder name into an Everett-compatible identifier
         /// </summary>
-        internal static string MakeValidEverettFolderIdentifier(string name)
+        internal static void MakeValidEverettFolderIdentifier(StringBuilder builder, string name)
         {
             ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
 
-            // give string length to avoid reallocations; +1 since the resulting string may be one char longer than the
-            // original - if the name is a single underscore we add another underscore to it
-            var everettId = new StringBuilder(name.Length + 1);
+            if (string.IsNullOrEmpty(name)) { return; }
+
+            // store the original length for use later
+            int length = builder.Length;
 
             // split folder name into subnames separated by '.', if any
             string[] subNames = name.Split(MSBuildConstants.DotChar);
 
             // convert each subname separately
-            everettId.Append(MakeValidEverettSubFolderIdentifier(subNames[0]));
+            MakeValidEverettSubFolderIdentifier(builder, subNames[0]);
 
             for (int i = 1; i < subNames.Length; i++)
             {
-                everettId.Append('.');
-                everettId.Append(MakeValidEverettSubFolderIdentifier(subNames[i]));
+                builder.Append('.');
+                MakeValidEverettSubFolderIdentifier(builder, subNames[i]);
             }
 
             // folder name cannot be a single underscore - add another underscore to it
-            if (everettId.ToString() == "_")
+            if ((builder.Length - length) == 1 && builder[length] == '_')
             {
-                everettId.Append('_');
+                builder.Append('_');
             }
-
-            return everettId.ToString();
         }
 
         /// <summary>
@@ -385,6 +371,7 @@ namespace Microsoft.Build.Tasks
         public static string MakeValidEverettIdentifier(string name)
         {
             ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
+            if (string.IsNullOrEmpty(name)) { return name; }
 
             var everettId = new StringBuilder(name.Length);
 
@@ -392,12 +379,12 @@ namespace Microsoft.Build.Tasks
             string[] subNames = name.Split(MSBuildConstants.ForwardSlashBackslash);
 
             // convert every folder name
-            everettId.Append(MakeValidEverettFolderIdentifier(subNames[0]));
+            MakeValidEverettFolderIdentifier(everettId, subNames[0]);
 
             for (int i = 1; i < subNames.Length; i++)
             {
                 everettId.Append('.');
-                everettId.Append(MakeValidEverettFolderIdentifier(subNames[i]));
+                MakeValidEverettFolderIdentifier(everettId, subNames[i]);
             }
 
             return everettId.ToString();
