@@ -645,7 +645,7 @@ namespace Microsoft.Build.Construction
                     "SubCategoryForSolutionParsingErrors",
                     new BuildEventFileInfo(FullPath),
                     "SolutionParseDuplicateProject",
-                    (uniqueNameExists) ? uniqueName : proj.ProjectName);
+                    uniqueNameExists ? uniqueName : proj.ProjectName);
             }
         } // ParseSolutionFile()
 
