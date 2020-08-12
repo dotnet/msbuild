@@ -6,7 +6,6 @@ using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Tool.Search;
 using Xunit;
 using Xunit.Abstractions;
@@ -28,10 +27,8 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool search");
             var appliedCommand = result["dotnet"]["tool"]["search"];
-            var toolSearchCommand = new ToolSearchCommand(appliedCommand, result);
-
-            Action a = () => toolSearchCommand.Execute();
-            a.ShouldThrow<GracefulException>();
+            Action a = () => new ToolSearchCommand(appliedCommand, result);
+            a.ShouldThrow<CommandParsingException>();
         }
 
         [Fact]
