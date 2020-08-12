@@ -60,9 +60,9 @@ namespace Microsoft.Build.Internal
         Administrator = 32,
 
         /// <summary>
-        /// Is worker node. Worker node can accept normal build requests.
+        /// Is special node. Special node can not accept normal build requests.
         /// </summary>
-        Worker = 64
+        Special = 64
     }
 
     internal readonly struct Handshake
@@ -481,7 +481,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Given the appropriate information, return the equivalent HandshakeOptions.
         /// </summary>
-        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, bool is64Bit = false, bool nodeReuse = false, bool lowPriority = false, bool workerNode = true, IDictionary<string, string> taskHostParameters = null)
+        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, bool is64Bit = false, bool nodeReuse = false, bool lowPriority = false, bool specialNode = true, IDictionary<string, string> taskHostParameters = null)
         {
             HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
 
@@ -532,9 +532,9 @@ namespace Microsoft.Build.Internal
                 context |= HandshakeOptions.Administrator;
             }
 #endif
-            if (workerNode)
+            if (specialNode)
             {
-                context |= HandshakeOptions.Worker;
+                context |= HandshakeOptions.Special;
             }
             return context;
         }

@@ -76,18 +76,21 @@ namespace Microsoft.Build.BackEnd
         /// <param name="buildParameters">The build parameters</param>
         /// <param name="forwardingLoggers">The forwarding loggers.</param>
         /// <param name="loggingNodeConfiguration">The logging configuration for the node.</param>
+        /// <param name="rarNode">Indicates if node works as RAR node.</param>
         public NodeConfiguration
             (
             int nodeId,
             BuildParameters buildParameters,
             LoggerDescription[] forwardingLoggers,
-            LoggingNodeConfiguration loggingNodeConfiguration
+            LoggingNodeConfiguration loggingNodeConfiguration,
+            bool rarNode = false
             )
         {
             _nodeId = nodeId;
             _buildParameters = buildParameters;
             _forwardingLoggers = forwardingLoggers;
             _loggingNodeConfiguration = loggingNodeConfiguration;
+            RarNode = rarNode;
         }
 #endif
 
@@ -211,7 +214,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                 , _appDomainSetup
 #endif
-                , _loggingNodeConfiguration
+                , _loggingNodeConfiguration, _rarNode
                 );
         }
     }

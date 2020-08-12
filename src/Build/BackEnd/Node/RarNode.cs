@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -38,10 +38,7 @@ namespace Microsoft.Build.Execution
             string pipeName = CommunicationsUtilities.GetRarPipeName(nodeReuse, lowPriority);
             RarController controller = new RarController(pipeName);
 
-            Console.CancelKeyPress += (e, sender) => cancellationTokenSource.Cancel();
-
-            _rarTask = Task.Run(async () => _rarResult = await controller.StartAsync(cancellationTokenSource.Token).ConfigureAwait(false));
-            _msBuildTask = Task.Run(() => shutdownReason = _msBuildNode.Run(nodeReuse, lowPriority, out this.shutdownException)).WithCancellation(cancellationTokenSource.Token);
+            _msBuildTask = Task.Run(() => shutdownReason = _msBuildNode.Run(nodeReuse, lowPriority, specialNode: true, out this.shutdownException), cts.Token);
 
             Task.WaitAny(_msBuildTask, _rarTask);
             cancellationTokenSource.Cancel();

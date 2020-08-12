@@ -22,7 +22,7 @@ namespace Microsoft.Build.BackEnd
 
         private readonly bool _lowPriority;
 
-        private readonly bool _workerNode;
+        private readonly bool _specialNode;
 
         #endregion
 
@@ -35,19 +35,19 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         /// <param name="enableReuse">Whether this node may be reused for a later build.</param>
         /// <param name="lowPriority">Whether this node is low priority.</param>
-        /// <param name="workerNode">Indicates if node is worker node (can accept normal MSBuild work)</param>
+        /// <param name="specialNode">Indicates if node is special node (can not accept normal MSBuild work)</param>
         internal NodeEndpointOutOfProc(
             string pipeName, 
             IBuildComponentHost host,
             bool enableReuse,
             bool lowPriority,
-            bool workerNode)
+            bool specialNode)
         {
             ErrorUtilities.VerifyThrowArgumentNull(host, "host");
             _componentHost = host;
             _enableReuse = enableReuse;
             _lowPriority = lowPriority;
-            _workerNode = workerNode;
+            _specialNode = specialNode;
 
 
             InternalConstruct(pipeName);
@@ -65,7 +65,7 @@ namespace Microsoft.Build.BackEnd
                 is64Bit: EnvironmentUtilities.Is64BitProcess,
                 nodeReuse: _enableReuse,
                 lowPriority: _lowPriority,
-                _workerNode));
+                _specialNode));
         }
 
         #region Structs

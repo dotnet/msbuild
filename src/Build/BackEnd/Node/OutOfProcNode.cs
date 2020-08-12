@@ -243,7 +243,7 @@ namespace Microsoft.Build.Execution
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(bool enableReuse, bool lowPriority, out Exception shutdownException)
         {
-            return Run(enableReuse, lowPriority, true, out shutdownException);
+            return Run(enableReuse, lowPriority, specialNode: false, out shutdownException);
         }
 
         /// <summary>
@@ -251,15 +251,15 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="enableReuse">Whether this node is eligible for reuse later.</param>
         /// <param name="lowPriority">Whether this node should be running with low priority.</param>
-        /// <param name="workerNode">Whether this node should act as worker node and accpet build requests.</param>
+        /// <param name="specialNode">Whether this node should act as special node and refuse build requests.</param>
         /// <param name="shutdownException">The exception which caused shutdown, if any.</param>
         /// <returns>The reason for shutting down.</returns>
-        public NodeEngineShutdownReason Run(bool enableReuse, bool lowPriority, bool workerNode, out Exception shutdownException)
+        public NodeEngineShutdownReason Run(bool enableReuse, bool lowPriority, bool specialNode, out Exception shutdownException)
         {
             // Console.WriteLine("Run called at {0}", DateTime.Now);
             string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + Process.GetCurrentProcess().Id);
 
-            _nodeEndpoint = new NodeEndpointOutOfProc(pipeName, this, enableReuse, lowPriority, workerNode);
+            _nodeEndpoint = new NodeEndpointOutOfProc(pipeName, this, enableReuse, lowPriority, specialNode);
             _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
             _nodeEndpoint.Listen(this);
 

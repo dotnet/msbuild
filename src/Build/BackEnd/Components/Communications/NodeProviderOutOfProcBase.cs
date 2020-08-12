@@ -125,16 +125,16 @@ namespace Microsoft.Build.BackEnd
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.
-                Stream nodeStream = NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false, true));
+                Stream nodeStream = NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: false, specialNode: false));
 
                 // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                nodeStream ??= NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true, true));
+                nodeStream ??= NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: true, specialNode: false));
 
                 // Attempt to connect to the non-worker process
                 // Attempt to connect to the process with the handshake without low priority.
-                nodeStream ??= NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false, false));
+                nodeStream ??= NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: false, specialNode: true));
                 // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                nodeStream ??= NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true, false));
+                nodeStream ??= NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: true, specialNode: true));
 
                 if (nodeStream != null)
                 {
@@ -303,7 +303,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Creates a new MSBuild process
         /// </summary>
-        private int LaunchNode(string msbuildLocation, string commandLineArgs)
+        internal static int LaunchNode(string msbuildLocation, string commandLineArgs)
         {
             // Should always have been set already.
             ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, "msbuildLocation");
