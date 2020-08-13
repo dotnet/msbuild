@@ -171,7 +171,7 @@ namespace Microsoft.Build.Globbing
             ErrorUtilities.VerifyThrowArgumentNull(fileSpec, nameof(fileSpec));
             ErrorUtilities.VerifyThrowArgumentInvalidPath(globRoot, nameof(globRoot));
 
-            if (string.IsNullOrEmpty(globRoot))
+            if (globRoot.Length == 0)
             {
                 globRoot = Directory.GetCurrentDirectory();
             }

@@ -376,11 +376,11 @@ namespace Microsoft.Build.Execution
             string runtime = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Runtime, expanderOptions, projectUsingTaskXml.RuntimeLocation);
             string architecture = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Architecture, expanderOptions, projectUsingTaskXml.ArchitectureLocation);
 
-            if ((runtime != String.Empty) || (architecture != String.Empty))
+            if ((runtime != string.Empty) || (architecture != string.Empty))
             {
                 taskFactoryParameters = CreateTaskFactoryParametersDictionary();
-                taskFactoryParameters.Add(XMakeAttributes.runtime, string.IsNullOrEmpty(runtime) ? XMakeAttributes.MSBuildRuntimeValues.any : runtime);
-                taskFactoryParameters.Add(XMakeAttributes.architecture, string.IsNullOrEmpty(architecture) ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
+                taskFactoryParameters.Add(XMakeAttributes.runtime, runtime.Length == 0 ? XMakeAttributes.MSBuildRuntimeValues.any : runtime);
+                taskFactoryParameters.Add(XMakeAttributes.architecture, architecture.Length == 0 ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
             taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord);
