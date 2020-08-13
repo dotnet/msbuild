@@ -43,7 +43,7 @@ namespace Microsoft.Build.Execution
 
             if(index == 0)
             {
-                // We know that this task is completed so we can accept
+                // We know that this task is completed so we can get Result without worring about waiting for it
                 return _msBuildShutdown.Result;
             }
             else
@@ -68,14 +68,14 @@ namespace Microsoft.Build.Execution
                 if (cancellationToken.IsCancellationRequested)
                     return NodeEngineShutdownReason.Error;
 
-                await serverStream.WaitForConnectionAsync(cancellationToken);
+                await serverStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
 
                 bool conected = NamedPipeUtil.ValidateHandshake(handshake, serverStream, ClientConnectTimeout);
                 if (!conected)
                     continue;
 
                 byte[] header = new byte[5];
-                int bytesRead = await serverStream.ReadAsync(header, 0, header.Length);
+                int bytesRead = await serverStream.ReadAsync(header, 0, header.Length).ConfigureAwait(false);
                 if (bytesRead != header.Length)
                 {
                     continue;

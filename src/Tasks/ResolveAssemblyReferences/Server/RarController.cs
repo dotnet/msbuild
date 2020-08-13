@@ -65,14 +65,11 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
             using CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             CancellationToken token = cancellationTokenSource.Token;
 
-            while (true)
+            while (!token.IsCancellationRequested)
             {
-                if (token.IsCancellationRequested)
-                    break;
-
                 // server will dispose stream too.
                 NamedPipeServerStream serverStream = GetStream(_pipeName);
-                await serverStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
+                await serverStream.WaitForConnectionAsync(token).ConfigureAwait(false);
 
                 // Connected! Refresh timeout for incoming request
                 cancellationTokenSource.CancelAfter(Timeout);
