@@ -365,12 +365,9 @@ namespace Microsoft.Build.BuildEngine
             error.VerifyThrowInvalidOperation(this.taskElement != null,
                 "CannotUseParameters");
 
-            
             // If this is a persisted Task, grab the attribute directly from the
             // task element.
-            string attributeValue = taskElement.GetAttribute(attributeName);
-
-            return attributeValue ?? String.Empty;
+            return taskElement.GetAttribute(attributeName) ?? string.Empty;
         }
 
         /// <summary>

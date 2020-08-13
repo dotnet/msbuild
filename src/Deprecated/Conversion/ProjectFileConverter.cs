@@ -2628,7 +2628,6 @@ namespace Microsoft.Build.Conversion
         private ProjectItemElement ConvertProjectToProjectReference(XmlElementWithLocation referenceElement, ProjectItemGroupElement referencesItemGroup, string referenceName, ref string referencedProjectGuid)
         {
             // This is a project-to-project reference.
-
             // This gets added as a new XMake item of type "ProjectReference".
             // The "Include" attribute should be the relative path from the
             // current project to the referenced project file.  For example,
@@ -2685,8 +2684,7 @@ namespace Microsoft.Build.Conversion
             // the relative path to the project, use it for the "Include", otherwise just use
             // the project name.
             string value = pathToReferencedProject ?? referenceName;
-            newReferenceItem = referencesItemGroup.AddItem(XMakeProjectStrings.projectReference, ProjectCollection.Escape(value));
-            return newReferenceItem;
+            return referencesItemGroup.AddItem(XMakeProjectStrings.projectReference, ProjectCollection.Escape(value));
         }
 
         /// <summary>
