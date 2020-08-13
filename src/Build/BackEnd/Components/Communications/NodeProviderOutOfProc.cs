@@ -18,7 +18,7 @@ namespace Microsoft.Build.BackEnd
     internal class NodeProviderOutOfProc : NodeProviderOutOfProcBase, INodeProvider
     {
         /// <summary>
-        /// A mapping of all normal nodes managed by this provider.
+        /// A mapping of all the nodes managed by this provider.
         /// </summary>
         private Dictionary<int, NodeContext> _nodeContexts;
 
@@ -138,13 +138,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
-
-            ShutdownAllNodes(enableReuse, ShutdownRarNode, onlySpecialNode: true);
-        }
-
-        private void ShutdownRarNode(int nodeId)
-        {
-            // Do nothig
         }
 
         /// <summary>

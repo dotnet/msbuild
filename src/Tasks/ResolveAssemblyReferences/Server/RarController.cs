@@ -1,13 +1,14 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
-
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Services;
@@ -21,56 +22,87 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
     public sealed class RarController
     {
         private const int PipeBufferSize = 131072;
-        
+
+        /// <summary>
+        /// Name of <see cref="NamedPipeServerStream"/>
+        /// </summary>
         private readonly string _pipeName;
 
+        /// <summary>
+        /// Handler for all incoming tasks
+        /// </summary>
         private readonly IResolveAssemblyReferenceTaskHandler _resolveAssemblyReferenceTaskHandler;
 
-        private NamedPipeServerStream? _serverStream;
+        /// <summary>
+        /// Timeout for incoming connections
+        /// </summary>
+        private readonly TimeSpan Timeout = new TimeSpan(0, 15, 0);
 
-        public RarController(string pipeName) : this(pipeName, new RarTaskHandler())
+        public RarController(string pipeName, TimeSpan? timeout = null) : this(pipeName, timeout: timeout, resolveAssemblyReferenceTaskHandler: new RarTaskHandler())
         {
         }
 
-        internal RarController(string pipeName, IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler)
+        internal RarController(string pipeName, IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler, TimeSpan? timeout = null)
         {
             _pipeName = pipeName;
             _resolveAssemblyReferenceTaskHandler = resolveAssemblyReferenceTaskHandler;
+
+            if (timeout.HasValue)
+            {
+                Timeout = timeout.Value;
+            }
         }
 
         public async Task<int> StartAsync(CancellationToken cancellationToken = default)
         {
+            using ServerMutex mutex = new ServerMutex(_pipeName);
 
-            using var mutex = new ServerMutex(_pipeName);
-
-            if (mutex.IsLocked)
+            if (!mutex.IsLocked)
+            {
                 return 1;
+            }
+
+            using CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            CancellationToken token = cancellationTokenSource.Token;
 
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested)
+                if (token.IsCancellationRequested)
                     break;
 
-                _serverStream = GetStream(_pipeName);
-                await _serverStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
-                // TODO: This waits for completion of the connection, make to accept multiple connection
-                await HandleConnectionAsync(_serverStream, cancellationToken).ConfigureAwait(false);
+                // server will dispose stream too.
+                NamedPipeServerStream serverStream = GetStream(_pipeName);
+                await serverStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
+
+                // Connected! Refresh timeout for incoming request
+                cancellationTokenSource.CancelAfter(Timeout);
+
+                _ = HandleClientAsync(serverStream, token).ConfigureAwait(false);
             }
+
             return 0;
         }
 
-        private async Task HandleConnectionAsync(Stream serverStream, CancellationToken cancellationToken = default)
+        private async Task HandleClientAsync(Stream serverStream, CancellationToken cancellationToken = default)
         {
-            var server = GetRpcServer(serverStream, _resolveAssemblyReferenceTaskHandler);
+            using JsonRpc server = GetRpcServer(serverStream, _resolveAssemblyReferenceTaskHandler);
             server.StartListening();
 
-            await server.Completion.WithCancellation(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await server.Completion.WithCancellation(cancellationToken).ConfigureAwait(false);
+            }
+            catch (ConnectionLostException)
+            {
+                // Some problem with connection, let's ignore it.
+                // All other exceptions are issue though
+            }
         }
 
         private JsonRpc GetRpcServer(Stream stream, IResolveAssemblyReferenceTaskHandler handler)
         {
-            var serverHandler = RpcUtils.GetRarMessageHandler(stream);
-            var rpc = new JsonRpc(serverHandler, handler);
+            IJsonRpcMessageHandler serverHandler = RpcUtils.GetRarMessageHandler(stream);
+            JsonRpc rpc = new JsonRpc(serverHandler, handler);
             return rpc;
         }
 
@@ -84,15 +116,16 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
             if (!NativeMethodsShared.IsMono)
             {
-                var identifier = WindowsIdentity.GetCurrent().Owner;
-                var security = new PipeSecurity();
+                SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
+                PipeSecurity security = new PipeSecurity();
 
                 // Restrict access to just this account.  We set the owner specifically here, and on the
                 // pipe client side they will check the owner against this one - they must have identical
                 // SIDs or the client will reject this server.  This is used to avoid attacks where a
                 // hacked server creates a less restricted pipe in an attempt to lure us into using it and
                 // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
-                var rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
+                // NOTE: There has to be PipeAccessRights.CreateNewInstance, without it we can't create new pipes
+                PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite | PipeAccessRights.CreateNewInstance, AccessControlType.Allow);
                 security.AddAccessRule(rule);
                 security.SetOwner(identifier);
 
@@ -100,9 +133,9 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
                     (
                     pipeName,
                     PipeDirection.InOut,
-                    1, // Only allow one connection at a time.
+                    NamedPipeServerStream.MaxAllowedServerInstances, // Only allow one connection at a time.
                     PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    PipeOptions.Asynchronous,
                     PipeBufferSize, // Default input buffer
                     PipeBufferSize,  // Default output buffer
                     security,
@@ -116,9 +149,9 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
                 (
                     pipeName,
                     PipeDirection.InOut,
-                    1, // Only allow one connection at a time.
+                    NamedPipeServerStream.MaxAllowedServerInstances,
                     PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    PipeOptions.Asynchronous,
                     PipeBufferSize, // Default input buffer
                     PipeBufferSize  // Default output buffer
                 );

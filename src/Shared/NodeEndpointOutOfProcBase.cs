@@ -31,7 +31,6 @@ namespace Microsoft.Build.BackEnd
     internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
     {
         #region Private Data
-
         /// <summary>
         /// The amount of time to wait for the client to connect to the host.
         /// </summary>
@@ -98,18 +97,18 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private SharedReadBuffer _sharedReadBuffer;
 
-        #endregion
+#endregion
 
-        #region INodeEndpoint Events
+#region INodeEndpoint Events
 
         /// <summary>
         /// Raised when the link status has changed.
         /// </summary>
         public event LinkStatusChangedDelegate OnLinkStatusChanged;
 
-        #endregion
+#endregion
 
-        #region INodeEndpoint Properties
+#region INodeEndpoint Properties
 
         /// <summary>
         /// Returns the link status of this node.
@@ -119,13 +118,13 @@ namespace Microsoft.Build.BackEnd
             get { return _status; }
         }
 
-        #endregion
+#endregion
 
-        #region Properties
+#region Properties
 
-        #endregion
+#endregion
 
-        #region INodeEndpoint Methods
+#region INodeEndpoint Methods
 
         /// <summary>
         /// Causes this endpoint to wait for the remote endpoint to connect
@@ -170,9 +169,9 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        #endregion
+#endregion
 
-        #region Construction
+#region Construction
 
         /// <summary>
         /// Instantiates an endpoint to act as a client
@@ -190,7 +189,7 @@ namespace Microsoft.Build.BackEnd
             _pipeServer = NamedPipeUtil.CreateNamedPipeServer(pipeName, PipeBufferSize, PipeBufferSize);
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Returns the host handshake for this node endpoint
@@ -218,7 +217,7 @@ namespace Microsoft.Build.BackEnd
             OnLinkStatusChanged?.Invoke(this, newStatus);
         }
 
-        #region Private Methods
+#region Private Methods
 
         /// <summary>
         /// This does the actual work of changing the status and shutting down any threads we may have for
@@ -239,7 +238,7 @@ namespace Microsoft.Build.BackEnd
             ChangeLinkStatus(LinkStatus.Inactive);
         }
 
-        #region Asynchronous Mode Methods
+#region Asynchronous Mode Methods
 
         /// <summary>
         /// Adds a packet to the packet queue when asynchronous mode is enabled.
@@ -519,8 +518,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-        #endregion
+#endregion
 
-        #endregion
+#endregion
     }
 }

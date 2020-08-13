@@ -18,6 +18,12 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
             IsLocked = createdNew;
         }
 
+        public bool Wait(int timeout)
+        {
+            return _mutex.WaitOne(timeout);
+        }
+
+
         public void Dispose()
         {
 

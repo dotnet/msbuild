@@ -7,6 +7,7 @@ using System.IO.Pipes;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences.Server;
 using StreamJsonRpc;
 
 
@@ -14,7 +15,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
 {
     internal sealed class RarClient : IDisposable
     {
-        private const int ConnectionTimeout = 30;
+        private const int ConnectionTimeout = 300;
         private readonly IRarBuildEngine _rarBuildEngine;
         private NamedPipeClientStream _clientStream;
 
@@ -23,11 +24,15 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
             _rarBuildEngine = rarBuildEngine;
         }
 
+        internal bool Connect() => Connect(ConnectionTimeout);
 
-        internal bool Connect()
+        internal bool Connect(int timeout)
         {
+            if (_clientStream != null)
+                return true;
+
             string pipeName = _rarBuildEngine.GetRarPipeName();
-            NamedPipeClientStream stream = _rarBuildEngine.GetRarClientStream(pipeName, ConnectionTimeout);
+            NamedPipeClientStream stream = _rarBuildEngine.GetRarClientStream(pipeName, timeout);
 
             if (stream == null)
                 return false; // We couldn't connect
@@ -44,6 +49,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
         internal int GetNumber(int parameter)
         {
             using IResolveAssemblyReferenceTaskHandler client = GetRpcClient();
+
             // TODO: Find out if there is any possibility of awaiting it.
             return client.GetNumber(parameter).GetAwaiter().GetResult();
         }

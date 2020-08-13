@@ -2988,7 +2988,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if(client.CreateNode())
                     {
-                        connected = client.Connect();
+                        connected = client.Connect(5000);
                     }
                 }
 
@@ -2996,9 +2996,8 @@ namespace Microsoft.Build.Tasks
                 {
                     // Client is connected to the RAR node, we can execute RAR task remotely
                     // return client.Execute(); // TODO: Let it do something.
-                    // var number = client.GetNumber(42);
+                    var number = client.GetNumber(42);
                 }
-
             }
 
             return Execute

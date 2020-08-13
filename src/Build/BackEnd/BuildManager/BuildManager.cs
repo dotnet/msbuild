@@ -2018,9 +2018,34 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        internal NodeInfo CreateRarNode()
+        internal int CreateRarNode()
         {
-            return null;
+            string nodeLocation = _buildParameters?.NodeExeLocation;
+            nodeLocation ??= OutOfProcNode.MsBuildPath;
+            if (string.IsNullOrEmpty(nodeLocation))
+            {
+                string msbuildExeName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
+
+                if (!string.IsNullOrEmpty(msbuildExeName))
+                {
+                    // we assume that MSBUILD_EXE_NAME is, in fact, just the name.
+                    nodeLocation = Path.Combine(msbuildExeName, ".exe");
+                }
+            }
+
+            bool nodeReuse = _buildParameters?.EnableNodeReuse ?? true;
+            bool lowPriority = _buildParameters?.LowPriority ?? false;
+            string commandLineArgs = $"/nologo /nodemode:3 /nodeReuse:{nodeReuse.ToString().ToLower()} /low:{lowPriority.ToString().ToLower()}";
+            try
+            {
+                int nodeId = NodeProviderOutOfProcBase.LaunchNode(nodeLocation, commandLineArgs);
+                return nodeId;
+            }
+            catch (Exception)
+            {
+                // Fail silently
+                return -1;
+            }
         }
 
         /// <summary>

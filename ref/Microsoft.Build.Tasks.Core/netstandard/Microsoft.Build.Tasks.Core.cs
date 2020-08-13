@@ -2177,7 +2177,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
 {
     public sealed partial class RarController
     {
-        public RarController(string pipeName) { }
+        public RarController(string pipeName, System.Nullable<System.TimeSpan> timeout=default(System.Nullable<System.TimeSpan>)) { }
         public System.Threading.Tasks.Task<int> StartAsync(System.Threading.CancellationToken cancellationToken=default(System.Threading.CancellationToken)) { throw null; }
     }
 }

@@ -14,7 +14,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
         public Task<int> GetNumber(int parameter)
         {
             Console.WriteLine(parameter);
-            Console.WriteLine();
             return Task.FromResult(parameter);
         }
 

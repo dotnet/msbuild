@@ -48,8 +48,8 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                // RAR task can only exit with error
-                return NodeEngineShutdownReason.Error;
+                // RAR task can only exit with connection error or timeout
+                return NodeEngineShutdownReason.ConnectionFailed;
             }
         }
 
@@ -69,6 +69,7 @@ namespace Microsoft.Build.Execution
                     return NodeEngineShutdownReason.Error;
 
                 await serverStream.WaitForConnectionAsync(cancellationToken);
+
                 bool conected = NamedPipeUtil.ValidateHandshake(handshake, serverStream, ClientConnectTimeout);
                 if (!conected)
                     continue;

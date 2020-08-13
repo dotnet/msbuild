@@ -62,7 +62,6 @@ namespace Microsoft.Build.Shared
         internal static NamedPipeClientStream TryConnectToProcess(int nodeProcessId, int timeout, Handshake? handshake)
         {
             string pipeName = GetPipeNameOrPath("MSBuild" + nodeProcessId);
-            Console.WriteLine(handshake);
             return TryConnectToProcess(pipeName, nodeProcessId, timeout, handshake);
         }
 

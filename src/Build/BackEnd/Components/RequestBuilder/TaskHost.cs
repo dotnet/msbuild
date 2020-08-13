@@ -991,8 +991,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         bool IRarBuildEngine.CreateRarNode()
         {
-            NodeInfo nodeInfo = BuildManager.DefaultBuildManager.CreateRarNode();
-            return nodeInfo != null;
+            int nodeId = BuildManager.DefaultBuildManager.CreateRarNode();
+            return nodeId != -1;
         }
 
         /// <summary>
