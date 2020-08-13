@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli
             return Create.Command(
                 "search",
                 LocalizableStrings.CommandDescription,
-                Accept.ZeroOrMoreArguments()
+                Accept.ExactlyOneArgument()
                     .With(name: LocalizableStrings.SearchTermArgumentName,
                         description: LocalizableStrings.SearchTermDescription),
                 Create.Option(
