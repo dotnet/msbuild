@@ -12,6 +12,3 @@ You can create a binary log by passing the `-bl` parameter to MSBuild.  You can 
 
 ## Capturing Binary Logs Through Visual Studio
 See this detailed guide in the [Project System Tools repo](https://github.com/dotnet/project-system-tools) for capturing binlogs through Visual Studio.
-
-
-
