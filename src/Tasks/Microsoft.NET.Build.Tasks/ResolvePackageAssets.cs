@@ -51,6 +51,11 @@ namespace Microsoft.NET.Build.Tasks
         public string TargetFrameworkMoniker { get; set; }
 
         /// <summary>
+        /// TPM to use for compile-time assets. 
+        /// </summary>
+        public string TargetPlatformMoniker { get; set; }
+
+        /// <summary>
         /// RID to use for runtime assets (may be empty)
         /// </summary>
         public string RuntimeIdentifier { get; set; }
@@ -434,6 +439,7 @@ namespace Microsoft.NET.Build.Tasks
                         }
                     }
                     writer.Write(TargetFrameworkMoniker);
+                    writer.Write(TargetPlatformMoniker ?? "");
                     writer.Write(VerifyMatchingImplicitPackageVersion);
                 }
 
@@ -645,7 +651,7 @@ namespace Microsoft.NET.Build.Tasks
 
             public CacheWriter(ResolvePackageAssets task)
             {
-                _targetFramework = NuGetUtils.ParseFrameworkName(task.TargetFrameworkMoniker);
+                _targetFramework = NuGetTargetFrameworkUtils.GetTargetFramework(task.TargetFrameworkMoniker, task.TargetPlatformMoniker);
 
                 _task = task;
                 _lockFile = new LockFileCache(task).GetLockFile(task.ProjectAssetsFile);
@@ -678,7 +684,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtime: null);
+                    _compileTimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, runtime: null); 
                     _runtimeTarget = _lockFile.GetTargetAndThrowIfNotFound(_targetFramework, _task.RuntimeIdentifier);
                 }
                 
@@ -1473,6 +1479,29 @@ namespace Microsoft.NET.Build.Tasks
 
                 throw new BuildErrorException(Strings.CannotFindApphostForRid, runtimeTarget.RuntimeIdentifier);
             }
+        }
+    }
+
+    internal static class NuGetTargetFrameworkUtils
+    {
+        public static NuGetFramework GetTargetFramework(string targetFrameworkMoniker, string targetPlatformMoniker)
+        {
+            var targetFramework = NuGetUtils.ParseFrameworkName(targetFrameworkMoniker);
+            if (targetPlatformMoniker != null && !targetPlatformMoniker.Equals(string.Empty))
+            {
+                try
+                {
+                    var targetPlatform = NuGetUtils.ParseFrameworkName(targetPlatformMoniker);
+                    var constructedFramework = new NuGetFramework(targetFramework.Framework, targetFramework.Version, targetPlatform.Framework, targetPlatform.Version);
+
+                    return constructedFramework;
+                }
+                catch
+                {
+                    return targetFramework;
+                }
+            }
+            return targetFramework;
         }
     }
 }

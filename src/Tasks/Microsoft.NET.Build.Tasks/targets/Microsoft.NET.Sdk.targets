@@ -196,6 +196,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       AssetsFilePath="$(ProjectAssetsFile)"
                       DepsFilePath="$(ProjectDepsFilePath)"
                       TargetFramework="$(TargetFrameworkMoniker)"
+                      TargetPlatformMoniker="$(TargetPlatformMoniker)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyExtension="$(TargetExt)"
                       AssemblyVersion="$(Version)"
@@ -289,7 +290,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
                                        TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
-                                       TargetFramework="$(TargetFramework)"
+                                       TargetPlatformMoniker="$(TargetPlatformMoniker)"
                                        RuntimeConfigPath="$(ProjectRuntimeConfigFilePath)"
                                        RuntimeConfigDevPath="$(ProjectRuntimeConfigDevFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"

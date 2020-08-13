@@ -592,6 +592,7 @@ Copyright (c) .NET Foundation. All rights reserved.
            PreserveStoreLayout without this task, and how to handle RuntimeStorePackages. -->
       <ResolveCopyLocalAssets AssetsFilePath="$(ProjectAssetsFile)"
                               TargetFramework="$(TargetFrameworkMoniker)"
+                              TargetPlatformMoniker="$(TargetPlatformMoniker)"
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                               RuntimeFrameworks="@(RuntimeFramework)"
@@ -1050,6 +1051,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       AssetsFilePath="$(ProjectAssetsFile)"
                       DepsFilePath="$(IntermediateDepsFilePath)"
                       TargetFramework="$(TargetFrameworkMoniker)"
+                      TargetPlatformMoniker="$(TargetPlatformMoniker)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyExtension="$(TargetExt)"
                       AssemblyVersion="$(Version)"
