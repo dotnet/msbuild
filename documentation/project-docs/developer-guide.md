@@ -101,7 +101,7 @@ This should output `.../artifacts/tmp/Debug/dotnet/dotnet`.
 
 You can now run `dotnet` commands to test changes.
 
-## Run tests in command line
+## Run tests from the command line
 
 ```shell
 build.cmd # to have a full build first
