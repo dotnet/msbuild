@@ -105,6 +105,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       RuntimeFrameworks="@(RuntimeFramework)"
       TargetFramework="$(TargetFramework)"
       TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
+      TargetPlatformMoniker="$(TargetPlatformMoniker)"
       UserRuntimeConfig="$(UserRuntimeConfig)"
       WriteAdditionalProbingPathsToMainConfig="true"
       />

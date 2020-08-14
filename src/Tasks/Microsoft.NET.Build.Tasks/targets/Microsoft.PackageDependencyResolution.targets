@@ -245,6 +245,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ProjectLanguage="$(Language)"
       EmitAssetsLogMessages="$(EmitAssetsLogMessages)"
       TargetFrameworkMoniker="$(NuGetTargetMoniker)"
+      TargetPlatformMoniker="$(TargetPlatformMoniker)"
       RuntimeIdentifier="$(RuntimeIdentifier)"
       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
       RuntimeFrameworks="@(RuntimeFramework)"
