@@ -49,6 +49,17 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
+        [InlineData("net5.0-windows", "net5.0", true)]
+        [InlineData("net5.0", "net5.0-windows", false)]
+        [InlineData("net5.0-windows", "net5.0-windows", true)]
+        [InlineData("net5.0-windows", "net5.0-windows7.0", true)]
+        [InlineData("net5.0-windows7.0", "net5.0-windows", true)]
+        public void It_checks_for_valid_platform_references(string referencerTarget, string dependencyTarget, bool succeeds)
+        {
+            It_checks_for_valid_references(referencerTarget, true, dependencyTarget, true, succeeds, succeeds);
+        }
+
+        [Theory]
         [InlineData("netstandard1.2", true, "netstandard1.5", true, false, false)]
         [InlineData("netcoreapp1.1", true, "net45;netstandard1.5", true, true, true)]
         [InlineData("netcoreapp1.1", true, "net45;net46", true, false, false)]
