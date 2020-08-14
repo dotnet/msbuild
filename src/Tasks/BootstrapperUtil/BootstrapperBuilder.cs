@@ -510,7 +510,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 StringBuilder productsOrder = new StringBuilder();
                 foreach (Product p in Products)
                 {
-                    productsOrder.Append(p.ProductCode + Environment.NewLine);
+                    productsOrder.Append(p.ProductCode).Append(Environment.NewLine);
                 }
                 DumpStringToFile(productsOrder.ToString(), "BootstrapperInstallOrder.txt", false);
             }

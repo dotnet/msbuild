@@ -1557,7 +1557,7 @@ namespace Microsoft.Build.UnitTests
             
             foreach (var defaultTarget in (defaultTargets ?? string.Empty).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
             {
-                sb.Append($"<Target Name='{defaultTarget}'/>");
+                sb.Append("<Target Name='").Append(defaultTarget).Append("'/>");
             }
 
             sb.Append(extraContent ?? string.Empty);

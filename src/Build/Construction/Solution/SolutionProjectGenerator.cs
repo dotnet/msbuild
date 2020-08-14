@@ -1420,7 +1420,7 @@ namespace Microsoft.Build.Construction
 
                     // Update our big condition string to include this configuration.
                     conditionDescribingValidConfigurations.Append(" or ");
-                    conditionDescribingValidConfigurations.Append(String.Format(CultureInfo.InvariantCulture, "('$(AspNetConfiguration)' == '{0}')", EscapingUtilities.Escape(configurationName)));
+                    conditionDescribingValidConfigurations.AppendFormat(CultureInfo.InvariantCulture, "('$(AspNetConfiguration)' == '{0}')", EscapingUtilities.Escape(configurationName));
                 }
 
                 StringBuilder referenceItemName = new StringBuilder(GenerateSafePropertyName(project, "References"));

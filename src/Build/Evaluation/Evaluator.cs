@@ -2554,7 +2554,7 @@ namespace Microsoft.Build.Evaluation
                     sb.Append(", ");
                 }
 
-                sb.Append($"\"{strings[i]}\"");
+                sb.Append('\"').Append(strings[i]).Append('\"');
             }
 
             if (strings.Count > 1)
@@ -2562,7 +2562,7 @@ namespace Microsoft.Build.Evaluation
                 sb.Append(" and ");
             }
 
-            sb.Append($"\"{strings[strings.Count - 1]}\"");
+            sb.Append('\"').Append(strings[strings.Count - 1]).Append('\"');
 
             return sb.ToString();
         }
