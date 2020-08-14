@@ -2170,7 +2170,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 {
     public partial interface IResolveAssemblyReferenceTaskHandler : System.IDisposable
     {
-        System.Threading.Tasks.Task<int> GetNumber(int parameter);
     }
 }
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
