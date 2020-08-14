@@ -19,11 +19,11 @@ namespace Microsoft.Build.BuildEngine
 
         public PropertyDefinition(string name, string value, string source)
         {
-            error.VerifyThrowArgumentLength(name, "name");
-            error.VerifyThrowArgumentLength(source, "source");
+            error.VerifyThrowArgumentLength(name, nameof(name));
+            error.VerifyThrowArgumentLength(source, nameof(source));
 
             // value can be the empty string but not null
-            error.VerifyThrowArgumentNull(value, "value");
+            error.VerifyThrowArgumentNull(value, nameof(value));
 
             this.name = name;
             this.value = value;
@@ -136,7 +136,7 @@ namespace Microsoft.Build.BuildEngine
             ToolsetRegistryReader registryReaderToUse = null;
             if ((locations & ToolsetDefinitionLocations.Registry) == ToolsetDefinitionLocations.Registry)
             {
-                registryReaderToUse = registryReader == null ? new ToolsetRegistryReader() : registryReader;
+                registryReaderToUse = registryReader ?? new ToolsetRegistryReader();
                 // We do not accumulate properties when reading them from the registry, because the order
                 // in which values are returned to us is essentially random: so we disallow one property
                 // in the registry to refer to another also in the registry
@@ -159,7 +159,7 @@ namespace Microsoft.Build.BuildEngine
 
                 if (configurationReader != null)
                 {
-                    configurationReaderToUse = configurationReader == null ? new ToolsetConfigurationReader() : configurationReader;
+                    configurationReaderToUse = configurationReader ?? new ToolsetConfigurationReader();
                     // Accumulation of properties is okay in the config file because it's deterministically ordered
                     defaultToolsVersionFromConfiguration =
                         configurationReaderToUse.ReadToolsets(toolsets, globalProperties, initialProperties, true /* accumulate properties */);
@@ -252,7 +252,7 @@ namespace Microsoft.Build.BuildEngine
                                      BuildPropertyGroup initialProperties,
                                      bool accumulateProperties)
         {
-            error.VerifyThrowArgumentNull(toolsets, "toolsets");
+            error.VerifyThrowArgumentNull(toolsets, nameof(toolsets));
 
             ReadEachToolset(toolsets, globalProperties, initialProperties, accumulateProperties);
 
@@ -391,7 +391,7 @@ namespace Microsoft.Build.BuildEngine
 
             try
             {
-                toolset = new Toolset(toolsVersion.Name, toolsPath == null ? binPath : toolsPath, properties);
+                toolset = new Toolset(toolsVersion.Name, toolsPath ?? binPath, properties);
             }
             catch (ArgumentException e)
             {

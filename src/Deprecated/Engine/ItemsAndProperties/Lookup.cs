@@ -883,10 +883,7 @@ namespace Microsoft.Build.BuildEngine
         private void RemoveItemsFromTableWithBackup(Hashtable table, string name, BuildItemGroup group)
         {
             BuildItemGroup existing = (BuildItemGroup)table[name];
-            if (existing != null)
-            {
-                existing.RemoveItemsWithBackup(group);
-            }
+            existing?.RemoveItemsWithBackup(group);
         }
 
         /// <summary>
@@ -896,10 +893,7 @@ namespace Microsoft.Build.BuildEngine
         private void ApplyModificationsToTable(Hashtable table, string name, Dictionary<BuildItem, Dictionary<string, string>> modify)
         {
             BuildItemGroup existing = (BuildItemGroup)table[name];
-            if (existing != null)
-            {
-                existing.ModifyItemsUsingVirtualMetadata(modify);
-            }
+            existing?.ModifyItemsUsingVirtualMetadata(modify);
         }
 
         /// <summary>
@@ -1017,7 +1011,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void MustNotBeInTable(Dictionary<string, Dictionary<BuildItem, Dictionary<string, string>>> table, BuildItem item)
         {
-            if (table != null && table.ContainsKey(item.Name))
+            if (table?.ContainsKey(item.Name) == true)
             {
                 Dictionary<BuildItem, Dictionary<string, string>> tableOfItemsOfSameType = table[item.Name];
                 if (tableOfItemsOfSameType != null)
@@ -1033,7 +1027,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void MustNotBeInTable(Hashtable table, string name, BuildItemGroup group)
         {
-            if (table != null && table.ContainsKey(name))
+            if (table?.ContainsKey(name) == true)
             {
                 BuildItemGroup existing = (BuildItemGroup)table[name];
                 if (existing != null)

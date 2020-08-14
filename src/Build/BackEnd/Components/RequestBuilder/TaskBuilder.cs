@@ -205,10 +205,7 @@ namespace Microsoft.Build.BackEnd
                 _componentHost = null;
 
                 IDisposable disposable = _taskExecutionHost as IDisposable;
-                if (disposable != null)
-                {
-                    disposable.Dispose();
-                }
+                disposable?.Dispose();
 
                 _taskExecutionHost = null;
             }
@@ -289,7 +286,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>true, if successful</returns>
         private async Task<WorkUnitResult> ExecuteTask(TaskExecutionMode mode, Lookup lookup)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(lookup, "lookup");
+            ErrorUtilities.VerifyThrowArgumentNull(lookup, nameof(lookup));
 
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
             TaskHost taskHost = null;
@@ -342,10 +339,7 @@ namespace Microsoft.Build.BackEnd
                 _taskExecutionHost.CleanupForTask();
 
 #if FEATURE_APPDOMAIN
-                if (taskHost != null)
-                {
-                    taskHost.MarkAsInactive();
-                }
+                taskHost?.MarkAsInactive();
 #endif
 
                 // Now all task batches are done, apply all item adds to the outer 
@@ -430,7 +424,7 @@ namespace Microsoft.Build.BackEnd
                         try
                         {
                             if (
-                                ((requirements.Value & TaskRequirements.RequireSTAThread) == TaskRequirements.RequireSTAThread)
+                                (requirements.Value & TaskRequirements.RequireSTAThread) == TaskRequirements.RequireSTAThread
 #if FEATURE_APARTMENT_STATE
                                 && (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
 #endif
@@ -596,10 +590,7 @@ namespace Microsoft.Build.BackEnd
                 taskRunnerFinished = null;
             }
 
-            if (exceptionFromExecution != null)
-            {
-                exceptionFromExecution.Throw();
-            }
+            exceptionFromExecution?.Throw();
 
             return taskResult;
         }
@@ -618,7 +609,7 @@ namespace Microsoft.Build.BackEnd
                     if (!_targetLoggingContext.LoggingService.OnlyLogCriticalEvents)
                     {
                         // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
-                        string expanded = bucket.Expander.ExpandIntoStringAndUnescape(_targetChildInstance.Condition, ExpanderOptions.ExpandAll | ExpanderOptions.LeavePropertiesUnexpandedOnError, _targetChildInstance.ConditionLocation);
+                        string expanded = bucket.Expander.ExpandIntoStringAndUnescape(_targetChildInstance.Condition, ExpanderOptions.ExpandAll | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _targetChildInstance.ConditionLocation);
 
                         // Whilst we are within the processing of the task, we haven't actually started executing it, so
                         // our skip task message needs to be in the context of the target. However any errors should be reported
@@ -872,7 +863,7 @@ namespace Microsoft.Build.BackEnd
                         _continueOnError = ContinueOnError.ErrorAndStop;
 
                         // Rethrow wrapped in order to avoid losing the callstack
-                        throw new BuildAbortedException(taskException.Message, ((BuildAbortedException)taskException));
+                        throw new BuildAbortedException(taskException.Message, (BuildAbortedException)taskException);
                     }
                     else if (type == typeof(CircularDependencyException))
                     {

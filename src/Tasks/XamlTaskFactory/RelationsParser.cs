@@ -582,13 +582,13 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             // "A Document node can have the following child node types: XmlDeclaration,
             // Element (maximum of one), ProcessingInstruction, Comment, and DocumentType."
-            return (
+            return
                    (node.NodeType != XmlNodeType.Comment) &&
                    (node.NodeType != XmlNodeType.Whitespace) &&
                    (node.NodeType != XmlNodeType.XmlDeclaration) &&
                    (node.NodeType != XmlNodeType.ProcessingInstruction) &&
                    (node.NodeType != XmlNodeType.DocumentType)
-                   );
+                   ;
         }
     }
 }

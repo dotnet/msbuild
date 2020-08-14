@@ -456,7 +456,7 @@ namespace Microsoft.Build.BackEnd
             NodeContext context = null;
             bool nodeCreationSucceeded = false;
 
-            if (!(_nodeContexts.TryGetValue(hostContext, out context)))
+            if (!_nodeContexts.TryGetValue(hostContext, out context))
             {
                 nodeCreationSucceeded = CreateNode(hostContext, factory, handler, configuration);
             }
@@ -496,7 +496,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool CreateNode(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(factory, "factory");
+            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
             ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey((int)hostContext), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
             if (AvailableNodes == 0)

@@ -762,7 +762,7 @@ namespace Microsoft.Build.Conversion
         private void RepairImportForAssetCompat(ProjectImportElement toRepairImport)
         {
             // We shouldn't have this happen but check anyway:
-            ErrorUtilities.VerifyThrowInternalNull(toRepairImport, "toRepairImport");
+            ErrorUtilities.VerifyThrowInternalNull(toRepairImport, nameof(toRepairImport));
             ErrorUtilities.VerifyThrow(!toRepairImport.Condition.Equals("false", StringComparison.OrdinalIgnoreCase), "RepairImportForAssetCompat should not receive imports with condition=false already");
 
             var newImportElement = this.xmakeProject.CreateImportElement(toRepairImport.Project);
@@ -1156,7 +1156,7 @@ namespace Microsoft.Build.Conversion
             ProjectItemElement newFSharpCoreItem = null;
             string targetFSharpCoreVersionValue = null;
 
-            var hintPathValue = fsharpCoreItem != null ? fsharpCoreItem.Metadata.FirstOrDefault(metadata => metadata.Name == HintPath) : null;
+            var hintPathValue = fsharpCoreItem?.Metadata.FirstOrDefault(metadata => metadata.Name == HintPath);
             if (hintPathValue != null)
             {
                 if (equals(hintPathValue.Value, Dev11PortableFSharpCoreLocation))
@@ -1186,10 +1186,7 @@ namespace Microsoft.Build.Conversion
                 }
             }
 
-            if (newFSharpCoreItem != null)
-            {
-                newFSharpCoreItem.AddMetadata("Private", "True");
-            }
+            newFSharpCoreItem?.AddMetadata("Private", "True");
 
             const string MinimumVisualStudioVersionProperty = "MinimumVisualStudioVersion";
             var hasMinimumVSVersion = xmakeProject.Properties.Any(prop => prop.Name == MinimumVisualStudioVersionProperty);
@@ -1427,8 +1424,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <VisualStudioProject> element.
-            error.VerifyThrow((visualStudioProjectElement != null) &&
-                (visualStudioProjectElement.Name == VSProjectElements.visualStudioProject),
+            error.VerifyThrow((visualStudioProjectElement?.Name == VSProjectElements.visualStudioProject),
                 "Expected <VisualStudioProject> element.");
 
             // Make sure the caller has given us a valid xmakeProject object.
@@ -1818,8 +1814,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Build> element.
-            error.VerifyThrow((buildElement != null) &&
-                (buildElement.Name == VSProjectElements.build), "Expected <Build> element.");
+            error.VerifyThrow((buildElement?.Name == VSProjectElements.build), "Expected <Build> element.");
 
             // Make sure the caller has given us a valid xmakeProject object.
             error.VerifyThrow(xmakeProject != null, "Expected valid XMake project object.");
@@ -1886,8 +1881,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Settings> element.
-            error.VerifyThrow((settingsElement != null) &&
-                (settingsElement.Name == VSProjectElements.settings),
+            error.VerifyThrow((settingsElement?.Name == VSProjectElements.settings),
                 "Expected <Settings> element.");
 
             // Make sure the caller has given us a valid xmakeProject object.
@@ -2012,8 +2006,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Config> element.
-            error.VerifyThrow((configElement != null) &&
-                (configElement.Name == VSProjectElements.config),
+            error.VerifyThrow((configElement?.Name == VSProjectElements.config),
                 "Expected <Config> element.");
 
             // Make sure the caller has given us a valid xmakeProject object.
@@ -2120,13 +2113,13 @@ namespace Microsoft.Build.Conversion
             // If the "SelectedDevice" or "DeploymentPlatform" attributes exist in the per-user
             //   project file, we should get rid of them.
             string selectedDevice = configElement.GetAttribute ( VSProjectAttributes.selectedDevice );
-            if ( isUserFile && ( selectedDevice != null ) && ( selectedDevice.Length > 0 ) )
+            if (isUserFile && (selectedDevice?.Length > 0))
             {
                 configElement.RemoveAttribute ( VSProjectAttributes.selectedDevice );
             }
 
             string deploymentPlatform = configElement.GetAttribute ( VSProjectAttributes.deploymentPlatform );
-            if ( isUserFile && ( deploymentPlatform != null ) && ( deploymentPlatform.Length > 0 ) )
+            if (isUserFile && (deploymentPlatform?.Length > 0))
             {
                 configElement.RemoveAttribute ( VSProjectAttributes.deploymentPlatform );
             }
@@ -2254,8 +2247,7 @@ namespace Microsoft.Build.Conversion
             if ( !IsUserFile )
             {
                 // Make sure this is the <Platform> element.
-                error.VerifyThrow((platformElement != null) &&
-                    (platformElement.Name == VSProjectElements.platform),
+                error.VerifyThrow((platformElement?.Name == VSProjectElements.platform),
                     "Expected <Platform> element.");
 
                 // Make sure the caller has given us a valid xmakeProject object.
@@ -2347,8 +2339,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <InteropRegistration> element.
-            error.VerifyThrow((interopRegistrationElement != null) &&
-                (interopRegistrationElement.Name == VSProjectElements.interopRegistration),
+            error.VerifyThrow((interopRegistrationElement?.Name == VSProjectElements.interopRegistration),
                 "Expected <InteropRegistration> element.");
 
             // Make sure we've been given a valid configuration property group.
@@ -2404,8 +2395,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <References> element.
-            error.VerifyThrow((referencesElement != null) &&
-                (referencesElement.Name == VSProjectElements.references),
+            error.VerifyThrow((referencesElement?.Name == VSProjectElements.references),
                 "Expected <References> element.");
 
             // Make sure the caller has given us a valid xmakeProject object.
@@ -2489,8 +2479,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Reference> element.
-            error.VerifyThrow((referenceElement != null) &&
-                (referenceElement.Name == VSProjectElements.reference),
+            error.VerifyThrow((referenceElement?.Name == VSProjectElements.reference),
                 "Expected <Reference> element.");
 
             // Make sure the caller has already created an ProjectItemGroupElement for us to
@@ -2522,8 +2511,8 @@ namespace Microsoft.Build.Conversion
 
             // Before we go any further, we must special-case some assemblies for VSD projects.
 
-            if ( ( ( this.language == VSProjectElements.ECSharp ) ||
-                   ( this.language == VSProjectElements.EVisualBasic ) ) )
+            if ((this.language == VSProjectElements.ECSharp) ||
+                   (this.language == VSProjectElements.EVisualBasic))
             {
                 if ( ( this.frameworkVersionForVSD == XMakeProjectStrings.vTwo ) &&
                      ( String.Equals ( referenceName, VSProjectElements.SystemDataCommon, StringComparison.OrdinalIgnoreCase ) ) )
@@ -2698,7 +2687,7 @@ namespace Microsoft.Build.Conversion
             // Add a new item to XMake of type "ProjectReference".  If we were able to find
             // the relative path to the project, use it for the "Include", otherwise just use
             // the project name.
-            string value = (pathToReferencedProject != null) ? pathToReferencedProject : referenceName;
+            string value = pathToReferencedProject ?? referenceName;
             newReferenceItem = referencesItemGroup.AddItem(XMakeProjectStrings.projectReference, ProjectCollection.Escape(value));
             return newReferenceItem;
         }
@@ -2947,8 +2936,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Imports> element.
-            error.VerifyThrow((importsElement != null) &&
-                (importsElement.Name == VSProjectElements.imports),
+            error.VerifyThrow((importsElement?.Name == VSProjectElements.imports),
                 "Expected <Imports> element.");
 
             // Make sure the caller gave us a valid xmakeProject to stuff
@@ -3012,8 +3000,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Import> element.
-            error.VerifyThrow((importElement != null) &&
-                (importElement.Name == VSProjectElements.import),
+            error.VerifyThrow((importElement?.Name == VSProjectElements.import),
                 "Expected <Import> element.");
 
             // Make sure the caller has already created an ProjectItemGroupElement for us to
@@ -3065,8 +3052,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Files> element.
-            error.VerifyThrow((filesElement != null) &&
-                (filesElement.Name == VSProjectElements.files),
+            error.VerifyThrow((filesElement?.Name == VSProjectElements.files),
                 "Expected <Files> element.");
 
             // Make sure the caller gave us a valid xmakeProject to stuff
@@ -3132,8 +3118,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Include> element.
-            error.VerifyThrow((includeElement != null) &&
-                (includeElement.Name == VSProjectElements.include),
+            error.VerifyThrow((includeElement?.Name == VSProjectElements.include),
                 "Expected <Include> element.");
 
             // Make sure the caller gave us a valid xmakeProject to stuff
@@ -3202,8 +3187,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <File> element.
-            error.VerifyThrow((fileElement != null) &&
-                (fileElement.Name == VSProjectElements.file),
+            error.VerifyThrow((fileElement?.Name == VSProjectElements.file),
                 "Expected <File> element.");
 
             // Make sure the caller has already created an ProjectItemGroupElement for us to
@@ -3307,8 +3291,8 @@ namespace Microsoft.Build.Conversion
 
                 // If this is a VSD(devices) project and we're dealing with a content file,
                 // mark it to copy if newer.
-                if ( ( ( ( this.language == VSProjectElements.ECSharp ) ||
-                         ( this.language == VSProjectElements.EVisualBasic ) ) ) &&
+                if ( ((this.language == VSProjectElements.ECSharp) ||
+                         (this.language == VSProjectElements.EVisualBasic)) &&
                      ( String.Equals ( buildAction, XMakeProjectStrings.content, StringComparison.OrdinalIgnoreCase ) ) )
                 {
                     newFileItem.AddMetadata ( XMakeProjectStrings.copytooutput,
@@ -3376,7 +3360,7 @@ namespace Microsoft.Build.Conversion
                 return false;
             }
 
-            return (length == 0);
+            return length == 0;
         }
 
         /// <summary>
@@ -3391,8 +3375,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Folder> element.
-            error.VerifyThrow((folderElement != null) &&
-                (folderElement.Name == VSProjectElements.folder),
+            error.VerifyThrow((folderElement?.Name == VSProjectElements.folder),
                 "Expected <Folder> element.");
 
             // Make sure the caller has already created an ProjectItemGroupElement for us to
@@ -3540,8 +3523,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <StartupServices> element.
-            error.VerifyThrow((startupServicesElement != null) &&
-                (startupServicesElement.Name == VSProjectElements.startupServices),
+            error.VerifyThrow((startupServicesElement?.Name == VSProjectElements.startupServices),
                 "Expected <StartupServices> element.");
 
             // Make sure the caller gave us a valid xmakeProject to stuff
@@ -3605,8 +3587,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <Service> element.
-            error.VerifyThrow((serviceElement != null) &&
-                (serviceElement.Name == VSProjectElements.service),
+            error.VerifyThrow((serviceElement?.Name == VSProjectElements.service),
                 "Expected <Service> element.");
 
             // Make sure the caller has already created an ProjectItemGroupElement for us to
@@ -3658,8 +3639,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <OtherProjectSettings> element.
-            error.VerifyThrow((otherProjectSettingsElement != null) &&
-                (otherProjectSettingsElement.Name == VSProjectElements.otherProjectSettings),
+            error.VerifyThrow((otherProjectSettingsElement?.Name == VSProjectElements.otherProjectSettings),
                 "Expected <Settings> element.");
 
             // Make sure the caller gave us a valid globalPropertyGroup to stuff
@@ -3715,8 +3695,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             // Make sure this is the <UserProperties> element.
-            error.VerifyThrow((userPropertiesElement != null) &&
-                (userPropertiesElement.Name == VSProjectElements.userProperties),
+            error.VerifyThrow((userPropertiesElement?.Name == VSProjectElements.userProperties),
                 "Expected <UserProperties> element.");
 
             isTriumphProject = false;

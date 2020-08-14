@@ -54,8 +54,8 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal ProjectItemDefinition(Project project, string itemType)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project, "project");
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, "itemType");
+            ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
+            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
 
             _project = project;
             _itemType = itemType;
@@ -119,7 +119,7 @@ namespace Microsoft.Build.Evaluation
         [DebuggerStepThrough]
         public ProjectMetadata GetMetadata(string name)
         {
-            return Link != null ? Link.GetMetadata(name) : (_metadata == null) ? null : _metadata[name];
+            return Link != null ? Link.GetMetadata(name) : _metadata?[name];
         }
 
         /// <summary>

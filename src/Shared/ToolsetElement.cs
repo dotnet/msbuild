@@ -100,7 +100,7 @@ namespace Microsoft.Build.Evaluation
 
             set
             {
-                base["toolsVersion"] = value;
+                base[nameof(toolsVersion)] = value;
             }
         }
 
@@ -655,7 +655,7 @@ namespace Microsoft.Build.Evaluation
                 // Note this means we can't distinguish between the attribute being present but containing
                 // an empty string for its value and the attribute not being present at all.
                 string defaultValue = (string)base["default"];
-                return (String.IsNullOrEmpty(defaultValue) ? null : defaultValue);
+                return String.IsNullOrEmpty(defaultValue) ? null : defaultValue;
             }
 
             set
@@ -678,7 +678,7 @@ namespace Microsoft.Build.Evaluation
                 // Note this means we can't distinguish between the attribute being present but containing
                 // an empty string for its value and the attribute not being present at all.
                 string defaultValue = (string)base["msbuildOverrideTasksPath"];
-                return (String.IsNullOrEmpty(defaultValue) ? null : defaultValue);
+                return String.IsNullOrEmpty(defaultValue) ? null : defaultValue;
             }
 
             set
@@ -702,12 +702,12 @@ namespace Microsoft.Build.Evaluation
                 // Note this means we can't distinguish between the attribute being present but containing
                 // an empty string for its value and the attribute not being present at all.
                 string defaultValue = (string)base["DefaultOverrideToolsVersion"];
-                return (String.IsNullOrEmpty(defaultValue) ? null : defaultValue);
+                return String.IsNullOrEmpty(defaultValue) ? null : defaultValue;
             }
 
             set
             {
-                base["DefaultOverrideToolsVersion"] = value;
+                base[nameof(DefaultOverrideToolsVersion)] = value;
             }
         }
     }

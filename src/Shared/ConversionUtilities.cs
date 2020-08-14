@@ -70,7 +70,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool CanConvertStringToBool(string parameterValue)
         {
-            return (ValidBooleanTrue(parameterValue) || ValidBooleanFalse(parameterValue));
+            return ValidBooleanTrue(parameterValue) || ValidBooleanFalse(parameterValue);
         }
 
         /// <summary>

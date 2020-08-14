@@ -605,7 +605,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                         string projectName = string.Empty;
 
-                        projectName = startedEvent.ProjectFile == null ? string.Empty : startedEvent.ProjectFile;
+                        projectName = startedEvent.ProjectFile ?? string.Empty;
                         // Show which targets were built as part of this project
                         if (string.IsNullOrEmpty(targets))
                         {
@@ -749,7 +749,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Gray);
 
                 // Indent the text by two tab lengths
-                StringBuilder result = new StringBuilder(2 * tabWidth + item.ItemSpec.Length);
+                StringBuilder result = new StringBuilder((2 * tabWidth) + item.ItemSpec.Length);
                 result.Append(' ', 2 * tabWidth).Append(item.ItemSpec);
                 WriteMessageAligned(result.ToString(), false);
 
@@ -1239,7 +1239,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 string targetName = string.Empty;
 
                 // Does the context (Project, Node, Context, Target, NOT task) of the previous event match the current message
-                bool contextAreEqual = s_compareContextNodeIdTargetId.Equals(currentBuildEventContext, _lastDisplayedBuildEventContext == null ? null : _lastDisplayedBuildEventContext);
+                bool contextAreEqual = s_compareContextNodeIdTargetId.Equals(currentBuildEventContext, _lastDisplayedBuildEventContext);
 
                 TargetStartedEventMinimumFields targetStartedEvent = null;
                 // If the previous event does not have the same target context information, the target name needs to be printed to the console
@@ -1285,7 +1285,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             bool prefixAlreadyWritten = true;
             ProjectFullKey currentProjectFullKey = GetFullProjectKey(e.BuildEventContext);
-            if (!(_lastProjectFullKey.Equals(currentProjectFullKey)))
+            if (!_lastProjectFullKey.Equals(currentProjectFullKey))
             {
                 // Write the prefix information about the target for the message
                 WriteLinePrefix(context, timeStamp, false);
@@ -1347,7 +1347,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         {
                             // Calculate how many chars will fit on the console buffer
                             int amountToCopy = (messageLength - index) < (bufferWidthMinusNewLine - adjustedPrefixWidth) ? (messageLength - index) : (bufferWidthMinusNewLine - adjustedPrefixWidth);
-                            WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), (prefixAlreadyWritten && index == 0 && i == 0), adjustedPrefixWidth);
+                            WriteBasedOnPrefix(nonNullMessage.Substring(index, amountToCopy), prefixAlreadyWritten && index == 0 && i == 0, adjustedPrefixWidth);
                             index += amountToCopy;
                         }
                     }
@@ -1387,7 +1387,7 @@ namespace Microsoft.Build.BackEnd.Logging
             TargetStartedEventMinimumFields targetStartedEvent = _buildEventManager.GetTargetStartedEvent(e);
 
             // Make sure we have not shown the event before
-            if (targetStartedEvent != null && !targetStartedEvent.ShowTargetFinishedEvent)
+            if (targetStartedEvent?.ShowTargetFinishedEvent == false)
             {
                 // Since the target started event has been shows, the target finished event should also be shown
                 targetStartedEvent.ShowTargetFinishedEvent = true;
@@ -1461,7 +1461,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 ProjectStartedEventMinimumFields projectStartedEvent = _buildEventManager.GetProjectStartedEvent(e);
 
                 // Make sure the project started event has not been show yet
-                if (projectStartedEvent != null && !projectStartedEvent.ShowProjectFinishedEvent)
+                if (projectStartedEvent?.ShowProjectFinishedEvent == false)
                 {
                     projectStartedEvent.ShowProjectFinishedEvent = true;
 
@@ -1719,7 +1719,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     String.Format(CultureInfo.CurrentCulture, "{0,-40}" /* pad to 40 align left */, scopeName),
                     String.Format(CultureInfo.CurrentCulture, "{0,3}", calls));
 
-                if (_internalPerformanceCounters != null && _internalPerformanceCounters.Count > 0)
+                if (_internalPerformanceCounters?.Count > 0)
                 {
                     // For each of the entry points in the project print out the performance numbers for them
                     foreach (var counter in _internalPerformanceCounters.Values)

@@ -208,7 +208,7 @@ namespace Microsoft.Build.Utilities
                     return true;
                 }
 
-                if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+                if (x is null || y is null)
                 {
                     return false;
                 }

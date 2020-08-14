@@ -126,7 +126,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void ApplyParameter(string parameterName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameterName, "parameterName");
+            ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
 
             if (forwardingTable.ContainsKey(parameterName))
             {
@@ -155,7 +155,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public virtual void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventSource, "eventSource");
+            ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
 
             ParseParameters();
 
@@ -166,18 +166,18 @@ namespace Microsoft.Build.BuildEngine
                 SetForwardingBasedOnVerbosity();
             }
 
-            eventSource.BuildStarted += new BuildStartedEventHandler(BuildStartedHandler);
-            eventSource.BuildFinished += new BuildFinishedEventHandler(BuildFinishedHandler);
-            eventSource.ProjectStarted += new ProjectStartedEventHandler(ProjectStartedHandler);
-            eventSource.ProjectFinished += new ProjectFinishedEventHandler(ProjectFinishedHandler);
-            eventSource.TargetStarted += new TargetStartedEventHandler(TargetStartedHandler);
-            eventSource.TargetFinished += new TargetFinishedEventHandler(TargetFinishedHandler);
-            eventSource.TaskStarted += new TaskStartedEventHandler(TaskStartedHandler);
-            eventSource.TaskFinished += new TaskFinishedEventHandler(TaskFinishedHandler);
-            eventSource.ErrorRaised += new BuildErrorEventHandler(ErrorHandler);
-            eventSource.WarningRaised += new BuildWarningEventHandler(WarningHandler);
-            eventSource.MessageRaised += new BuildMessageEventHandler(MessageHandler);
-            eventSource.CustomEventRaised += new CustomBuildEventHandler(CustomEventHandler);
+            eventSource.BuildStarted += BuildStartedHandler;
+            eventSource.BuildFinished += BuildFinishedHandler;
+            eventSource.ProjectStarted += ProjectStartedHandler;
+            eventSource.ProjectFinished += ProjectFinishedHandler;
+            eventSource.TargetStarted += TargetStartedHandler;
+            eventSource.TargetFinished += TargetFinishedHandler;
+            eventSource.TaskStarted += TaskStartedHandler;
+            eventSource.TaskFinished += TaskFinishedHandler;
+            eventSource.ErrorRaised += ErrorHandler;
+            eventSource.WarningRaised += WarningHandler;
+            eventSource.MessageRaised += MessageHandler;
+            eventSource.CustomEventRaised += CustomEventHandler;
         }
 
         /// <summary>
@@ -450,7 +450,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private bool IsVerbosityAtLeast(LoggerVerbosity checkVerbosity)
         {
-            return (this.verbosity >= checkVerbosity);
+            return this.verbosity >= checkVerbosity;
         }
         #endregion
 

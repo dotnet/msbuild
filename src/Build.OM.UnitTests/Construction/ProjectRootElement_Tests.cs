@@ -935,10 +935,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 }
                 finally
                 {
-                    if (security != null)
-                    {
-                        security.RemoveAccessRule(rule);
-                    }
+                    security?.RemoveAccessRule(rule);
 
                     File.Delete(solutionFile);
                     File.Delete(tempFileSentinel);
@@ -983,10 +980,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 }
                 finally
                 {
-                    if (security != null)
-                    {
-                        security.RemoveAccessRule(rule);
-                    }
+                    security?.RemoveAccessRule(rule);
 
                     File.Delete(projectFile);
                     Assert.False(File.Exists(projectFile));

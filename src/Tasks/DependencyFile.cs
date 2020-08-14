@@ -79,7 +79,7 @@ namespace Microsoft.Build.Tasks
             FileInfo info = FileUtilities.GetFileInfoNoThrow(filename);
 
             // Obviously if the file no longer exists then we are not up to date.
-            if (info == null || !info.Exists)
+            if (info?.Exists != true)
             {
                 return true;
             }

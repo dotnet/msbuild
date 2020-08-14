@@ -117,7 +117,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     result = (SdkResult)sdkResolver.Resolve(sdk, context, resultFactory);
                 }
-                catch (Exception e) when (e is FileNotFoundException || e is FileLoadException && sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal))
+                catch (Exception e) when (e is FileNotFoundException || (e is FileLoadException && sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal)))
                 {
                     // Since we explicitly add the NuGetSdkResolver, we special case this.  The NuGetSdkResolver has special logic
                     // to load NuGet assemblies at runtime which could fail if the user is not running installed MSBuild.  Rather

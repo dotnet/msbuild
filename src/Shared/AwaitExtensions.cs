@@ -54,7 +54,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The awaiter.</returns>
         internal static TaskAwaiter GetAwaiter(this WaitHandle handle)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(handle, "handle");
+            ErrorUtilities.VerifyThrowArgumentNull(handle, nameof(handle));
             return handle.ToTask().GetAwaiter();
         }
 

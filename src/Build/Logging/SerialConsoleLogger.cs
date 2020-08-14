@@ -543,7 +543,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 else
                 {
                     // null messages are ok -- treat as blank line
-                    nonNullMessage = (e.Message == null) ? String.Empty : e.Message;
+                    nonNullMessage = e.Message ?? String.Empty;
                 }
 
                 WriteLinePretty(nonNullMessage);
@@ -630,7 +630,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 setColor(ConsoleColor.Cyan);
 
-                this.VerifyStack((current != null), "Unexpected null project stack");
+                this.VerifyStack(current != null, "Unexpected null project stack");
 
                 WriteLinePretty(projectSeparatorLine);
 
@@ -971,7 +971,7 @@ namespace Microsoft.Build.BackEnd.Logging
             /// </summary>
             internal bool IsEmpty()
             {
-                return (_frames.Count == 0);
+                return _frames.Count == 0;
             }
         }
         #endregion

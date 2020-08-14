@@ -892,7 +892,7 @@ namespace Microsoft.Build.Tasks
             string fullSourcePath = Path.GetFullPath(source);
             string fullDestinationPath = Path.GetFullPath(destination);
             StringComparison filenameComparison = NativeMethodsShared.IsWindows ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-            return (String.Equals(fullSourcePath, fullDestinationPath, filenameComparison));
+            return String.Equals(fullSourcePath, fullDestinationPath, filenameComparison);
         }
 
     	private static int GetParallelismFromEnvironment()

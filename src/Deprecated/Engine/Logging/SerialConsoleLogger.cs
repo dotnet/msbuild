@@ -529,7 +529,7 @@ namespace Microsoft.Build.BuildEngine
                 }
 
                 // null messages are ok -- treat as blank line
-                string nonNullMessage = (e.Message == null) ? String.Empty : e.Message;
+                string nonNullMessage = e.Message ?? String.Empty;
 
                 WriteLinePretty(nonNullMessage);
 
@@ -594,7 +594,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 setColor(ConsoleColor.Cyan);
 
-                this.VerifyStack((current != null), "Unexpected null project stack");
+                this.VerifyStack(current != null, "Unexpected null project stack");
 
                 WriteLinePretty(projectSeparatorLine);
 
@@ -962,7 +962,7 @@ namespace Microsoft.Build.BuildEngine
             /// <owner>t-jeffv, sumedhk</owner>
             internal bool IsEmpty()
             {
-                return (frames.Count == 0);
+                return frames.Count == 0;
             }
         }
         #endregion

@@ -28,7 +28,7 @@ namespace Microsoft.Build.BuildEngine
         static LocalNode()
         {
             AppDomain currentDomain = AppDomain.CurrentDomain;
-            currentDomain.UnhandledException += new UnhandledExceptionEventHandler(UnhandledExceptionHandler);
+            currentDomain.UnhandledException += UnhandledExceptionHandler;
         }
         #endregion
 
@@ -151,15 +151,9 @@ namespace Microsoft.Build.BuildEngine
             // to start up its communication threads. This can happen if the node is started with /nodemode:x
             // and no parent is running, or if the parent node has spawned a new process and then crashed 
             // before establishing communication with the child node.
-            if(writerThread != null)
-            {
-              writerThread.Join();
-            }
+            writerThread?.Join();
 
-            if (readerThread != null)
-            {
-                readerThread.Join();
-            }
+            readerThread?.Join();
 
             // Make sure the exit event is not set
             communicationThreadExitEvent.Reset();
@@ -284,7 +278,7 @@ namespace Microsoft.Build.BuildEngine
 
                         if (eventType == 0 || /* nice shutdown due to shutdownEvent */
                             eventType == 1 || /* error shutdown due to globalNodeErrorShutdown */
-                            eventType == WaitHandle.WaitTimeout && !localNode.IsParentProcessAlive())
+                            (eventType == WaitHandle.WaitTimeout && !localNode.IsParentProcessAlive()))
                         {
                             continueRunning = false;
                             // If the exit is not triggered by running of shutdown method
@@ -545,10 +539,7 @@ namespace Microsoft.Build.BuildEngine
             }
             finally
             {
-                if (node != null)
-                {
-                    node.ReportFatalCommunicationError(originalException, null);
-                }
+                node?.ReportFatalCommunicationError(originalException, null);
             }
         }
 

@@ -235,7 +235,7 @@ namespace Microsoft.Build.BackEnd
                 // 1) they do not reference any item vector
                 // 2) they reference item vectors that are not referenced by any input item
                 if ((discreteItemsInTargetOutputs.Count > 0) ||
-                    ((itemVectorsReferencedOnlyInTargetOutputs != null) && (itemVectorsReferencedOnlyInTargetOutputs.Count > 0)))
+                    ((itemVectorsReferencedOnlyInTargetOutputs?.Count > 0)))
                 {
                     result = PerformDependencyAnalysisIfDiscreteOutputs(
                                 itemVectorsInTargetInputs, itemVectorTransformsInTargetInputs, discreteItemsInTargetInputs,

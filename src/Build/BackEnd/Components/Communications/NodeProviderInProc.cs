@@ -151,7 +151,7 @@ namespace Microsoft.Build.BackEnd
         public void SendData(int nodeId, INodePacket packet)
         {
             ErrorUtilities.VerifyThrowArgumentOutOfRange(nodeId == _inProcNodeId, "node");
-            ErrorUtilities.VerifyThrowArgumentNull(packet, "packet");
+            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
 
             if (null == _inProcNode)
             {

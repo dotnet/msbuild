@@ -100,7 +100,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
 
             // if first two bytes are "MZ" then we're looking at an .exe or a .dll not a .manifest
-            return ((buffer[0] == 0x4D) && (buffer[1] == 0x5A));
+            return (buffer[0] == 0x4D) && (buffer[1] == 0x5A);
         }
 
         public static bool IsProgramFile(string path)

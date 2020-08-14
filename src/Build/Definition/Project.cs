@@ -2016,7 +2016,7 @@ namespace Microsoft.Build.Evaluation
 
                                 if (reason != null)
                                 {
-                                    Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1} - {2}] [PC Hash {3}]", reason, FullPath, (import.ImportedProject.FullPath == FullPath ? String.Empty : import.ImportedProject.FullPath), ProjectCollection.GetHashCode()));
+                                    Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1} - {2}] [PC Hash {3}]", reason, FullPath, import.ImportedProject.FullPath == FullPath ? String.Empty : import.ImportedProject.FullPath, ProjectCollection.GetHashCode()));
                                 }
                             }
 
@@ -2665,7 +2665,7 @@ namespace Microsoft.Build.Evaluation
                 IEnumerable<ProjectItemElement> relevantElementsAfterInclude = evaluatedItemElements
                     // Skip until we encounter the element that produced the item because
                     // there are no item operations that can affect future items
-                    .SkipWhile((i => i != item.Xml))
+                    .SkipWhile(i => i != item.Xml)
                     .Where(itemElement =>
                         // items operations of different item types cannot affect each other
                         itemElement.ItemType.Equals(item.ItemType) &&
@@ -2878,12 +2878,11 @@ namespace Microsoft.Build.Evaluation
 
                 ProjectProperty property = _data.Properties[name];
 
-                ErrorUtilities.VerifyThrowInvalidOperation(property == null || !property.IsReservedProperty, "OM_ReservedName", name);
-                ErrorUtilities.VerifyThrowInvalidOperation(property == null || !property.IsGlobalProperty, "OM_GlobalProperty", name);
+                ErrorUtilities.VerifyThrowInvalidOperation(property?.IsReservedProperty != true, "OM_ReservedName", name);
+                ErrorUtilities.VerifyThrowInvalidOperation(property?.IsGlobalProperty != true, "OM_GlobalProperty", name);
 
                 // If there's an existing regular property, we can reuse it, unless it's not attached to its XML any more
-                if (property != null &&
-                    !property.IsEnvironmentProperty &&
+                if (property?.IsEnvironmentProperty == false &&
                     property.Xml.Parent?.Parent != null &&
                     ReferenceEquals(property.Xml.ContainingProject, Xml))
                 {
@@ -3386,7 +3385,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if ((metadata != null && metadata.Any()) || candidateExistingItemXml.Count > 0)
+                if ((metadata?.Any() == true) || candidateExistingItemXml.Count > 0)
                 {
                     // Don't try to make sure the metadata are the same.
                     return false;
@@ -3771,7 +3770,7 @@ namespace Microsoft.Build.Evaluation
                     return null;
                 }
 
-                if (metadata != null && metadata.Any())
+                if (metadata?.Any() == true)
                 {
                     // Don't bother trying to match up metadata
                     return null;

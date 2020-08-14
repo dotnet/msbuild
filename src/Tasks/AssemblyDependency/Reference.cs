@@ -609,7 +609,7 @@ namespace Microsoft.Build.Tasks
                 ErrorUtilities.VerifyThrow(
                     !(IsPrimary && _primarySourceItem == null), "A primary reference must have a primary source item.");
                 ErrorUtilities.VerifyThrow(
-                    (IsPrimary || _primarySourceItem == null), "Only a primary reference can have a primary source item.");
+                    IsPrimary || _primarySourceItem == null, "Only a primary reference can have a primary source item.");
 
                 return _primarySourceItem;
             }

@@ -143,7 +143,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public void LogErrorEvent(BuildErrorEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
             if (parentModule.IsRunningMultipleNodes && !e.GetType().IsSerializable)
@@ -212,7 +212,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public void LogWarningEvent(BuildWarningEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
             if (parentModule.IsRunningMultipleNodes && !e.GetType().IsSerializable)
@@ -289,7 +289,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public void LogMessageEvent(BuildMessageEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
             if (parentModule.IsRunningMultipleNodes && !e.GetType().IsSerializable)
@@ -306,7 +306,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public void LogCustomEvent(CustomBuildEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
             if (parentModule.IsRunningMultipleNodes && !e.GetType().IsSerializable)
@@ -529,7 +529,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
-                ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, "projectFileNames");
+                ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, nameof(projectFileNames));
                 ErrorUtilities.VerifyThrowArgumentNull(globalProperties, "globalPropertiesPerProject");
 
                 Dictionary<string, ITaskItem[]>[] targetOutputsPerProject = null;
@@ -624,11 +624,7 @@ namespace Microsoft.Build.BuildEngine
             if (sponsor != null)
             {
                 ILease lease = (ILease)RemotingServices.GetLifetimeService(this);
-
-                if (lease != null)
-                {
-                    lease.Unregister(sponsor);
-                }
+                lease?.Unregister(sponsor);
 
                 sponsor.Close();
                 sponsor = null;

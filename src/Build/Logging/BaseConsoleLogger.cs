@@ -276,7 +276,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WritePretty(int indentLevel, string formattedString)
         {
-            StringBuilder result = new StringBuilder(indentLevel * tabWidth + formattedString.Length);
+            StringBuilder result = new StringBuilder((indentLevel * tabWidth) + formattedString.Length);
             result.Append(' ', indentLevel * tabWidth).Append(formattedString);
             WriteHandler(result.ToString());
         }
@@ -552,7 +552,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     setColor(ConsoleColor.Gray);
                     WritePretty(String.Format(CultureInfo.CurrentCulture, "{0,-30} = ", entry.Key));
                     setColor(ConsoleColor.DarkGray);
-                    WriteLinePretty((entry.Value));
+                    WriteLinePretty(entry.Value);
                 }
             }
 
@@ -968,7 +968,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal virtual bool ApplyParameter(string parameterName, string parameterValue)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameterName, "parameterName");
+            ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
 
             switch (parameterName.ToUpperInvariant())
             {
@@ -1006,16 +1006,11 @@ namespace Microsoft.Build.BackEnd.Logging
                         }
                         else
                         {
-                            switch (parameterValue.ToUpperInvariant())
+                            showProjectFile = (parameterValue.ToUpperInvariant()) switch
                             {
-                                case "TRUE":
-                                    showProjectFile = true;
-                                    break;
-
-                                default:
-                                    showProjectFile = false;
-                                    break;
-                            }
+                                "TRUE" => true,
+                                _ => false,
+                            };
                         }
                     }
 

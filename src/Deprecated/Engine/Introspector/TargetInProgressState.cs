@@ -270,7 +270,7 @@ namespace Microsoft.Build.BuildEngine
             TargetInProgessState.TargetIdWrapper parentName =
                 FindParentTarget(engineCallback, projectBuildState, target, out parentRequest);
 
-            if (parentName != null && parentName.Equals(parentId))
+            if (parentName?.Equals(parentId) == true)
             {
                 return true;
             }

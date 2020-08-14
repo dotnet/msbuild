@@ -33,8 +33,8 @@ namespace Microsoft.Build.BuildEngine
             if (taskExecutionModule == null)
             {
                 taskExecutionModule = new TaskExecutionModule(parentEngine.EngineCallback,
-                    (cpuCount == 1 && !childMode ? TaskExecutionModule.TaskExecutionModuleMode.SingleProcMode :
-                                                   TaskExecutionModule.TaskExecutionModuleMode.MultiProcFullNodeMode), parentEngine.ProfileBuild);
+                    cpuCount == 1 && !childMode ? TaskExecutionModule.TaskExecutionModuleMode.SingleProcMode :
+                                                   TaskExecutionModule.TaskExecutionModuleMode.MultiProcFullNodeMode, parentEngine.ProfileBuild);
             }
         }
         #endregion
@@ -50,7 +50,7 @@ namespace Microsoft.Build.BuildEngine
         /// <returns></returns>
         internal bool RegisterNodeProvider(INodeProvider nodeProviderToRegister)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(nodeProviderToRegister,"nodeProviderToRegister");
+            ErrorUtilities.VerifyThrowArgumentNull(nodeProviderToRegister, nameof(nodeProviderToRegister));
 
             INodeDescription[] nodeDescriptions = nodeProviderToRegister.QueryNodeDescriptions();
 

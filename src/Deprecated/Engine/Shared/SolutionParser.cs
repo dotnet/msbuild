@@ -328,15 +328,9 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
             finally
             {
-                if (fileStream != null)
-                {
-                    fileStream.Close();
-                }
+                fileStream?.Close();
 
-                if (reader != null)
-                {
-                    reader.Close();
-                }
+                reader?.Close();
             }
         }
 
@@ -553,7 +547,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     // We have a ProjectDependencies section.  Each subsequent line should identify
                     // a dependency.
                     line = ReadLine();
-                    while ((line != null) && (!line.StartsWith("EndProjectSection", StringComparison.Ordinal)))
+                    while ((line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false))
                     {
                         // This should be a dependency.  The GUID identifying the parent project should
                         // be both the property name and the property value.
@@ -573,7 +567,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                     // projects, and contains properties that we'll need in order to call the 
                     // AspNetCompiler task.
                     line = ReadLine();
-                    while ((line != null) && (!line.StartsWith("EndProjectSection", StringComparison.Ordinal)))
+                    while ((line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false))
                     {
                         Match match = crackPropertyLine.Match(line);
                         ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(match.Success, "SubCategoryForSolutionParsingErrors",
@@ -1317,7 +1311,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal string GetProjectUniqueNameByGuid(string projectGuid)
         {
             ProjectInSolution proj = (ProjectInSolution) projects[projectGuid];
-            return (proj == null) ? null : proj.GetUniqueProjectName();
+            return proj?.GetUniqueProjectName();
         }
 
         /// <summary>
@@ -1330,7 +1324,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal string GetProjectRelativePathByGuid(string projectGuid)
         {
             ProjectInSolution proj = (ProjectInSolution) projects[projectGuid];
-            return (proj == null) ? null : proj.RelativePath;
+            return proj?.RelativePath;
         }
 
         #endregion

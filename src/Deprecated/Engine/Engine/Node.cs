@@ -455,10 +455,7 @@ namespace Microsoft.Build.BuildEngine
                 LocalNode.DumpExceptionToFile(originalException);
             }
 
-            if (localEngine != null)
-            {
-                localEngine.Shutdown();
-            }
+            localEngine?.Shutdown();
         }
 
         /// <summary>
@@ -472,10 +469,7 @@ namespace Microsoft.Build.BuildEngine
         /// <exception cref="Exception">Re-throws exception passed in</exception>
         internal void ReportFatalCommunicationError(Exception originalException, TextWriter loggingStream)
         {
-            if (loggingStream != null)
-            {
-                loggingStream.WriteLine(originalException.ToString());
-            }
+            loggingStream?.WriteLine(originalException.ToString());
 
             string message = ResourceUtilities.FormatResourceString("FatalErrorOnChildNode", nodeId, originalException.Message);
 

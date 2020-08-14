@@ -699,9 +699,9 @@ namespace Microsoft.Build.UnitTests.Construction
                    "someproj.etp", String.Empty);
                 foreach (string warningString in solution.SolutionParserWarnings)
                 {
-                    Console.WriteLine(warningString.ToString());
+                    Console.WriteLine(warningString);
                 }
-                Assert.Contains(errCode, solution.SolutionParserErrorCodes[0].ToString());
+                Assert.Contains(errCode, solution.SolutionParserErrorCodes[0]);
             }
             // Delete the files created during the test
             finally
@@ -732,7 +732,7 @@ namespace Microsoft.Build.UnitTests.Construction
             string errCode, ignoredKeyword;
             ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out ignoredKeyword, "Shared.ProjectFileCouldNotBeLoaded",
                   "someproj.etp", String.Empty);
-            Assert.Contains(errCode, solution.SolutionParserErrorCodes[0].ToString());
+            Assert.Contains(errCode, solution.SolutionParserErrorCodes[0]);
         }
 
         /// <summary>

@@ -135,7 +135,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (activeThreadCount == 0 && workerThread.WorkItemCount == 0);
+                return activeThreadCount == 0 && workerThread.WorkItemCount == 0;
             }
         }
 
@@ -203,8 +203,7 @@ namespace Microsoft.Build.BuildEngine
                 bool remoteNode = false;
                 for (int r = 0; r < projectFileNames.Length; r++)
                 {
-                    string fullProjectName = projectFileNames[r] != null ?
-                       projectFileNames[r] : "null";
+                    string fullProjectName = projectFileNames[r] ?? "null";
                     Console.WriteLine("RemoteNode: " + remoteNode + " Project " + fullProjectName + " T:" + targetName + " NodeProdyId# " + handleId + " Time " + DateTime.Now.ToLongTimeString());
                     if (globalPropertiesPerProject[r] != null)
                     {
@@ -427,7 +426,7 @@ namespace Microsoft.Build.BuildEngine
 
         internal bool RethrowTaskExceptions()
         {
-            return (moduleMode == TaskExecutionModuleMode.SingleProcMode);
+            return moduleMode == TaskExecutionModuleMode.SingleProcMode;
         }
 
         #endregion

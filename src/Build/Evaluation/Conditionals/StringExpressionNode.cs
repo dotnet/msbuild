@@ -117,7 +117,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            return (_cachedExpandedValue.Length == 0);
+            return _cachedExpandedValue.Length == 0;
         }
 
 

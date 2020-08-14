@@ -1615,7 +1615,7 @@ namespace Microsoft.Build.BuildEngine
                     else if (argumentsContent[n] == '`' || argumentsContent[n] == '"' || argumentsContent[n] == '\'')
                     {
                         int quoteStart = n;
-                        n += 1; // skip over the opening quote
+                        n++; // skip over the opening quote
 
                         n = ScanForClosingQuote(argumentsContent[quoteStart], argumentsContent, n);
 
@@ -1671,7 +1671,7 @@ namespace Microsoft.Build.BuildEngine
                 // If we don't have something that can be treated as an argument
                 // then we should treat it as a null so that passing nulls
                 // becomes possible through an empty argument between commas.
-                ErrorUtilities.VerifyThrowArgumentNull(argumentBuilder, "argumentBuilder");
+                ErrorUtilities.VerifyThrowArgumentNull(argumentBuilder, nameof(argumentBuilder));
                 // we reached the end of an argument, add the builder's final result
                 // to our arguments. 
                 string argValue = argumentBuilder.ToString().Trim();

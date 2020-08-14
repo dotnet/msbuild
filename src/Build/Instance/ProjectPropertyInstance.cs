@@ -116,7 +116,7 @@ namespace Microsoft.Build.Execution
             }
 
             // Do not consider mutability for equality comparison
-            return (_escapedValue == other._escapedValue && String.Equals(_name, other._name, StringComparison.OrdinalIgnoreCase));
+            return _escapedValue == other._escapedValue && String.Equals(_name, other._name, StringComparison.OrdinalIgnoreCase);
         }
 
         #endregion

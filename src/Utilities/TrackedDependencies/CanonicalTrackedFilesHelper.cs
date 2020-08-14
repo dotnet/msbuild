@@ -93,7 +93,7 @@ namespace Microsoft.Build.Utilities
                         break;
                     }
 
-                    if (getNewest && lastWriteTime > requestedTime || !getNewest && lastWriteTime < requestedTime)
+                    if ((getNewest && lastWriteTime > requestedTime) || (!getNewest && lastWriteTime < requestedTime))
                     {
                         requestedTime = lastWriteTime;
                         requestedFilename = item.ItemSpec;

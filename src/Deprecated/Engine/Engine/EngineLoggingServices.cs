@@ -75,7 +75,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="e"></param>
         internal void PostLoggingEvent(BuildEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             if (paused)
             {
@@ -106,7 +106,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="eventArray"></param>
         internal void PostLoggingEvents(BuildEventArgs[] eventArray)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventArray, "eventArray");
+            ErrorUtilities.VerifyThrowArgumentNull(eventArray, nameof(eventArray));
 
             if (paused)
             {
@@ -139,7 +139,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="e"></param>
         internal void PostLoggingEvent(NodeLoggingEvent e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             if (paused)
             {
@@ -163,7 +163,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="eventArray"></param>
         internal void PostLoggingEvents(NodeLoggingEvent[] eventArray)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventArray, "eventArray");
+            ErrorUtilities.VerifyThrowArgumentNull(eventArray, nameof(eventArray));
 
             if (paused)
             {
@@ -220,7 +220,7 @@ namespace Microsoft.Build.BuildEngine
                 currentTickCount = DateTime.Now.Ticks;
             }
 
-            return ((currentTickCount - lastFlushTime) > flushTimeoutInTicks);
+            return (currentTickCount - lastFlushTime) > flushTimeoutInTicks;
         }
 
         #endregion
@@ -240,7 +240,7 @@ namespace Microsoft.Build.BuildEngine
             // issue, and it apparently will also cause us problems if we adopt the
             // new Longhorn Add-In Programming Model.  
 
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             PostLoggingEvent(e);
         }
 
@@ -260,7 +260,7 @@ namespace Microsoft.Build.BuildEngine
                 // issue, and it apparently will also cause us problems if we adopt the
                 // new Longhorn Add-In Programming Model.
 
-                ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+                ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
                 PostLoggingEvent(e);
             }
         }
@@ -279,7 +279,7 @@ namespace Microsoft.Build.BuildEngine
             // issue, and it apparently will also cause us problems if we adopt the
             // new Longhorn Add-In Programming Model.
 
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             PostLoggingEvent(e);
         }
 
@@ -297,7 +297,7 @@ namespace Microsoft.Build.BuildEngine
             // issue, and it apparently will also cause us problems if we adopt the
             // new Longhorn Add-In Programming Model.
 
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             PostLoggingEvent(e);
         }
         #endregion
@@ -741,8 +741,7 @@ namespace Microsoft.Build.BuildEngine
             if (!OnlyLogCriticalEvents)
             {
                 ProjectStartedEventArgs e;
-
-               
+              
                 if (!string.IsNullOrEmpty(targetNames))
                 {
                     e = new ProjectStartedEventArgs
@@ -788,7 +787,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (!OnlyLogCriticalEvents)
             {
-                string message = ResourceUtilities.FormatResourceString((success ? "ProjectFinishedSuccess" : "ProjectFinishedFailure"), Path.GetFileName(projectFile));
+                string message = ResourceUtilities.FormatResourceString(success ? "ProjectFinishedSuccess" : "ProjectFinishedFailure", Path.GetFileName(projectFile));
 
                 ProjectFinishedEventArgs e = new ProjectFinishedEventArgs
                     (
@@ -838,7 +837,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (!OnlyLogCriticalEvents)
             {
-                string message = ResourceUtilities.FormatResourceString((success ? "TargetFinishedSuccess" : "TargetFinishedFailure"), targetName, Path.GetFileName(projectFile));
+                string message = ResourceUtilities.FormatResourceString(success ? "TargetFinishedSuccess" : "TargetFinishedFailure", targetName, Path.GetFileName(projectFile));
 
                 TargetFinishedEventArgs e = new TargetFinishedEventArgs
                     (
@@ -891,7 +890,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (!OnlyLogCriticalEvents)
             {
-                string message = ResourceUtilities.FormatResourceString((success ? "TaskFinishedSuccess" : "TaskFinishedFailure"), taskName);
+                string message = ResourceUtilities.FormatResourceString(success ? "TaskFinishedSuccess" : "TaskFinishedFailure", taskName);
 
                 TaskFinishedEventArgs e = new TaskFinishedEventArgs
                     (

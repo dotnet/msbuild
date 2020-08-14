@@ -106,7 +106,7 @@ namespace Microsoft.Build.Execution
         {
             CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = null;
 
-            if (directMetadata != null && directMetadata.GetEnumerator().MoveNext())
+            if (directMetadata?.GetEnumerator().MoveNext() == true)
             {
                 metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(directMetadata.FastCountOrZero());
                 foreach (KeyValuePair<string, string> metadatum in directMetadata)
@@ -708,7 +708,7 @@ namespace Microsoft.Build.Execution
             _taskItem = new TaskItem(
                                         includeEscaped,
                                         includeBeforeWildcardExpansionEscaped,
-                                        (directMetadata == null) ? null : directMetadata.DeepClone(), // copy on write!
+                                        directMetadata?.DeepClone(), // copy on write!
                                         inheritedItemDefinitions,
                                         _project.Directory,
                                         _project.IsImmutable,
@@ -802,8 +802,8 @@ namespace Microsoft.Build.Execution
                               string definingFileEscaped // the actual project file (or import) that defines this item.
                               )
             {
-                ErrorUtilities.VerifyThrowArgumentLength(includeEscaped, "includeEscaped");
-                ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped, "includeBeforeWildcardExpansionEscaped");
+                ErrorUtilities.VerifyThrowArgumentLength(includeEscaped, nameof(includeEscaped));
+                ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped, nameof(includeBeforeWildcardExpansionEscaped));
 
                 _includeEscaped = FileUtilities.FixFilePath(includeEscaped);
                 _includeBeforeWildcardExpansionEscaped = FileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped);
@@ -1114,7 +1114,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// This allows an explicit typecast from a "TaskItem" to a "string", returning the ItemSpec for this item.
             /// </summary>
-            public static explicit operator string (TaskItem that)
+            public static explicit operator string(TaskItem that)
             {
                 return that._includeEscaped;
             }
@@ -1127,11 +1127,11 @@ namespace Microsoft.Build.Execution
             /// <returns>True if the items are equivalent, false otherwise.</returns>
             public static bool operator ==(TaskItem left, TaskItem right)
             {
-                if (!Object.ReferenceEquals(left, null))
+                if (!(left is null))
                 {
                     return left.Equals(right);
                 }
-                else if (!Object.ReferenceEquals(right, null))
+                else if (!(right is null))
                 {
                     return right.Equals(left);
                 }
@@ -1238,7 +1238,7 @@ namespace Microsoft.Build.Execution
             {
                 if (string.IsNullOrEmpty(metadataName))
                 {
-                    ErrorUtilities.VerifyThrowArgumentLength(metadataName, "metadataName");
+                    ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
                 }
 
                 string value = null;
@@ -1337,7 +1337,7 @@ namespace Microsoft.Build.Execution
             /// </param>
             public void CopyMetadataTo(ITaskItem destinationItem, bool addOriginalItemSpec)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(destinationItem, "destinationItem");
+                ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
 
                 string originalItemSpec = null;
                 if (addOriginalItemSpec)
@@ -1495,7 +1495,7 @@ namespace Microsoft.Build.Execution
             /// <returns>True if the items are equivalent, false otherwise.</returns>
             public bool Equals(TaskItem other)
             {
-                if (Object.ReferenceEquals(other, null))
+                if (other is null)
                 {
                     return false;
                 }
@@ -1553,7 +1553,7 @@ namespace Microsoft.Build.Execution
             /// </remarks>
             public bool HasMetadata(string name)
             {
-                if ((_directMetadata != null && _directMetadata.Contains(name)) ||
+                if ((_directMetadata?.Contains(name) == true) ||
                      FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) ||
                     GetItemDefinitionMetadata(name) != null)
                 {
@@ -1596,16 +1596,32 @@ namespace Microsoft.Build.Execution
                 return new TaskItem(translator, interner);
             }
 
+            private void WriteInternString(ITranslator translator, LookasideStringInterner interner, ref string str)
+            {
+                var key = interner.Intern(str);
+                translator.Writer.Write(key);
+            }
+            
+            private void ReadInternString(ITranslator translator, LookasideStringInterner interner, ref string str)
+            {
+                var val = translator.Reader.ReadInt32();
+                str = interner.GetString(val);
+            }
+
             /// <summary>
             /// Reads or writes the task item to the translator using an interner for metadata.
             /// </summary>
             internal void TranslateWithInterning(ITranslator translator, LookasideStringInterner interner)
             {
+                translator.Translate(ref _itemDefinitions, ProjectItemDefinitionInstance.FactoryForDeserialization);
+                translator.Translate(ref _isImmutable);
                 translator.Translate(ref _includeEscaped);
-                translator.Translate(ref _includeBeforeWildcardExpansionEscaped);
 
                 if (translator.Mode == TranslationDirection.WriteToStream)
                 {
+                    WriteInternString(translator, interner, ref _includeBeforeWildcardExpansionEscaped);
+                    WriteInternString(translator, interner, ref _definingFileEscaped);
+
                     CopyOnWritePropertyDictionary<ProjectMetadataInstance> temp = MetadataCollection;
 
                     // Intern the metadata
@@ -1624,6 +1640,8 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
+                    ReadInternString(translator, interner, ref _includeBeforeWildcardExpansionEscaped);
+                    ReadInternString(translator, interner, ref _definingFileEscaped);
                     if (translator.TranslateNullable(_directMetadata))
                     {
                         int count = translator.Reader.ReadInt32();
@@ -1809,7 +1827,7 @@ namespace Microsoft.Build.Execution
                 internal ProjectItemInstanceFactory(ProjectInstance project, string itemType)
                     : this(project)
                 {
-                    ErrorUtilities.VerifyThrowInternalLength(itemType, "itemType");
+                    ErrorUtilities.VerifyThrowInternalLength(itemType, nameof(itemType));
                     this.ItemType = itemType;
                 }
 
@@ -1901,7 +1919,7 @@ namespace Microsoft.Build.Execution
                 private ProjectItemInstance CreateItem(string includeEscaped, string includeBeforeWildcardExpansionEscaped, ProjectItemInstance source, string definingProject)
                 {
                     ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
-                    ErrorUtilities.VerifyThrowInternalNull(source, "source");
+                    ErrorUtilities.VerifyThrowInternalNull(source, nameof(source));
 
                     // The new item inherits any metadata originating in item definitions, which
                     // takes precedence over its own item definition metadata.
@@ -2026,7 +2044,7 @@ namespace Microsoft.Build.Execution
                 {
                     TaskItem item = new TaskItem(baseItem);
 
-                    if (Path.DirectorySeparatorChar != '\\' && includeEscaped != null && includeEscaped.IndexOf('\\') > -1)
+                    if (Path.DirectorySeparatorChar != '\\' && includeEscaped?.IndexOf('\\') > -1)
                     {
                         includeEscaped = includeEscaped.Replace('\\', '/');
                     }

@@ -230,7 +230,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (GlobalLock)
             {
-                if (_unresolvedConfigurations == null || !_unresolvedConfigurations.ContainsKey(unresolvedConfigId))
+                if (_unresolvedConfigurations?.ContainsKey(unresolvedConfigId) != true)
                 {
                     return false;
                 }
@@ -249,7 +249,7 @@ namespace Microsoft.Build.BackEnd
                     WaitForResult(request, false);
                 }
 
-                return (_unresolvedConfigurations == null);
+                return _unresolvedConfigurations == null;
             }
         }
 

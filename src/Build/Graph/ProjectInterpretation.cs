@@ -423,17 +423,13 @@ namespace Microsoft.Build.Graph
 
             public ImmutableList<string> GetApplicableTargetsForReference(ProjectInstance reference)
             {
-                switch (GetProjectType(reference))
+                return (GetProjectType(reference)) switch
                 {
-                    case ProjectType.InnerBuild:
-                        return _allTargets;
-                    case ProjectType.OuterBuild:
-                        return _outerBuildTargets;
-                    case ProjectType.NonMultitargeting:
-                        return _allTargets;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                    ProjectType.InnerBuild => _allTargets,
+                    ProjectType.OuterBuild => _outerBuildTargets,
+                    ProjectType.NonMultitargeting => _allTargets,
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
             }
         }
 

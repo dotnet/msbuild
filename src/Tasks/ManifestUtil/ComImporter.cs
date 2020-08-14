@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Resources;
 using System.Runtime.InteropServices;
+#if RUNTIME_TYPE_NETCORE
+using System.Runtime.InteropServices.ComTypes;
+#endif
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -46,7 +49,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             catch (COMException) { }
 
 #pragma warning disable 618
+#if RUNTIME_TYPE_NETCORE
+            ITypeLib tlib = (ITypeLib)obj;
+#else
             UCOMITypeLib tlib = (UCOMITypeLib)obj;
+#endif
             if (tlib != null)
             {
                 IntPtr typeLibAttrPtr = IntPtr.Zero;
@@ -67,7 +74,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     tlib.GetTypeInfoType(i, out TYPEKIND tkind);
                     if (tkind == TYPEKIND.TKIND_COCLASS)
                     {
+#if RUNTIME_TYPE_NETCORE
+                        tlib.GetTypeInfo(i, out ITypeInfo tinfo);
+#else
                         tlib.GetTypeInfo(i, out UCOMITypeInfo tinfo);
+#endif
 
                         IntPtr tinfoAttrPtr = IntPtr.Zero;
                         tinfo.GetTypeAttr(out tinfoAttrPtr);

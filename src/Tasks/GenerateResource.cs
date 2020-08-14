@@ -626,7 +626,7 @@ namespace Microsoft.Build.Tasks
         {
             // Throw an internal error, since this method should only ever get called by other aspects of this task, not
             // anything that the user touches.
-            ErrorUtilities.VerifyThrowInternalNull(resGenCommand, "resGenCommand");
+            ErrorUtilities.VerifyThrowInternalNull(resGenCommand, nameof(resGenCommand));
 
             // append the /useSourcePath flag if requested.
             if (UseSourcePath)
@@ -1389,7 +1389,7 @@ namespace Microsoft.Build.Tasks
                     // However, our cache will sometimes record all the info we need (for incremental builds).
                     string sourceFileName = Sources[i].ItemSpec;
                     ResGenDependencies.PortableLibraryFile library = _cache.TryGetPortableLibraryInfo(sourceFileName);
-                    if (library != null && library.AllOutputFilesAreUpToDate())
+                    if (library?.AllOutputFilesAreUpToDate() == true)
                     {
                         AppendCachedOutputTaskItems(library, cachedOutputFiles);
                     }
@@ -1833,7 +1833,7 @@ namespace Microsoft.Build.Tasks
                                             (
                                                 MessageImportance.Low,
                                                 "GenerateResource.SeparateAppDomainBecauseOfType",
-                                                (name == null) ? String.Empty : name,
+                                                name ?? String.Empty,
                                                 typeName,
                                                 source.ItemSpec,
                                                 ((IXmlLineInfo)reader).LineNumber
@@ -1879,7 +1879,7 @@ namespace Microsoft.Build.Tasks
                                             (
                                                 MessageImportance.Low,
                                                 "GenerateResource.SeparateAppDomainBecauseOfMimeType",
-                                                (name == null) ? String.Empty : name,
+                                                name ?? String.Empty,
                                                 mimeType,
                                                 source.ItemSpec,
                                                 ((IXmlLineInfo)reader).LineNumber
@@ -1925,7 +1925,7 @@ namespace Microsoft.Build.Tasks
                                         MessageImportance.Low,
                                         "GenerateResource.SeparateAppDomainBecauseOfErrorDeserializingLineNumber",
                                         source.ItemSpec,
-                                        (name == null) ? String.Empty : name,
+                                        name ?? String.Empty,
                                         ((IXmlLineInfo)reader).LineNumber,
                                         e.Message
                                     );
@@ -2025,7 +2025,7 @@ namespace Microsoft.Build.Tasks
             {
                 object result = binaryFormatter.Deserialize(memoryStream);
 
-                return (result != null);
+                return result != null;
             }
         }
 
@@ -2157,7 +2157,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Add any state file
-            if (StateFile != null && StateFile.ItemSpec.Length > 0)
+            if (StateFile?.ItemSpec.Length > 0)
             {
                 // It's possible the file wasn't actually written (eg the path was invalid)
                 // We can't easily tell whether that happened here, and I think it's fine to add it anyway.
@@ -2193,7 +2193,7 @@ namespace Microsoft.Build.Tasks
             // just doesn't exist, then this method will return a brand new cache object.
 
             // This method eats IO Exceptions
-            _cache = ResGenDependencies.DeserializeCache((StateFile == null) ? null : StateFile.ItemSpec, UseSourcePath, Log);
+            _cache = ResGenDependencies.DeserializeCache(StateFile?.ItemSpec, UseSourcePath, Log);
             ErrorUtilities.VerifyThrow(_cache != null, "We did not create a cache!");
         }
 
@@ -2205,7 +2205,7 @@ namespace Microsoft.Build.Tasks
             if (_cache.IsDirty)
             {
                 // And now we serialize the cache to save our resgen linked file resolution for later use.
-                _cache.SerializeCache((StateFile == null) ? null : StateFile.ItemSpec, Log);
+                _cache.SerializeCache(StateFile?.ItemSpec, Log);
             }
         }
     }
@@ -2428,7 +2428,7 @@ namespace Microsoft.Build.Tasks
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             // If references were passed in, we will have to give the ResxResourceReader an object
             // by which it can resolve types that are referenced from within the .RESX.
-            if ((_assemblyFiles != null) && (_assemblyFiles.Length > 0))
+            if ((_assemblyFiles?.Length > 0))
             {
                 _typeResolver = new AssemblyNamesTypeResolutionService(_assemblyFiles);
             }
@@ -3616,7 +3616,7 @@ namespace Microsoft.Build.Tasks
                     // sign.  Deal with it.
                     if (name[name.Length - 1] == ' ')
                     {
-                        name.Length -= 1;
+                        name.Length--;
                     }
                     ch = sr.Read(); // move past =
                     // If it exists, move past the first space after the equals sign.

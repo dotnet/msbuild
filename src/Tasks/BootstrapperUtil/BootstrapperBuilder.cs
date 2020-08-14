@@ -597,7 +597,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         int nStartIndex = packagePath.Length;
                         if ((strSubDirectory.ToCharArray())[nStartIndex] == System.IO.Path.DirectorySeparatorChar)
                         {
-                            nStartIndex += 1;
+                            nStartIndex++;
                         }
 
                         ExploreDirectory(strSubDirectory.Substring(nStartIndex), rootElement, packagePath);
@@ -2092,7 +2092,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     }
 
                     // If the public key in the file doesn't match the public key on disk, issue a build warning
-                    if (publicKey == null || !publicKey.Equals(publicKeyAttribute.Value, StringComparison.OrdinalIgnoreCase))
+                    if (publicKey?.Equals(publicKeyAttribute.Value, StringComparison.OrdinalIgnoreCase) == false)
                     {
                         results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.DifferingPublicKeys", PUBLICKEY_ATTRIBUTE, builder.Name, fileSource));
                     }

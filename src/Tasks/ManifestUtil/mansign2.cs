@@ -274,8 +274,13 @@ namespace System.Deployment.Internal.CodeSigning
             CryptoConfig.AddAlgorithm(typeof(RSAPKCS1SHA256SignatureDescription),
                                Sha256SignatureMethodUri);
 
+#if RUNTIME_TYPE_NETCORE
+            CryptoConfig.AddAlgorithm(typeof(SHA256Managed),
+                               Sha256DigestMethod);
+#else
             CryptoConfig.AddAlgorithm(typeof(System.Security.Cryptography.SHA256Cng),
                                Sha256DigestMethod);
+#endif
         }
 
         private static XmlElement FindIdElement(XmlElement context, string idValue)
@@ -324,9 +329,7 @@ namespace System.Deployment.Internal.CodeSigning
 
         internal SignedCmiManifest2(XmlDocument manifestDom, bool useSha256)
         {
-            if (manifestDom == null)
-                throw new ArgumentNullException("manifestDom");
-            _manifestDom = manifestDom;
+            _manifestDom = manifestDom ?? throw new ArgumentNullException(nameof(manifestDom));
             _useSha256 = useSha256;
         }
 
@@ -344,7 +347,7 @@ namespace System.Deployment.Internal.CodeSigning
             // Signer cannot be null.
             if (signer == null || signer.StrongNameKey == null)
             {
-                throw new ArgumentNullException("signer");
+                throw new ArgumentNullException(nameof(signer));
             }
 
             // Remove existing SN signature.
@@ -682,8 +685,8 @@ namespace System.Deployment.Internal.CodeSigning
             XmlElement manifestInformationNode = licenseDom.SelectSingleNode("r:license/r:grant/as:ManifestInformation", nsm) as XmlElement;
 
             manifestInformationNode.SetAttribute("Hash", hash.Length == 0 ? "" : BytesToHexString(hash, 0, hash.Length));
-            manifestInformationNode.SetAttribute("Description", signer.Description == null ? "" : signer.Description);
-            manifestInformationNode.SetAttribute("Url", signer.DescriptionUrl == null ? "" : signer.DescriptionUrl);
+            manifestInformationNode.SetAttribute("Description", signer.Description ?? "");
+            manifestInformationNode.SetAttribute("Url", signer.DescriptionUrl ?? "");
 
             XmlElement authenticodePublisherNode = licenseDom.SelectSingleNode("r:license/r:grant/as:AuthenticodePublisher/as:X509SubjectName", nsm) as XmlElement;
             authenticodePublisherNode.InnerText = signer.Certificate.SubjectName.Name;
@@ -694,7 +697,11 @@ namespace System.Deployment.Internal.CodeSigning
         private static void AuthenticodeSignLicenseDom(XmlDocument licenseDom, CmiManifestSigner2 signer, string timeStampUrl, bool useSha256)
         {
             // Make sure it is RSA, as this is the only one Fusion will support.
+#if RUNTIME_TYPE_NETCORE
+            RSA rsaPrivateKey = signer.Certificate.GetRSAPrivateKey();
+#else
             RSA rsaPrivateKey = CngLightup.GetRSAPrivateKey(signer.Certificate);
+#endif
             if (rsaPrivateKey == null)
             {
                 throw new NotSupportedException();
@@ -1049,12 +1056,12 @@ namespace System.Deployment.Internal.CodeSigning
         internal CmiManifestSigner2(AsymmetricAlgorithm strongNameKey, X509Certificate2 certificate, bool useSha256)
         {
             if (strongNameKey == null)
-                throw new ArgumentNullException("strongNameKey");
+                throw new ArgumentNullException(nameof(strongNameKey));
 
 #if (true) // BUGBUG: Fusion only supports RSA. Do we throw if not RSA???
             RSA rsa = strongNameKey as RSA;
             if (rsa == null)
-                throw new ArgumentNullException("strongNameKey");
+                throw new ArgumentNullException(nameof(strongNameKey));
 #endif
             _strongNameKey = strongNameKey;
             _certificate = certificate;

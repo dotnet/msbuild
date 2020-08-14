@@ -349,7 +349,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private IDictionary<AssemblyName, string> ParseSuggestedRedirects()
         {
-            ErrorUtilities.VerifyThrow(SuggestedRedirects != null && SuggestedRedirects.Length > 0, "This should not be called if there is no suggested redirect.");
+            ErrorUtilities.VerifyThrow(SuggestedRedirects?.Length > 0, "This should not be called if there is no suggested redirect.");
 
             var map = new Dictionary<AssemblyName, string>();
             foreach (var redirect in SuggestedRedirects)

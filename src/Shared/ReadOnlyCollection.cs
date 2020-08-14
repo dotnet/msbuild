@@ -128,7 +128,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void CopyTo(T[] array, int arrayIndex)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(array, "array");
+            ErrorUtilities.VerifyThrowArgumentNull(array, nameof(array));
 
             ICollection<T> backingCollection = _backing as ICollection<T>;
             if (backingCollection != null)
@@ -184,7 +184,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         void ICollection.CopyTo(Array array, int index)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(array, "array");
+            ErrorUtilities.VerifyThrowArgumentNull(array, nameof(array));
 
             int i = index;
             foreach (T entry in _backing)

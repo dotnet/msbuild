@@ -266,7 +266,7 @@ namespace Microsoft.Build.Evaluation
         {
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(oldFullPath, "oldFullPath");
+                ErrorUtilities.VerifyThrowArgumentLength(oldFullPath, nameof(oldFullPath));
                 RenameEntryInternal(oldFullPath, projectRootElement);
             }
         }
@@ -394,7 +394,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal override void DiscardAnyWeakReference(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, "projectRootElement");
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
 
             // A PRE may be unnamed if it was only used in memory.
             if (projectRootElement.FullPath != null)

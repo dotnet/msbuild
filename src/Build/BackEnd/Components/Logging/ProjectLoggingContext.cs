@@ -101,7 +101,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 items = new ProjectItemInstanceEnumeratorProxy(projectItemsEnumerator);
             }
 
-            if (projectProperties != null && propertiesToSerialize != null && propertiesToSerialize.Length > 0 && !LoggingService.SerializeAllProperties)
+            if (projectProperties != null && propertiesToSerialize?.Length > 0 && !LoggingService.SerializeAllProperties)
             {
                 PropertyDictionary<ProjectPropertyInstance> projectPropertiesToSerialize = new PropertyDictionary<ProjectPropertyInstance>();
                 foreach (string propertyToGet in propertiesToSerialize)
