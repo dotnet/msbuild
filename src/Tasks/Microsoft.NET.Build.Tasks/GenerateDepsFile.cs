@@ -32,6 +32,8 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string TargetFramework { get; set; }
 
+        public string TargetPlatformMoniker { get; set; }
+
         public string RuntimeIdentifier { get; set; }
 
         public string PlatformLibraryName { get; set; }
@@ -134,7 +136,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 LockFile lockFile = new LockFileCache(this).GetLockFile(AssetsFilePath);
                 projectContext = lockFile.CreateProjectContext(
-                 NuGetUtils.ParseFrameworkName(TargetFramework),
+                 NuGetTargetFrameworkUtils.GetTargetFramework(TargetFramework, TargetPlatformMoniker),
                  RuntimeIdentifier,
                  PlatformLibraryName,
                  RuntimeFrameworks,

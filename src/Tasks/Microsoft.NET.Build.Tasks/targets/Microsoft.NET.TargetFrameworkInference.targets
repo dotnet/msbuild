@@ -94,7 +94,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           errors that are only consequences of the root cause identified here.
   -->
   <Target Name="_CheckForUnsupportedTargetFramework"
-          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;RunResolvePackageDependencies;GetFrameworkPaths;GetReferenceAssemblyPaths"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform;RunResolvePackageDependencies;GetFrameworkPaths;GetReferenceAssemblyPaths;Restore"
           Condition="'$(_UnsupportedTargetFrameworkError)' == 'true'"
           >
     <NETSdkError Condition="!$(TargetFramework.Contains(';'))"
