@@ -555,9 +555,9 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the objects are equivalent, false otherwise.</returns>
         public static bool operator ==(BuildRequestConfiguration left, BuildRequestConfiguration right)
         {
-            if (ReferenceEquals(left, null))
+            if (left is null)
             {
-                if (ReferenceEquals(right, null))
+                if (right is null)
                 {
                     return true;
                 }
@@ -568,7 +568,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                if (ReferenceEquals(right, null))
+                if (right is null)
                 {
                     return false;
                 }
@@ -748,7 +748,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if they contain the same data, false otherwise</returns>
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(obj, null))
+            if (obj is null)
             {
                 return false;
             }
@@ -770,7 +770,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if equal, false otherwise.</returns>
         public bool Equals(BuildRequestConfiguration other)
         {
-            if (ReferenceEquals(other, null))
+            if (other is null)
             {
                 return false;
             }

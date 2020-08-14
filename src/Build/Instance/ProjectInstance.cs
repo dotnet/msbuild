@@ -2603,7 +2603,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(buildParameters, nameof(buildParameters));
 
             _directory = xml.DirectoryPath;
-            _projectFileLocation = (xml.ProjectFileLocation != null) ? xml.ProjectFileLocation : ElementLocation.EmptyLocation;
+            _projectFileLocation = xml.ProjectFileLocation ?? ElementLocation.EmptyLocation;
             _properties = new PropertyDictionary<ProjectPropertyInstance>();
             _items = new ItemDictionary<ProjectItemInstance>();
             _actualTargets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);

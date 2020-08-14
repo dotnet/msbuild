@@ -142,7 +142,7 @@ namespace Microsoft.Build.Execution
         [DebuggerStepThrough]
         public ProjectMetadataInstance GetMetadata(string name)
         {
-            return (_metadata == null) ? null : _metadata[name];
+            return _metadata?[name];
         }
 
         #region IMetadataTable Members
