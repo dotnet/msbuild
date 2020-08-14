@@ -6,7 +6,7 @@ using System.IO.Pipes;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// This interface provides necessary funcionality from <see cref="Microsoft.Build"/> to RAR as a service funcionality
+    /// This interface provides necessary functionality from <see cref="Microsoft.Build"/> to RAR as a service functionality.
     /// </summary>
     internal interface IRarBuildEngine
     {
