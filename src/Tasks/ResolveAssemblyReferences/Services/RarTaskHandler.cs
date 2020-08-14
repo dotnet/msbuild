@@ -10,13 +10,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 {
     internal class RarTaskHandler : IResolveAssemblyReferenceTaskHandler
     {
-
-        public Task<int> GetNumber(int parameter)
-        {
-            Console.WriteLine(parameter);
-            return Task.FromResult(parameter);
-        }
-
         public void Dispose()
         {
             // For RPC dispose

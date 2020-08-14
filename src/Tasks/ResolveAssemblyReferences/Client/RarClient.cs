@@ -49,12 +49,13 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
             return _rarBuildEngine.CreateRarNode();
         }
 
-        internal int GetNumber(int parameter)
+        internal object Execute()
         {
-            using IResolveAssemblyReferenceTaskHandler client = GetRpcClient();
+            throw new NotImplementedException();
+            //using IResolveAssemblyReferenceTaskHandler client = GetRpcClient();
 
             // TODO: Find out if there is any possibility of awaiting it.
-            return client.GetNumber(parameter).GetAwaiter().GetResult();
+            //return client.GetNumber(parameter).GetAwaiter().GetResult();
         }
 
         private IResolveAssemblyReferenceTaskHandler GetRpcClient()

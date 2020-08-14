@@ -8,6 +8,5 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 {
     public interface IResolveAssemblyReferenceTaskHandler : IDisposable
     {
-        Task<int> GetNumber(int parameter);
     }
 }
