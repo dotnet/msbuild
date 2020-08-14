@@ -519,7 +519,8 @@ namespace Microsoft.Build.Shared
                         // Walk each SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX in the buffer, where the Size of each dictates how
                         // much space it's consuming.  For each group relation, count the number of active processors in each of its group infos.
                         int processorCount = 0;
-                        byte* ptr = bufferPtr, endPtr = bufferPtr + len;
+                        byte* ptr = bufferPtr;
+                        byte* endPtr = bufferPtr + len;
                         while (ptr < endPtr)
                         {
                             var current = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)ptr;
