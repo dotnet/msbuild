@@ -61,7 +61,7 @@ namespace Microsoft.NET.Publish.Tests
             //  <TestRoot>/SmallNameDir/This is a directory with a really long name for one that only contains a small file/.word
             //
             // This content is not checked in to the test assets, but generated during test execution
-            // in order to circumvent certain issues like: 
+            // in order to circumvent certain issues like:
             // Git Clone: Cannot clone files with long names on Windows if long file name support is not enabled
             // Nuget Pack: By default ignores files starting with "."
             string longDirPath = Path.Combine(testAsset.TestRoot, SmallNameDir, LargeNameDir);
@@ -84,6 +84,40 @@ namespace Microsoft.NET.Publish.Tests
         {
             return publishCommand.GetOutputDirectory(targetFramework: targetFramework,
                                                      runtimeIdentifier: RuntimeInformation.RuntimeIdentifier);
+        }
+
+        [Fact]
+        public void Incremental_add_single_file()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "SingleFileTest",
+                TargetFrameworks = "net5.0",
+                IsSdkProject = true,
+                IsExe = true,
+            };
+            testProject.AdditionalProperties.Add("SelfContained", $"{true}");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var cmd = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            var singleFilePath = Path.Combine(GetPublishDirectory(cmd).FullName, $"SingleFileTest{Constants.ExeSuffix}");
+            cmd.Execute(RuntimeIdentifier).Should().Pass();
+            var time1 = File.GetLastWriteTimeUtc(singleFilePath);
+
+            WaitForUtcNowToAdvance();
+
+            cmd.Execute(PublishSingleFile, RuntimeIdentifier).Should().Pass();
+            var time2 = File.GetLastWriteTimeUtc(singleFilePath);
+
+            time2.Should().BeAfter(time1);
+
+            var exeCommand = new RunExeCommand(Log, singleFilePath);
+            exeCommand.Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World");
         }
 
         [Fact]
