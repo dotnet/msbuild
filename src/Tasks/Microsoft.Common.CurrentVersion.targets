@@ -1697,18 +1697,39 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </Target>
 
   <Target Name="GetTargetFrameworks"
+          DependsOnTargets="GetTargetFrameworksWithPlatformForSingleTargetFramework"
           Returns="@(_ThisProjectBuildMetadata)">
+
+    <Error Condition="'$(IsCrossTargetingBuild)' == 'true'"
+           Text="Internal MSBuild error: Non-CrossTargeting GetTargetFrameworks target should not be used in cross targeting (outer) build" />
+
     <ItemGroup>
       <_ThisProjectBuildMetadata Include="$(MSBuildProjectFullPath)">
-        <TargetFrameworks Condition="'$(TargetFrameworks)' != ''">$(TargetFrameworks)</TargetFrameworks>
-        <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">$(TargetFramework)</TargetFrameworks>
+        <TargetFrameworks>@(_TargetFrameworkInfo)</TargetFrameworks>
+        <TargetFrameworkMonikers>@(_TargetFrameworkInfo->'%(TargetFrameworkMonikers)')</TargetFrameworkMonikers>
+        <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
+
         <HasSingleTargetFramework>true</HasSingleTargetFramework>
-        <HasSingleTargetFramework Condition="'$(IsCrossTargetingBuild)' == 'true'">false</HasSingleTargetFramework>
+        
         <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
-      <IsRidAgnostic>false</IsRidAgnostic>
-      <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <IsRidAgnostic>false</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
+  </Target>
+
+  <Target Name="GetTargetFrameworksWithPlatformForSingleTargetFramework"
+        Returns="@(_TargetFrameworkInfo)">
+
+    <ItemGroup>
+      <_TargetFrameworkInfo Include="$(TargetFramework)">
+        <TargetFrameworks>$(TargetFramework)</TargetFrameworks>
+        <TargetFrameworkMonikers>$(TargetFrameworkMoniker)</TargetFrameworkMonikers>
+        <TargetPlatformMonikers>$(TargetPlatformMoniker)</TargetPlatformMonikers>
+        <TargetPlatformMonikers Condition="'$(TargetPlatformMoniker)' == ''">None</TargetPlatformMonikers>
+      </_TargetFrameworkInfo>
+    </ItemGroup>
+
   </Target>
 
   <!--
