@@ -963,7 +963,7 @@ namespace Microsoft.Build.BackEnd
             string oldestOutput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(outputs[0].ToString()));
             ErrorUtilities.ThrowIfTypeDoesNotImplementToString(outputs[0]);
 
-            DateTime oldestOutputFileTime;
+            DateTime oldestOutputFileTime = DateTime.MinValue;
             try
             {
                 string oldestOutputFullPath = Path.Combine(projectDirectory, oldestOutput);
@@ -988,7 +988,7 @@ namespace Microsoft.Build.BackEnd
             {
                 string candidateOutput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(outputs[i].ToString()));
                 ErrorUtilities.ThrowIfTypeDoesNotImplementToString(outputs[i]);
-                DateTime candidateOutputFileTime;
+                DateTime candidateOutputFileTime = DateTime.MinValue;
                 try
                 {
                     string candidateOutputFullPath = Path.Combine(projectDirectory, candidateOutput);
