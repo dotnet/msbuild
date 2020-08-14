@@ -5,8 +5,7 @@
     <EnableAnalyzers Condition="'$(DotNetBuildFromSource)' == 'true'">false</EnableAnalyzers>
   </PropertyGroup>
   <ItemGroup Condition="'$(EnableAnalyzers)' == 'true'">
-    <PackageReference Include="Microsoft.DotNet.CodeAnalysis" VersionOverride="5.0.0-beta.20407.3" PrivateAssets="all" IsImplicitlyDefined="true" />
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" VersionOverride="3.3.0-beta3.20410.1" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeQuality.Analyzers" VersionOverride="3.3.0" PrivateAssets="all" />
     <PackageReference Include="StyleCop.Analyzers" VersionOverride="1.2.0-beta.164" PrivateAssets="all" />
   </ItemGroup>
 </Project>
