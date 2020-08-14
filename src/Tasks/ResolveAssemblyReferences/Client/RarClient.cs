@@ -15,7 +15,10 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
 {
     internal sealed class RarClient : IDisposable
     {
-        private const int ConnectionTimeout = 300;
+        /// <summary>
+        /// Default connection timeout for connection to the pipe. Timeout is in millisecond.
+        /// </summary>
+        private const int DefaultConnectionTimeout = 300;
         private readonly IRarBuildEngine _rarBuildEngine;
         private NamedPipeClientStream _clientStream;
 
@@ -24,7 +27,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
             _rarBuildEngine = rarBuildEngine;
         }
 
-        internal bool Connect() => Connect(ConnectionTimeout);
+        internal bool Connect() => Connect(DefaultConnectionTimeout);
 
         internal bool Connect(int timeout)
         {
@@ -56,7 +59,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
 
         private IResolveAssemblyReferenceTaskHandler GetRpcClient()
         {
-            ErrorUtilities.VerifyThrowArgumentNull(_clientStream, nameof(_clientStream));
+            ErrorUtilities.VerifyThrowInvalidOperation(_clientStream != null, nameof(_clientStream));
 
             IJsonRpcMessageHandler handler = RpcUtils.GetRarMessageHandler(_clientStream);
             return JsonRpc.Attach<IResolveAssemblyReferenceTaskHandler>(handler);

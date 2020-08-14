@@ -23,28 +23,25 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private const int ClientConnectTimeout = 60000;
 
-        private Task<int> _rarTask;
-        private Task<NodeEngineShutdownReason> _msBuildShutdown;
-
         public NodeEngineShutdownReason Run(bool nodeReuse, bool lowPriority, out Exception shutdownException)
         {
             shutdownException = null;
             using CancellationTokenSource cts = new CancellationTokenSource();
             string pipeName = CommunicationsUtilities.GetRarPipeName(nodeReuse, lowPriority);
-            RarController controller = new RarController(pipeName);
+            RarController controller = new RarController(pipeName, NamedPipeUtil.CreateNamedPipeServer);
 
-            _rarTask = controller.StartAsync(cts.Token);
+            Task<int> rarTask = controller.StartAsync(cts.Token);
 
             Handshake handshake = NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: lowPriority, specialNode: true);
-            _msBuildShutdown = RunShutdownCheckAsync(handshake, cts.Token);
+            Task<NodeEngineShutdownReason> msBuildShutdown = RunShutdownCheckAsync(handshake, cts.Token);
 
-            int index = Task.WaitAny(_msBuildShutdown, _rarTask);
+            int index = Task.WaitAny(msBuildShutdown, rarTask);
             cts.Cancel();
 
-            if(index == 0)
+            if (index == 0)
             {
                 // We know that this task is completed so we can get Result without worring about waiting for it
-                return _msBuildShutdown.Result;
+                return msBuildShutdown.Result;
             }
             else
             {
@@ -70,8 +67,8 @@ namespace Microsoft.Build.Execution
 
                 await serverStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
 
-                bool conected = NamedPipeUtil.ValidateHandshake(handshake, serverStream, ClientConnectTimeout);
-                if (!conected)
+                bool connected = NamedPipeUtil.ValidateHandshake(handshake, serverStream, ClientConnectTimeout);
+                if (!connected)
                     continue;
 
                 byte[] header = new byte[5];

@@ -4,12 +4,8 @@
 using System;
 using System.IO;
 using System.IO.Pipes;
-using System.Security.AccessControl;
-using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Services;
 using Microsoft.VisualStudio.Threading;
@@ -29,6 +25,16 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         private readonly string _pipeName;
 
         /// <summary>
+        /// Factory callback to NamedPipeUtils.CreateNamedPipeServer
+        /// 1. arg: pipe name
+        /// 2. arg: input buffer size
+        /// 3. arg: input buffer size
+        /// 4. arg. number of allow clients
+        /// 5. arg. add right to CreateNewInstance
+        /// </summary>
+        private readonly Func<string, int?, int?, int, bool, NamedPipeServerStream> _namedPipeServerFactory;
+
+        /// <summary>
         /// Handler for all incoming tasks
         /// </summary>
         private readonly IResolveAssemblyReferenceTaskHandler _resolveAssemblyReferenceTaskHandler;
@@ -36,15 +42,20 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         /// <summary>
         /// Timeout for incoming connections
         /// </summary>
-        private readonly TimeSpan Timeout = new TimeSpan(0, 15, 0);
+        private readonly TimeSpan Timeout = TimeSpan.FromMinutes(15);
 
-        public RarController(string pipeName, TimeSpan? timeout = null) : this(pipeName, timeout: timeout, resolveAssemblyReferenceTaskHandler: new RarTaskHandler())
+        public RarController(
+            string pipeName,
+            Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory,
+            TimeSpan? timeout = null)
+            : this(pipeName, namedPipeServerFactory, timeout: timeout, resolveAssemblyReferenceTaskHandler: new RarTaskHandler())
         {
         }
 
-        internal RarController(string pipeName, IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler, TimeSpan? timeout = null)
+        internal RarController(string pipeName, Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory, IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler, TimeSpan? timeout = null)
         {
             _pipeName = pipeName;
+            _namedPipeServerFactory = namedPipeServerFactory;
             _resolveAssemblyReferenceTaskHandler = resolveAssemblyReferenceTaskHandler;
 
             if (timeout.HasValue)
@@ -109,50 +120,11 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         /// <param name="pipeName">The name of the pipe to which we should connect.</param>
         private NamedPipeServerStream GetStream(string pipeName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(pipeName, "pipeName");
-#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
-            if (!NativeMethodsShared.IsMono)
-            {
-                SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
-                PipeSecurity security = new PipeSecurity();
-
-                // Restrict access to just this account.  We set the owner specifically here, and on the
-                // pipe client side they will check the owner against this one - they must have identical
-                // SIDs or the client will reject this server.  This is used to avoid attacks where a
-                // hacked server creates a less restricted pipe in an attempt to lure us into using it and
-                // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
-                // NOTE: There has to be PipeAccessRights.CreateNewInstance, without it we can't create new pipes
-                PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite | PipeAccessRights.CreateNewInstance, AccessControlType.Allow);
-                security.AddAccessRule(rule);
-                security.SetOwner(identifier);
-
-                return new NamedPipeServerStream
-                    (
-                    pipeName,
-                    PipeDirection.InOut,
-                    NamedPipeServerStream.MaxAllowedServerInstances, // Only allow one connection at a time.
-                    PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous,
-                    PipeBufferSize, // Default input buffer
-                    PipeBufferSize,  // Default output buffer
-                    security,
-                    HandleInheritability.None
-                );
-            }
-            else
-#endif
-            {
-                return new NamedPipeServerStream
-                (
-                    pipeName,
-                    PipeDirection.InOut,
-                    NamedPipeServerStream.MaxAllowedServerInstances,
-                    PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous,
-                    PipeBufferSize, // Default input buffer
-                    PipeBufferSize  // Default output buffer
-                );
-            }
+            return _namedPipeServerFactory(pipeName,
+                PipeBufferSize,
+                PipeBufferSize,
+                NamedPipeServerStream.MaxAllowedServerInstances,
+                true);
         }
     }
 }

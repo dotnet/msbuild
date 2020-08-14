@@ -2024,13 +2024,8 @@ namespace Microsoft.Build.Execution
             nodeLocation ??= OutOfProcNode.MsBuildPath;
             if (string.IsNullOrEmpty(nodeLocation))
             {
-                string msbuildExeName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
-
-                if (!string.IsNullOrEmpty(msbuildExeName))
-                {
-                    // we assume that MSBUILD_EXE_NAME is, in fact, just the name.
-                    nodeLocation = Path.Combine(msbuildExeName, ".exe");
-                }
+                // Couldn't find any path
+                return -1;
             }
 
             bool nodeReuse = _buildParameters?.EnableNodeReuse ?? true;

@@ -2986,7 +2986,7 @@ namespace Microsoft.Build.Tasks
                 var connected = client.Connect();
                 if (!connected)
                 {
-                    if(client.CreateNode())
+                    if (client.CreateNode())
                     {
                         connected = client.Connect(5000);
                     }

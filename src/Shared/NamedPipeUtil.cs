@@ -229,7 +229,7 @@ namespace Microsoft.Build.Shared
             return true;
         }
 
-        internal static NamedPipeServerStream CreateNamedPipeServer(string pipeName, int? inputBufferSize = null, int? outputBufferSize = null, int maxNumberOfServerInstances = 1)
+        internal static NamedPipeServerStream CreateNamedPipeServer(string pipeName, int? inputBufferSize = null, int? outputBufferSize = null, int maxNumberOfServerInstances = 1, bool allowNewInstances = false)
         {
             inputBufferSize ??= PipeBufferSize;
             outputBufferSize ??= PipeBufferSize;
@@ -245,7 +245,14 @@ namespace Microsoft.Build.Shared
                 // SIDs or the client will reject this server.  This is used to avoid attacks where a
                 // hacked server creates a less restricted pipe in an attempt to lure us into using it and 
                 // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
-                PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
+
+                PipeAccessRights rights = PipeAccessRights.ReadWrite;
+                if (allowNewInstances)
+                {
+                    rights |= PipeAccessRights.CreateNewInstance;
+                }
+
+                PipeAccessRule rule = new PipeAccessRule(identifier, rights, AccessControlType.Allow);
                 security.AddAccessRule(rule);
                 security.SetOwner(identifier);
 

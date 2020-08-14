@@ -328,7 +328,6 @@ namespace Microsoft.Build.BackEnd
                         return;
                     }
 
-
                     ChangeLinkStatus(LinkStatus.Active);
                 }
                 catch (Exception e)
