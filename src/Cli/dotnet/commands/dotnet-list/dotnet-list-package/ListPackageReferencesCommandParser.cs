@@ -51,7 +51,8 @@ namespace Microsoft.DotNet.Cli
                                     .ForwardAsMany(o => ForwardedArguments("--source", o.Arguments))),
                 Create.Option("--interactive",
                              CommonLocalizableStrings.CommandInteractiveOptionDescription,
-                             Accept.NoArguments().ForwardAs("--interactive")));
+                             Accept.NoArguments().ForwardAs("--interactive")),
+                CommonOptions.VerbosityOption(o => $"--verbosity:{o.Arguments.Single()}"));
 
         private static IEnumerable<string> ForwardedArguments(string token, IEnumerable<string> arguments)
         {

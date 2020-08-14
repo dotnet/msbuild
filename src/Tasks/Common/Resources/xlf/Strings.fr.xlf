@@ -142,6 +142,16 @@
         <target state="new">NETSDK1134: Building a solution with a specific RuntimeIdentifier is not supported. If you would like to publish for a single RID, specifiy the RID at the individual project level instead.</target>
         <note>{StrBegin="NETSDK1134: "}</note>
       </trans-unit>
+      <trans-unit id="CannotIncludeAllContentButNotNativeLibrariesInSingleFile">
+        <source>NETSDK1143: Including all content in a single file bundle also includes native libraries. If IncludeAllContentForSelfExtract is true, IncludeNativeLibrariesForSelfExtract must not be false.</source>
+        <target state="new">NETSDK1143: Including all content in a single file bundle also includes native libraries. If IncludeAllContentForSelfExtract is true, IncludeNativeLibrariesForSelfExtract must not be false.</target>
+        <note>{StrBegin="NETSDK1143: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotIncludeSymbolsInSingleFile">
+        <source>NETSDK1142: Including symbols in a single file bundle is not supported when publishing for .NET5 or higher.</source>
+        <target state="new">NETSDK1142: Including symbols in a single file bundle is not supported when publishing for .NET5 or higher.</target>
+        <note>{StrBegin="NETSDK1142: "}</note>
+      </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
         <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
         <target state="translated">NETSDK1013: La valeur TargetFramework '{0}' n'a pas été reconnue. Elle est peut-être mal orthographiée. Sinon, vous devez spécifier explicitement les propriétés TargetFrameworkIdentifier et/ou TargetFrameworkVersion.</target>
@@ -349,6 +359,16 @@
         <target state="translated">NETSDK1049: Le fichier résolu a une image incorrecte, ne comporte pas de métadonnées ou n'est pas accessible. {0} {1}</target>
         <note>{StrBegin="NETSDK1049: "}</note>
       </trans-unit>
+      <trans-unit id="GlobalJsonSDKResolutionFailed">
+        <source>NETSDK1141: Unable to resolve the .NET SDK version as specified in the global.json located at {0}.</source>
+        <target state="new">NETSDK1141: Unable to resolve the .NET SDK version as specified in the global.json located at {0}.</target>
+        <note>{StrBegin="NETSDK1141: "}</note>
+      </trans-unit>
+      <trans-unit id="ILLinkFailed">
+        <source>NETSDK1144: Optimizing assemblies for size failed. Optimization can be disabled by setting the PublishTrimmed property to false.</source>
+        <target state="new">NETSDK1144: Optimizing assemblies for size failed. Optimization can be disabled by setting the PublishTrimmed property to false.</target>
+        <note>{StrBegin="NETSDK1144: "}</note>
+      </trans-unit>
       <trans-unit id="ILLinkNotSupportedError">
         <source>NETSDK1102: Optimizing assemblies for size is not supported for the selected publish configuration. Please ensure that you are publishing a self-contained app.</source>
         <target state="translated">NETSDK1102: l'optimisation de la taille des assemblys n'est pas prise en charge pour la configuration de publication sélectionnée. Vérifiez que vous publiez une application autonome.</target>
@@ -394,6 +414,13 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1104: RollForward value '{0}' is invalid. Allowed values are {1}.</source>
         <target state="translated">NETSDK1104: la valeur RollForward '{0}' est non valide. Les valeurs autorisées sont {1}.</target>
         <note>{StrBegin="NETSDK1104: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidTargetPlatformVersion">
+        <source>NETSDK1140: {0} is not a valid TargetPlatformVersion for {1}. Valid versions include:
+{2}</source>
+        <target state="new">NETSDK1140: {0} is not a valid TargetPlatformVersion for {1}. Valid versions include:
+{2}</target>
+        <note>{StrBegin="NETSDK1140: "}</note>
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
@@ -583,6 +610,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1048: Des 'AdditionalProbingPaths' ont été spécifiés pour GenerateRuntimeConfigurationFiles, mais ils sont ignorés, car 'RuntimeConfigDevPath' est vide.</target>
         <note>{StrBegin="NETSDK1048: "}</note>
       </trans-unit>
+      <trans-unit id="TargetFrameworkIsEol">
+        <source>NETSDK1138: The target framework '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</source>
+        <target state="new">NETSDK1138: The target framework '{0}' is out of support and will not receive security updates in the future. Please refer to {1} for more information about the support policy.</target>
+        <note>{StrBegin="NETSDK1138: "}</note>
+      </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
         <source>NETSDK1046: The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
         <target state="translated">NETSDK1046: La valeur TargetFramework '{0}' est non valide. Pour effectuer un multiciblage, utilisez la propriété 'TargetFrameworks' à la place.</target>
@@ -647,6 +679,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
         <target state="translated">NETSDK1045: Le kit .NET SDK actuel ne prend pas en charge le ciblage de {0} {1}. Vous devez soit cibler {0} {2} ou une version antérieure, soit utiliser une version du kit .NET SDK qui prend en charge {0} {1}.</target>
         <note>{StrBegin="NETSDK1045: "}</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedTargetPlatformIdentifier">
+        <source>NETSDK1139: The target platform identifier {0} was not recognized.</source>
+        <target state="new">NETSDK1139: The target platform identifier {0} was not recognized.</target>
+        <note>{StrBegin="NETSDK1139: "}</note>
       </trans-unit>
       <trans-unit id="UseWpfOrUseWindowsFormsRequiresWindowsDesktopFramework">
         <source>NETSDK1107: Microsoft.NET.Sdk.WindowsDesktop is required to build Windows desktop applications. 'UseWpf' and 'UseWindowsForms' are not supported by the current SDK.</source>

@@ -194,7 +194,7 @@ namespace Microsoft.NET.Publish.Tests
             TestProjectPublishing_Internal("LibraryProject2", targetFramework, isSelfContained:true, makeExeProject: false);
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         void It_can_publish_readytorun_using_crossgen2(string targetFramework)
         {
@@ -205,7 +205,7 @@ namespace Microsoft.NET.Publish.Tests
             TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: true, useCrossgen2: true, composite: false);
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         void It_can_publish_readytorun_using_crossgen2_composite_mode(string targetFramework)
         {
@@ -216,7 +216,7 @@ namespace Microsoft.NET.Publish.Tests
             TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: false, useCrossgen2: true, composite: true);
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         public void It_only_supports_selfcontained_when_using_crossgen2(string targetFramework)
         {
@@ -328,7 +328,7 @@ public class Program
             return testProject;
         }
 
-        private string GetPDBFileName(string assemblyFile)
+        public static string GetPDBFileName(string assemblyFile)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {

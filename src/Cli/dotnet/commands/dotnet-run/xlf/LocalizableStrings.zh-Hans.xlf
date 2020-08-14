@@ -32,6 +32,11 @@
         <target state="translated">无法将属性“{0}”的值转换为字符串。</target>
         <note />
       </trans-unit>
+      <trans-unit id="RunCommandBuilding">
+        <source>Building...</source>
+        <target state="new">Building...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandException">
         <source>The build failed. Fix the build errors and run again.</source>
         <target state="translated">生成失败。请修复生成错误并重新运行。</target>

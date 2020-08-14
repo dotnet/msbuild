@@ -30,7 +30,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("netcoreapp3.0");
+            var publishDirectory = publishCommand.GetOutputDirectory("netcoreapp3.1");
             var outputDirectory = publishDirectory.Parent;
 
             var filesPublished = new[] {

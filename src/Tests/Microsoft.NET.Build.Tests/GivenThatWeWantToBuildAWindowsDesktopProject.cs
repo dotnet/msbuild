@@ -30,6 +30,7 @@ namespace Microsoft.NET.Build.Tests
             };
             testProject.AdditionalProperties[propertyName] = "true";
             testProject.AdditionalProperties["TargetPlatformIdentifier"] = "custom"; // Make sure we don't get windows implicitly set as the TPI
+            testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: propertyName);
 
             var buildCommand = new BuildCommand(testAsset);
@@ -80,7 +81,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1136");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_warns_when_specifying_windows_desktop_sdk()
         {
             var targetFramework = "net5.0";
@@ -100,6 +101,71 @@ namespace Microsoft.NET.Build.Tests
                 .Pass()
                 .And
                 .HaveStdOutContaining("NETSDK1137");
+        }
+		
+		[WindowsOnlyFact]
+        public void It_fails_if_windows_target_platform_version_is_invalid()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "InvalidWindowsVersion",
+                IsSdkProject = true,
+                TargetFrameworks = "net5.0-windows1.0"
+            };
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1140");
+        }
+
+        [WindowsOnlyFact]
+        public void It_succeeds_if_windows_target_platform_version_has_trailing_zeros()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "ValidWindowsVersion",
+                IsSdkProject = true,
+                TargetFrameworks = "net5.0"
+            };
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "Windows"; 
+            testProject.AdditionalProperties["TargetPlatformVersion"] = "10.0.18362.0"; // We must set this manually because if we set it in the TFM we remove the trailing zeroes. 
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            var getValuesCommand = new GetValuesCommand(testAsset, "TargetPlatformVersion");
+            getValuesCommand.Execute()
+                .Should()
+                .Pass();
+            getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "10.0.18362" });
+        }
+
+        [Fact]
+        public void It_fails_if_target_platform_identifier_and_version_are_invalid()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "InvalidTargetPlatform",
+                IsSdkProject = true,
+                TargetFrameworks = "net5.0-custom1.0"
+            };
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1139")
+                .And
+                .NotHaveStdOutContaining("NETSDK1140");
         }
     }
 }
