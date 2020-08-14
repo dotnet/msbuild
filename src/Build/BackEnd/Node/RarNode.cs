@@ -58,13 +58,13 @@ namespace Microsoft.Build.Execution
         private async Task<NodeEngineShutdownReason> RunShutdownCheckAsync(Handshake handshake, CancellationToken cancellationToken = default)
         {
             string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + Process.GetCurrentProcess().Id);
-            using NamedPipeServerStream serverStream = NamedPipeUtil.CreateNamedPipeServer(pipeName, maxNumberOfServerInstances: NamedPipeServerStream.MaxAllowedServerInstances);
 
             while (true)
             {
                 if (cancellationToken.IsCancellationRequested)
                     return NodeEngineShutdownReason.Error;
 
+                using NamedPipeServerStream serverStream = NamedPipeUtil.CreateNamedPipeServer(pipeName, maxNumberOfServerInstances: NamedPipeServerStream.MaxAllowedServerInstances);
                 await serverStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
 
                 bool connected = NamedPipeUtil.ValidateHandshake(handshake, serverStream, ClientConnectTimeout);
