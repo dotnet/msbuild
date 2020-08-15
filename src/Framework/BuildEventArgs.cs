@@ -10,7 +10,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// This class encapsulates the default data associated with build events. 
+    /// This class encapsulates the default data associated with build events.
     /// It is intended to be extended/sub-classed.
     /// </summary>
     /// <remarks>
@@ -115,12 +115,12 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// The thread that raised event.  
+        /// The thread that raised event.
         /// </summary>
         public int ThreadId => threadId;
 
         /// <summary>
-        /// Text of event. 
+        /// Text of event.
         /// </summary>
         public virtual string Message
         {
@@ -147,7 +147,7 @@ namespace Microsoft.Build.Framework
             set => buildEventContext = value;
         }
 
-#region CustomSerializationToStream
+        #region CustomSerializationToStream
         /// <summary>
         /// Serializes to a stream through a binary writer
         /// </summary>
@@ -227,9 +227,9 @@ namespace Microsoft.Build.Framework
                 }
             }
         }
-#endregion
+        #endregion
 
-#region SetSerializationDefaults
+        #region SetSerializationDefaults
         /// <summary>
         /// Run before the object has been deserialized
         /// UNDONE (Logging.)  Can this and the next function go away, and instead return a BuildEventContext.Invalid from
@@ -238,7 +238,7 @@ namespace Microsoft.Build.Framework
         [OnDeserializing]
         private void SetBuildEventContextDefaultBeforeSerialization(StreamingContext sc)
         {
-            // Don't want to create a new one here as default all the time as that would be a lot of 
+            // Don't want to create a new one here as default all the time as that would be a lot of
             // possibly useless allocations
             buildEventContext = null;
         }
@@ -254,7 +254,7 @@ namespace Microsoft.Build.Framework
                 buildEventContext = BuildEventContext.Invalid;
             }
         }
-#endregion
+        #endregion
 
     }
 }

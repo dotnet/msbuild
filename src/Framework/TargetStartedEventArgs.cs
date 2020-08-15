@@ -18,7 +18,7 @@ namespace Microsoft.Build.Framework
     /// immutable; adding new fields in the next version of the type
     /// without following certain special FX guidelines, can break both
     /// forward and backward compatibility
-    /// </remarks>    
+    /// </remarks>
     [Serializable]
     public class TargetStartedEventArgs : BuildStatusEventArgs
     {
@@ -165,7 +165,7 @@ namespace Microsoft.Build.Framework
         public string ParentTarget => parentTarget;
 
         /// <summary>
-        /// Project file associated with event.   
+        /// Project file associated with event.
         /// </summary>
         public string ProjectFile => projectFile;
 

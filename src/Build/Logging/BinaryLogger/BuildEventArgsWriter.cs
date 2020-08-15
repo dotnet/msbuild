@@ -130,7 +130,7 @@ namespace Microsoft.Build.Logging
         private void Write(ProjectEvaluationFinishedEventArgs e)
         {
             Write(BinaryLogRecordKind.ProjectEvaluationFinished);
-            
+
             WriteBuildEventArgsFields(e);
             Write(e.ProjectFile);
 
@@ -199,7 +199,7 @@ namespace Microsoft.Build.Logging
             WriteOptionalString(e.ProjectFile);
             WriteOptionalString(e.TargetFile);
             WriteOptionalString(e.ParentTarget);
-            Write((int) e.BuildReason);
+            Write((int)e.BuildReason);
         }
 
         private void Write(TargetFinishedEventArgs e)
@@ -635,7 +635,7 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            // there are no guarantees that the properties iterator won't change, so 
+            // there are no guarantees that the properties iterator won't change, so
             // take a snapshot and work with the readonly copy
             var propertiesArray = properties.OfType<DictionaryEntry>().ToArray();
 

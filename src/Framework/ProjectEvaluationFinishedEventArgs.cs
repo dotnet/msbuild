@@ -38,6 +38,6 @@ namespace Microsoft.Build.Framework
         /// <remarks>
         /// Null if profiling is not turned on
         /// </remarks>
-        public ProfilerResult? ProfilerResult { get; set; } 
+        public ProfilerResult? ProfilerResult { get; set; }
     }
 }
