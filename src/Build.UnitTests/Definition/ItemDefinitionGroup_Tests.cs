@@ -587,13 +587,12 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.True(p.ItemDefinitions.ContainsKey("ItemA"));
 
             ProjectInstance pi = p.CreateProjectInstance();
-            ITaskItem noMetaItem = null;
             ITaskItem withMetaItem;
 
             List<ProjectItemDefinitionInstance> itemdefs = new List<ProjectItemDefinitionInstance>();
             itemdefs.Add(pi.ItemDefinitions["ItemA"]);
 
-            noMetaItem = new TaskItem("NoMetaItem", pi.FullPath);
+            ITaskItem noMetaItem = new TaskItem("NoMetaItem", pi.FullPath);
             withMetaItem = new TaskItem("WithMetaItem", "WithMetaItem", null, itemdefs, ".", false, pi.FullPath);
 
             // Copy the metadata on the item with no metadata onto the item with metadata
@@ -623,13 +622,12 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.True(p.ItemDefinitions.ContainsKey("ItemA"));
 
             ProjectInstance pi = p.CreateProjectInstance();
-            ITaskItem noMetaItem = null;
             ITaskItem withMetaItem;
 
             List<ProjectItemDefinitionInstance> itemdefs = new List<ProjectItemDefinitionInstance>();
             itemdefs.Add(pi.ItemDefinitions["ItemA"]);
 
-            noMetaItem = new TaskItem("NoMetaItem", pi.FullPath);
+            ITaskItem noMetaItem = new TaskItem("NoMetaItem", pi.FullPath);
             noMetaItem.SetMetadata("MetaA", "NEWMETA_A");
 
             withMetaItem = new TaskItem("WithMetaItem", "WithMetaItem", null, itemdefs, ".", false, pi.FullPath);
@@ -665,13 +663,12 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.True(p.ItemDefinitions.ContainsKey("ItemA"));
 
             ProjectInstance pi = p.CreateProjectInstance();
-            ITaskItem noMetaItem = null;
             ITaskItem withMetaItem = null;
 
             List<ProjectItemDefinitionInstance> itemdefs = new List<ProjectItemDefinitionInstance>();
             itemdefs.Add(pi.ItemDefinitions["ItemA"]);
 
-            noMetaItem = new TaskItem("NoMetaItem", pi.FullPath);
+            ITaskItem noMetaItem = new TaskItem("NoMetaItem", pi.FullPath);
 
             // No the ideal way to get the first item, but there is no other way since GetItems returns an IEnumerable :(
             foreach (ProjectItemInstance item in pi.GetItems("ItemA"))

@@ -395,12 +395,11 @@ namespace Microsoft.Build.CommandLine
                 if (!initializeOnly)
                 {
                     string friendlyCounterType = GetFriendlyCounterType(counter.CounterType, counter.CounterName);
-                    string valueFormat;
-
+                    
                     // At least some (such as % in GC; maybe all) "%" counters are already multiplied by 100. So we don't do that here.
 
                     // Show decimal places if meaningful
-                    valueFormat = value < 10 ? "{0,20:N2}" : "{0,20:N0}";
+                    string valueFormat = value < 10 ? "{0,20:N2}" : "{0,20:N0}";
 
                     string valueString = String.Format(CultureInfo.CurrentCulture, valueFormat, value);
 
@@ -1776,7 +1775,6 @@ namespace Microsoft.Build.CommandLine
             int switchParameterIndicator
         )
         {
-            string switchParameters = null;
 
             // find the parameter indicator again using the quoted arg
             // NOTE: since the parameter indicator cannot be part of a switch name, quoting around it is not relevant, because a
@@ -1793,6 +1791,7 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(doubleQuotesRemovedFromArg >= doubleQuotesRemovedFromSwitchIndicatorAndName,
                 "The name portion of the switch cannot contain more quoting than the arg itself.");
 
+            string switchParameters;
             // if quoting in the name portion of the switch was terminated
             if ((doubleQuotesRemovedFromSwitchIndicatorAndName % 2) == 0)
             {

@@ -1072,7 +1072,7 @@ namespace Microsoft.Build.Shared
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
 
-            Uri pathUri = null;
+            Uri pathUri;
 
             // Try absolute first, then fall back on relative, otherwise it
             // makes some absolute UNC paths like (\\foo\bar) relative ...

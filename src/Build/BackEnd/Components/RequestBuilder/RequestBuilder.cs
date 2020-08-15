@@ -916,8 +916,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BuildResult[] GetResultsForContinuation(FullyQualifiedBuildRequest[] requests, bool isContinue)
         {
-            IDictionary<int, BuildResult> results;
-            results = _continueResults;
+            IDictionary<int, BuildResult> results = _continueResults;
             _continueResults = null;
             if (results == null)
             {

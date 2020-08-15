@@ -82,10 +82,10 @@ namespace Microsoft.Build.UnitTests.Definition
             DeleteTestRegistryKey();
 
             ToolsetReader reader = GetStandardRegistryReader();
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
             Assert.Empty(values);
         }
@@ -103,9 +103,8 @@ namespace Microsoft.Build.UnitTests.Definition
             ToolsetReader reader = new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>());  //we don't use the test registry key because we want to verify the install
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
-
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             // Check the values in the data
@@ -124,9 +123,10 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+
             // Should not throw
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Null(defaultToolsVersion);
@@ -139,9 +139,9 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ReadRegistry_NoSubkeyNoValues()
         {
             ToolsetReader reader = GetStandardRegistryReader();
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Empty(values);
@@ -159,9 +159,9 @@ namespace Microsoft.Build.UnitTests.Definition
             _toolsVersionsRegistryKey.SetValue("Name2", "Value2");
 
             ToolsetReader reader = GetStandardRegistryReader();
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Empty(values);
@@ -180,10 +180,9 @@ namespace Microsoft.Build.UnitTests.Definition
             key1.SetValue("msbuildtoolspath", xdir);
 
             ToolsetReader reader = GetStandardRegistryReader();
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Null(defaultToolsVersion);
@@ -208,10 +207,9 @@ namespace Microsoft.Build.UnitTests.Definition
             key2.SetValue("msbuildtoolspath", ydir);
 
             ToolsetReader reader = GetStandardRegistryReader();
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Equal(2, values.Count);
@@ -279,10 +277,9 @@ namespace Microsoft.Build.UnitTests.Definition
             subKey3.SetValue("name5a", "value5a");
 
             ToolsetReader reader = GetStandardRegistryReader();
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Equal(2, values.Count);
@@ -328,10 +325,9 @@ namespace Microsoft.Build.UnitTests.Definition
             subSubKey1.SetValue("name2b", "value2b");
 
             ToolsetReader reader = GetStandardRegistryReader();
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Single(values);
@@ -363,10 +359,9 @@ namespace Microsoft.Build.UnitTests.Definition
             subKey1.SetValue("name2", "");
 
             ToolsetReader reader = GetStandardRegistryReader();
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Single(values);
@@ -404,10 +399,9 @@ namespace Microsoft.Build.UnitTests.Definition
             subKey1.SetValue("name2", "");
 
             ToolsetReader reader = GetStandardRegistryReader();
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Single(values);
@@ -428,10 +422,9 @@ namespace Microsoft.Build.UnitTests.Definition
             key1.SetValue("msbuildtoolspath", "c:\\xxx");
 
             ToolsetReader reader = GetStandardRegistryReader();
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Equal("tv1", defaultToolsVersion);
@@ -444,10 +437,9 @@ namespace Microsoft.Build.UnitTests.Definition
         public void GetDefaultToolsVersionFromRegistry_DefaultValueNotSet()
         {
             ToolsetReader reader = GetStandardRegistryReader();
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Null(defaultToolsVersion);
@@ -492,9 +484,8 @@ namespace Microsoft.Build.UnitTests.Definition
 
             ToolsetReader reader = GetStandardRegistryReader();
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
-
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Equal("c:\\Foo", msbuildOverrideTasksPath);
@@ -508,9 +499,8 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             ToolsetReader reader = GetStandardRegistryReader();
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
-
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Null(msbuildOverrideTasksPath);
@@ -544,9 +534,8 @@ namespace Microsoft.Build.UnitTests.Definition
 
             ToolsetReader reader = GetStandardRegistryReader();
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
-
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Equal("Current", defaultOverrideToolsVersion);
@@ -560,9 +549,8 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             ToolsetReader reader = GetStandardRegistryReader();
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
-
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Null(defaultOverrideToolsVersion);
@@ -599,11 +587,10 @@ namespace Microsoft.Build.UnitTests.Definition
             key3.SetValue("name3", "value3");
 
             ToolsetReader reader = GetStandardRegistryReader();
-            string msbuildOverrideTasksPath = null;
-            string defaultOverrideToolsVersion = null;
-
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            string msbuildOverrideTasksPath;
+            string defaultOverrideToolsVersion;
             //should not throw
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 

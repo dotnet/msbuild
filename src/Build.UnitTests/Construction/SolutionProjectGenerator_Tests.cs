@@ -203,9 +203,8 @@ namespace Microsoft.Build.UnitTests.Construction
             Project project = new Project(projectXml);
 
             project.Build(logger);
-
-            string code = null;
-            string keyword = null;
+            string code;
+            string keyword;
             string text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionParseUnknownProjectType", "proj1.csproj");
 
             // check the error event
@@ -215,9 +214,6 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal(text, warning.Message);
             Assert.Equal(code, warning.Code);
             Assert.Equal(keyword, warning.HelpKeyword);
-
-            code = null;
-            keyword = null;
             text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionInvalidSolutionConfiguration");
 
             // check the warning event
@@ -227,9 +223,6 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal(text, error.Message);
             Assert.Equal(code, error.Code);
             Assert.Equal(keyword, error.HelpKeyword);
-
-            code = null;
-            keyword = null;
             text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionVenusProjectNoClean");
 
             // check the message event
@@ -1317,8 +1310,6 @@ EndGlobal
                     EndGlobalSection
                 EndGlobal
                 ";
-
-            ProjectInstance[] instances = null;
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
             bool caughtException = false;
 
@@ -1326,7 +1317,7 @@ EndGlobal
             {
                 // SolutionProjectGenerator.Generate() is used at build-time, and creates evaluation- and 
                 // execution-model projects; as such it will throw if fed an explicitly invalid toolsversion
-                instances = SolutionProjectGenerator.Generate(solution, null, "invalid", _buildEventContext, CreateMockLoggingService());
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "invalid", _buildEventContext, CreateMockLoggingService());
             }
             catch (InvalidProjectFileException)
             {
@@ -1730,9 +1721,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = null;
-
-            solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
             // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
             Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);

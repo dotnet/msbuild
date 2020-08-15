@@ -52,7 +52,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
             // Maybe we've already cracked open this assembly before.  If so, just grab the list
             // of public desired types that we found last time.
-            List<Type> desiredTypesInAssembly = null;
+            List<Type> desiredTypesInAssembly;
             cacheOfAllDesiredTypesInAnAssembly.TryGetValue(assembly, out desiredTypesInAssembly);
 
             // If we have the assembly name (strong or weak), and we haven't cracked this assembly open

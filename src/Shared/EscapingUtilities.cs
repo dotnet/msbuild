@@ -167,9 +167,9 @@ namespace Microsoft.Build.Shared
             // next, if we're caching, check to see if it's already there.
             if (cache)
             {
-                string cachedEscapedString = null;
                 lock (s_unescapedToEscapedStrings)
                 {
+                    string cachedEscapedString;
                     if (s_unescapedToEscapedStrings.TryGetValue(unescapedString, out cachedEscapedString))
                     {
                         return cachedEscapedString;

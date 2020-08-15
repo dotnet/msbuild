@@ -216,9 +216,7 @@ namespace Microsoft.Build.Evaluation
                 return kindToPathsCache;
             }
 
-            kindToPathsCache = ComputeDistinctListOfSearchPaths(propertyCollection);
-
-            return kindToPathsCache;
+            return ComputeDistinctListOfSearchPaths(propertyCollection);
         }
 
         /// <summary>

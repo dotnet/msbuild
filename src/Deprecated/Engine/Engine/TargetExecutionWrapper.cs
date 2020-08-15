@@ -533,9 +533,6 @@ namespace Microsoft.Build.BuildEngine
             ErrorUtilities.VerifyThrow(inProgressBuildState == InProgressBuildState.RunningTasks, "Wrong state");
             // Check if the current task number is valid
             ErrorUtilities.VerifyThrow(currentBucket < buckets.Count, "No buckets left");
-
-            Hashtable changedTargetInputs = null;
-            Hashtable upToDateTargetInputs = null;
             howToBuild = DependencyAnalysisResult.FullBuild;
             ItemBucket bucket = (ItemBucket)buckets[currentBucket];
 
@@ -555,6 +552,9 @@ namespace Microsoft.Build.BuildEngine
 
             // Figure out how we should build the target
             TargetDependencyAnalyzer dependencyAnalyzer = new TargetDependencyAnalyzer(parentProject.ProjectDirectory, targetClass, parentEngine.LoggingServices, targetBuildEventContext);
+
+            Hashtable changedTargetInputs;
+            Hashtable upToDateTargetInputs;
             howToBuild = dependencyAnalyzer.PerformDependencyAnalysis(bucket, out changedTargetInputs, out upToDateTargetInputs);
 
             targetBuildSuccessful = true;

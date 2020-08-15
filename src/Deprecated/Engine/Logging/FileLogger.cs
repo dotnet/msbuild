@@ -157,9 +157,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (this.Parameters != null)
             {
-                string[] parameterComponents;
-
-                parameterComponents = this.Parameters.Split(fileLoggerParameterDelimiters);
+                string[] parameterComponents = this.Parameters.Split(fileLoggerParameterDelimiters);
                 for (int param = 0; param < parameterComponents.Length; param++)
                 {
                     if (parameterComponents[param].Length > 0)

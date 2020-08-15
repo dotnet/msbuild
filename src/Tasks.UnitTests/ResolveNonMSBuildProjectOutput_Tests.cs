@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
             ITaskItem reference = CreateReferenceItem(itemSpec, projectGuid, package, name);
 
             ResolveNonMSBuildProjectOutput rvpo = new ResolveNonMSBuildProjectOutput();
-            string missingAttr = null;
+            string missingAttr;
             bool result = rvpo.VerifyReferenceAttributes(reference, out missingAttr);
 
             string message = string.Format("Reference \"{0}\" [project \"{1}\", package \"{2}\", name \"{3}\"], " +
@@ -208,9 +208,7 @@ namespace Microsoft.Build.UnitTests
             Hashtable unresolvedOutputs = null;
             Hashtable resolvedOutputs = null;
             Hashtable projectOutputs = null;
-            ArrayList projectRefs = null;
-
-            projectRefs = new ArrayList();
+            ArrayList projectRefs = new ArrayList();
             projectRefs.Add(CreateReferenceItem("MCDep1.vcproj", "{2F6BBCC3-7111-4116-A68B-000000000000}",
                 "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}", "MCDep1"));
             projectRefs.Add(CreateReferenceItem("MCDep2.vcproj", "{2F6BBCC3-7111-4116-A68B-34CFC76F37C5}",
@@ -237,23 +235,20 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "mono-osx-failing")]
         public void TestUnresolvedReferences()
         {
-            Hashtable unresolvedOutputs = null;
-            Hashtable resolvedOutputs = null;
-            Hashtable projectOutputs = null;
-            ArrayList projectRefs = null;
-
-            projectRefs = new ArrayList();
+            ArrayList projectRefs = new ArrayList();
             projectRefs.Add(CreateReferenceItem("MCDep1.vcproj", "{2F6BBCC3-7111-4116-A68B-000000000000}",
                 "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}", "MCDep1"));
             projectRefs.Add(CreateReferenceItem("MCDep2.vcproj", "{2F6BBCC3-7111-4116-A68B-34CFC76F37C5}",
                 "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}", "MCDep2"));
 
             // 1. multiple project refs, none resolvable
-            projectOutputs = new Hashtable();
+            Hashtable projectOutputs = new Hashtable();
             projectOutputs.Add("{11111111-1111-1111-1111-111111111111}", Path.Combine("obj", "wrong.dll"));
             projectOutputs.Add("{11111111-1111-1111-1111-111111111112}", Path.Combine("obj", "wrong2.dll"));
             projectOutputs.Add("{11111111-1111-1111-1111-111111111113}", Path.Combine("obj", "wrong3.dll"));
 
+            Hashtable unresolvedOutputs;
+            Hashtable resolvedOutputs;
             TestUnresolvedReferencesHelper(projectRefs, projectOutputs, out unresolvedOutputs, out resolvedOutputs);
 
             Assert.Empty(resolvedOutputs); // "No resolved refs expected for case 1"

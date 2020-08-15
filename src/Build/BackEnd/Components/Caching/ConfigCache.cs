@@ -207,8 +207,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>Set if configurations which have been cleared.</returns>
         public List<int> ClearNonExplicitlyLoadedConfigurations()
         {
-            List<int> configurationIdsCleared = null;
-            configurationIdsCleared = new List<int>();
+            List<int> configurationIdsCleared = new List<int>();
 
             Dictionary<int, BuildRequestConfiguration> configurationsToKeep = new Dictionary<int, BuildRequestConfiguration>();
             Dictionary<ConfigurationMetadata, int> configurationIdsByMetadataToKeep = new Dictionary<ConfigurationMetadata, int>();

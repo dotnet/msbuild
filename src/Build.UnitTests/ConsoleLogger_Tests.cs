@@ -1422,10 +1422,9 @@ namespace Microsoft.Build.UnitTests
             properties.Add("prop1", "val1");
             properties.Add("prop2", "val2");
             properties.Add("pro(p3)", "va%3b%253b%3bl3");
-            string prop1 = string.Empty;
-            string prop2 = string.Empty;
-            string prop3 = string.Empty;
-
+            string prop1;
+            string prop2;
+            string prop3;
             if (cl is SerialConsoleLogger)
             {
                 var propertyList = ((SerialConsoleLogger)cl).ExtractPropertyList(properties);
@@ -1624,7 +1623,7 @@ namespace Microsoft.Build.UnitTests
             // Being careful not to make locale assumptions here, eg about sorting
             foreach (KeyValuePair<string, string> kvp in _environment)
             {
-                string message = String.Empty;
+                string message;
                 if (cl is ParallelConsoleLogger)
                 {
                     message = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", kvp.Key, kvp.Value);
@@ -1665,12 +1664,12 @@ namespace Microsoft.Build.UnitTests
 
             items.Add("type(3)", taskItem3);
 
-            string item1type = string.Empty;
-            string item2type = string.Empty;
-            string item3type = string.Empty;
-            string item1spec = string.Empty;
-            string item2spec = string.Empty;
-            string item3spec = string.Empty;
+            string item1type;
+            string item2type;
+            string item3type;
+            string item1spec;
+            string item2spec;
+            string item3spec;
             string item3metadatum = string.Empty;
 
             if (cl is SerialConsoleLogger)

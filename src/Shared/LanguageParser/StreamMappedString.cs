@@ -378,7 +378,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         {
             StringBuilder result = new StringBuilder(length);
 
-            int charactersExtracted = 0;
+            int charactersExtracted;
             for (int i = 0; i < length; i += charactersExtracted)
             {
                 char[] page = GetPage(startPosition + i);

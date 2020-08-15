@@ -105,9 +105,7 @@ namespace Microsoft.Build.Logging
         {
             if (_loggerParameters != null)
             {
-                string[] parameterComponents;
-
-                parameterComponents = _loggerParameters.Split(s_parameterDelimiters);
+                string[] parameterComponents = _loggerParameters.Split(s_parameterDelimiters);
                 for (int param = 0; param < parameterComponents.Length; param++)
                 {
                     if (parameterComponents[param].Length > 0)

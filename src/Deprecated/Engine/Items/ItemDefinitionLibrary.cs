@@ -241,9 +241,9 @@ namespace Microsoft.Build.BuildEngine
 
                 XmlAttribute conditionAttribute = ProjectXmlUtilities.GetConditionAttribute(itemDefinitionElement, /* sole attribute */ true);
                 string condition = ProjectXmlUtilities.GetAttributeValue(conditionAttribute);
-
-                MetadataDictionary metadataDictionary = null;
                 string itemType = itemDefinitionElement.Name;
+
+                MetadataDictionary metadataDictionary;
                 itemDefinitionsDictionary.TryGetValue(itemType, out metadataDictionary);
 
                 Expander expander = new Expander(properties, itemType, metadataDictionary);
@@ -274,9 +274,9 @@ namespace Microsoft.Build.BuildEngine
 
                 XmlAttribute conditionAttribute = ProjectXmlUtilities.GetConditionAttribute(itemDefinitionChildElement, /* sole attribute */ true);
                 string condition = ProjectXmlUtilities.GetAttributeValue(conditionAttribute);
-
-                MetadataDictionary metadataDictionary = null;
                 string itemType = itemDefinitionChildElement.ParentNode.Name;
+
+                MetadataDictionary metadataDictionary;
                 itemDefinitionsDictionary.TryGetValue(itemType, out metadataDictionary);
 
                 Expander expander = new Expander(properties, itemType, metadataDictionary);

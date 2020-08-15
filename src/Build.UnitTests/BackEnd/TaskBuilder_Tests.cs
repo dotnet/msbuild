@@ -859,7 +859,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             MockLogger logger = new MockLogger();
             logger.AllowTaskCrashes = throwException;
 
-            string taskAssemblyName = null;
+            string taskAssemblyName;
             Project project = CreateSTATestProject(requireSTA, failTask, throwException, out taskAssemblyName);
 
             List<ILogger> loggers = new List<ILogger>();

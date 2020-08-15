@@ -1334,10 +1334,7 @@ typedef enum _tagAssemblyComparisonResult
         [HandleProcessCorruptedStateExceptions]
         internal static unsafe bool TryReadMetadataString(string fullPath, IntPtr attrData, uint attrDataSize, out string strValue)
         {
-            IntPtr attrDataPostProlog = IntPtr.Zero;
             int attrDataOffset = 0;
-            int strLen = 0;
-            int i = 0;
             strValue = null;
 
             try
@@ -1354,8 +1351,9 @@ typedef enum _tagAssemblyComparisonResult
                 if ((attrDataSize >= 4) && (Marshal.ReadInt16(attrData, attrDataOffset) == 1))
                 {
                     int preReadOffset = 2; // pass the prolog
-                    attrDataPostProlog = attrData + preReadOffset;
+                    IntPtr attrDataPostProlog = attrData + preReadOffset;
 
+                    int strLen;
                     // Get the offset at which the uncompressed data starts, and the 
                     // length of the uncompressed data.
                     attrDataOffset = CorSigUncompressData(attrDataPostProlog, out strLen);
@@ -1368,6 +1366,7 @@ typedef enum _tagAssemblyComparisonResult
                         {
                             // Read in the uncompressed data
                             byte[] bytes = new byte[(int)strLen];
+                            int i;
                             for (i = 0; i < strLen; i++)
                             {
                                 bytes[i] = Marshal.ReadByte(attrDataPostProlog, attrDataOffset + i);

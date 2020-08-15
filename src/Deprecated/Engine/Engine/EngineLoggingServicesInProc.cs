@@ -62,7 +62,7 @@ namespace Microsoft.Build.BuildEngine
             lastFlushTime = DateTime.Now.Ticks;
 
             // Process all the events posted with a logger Id
-            NodeLoggingEvent nodeLoggingEvent = null;
+            NodeLoggingEvent nodeLoggingEvent;
 
             // We may get a single event for multiple messages
             while ((nodeLoggingEvent = loggingQueueOfNodeEvents.Dequeue()) != null)
@@ -89,7 +89,7 @@ namespace Microsoft.Build.BuildEngine
             }
 
             // Process all the events in that have been already posted
-            BuildEventArgs buildEventArgs = null;
+            BuildEventArgs buildEventArgs;
 
             // We may get a single event for multiple messages
             while ((buildEventArgs = loggingQueueOfBuildEvents.Dequeue()) != null)

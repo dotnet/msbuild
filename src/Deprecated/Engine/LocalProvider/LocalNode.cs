@@ -170,7 +170,7 @@ namespace Microsoft.Build.BuildEngine
         /// <returns>True if events created successfully and false otherwise</returns>
         private static bool CreateGlobalEvents(int nodeNumber)
         {
-            bool createdNew = false;
+            bool createdNew;
             if (NativeMethods.IsUserAdministrator())
             {
                 EventWaitHandleSecurity mSec = new EventWaitHandleSecurity();

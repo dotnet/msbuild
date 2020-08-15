@@ -159,7 +159,7 @@ namespace Microsoft.Build.BackEnd
         {
             // First, collect up the appropriate metadata collections.  We need the one from the item definition, if any, and
             // the one we are using for this batching bucket.
-            ProjectItemDefinitionInstance itemDefinition = null;
+            ProjectItemDefinitionInstance itemDefinition;
             Project.ItemDefinitions.TryGetValue(child.ItemType, out itemDefinition);
 
             // The NestedMetadataTable will handle the aggregation of the different metadata collections
@@ -246,8 +246,7 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            List<ProjectItemInstance> itemsToRemove = null;
-
+            List<ProjectItemInstance> itemsToRemove;
             if (matchOnMetadata == null)
             {
                 itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, bucket.Expander);

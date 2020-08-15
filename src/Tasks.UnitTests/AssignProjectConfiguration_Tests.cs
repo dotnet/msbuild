@@ -292,23 +292,20 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestUnresolvedReferences()
         {
-            Hashtable unresolvedProjects = null;
-            Hashtable resolvedProjects = null;
-            Hashtable projectConfigurations = null;
-            ArrayList projectRefs = null;
-
-            projectRefs = new ArrayList();
+            ArrayList projectRefs = new ArrayList();
             projectRefs.Add(ResolveNonMSBuildProjectOutput_Tests.CreateReferenceItem("MCDep1.vcproj", "{2F6BBCC3-7111-4116-A68B-000000000000}",
                 "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}", "MCDep1"));
             projectRefs.Add(ResolveNonMSBuildProjectOutput_Tests.CreateReferenceItem("MCDep2.vcproj", "{2F6BBCC3-7111-4116-A68B-34CFC76F37C5}",
                 "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}", "MCDep2"));
 
             // 1. multiple projects, none resolvable
-            projectConfigurations = new Hashtable();
+            Hashtable projectConfigurations = new Hashtable();
             projectConfigurations.Add("{11111111-1111-1111-1111-111111111111}", @"Config1|Win32");
             projectConfigurations.Add("{11111111-1111-1111-1111-111111111112}", @"Config2|AnyCPU");
             projectConfigurations.Add("{11111111-1111-1111-1111-111111111113}", @"Config3|AnyCPU");
 
+            Hashtable unresolvedProjects;
+            Hashtable resolvedProjects;
             TestUnresolvedReferencesHelper(projectRefs, projectConfigurations, out unresolvedProjects, out resolvedProjects);
 
             Assert.Empty(resolvedProjects); // "No resolved refs expected for case 1"

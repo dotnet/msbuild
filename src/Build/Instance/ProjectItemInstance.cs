@@ -1241,9 +1241,7 @@ namespace Microsoft.Build.Execution
                     ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
                 }
 
-                string value = null;
-                ProjectMetadataInstance metadatum = null;
-
+                ProjectMetadataInstance metadatum;
                 if (_directMetadata != null)
                 {
                     metadatum = _directMetadata[metadataName];
@@ -1260,16 +1258,14 @@ namespace Microsoft.Build.Execution
                     Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
 
                     // We don't have a location to use, but this is very unlikely to error
-                    value = expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
-
-                    return value;
+                    return expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
                 }
                 else if (null != metadatum)
                 {
                     return metadatum.EvaluatedValueEscaped;
                 }
 
-                value = GetBuiltInMetadataEscaped(metadataName);
+                string value = GetBuiltInMetadataEscaped(metadataName);
 
                 return value ?? String.Empty;
             }
@@ -1781,7 +1777,6 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private ProjectMetadataInstance GetItemDefinitionMetadata(string metadataName)
             {
-                ProjectMetadataInstance metadataFromDefinition = null;
 
                 // Check any inherited item definition metadata first. It's more like
                 // direct metadata, but we didn't want to copy the tables.
@@ -1789,7 +1784,7 @@ namespace Microsoft.Build.Execution
                 {
                     foreach (ProjectItemDefinitionInstance itemDefinition in _itemDefinitions)
                     {
-                        metadataFromDefinition = itemDefinition.GetMetadata(metadataName);
+                        ProjectMetadataInstance metadataFromDefinition = itemDefinition.GetMetadata(metadataName);
 
                         if (metadataFromDefinition != null)
                         {

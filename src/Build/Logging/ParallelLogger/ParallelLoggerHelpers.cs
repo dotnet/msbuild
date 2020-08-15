@@ -50,7 +50,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 if (!_projectStartedEvents.ContainsKey(e.BuildEventContext))
                 {
                     int projectTargetKeyLocal = 1;
-                    int projectIncrementKeyLocal = 1;
+                    int projectIncrementKeyLocal;
                     // If we haven't seen this project before (by full path) then
                     // allocate a new key for it and save it away
                     if (!_projectKey.ContainsKey(e.ProjectFile))

@@ -105,9 +105,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>A string containing the full path of this tool, or null if the tool was not found</returns>
         protected override string GenerateFullPathToTool()
         {
-            string pathToTool = null;
-
-            pathToTool = SdkToolsPathUtility.GeneratePathToTool
+            string pathToTool = SdkToolsPathUtility.GeneratePathToTool
             (
                 SdkToolsPathUtility.FileInfoExists,
                 Utilities.ProcessorArchitecture.CurrentProcessArchitecture,

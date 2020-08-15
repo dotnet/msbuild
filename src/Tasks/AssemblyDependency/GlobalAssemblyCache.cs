@@ -134,7 +134,7 @@ namespace Microsoft.Build.Tasks
                         {
                             if (targetedRuntime.CompareTo(runtimeVersion) >= 0 || specificVersion)
                             {
-                                SortedDictionary<AssemblyNameExtension, string> assembliesWithRuntime = null;
+                                SortedDictionary<AssemblyNameExtension, string> assembliesWithRuntime;
                                 assembliesWithValidRuntimes.TryGetValue(runtimeVersion, out assembliesWithRuntime);
 
                                 // Create a new list if one does not exist.

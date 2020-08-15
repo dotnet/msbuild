@@ -764,21 +764,18 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal string GenerateSubToolsetVersion(PropertyDictionary<ProjectPropertyInstance> overrideGlobalProperties)
         {
-            ProjectPropertyInstance subToolsetProperty = null;
-            string visualStudioVersion = null;
             if (overrideGlobalProperties != null)
             {
-                subToolsetProperty = overrideGlobalProperties[Constants.SubToolsetVersionPropertyName];
+                ProjectPropertyInstance subToolsetProperty = overrideGlobalProperties[Constants.SubToolsetVersionPropertyName];
 
                 if (subToolsetProperty != null)
                 {
-                    visualStudioVersion = subToolsetProperty.EvaluatedValue;
-                    return visualStudioVersion;
+                    return subToolsetProperty.EvaluatedValue;
                 }
             }
 
-            visualStudioVersion = GenerateSubToolsetVersion(0 /* don't care about solution version */);
-            return visualStudioVersion;
+            /* don't care about solution version */
+            return GenerateSubToolsetVersion(0);
         }
 
         /// <summary>
@@ -851,14 +848,13 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal string GenerateSubToolsetVersionUsingVisualStudioVersion(IDictionary<string, string> overrideGlobalProperties, int visualStudioVersionFromSolution)
         {
-            string visualStudioVersion = null;
+            string visualStudioVersion;
             if (overrideGlobalProperties != null && overrideGlobalProperties.TryGetValue(Constants.SubToolsetVersionPropertyName, out visualStudioVersion))
             {
                 return visualStudioVersion;
             }
 
-            visualStudioVersion = GenerateSubToolsetVersion(visualStudioVersionFromSolution);
-            return visualStudioVersion;
+            return GenerateSubToolsetVersion(visualStudioVersionFromSolution);
         }
 
         /// <summary>

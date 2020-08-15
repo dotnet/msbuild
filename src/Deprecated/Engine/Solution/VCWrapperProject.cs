@@ -138,8 +138,7 @@ namespace Microsoft.Build.BuildEngine
         static internal XmlDocument GenerateVCWrapperProject(Engine parentEngine, string vcProjectFilename, string toolsVersion)
         {
             string projectPath = Path.GetFullPath(vcProjectFilename);
-            Project msbuildProject = null;
-
+            Project msbuildProject;
             try
             {
                 msbuildProject = new Project(parentEngine, toolsVersion);

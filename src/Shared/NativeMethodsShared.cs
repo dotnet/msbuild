@@ -820,9 +820,7 @@ namespace Microsoft.Build.Shared
                 fileModifiedTimeUtc = DateTime.MinValue;
 
                 WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-                bool success = false;
-
-                success = GetFileAttributesEx(fullPath, 0, ref data);
+                bool success = GetFileAttributesEx(fullPath, 0, ref data);
                 if (success)
                 {
                     if ((data.fileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
@@ -970,9 +968,7 @@ namespace Microsoft.Build.Shared
                 }
 
                 WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-                bool success = false;
-
-                success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
+                bool success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
 
                 if (success && (data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) == 0)
                 {
@@ -1078,7 +1074,7 @@ namespace Microsoft.Build.Shared
             // Only when you create the process using the Process object
             // does the Process object retain the original handle.
 
-            Process thisProcess = null;
+            Process thisProcess;
             try
             {
                 thisProcess = Process.GetProcessById(processIdToKill);
@@ -1580,9 +1576,7 @@ namespace Microsoft.Build.Shared
         internal static bool DirectoryExistsWindows(string fullPath)
         {
             NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
-            bool success = false;
-
-            success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
+            bool success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
             return success && (data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) != 0;
         }
 
@@ -1596,9 +1590,7 @@ namespace Microsoft.Build.Shared
         internal static bool FileExistsWindows(string fullPath)
         {
             NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
-            bool success = false;
-
-            success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
+            bool success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
             return success && (data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) == 0;
         }
 

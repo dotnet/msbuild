@@ -699,8 +699,6 @@ namespace Microsoft.Build.BuildEngine
         {
             ErrorUtilities.VerifyThrow(type == SharedMemoryType.ReadOnly, "Should only be calling Read from a readonly shared memory object");
             ArrayList objectsRead = null;
-            int objectId = -1;
-
             lock (readLock)
             {
                 if (NumberOfUnreadBatches > 0)
@@ -735,6 +733,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         objectsRead = new ArrayList();
 
+                        int objectId;
                         // Deserialize the object in the read stream to a LocalCallDescriptor. The objectId
                         // is the "ObjectType" which was written to the head of the object when written to the memory stream.
                         // It describes which kind of object was serialized

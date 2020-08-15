@@ -7178,14 +7178,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void IgnoreDefaultInstalledSubsetTables()
         {
             string redistListPath = CreateGenericRedistList();
-            string subsetListClientPath = string.Empty;
-            string explicitSubsetListPath = string.Empty;
-
             try
             {
-                subsetListClientPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("v3.5\\SubsetList\\Client.xml", _engineOnlySubset);
-                explicitSubsetListPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("v3.5\\SubsetList\\ExplicitList.xml", _xmlOnlySubset);
-
+                string subsetListClientPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("v3.5\\SubsetList\\Client.xml", _engineOnlySubset);
+                string explicitSubsetListPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("v3.5\\SubsetList\\ExplicitList.xml", _xmlOnlySubset);
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
                 t.BuildEngine = new MockEngine(_output);
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };
@@ -8021,8 +8017,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Trait("Category", "mono-osx-failing")]
         public void TargetFrameworkFiltering()
         {
-            int resultSet = 0;
-            resultSet = RunTargetFrameworkFilteringTest("3.0");
+            int resultSet = RunTargetFrameworkFilteringTest("3.0");
             Assert.Equal(0x3, resultSet); // "Expected assemblies A & B to be found."
 
             resultSet = RunTargetFrameworkFilteringTest("3.5");
@@ -8321,9 +8316,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Verifyp2pAndProfile()
         {
-            // Create a generic redist list with system.xml and microsoft.build.engine.
-            string profileRedistList = String.Empty;
-            string fullRedistList = String.Empty;
             string fullFrameworkDirectory = Path.Combine(Path.GetTempPath(), "Verifyp2pAndProfile");
             string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles", "Client");
 
@@ -8334,6 +8326,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             try
             {
+                // Create a generic redist list with system.xml and microsoft.build.engine.
+                string profileRedistList;
+                string fullRedistList;
                 GenerateRedistAndProfileXmlLocations(fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8369,9 +8364,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Verifyp2pAndProfile2()
         {
-            // Create a generic redist list with system.xml and microsoft.build.engine.
-            string profileRedistList = String.Empty;
-            string fullRedistList = String.Empty;
             string fullFrameworkDirectory = Path.Combine(Path.GetTempPath(), "Verifyp2pAndProfile");
             string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles", "Client");
 
@@ -8382,6 +8374,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             try
             {
+                // Create a generic redist list with system.xml and microsoft.build.engine.
+                string profileRedistList;
+                string fullRedistList;
                 GenerateRedistAndProfileXmlLocations(fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8419,13 +8414,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyClientProfileRedistListAndProfileList()
         {
-            // Create a generic redist list with system.xml and microsoft.build.engine.
-            string profileRedistList = String.Empty;
-            string fullRedistList = String.Empty;
             string fullFrameworkDirectory = Path.Combine(Path.GetTempPath(), "VerifyClientProfileRedistListAndProfileList");
             string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles", "Client");
             try
             {
+                // Create a generic redist list with system.xml and microsoft.build.engine.
+                string profileRedistList;
+                string fullRedistList;
                 GenerateRedistAndProfileXmlLocations(_fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8466,13 +8461,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyClientProfileRedistListAndProfileList2()
         {
-            // Create a generic redist list with system.xml and microsoft.build.engine.
-            string profileRedistList = String.Empty;
-            string fullRedistList = String.Empty;
             string fullFrameworkDirectory = Path.Combine(Path.GetTempPath(), "VerifyClientProfileRedistListAndProfileList2");
             string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles", "Client");
             try
             {
+                // Create a generic redist list with system.xml and microsoft.build.engine.
+                string profileRedistList;
+                string fullRedistList;
                 GenerateRedistAndProfileXmlLocations(_fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8514,9 +8509,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyAssemblyInGacButNotInProfileIsNotResolved()
         {
-            // Create a generic redist list with system.xml and microsoft.build.engine.
-            string profileRedistList = String.Empty;
-            string fullRedistList = String.Empty;
             string fullFrameworkDirectory = Path.Combine(Path.GetTempPath(), "VerifyAssemblyInGacButNotInProfileIsNotResolved");
             string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles", "Client");
             useFrameworkFileExists = true;
@@ -8527,6 +8519,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             try
             {
+                // Create a generic redist list with system.xml and microsoft.build.engine.
+                string profileRedistList;
+                string fullRedistList;
                 GenerateRedistAndProfileXmlLocations(fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -8568,9 +8563,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyProfileErrorsAreLogged()
         {
-            // Create a generic redist list with system.xml and microsoft.build.engine.
-            string profileRedistList = String.Empty;
-            string fullRedistList = String.Empty;
             string fullFrameworkDirectory = Path.Combine(Path.GetTempPath(), "VerifyProfileErrorsAreLogged");
             string targetFrameworkDirectory = Path.Combine(fullFrameworkDirectory, "Profiles", "Client");
             try
@@ -8581,6 +8573,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         "File AssemblyName='Microsoft.Build.Engine' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' >" +
                    "";
 
+                // Create a generic redist list with system.xml and microsoft.build.engine.
+                string profileRedistList;
+                string fullRedistList;
                 GenerateRedistAndProfileXmlLocations(fullRedistListContentsErrors, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();

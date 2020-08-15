@@ -132,11 +132,9 @@ namespace Microsoft.Build.BuildEngine
             // The ordering here is important because the configuration file should have greater precedence
             // than the registry
             string defaultToolsVersionFromRegistry = null;
-
-            ToolsetRegistryReader registryReaderToUse = null;
             if ((locations & ToolsetDefinitionLocations.Registry) == ToolsetDefinitionLocations.Registry)
             {
-                registryReaderToUse = registryReader ?? new ToolsetRegistryReader();
+                ToolsetRegistryReader registryReaderToUse = registryReader ?? new ToolsetRegistryReader();
                 // We do not accumulate properties when reading them from the registry, because the order
                 // in which values are returned to us is essentially random: so we disallow one property
                 // in the registry to refer to another also in the registry
@@ -145,8 +143,6 @@ namespace Microsoft.Build.BuildEngine
             }
 
             string defaultToolsVersionFromConfiguration = null;
-
-            ToolsetConfigurationReader configurationReaderToUse = null;
             if ((locations & ToolsetDefinitionLocations.ConfigurationFile) == ToolsetDefinitionLocations.ConfigurationFile)
             {
                 if (configurationReader == null && ConfigurationFileMayHaveToolsets())
@@ -159,7 +155,7 @@ namespace Microsoft.Build.BuildEngine
 
                 if (configurationReader != null)
                 {
-                    configurationReaderToUse = configurationReader ?? new ToolsetConfigurationReader();
+                    ToolsetConfigurationReader configurationReaderToUse = configurationReader ?? new ToolsetConfigurationReader();
                     // Accumulation of properties is okay in the config file because it's deterministically ordered
                     defaultToolsVersionFromConfiguration =
                         configurationReaderToUse.ReadToolsets(toolsets, globalProperties, initialProperties, true /* accumulate properties */);
