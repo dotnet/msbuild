@@ -13,8 +13,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
     {
         internal static IJsonRpcMessageHandler GetRarMessageHandler(Stream stream)
         {
-            var formatter = new MessagePackFormatter();
-            return new LengthHeaderMessageHandler(stream.UsePipe(), formatter);
+            return new LengthHeaderMessageHandler(stream.UsePipe(), new MessagePackFormatter());
         }
     }
 }
