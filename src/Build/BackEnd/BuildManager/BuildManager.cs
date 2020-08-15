@@ -2023,7 +2023,7 @@ namespace Microsoft.Build.Execution
             string nodeLocation = _buildParameters?.NodeExeLocation ?? OutOfProcNode.MsBuildPath;
             if (string.IsNullOrEmpty(nodeLocation))
             {
-                // Couldn't find any path
+                // Couldn't find any path to MsBuild, not creating new node.
                 return -1;
             }
 

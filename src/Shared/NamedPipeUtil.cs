@@ -80,7 +80,7 @@ namespace Microsoft.Build.Shared
                                                                          | PipeOptions.CurrentUserOnly
 #endif
                                                                          );
-           CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId.HasValue ? nodeProcessId.Value : pipeName, pipeName, timeout);
+           CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId.HasValue ? nodeProcessId.Value.ToString() : pipeName, pipeName, timeout);
 
             try
             {

@@ -32,7 +32,8 @@ namespace Microsoft.Build.Execution
 
             Task<int> rarTask = controller.StartAsync(cts.Token);
 
-            Handshake handshake = NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: lowPriority, specialNode: true);
+            Handshake handshake = NodeProviderOutOfProc.GetHandshake(enableNodeReuse: nodeReuse,
+                                                                     enableLowPriority: lowPriority, specialNode: true);
             Task<NodeEngineShutdownReason> msBuildShutdown = RunShutdownCheckAsync(handshake, cts.Token);
 
             int index = Task.WaitAny(msBuildShutdown, rarTask);
