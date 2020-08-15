@@ -2020,8 +2020,7 @@ namespace Microsoft.Build.Execution
 
         internal int CreateRarNode()
         {
-            string nodeLocation = _buildParameters?.NodeExeLocation;
-            nodeLocation ??= OutOfProcNode.MsBuildPath;
+            string nodeLocation = _buildParameters?.NodeExeLocation ?? OutOfProcNode.MsBuildPath;
             if (string.IsNullOrEmpty(nodeLocation))
             {
                 // Couldn't find any path

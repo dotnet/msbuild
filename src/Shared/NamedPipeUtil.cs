@@ -80,14 +80,7 @@ namespace Microsoft.Build.Shared
                                                                          | PipeOptions.CurrentUserOnly
 #endif
                                                                          );
-            if (nodeProcessId.HasValue)
-            {
-                CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId.Value, pipeName, timeout);
-            }
-            else
-            {
-                CommunicationsUtilities.Trace("Attempting connect to process {0} with pipe {1} with timeout {2} ms", pipeName, pipeName, timeout);
-            }
+           CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId.HasValue ? nodeProcessId.Value : pipeName, pipeName, timeout);
 
             try
             {

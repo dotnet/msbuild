@@ -60,7 +60,7 @@ namespace Microsoft.Build.Internal
         Administrator = 32,
 
         /// <summary>
-        /// Is special node. Special node can not accept normal build requests.
+        /// Is a special node. Special nodes cannot accept normal build requests.
         /// </summary>
         Special = 64
     }
