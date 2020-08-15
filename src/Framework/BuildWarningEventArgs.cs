@@ -286,5 +286,9 @@ namespace Microsoft.Build.Framework
         /// A link pointing to more information about the warning.
         /// </summary>
         public string HelpLink => helpLink;
+
+        public override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
+
+        public override void Visit(IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) => buildEventArgsDispatcher.Visit(this);
     }
 }

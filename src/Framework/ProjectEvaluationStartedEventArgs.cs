@@ -30,5 +30,7 @@ namespace Microsoft.Build.Framework
         /// Gets or sets the full path of the project that started evaluation.
         /// </summary>
         public string ProjectFile { get; set; }
+
+        public override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
     }
 }

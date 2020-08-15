@@ -87,6 +87,8 @@ namespace Microsoft.Build.Framework
         {
             // do nothing
         }
+
+        public override void Visit(IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) => buildEventArgsDispatcher.Visit(this);
     }
 }
 

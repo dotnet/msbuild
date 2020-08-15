@@ -93,5 +93,7 @@ namespace Microsoft.Build.Framework
                 return SenderName;
             }
         }
+
+        public override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
     }
 }

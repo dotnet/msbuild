@@ -13,7 +13,7 @@ namespace Microsoft.Build.Logging
     /// <summary>
     /// Serializes BuildEventArgs-derived objects into a provided BinaryWriter
     /// </summary>
-    internal class BuildEventArgsWriter
+    internal class BuildEventArgsWriter : IBuildEventArgsWriteVisitor
     {
         private readonly BinaryWriter binaryWriter;
 
@@ -31,72 +31,21 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Write(BuildEventArgs e)
         {
-            // the cases are ordered by most used first for performance
-            if (e is BuildMessageEventArgs)
-            {
-                Write((BuildMessageEventArgs)e);
-            }
-            else if (e is TaskStartedEventArgs)
-            {
-                Write((TaskStartedEventArgs)e);
-            }
-            else if (e is TaskFinishedEventArgs)
-            {
-                Write((TaskFinishedEventArgs)e);
-            }
-            else if (e is TargetStartedEventArgs)
-            {
-                Write((TargetStartedEventArgs)e);
-            }
-            else if (e is TargetFinishedEventArgs)
-            {
-                Write((TargetFinishedEventArgs)e);
-            }
-            else if (e is BuildErrorEventArgs)
-            {
-                Write((BuildErrorEventArgs)e);
-            }
-            else if (e is BuildWarningEventArgs)
-            {
-                Write((BuildWarningEventArgs)e);
-            }
-            else if (e is ProjectStartedEventArgs)
-            {
-                Write((ProjectStartedEventArgs)e);
-            }
-            else if (e is ProjectFinishedEventArgs)
-            {
-                Write((ProjectFinishedEventArgs)e);
-            }
-            else if (e is BuildStartedEventArgs)
-            {
-                Write((BuildStartedEventArgs)e);
-            }
-            else if (e is BuildFinishedEventArgs)
-            {
-                Write((BuildFinishedEventArgs)e);
-            }
-            else if (e is ProjectEvaluationStartedEventArgs)
-            {
-                Write((ProjectEvaluationStartedEventArgs)e);
-            }
-            else if (e is ProjectEvaluationFinishedEventArgs)
-            {
-                Write((ProjectEvaluationFinishedEventArgs)e);
-            }
-            else
-            {
-                // convert all unrecognized objects to message
-                // and just preserve the message
-                var buildMessageEventArgs = new BuildMessageEventArgs(
-                    e.Message,
-                    e.HelpKeyword,
-                    e.SenderName,
-                    MessageImportance.Normal,
-                    e.Timestamp);
-                buildMessageEventArgs.BuildEventContext = e.BuildEventContext ?? BuildEventContext.Invalid;
-                Write(buildMessageEventArgs);
-            }
+            e.Visit(this);
+        }
+
+        void IBuildEventArgsWriteVisitor.Visit(BuildEventArgs e)
+        {
+            // convert all unrecognized objects to message
+            // and just preserve the message
+            var buildMessageEventArgs = new BuildMessageEventArgs(
+                e.Message,
+                e.HelpKeyword,
+                e.SenderName,
+                MessageImportance.Normal,
+                e.Timestamp);
+            buildMessageEventArgs.BuildEventContext = e.BuildEventContext ?? BuildEventContext.Invalid;
+            ((IBuildEventArgsWriteVisitor)this).Visit(buildMessageEventArgs);
         }
 
         public void WriteBlob(BinaryLogRecordKind kind, byte[] bytes)
@@ -106,28 +55,28 @@ namespace Microsoft.Build.Logging
             Write(bytes);
         }
 
-        private void Write(BuildStartedEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(BuildStartedEventArgs e)
         {
             Write(BinaryLogRecordKind.BuildStarted);
             WriteBuildEventArgsFields(e);
             Write(e.BuildEnvironment);
         }
 
-        private void Write(BuildFinishedEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(BuildFinishedEventArgs e)
         {
             Write(BinaryLogRecordKind.BuildFinished);
             WriteBuildEventArgsFields(e);
             Write(e.Succeeded);
         }
 
-        private void Write(ProjectEvaluationStartedEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(ProjectEvaluationStartedEventArgs e)
         {
             Write(BinaryLogRecordKind.ProjectEvaluationStarted);
             WriteBuildEventArgsFields(e);
             Write(e.ProjectFile);
         }
 
-        private void Write(ProjectEvaluationFinishedEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(ProjectEvaluationFinishedEventArgs e)
         {
             Write(BinaryLogRecordKind.ProjectEvaluationFinished);
 
@@ -147,7 +96,7 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private void Write(ProjectStartedEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(ProjectStartedEventArgs e)
         {
             Write(BinaryLogRecordKind.ProjectStarted);
             WriteBuildEventArgsFields(e);
@@ -183,7 +132,7 @@ namespace Microsoft.Build.Logging
             WriteItems(e.Items);
         }
 
-        private void Write(ProjectFinishedEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(ProjectFinishedEventArgs e)
         {
             Write(BinaryLogRecordKind.ProjectFinished);
             WriteBuildEventArgsFields(e);
@@ -191,7 +140,7 @@ namespace Microsoft.Build.Logging
             Write(e.Succeeded);
         }
 
-        private void Write(TargetStartedEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(TargetStartedEventArgs e)
         {
             Write(BinaryLogRecordKind.TargetStarted);
             WriteBuildEventArgsFields(e);
@@ -202,7 +151,7 @@ namespace Microsoft.Build.Logging
             Write((int)e.BuildReason);
         }
 
-        private void Write(TargetFinishedEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(TargetFinishedEventArgs e)
         {
             Write(BinaryLogRecordKind.TargetFinished);
             WriteBuildEventArgsFields(e);
@@ -213,7 +162,7 @@ namespace Microsoft.Build.Logging
             WriteItemList(e.TargetOutputs);
         }
 
-        private void Write(TaskStartedEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(TaskStartedEventArgs e)
         {
             Write(BinaryLogRecordKind.TaskStarted);
             WriteBuildEventArgsFields(e);
@@ -222,7 +171,7 @@ namespace Microsoft.Build.Logging
             WriteOptionalString(e.TaskFile);
         }
 
-        private void Write(TaskFinishedEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(TaskFinishedEventArgs e)
         {
             Write(BinaryLogRecordKind.TaskFinished);
             WriteBuildEventArgsFields(e);
@@ -232,7 +181,7 @@ namespace Microsoft.Build.Logging
             WriteOptionalString(e.TaskFile);
         }
 
-        private void Write(BuildErrorEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(BuildErrorEventArgs e)
         {
             Write(BinaryLogRecordKind.Error);
             WriteBuildEventArgsFields(e);
@@ -246,7 +195,7 @@ namespace Microsoft.Build.Logging
             Write(e.EndColumnNumber);
         }
 
-        private void Write(BuildWarningEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(BuildWarningEventArgs e)
         {
             Write(BinaryLogRecordKind.Warning);
             WriteBuildEventArgsFields(e);
@@ -260,61 +209,13 @@ namespace Microsoft.Build.Logging
             Write(e.EndColumnNumber);
         }
 
-        private void Write(BuildMessageEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(BuildMessageEventArgs e)
         {
-            if (e is CriticalBuildMessageEventArgs)
-            {
-                Write((CriticalBuildMessageEventArgs)e);
-                return;
-            }
-
-            if (e is TaskCommandLineEventArgs)
-            {
-                Write((TaskCommandLineEventArgs)e);
-                return;
-            }
-
-            if (e is ProjectImportedEventArgs)
-            {
-                Write((ProjectImportedEventArgs)e);
-                return;
-            }
-
-            if (e is TargetSkippedEventArgs)
-            {
-                Write((TargetSkippedEventArgs)e);
-                return;
-            }
-
-            if (e is PropertyReassignmentEventArgs)
-            {
-                Write((PropertyReassignmentEventArgs)e);
-                return;
-            }
-
-            if (e is UninitializedPropertyReadEventArgs)
-            {
-                Write((UninitializedPropertyReadEventArgs)e);
-                return;
-            }
-
-            if (e is EnvironmentVariableReadEventArgs)
-            {
-                Write((EnvironmentVariableReadEventArgs)e);
-                return;
-            }
-
-            if (e is PropertyInitialValueSetEventArgs)
-            {
-                Write((PropertyInitialValueSetEventArgs)e);
-                return;
-            }
-
             Write(BinaryLogRecordKind.Message);
             WriteMessageFields(e);
         }
 
-        private void Write(ProjectImportedEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(ProjectImportedEventArgs e)
         {
             Write(BinaryLogRecordKind.ProjectImported);
             WriteMessageFields(e);
@@ -323,7 +224,7 @@ namespace Microsoft.Build.Logging
             WriteOptionalString(e.UnexpandedProject);
         }
 
-        private void Write(TargetSkippedEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(TargetSkippedEventArgs e)
         {
             Write(BinaryLogRecordKind.TargetSkipped);
             WriteMessageFields(e);
@@ -333,13 +234,13 @@ namespace Microsoft.Build.Logging
             Write((int)e.BuildReason);
         }
 
-        private void Write(CriticalBuildMessageEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(CriticalBuildMessageEventArgs e)
         {
             Write(BinaryLogRecordKind.CriticalBuildMessage);
             WriteMessageFields(e);
         }
 
-        private void Write(PropertyReassignmentEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(PropertyReassignmentEventArgs e)
         {
             Write(BinaryLogRecordKind.PropertyReassignment);
             WriteMessageFields(e);
@@ -349,14 +250,14 @@ namespace Microsoft.Build.Logging
             Write(e.Location);
         }
 
-        private void Write(UninitializedPropertyReadEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(UninitializedPropertyReadEventArgs e)
         {
             Write(BinaryLogRecordKind.UninitializedPropertyRead);
             WriteMessageFields(e);
             Write(e.PropertyName);
         }
 
-        private void Write(PropertyInitialValueSetEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(PropertyInitialValueSetEventArgs e)
         {
             Write(BinaryLogRecordKind.PropertyInitialValueSet);
             WriteMessageFields(e);
@@ -365,14 +266,14 @@ namespace Microsoft.Build.Logging
             Write(e.PropertySource);
         }
 
-        private void Write(EnvironmentVariableReadEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(EnvironmentVariableReadEventArgs e)
         {
             Write(BinaryLogRecordKind.EnvironmentVariableRead);
             WriteMessageFields(e);
             Write(e.EnvironmentVariableName);
         }
 
-        private void Write(TaskCommandLineEventArgs e)
+        void IBuildEventArgsWriteVisitor.Visit(TaskCommandLineEventArgs e)
         {
             Write(BinaryLogRecordKind.TaskCommandLine);
             WriteMessageFields(e);

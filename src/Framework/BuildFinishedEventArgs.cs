@@ -125,5 +125,9 @@ namespace Microsoft.Build.Framework
                 return succeeded;
             }
         }
+
+        public override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
+
+        public override void Visit(IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) => buildEventArgsDispatcher.Visit(this);
     }
 }

@@ -39,5 +39,7 @@ namespace Microsoft.Build.Framework
         /// Null if profiling is not turned on
         /// </remarks>
         public ProfilerResult? ProfilerResult { get; set; }
+
+        public override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
     }
 }

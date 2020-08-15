@@ -40,5 +40,7 @@ namespace Microsoft.Build.Framework
         /// The name of the environment variable that was read.
         /// </summary>
         public string EnvironmentVariableName { get; set; }
+
+        public override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
     }
 }

@@ -8,7 +8,7 @@ namespace Microsoft.Build.Logging
     /// <remarks>This class is public because BinaryLogReplayEventSource is a derived class.
     /// This is abstracted into its own class because it's a useful single-purpose helper that
     /// can be used independently as a generic implementation of IEventSource.</remarks>
-    public class EventArgsDispatcher : IEventSource
+    public class EventArgsDispatcher : IEventSource, IBuildEventArgsDispatchVisitor
     {
         /// <summary>
         /// This event is raised for all BuildEventArgs objects after a more type-specific event
@@ -83,62 +83,34 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Raise one of the events that is appropriate for the type of the BuildEventArgs
         /// </summary>
-        public void Dispatch(BuildEventArgs buildEvent)
-        {
-            if (buildEvent is BuildMessageEventArgs)
-            {
-                MessageRaised?.Invoke(null, (BuildMessageEventArgs)buildEvent);
-            }
-            else if (buildEvent is TaskStartedEventArgs)
-            {
-                TaskStarted?.Invoke(null, (TaskStartedEventArgs)buildEvent);
-            }
-            else if (buildEvent is TaskFinishedEventArgs)
-            {
-                TaskFinished?.Invoke(null, (TaskFinishedEventArgs)buildEvent);
-            }
-            else if (buildEvent is TargetStartedEventArgs)
-            {
-                TargetStarted?.Invoke(null, (TargetStartedEventArgs)buildEvent);
-            }
-            else if (buildEvent is TargetFinishedEventArgs)
-            {
-                TargetFinished?.Invoke(null, (TargetFinishedEventArgs)buildEvent);
-            }
-            else if (buildEvent is ProjectStartedEventArgs)
-            {
-                ProjectStarted?.Invoke(null, (ProjectStartedEventArgs)buildEvent);
-            }
-            else if (buildEvent is ProjectFinishedEventArgs)
-            {
-                ProjectFinished?.Invoke(null, (ProjectFinishedEventArgs)buildEvent);
-            }
-            else if (buildEvent is BuildStartedEventArgs)
-            {
-                BuildStarted?.Invoke(null, (BuildStartedEventArgs)buildEvent);
-            }
-            else if (buildEvent is BuildFinishedEventArgs)
-            {
-                BuildFinished?.Invoke(null, (BuildFinishedEventArgs)buildEvent);
-            }
-            else if (buildEvent is CustomBuildEventArgs)
-            {
-                CustomEventRaised?.Invoke(null, (CustomBuildEventArgs)buildEvent);
-            }
-            else if (buildEvent is BuildStatusEventArgs)
-            {
-                StatusEventRaised?.Invoke(null, (BuildStatusEventArgs)buildEvent);
-            }
-            else if (buildEvent is BuildWarningEventArgs)
-            {
-                WarningRaised?.Invoke(null, (BuildWarningEventArgs)buildEvent);
-            }
-            else if (buildEvent is BuildErrorEventArgs)
-            {
-                ErrorRaised?.Invoke(null, (BuildErrorEventArgs)buildEvent);
-            }
+        public void Dispatch(BuildEventArgs buildEvent) => buildEvent.Visit(this);
 
-            AnyEventRaised?.Invoke(null, buildEvent);
-        }
+        void IBuildEventArgsDispatchVisitor.Visit(BuildEventArgs buildEventArgs) => AnyEventRaised?.Invoke(null, buildEventArgs);
+
+        void IBuildEventArgsDispatchVisitor.Visit(BuildMessageEventArgs buildEventArgs) => MessageRaised?.Invoke(null, buildEventArgs);
+
+        void IBuildEventArgsDispatchVisitor.Visit(TaskStartedEventArgs buildEventArgs) => TaskStarted?.Invoke(null, buildEventArgs);
+
+        void IBuildEventArgsDispatchVisitor.Visit(TaskFinishedEventArgs buildEventArgs) => TaskFinished?.Invoke(null, buildEventArgs);
+
+        void IBuildEventArgsDispatchVisitor.Visit(TargetStartedEventArgs buildEventArgs) => TargetStarted?.Invoke(null, buildEventArgs);
+
+        void IBuildEventArgsDispatchVisitor.Visit(TargetFinishedEventArgs buildEventArgs) => TargetFinished?.Invoke(null, buildEventArgs);
+
+        void IBuildEventArgsDispatchVisitor.Visit(ProjectStartedEventArgs buildEventArgs) => ProjectStarted?.Invoke(null, buildEventArgs);
+
+        void IBuildEventArgsDispatchVisitor.Visit(ProjectFinishedEventArgs buildEventArgs) => ProjectFinished?.Invoke(null, buildEventArgs);
+
+        void IBuildEventArgsDispatchVisitor.Visit(BuildStartedEventArgs buildEventArgs) => BuildStarted?.Invoke(null, buildEventArgs);
+
+        void IBuildEventArgsDispatchVisitor.Visit(BuildFinishedEventArgs buildEventArgs) => BuildFinished?.Invoke(null, buildEventArgs);
+
+        void IBuildEventArgsDispatchVisitor.Visit(CustomBuildEventArgs buildEventArgs) => CustomEventRaised?.Invoke(null, buildEventArgs);
+
+        void IBuildEventArgsDispatchVisitor.Visit(BuildStatusEventArgs buildEventArgs) => StatusEventRaised?.Invoke(null, buildEventArgs);
+
+        void IBuildEventArgsDispatchVisitor.Visit(BuildWarningEventArgs buildEventArgs) => WarningRaised?.Invoke(null, buildEventArgs);
+
+        void IBuildEventArgsDispatchVisitor.Visit(BuildErrorEventArgs buildEventArgs) => ErrorRaised?.Invoke(null, buildEventArgs);
     }
 }

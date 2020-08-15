@@ -178,5 +178,9 @@ namespace Microsoft.Build.Framework
         /// Why this target was built by its parent.
         /// </summary>
         public TargetBuiltReason BuildReason => buildReason;
+
+        public override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
+
+        public override void Visit(IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) => buildEventArgsDispatcher.Visit(this);
     }
 }

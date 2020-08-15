@@ -51,5 +51,7 @@ namespace Microsoft.Build.Framework
         /// no matches, or a conditioned import that evaluated to false.
         /// </summary>
         public bool ImportIgnored { get; set; }
+
+        public override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
     }
 }

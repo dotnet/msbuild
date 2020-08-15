@@ -179,5 +179,9 @@ namespace Microsoft.Build.Framework
             get => targetOutputs;
             set => targetOutputs = value;
         }
+
+        public override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
+
+        public override void Visit(IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) => buildEventArgsDispatcher.Visit(this);
     }
 }

@@ -54,5 +54,7 @@ namespace Microsoft.Build.Framework
         /// The source of the property.
         /// </summary>
         public string PropertySource { get; set; }
+
+        public override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
     }
 }

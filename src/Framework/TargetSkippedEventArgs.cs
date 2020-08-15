@@ -49,5 +49,7 @@ namespace Microsoft.Build.Framework
         /// Why the parent target built this target.
         /// </summary>
         public TargetBuiltReason BuildReason { get; set; }
+
+        public override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
     }
 }

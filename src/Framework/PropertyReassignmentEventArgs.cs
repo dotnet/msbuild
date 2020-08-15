@@ -64,5 +64,7 @@ namespace Microsoft.Build.Framework
         /// The location of the reassignment.
         /// </summary>
         public string Location { get; set; }
+
+        public override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
     }
 }

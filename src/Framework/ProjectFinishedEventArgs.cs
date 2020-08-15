@@ -112,5 +112,9 @@ namespace Microsoft.Build.Framework
         /// True if project built successfully, false otherwise
         /// </summary>
         public bool Succeeded => succeeded;
+
+        public override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
+
+        public override void Visit(IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) => buildEventArgsDispatcher.Visit(this);
     }
 }
