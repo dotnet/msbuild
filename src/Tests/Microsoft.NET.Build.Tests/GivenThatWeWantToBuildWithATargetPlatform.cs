@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [WindowsOnlyRequiresMSBuildVersionTheory("16.8.0-preview-20414-02")]
+        [WindowsOnlyRequiresMSBuildVersionTheory("16.8.0.41402")]
         [InlineData("netcoreapp3.1", ".NETCoreApp", "v3.1", "Windows", "7.0")] // Default values pre-5.0
         [InlineData("net5.0", ".NETCoreApp", "v5.0", "", "")]
         [InlineData("net5.0-Windows7.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
@@ -45,11 +45,11 @@ namespace Microsoft.NET.Build.Tests
                     .Pass();
                 if (expected.Trim().Equals(string.Empty))
                 {
-                    getValuesCommand.GetValues().Count.Should().Be(0);
+                    getValuesCommand.GetValues().Count.Should().Be(0, $"expect '{valueName}' to be '{expected}'. But get {string.Join(";", getValuesCommand.GetValues())}");
                 }
                 else
                 {
-                    getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { expected });
+                    getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { expected }, $"Asserting \"{valueName}\"'s value");
                 }
             };
 
