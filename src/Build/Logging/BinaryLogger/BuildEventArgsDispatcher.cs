@@ -83,9 +83,13 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Raise one of the events that is appropriate for the type of the BuildEventArgs
         /// </summary>
-        public void Dispatch(BuildEventArgs buildEvent) => buildEvent.Visit(this);
+        public void Dispatch(BuildEventArgs buildEvent)
+        {
+            buildEvent.Visit(this);
+            AnyEventRaised?.Invoke(null, buildEvent);
+        }
 
-        void IBuildEventArgsDispatchVisitor.Visit(BuildEventArgs buildEventArgs) => AnyEventRaised?.Invoke(null, buildEventArgs);
+        void IBuildEventArgsDispatchVisitor.Visit(BuildEventArgs buildEventArgs) { /* AnyEventRaised will be called by Dispatch */ }
 
         void IBuildEventArgsDispatchVisitor.Visit(BuildMessageEventArgs buildEventArgs) => MessageRaised?.Invoke(null, buildEventArgs);
 
