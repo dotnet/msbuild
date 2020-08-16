@@ -31,7 +31,7 @@ namespace Microsoft.NET.Build.Tests
             var testProj = new TestProject()
             {
                 Name = "TargetPlatformTests",
-                IsSdkProject = true, 
+                IsSdkProject = true,
                 TargetFrameworks = targetFramework
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProj);
@@ -58,7 +58,7 @@ namespace Microsoft.NET.Build.Tests
             assertValue("TargetPlatformIdentifier", expectedTargetPlatformIdentifier);
             assertValue("TargetPlatformIdentifier", expectedTargetPlatformIdentifier);
             assertValue("TargetPlatformVersion", expectedTargetPlatformVersion);
-            assertValue("TargetPlatformMoniker", expectedTargetPlatformIdentifier.Equals(string.Empty) && expectedTargetPlatformVersion.Equals(string.Empty) ? 
+            assertValue("TargetPlatformMoniker", expectedTargetPlatformIdentifier.Equals(string.Empty) && expectedTargetPlatformVersion.Equals(string.Empty) ?
                 string.Empty : $"{expectedTargetPlatformIdentifier},Version={expectedTargetPlatformVersion}");
             assertValue("TargetPlatformDisplayName", $"{expectedTargetPlatformIdentifier} {expectedTargetPlatformVersion}");
         }
