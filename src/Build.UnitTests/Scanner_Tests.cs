@@ -98,6 +98,22 @@ namespace Microsoft.Build.UnitTests
             lexer = new Scanner("$x", ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
             Assert.Equal("IllFormedPropertyOpenParenthesisInCondition", lexer.GetErrorResource());
+
+        }
+
+        /// <summary>
+        /// Tests the whitespace errors case
+        /// </summary>
+        [Fact]
+        public void WhitespaceProperty()
+        {
+            Scanner lexer = new Scanner("$(x )", ParserOptions.AllowProperties);
+            AdvanceToScannerError(lexer);
+            Assert.Equal("IllFormedPropertyWhitespaceInCondition", lexer.GetErrorResource());
+
+            lexer = new Scanner("$( x)", ParserOptions.AllowProperties);
+            AdvanceToScannerError(lexer);
+            Assert.Equal("IllFormedPropertyWhitespaceInCondition", lexer.GetErrorResource());
         }
 
         /// <summary>

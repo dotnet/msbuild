@@ -283,8 +283,17 @@ namespace Microsoft.Build.Evaluation
                 return null;
             }
 
-            _parsePoint = ScanForPropertyExpressionEnd(_expression, _parsePoint++);
+            var result = ScanForPropertyExpressionEnd(_expression, _parsePoint++);
+            if (!result.result)
+            {
+                _errorState = true;
+                _errorPosition = result.index;
+                _errorResource = "IllFormedPropertyWhitespaceInCondition";
+                _unexpectedlyFound = Convert.ToString(_expression[result.index], CultureInfo.InvariantCulture);
+                return null;
+            }
 
+            _parsePoint = result.index;
             // Maybe we need to generate an error for invalid characters in property/metadata name?
             // For now, just wait and let the property/metadata evaluation handle the error case.
             if (_parsePoint >= _expression.Length)
@@ -303,7 +312,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Scan for the end of the property expression
         /// </summary>
-        private static int ScanForPropertyExpressionEnd(string expression, int index)
+        /// <param name="expression">property expression to parse</param>
+        /// <param name="index">current index to start from</param>
+        /// <returns>A tuple result indicating whether the scan was successful. If successful, the index corresponds to the end of the property expression.
+        /// In case of scan failure, it is the error position index.
+        /// </returns>
+        private static (bool result, int index) ScanForPropertyExpressionEnd(string expression, int index)
         {
             int nestLevel = 0;
 
@@ -322,13 +336,17 @@ namespace Microsoft.Build.Evaluation
                         {
                             nestLevel--;
                         }
+                        else if (character == ' ')
+                        {
+                            return (false, index);
+                        }
 
                         // We have reached the end of the parenthesis nesting
                         // this should be the end of the property expression
                         // If it is not then the calling code will determine that
                         if (nestLevel == 0)
                         {
-                            return index;
+                            return (true, index);
                         }
                         else
                         {
@@ -337,7 +355,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
             }
-            return index;
+            return (true, index);
         }
 
         /// <summary>
