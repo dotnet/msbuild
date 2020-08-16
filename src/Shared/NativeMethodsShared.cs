@@ -524,13 +524,20 @@ namespace Microsoft.Build.Shared
                         while (ptr < endPtr)
                         {
                             var current = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)ptr;
-                            if (current->Relationship == LOGICAL_PROCESSOR_RELATIONSHIP.RelationGroup)
+                            if (current != null && current->Relationship == LOGICAL_PROCESSOR_RELATIONSHIP.RelationGroup)
                             {
                                 PROCESSOR_GROUP_INFO* groupInfo = &current->Group.GroupInfo;
-                                int groupCount = current->Group.ActiveGroupCount;
-                                for (int i = 0; i < groupCount; i++)
+                                if (groupInfo != null)
                                 {
-                                    processorCount += (groupInfo + i)->ActiveProcessorCount;
+                                    int groupCount = current->Group.ActiveGroupCount;
+                                    for (int i = 0; i < groupCount; i++)
+                                    {
+                                        var nextGroupInfo = (groupInfo + i);
+                                        if (nextGroupInfo != null)
+                                        {
+                                            processorCount += nextGroupInfo->ActiveProcessorCount;
+                                        }
+                                    }
                                 }
                             }
                             ptr += current->Size;
