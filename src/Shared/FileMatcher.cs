@@ -444,9 +444,8 @@ namespace Microsoft.Build.Shared
 
             string[] parts = path.Split(directorySeparatorCharacters);
             string pathRoot;
-            int startingElement = 0;
-
             bool isUnc = path.StartsWith(s_directorySeparator + s_directorySeparator, StringComparison.Ordinal);
+            int startingElement;
             if (isUnc)
             {
                 pathRoot = s_directorySeparator + s_directorySeparator;

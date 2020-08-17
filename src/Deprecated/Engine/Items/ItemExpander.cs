@@ -186,7 +186,6 @@ namespace Microsoft.Build.BuildEngine
             out Match itemVectorMatch
         )
         {
-            itemVectorMatch = null;
             BuildItemGroup items = null;
 
             itemVectorMatch = GetItemVectorMatches(itemVectorExpression);

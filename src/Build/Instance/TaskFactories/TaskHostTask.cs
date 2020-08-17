@@ -464,7 +464,6 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    exceptionMessage = "TaskInstantiationFailureError";
                     exceptionMessageArgs = new string[] { _taskType.Type.Name,
                         AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
                         string.Empty };

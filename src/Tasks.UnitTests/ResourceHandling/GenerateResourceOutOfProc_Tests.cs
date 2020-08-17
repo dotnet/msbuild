@@ -1190,10 +1190,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 // another invalid escape, this one more serious, "unsupported or invalid escape character"
                 new string[] {   @"foo=\ujjjjbar", "MSB3569"},
             };
-
-            GenerateResource t = null;
-            string textFile = null;
-
+            GenerateResource t;
+            string textFile;
             foreach (string[] test in tests)
             {
                 t = Utilities.CreateTaskOutOfProc(_output);
@@ -1651,8 +1649,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
             Utilities.ExecuteTask(t);
 
-            int i = 0;
-
+            int i;
             for (i = 0; i < 4; i++)
             {
                 Assert.Equal(t.FilesWritten[i].ItemSpec, t.OutputResources[i].ItemSpec);

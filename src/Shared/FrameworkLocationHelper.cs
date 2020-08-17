@@ -849,7 +849,7 @@ namespace Microsoft.Build.Shared
                 return Path.Combine(NativeMethodsShared.FrameworkBasePath, "xbuild");
             }
 
-            string programFilesX64 = null;
+            string programFilesX64;
             if (string.Equals(programFiles, programFiles32))
             {
                 // either we're in a 32-bit window, or we're on a 32-bit machine.  
@@ -944,8 +944,7 @@ namespace Microsoft.Build.Shared
                     path = Path.Combine(path, frameworkName.Profile);
                 }
 
-                path = Path.GetFullPath(path);
-                return path;
+                return Path.GetFullPath(path);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
@@ -1661,8 +1660,7 @@ namespace Microsoft.Build.Shared
             public override string GetPathToDotNetFrameworkSdk(VisualStudioSpec visualStudioSpec)
             {
                 string pathToBinRoot = this.GetPathToDotNetFrameworkSdkTools(visualStudioSpec);
-                pathToBinRoot = RemoveDirectories(pathToBinRoot, 1);
-                return pathToBinRoot;
+                return RemoveDirectories(pathToBinRoot, 1);
             }
 
             /// <summary>

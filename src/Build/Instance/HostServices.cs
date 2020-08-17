@@ -283,8 +283,7 @@ After:
             // Now see if a specific affinity has been provided.
             if (_projectAffinities != null)
             {
-                NodeAffinity affinity = NodeAffinity.Any;
-
+                NodeAffinity affinity;
                 if (_projectAffinities.TryGetValue(projectFile, out affinity))
                 {
                     isExplicit = true;

@@ -733,21 +733,21 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             var commandLine = new StringBuilder();
             if (useSha256)
             {
-                commandLine.Append(String.Format(CultureInfo.InvariantCulture, "sign /fd sha256 /sha1 {0} ", certThumbprint));
+                commandLine.AppendFormat(CultureInfo.InvariantCulture, "sign /fd sha256 /sha1 {0} ", certThumbprint);
             }
             else
             {
-                commandLine.Append(String.Format(CultureInfo.InvariantCulture, "sign /sha1 {0} ", certThumbprint));
+                commandLine.AppendFormat(CultureInfo.InvariantCulture, "sign /sha1 {0} ", certThumbprint);
             }
 
             if (timestampUrl != null)
             {
-                commandLine.Append(String.Format(CultureInfo.InvariantCulture,
+                commandLine.AppendFormat(CultureInfo.InvariantCulture,
                                                 "{0} {1} ",
                                                 useRFC3161Timestamp ? "/tr" : "/t",
-                                                timestampUrl.ToString()));
+                                                timestampUrl.ToString());
             }
-            commandLine.Append(string.Format(CultureInfo.InvariantCulture, "\"{0}\"", path));
+            commandLine.AppendFormat(CultureInfo.InvariantCulture, "\"{0}\"", path);
             return commandLine.ToString();
         }
 

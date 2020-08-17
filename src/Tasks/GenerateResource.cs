@@ -955,7 +955,7 @@ namespace Microsoft.Build.Tasks
                 internetSecurityManager = (IInternetSecurityManager)Activator.CreateInstance(iismType);
             }
 
-            Int32 zone = 0;
+            int zone;
             internetSecurityManager.MapUrlToZone(Path.GetFullPath(filename), out zone, 0);
             if (zone < ZoneInternet)
             {
@@ -1175,7 +1175,6 @@ namespace Microsoft.Build.Tasks
             else
             {
                 int initialResourceIndex = 0;
-                int numberOfResourcesToAdd = 0;
                 bool doneProcessingResources = false;
                 CommandLineBuilderExtension resourcelessCommandBuilder = new CommandLineBuilderExtension();
                 string resourcelessCommand = null;
@@ -1189,7 +1188,7 @@ namespace Microsoft.Build.Tasks
 
                 while (!doneProcessingResources)
                 {
-                    numberOfResourcesToAdd = CalculateResourceBatchSize(inputsToProcess, outputsToProcess, resourcelessCommand, initialResourceIndex);
+                    int numberOfResourcesToAdd = CalculateResourceBatchSize(inputsToProcess, outputsToProcess, resourcelessCommand, initialResourceIndex);
                     ResGen resGen = CreateResGenTaskWithDefaultParameters();
 
                     resGen.InputFiles = inputsToProcess.GetRange(initialResourceIndex, numberOfResourcesToAdd).ToArray();
@@ -1244,7 +1243,7 @@ namespace Microsoft.Build.Tasks
                 i++;
             }
 
-            int numberOfResourcesToAdd = 0;
+            int numberOfResourcesToAdd;
             if (currentCommand.Length <= s_maximumCommandLength)
             {
                 // We've successfully added all the rest.
@@ -2170,8 +2169,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (StronglyTypedFileName == null)
                 {
-                    CodeDomProvider provider = null;
-
+                    CodeDomProvider provider;
                     if (ProcessResourceFiles.TryCreateCodeDomProvider(Log, StronglyTypedLanguage, out provider))
                     {
                         StronglyTypedFileName = ProcessResourceFiles.GenerateDefaultStronglyTypedFilename(
@@ -2846,7 +2844,7 @@ namespace Microsoft.Build.Tasks
             // reliably with cmd's dir command either (depending on whether you use absolute or relative paths
             // and whether there are quotes around the name).
             const int EffectiveMaxPath = 258;   // Everything <= EffectiveMaxPath should work well.
-            bool success = false;
+            bool success;
             try
             {
                 currentOutputFile = Path.GetFullPath(currentOutputFile);
@@ -2917,8 +2915,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Resources format</returns>
         private Format GetFormat(string filename)
         {
-            string extension = String.Empty;
-
+            string extension;
             try
             {
                 extension = Path.GetExtension(filename);
@@ -3416,8 +3413,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="sourceFile">The generated strongly typed filename</param>
         private void CreateStronglyTypedResources(ReaderInfo reader, String outFile, String inputFileName, out String sourceFile)
         {
-            CodeDomProvider provider = null;
-
+            CodeDomProvider provider;
             if (!TryCreateCodeDomProvider(_logger, _stronglyTypedLanguage, out provider))
             {
                 sourceFile = null;

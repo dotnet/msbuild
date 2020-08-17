@@ -274,11 +274,9 @@ namespace Microsoft.Build.BackEnd
         private ITaskItem CreateNewTaskItemFrom(ITaskItem copyFrom)
         {
             ITaskItem2 copyFromAsITaskItem2 = copyFrom as ITaskItem2;
-
-            string escapedItemSpec = null;
-            string escapedDefiningProject = null;
-            Dictionary<string, string> escapedMetadata = null;
-
+            string escapedItemSpec;
+            string escapedDefiningProject;
+            Dictionary<string, string> escapedMetadata;
             if (copyFromAsITaskItem2 != null)
             {
                 escapedItemSpec = copyFromAsITaskItem2.EvaluatedIncludeEscaped;

@@ -2739,8 +2739,7 @@ namespace Microsoft.Build.Evaluation
                     return result;
                 }
 
-                result = SingleItemSpecProvenance(itemElement.Remove, itemElement.RemoveLocation, Operation.Remove);
-                return result;
+                return SingleItemSpecProvenance(itemElement.Remove, itemElement.RemoveLocation, Operation.Remove);
             }
 
             /// <summary>

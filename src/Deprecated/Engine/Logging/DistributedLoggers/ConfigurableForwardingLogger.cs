@@ -100,9 +100,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (loggerParameters != null)
             {
-                string[] parameterComponents;
-
-                parameterComponents = loggerParameters.Split(parameterDelimiters);
+                string[] parameterComponents = loggerParameters.Split(parameterDelimiters);
                 for (int param = 0; param < parameterComponents.Length; param++)
                 {
                     if (parameterComponents[param].Length > 0)

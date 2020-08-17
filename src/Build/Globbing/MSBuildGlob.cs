@@ -238,9 +238,7 @@ namespace Microsoft.Build.Globbing
             // concatenate the glob parent to the fixed dir part
             var parentedFixedPart = Path.Combine(globRoot, fixedDirPart);
             var normalizedFixedPart = FileUtilities.GetFullPathNoThrow(parentedFixedPart);
-            normalizedFixedPart = normalizedFixedPart.WithTrailingSlash();
-
-            return normalizedFixedPart;
+            return normalizedFixedPart.WithTrailingSlash();
         }
 
         /// <summary>

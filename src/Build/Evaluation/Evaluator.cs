@@ -1053,15 +1053,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void ReadTargetElement(ProjectTargetElement targetElement, LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder, Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets)
         {
-            ProjectTargetInstance targetInstance = null;
-
             // If we already have read a target instance for this element, use that. 
-            targetInstance = targetElement.TargetInstance;
-
-            if (targetInstance == null)
-            {
-                targetInstance = ReadNewTargetElement(targetElement, _projectSupportsReturnsAttribute[(ProjectRootElement)targetElement.Parent], _evaluationProfiler);
-            }
+            ProjectTargetInstance targetInstance = targetElement.TargetInstance ?? ReadNewTargetElement(targetElement, _projectSupportsReturnsAttribute[(ProjectRootElement)targetElement.Parent], _evaluationProfiler);
 
             string targetName = targetElement.Name;
             ProjectTargetInstance otherTarget = _data.GetTarget(targetName);
@@ -1070,8 +1063,7 @@ namespace Microsoft.Build.Evaluation
                 _evaluationLoggingContext.LogComment(MessageImportance.Low, "OverridingTarget", otherTarget.Name, otherTarget.Location.File, targetName, targetElement.Location.File);
             }
 
-            LinkedListNode<ProjectTargetElement> node;
-            if (activeTargets.TryGetValue(targetName, out node))
+            if (activeTargets.TryGetValue(targetName, out LinkedListNode<ProjectTargetElement> node))
             {
                 activeTargetsByEvaluationOrder.Remove(node);
             }
@@ -1094,7 +1086,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (activeTargets.ContainsKey(unescapedBeforeTarget))
                 {
-                    List<TargetSpecification> beforeTargetsForTarget = null;
+                    List<TargetSpecification> beforeTargetsForTarget;
                     if (!targetsWhichRunBeforeByTarget.TryGetValue(unescapedBeforeTarget, out beforeTargetsForTarget))
                     {
                         beforeTargetsForTarget = new List<TargetSpecification>();
@@ -1117,7 +1109,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (activeTargets.ContainsKey(unescapedAfterTarget))
                 {
-                    List<TargetSpecification> afterTargetsForTarget = null;
+                    List<TargetSpecification> afterTargetsForTarget;
                     if (!targetsWhichRunAfterByTarget.TryGetValue(unescapedAfterTarget, out afterTargetsForTarget))
                     {
                         afterTargetsForTarget = new List<TargetSpecification>();
@@ -1252,7 +1244,6 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                SubToolset subToolset = null;
 
                 // Make the subtoolset version itself available as a property -- but only if it's not already set. 
                 // Because some people may be depending on this value even if there isn't a matching sub-toolset,
@@ -1263,6 +1254,7 @@ namespace Microsoft.Build.Evaluation
                     toolsetProperties.Add(subToolsetVersionProperty);
                 }
 
+                SubToolset subToolset;
                 if (_data.Toolset.SubToolsets.TryGetValue(_data.SubToolsetVersion, out subToolset))
                 {
                     foreach (ProjectPropertyInstance subToolsetProperty in subToolset.Properties.Values)
@@ -1344,7 +1336,7 @@ namespace Microsoft.Build.Evaluation
                 if (evaluatedValue.Length > 0 && _expander.WarnForUninitializedProperties)
                 {
                     // Is the property we are currently setting in the list of properties which have been used but not initialized
-                    IElementLocation elementWhichUsedProperty = null;
+                    IElementLocation elementWhichUsedProperty;
                     bool isPropertyInList = _expander.UsedUninitializedProperties.Properties.TryGetValue(propertyElement.Name, out elementWhichUsedProperty);
 
                     if (isPropertyInList)
@@ -2554,7 +2546,7 @@ namespace Microsoft.Build.Evaluation
                     sb.Append(", ");
                 }
 
-                sb.Append($"\"{strings[i]}\"");
+                sb.Append('\"').Append(strings[i]).Append('\"');
             }
 
             if (strings.Count > 1)
@@ -2562,7 +2554,7 @@ namespace Microsoft.Build.Evaluation
                 sb.Append(" and ");
             }
 
-            sb.Append($"\"{strings[strings.Count - 1]}\"");
+            sb.Append('\"').Append(strings[strings.Count - 1]).Append('\"');
 
             return sb.ToString();
         }

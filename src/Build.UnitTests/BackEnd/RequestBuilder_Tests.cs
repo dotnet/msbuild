@@ -261,8 +261,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string projectFile = GetTestProjectFile(configId);
             File.WriteAllText(projectFile, projectFileContents.Replace('`', '"'));
 
-            string defaultToolsVersion = null;
-            defaultToolsVersion = FrameworkLocationHelper.PathToDotNetFrameworkV20 == null
+            string defaultToolsVersion = FrameworkLocationHelper.PathToDotNetFrameworkV20 == null
                                       ? ObjectModelHelpers.MSBuildDefaultToolsVersion
                                       : "2.0";
 

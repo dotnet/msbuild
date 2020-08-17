@@ -263,9 +263,7 @@ namespace Microsoft.Build.Evaluation
         {
             string result = ExpandIntoStringLeaveEscaped(expression, options, elementLocation);
 
-            result = (result == null) ? null : EscapingUtilities.UnescapeAll(result);
-
-            return result;
+            return (result == null) ? null : EscapingUtilities.UnescapeAll(result);
         }
 
         /// <summary>
@@ -494,8 +492,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static int ScanForClosingParenthesis(string expression, int index)
         {
-            bool potentialPropertyFunction = false;
-            bool potentialRegistryFunction = false;
+            bool potentialPropertyFunction;
+            bool potentialRegistryFunction;
             return ScanForClosingParenthesis(expression, index, out potentialPropertyFunction, out potentialRegistryFunction);
         }
 
@@ -1023,8 +1021,6 @@ namespace Microsoft.Build.Evaluation
                         results.Add(lastResult);
                     }
 
-                    bool tryExtractPropertyFunction = false;
-                    bool tryExtractRegistryFunction = false;
 
                     // Append the result with the portion of the expression up to
                     // (but not including) the "$(", and advance the sourceIndex pointer.
@@ -1038,8 +1034,8 @@ namespace Microsoft.Build.Evaluation
                         results.Add(expression.Substring(sourceIndex, propertyStartIndex - sourceIndex));
                     }
 
-                    sourceIndex = propertyStartIndex;
-
+                    bool tryExtractPropertyFunction;
+                    bool tryExtractRegistryFunction;
                     // Following the "$(" we need to locate the matching ')'
                     // Scan for the matching closing bracket, skipping any nested ones
                     // This is a very complete, fast validation of parenthesis matching including for nested
@@ -1066,7 +1062,7 @@ namespace Microsoft.Build.Evaluation
                         string propertyBody;
 
                         // A property value of null will indicate that we're calling a static function on a type
-                        object propertyValue = null;
+                        object propertyValue;
 
                         // Compat: $() should return String.Empty
                         if (propertyStartIndex + 2 == propertyEndIndex)
@@ -1719,8 +1715,7 @@ namespace Microsoft.Build.Evaluation
                     return null;
                 }
 
-                List<ExpressionShredder.ItemExpressionCapture> matches = null;
-
+                List<ExpressionShredder.ItemExpressionCapture> matches;
                 if (s_invariantCompareInfo.IndexOf(expression, '@') == -1)
                 {
                     return null;
@@ -1754,8 +1749,6 @@ namespace Microsoft.Build.Evaluation
                 where T : class, IItem
             {
                 ErrorUtilities.VerifyThrow(items != null, "Cannot expand items without providing items");
-
-                IList<T> result = null;
                 isTransformExpression = false;
                 bool brokeEarlyNonEmpty;
 
@@ -1768,6 +1761,8 @@ namespace Microsoft.Build.Evaluation
                     itemFactory.ItemType = expressionCapture.ItemType;
                 }
 
+
+                IList<T> result;
                 if (expressionCapture.Separator != null)
                 {
                     // Reference contains a separator, for example @(Compile, ';').
@@ -2425,8 +2420,7 @@ namespace Microsoft.Build.Evaluation
                             continue;
                         }
 
-                        string directoryName = null;
-
+                        string directoryName;
                         if (!directoryNameTable.TryGetValue(item.Key, out directoryName))
                         {
                             // Unescape as we are passing to the file system
@@ -4564,7 +4558,6 @@ namespace Microsoft.Build.Evaluation
             {
                 string baseName = typeName;
                 int assemblyNameEnd = baseName.Length;
-                Type foundType = null;
 
                 // If the string has no dot, or is nothing but a dot, we have no
                 // namespace to look for, so we can't help.
@@ -4579,7 +4572,7 @@ namespace Microsoft.Build.Evaluation
                     string candidateAssemblyName = baseName.Substring(0, assemblyNameEnd);
 
                     // Try to load the assembly with the computed name
-                    foundType = GetTypeFromAssembly(typeName, candidateAssemblyName);
+                    Type foundType = GetTypeFromAssembly(typeName, candidateAssemblyName);
 
                     if (foundType != null)
                     {
@@ -4704,8 +4697,6 @@ namespace Microsoft.Build.Evaluation
                 // There are arguments that need to be passed to the function
                 if (argumentStartIndex > -1 && !expressionSubstringAsSpan.Contains(".".AsSpan(), StringComparison.OrdinalIgnoreCase))
                 {
-                    string argumentsContent;
-
                     // separate the function and the arguments
                     functionName = expressionSubstringAsSpan.Trim();
 
@@ -4726,16 +4717,15 @@ namespace Microsoft.Build.Evaluation
                     // It may be that there are '()' but no actual arguments content
                     if (argumentStartIndex == expressionFunction.Length - 1)
                     {
-                        argumentsContent = String.Empty;
                         functionArguments = Array.Empty<string>();
                     }
                     else
                     {
                         // we have content within the '()' so let's extract and deal with it
-                        argumentsContent = expressionFunction.Substring(argumentStartIndex, argumentsEndIndex - argumentStartIndex);
+                        string argumentsContent = expressionFunction.Substring(argumentStartIndex, argumentsEndIndex - argumentStartIndex);
 
                         // If there are no arguments, then just create an empty array
-                        if (String.IsNullOrEmpty(argumentsContent))
+                        if (string.IsNullOrEmpty(argumentsContent))
                         {
                             functionArguments = Array.Empty<string>();
                         }
@@ -4955,9 +4945,6 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private object LateBindExecute(Exception ex, BindingFlags bindingFlags, object objectInstance /* null unless instance method */, object[] args, bool isConstructor)
             {
-                ParameterInfo[] parameters = null;
-                MethodBase[] members = null;
-                MethodBase memberInfo = null;
 
                 // First let's try for a method where all arguments are strings..
                 Type[] types = new Type[_arguments.Length];
@@ -4966,6 +4953,7 @@ namespace Microsoft.Build.Evaluation
                     types[n] = typeof(string);
                 }
 
+                MethodBase memberInfo;
                 if (isConstructor)
                 {
                     memberInfo = _receiverType.GetConstructor(bindingFlags, null, types, null);
@@ -4979,6 +4967,7 @@ namespace Microsoft.Build.Evaluation
                 // search for a method with the right number of arguments
                 if (memberInfo == null)
                 {
+                    MethodBase[] members;
                     // Gather all methods that may match
                     if (isConstructor)
                     {
@@ -4989,22 +4978,21 @@ namespace Microsoft.Build.Evaluation
                         members = _receiverType.GetMethods(bindingFlags);
                     }
 
-                    // Try to find a method with the right name, number of arguments and
-                    // compatible argument types
-                    object[] coercedArguments = null;
                     foreach (MethodBase member in members)
                     {
-                        parameters = member.GetParameters();
+                        ParameterInfo[] parameters = member.GetParameters();
 
                         // Simple match on name and number of params, we will be case insensitive
                         if (parameters.Length == _arguments.Length)
                         {
                             if (isConstructor || String.Equals(member.Name, _methodMethodName, StringComparison.OrdinalIgnoreCase))
                             {
+                                // Try to find a method with the right name, number of arguments and
+                                // compatible argument types
                                 // we have a match on the name and argument number
                                 // now let's try to coerce the arguments we have
                                 // into the arguments on the matching method
-                                coercedArguments = CoerceArguments(args, parameters);
+                                object[] coercedArguments = CoerceArguments(args, parameters);
 
                                 if (coercedArguments != null)
                                 {

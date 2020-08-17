@@ -2449,13 +2449,13 @@ namespace Microsoft.Build.Tasks
             AssemblyNameExtension[] result = null;
             if (resolvedReference?.IsPrimary == true && !resolvedReference.IsBadImage)
             {
-                System.Runtime.Versioning.FrameworkName frameworkName = null;
-                string[] scatterFiles = null;
                 try
                 {
                     // in case of P2P that have not build the reference can be resolved but file does not exist on disk. 
                     if (fileExists(resolvedReference.FullPath))
                     {
+                        FrameworkNameVersioning frameworkName;
+                        string[] scatterFiles;
                         getAssemblyMetadata(resolvedReference.FullPath, assemblyMetadataCache, out result, out scatterFiles, out frameworkName);
                     }
                 }

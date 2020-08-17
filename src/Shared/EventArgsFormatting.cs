@@ -333,12 +333,12 @@ namespace Microsoft.Build.Shared
 
             for (int i = 0; i < lines.Length; i++)
             {
-                formattedMessage.Append(String.Format(
+                formattedMessage.AppendFormat(
                         CultureInfo.CurrentCulture, finalFormat,
                         threadId, file,
                         lineNumber, columnNumber, category, code,
                         lines[i], endLineNumber, endColumnNumber,
-                        subcategory, projectFile, logOutputProperties));
+                        subcategory, projectFile, logOutputProperties);
 
                 if (i < (lines.Length - 1))
                 {

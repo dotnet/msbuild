@@ -153,24 +153,13 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                ItemVectorPartitionCollection itemVectorsInTargetInputs;
-                ItemVectorPartitionCollection itemVectorTransformsInTargetInputs;
-                Dictionary<string, string> discreteItemsInTargetInputs; // UNDONE: (Refactor) Change to HashSet
-
-                ItemVectorPartitionCollection itemVectorsInTargetOutputs;
-                Dictionary<string, string> discreteItemsInTargetOutputs; // UNDONE: (Refactor) Change to HashSet
-                List<string> targetOutputItemSpecs;
-
                 ParseTargetInputOutputSpecifications(bucket,
-                    out itemVectorsInTargetInputs,
-                    out itemVectorTransformsInTargetInputs,
-                    out discreteItemsInTargetInputs,
-                    out itemVectorsInTargetOutputs,
-                    out discreteItemsInTargetOutputs,
-                    out targetOutputItemSpecs);
-
-                List<string> itemVectorsReferencedInBothTargetInputsAndOutputs = null;
-                List<string> itemVectorsReferencedOnlyInTargetInputs = null;
+                    out ItemVectorPartitionCollection itemVectorsInTargetInputs,
+                    out ItemVectorPartitionCollection itemVectorTransformsInTargetInputs,
+                    out Dictionary<string, string> discreteItemsInTargetInputs,
+                    out ItemVectorPartitionCollection itemVectorsInTargetOutputs,
+                    out Dictionary<string, string> discreteItemsInTargetOutputs,
+                    out List<string> targetOutputItemSpecs);
                 List<string> itemVectorsReferencedOnlyInTargetOutputs = null;
 
                 // if the target has no outputs because the output specification evaluated to empty
@@ -189,8 +178,8 @@ namespace Microsoft.Build.BackEnd
                     // depending on the transform expression, there might be no relation between the results of the transforms; as
                     // a result, input items that are item vector transforms are treated as discrete items
                     DiffHashtables(itemVectorsInTargetInputs, itemVectorsInTargetOutputs,
-                        out itemVectorsReferencedInBothTargetInputsAndOutputs,
-                        out itemVectorsReferencedOnlyInTargetInputs,
+                        out List<string> itemVectorsReferencedInBothTargetInputsAndOutputs,
+                        out List<string> itemVectorsReferencedOnlyInTargetInputs,
                         out itemVectorsReferencedOnlyInTargetOutputs);
 
                     // if there are no item vectors only referenced by output items...
@@ -555,8 +544,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // if any output item is out-of-date w.r.t. any discrete input item, do a full build
-                DependencyAnalysisLogDetail dependencyAnalysisDetailEntry;
-                bool someOutOfDate = IsAnyOutOfDate(out dependencyAnalysisDetailEntry, _project.Directory, inputs, outputs);
+                bool someOutOfDate = IsAnyOutOfDate(out DependencyAnalysisLogDetail dependencyAnalysisDetailEntry, _project.Directory, inputs, outputs);
 
                 if (someOutOfDate)
                 {
@@ -655,8 +643,7 @@ namespace Microsoft.Build.BackEnd
                             else
                             {
                                 // if any input is newer than any output, do a full build
-                                DependencyAnalysisLogDetail dependencyAnalysisDetailEntry;
-                                bool someOutOfDate = IsAnyOutOfDate(out dependencyAnalysisDetailEntry, _project.Directory, upToDateInputItems, outputItems);
+                                bool someOutOfDate = IsAnyOutOfDate(out DependencyAnalysisLogDetail dependencyAnalysisDetailEntry, _project.Directory, upToDateInputItems, outputItems);
 
                                 if (someOutOfDate)
                                 {
@@ -741,8 +728,6 @@ namespace Microsoft.Build.BackEnd
             List<string> targetOutputItemSpecs
         )
         {
-            DependencyAnalysisResult result = DependencyAnalysisResult.SkipUpToDate;
-
             List<string> targetInputItemSpecs = GetItemSpecsFromItemVectors(itemVectorsInTargetInputs);
             targetInputItemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectorTransformsInTargetInputs));
             targetInputItemSpecs.AddRange(discreteItemsInTargetInputs.Values);
@@ -761,9 +746,9 @@ namespace Microsoft.Build.BackEnd
             }
 
             // if any input is newer than any output, do a full build
-            DependencyAnalysisLogDetail dependencyAnalysisDetailEntry;
-            bool someOutOfDate = IsAnyOutOfDate(out dependencyAnalysisDetailEntry, _project.Directory, inputs, outputs);
+            bool someOutOfDate = IsAnyOutOfDate(out DependencyAnalysisLogDetail dependencyAnalysisDetailEntry, _project.Directory, inputs, outputs);
 
+            DependencyAnalysisResult result;
             if (someOutOfDate)
             {
                 _dependencyAnalysisDetail.Add(dependencyAnalysisDetailEntry);
@@ -819,8 +804,7 @@ namespace Microsoft.Build.BackEnd
                 ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(
                     _project /* no item type specified; use item type of vector itself */);
 
-                bool isTransformExpression;
-                IList<ProjectItemInstance> itemVectorContents = bucket.Expander.ExpandSingleItemVectorExpressionIntoItems(item, itemFactory, ExpanderOptions.ExpandItems, true /* include null entries from transforms */, out isTransformExpression, elementLocation);
+                IList<ProjectItemInstance> itemVectorContents = bucket.Expander.ExpandSingleItemVectorExpressionIntoItems(item, itemFactory, ExpanderOptions.ExpandItems, true /* include null entries from transforms */, out bool isTransformExpression, elementLocation);
 
                 if (itemVectorContents != null)
                 {
@@ -828,11 +812,11 @@ namespace Microsoft.Build.BackEnd
 
                     if (itemVectorContents.Count > 0)
                     {
-                        ItemVectorPartitionCollection itemVectorCollection = null;
 
                         // Expander set the item type it found
                         string itemVectorType = itemFactory.ItemType;
 
+                        ItemVectorPartitionCollection itemVectorCollection;
                         if (itemVectorTransforms == null || !isTransformExpression)
                         {
                             // We either don't want transforms separated out, or this was not a transform.
@@ -1125,11 +1109,9 @@ namespace Microsoft.Build.BackEnd
         /// <returns>true, if "input" is newer than "output"</returns>
         private bool IsOutOfDate(string input, string output, string inputItemName, string outputItemName)
         {
-            bool inputDoesNotExist;
-            bool outputDoesNotExist;
             input = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(input));
             output = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(output));
-            bool outOfDate = (CompareLastWriteTimes(input, output, out inputDoesNotExist, out outputDoesNotExist) == 1) || inputDoesNotExist;
+            bool outOfDate = (CompareLastWriteTimes(input, output, out bool inputDoesNotExist, out bool outputDoesNotExist) == 1) || inputDoesNotExist;
 
             // Only if we are not logging just critical events should we be gathering full details
             if (!_loggingService.OnlyLogCriticalEvents)

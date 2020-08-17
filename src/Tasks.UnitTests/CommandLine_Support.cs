@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests
          */
         private static string[] Parse(string cl)
         {
-            int emptySplits = 0;
+            int emptySplits;
             string[] pieces = (string[])QuotingUtilities.SplitUnquoted(cl, int.MaxValue, false, true, out emptySplits, ' ', '\n').ToArray(typeof(string));
             return pieces;
         }
@@ -262,8 +262,7 @@ namespace Microsoft.Build.UnitTests
                 t.AddCommandLineCommands(b);
 
             string cl = b.ToString();
-            string msg;
-            msg = String.Format("Command-line = [{0}]\r\n", cl);
+            string msg = String.Format("Command-line = [{0}]\r\n", cl);
             msg += String.Format("Expected     = [{0}]\r\n", lookFor);
 
             if (cl != lookFor)

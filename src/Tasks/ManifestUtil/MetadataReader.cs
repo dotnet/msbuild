@@ -289,7 +289,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             _assemblyImport.GetAssemblyFromScope(out uint assemblyScope);
             IMetaDataImport2 import2 = (IMetaDataImport2)_assemblyImport;
-            IntPtr valuePtr = IntPtr.Zero;
+            IntPtr valuePtr;
             import2.GetCustomAttributeByName(assemblyScope, name, out valuePtr, out uint valueLen);
             return valueLen != 0;
         }

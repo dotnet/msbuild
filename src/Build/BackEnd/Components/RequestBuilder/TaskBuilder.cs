@@ -382,9 +382,7 @@ namespace Microsoft.Build.BackEnd
             if (!condition)
             {
                 LogSkippedTask(bucket, howToExecuteTask);
-                taskResult = new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null);
-
-                return taskResult;
+                return new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null);
             }
 
             // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.

@@ -1126,16 +1126,12 @@ namespace Microsoft.Build.UnitTests
 
             // Create TypeBuilder and compile the stylesheet into it
             TypeBuilder typeBldr = modBldr.DefineType(CompiledQueryName, TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit);
-
-            CompilerErrorCollection errors = null;
             try
             {
-                using (XmlReader reader = XmlReader.Create(sourceUri, readerSettings))
-                {
-                    errors = XslCompiledTransform.CompileToType(
-                        reader, xsltSettings, xmlResolver, false, typeBldr, scriptAsmPath
-                    );
-                }
+                using XmlReader reader = XmlReader.Create(sourceUri, readerSettings);
+                CompilerErrorCollection errors = XslCompiledTransform.CompileToType(reader, xsltSettings,
+                                                                                    xmlResolver, false, typeBldr,
+                                                                                    scriptAsmPath);
             }
             catch (Exception e)
             {

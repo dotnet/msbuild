@@ -214,8 +214,7 @@ namespace Microsoft.Build.Conversion
             }
 
             // Tokenize the additional options first
-            string[] compSwitchList;
-            compSwitchList = TokenizeAdditionalOptionsValue(additionalOptionsValue);
+            string[] compSwitchList = TokenizeAdditionalOptionsValue(additionalOptionsValue);
 
             // Extract the switch arguments
             foreach (string compSwitch in compSwitchList)

@@ -501,13 +501,13 @@ namespace Microsoft.Build.Graph
                     node.ProjectInstance.GlobalProperties.OrderBy(kvp => kvp.Key)
                         .Select(kvp => $"{kvp.Key}={kvp.Value}"));
 
-                sb.AppendLine($"\t{nodeId} [label=<{nodeName}<br/>{globalPropertiesString}>]");
+                sb.Append('\t').Append(nodeId).Append(" [label=<").Append(nodeName).Append("<br/>").Append(globalPropertiesString).AppendLine(">]");
 
                 foreach (var reference in node.ProjectReferences)
                 {
                     var referenceId = nodeIds.GetOrAdd(reference, (n, idProvider) => idProvider(n), nodeIdProvider);
 
-                    sb.AppendLine($"\t{nodeId} -> {referenceId}");
+                    sb.Append('\t').Append(nodeId).Append(" -> ").AppendLine(referenceId);
                 }
             }
 

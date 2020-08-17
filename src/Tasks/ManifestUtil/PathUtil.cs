@@ -112,7 +112,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public static bool IsUncPath(string path)
         {
-            Uri u = null;
+            Uri u;
             if (!Uri.TryCreate(path, UriKind.Absolute, out u) || u == null)
                 return false;
             return u.IsUnc;

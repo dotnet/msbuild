@@ -797,8 +797,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                int count = 0;
-                count = array.Length;
+                int count = array.Length;
                 _writer.Write(count);
 
                 for (int i = 0; i < count; i++)

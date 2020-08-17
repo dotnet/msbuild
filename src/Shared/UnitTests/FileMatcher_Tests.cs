@@ -2034,10 +2034,9 @@ namespace Microsoft.Build.UnitTests
                             int nextSlash = normalizedCandidate.IndexOfAny(FileMatcher.directorySeparatorCharacters, path.Length + 1);
                             if (nextSlash != -1)
                             {
-                                string match;
-
+                                
                                 //UNC paths start with a \\ fragment. Match against \\ when path is empty (i.e., inside the current working directory)
-                                match = normalizedCandidate.StartsWith(@"\\") && string.IsNullOrEmpty(path)
+                                string match = normalizedCandidate.StartsWith(@"\\") && string.IsNullOrEmpty(path)
                                     ? @"\\"
                                     : normalizedCandidate.Substring(0, nextSlash);
 

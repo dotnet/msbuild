@@ -220,12 +220,12 @@ namespace Microsoft.Build.BuildEngine.Shared
 
             for (int i = 0; i < lines.Length; i++)
             {
-                formattedMessage.Append(String.Format(
+                formattedMessage.AppendFormat(
                         CultureInfo.CurrentCulture, finalFormat,
                         threadId, file,
                         lineNumber, columnNumber, category, code,
                         lines[i], endLineNumber, endColumnNumber,
-                        subcategory));
+                        subcategory);
 
                 if (i < (lines.Length - 1))
                 {
