@@ -1,6 +1,6 @@
 ﻿namespace Microsoft.Build.Framework
 {
-    public interface IBuildEventArgsDispatchVisitor
+    internal interface IBuildEventArgsDispatchVisitor
     {
         void Visit(BuildEventArgs buildEventArgs);
         void Visit(BuildMessageEventArgs buildEventArgs);

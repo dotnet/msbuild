@@ -1,6 +1,6 @@
 ﻿namespace Microsoft.Build.Framework
 {
-    public interface IBuildEventArgsWriteVisitor
+    internal interface IBuildEventArgsWriteVisitor
     {
         void Visit(BuildEventArgs e);
         void Visit(BuildMessageEventArgs e);
