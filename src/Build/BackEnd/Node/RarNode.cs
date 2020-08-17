@@ -72,6 +72,9 @@ namespace Microsoft.Build.Execution
                 if (!connected)
                     continue;
 
+                // Header consits of:
+                // 1 byte - Packet type
+                // 4 bytes - packet length
                 byte[] header = new byte[5];
                 int bytesRead = await serverStream.ReadAsync(header, 0, header.Length).ConfigureAwait(false);
                 if (bytesRead != header.Length)
@@ -83,12 +86,14 @@ namespace Microsoft.Build.Execution
                 // Packet type sent by Shutdown
                 if (packetType == NodePacketType.NodeBuildComplete)
                 {
-                    // Finish this task
-                    break;
+                    // Body of NodeBuildComplete contains only one boolean (= 1 byte)
+                    byte[] packetBody = new byte[sizeof(bool)];
+                    await serverStream.ReadAsync(packetBody, 0, packetBody.Length, cancellationToken).ConfigureAwait(false);
+                    bool nodeReuse = Convert.ToBoolean(packetBody[0]);
+
+                    return nodeReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
                 }
             }
-
-            return NodeEngineShutdownReason.BuildComplete;
         }
     }
 }

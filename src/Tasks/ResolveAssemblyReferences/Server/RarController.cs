@@ -17,8 +17,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
 {
     public sealed class RarController
     {
-        private const int PipeBufferSize = 131072;
-
         /// <summary>
         /// Name of <see cref="NamedPipeServerStream"/>
         /// </summary>
@@ -121,8 +119,8 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         private NamedPipeServerStream GetStream(string pipeName)
         {
             return _namedPipeServerFactory(pipeName,
-                PipeBufferSize,
-                PipeBufferSize,
+                null, // Use default size
+                null, // Use default size
                 NamedPipeServerStream.MaxAllowedServerInstances,
                 true);
         }
