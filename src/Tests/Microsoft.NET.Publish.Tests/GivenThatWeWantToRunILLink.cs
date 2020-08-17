@@ -116,7 +116,7 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true", "/p:PublishTrimmed=true", $"/p:TrimMode={trimMode}")
                 .Should().Pass()
-                .And.NotHaveStdOutContaining("warning IL2006")
+                .And.NotHaveStdOutContaining("warning IL2075")
                 .And.NotHaveStdOutContaining("warning IL2026");
 
             var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid);
@@ -220,12 +220,11 @@ namespace Microsoft.NET.Publish.Tests
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true")
                 .Should().Pass()
                 // trim analysis warnings are disabled
-                .And.NotHaveStdOutContaining("warning IL2006")
+                .And.NotHaveStdOutContaining("warning IL2075")
                 .And.NotHaveStdOutContaining("warning IL2026")
-                // warnings about invalid attributes still show up
-                .And.HaveStdOutContaining("warning IL2043")
-                .And.HaveStdOutContaining("warning IL2046")
-                .And.HaveStdOutContaining("warning IL2047");
+                .And.NotHaveStdOutContaining("warning IL2043")
+                .And.NotHaveStdOutContaining("warning IL2046")
+                .And.NotHaveStdOutContaining("warning IL2093");
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
@@ -241,11 +240,11 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false")
                 .Should().Pass()
-                .And.HaveStdOutMatching("warning IL2006.*Program.IL_2006")
+                .And.HaveStdOutMatching("warning IL2075.*Program.IL_2075")
                 .And.HaveStdOutMatching("warning IL2026.*Program.IL_2026.*Testing analysis warning IL2026")
                 .And.HaveStdOutMatching("warning IL2043.*Program.get_IL_2043")
                 .And.HaveStdOutMatching("warning IL2046.*Program.Derived.IL_2046")
-                .And.HaveStdOutMatching("warning IL2047.*Program.Derived.IL_2047");
+                .And.HaveStdOutMatching("warning IL2093.*Program.Derived.IL_2093");
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
@@ -654,9 +653,9 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
-                                    "/p:WarningsAsErrors=IL2006")
+                                    "/p:WarningsAsErrors=IL2075")
                 .Should().Fail()
-                .And.HaveStdOutContaining("error IL2006")
+                .And.HaveStdOutContaining("error IL2075")
                 .And.HaveStdOutContaining("warning IL2026");
         }
 
@@ -672,10 +671,10 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
-                                    "/p:TreatWarningsAsErrors=true", "/p:WarningsNotAsErrors=IL2006")
+                                    "/p:TreatWarningsAsErrors=true", "/p:WarningsNotAsErrors=IL2075")
                 .Should().Fail()
                 .And.HaveStdOutContaining("error IL2026")
-                .And.HaveStdOutContaining("warning IL2006");
+                .And.HaveStdOutContaining("warning IL2075");
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
@@ -690,10 +689,10 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
-                                    "/p:NoWarn=IL2006", "/p:WarnAsError=IL2006")
+                                    "/p:NoWarn=IL2075", "/p:WarnAsError=IL2075")
                 .Should().Pass()
-                .And.NotHaveStdOutContaining("warning IL2006")
-                .And.NotHaveStdOutContaining("error IL2006")
+                .And.NotHaveStdOutContaining("warning IL2075")
+                .And.NotHaveStdOutContaining("error IL2075")
                 .And.HaveStdOutContaining("warning IL2026");
         }
 
@@ -728,7 +727,7 @@ namespace Microsoft.NET.Publish.Tests
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
                                     "/p:ILLinkWarningLevel=0")
                 .Should().Pass()
-                .And.NotHaveStdOutContaining("warning IL2006");
+                .And.NotHaveStdOutContaining("warning IL2075");
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
@@ -745,7 +744,7 @@ namespace Microsoft.NET.Publish.Tests
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
                                     "/p:TreatWarningsAsErrors=true", "/p:ILLinkTreatWarningsAsErrors=false")
                 .Should().Pass()
-                .And.HaveStdOutContaining("warning IL2006");
+                .And.HaveStdOutContaining("warning IL2075");
         }
 
         [Theory]
@@ -1022,17 +1021,17 @@ public class Program
 {
     public static void Main()
     {
-        IL_2006();
+        IL_2075();
         IL_2026();
         _ = IL_2043;
         new Derived().IL_2046();
-        new Derived().IL_2047();
+        new Derived().IL_2093();
     }
 
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
     public static string typeName;
 
-    public static void IL_2006()
+    public static void IL_2075()
     {
         _ = Type.GetType(typeName).GetMethod(""SomeMethod"");
     }
@@ -1053,7 +1052,7 @@ public class Program
         [RequiresUnreferencedCode(""Testing analysis warning IL2046"")]
         public virtual void IL_2046() {}
 
-        public virtual string IL_2047() => null;
+        public virtual string IL_2093() => null;
     }
 
     public class Derived : Base
@@ -1061,7 +1060,7 @@ public class Program
         public override void IL_2046() {}
 
         [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
-        public override string IL_2047() => null;
+        public override string IL_2093() => null;
     }
 }
 ";
