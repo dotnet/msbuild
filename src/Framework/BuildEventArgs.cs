@@ -147,9 +147,9 @@ namespace Microsoft.Build.Framework
             set => buildEventContext = value;
         }
 
-        public virtual void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
+        internal virtual void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
 
-        public virtual void Visit(IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) => buildEventArgsDispatcher.Visit(this);
+        internal virtual void Visit(IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) => buildEventArgsDispatcher.Visit(this);
 
         #region CustomSerializationToStream
         /// <summary>

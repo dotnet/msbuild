@@ -31,6 +31,6 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public string ProjectFile { get; set; }
 
-        public override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
+        internal override void Visit(IBuildEventArgsWriteVisitor buildEventArgsWriter) => buildEventArgsWriter.Visit(this);
     }
 }
