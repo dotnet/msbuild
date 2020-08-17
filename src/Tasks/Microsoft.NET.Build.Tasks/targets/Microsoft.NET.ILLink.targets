@@ -165,13 +165,15 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- COM marshalling warning -->
       <NoWarn>$(NoWarn);IL2050</NoWarn>
       <!-- Reflection intrinsics with unknown arguments -->
-      <NoWarn>$(NoWarn);IL2032;IL2055;IL2057;IL2058;IL2059;IL2060;IL2061</NoWarn>
+      <NoWarn>$(NoWarn);IL2032;IL2055;IL2057;IL2058;IL2059;IL2060;IL2061;IL2096</NoWarn>
       <!-- Unknown values passed to locations with DynamicallyAccessedMemberTypes -->
       <NoWarn>$(NoWarn);IL2062;IL2063;IL2064;IL2065;IL2066</NoWarn>
       <!-- Unsatisfied DynamicallyAccessedMembers requirements -->
       <NoWarn>$(NoWarn);IL2067;IL2068;IL2069;IL2070;IL2071;IL2072;IL2073;IL2074;IL2075;IL2076;IL2077;IL2078;IL2079;IL2080;IL2081;IL2082;IL2083;IL2084;IL2085;IL2086;IL2087;IL2088;IL2089;IL2090;IL2091</NoWarn>
       <!-- DynamicallyAccessedMembersAttribute mismatch on virtual override -->
       <NoWarn>$(NoWarn);IL2092;IL2093;IL2094;IL2095</NoWarn>
+      <!-- DynamicallyAccessedMembersAttribute used on unsupported member -->
+      <NoWarn>$(NoWarn);IL2097;IL2098;IL2099</NoWarn>
 
       <!-- Warnings from the framework. Can be removed once https://github.com/dotnet/runtime/issues/40336 is fixed. -->
       <!-- Framework embedded XML descriptors reference windows-only members. -->
