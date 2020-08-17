@@ -16,6 +16,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Client;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 using Microsoft.Build.Utilities;
 
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
@@ -56,6 +57,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ResolveAssemblyReference()
         {
+        }
+
+        internal ResolveAssemblyReference(ResolveAssemblyReferenceInput input)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(input, nameof(input));
+            ResolveAssemblyReferenceInput = input;
         }
 
         #region Properties
@@ -906,6 +913,95 @@ namespace Microsoft.Build.Tasks
         {
             get;
             private set;
+        }
+
+        private ResolveAssemblyReferenceInput ResolveAssemblyReferenceInput
+        {
+            get
+            {
+                return new ResolveAssemblyReferenceInput
+                {
+                    AllowedAssemblyExtensions = AllowedAssemblyExtensions,
+                    AllowedRelatedFileExtensions = AllowedRelatedFileExtensions,
+                    AppConfigFile = AppConfigFile,
+                    Assemblies = Assemblies,
+                    AssemblyFiles = AssemblyFiles,
+                    AutoUnify = AutoUnify,
+                    CandidateAssemblyFiles = CandidateAssemblyFiles,
+                    CopyLocalDependenciesWhenParentReferenceInGac = CopyLocalDependenciesWhenParentReferenceInGac,
+                    FindDependencies = FindDependencies,
+                    FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences,
+                    FindRelatedFiles = FindRelatedFiles,
+                    FindSatellites = FindSatellites,
+                    FindSerializationAssemblies = FindSerializationAssemblies,
+                    FullFrameworkAssemblyTables = FullFrameworkAssemblyTables,
+                    FullFrameworkFolders = FullFrameworkFolders,
+                    FullTargetFrameworkSubsetNames = FullTargetFrameworkSubsetNames,
+                    IgnoreDefaultInstalledAssemblySubsetTables = IgnoreDefaultInstalledAssemblySubsetTables,
+                    IgnoreDefaultInstalledAssemblyTables = IgnoreDefaultInstalledAssemblyTables,
+                    IgnoreTargetFrameworkAttributeVersionMismatch = IgnoreTargetFrameworkAttributeVersionMismatch,
+                    IgnoreVersionForFrameworkReferences = IgnoreVersionForFrameworkReferences,
+                    InstalledAssemblySubsetTables = InstalledAssemblySubsetTables,
+                    InstalledAssemblyTables = InstalledAssemblyTables,
+                    LatestTargetFrameworkDirectories = LatestTargetFrameworkDirectories,
+                    ProfileName = ProfileName,
+                    SearchPaths = SearchPaths,
+                    Silent = Silent,
+                    StateFile = StateFile,
+                    SupportsBindingRedirectGeneration = SupportsBindingRedirectGeneration,
+                    TargetedRuntimeVersion = TargetedRuntimeVersion,
+                    TargetFrameworkDirectories = TargetFrameworkDirectories,
+                    TargetFrameworkMoniker = TargetFrameworkMoniker,
+                    TargetFrameworkMonikerDisplayName = TargetFrameworkMonikerDisplayName,
+                    TargetFrameworkSubsets = TargetFrameworkSubsets,
+                    TargetFrameworkVersion = TargetFrameworkVersion,
+                    TargetProcessorArchitecture = TargetProcessorArchitecture,
+                    UnresolveFrameworkAssembliesFromHigherFrameworks = UnresolveFrameworkAssembliesFromHigherFrameworks,
+                    UseResolveAssemblyReferenceService = UseResolveAssemblyReferenceService,
+                    WarnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatch
+                };
+            }
+            set
+            {
+                AllowedAssemblyExtensions = value.AllowedAssemblyExtensions;
+                AllowedRelatedFileExtensions = value.AllowedRelatedFileExtensions;
+                AppConfigFile = value.AppConfigFile;
+                Assemblies = value.Assemblies;
+                AssemblyFiles = value.AssemblyFiles;
+                AutoUnify = value.AutoUnify;
+                CandidateAssemblyFiles = value.CandidateAssemblyFiles;
+                CopyLocalDependenciesWhenParentReferenceInGac = value.CopyLocalDependenciesWhenParentReferenceInGac;
+                FindDependencies = value.FindDependencies;
+                FindDependenciesOfExternallyResolvedReferences = value.FindDependenciesOfExternallyResolvedReferences;
+                FindRelatedFiles = value.FindRelatedFiles;
+                FindSatellites = value.FindSatellites;
+                FindSerializationAssemblies = value.FindSerializationAssemblies;
+                FullFrameworkAssemblyTables = value.FullFrameworkAssemblyTables;
+                FullFrameworkFolders = value.FullFrameworkFolders;
+                FullTargetFrameworkSubsetNames = value.FullTargetFrameworkSubsetNames;
+                IgnoreDefaultInstalledAssemblySubsetTables = value.IgnoreDefaultInstalledAssemblySubsetTables;
+                IgnoreDefaultInstalledAssemblyTables = value.IgnoreDefaultInstalledAssemblyTables;
+                IgnoreTargetFrameworkAttributeVersionMismatch = value.IgnoreTargetFrameworkAttributeVersionMismatch;
+                IgnoreVersionForFrameworkReferences = value.IgnoreVersionForFrameworkReferences;
+                InstalledAssemblySubsetTables = value.InstalledAssemblySubsetTables;
+                InstalledAssemblyTables = value.InstalledAssemblyTables;
+                LatestTargetFrameworkDirectories = value.LatestTargetFrameworkDirectories;
+                ProfileName = value.ProfileName;
+                SearchPaths = value.SearchPaths;
+                Silent = value.Silent;
+                StateFile = value.StateFile;
+                SupportsBindingRedirectGeneration = value.SupportsBindingRedirectGeneration;
+                TargetedRuntimeVersion = value.TargetedRuntimeVersion;
+                TargetFrameworkDirectories = value.TargetFrameworkDirectories;
+                TargetFrameworkMoniker = value.TargetFrameworkMoniker;
+                TargetFrameworkMonikerDisplayName = value.TargetFrameworkMonikerDisplayName;
+                TargetFrameworkSubsets = value.TargetFrameworkSubsets;
+                TargetFrameworkVersion = value.TargetFrameworkVersion;
+                TargetProcessorArchitecture = value.TargetProcessorArchitecture;
+                UnresolveFrameworkAssembliesFromHigherFrameworks = value.UnresolveFrameworkAssembliesFromHigherFrameworks;
+                UseResolveAssemblyReferenceService = value.UseResolveAssemblyReferenceService;
+                WarnOrErrorOnTargetArchitectureMismatch = value.WarnOrErrorOnTargetArchitectureMismatch;
+            }
         }
 
         #endregion
