@@ -211,48 +211,6 @@ namespace Microsoft.Build.Framework
     {
         bool AllowFailureWithoutError { get; set; }
     }
-    public partial interface IBuildEventArgsDispatchVisitor
-    {
-        void Visit(Microsoft.Build.Framework.BuildErrorEventArgs buildEventArgs);
-        void Visit(Microsoft.Build.Framework.BuildEventArgs buildEventArgs);
-        void Visit(Microsoft.Build.Framework.BuildFinishedEventArgs buildEventArgs);
-        void Visit(Microsoft.Build.Framework.BuildMessageEventArgs buildEventArgs);
-        void Visit(Microsoft.Build.Framework.BuildStartedEventArgs buildEventArgs);
-        void Visit(Microsoft.Build.Framework.BuildStatusEventArgs buildEventArgs);
-        void Visit(Microsoft.Build.Framework.BuildWarningEventArgs buildEventArgs);
-        void Visit(Microsoft.Build.Framework.CustomBuildEventArgs buildEventArgs);
-        void Visit(Microsoft.Build.Framework.ProjectFinishedEventArgs buildEventArgs);
-        void Visit(Microsoft.Build.Framework.ProjectStartedEventArgs buildEventArgs);
-        void Visit(Microsoft.Build.Framework.TargetFinishedEventArgs buildEventArgs);
-        void Visit(Microsoft.Build.Framework.TargetStartedEventArgs buildEventArgs);
-        void Visit(Microsoft.Build.Framework.TaskFinishedEventArgs buildEventArgs);
-        void Visit(Microsoft.Build.Framework.TaskStartedEventArgs buildEventArgs);
-    }
-    public partial interface IBuildEventArgsWriteVisitor
-    {
-        void Visit(Microsoft.Build.Framework.BuildErrorEventArgs e);
-        void Visit(Microsoft.Build.Framework.BuildEventArgs e);
-        void Visit(Microsoft.Build.Framework.BuildFinishedEventArgs e);
-        void Visit(Microsoft.Build.Framework.BuildMessageEventArgs e);
-        void Visit(Microsoft.Build.Framework.BuildStartedEventArgs e);
-        void Visit(Microsoft.Build.Framework.BuildWarningEventArgs e);
-        void Visit(Microsoft.Build.Framework.CriticalBuildMessageEventArgs e);
-        void Visit(Microsoft.Build.Framework.EnvironmentVariableReadEventArgs e);
-        void Visit(Microsoft.Build.Framework.ProjectEvaluationFinishedEventArgs e);
-        void Visit(Microsoft.Build.Framework.ProjectEvaluationStartedEventArgs e);
-        void Visit(Microsoft.Build.Framework.ProjectFinishedEventArgs e);
-        void Visit(Microsoft.Build.Framework.ProjectImportedEventArgs e);
-        void Visit(Microsoft.Build.Framework.ProjectStartedEventArgs e);
-        void Visit(Microsoft.Build.Framework.PropertyInitialValueSetEventArgs e);
-        void Visit(Microsoft.Build.Framework.PropertyReassignmentEventArgs e);
-        void Visit(Microsoft.Build.Framework.TargetFinishedEventArgs e);
-        void Visit(Microsoft.Build.Framework.TargetSkippedEventArgs e);
-        void Visit(Microsoft.Build.Framework.TargetStartedEventArgs e);
-        void Visit(Microsoft.Build.Framework.TaskCommandLineEventArgs e);
-        void Visit(Microsoft.Build.Framework.TaskFinishedEventArgs e);
-        void Visit(Microsoft.Build.Framework.TaskStartedEventArgs e);
-        void Visit(Microsoft.Build.Framework.UninitializedPropertyReadEventArgs e);
-    }
     public partial interface ICancelableTask : Microsoft.Build.Framework.ITask
     {
         void Cancel();

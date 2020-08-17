@@ -1618,7 +1618,7 @@ namespace Microsoft.Build.Logging
         public void Initialize(Microsoft.Build.Framework.IEventSource eventSource, int nodeCount) { }
         public void Shutdown() { }
     }
-    public partial class EventArgsDispatcher : Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor, Microsoft.Build.Framework.IEventSource
+    public partial class EventArgsDispatcher : Microsoft.Build.Framework.IEventSource
     {
         public EventArgsDispatcher() { }
         public event Microsoft.Build.Framework.AnyEventHandler AnyEventRaised { add { } remove { } }
@@ -1636,20 +1636,6 @@ namespace Microsoft.Build.Logging
         public event Microsoft.Build.Framework.TaskStartedEventHandler TaskStarted { add { } remove { } }
         public event Microsoft.Build.Framework.BuildWarningEventHandler WarningRaised { add { } remove { } }
         public void Dispatch(Microsoft.Build.Framework.BuildEventArgs buildEvent) { }
-        void Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor.Visit(Microsoft.Build.Framework.BuildErrorEventArgs buildEventArgs) { }
-        void Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor.Visit(Microsoft.Build.Framework.BuildEventArgs buildEventArgs) { }
-        void Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor.Visit(Microsoft.Build.Framework.BuildFinishedEventArgs buildEventArgs) { }
-        void Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor.Visit(Microsoft.Build.Framework.BuildMessageEventArgs buildEventArgs) { }
-        void Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor.Visit(Microsoft.Build.Framework.BuildStartedEventArgs buildEventArgs) { }
-        void Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor.Visit(Microsoft.Build.Framework.BuildStatusEventArgs buildEventArgs) { }
-        void Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor.Visit(Microsoft.Build.Framework.BuildWarningEventArgs buildEventArgs) { }
-        void Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor.Visit(Microsoft.Build.Framework.CustomBuildEventArgs buildEventArgs) { }
-        void Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor.Visit(Microsoft.Build.Framework.ProjectFinishedEventArgs buildEventArgs) { }
-        void Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor.Visit(Microsoft.Build.Framework.ProjectStartedEventArgs buildEventArgs) { }
-        void Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor.Visit(Microsoft.Build.Framework.TargetFinishedEventArgs buildEventArgs) { }
-        void Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor.Visit(Microsoft.Build.Framework.TargetStartedEventArgs buildEventArgs) { }
-        void Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor.Visit(Microsoft.Build.Framework.TaskFinishedEventArgs buildEventArgs) { }
-        void Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor.Visit(Microsoft.Build.Framework.TaskStartedEventArgs buildEventArgs) { }
     }
     public partial class FileLogger : Microsoft.Build.Logging.ConsoleLogger
     {
