@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.DotNet.MSBuildSdkResolver
+namespace Microsoft.DotNet.DotNetSdkResolver
 {
-    internal class NETCoreSdkResolver
+    public class NETCoreSdkResolver
     {
         private readonly Func<string, string> _getEnvironmentVariable;
         private readonly VSSettings _vsSettings;
@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         {
         }
 
-        internal NETCoreSdkResolver(Func<string, string> getEnvironmentVariable, VSSettings vsSettings)
+        public NETCoreSdkResolver(Func<string, string> getEnvironmentVariable, VSSettings vsSettings)
         {
             _getEnvironmentVariable = getEnvironmentVariable;
             _vsSettings = vsSettings;

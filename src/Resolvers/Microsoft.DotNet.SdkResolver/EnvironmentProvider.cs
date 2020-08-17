@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.DotNet.MSBuildSdkResolver
+namespace Microsoft.DotNet.DotNetSdkResolver
 {
     internal class EnvironmentProvider
     {

@@ -4,7 +4,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Microsoft.DotNet.MSBuildSdkResolver
+namespace Microsoft.DotNet.DotNetSdkResolver
 {
     internal static class NETCoreSdkResolverNativeWrapper
     {

@@ -14,6 +14,7 @@ using Xunit.Abstractions;
 using System;
 using Microsoft.NET.TestFramework;
 using System.Linq;
+using Microsoft.DotNet.DotNetSdkResolver;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 

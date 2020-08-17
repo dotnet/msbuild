@@ -6,7 +6,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Microsoft.DotNet.MSBuildSdkResolver
+namespace Microsoft.DotNet.DotNetSdkResolver
 {
     internal static partial class Interop
     {

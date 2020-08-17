@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.DotNet.MSBuildSdkResolver
+namespace Microsoft.DotNet.DotNetSdkResolver
 {
     public class SdkResolutionResult
     {
