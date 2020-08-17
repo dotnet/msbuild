@@ -26,8 +26,6 @@ namespace Microsoft.Build.Framework
         public int LineNumber { get { throw null; } }
         public string ProjectFile { get { throw null; } set { } }
         public string Subcategory { get { throw null; } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) { }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public delegate void BuildErrorEventHandler(object sender, Microsoft.Build.Framework.BuildErrorEventArgs e);
     public abstract partial class BuildEventArgs : System.EventArgs
@@ -41,8 +39,6 @@ namespace Microsoft.Build.Framework
         public string SenderName { get { throw null; } }
         public int ThreadId { get { throw null; } }
         public System.DateTime Timestamp { get { throw null; } }
-        public virtual void Visit(Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) { }
-        public virtual void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public partial class BuildEventContext
     {
@@ -78,8 +74,6 @@ namespace Microsoft.Build.Framework
         public BuildFinishedEventArgs(string message, string helpKeyword, bool succeeded, System.DateTime eventTimestamp) { }
         public BuildFinishedEventArgs(string message, string helpKeyword, bool succeeded, System.DateTime eventTimestamp, params object[] messageArgs) { }
         public bool Succeeded { get { throw null; } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) { }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public delegate void BuildFinishedEventHandler(object sender, Microsoft.Build.Framework.BuildFinishedEventArgs e);
     public partial class BuildMessageEventArgs : Microsoft.Build.Framework.LazyFormattedBuildEventArgs
@@ -100,8 +94,6 @@ namespace Microsoft.Build.Framework
         public int LineNumber { get { throw null; } }
         public string ProjectFile { get { throw null; } set { } }
         public string Subcategory { get { throw null; } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) { }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public delegate void BuildMessageEventHandler(object sender, Microsoft.Build.Framework.BuildMessageEventArgs e);
     public partial class BuildStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
@@ -112,8 +104,6 @@ namespace Microsoft.Build.Framework
         public BuildStartedEventArgs(string message, string helpKeyword, System.DateTime eventTimestamp) { }
         public BuildStartedEventArgs(string message, string helpKeyword, System.DateTime eventTimestamp, params object[] messageArgs) { }
         public System.Collections.Generic.IDictionary<string, string> BuildEnvironment { get { throw null; } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) { }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public delegate void BuildStartedEventHandler(object sender, Microsoft.Build.Framework.BuildStartedEventArgs e);
     public abstract partial class BuildStatusEventArgs : Microsoft.Build.Framework.LazyFormattedBuildEventArgs
@@ -122,7 +112,6 @@ namespace Microsoft.Build.Framework
         protected BuildStatusEventArgs(string message, string helpKeyword, string senderName) { }
         protected BuildStatusEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp) { }
         protected BuildStatusEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) { }
     }
     public delegate void BuildStatusEventHandler(object sender, Microsoft.Build.Framework.BuildStatusEventArgs e);
     public partial class BuildWarningEventArgs : Microsoft.Build.Framework.LazyFormattedBuildEventArgs
@@ -141,8 +130,6 @@ namespace Microsoft.Build.Framework
         public int LineNumber { get { throw null; } }
         public string ProjectFile { get { throw null; } set { } }
         public string Subcategory { get { throw null; } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) { }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public delegate void BuildWarningEventHandler(object sender, Microsoft.Build.Framework.BuildWarningEventArgs e);
     public partial class CriticalBuildMessageEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
@@ -151,7 +138,6 @@ namespace Microsoft.Build.Framework
         public CriticalBuildMessageEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName) { }
         public CriticalBuildMessageEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp) { }
         public CriticalBuildMessageEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public abstract partial class CustomBuildEventArgs : Microsoft.Build.Framework.LazyFormattedBuildEventArgs
     {
@@ -159,7 +145,6 @@ namespace Microsoft.Build.Framework
         protected CustomBuildEventArgs(string message, string helpKeyword, string senderName) { }
         protected CustomBuildEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp) { }
         protected CustomBuildEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) { }
     }
     public delegate void CustomBuildEventHandler(object sender, Microsoft.Build.Framework.CustomBuildEventArgs e);
     public partial class EnvironmentVariableReadEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
@@ -167,7 +152,6 @@ namespace Microsoft.Build.Framework
         public EnvironmentVariableReadEventArgs() { }
         public EnvironmentVariableReadEventArgs(string environmentVariableName, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) { }
         public string EnvironmentVariableName { get { throw null; } set { } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public partial class ExternalProjectFinishedEventArgs : Microsoft.Build.Framework.CustomBuildEventArgs
     {
@@ -434,14 +418,12 @@ namespace Microsoft.Build.Framework
         public ProjectEvaluationFinishedEventArgs(string message, params object[] messageArgs) { }
         public System.Nullable<Microsoft.Build.Framework.Profiler.ProfilerResult> ProfilerResult { get { throw null; } set { } }
         public string ProjectFile { get { throw null; } set { } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public partial class ProjectEvaluationStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
         public ProjectEvaluationStartedEventArgs() { }
         public ProjectEvaluationStartedEventArgs(string message, params object[] messageArgs) { }
         public string ProjectFile { get { throw null; } set { } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public partial class ProjectFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
@@ -450,8 +432,6 @@ namespace Microsoft.Build.Framework
         public ProjectFinishedEventArgs(string message, string helpKeyword, string projectFile, bool succeeded, System.DateTime eventTimestamp) { }
         public string ProjectFile { get { throw null; } }
         public bool Succeeded { get { throw null; } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) { }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public delegate void ProjectFinishedEventHandler(object sender, Microsoft.Build.Framework.ProjectFinishedEventArgs e);
     public partial class ProjectImportedEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
@@ -461,7 +441,6 @@ namespace Microsoft.Build.Framework
         public string ImportedProjectFile { get { throw null; } set { } }
         public bool ImportIgnored { get { throw null; } set { } }
         public string UnexpandedProject { get { throw null; } set { } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public partial class ProjectStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
@@ -480,8 +459,6 @@ namespace Microsoft.Build.Framework
         public System.Collections.IEnumerable Properties { get { throw null; } }
         public string TargetNames { get { throw null; } }
         public string ToolsVersion { get { throw null; } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) { }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public delegate void ProjectStartedEventHandler(object sender, Microsoft.Build.Framework.ProjectStartedEventArgs e);
     public partial class PropertyInitialValueSetEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
@@ -491,7 +468,6 @@ namespace Microsoft.Build.Framework
         public string PropertyName { get { throw null; } set { } }
         public string PropertySource { get { throw null; } set { } }
         public string PropertyValue { get { throw null; } set { } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public partial class PropertyReassignmentEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
@@ -501,7 +477,6 @@ namespace Microsoft.Build.Framework
         public string NewValue { get { throw null; } set { } }
         public string PreviousValue { get { throw null; } set { } }
         public string PropertyName { get { throw null; } set { } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public enum RegisteredTaskObjectLifetime
     {
@@ -610,8 +585,6 @@ namespace Microsoft.Build.Framework
         public string TargetFile { get { throw null; } }
         public string TargetName { get { throw null; } }
         public System.Collections.IEnumerable TargetOutputs { get { throw null; } set { } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) { }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public delegate void TargetFinishedEventHandler(object sender, Microsoft.Build.Framework.TargetFinishedEventArgs e);
     public partial class TargetSkippedEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
@@ -622,7 +595,6 @@ namespace Microsoft.Build.Framework
         public string ParentTarget { get { throw null; } set { } }
         public string TargetFile { get { throw null; } set { } }
         public string TargetName { get { throw null; } set { } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public partial class TargetStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
@@ -635,8 +607,6 @@ namespace Microsoft.Build.Framework
         public string ProjectFile { get { throw null; } }
         public string TargetFile { get { throw null; } }
         public string TargetName { get { throw null; } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) { }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public delegate void TargetStartedEventHandler(object sender, Microsoft.Build.Framework.TargetStartedEventArgs e);
     public partial class TaskCommandLineEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
@@ -646,7 +616,6 @@ namespace Microsoft.Build.Framework
         public TaskCommandLineEventArgs(string commandLine, string taskName, Microsoft.Build.Framework.MessageImportance importance, System.DateTime eventTimestamp) { }
         public string CommandLine { get { throw null; } }
         public string TaskName { get { throw null; } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public partial class TaskFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
@@ -657,8 +626,6 @@ namespace Microsoft.Build.Framework
         public bool Succeeded { get { throw null; } }
         public string TaskFile { get { throw null; } }
         public string TaskName { get { throw null; } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) { }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public delegate void TaskFinishedEventHandler(object sender, Microsoft.Build.Framework.TaskFinishedEventArgs e);
     public partial class TaskPropertyInfo
@@ -679,8 +646,6 @@ namespace Microsoft.Build.Framework
         public string ProjectFile { get { throw null; } }
         public string TaskFile { get { throw null; } }
         public string TaskName { get { throw null; } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsDispatchVisitor buildEventArgsDispatcher) { }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
     public delegate void TaskStartedEventHandler(object sender, Microsoft.Build.Framework.TaskStartedEventArgs e);
     public sealed partial class TelemetryEventArgs : Microsoft.Build.Framework.BuildEventArgs
@@ -695,7 +660,6 @@ namespace Microsoft.Build.Framework
         public UninitializedPropertyReadEventArgs() { }
         public UninitializedPropertyReadEventArgs(string propertyName, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) { }
         public string PropertyName { get { throw null; } set { } }
-        public override void Visit(Microsoft.Build.Framework.IBuildEventArgsWriteVisitor buildEventArgsWriter) { }
     }
 }
 namespace Microsoft.Build.Framework.Profiler
