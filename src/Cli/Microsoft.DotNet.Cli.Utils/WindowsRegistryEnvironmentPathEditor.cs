@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Threading.Tasks;
 using Microsoft.Win32;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -29,14 +30,17 @@ namespace Microsoft.DotNet.Cli.Utils
                 environmentKey?.SetValue(Path, value, RegistryValueKind.ExpandString);
             }
 
-            unsafe
+            Task.Factory.StartNew(() =>
             {
-                // send a WM_SETTINGCHANGE message to all windows
-                fixed (char* lParam = "Environment")
+                unsafe
                 {
-                    IntPtr r = SendMessageTimeout(new IntPtr(HWND_BROADCAST), WM_SETTINGCHANGE, IntPtr.Zero, (IntPtr)lParam, 0, 1000, out IntPtr _);
+                    // send a WM_SETTINGCHANGE message to all windows
+                    fixed (char* lParam = "Environment")
+                    {
+                        IntPtr r = SendMessageTimeout(new IntPtr(HWND_BROADCAST), WM_SETTINGCHANGE, IntPtr.Zero, (IntPtr)lParam, 0, 1000, out IntPtr _);
+                    }
                 }
-            }
+            });
         }
 
         private static RegistryKey OpenEnvironmentKeyIfExists(bool writable, SdkEnvironmentVariableTarget sdkEnvironmentVariableTarget)

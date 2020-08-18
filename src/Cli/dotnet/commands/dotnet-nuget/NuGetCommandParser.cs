@@ -54,7 +54,8 @@ namespace Microsoft.DotNet.Cli
                     Create.Option("-d|--disable-buffering", Parser.CompletionOnlyDescription),
                     Create.Option("-n|--no-symbols", Parser.CompletionOnlyDescription),
                     Create.Option("--no-service-endpoint", Parser.CompletionOnlyDescription),
-                    Create.Option("--interactive", Parser.CompletionOnlyDescription)
+                    Create.Option("--interactive", Parser.CompletionOnlyDescription),
+                    Create.Option("--skip-duplicate", Parser.CompletionOnlyDescription)
                     ));
     }
 }

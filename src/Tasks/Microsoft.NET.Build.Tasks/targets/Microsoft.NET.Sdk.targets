@@ -109,7 +109,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-    <EmbeddedResourceUseDependentUponConvention 
+    <EmbeddedResourceUseDependentUponConvention
       Condition="'$(EmbeddedResourceUseDependentUponConvention)' == '' and
                  (('$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' >= '3.0') or
                   ('$(TargetFrameworkIdentifier)' == '.NETStandard' and '$(_TargetFrameworkVersionWithoutV)' >= '2.1'))">true</EmbeddedResourceUseDependentUponConvention>
@@ -191,7 +191,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <RuntimeTargetsCopyLocalItems Remove="@(_ConflictPackageFiles)" Condition="'%(_ConflictPackageFiles.ConflictItemType)' != 'Reference'" />
       <RuntimePackAsset Remove="@(_ConflictPackageFiles)" Condition="'%(_ConflictPackageFiles.ConflictItemType)' != 'Reference'" />
     </ItemGroup>
-    
+
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
                       AssetsFilePath="$(ProjectAssetsFile)"
                       DepsFilePath="$(ProjectDepsFilePath)"
@@ -287,9 +287,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <_WriteIncludedFrameworks Condition="'$(SelfContained)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &gt;= '3.1'">true</_WriteIncludedFrameworks>
     </PropertyGroup>
-    
+
     <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
-                                       TargetFramework="$(TargetFramework)"
                                        TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
                                        TargetPlatformMoniker="$(TargetPlatformMoniker)"
                                        RuntimeConfigPath="$(ProjectRuntimeConfigFilePath)"
@@ -320,7 +319,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
           BeforeTargets="BuiltProjectOutputGroup">
     <ItemGroup>
-      <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)" 
+      <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)"
                                      TargetPath="$(ProjectRuntimeConfigFileName)"
                                      FinalOutputPath="$(ProjectRuntimeConfigFilePath)" />
     </ItemGroup>
@@ -473,18 +472,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                                         _ChooseAppHost
       Choose the correct app-host for the build scenario:
-      * SingleFileHost if an app being published as a self-contained single-file .net5+ app 
+      * SingleFileHost if an app being published as a self-contained single-file .net5+ app
       * AppHost otherwise
     ============================================================
      -->
   <Target Name="_ChooseAppHost"
           DependsOnTargets="_GetAppHostPaths"
           Condition="'$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true'">
-    <PropertyGroup>
-      <AppHostSourcePath Condition="'$(PublishSingleFile)' == 'true' and 
-                                  '$(SelfContained)' == 'true' and
-                                  '$(_TargetFrameworkVersionWithoutV)' >= '5.0' and
-                                  '$(SingleFileHostSourcePath)' != ''">$(SingleFileHostSourcePath)</AppHostSourcePath>
+    <PropertyGroup Condition="'$(PublishSingleFile)' == 'true' and
+                              '$(SelfContained)' == 'true' and
+                              '$(_TargetFrameworkVersionWithoutV)' >= '5.0' and
+                              '$(SingleFileHostSourcePath)' != ''">
+      <AppHostSourcePath>$(SingleFileHostSourcePath)</AppHostSourcePath>
+      <AppHostIntermediatePath>$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)singlefilehost$(_NativeExecutableExtension)'))</AppHostIntermediatePath>
     </PropertyGroup>
   </Target>
 
@@ -509,16 +509,16 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AppHostSourcePath Condition="'$(UseAppHostFromAssetsFile)' == 'true'">@(_NativeRestoredAppHostNETCore)</AppHostSourcePath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(UseAppHostFromAssetsFile)' == 'false' Or '@(_NativeRestoredAppHostNETCore)' != ''">
-      <AppHostIntermediatePath>$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)$(AssemblyName)$(_NativeExecutableExtension)'))</AppHostIntermediatePath>
+      <AppHostIntermediatePath>$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)apphost$(_NativeExecutableExtension)'))</AppHostIntermediatePath>
     </PropertyGroup>
-    
+
   </Target>
 
   <ItemGroup>
     <ClsidMap Include="$(IntermediateOutputPath)$(AssemblyName).clsidmap" />
     <RegFreeComManifest Include="$(IntermediateOutputPath)$(AssemblyName).X.manifest" />
   </ItemGroup>
-  
+
   <!--
       ============================================================
                                         _GenerateClsidMap
@@ -562,7 +562,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <UsingTask TaskName="GenerateRegFreeComManifest" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  <!-- 
+  <!--
     ============================================================
                                         _GenerateRegFreeComManifest
 
@@ -619,7 +619,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(IjwHostSourcePath)' == '' or !Exists('$(IjwHostSourcePath)')"
              ResourceName="CannotFindIjwhost" />
   </Target>
-  
+
   <!--
     ============================================================
                                         _ComputeNETCoreBuildOutputFiles
@@ -628,7 +628,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="_ComputeNETCoreBuildOutputFiles"
-          DependsOnTargets="_GetAppHostPaths;_GetComHostPaths;_GetIjwHostPaths"
+          DependsOnTargets="_ChooseAppHost;_GetComHostPaths;_GetIjwHostPaths"
           BeforeTargets="AssignTargetPaths"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
 
@@ -664,15 +664,15 @@ Copyright (c) .NET Foundation. All rights reserved.
       <None Include="$(AppHostIntermediatePath)">
         <Link>$(AssemblyName)$(_NativeExecutableExtension)</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <!-- Always copy the AppHost because the contents of the apphost binary can change during the publish step (due to single-file bundling). 
+        <!-- Always copy the AppHost because the contents of the apphost binary can change during the publish step (due to single-file bundling).
              Always copying the apphost ensures that that the sequence
-                 dotnet publish /p:PublishSingleFile=true 
+                 dotnet publish /p:PublishSingleFile=true
                  dotnet publish /p:PublishSingleFile=false
              places the correct unbundled apphost in the publish directory. -->
         <CopyToPublishDirectory>Always</CopyToPublishDirectory>
       </None>
     </ItemGroup>
-    
+
     <ItemGroup Condition="'$(ComHostIntermediatePath)' != ''">
       <None Include="$(ComHostIntermediatePath)">
         <Link>$(AssemblyName).$(_DotNetComHostLibraryName)</Link>
@@ -899,7 +899,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   .NET Core apps can have shared frameworks that are pre-installed on the target machine, thus the app is "portable"
   to any machine that already has the shared framework installed. For .NET Core 1.x and 2.x, a "platform" library
   is declared. The platform library and its dependencies will be excluded from the publish output.
-  
+
   For .NET Core 3 and up, targeting packs and runtime packs are used for shared framework assets instead of PackageReference
   ============================================================
   -->

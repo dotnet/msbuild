@@ -445,6 +445,33 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Generating Entity Framework SQL Scripts....
+        /// </summary>
+        public static string EFSCRIPT_Generating {
+            get {
+                return ResourceManager.GetString("EFSCRIPT_Generating", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Generating Entity Framework SQL Scripts completed successfully.
+        /// </summary>
+        public static string EFSCRIPT_GenerationCompleted {
+            get {
+                return ResourceManager.GetString("EFSCRIPT_GenerationCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Entity Framework SQL Script generation failed.
+        /// </summary>
+        public static string EFSCRIPT_GenerationFailed {
+            get {
+                return ResourceManager.GetString("EFSCRIPT_GenerationFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Adding file ({0})..
         /// </summary>
         public static string KUDUDEPLOY_AddingFile {

@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks
 {
@@ -15,6 +16,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         public string EFPublishDirectory { get; set; }
         [Required]
         public ITaskItem[] EFMigrations { get; set; }
+        [Required]
+        public string Configuration { get; set; }
         public string EFSQLScriptsFolderName { get; set; }
         public string EFMigrationsAdditionalArgs { get; set; }
         [Output]
@@ -23,11 +26,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         public override bool Execute()
         {
             bool isSuccess = true;
-            Log.LogMessage(MessageImportance.High, $"Generating Entity framework SQL Scripts...");
+            Log.LogMessage(MessageImportance.High, Resources.EFSCRIPT_Generating);
             isSuccess = GenerateEFSQLScriptsInternal();
             if (isSuccess)
             {
-                Log.LogMessage(MessageImportance.High, $"Generating Entity framework SQL Scripts completed successfully");
+                Log.LogMessage(MessageImportance.High, Resources.EFSCRIPT_GenerationCompleted);
             }
 
             return isSuccess;
@@ -79,7 +82,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             string previousAspNetCoreEnvironment = Environment.GetEnvironmentVariable(AspNetCoreEnvironment); 
             Environment.SetEnvironmentVariable(SkipFirstTimeEnvironmentVariable, "true");
             Environment.SetEnvironmentVariable(AspNetCoreEnvironment, "Development");
-            ProcessStartInfo psi = new ProcessStartInfo("dotnet", string.Format("ef migrations script --idempotent --output \"{0}\" --context {1} {2}", sqlFileFullPath, dbContextName, EFMigrationsAdditionalArgs))
+            ProcessStartInfo psi = new ProcessStartInfo("dotnet", $@"ef migrations script --no-build --idempotent --configuration {Configuration} --output ""{sqlFileFullPath}"" --context {dbContextName} {EFMigrationsAdditionalArgs}")
             {
                 WorkingDirectory = ProjectDirectory,
                 CreateNoWindow = true,
@@ -130,7 +133,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 if (isLoggingEnabled)
                 {
                     Log.LogMessage(MessageImportance.High, _standardOut.ToString());
-                    Log.LogError($"Entity framework SQL Script generation failed");
+                    Log.LogError(Resources.EFSCRIPT_GenerationFailed);
                 }
                 return false;
             }

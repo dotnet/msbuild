@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         {
         }
 
-        private readonly string [] ConsoleLoggerOutputNormal = new[] { "--logger", "console;verbosity=normal" };
+        private readonly string[] ConsoleLoggerOutputNormal = new[] { "--logger", "console;verbosity=normal" };
 
         [Fact]
         public void MSTestSingleTFM()
@@ -261,7 +261,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.StdOut.Should().Contain(trxFiles[0]);
 
             // Cleanup trxLoggerDirectory if it exist
-            if(Directory.Exists(trxLoggerDirectory))
+            if (Directory.Exists(trxLoggerDirectory))
             {
                 Directory.Delete(trxLoggerDirectory, true);
             }
@@ -307,7 +307,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .WithVersionVariables()
                 .Path;
 
-            
+
             string pkgDir;
             //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             //{
@@ -443,7 +443,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 Directory.Delete(resultsDirectory, true);
             }
 
-            var settingsPath =Path.Combine(AppContext.BaseDirectory, "CollectCodeCoverage.runsettings");
+            var settingsPath = Path.Combine(AppContext.BaseDirectory, "CollectCodeCoverage.runsettings");
 
             // Call test
             CommandResult result = new DotnetTestCommand(Log)

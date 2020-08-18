@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli
                         .With(name: LocalizableStrings.CmdOutputDir)
                         .ForwardAsSingle(o => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
                 Create.Option(
-                    "--nologo|/nologo",
+                    "--nologo",
                     LocalizableStrings.CmdNoLogo,
                     Accept.NoArguments()
                           .ForwardAs("-nologo")),

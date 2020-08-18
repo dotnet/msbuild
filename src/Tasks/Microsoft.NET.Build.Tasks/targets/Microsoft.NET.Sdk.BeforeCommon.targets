@@ -65,6 +65,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     Also, enforce that RuntimeIdentifier is always specified for .NETFramework executables.
   -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.RuntimeIdentifierInference.targets" />
+  
+  <!-- Checks for EOL frameworks -->
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.EolTargetFrameworks.targets" />
 
   <!-- Check if the Target Framework is coreclr based -->
   <PropertyGroup Condition="'$(_IsNETCoreOrNETStandard)' == ''">

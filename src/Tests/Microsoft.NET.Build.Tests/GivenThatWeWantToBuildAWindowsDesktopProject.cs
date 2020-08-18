@@ -16,7 +16,94 @@ namespace Microsoft.NET.Build.Tests
         public GivenThatWeWantToBuildAWindowsDesktopProject(ITestOutputHelper log) : base(log)
         {}
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
+        [InlineData("UseWindowsForms")]
+        [InlineData("UseWPF")]
+        public void It_errors_when_missing_windows_target_platform(string propertyName)
+        {
+            var targetFramework = "net5.0";
+            TestProject testProject = new TestProject()
+            {
+                Name = "MissingTargetPlatform",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework
+            };
+            testProject.AdditionalProperties[propertyName] = "true";
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "custom"; // Make sure we don't get windows implicitly set as the TPI
+            testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: propertyName);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1136");
+        }
+
+        [WindowsOnlyRequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
+        [InlineData("UseWindowsForms")]
+        [InlineData("UseWPF")]
+        public void It_errors_when_missing_transitive_windows_target_platform(string propertyName)
+        {
+            TestProject testProjectA = new TestProject()
+            {
+                Name = "A",
+                IsSdkProject = true,
+                ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
+                TargetFrameworks = "netcoreapp3.1"
+            };
+            testProjectA.AdditionalProperties[propertyName] = "true";
+
+            TestProject testProjectB = new TestProject()
+            {
+                Name = "B",
+                IsSdkProject = true,
+                TargetFrameworks = "net5.0"
+            };
+            testProjectB.ReferencedProjects.Add(testProjectA);
+
+            TestProject testProjectC = new TestProject()
+            {
+                Name = "C",
+                IsSdkProject = true,
+                TargetFrameworks = "net5.0"
+            };
+            testProjectC.ReferencedProjects.Add(testProjectB);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProjectC);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1136");
+        }
+
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
+        public void It_warns_when_specifying_windows_desktop_sdk()
+        {
+            var targetFramework = "net5.0";
+            TestProject testProject = new TestProject()
+            {
+                Name = "windowsDesktopSdk",
+                IsSdkProject = true,
+                ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
+                TargetFrameworks = targetFramework
+            };
+            testProject.AdditionalProperties["UseWPF"] = "true";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("NETSDK1137");
+        }
+		
+		[WindowsOnlyFact]
         public void It_fails_if_windows_target_platform_version_is_invalid()
         {
             var testProject = new TestProject()
@@ -32,7 +119,32 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("NETSDK1137");
+                .HaveStdOutContaining("NETSDK1140");
+        }
+
+        [WindowsOnlyFact]
+        public void It_succeeds_if_windows_target_platform_version_has_trailing_zeros()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "ValidWindowsVersion",
+                IsSdkProject = true,
+                TargetFrameworks = "net5.0"
+            };
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "Windows"; 
+            testProject.AdditionalProperties["TargetPlatformVersion"] = "10.0.18362.0"; // We must set this manually because if we set it in the TFM we remove the trailing zeroes. 
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            var getValuesCommand = new GetValuesCommand(testAsset, "TargetPlatformVersion");
+            getValuesCommand.Execute()
+                .Should()
+                .Pass();
+            getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "10.0.18362" });
         }
 
         [Fact]
@@ -51,9 +163,9 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("NETSDK1136")
+                .HaveStdOutContaining("NETSDK1139")
                 .And
-                .NotHaveStdOutContaining("NETSDK1137");
+                .NotHaveStdOutContaining("NETSDK1140");
         }
     }
 }

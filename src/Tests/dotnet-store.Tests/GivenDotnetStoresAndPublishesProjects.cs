@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 {
     public class GivenDotnetStoresAndPublishesProjects : SdkTest
     {
-        private static string _tfm = "netcoreapp3.0";
+        private static string _tfm = "netcoreapp3.1";
         private static string _arch = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
 
         public GivenDotnetStoresAndPublishesProjects(ITestOutputHelper log) : base(log)

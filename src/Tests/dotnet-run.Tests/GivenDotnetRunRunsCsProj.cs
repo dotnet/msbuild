@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("--framework", "netcoreapp3.0")
+                .Execute("--framework", "netcoreapp3.1")
                 .Should().Pass()
                          .And.HaveStdOutContaining("This string came from the test library!");
         }
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework", "netcoreapp3.0")
+                .Execute("--framework", "netcoreapp3.1")
                 .Should().Pass()
                          .And.HaveStdOut("Hello World!");
         }

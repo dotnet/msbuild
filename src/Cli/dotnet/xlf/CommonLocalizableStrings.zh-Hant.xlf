@@ -7,6 +7,11 @@
         <target state="translated">允許命令停止並等候使用者輸入或動作 (例如: 完成驗證)。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandPrereleaseOptionDescription">
+        <source>Allows prerelease packages to be installed.</source>
+        <target state="new">Allows prerelease packages to be installed.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">在 `{0}` 中找不到任何專案。</target>

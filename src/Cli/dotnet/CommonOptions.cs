@@ -16,6 +16,9 @@ namespace Microsoft.DotNet.Cli
                 Accept.NoArguments());
 
         public static Option VerbosityOption() =>
+            VerbosityOption(o => $"-verbosity:{o.Arguments.Single()}");
+
+        public static Option VerbosityOption(Func<AppliedOption, string> format) =>
             Create.Option(
                 "-v|--verbosity",
                 CommonLocalizableStrings.VerbosityOptionDescription,
@@ -26,7 +29,7 @@ namespace Microsoft.DotNet.Cli
                           "d", "detailed",
                           "diag", "diagnostic")
                       .With(name: CommonLocalizableStrings.LevelArgumentName)
-                      .ForwardAsSingle(o => $"-verbosity:{o.Arguments.Single()}"));
+                      .ForwardAsSingle(format));
         
         public static Option FrameworkOption(string description) =>
             Create.Option(

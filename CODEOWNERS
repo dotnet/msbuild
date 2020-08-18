@@ -1,5 +1,26 @@
 # This is a comment.
 # Each line is a file pattern followed by one or more owners.
 
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+# @dotnet/dotnet-cli  will be requested for
+# review when someone opens a pull request.
+
 /src/WebSdk/ @vijayrkn
 /src/Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests/ @vijayrkn
+
+/src/Cli/dotnet/commands/dotnet-add/dotnet-add-package @dotnet/nuget-team
+/src/Tests/dotnet-add-package.Tests @dotnet/nuget-team
+/src/Cli/dotnet/commands/dotnet-nuget @dotnet/nuget-team
+/src/Tests/dotnet-nuget.UnitTests @dotnet/nuget-team
+
+/src/Cli/dotnet/commands/dotnet-fsi @dotnet/fsharp
+/src/Tests/dotnet-fsi.Tests @dotnet/fsharp
+
+/src/Cli/dotnet/commands/dotnet-test @dotnet/dotnet-test-templates-admin
+/src/Cli/dotnet/commands/dotnet-vstest @dotnet/dotnet-test-templates-admin
+/src/Tests/dotnet-test.Tests @dotnet/dotnet-test-templates-admin
+/src/Tests/dotnet-vstest.Tests @dotnet/dotnet-test-templates-admin
+
+/src/Cli/dotnet/commands/dotnet-new @DonJoseLuis
+/src/Tests/dotnet-new.Tests @DonJoseLuis

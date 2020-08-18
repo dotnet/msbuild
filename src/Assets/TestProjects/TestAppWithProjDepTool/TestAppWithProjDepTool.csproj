@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(RestoreAdditionalProjectSources);$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
   </PropertyGroup>

@@ -218,7 +218,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       EFPublishDirectory="$(_EFPublishDirectory)"
       EFSQLScriptsFolderName="$(EFSQLScriptsFolderName)"
       EFMigrations="@(EFMigrations)"
-      EFMigrationsAdditionalArgs="$(EFMigrationsAdditionalArgs)">
+      EFMigrationsAdditionalArgs="$(EFMigrationsAdditionalArgs)"
+      Configuration="$(Configuration)">
       <Output TaskParameter="EFSQLScripts" ItemName="_EFSQLScripts" />
     </GenerateEFSQLScripts>
   </Target>

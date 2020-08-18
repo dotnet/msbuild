@@ -1169,4 +1169,13 @@ For more information on this deploy script visit:	https://go.microsoft.com/fwlin
   <data name="ZIPDEPLOY_FailedToRetrieveCred" xml:space="preserve">
     <value>Failed to retrieve credentials.</value>
   </data>
+  <data name="EFSCRIPT_Generating" xml:space="preserve">
+    <value>Generating Entity Framework SQL Scripts...</value>
+  </data>
+  <data name="EFSCRIPT_GenerationCompleted" xml:space="preserve">
+    <value>Generating Entity Framework SQL Scripts completed successfully</value>
+  </data>
+  <data name="EFSCRIPT_GenerationFailed" xml:space="preserve">
+    <value>Entity Framework SQL Script generation failed</value>
+  </data>
 </root>

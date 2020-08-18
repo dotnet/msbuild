@@ -18,7 +18,7 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_publishes_and_runs_self_contained_wpf_app()
         {
             var testDir = _testAssetsManager.CreateTestDirectory();
@@ -51,7 +51,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishCommand = new PublishCommand(Log, testDir.Path);
 
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:TargetPlatformIdentifier=Windows", "/p:TargetPlatformVersion=7.0")
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}")
                 .Should()
                 .Pass();
 

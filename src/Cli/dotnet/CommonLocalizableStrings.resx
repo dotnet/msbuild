@@ -671,4 +671,7 @@ setx PATH "%PATH%;{0}"
   <data name="CommandInteractiveOptionDescription" xml:space="preserve">
     <value>Allows the command to stop and wait for user input or action (for example to complete authentication).</value>
   </data>
+  <data name="CommandPrereleaseOptionDescription" xml:space="preserve">
+    <value>Allows prerelease packages to be installed.</value>
+  </data>
 </root>
