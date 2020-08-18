@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.NET.TestFramework;
@@ -26,8 +27,15 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData("net46")]
         [InlineData("netcoreapp3.0")]
+        [InlineData("net5.0-windows")]
         public void It_provides_runtime_configuration_and_shadow_copy_files_via_outputgroup(string targetFramework)
         {
+            if (targetFramework == "net5.0-windows" && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // net5.0-windows is windows only scenario
+                return;
+            }
+
             var projectRef = new TestProject
             {
                 Name = "ReferencedProject",
@@ -95,6 +103,7 @@ namespace Microsoft.NET.Build.Tests
             switch (targetFramework)
             {
                 case "netcoreapp3.0":
+                case "net5.0-windows":
                     var depsFileLibraries = GetRuntimeLibraryFileNames(depsFile);
                     depsFileLibraries.Should().BeEquivalentTo(new[] { "Newtonsoft.Json.dll" });
                     
