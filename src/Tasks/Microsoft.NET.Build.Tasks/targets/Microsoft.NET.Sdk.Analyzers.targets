@@ -52,6 +52,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="$(EnableNETAnalyzers)" />
   <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
           Condition="$(EnableNETAnalyzers)" />
+
+  <!-- .NET Analyzers -->
   <ItemGroup Condition="$(EnableNETAnalyzers)">
     <Analyzer
       Condition="'$(Language)' == 'VB'"
@@ -62,23 +64,39 @@ Copyright (c) .NET Foundation. All rights reserved.
       Include="$(MSBuildThisFileDirectory)..\analyzers\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll"
       IsImplicitlyDefined="true" />
     <Analyzer
-      Condition="'$(Language)' == 'C#'"
-      Include="$(MSBuildThisFileDirectory)..\codestyle\Microsoft.CodeAnalysis.CodeStyle.dll"
-      IsImplicitlyDefined="true" />
-    <Analyzer
-      Condition="'$(Language)' == 'C#'"
-      Include="$(MSBuildThisFileDirectory)..\codestyle\Microsoft.CodeAnalysis.CodeStyle.Fixes.dll"
-      IsImplicitlyDefined="true" />
-    <Analyzer
-      Condition="'$(Language)' == 'C#'"
-      Include="$(MSBuildThisFileDirectory)..\codestyle\Microsoft.CodeAnalysis.CSharp.CodeStyle.dll"
-      IsImplicitlyDefined="true" />
-    <Analyzer
-      Condition="'$(Language)' == 'C#'"
-      Include="$(MSBuildThisFileDirectory)..\codestyle\Microsoft.CodeAnalysis.CSharp.CodeStyle.Fixes.dll"
-      IsImplicitlyDefined="true" />
-    <Analyzer
       Include="$(MSBuildThisFileDirectory)..\analyzers\Microsoft.CodeAnalysis.NetAnalyzers.dll"
+      IsImplicitlyDefined="true" />
+  </ItemGroup>
+
+  <!-- C# Code Style Analyzers -->
+  <ItemGroup Condition="$(EnableNETAnalyzers) And '$(Language)' == 'C#'">
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\cs\Microsoft.CodeAnalysis.CodeStyle.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\cs\Microsoft.CodeAnalysis.CodeStyle.Fixes.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\cs\Microsoft.CodeAnalysis.CSharp.CodeStyle.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\cs\Microsoft.CodeAnalysis.CSharp.CodeStyle.Fixes.dll"
+      IsImplicitlyDefined="true" />
+  </ItemGroup>
+
+  <!-- Visual Basic Code Style Analyzers -->
+  <ItemGroup Condition="$(EnableNETAnalyzers) And '$(Language)' == 'VB'">
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\vb\Microsoft.CodeAnalysis.CodeStyle.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\vb\Microsoft.CodeAnalysis.CodeStyle.Fixes.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\vb\Microsoft.CodeAnalysis.VisualBasic.CodeStyle.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\vb\Microsoft.CodeAnalysis.VisualBasic.CodeStyle.Fixes.dll"
       IsImplicitlyDefined="true" />
   </ItemGroup>
 </Project>
