@@ -11,7 +11,7 @@
     <!-- Create FileDefinitions items for ResolveHostfxrCopyLocalContent target -->
     <EmitLegacyAssetsFileItems>true</EmitLegacyAssetsFileItems>
 
-    <PackageId>Microsoft.Internal.DotNet.MockTemplateLocator</PackageId>
+    <PackageId>microsoft.dotnet.templateLocator</PackageId>
   </PropertyGroup>
 
   <Target Name="LinkVSEmbeddableAssemblies" DependsOnTargets="ResolveReferences" AfterTargets="ResolveReferences">
@@ -23,7 +23,7 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.Protocol" Version="$(NuGetProjectModelVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <ProjectReference Include="..\Resolvers\Microsoft.DotNet.SdkResolver\Microsoft.DotNet.SdkResolver.csproj" />
+    <ProjectReference Include="..\Resolvers\Microsoft.DotNet.WorkloadManifestReader\Microsoft.DotNet.WorkloadManifestReader.csproj" />
   </ItemGroup>
 </Project>

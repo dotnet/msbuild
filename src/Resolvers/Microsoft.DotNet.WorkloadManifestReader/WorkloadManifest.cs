@@ -7,10 +7,10 @@ using System.Xml.Linq;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    class WorkloadManifest
+    public class WorkloadManifest
     {
         public Dictionary<string, List<string>> Workloads { get; set; } = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-        public Dictionary<string, string> SdkPackVersions { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, (string version, string kind)> SdkPackDetail { get; set; } = new Dictionary<string, (string version, string kind)>(StringComparer.OrdinalIgnoreCase);
 
         public static WorkloadManifest LoadFromFolder(string manifestFolder)
         {
@@ -21,20 +21,30 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             {
                 var manifestXml = XDocument.Load(manifestPath);
 
-                foreach (var workload in manifestXml.Root.Element("Workloads").Elements("Workload"))
+                if (manifestXml.Root?.Element("Workloads")?.Elements("Workload") != null)
                 {
-                    string workloadName = workload.Attribute("Name").Value;
-                    var workloadPacks = workload.Elements("RequiredPack").Select(rp => rp.Attribute("Name").Value).ToList();
+                    foreach (var workload in manifestXml.Root.Element("Workloads").Elements("Workload"))
+                    {
+                        string workloadName = workload?.Attribute("Name").Value;
+                        var workloadPacks = workload.Elements("RequiredPack").Select(rp => rp.Attribute("Name").Value)
+                            .ToList();
 
-                    manifest.Workloads[workloadName] = workloadPacks;
+                        manifest.Workloads[workloadName] = workloadPacks;
+                    }
                 }
-                foreach (var pack in manifestXml.Root.Element("WorkloadPacks").Elements("Pack"))
+
+                if (manifestXml.Root?.Element("WorkloadPacks")?.Elements("Pack") != null)
                 {
-                    string packName = pack.Attribute("Name").Value;
-                    string packVersion = pack.Attribute("Version").Value;
-                    manifest.SdkPackVersions[packName] = packVersion;
+                    foreach (var pack in manifestXml.Root.Element("WorkloadPacks").Elements("Pack"))
+                    {
+                        string packName = pack.Attribute("Name").Value;
+                        string packVersion = pack.Attribute("Version").Value;
+                        string kind = pack.Attribute("Kind").Value;
+                        manifest.SdkPackDetail[packName] = (packVersion, kind);
+                    }
                 }
             }
+
             return manifest;
         }
 
@@ -57,9 +67,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     {
                         mergedManifest.Workloads.Add(workload.Key, workload.Value);
                     }
-                    foreach (var sdkPackVersion in manifest.SdkPackVersions)
+                    foreach (var sdkPackVersion in manifest.SdkPackDetail)
                     {
-                        mergedManifest.SdkPackVersions.Add(sdkPackVersion.Key, sdkPackVersion.Value);
+                        mergedManifest.SdkPackDetail.Add(sdkPackVersion.Key, sdkPackVersion.Value);
                     }
                 }
                 return mergedManifest;
