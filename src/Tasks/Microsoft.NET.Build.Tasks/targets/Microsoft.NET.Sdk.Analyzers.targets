@@ -62,6 +62,22 @@ Copyright (c) .NET Foundation. All rights reserved.
       Include="$(MSBuildThisFileDirectory)..\analyzers\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll"
       IsImplicitlyDefined="true" />
     <Analyzer
+      Condition="'$(Language)' == 'C#'"
+      Include="$(MSBuildThisFileDirectory)..\codestyle\Microsoft.CodeAnalysis.CodeStyle.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Condition="'$(Language)' == 'C#'"
+      Include="$(MSBuildThisFileDirectory)..\codestyle\Microsoft.CodeAnalysis.CodeStyle.Fixes.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Condition="'$(Language)' == 'C#'"
+      Include="$(MSBuildThisFileDirectory)..\codestyle\Microsoft.CodeAnalysis.CSharp.CodeStyle.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Condition="'$(Language)' == 'C#'"
+      Include="$(MSBuildThisFileDirectory)..\codestyle\Microsoft.CodeAnalysis.CSharp.CodeStyle.Fixes.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
       Include="$(MSBuildThisFileDirectory)..\analyzers\Microsoft.CodeAnalysis.NetAnalyzers.dll"
       IsImplicitlyDefined="true" />
   </ItemGroup>
