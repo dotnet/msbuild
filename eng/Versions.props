@@ -80,7 +80,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn-analyzers -->
-    <MicrosoftCodeAnalysisNetAnalyzersVersion>5.0.0-rc1.20414.3</MicrosoftCodeAnalysisNetAnalyzersVersion>
+    <MicrosoftCodeAnalysisNetAnalyzersVersion>5.0.0-rc2.20417.2</MicrosoftCodeAnalysisNetAnalyzersVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/msbuild -->
