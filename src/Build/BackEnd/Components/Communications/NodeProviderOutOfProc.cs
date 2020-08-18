@@ -94,7 +94,7 @@ namespace Microsoft.Build.BackEnd
             Handshake hostHandshake = new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, nodeReuse: ComponentHost.BuildParameters.EnableNodeReuse, lowPriority: ComponentHost.BuildParameters.LowPriority, is64Bit: EnvironmentUtilities.Is64BitProcess));
             NodeContext context = GetNode(null, commandLineArgs, nodeId, factory, hostHandshake, NodeContextTerminated);
 
-            if (null != context)
+            if (context != null)
             {
                 _nodeContexts[nodeId] = context;
 

@@ -2215,7 +2215,7 @@ namespace Microsoft.Build.Execution
         {
             VerifyThrowNotImmutable();
 
-            if (null == targets)
+            if (targets == null)
             {
                 targets = Array.Empty<string>();
             }

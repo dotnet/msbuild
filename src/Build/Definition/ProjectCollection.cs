@@ -875,11 +875,11 @@ namespace Microsoft.Build.Evaluation
                     // This is only done once, when the project collection is created. Any subsequent
                     // environment changes will be ignored. Child nodes will be passed this set
                     // of properties in their build parameters.
-                    if (null == _environmentProperties)
+                    if (_environmentProperties == null)
                     {
                         using (_locker.EnterWriteLock())
                         {
-                            if (null == _environmentProperties)
+                            if (_environmentProperties == null)
                             {
                                 _environmentProperties = Utilities.GetEnvironmentProperties();
                             }

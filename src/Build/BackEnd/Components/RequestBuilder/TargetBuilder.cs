@@ -439,7 +439,7 @@ namespace Microsoft.Build.BackEnd
                             }
 
                             // And if we have dependencies to run, push them now.
-                            if (null != dependencies)
+                            if (dependencies != null)
                             {
                                 await PushTargets(dependencies, currentTargetEntry, currentTargetEntry.Lookup, false, false, TargetBuiltReason.DependsOn);
                             }

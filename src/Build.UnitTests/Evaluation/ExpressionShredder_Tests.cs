@@ -442,7 +442,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var actual = ExpressionShredder.SplitSemiColonSeparatedList(input);
             Console.WriteLine(input);
 
-            if (null == expected)
+            if (expected == null)
             {
                 // passing "null" means you expect an empty array back
                 expected = new string[] { };

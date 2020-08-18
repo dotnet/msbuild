@@ -1253,14 +1253,14 @@ namespace Microsoft.Build.Execution
 
                 metadatum = GetItemDefinitionMetadata(metadataName);
 
-                if (null != metadatum && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
+                if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
                 {
                     Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
 
                     // We don't have a location to use, but this is very unlikely to error
                     return expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
                 }
-                else if (null != metadatum)
+                else if (metadatum != null)
                 {
                     return metadatum.EvaluatedValueEscaped;
                 }

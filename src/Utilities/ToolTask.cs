@@ -607,7 +607,7 @@ namespace Microsoft.Build.Utilities
 
             // Generally we won't set a working directory, and it will use the current directory
             string workingDirectory = GetWorkingDirectory();
-            if (null != workingDirectory)
+            if (workingDirectory != null)
             {
                 startInfo.WorkingDirectory = workingDirectory;
             }
@@ -615,7 +615,7 @@ namespace Microsoft.Build.Utilities
             // Old style environment overrides
 #pragma warning disable 0618 // obsolete
             Dictionary<string, string> envOverrides = EnvironmentOverride;
-            if (null != envOverrides)
+            if (envOverrides != null)
             {
                 foreach (KeyValuePair<string, string> entry in envOverrides)
                 {
@@ -1453,7 +1453,7 @@ namespace Microsoft.Build.Utilities
                 // Old style environment overrides
 #pragma warning disable 0618 // obsolete
                 Dictionary<string, string> envOverrides = EnvironmentOverride;
-                if (null != envOverrides)
+                if (envOverrides != null)
                 {
                     foreach (KeyValuePair<string, string> entry in envOverrides)
                     {

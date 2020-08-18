@@ -177,7 +177,7 @@ namespace Microsoft.Build.Tasks.Xaml
             ErrorUtilities.VerifyThrowArgumentLength(desiredRule, nameof(desiredRule));
 
             object rootObject = XamlServices.Load(reader);
-            if (null != rootObject)
+            if (rootObject != null)
             {
                 XamlTypes.ProjectSchemaDefinitions schemas = rootObject as XamlTypes.ProjectSchemaDefinitions;
                 if (schemas != null)

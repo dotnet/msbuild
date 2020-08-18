@@ -173,7 +173,7 @@ namespace Microsoft.Build.BuildEngine
         internal string IndentString(string s, int indent)
         {
             // It's possible the event has a null message
-            if (null == s)
+            if (s == null)
             {
                 s = String.Empty;
             }

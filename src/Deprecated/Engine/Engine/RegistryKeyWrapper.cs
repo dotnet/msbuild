@@ -179,7 +179,7 @@ namespace Microsoft.Build.BuildEngine
         /// <returns></returns>
         public virtual bool Exists()
         {
-            return null != WrappedKey;
+            return WrappedKey != null;
         }
 
         /// <summary>
