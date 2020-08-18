@@ -2561,6 +2561,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="IconFile" />
                     <xs:attribute name="InputManifest" />
                     <xs:attribute name="IsolatedComReferences" />
+                    <xs:attribute name="LauncherBasedDeployment" type="msb:boolean" />
                     <xs:attribute name="ManifestType" />
                     <xs:attribute name="MaxTargetPath" />
                     <xs:attribute name="OSVersion" />
@@ -2620,6 +2621,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="ErrorReportUrl" />
                     <xs:attribute name="InputManifest" />
                     <xs:attribute name="Install" type="msb:boolean" />
+                    <xs:attribute name="LauncherBasedDeployment" type="msb:boolean" />
                     <xs:attribute name="MapFileExtensions" type="msb:boolean" />
                     <xs:attribute name="MaxTargetPath" />
                     <xs:attribute name="MinimumRequiredVersion" />
@@ -2637,6 +2639,17 @@ elementFormDefault="qualified">
                     <xs:attribute name="UpdateInterval" />
                     <xs:attribute name="UpdateMode" />
                     <xs:attribute name="UpdateUnit" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="GenerateLauncher" substitutionGroup="msb:Task">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:TaskType">
+                    <xs:attribute name="EntryPoint" />
+                    <xs:attribute name="OutputPath" />
+                    <xs:attribute name="VisualStudioVersion" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
