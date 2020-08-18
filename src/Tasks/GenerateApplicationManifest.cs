@@ -125,7 +125,15 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (ITaskItem item in Dependencies)
                 {
-                    AddAssemblyFromItem(item);
+                    if (LauncherBasedDeployment)
+                    {
+                        // In Launcher-based deployments, everything needs to be a regular file.
+                        AddFileFromItem(item);
+                    }
+                    else
+                    {
+                        AddAssemblyFromItem(item);
+                    }
                 }
             }
 

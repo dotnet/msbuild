@@ -256,6 +256,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_DeploymentBuiltUpdateIntervalUnits Condition="'$(UpdatePeriodically)'!='true'">Days</_DeploymentBuiltUpdateIntervalUnits>
     <_DeploymentBuiltMinimumRequiredVersion Condition="'$(UpdateRequired)'=='true' and '$(Install)'=='true'">$(MinimumRequiredVersion)</_DeploymentBuiltMinimumRequiredVersion>
 
+    <_DeploymentLauncherBased Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</_DeploymentLauncherBased>
+
     <MaxTargetPath Condition="'$(MaxTargetPath)'==''">100</MaxTargetPath>
   </PropertyGroup>
 
@@ -3863,6 +3865,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="GenerateApplicationManifest"
       DependsOnTargets="
+            _DeploymentGenerateLauncher;
             _DeploymentComputeNativeManifestInfo;
             _DeploymentComputeClickOnceManifestInfo;
             ResolveComReferences;
@@ -3908,6 +3911,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         IconFile="@(_DeploymentManifestIconFile)"
         InputManifest="$(_DeploymentBaseManifest)"
         IsolatedComReferences="@(ResolvedIsolatedComModules)"
+        LauncherBasedDeployment="$(_DeploymentLauncherBased)"
         ManifestType="$(_DeploymentManifestType)"
         MaxTargetPath="$(MaxTargetPath)"
         OutputManifest="@(ApplicationManifest)"
@@ -3933,6 +3937,37 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_DeploymentCopyApplicationManifest>true</_DeploymentCopyApplicationManifest>
     </PropertyGroup>
 
+  </Target>
+
+  <!--
+    ============================================================
+                                        _DeploymentGenerateLauncher
+
+    Generates Launcher if needed
+    ============================================================
+    -->
+  <Target
+      Name="_DeploymentGenerateLauncher"
+      Condition="'$(GenerateClickOnceManifests)'=='true' and '$(_DeploymentLauncherBased)' == 'true'">
+
+    <!-- Create list of items for manifest generation -->
+    <GenerateLauncher
+        EntryPoint="@(_DeploymentManifestEntryPoint)"
+        OutputPath="$(IntermediateOutputPath)"
+        VisualStudioVersion="$(VisualStudioVersion)">
+
+      <Output TaskParameter="OutputEntryPoint" ItemName="_DeploymentManifestLauncherEntryPoint"/>
+
+    </GenerateLauncher>
+
+    <!--
+      Replace entry-point with Launcher and move original project's entry-point to content group.
+    -->
+    <ItemGroup>
+      <ContentWithTargetPath Include="@(_DeploymentManifestEntryPoint)"/>
+      <_DeploymentManifestEntryPoint Remove="@(_DeploymentManifestEntryPoint)"/>
+      <_DeploymentManifestEntryPoint Include="@(_DeploymentManifestLauncherEntryPoint)"/>
+    </ItemGroup>
   </Target>
 
   <!--
@@ -4127,6 +4162,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           EntryPoint="@(_DeploymentResolvedDeploymentManifestEntryPoint)"
           ErrorReportUrl="$(_DeploymentFormattedErrorReportUrl)"
           Install="$(Install)"
+          LauncherBasedDeployment="$(_DeploymentLauncherBased)"
           MapFileExtensions="$(MapFileExtensions)"
           MaxTargetPath="$(MaxTargetPath)"
           MinimumRequiredVersion="$(_DeploymentBuiltMinimumRequiredVersion)"

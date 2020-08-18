@@ -383,6 +383,7 @@ namespace Microsoft.Build.Tasks
         public string Description { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem EntryPoint { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem InputManifest { get { throw null; } set { } }
+        public bool LauncherBasedDeployment { get { throw null; } set { } }
         public int MaxTargetPath { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem OutputManifest { get { throw null; } set { } }
@@ -1222,6 +1223,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public bool IsClickOnceManifest { get { throw null; } set { } }
         [System.Xml.Serialization.XmlIgnoreAttribute]
+        public bool LauncherBasedDeployment { get { throw null; } set { } }
+        [System.Xml.Serialization.XmlIgnoreAttribute]
         public int MaxTargetPath { get { throw null; } set { } }
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public string OSDescription { get { throw null; } set { } }
@@ -1765,6 +1768,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public Microsoft.Build.Tasks.Deployment.ManifestUtilities.FileReference FindTargetPath(string targetPath) { throw null; }
         public System.Collections.IEnumerator GetEnumerator() { throw null; }
         public void Remove(Microsoft.Build.Tasks.Deployment.ManifestUtilities.FileReference file) { }
+    }
+    [System.Runtime.InteropServices.ComVisibleAttribute(true)]
+    public partial class LauncherBuilder
+    {
+        public LauncherBuilder(string launcherPath) { }
+        public string LauncherPath { get { throw null; } set { } }
+        public Microsoft.Build.Tasks.Deployment.Bootstrapper.BuildResults Build(string filename, string outputPath) { throw null; }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(false)]
     public abstract partial class Manifest
