@@ -1725,12 +1725,16 @@ namespace Microsoft.Build.CommandLine
                                 String.Equals(switchName, "maxcpucount", StringComparison.OrdinalIgnoreCase))
                             {
                                 int numberOfCpus = Environment.ProcessorCount;
-                                if (!Environment.Is64BitProcess && NativeMethodsShared.IsWindows) // 32-bit process, 32-bit Windows had a 32-core limit
+#if !RUNTIME_TYPE_NETCORE
+                                // .NET framework has a core count limit (32/64 depending on process bitness), 
+                                // so check with GetLogicalProcessorInformationEx in that case.
+                                if (numberOfCpus >= 32 && NativeMethodsShared.IsWindows)
                                 {
                                     var result = NativeMethodsShared.GetPhysicalCoreCount();
                                     if(result != -1)
                                         numberOfCpus = result;
                                 }
+#endif
                                 switchParameters = ":" + numberOfCpus;
                             }
                             else if (String.Equals(switchName, "bl", StringComparison.OrdinalIgnoreCase) ||
