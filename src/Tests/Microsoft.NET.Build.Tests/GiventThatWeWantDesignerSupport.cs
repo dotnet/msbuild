@@ -109,7 +109,9 @@ namespace Microsoft.NET.Build.Tests
                     
                     var options = GetRuntimeOptions(runtimeConfig);
                     options["configProperties"]["Microsoft.NETCore.DotNetHostPolicy.SetAppPaths"].Value<bool>().Should().BeTrue();
-                    options["tfm"].Value<string>().Should().Be(targetFramework);
+                    // runtimeconfiguration should not have platform.
+                    // it should be net5.0 instead of net5.0-windows
+                    options["tfm"].Value<string>().Should().Be(targetFramework.Split('-')[0]);
                     options["additionalProbingPaths"].Value<JArray>().Should().NotBeEmpty();
 
                     otherFiles.Should().BeEquivalentTo(new[] { "ReferencedProject.dll", "ReferencedProject.pdb" });
