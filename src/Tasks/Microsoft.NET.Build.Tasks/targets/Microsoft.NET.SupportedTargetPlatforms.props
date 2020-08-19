@@ -1,6 +1,6 @@
 <!--
 ***********************************************************************************************
-Microsoft.NET.SupportedTargetPlatforms.targets
+Microsoft.NET.SupportedTargetPlatforms.props
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
