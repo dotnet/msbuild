@@ -40,7 +40,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableCodeStyleAnalyzers Condition="'$(EnableCodeStyleAnalyzers)' == '' And 
                                          '$(EffectiveAnalysisLevel)' != '' And
                                           $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '5.0'))">true</EnableNETAnalyzers>
-    <EnableCodeStyleAnalyzers Condition="'$(EnableCodeStyleAnalyzers)' == ''">false</EnableNETAnalyzers>
+    <EnableCodeStyleAnalyzers Condition="'$(EnableCodeStyleAnalyzers)' == ''">false</EnableCodeStyleAnalyzers>
     
     <!-- Compiler warning level, defaulted to 4. We promote it to 5 if the user has set analysis level to 5 or higher
          NOTE: at this time only the C# compiler supports warning waves -->
