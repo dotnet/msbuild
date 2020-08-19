@@ -80,7 +80,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn-analyzers -->
-    <MicrosoftCodeAnalysisNetAnalyzersVersion>5.0.0-rc1.20414.3</MicrosoftCodeAnalysisNetAnalyzersVersion>
+    <MicrosoftCodeAnalysisNetAnalyzersVersion>5.0.0-rc2.20417.2</MicrosoftCodeAnalysisNetAnalyzersVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/msbuild -->
@@ -108,23 +108,23 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/Microsoft/visualfsharp -->
-    <MicrosoftFSharpCompilerPackageVersion>11.0.0-beta.20414.6</MicrosoftFSharpCompilerPackageVersion>
+    <MicrosoftFSharpCompilerPackageVersion>11.0.0-beta.20418.2</MicrosoftFSharpCompilerPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn -->
-    <MicrosoftNetCompilersToolsetPackageVersion>3.8.0-3.20418.5</MicrosoftNetCompilersToolsetPackageVersion>
-    <MicrosoftCodeAnalysisCSharpCodeStylePackageVersion>3.8.0-3.20418.5</MicrosoftCodeAnalysisCSharpCodeStylePackageVersion>
-    <MicrosoftCodeAnalysisVisualBasicCodeStylePackageVersion>3.8.0-3.20418.5</MicrosoftCodeAnalysisVisualBasicCodeStylePackageVersion>
+    <MicrosoftNetCompilersToolsetPackageVersion>3.8.0-3.20418.8</MicrosoftNetCompilersToolsetPackageVersion>
+    <MicrosoftCodeAnalysisCSharpCodeStylePackageVersion>3.8.0-3.20418.8</MicrosoftCodeAnalysisCSharpCodeStylePackageVersion>
+    <MicrosoftCodeAnalysisVisualBasicCodeStylePackageVersion>3.8.0-3.20418.8</MicrosoftCodeAnalysisVisualBasicCodeStylePackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>5.0.0-rc.1.20418.10</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
-    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>5.0.0-rc.1.20418.10</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>5.0.0-rc.1.20418.10</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>5.0.0-rc.1.20418.10</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreAnalyzersPackageVersion>5.0.0-rc.1.20418.10</MicrosoftAspNetCoreAnalyzersPackageVersion>
-    <MicrosoftNETSdkRazorPackageVersion>5.0.0-rc.1.20418.10</MicrosoftNETSdkRazorPackageVersion>
-    <MicrosoftNETSdkBlazorWebAssemblyPackageVersion>5.0.0-rc.1.20418.10</MicrosoftNETSdkBlazorWebAssemblyPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>5.0.0-rc.1.20418.20</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>5.0.0-rc.1.20418.20</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>5.0.0-rc.1.20418.20</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>5.0.0-rc.1.20418.20</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreAnalyzersPackageVersion>5.0.0-rc.1.20418.20</MicrosoftAspNetCoreAnalyzersPackageVersion>
+    <MicrosoftNETSdkRazorPackageVersion>5.0.0-rc.1.20418.20</MicrosoftNETSdkRazorPackageVersion>
+    <MicrosoftNETSdkBlazorWebAssemblyPackageVersion>5.0.0-rc.1.20418.20</MicrosoftNETSdkBlazorWebAssemblyPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/wpf -->
