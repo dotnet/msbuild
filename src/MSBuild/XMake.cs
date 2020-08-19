@@ -1722,7 +1722,7 @@ namespace Microsoft.Build.CommandLine
                             {
                                 int numberOfCpus = Environment.ProcessorCount;
 #if NETFRAMEWORK && !MONO
-                                // .NET framework has a core count limit (32/64 depending on process bitness), 
+                                // .NET framework calls Windows APIs that have a core count limit (32/64 depending on process bitness), 
                                 // so check with GetLogicalProcessorInformationEx in that case.
                                 if (numberOfCpus >= 32 && NativeMethodsShared.IsWindows)
                                 {
