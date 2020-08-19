@@ -1721,7 +1721,7 @@ namespace Microsoft.Build.CommandLine
                                 String.Equals(switchName, "maxcpucount", StringComparison.OrdinalIgnoreCase))
                             {
                                 int numberOfCpus = Environment.ProcessorCount;
-#if !RUNTIME_TYPE_NETCORE
+#if NETFRAMEWORK && !MONO
                                 // .NET framework has a core count limit (32/64 depending on process bitness), 
                                 // so check with GetLogicalProcessorInformationEx in that case.
                                 if (numberOfCpus >= 32 && NativeMethodsShared.IsWindows)
