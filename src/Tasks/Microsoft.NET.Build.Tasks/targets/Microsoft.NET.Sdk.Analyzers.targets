@@ -36,11 +36,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '5.0'))">true</EnableNETAnalyzers>
     <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
 
-    <!-- EnableCodeStyleAnalyzers Allows code style analyzers to be disabled in bulk via msbuild if the user wants to -->
-    <EnableCodeStyleAnalyzers Condition="'$(EnableCodeStyleAnalyzers)' == '' And 
+    <!-- EnforceCodeStyleInBuild Allows code style analyzers to be disabled in bulk via msbuild if the user wants to -->
+    <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == '' And 
                                          '$(EffectiveAnalysisLevel)' != '' And
                                           $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '5.0'))">true</EnableNETAnalyzers>
-    <EnableCodeStyleAnalyzers Condition="'$(EnableCodeStyleAnalyzers)' == ''">false</EnableCodeStyleAnalyzers>
+    <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
     
     <!-- Compiler warning level, defaulted to 4. We promote it to 5 if the user has set analysis level to 5 or higher
          NOTE: at this time only the C# compiler supports warning waves -->
@@ -75,7 +75,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <!-- C# Code Style Analyzers -->
-  <ItemGroup Condition="$(EnableCodeStyleAnalyzers) And '$(Language)' == 'C#'">
+  <ItemGroup Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'C#'">
     <Analyzer
       Include="$(MSBuildThisFileDirectory)..\codestyle\cs\Microsoft.CodeAnalysis.CodeStyle.dll"
       IsImplicitlyDefined="true" />
@@ -91,7 +91,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <!-- Visual Basic Code Style Analyzers -->
-  <ItemGroup Condition="$(EnableCodeStyleAnalyzers) And '$(Language)' == 'VB'">
+  <ItemGroup Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'VB'">
     <Analyzer
       Include="$(MSBuildThisFileDirectory)..\codestyle\vb\Microsoft.CodeAnalysis.CodeStyle.dll"
       IsImplicitlyDefined="true" />
