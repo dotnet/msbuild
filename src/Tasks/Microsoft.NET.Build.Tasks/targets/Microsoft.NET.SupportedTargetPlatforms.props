@@ -12,10 +12,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 <Project>
   <ItemGroup>
-    <SupportedTargetPlatform Include="Android" />
-    <SupportedTargetPlatform Include="iOS" />
-    <SupportedTargetPlatform Include="Linux" />
-    <SupportedTargetPlatform Include="macOS" />
-    <SupportedTargetPlatform Include="Windows" />
+    <SupportedPlatform Include="Android" />
+    <SupportedPlatform Include="iOS" />
+    <SupportedPlatform Include="Linux" />
+    <SupportedPlatform Include="macOS" />
+    <SupportedPlatform Include="Windows" />
   </ItemGroup>
 </Project>
