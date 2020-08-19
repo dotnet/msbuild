@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.Bootstrapper;
@@ -17,6 +19,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public sealed class GenerateLauncher : TaskExtension
     {
+        private const string LAUNCHER_EXE = "Launcher.exe";
         private const string ENGINE_PATH = "Engine"; // relative to ClickOnce bootstrapper path
 
         #region Properties
@@ -32,6 +35,11 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem OutputEntryPoint { get; set; }
 
+        [Output]
+        public string FrameworkName { get; set; }
+
+        [Output]
+        public string FrameworkVersion { get; set; }
         #endregion
 
         public override bool Execute()
@@ -42,12 +50,24 @@ namespace Microsoft.Build.Tasks
                 // GetDefaultPath obtains the root ClickOnce boostrapper path.
                 LauncherPath = Path.Combine(
                     Microsoft.Build.Tasks.Deployment.Bootstrapper.Util.GetDefaultPath(VisualStudioVersion),
-                    ENGINE_PATH);
+                    ENGINE_PATH,
+                    LAUNCHER_EXE);
             }
 
             if (EntryPoint == null)
             {
                 return false;
+            }
+
+            // Get Framework name and version.
+            // Launcher-based manifest generation has to use Framework elements that match Launcher identity.
+            Assembly a = Assembly.UnsafeLoadFrom(LauncherPath);
+            var targetFrameworkAttribute = a.GetCustomAttribute<TargetFrameworkAttribute>();
+            if (targetFrameworkAttribute != null)
+            {
+                FrameworkName = targetFrameworkAttribute.FrameworkName;
+                string[] split = FrameworkName.Split(new string[] { "Version=" }, StringSplitOptions.None);
+                FrameworkVersion = split.Length > 1 ? split[split.Length - 1] : string.Empty;
             }
 
             var launcherBuilder = new LauncherBuilder(LauncherPath);

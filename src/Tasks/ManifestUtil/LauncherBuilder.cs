@@ -17,7 +17,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(true)]
     public class LauncherBuilder
     {
-        private const string LAUNCHER_EXE = "Launcher.exe";
         private const string LAUNCHER_RESOURCENAME = "FILENAME";
         private const int LAUNCHER_RESOURCE_TABLE = 50;
 
@@ -36,6 +35,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public BuildResults Build(string filename, string outputPath)
         {
+            string launcherFilename = Path.GetFileName(LauncherPath);
+
             _results = new BuildResults();
 
             try
@@ -53,7 +54,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
 
                 // Copy setup.bin to the output directory
-                string strOutputExe = System.IO.Path.Combine(outputPath, LAUNCHER_EXE);
+                string strOutputExe = System.IO.Path.Combine(outputPath, launcherFilename);
                 if (!CopyLauncherToOutputDirectory(strOutputExe))
                 {
                     // Appropriate messages should have been stuffed into the results already
@@ -67,7 +68,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     return _results;
                 }
 
-                _results.SetKeyFile(LAUNCHER_EXE);
+                _results.SetKeyFile(launcherFilename);
                 _results.BuildSucceeded();
             }
             catch (Exception ex)
@@ -80,19 +81,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private bool CopyLauncherToOutputDirectory(string strOutputExe)
         {
-            string launcherPath = LauncherPath;
-            string launcherSourceFile = System.IO.Path.Combine(launcherPath, LAUNCHER_EXE);
-
-            if (!FileSystems.Default.FileExists(launcherSourceFile))
+            if (!FileSystems.Default.FileExists(LauncherPath))
             {
-                _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.MissingLauncherExe", LAUNCHER_EXE, launcherPath));
+                _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.MissingLauncherExe", LauncherPath));
                 return false;
             }
 
             try
             {
                 EnsureFolderExists(Path.GetDirectoryName(strOutputExe));
-                File.Copy(launcherSourceFile, strOutputExe, true);
+                File.Copy(LauncherPath, strOutputExe, true);
                 ClearReadOnlyAttribute(strOutputExe);
             }
             catch (Exception ex)
@@ -102,7 +100,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     ex is ArgumentException ||
                     ex is NotSupportedException)
                 {
-                    _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.CopyError", launcherSourceFile, strOutputExe, ex.Message));
+                    _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.CopyError", LauncherPath, strOutputExe, ex.Message));
                     return false;
                 }
 

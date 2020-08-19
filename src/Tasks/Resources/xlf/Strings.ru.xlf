@@ -790,8 +790,8 @@
         <note>{StrBegin="MSB3963: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.MissingLauncherExe">
-        <source>MSB3964: Could not find required file '{0}' in '{1}'.</source>
-        <target state="new">MSB3964: Could not find required file '{0}' in '{1}'.</target>
+        <source>MSB3964: Could not find required file '{0}'.</source>
+        <target state="new">MSB3964: Could not find required file '{0}'.</target>
         <note>{StrBegin="MSB3964: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.NoOutputPath">

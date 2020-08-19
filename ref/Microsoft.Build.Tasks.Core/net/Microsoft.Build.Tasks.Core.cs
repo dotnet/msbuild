@@ -493,6 +493,10 @@ namespace Microsoft.Build.Tasks
     {
         public GenerateLauncher() { }
         public Microsoft.Build.Framework.ITaskItem EntryPoint { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public string FrameworkName { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public string FrameworkVersion { get { throw null; } set { } }
         public string LauncherPath { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem OutputEntryPoint { get { throw null; } set { } }
