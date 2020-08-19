@@ -2850,7 +2850,7 @@
     <comment>{StrBegin="MSB3963: "}</comment>
   </data>
   <data name="GenerateLauncher.MissingLauncherExe">
-    <value>MSB3964: Could not find required file '{0}' in '{1}'.</value>
+    <value>MSB3964: Could not find required file '{0}'.</value>
     <comment>{StrBegin="MSB3964: "}</comment>
   </data>
   <data name="GenerateLauncher.NoOutputPath">

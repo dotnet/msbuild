@@ -3865,6 +3865,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="GenerateApplicationManifest"
       DependsOnTargets="
+            _DeploymentSetClickOnceVersions;
             _DeploymentGenerateLauncher;
             _DeploymentComputeNativeManifestInfo;
             _DeploymentComputeClickOnceManifestInfo;
@@ -3925,7 +3926,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         TargetCulture="$(TargetCulture)"
         TargetFrameworkSubset="$(TargetFrameworkSubset)"
         TargetFrameworkProfile="$(TargetFrameworkProfile)"
-        TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        TargetFrameworkVersion="$(_DeploymentManifestTargetFrameworkVersion)"
         TrustInfoFile="@(_DeploymentIntermediateTrustInfoFile)"
         UseApplicationTrust="$(UseApplicationTrust)">
 
@@ -3941,6 +3942,24 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ============================================================
+                                        _DeploymentSetClickOnceVersions
+
+    Sets ClickOnce versions
+    ============================================================
+    -->
+  <Target
+      Name="_DeploymentSetClickOnceVersions"
+      Condition="'$(GenerateClickOnceManifests)'=='true'">
+
+    <PropertyGroup>
+      <_DeploymentManifestTargetFrameworkMoniker>$(TargetFrameworkMoniker)</_DeploymentManifestTargetFrameworkMoniker>
+      <_DeploymentManifestTargetFrameworkVersion>$(TargetFrameworkVersion)</_DeploymentManifestTargetFrameworkVersion>
+    </PropertyGroup>
+
+  </Target>
+
+  <!--
+    ============================================================
                                         _DeploymentGenerateLauncher
 
     Generates Launcher if needed
@@ -3950,13 +3969,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="_DeploymentGenerateLauncher"
       Condition="'$(GenerateClickOnceManifests)'=='true' and '$(_DeploymentLauncherBased)' == 'true'">
 
-    <!-- Create list of items for manifest generation -->
+    <!-- Generates Launcher and obtains its Framework version and moniker -->
     <GenerateLauncher
         EntryPoint="@(_DeploymentManifestEntryPoint)"
         OutputPath="$(IntermediateOutputPath)"
         VisualStudioVersion="$(VisualStudioVersion)">
 
       <Output TaskParameter="OutputEntryPoint" ItemName="_DeploymentManifestLauncherEntryPoint"/>
+      <Output TaskParameter="FrameworkName" PropertyName="_DeploymentManifestTargetFrameworkMoniker"/>
+      <Output TaskParameter="FrameworkVersion" PropertyName="_DeploymentManifestTargetFrameworkVersion"/>
 
     </GenerateLauncher>
 
@@ -4173,8 +4194,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           SuiteName="$(SuiteName)"
           SupportUrl="$(_DeploymentFormattedSupportUrl)"
           TargetCulture="$(TargetCulture)"
-          TargetFrameworkVersion="$(TargetFrameworkVersion)"
-          TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
+          TargetFrameworkVersion="$(_DeploymentManifestTargetFrameworkVersion)"
+          TargetFrameworkMoniker="$(_DeploymentManifestTargetFrameworkMoniker)"
           TrustUrlParameters="$(TrustUrlParameters)"
           UpdateEnabled="$(UpdateEnabled)"
           UpdateInterval="$(_DeploymentBuiltUpdateInterval)"

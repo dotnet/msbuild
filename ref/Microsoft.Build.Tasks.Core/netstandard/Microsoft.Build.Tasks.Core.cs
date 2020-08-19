@@ -375,6 +375,21 @@ namespace Microsoft.Build.Tasks
         protected override bool OnManifestResolved(Microsoft.Build.Tasks.Deployment.ManifestUtilities.Manifest manifest) { throw null; }
         protected internal override bool ValidateInputs() { throw null; }
     }
+    public sealed partial class GenerateLauncher : Microsoft.Build.Tasks.TaskExtension
+    {
+        public GenerateLauncher() { }
+        public Microsoft.Build.Framework.ITaskItem EntryPoint { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public string FrameworkName { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public string FrameworkVersion { get { throw null; } set { } }
+        public string LauncherPath { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem OutputEntryPoint { get { throw null; } set { } }
+        public string OutputPath { get { throw null; } set { } }
+        public string VisualStudioVersion { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
     public abstract partial class GenerateManifestBase : Microsoft.Build.Utilities.Task
     {
         protected GenerateManifestBase() { }
