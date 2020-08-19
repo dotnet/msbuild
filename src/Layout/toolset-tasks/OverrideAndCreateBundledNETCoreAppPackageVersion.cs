@@ -95,8 +95,6 @@ namespace Microsoft.DotNet.Build.Tasks
                 .Elements(ns + "KnownFrameworkReference").First().Attribute("TargetingPackVersion"));
             CheckAndReplaceAttribute(itemGroup
                 .Elements(ns + "KnownAppHostPack").First().Attribute("AppHostPackVersion"));
-            CheckAndReplaceAttribute(itemGroup
-                .Elements(ns + "KnownCrossgen2Pack").First().Attribute("Crossgen2PackVersion"));
 
             return projectXml.ToString();
         }
