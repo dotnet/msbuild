@@ -67,6 +67,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolvedNuGetFiles="@(NativeCopyLocalItems);@(ResourceCopyLocalItems);@(RuntimeCopyLocalItems)"
       ResolvedRuntimeTargetsFiles="@(RuntimeTargetsCopyLocalItems)"
       TargetFramework="$(TargetFrameworkMoniker)"
+      TargetPlatformMoniker="$(TargetPlatformMoniker)"
       RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
       />
 
@@ -104,6 +105,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       RuntimeConfigPath="$(_DesignerRuntimeConfigFilePath)"
       RuntimeFrameworks="@(RuntimeFramework)"
       TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
+      TargetPlatformMoniker="$(TargetPlatformMoniker)"
       UserRuntimeConfig="$(UserRuntimeConfig)"
       WriteAdditionalProbingPathsToMainConfig="true"
       />

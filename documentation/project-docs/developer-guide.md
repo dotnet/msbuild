@@ -101,6 +101,15 @@ This should output `.../artifacts/tmp/Debug/dotnet/dotnet`.
 
 You can now run `dotnet` commands to test changes.
 
+## Run tests from the command line
+
+```shell
+build.cmd # to have a full build first
+.\artifacts\sdk-build-env.bat
+cd src\Tests\YOURTEST.Tests # cd to the test folder that contains the test csproj file
+dotnet test --filter "FullyQualifiedName~TESTNAME" # run individual test
+```
+
 ## A simple test
 
 Using the `dotnet` built in the previous steps:

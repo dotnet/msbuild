@@ -25,5 +25,6 @@
   <UsingTask TaskName="ChangeEntryPointLibraryName" AssemblyFile="$(ToolsetTaskDll)"/>
   <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(ToolsetTaskDll)"/>
   <UsingTask TaskName="ZipFileCreateFromDirectory" AssemblyFile="$(ToolsetTaskDll)"/>
+  <UsingTask TaskName="OverrideAndCreateBundledNETCoreAppPackageVersion" AssemblyFile="$(ToolsetTaskDll)"/>
 
 </Project>

@@ -10,9 +10,9 @@ using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Setup.Configuration;
 #endif
 
-namespace Microsoft.DotNet.MSBuildSdkResolver
+namespace Microsoft.DotNet.DotNetSdkResolver
 {
-    internal sealed class VSSettings
+    public sealed class VSSettings
     {
         private readonly object _lock = new object();
         private readonly string _settingsFilePath;
