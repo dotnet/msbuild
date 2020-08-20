@@ -107,9 +107,9 @@
         <target state="translated">NETSDK1007: Les informations relatives au projet sont introuvables pour '{0}'. Cela peut indiquer une référence de projet manquante.</target>
         <note>{StrBegin="NETSDK1007: "}</note>
       </trans-unit>
-      <trans-unit id="CannotHaveMinimumOSPlatformHigherThanTargetPlatformVersion">
-        <source>NETSDK1135: MinimumOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</source>
-        <target state="new">NETSDK1135: MinimumOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</target>
+      <trans-unit id="CannotHaveSupportedOSPlatformHigherThanTargetPlatformVersion">
+        <source>NETSDK1135: SupportedOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</source>
+        <target state="new">NETSDK1135: SupportedOSPlatform {0} cannot be higher than TargetPlatformVersion {1}.</target>
         <note>{StrBegin="NETSDK1135: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
