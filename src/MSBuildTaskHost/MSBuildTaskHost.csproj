@@ -166,6 +166,7 @@
     <Compile Include="AssemblyResources.cs" />
     <Compile Include="Concurrent\ConcurrentDictionary.cs" />
     <Compile Include="Concurrent\ConcurrentQueue.cs" />
+    <Compile Include="Immutable\ImmutableDictionary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeLoader.cs" />
     <Compile Include="WeakStringCache.Locking.cs" />
@@ -197,7 +198,6 @@
     </Compile>
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
