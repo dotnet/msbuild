@@ -3,7 +3,7 @@
     "dotnet": "5.0.100-rc.1.20376.1",
     "runtimes": {
       "dotnet": [
-        "$(MicrosoftNETCoreAppRuntimePackageVersion)"
+        "$(MicrosoftNETCoreAppInternalPackageVersion)"
       ]
     },
     "vs-opt": {
