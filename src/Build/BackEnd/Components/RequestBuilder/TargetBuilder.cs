@@ -777,6 +777,10 @@ namespace Microsoft.Build.BackEnd
                     var targetsToCheckForAfterTargets = new Queue<string>();
                     targetsToCheckForAfterTargets.Enqueue(targetName);
 
+                    // Set of targets already processed, to break cycles of AfterTargets.
+                    // Initialized lazily when needed below.
+                    HashSet<string> targetsChecked = null;
+
                     while (targetsToCheckForAfterTargets?.Count > 0)
                     {
                         string targetToCheck = targetsToCheckForAfterTargets.Dequeue();
@@ -793,8 +797,16 @@ namespace Microsoft.Build.BackEnd
                                 break;
                             }
 
-                            // We haven't seen this target yet, add it to the list to check.
-                            targetsToCheckForAfterTargets.Enqueue(afterTarget.TargetName);
+                            targetsChecked ??= new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default)
+                                {
+                                    targetName
+                                };
+
+                            // If we haven't seen this target yet, add it to the list to check.
+                            if (targetsChecked.Add(afterTarget.TargetName))
+                            {
+                                targetsToCheckForAfterTargets.Enqueue(afterTarget.TargetName);
+                            }
                         }
                     }
                 }
