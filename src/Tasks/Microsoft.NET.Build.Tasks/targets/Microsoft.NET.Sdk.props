@@ -121,7 +121,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />
 
   <!-- List of supported target platforms -->
-  <Import Project="Microsoft.NET.SupportedTargetPlatforms.props" />
+  <Import Project="Microsoft.NET.SupportedPlatforms.props" />
   
   <!-- List of supported .NET windows target platform versions -->
   <Import Project="Microsoft.NET.WindowsSdkSupportedTargetPlatforms.props" />
