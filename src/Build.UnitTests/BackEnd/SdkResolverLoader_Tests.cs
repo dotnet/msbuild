@@ -287,7 +287,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                             resolvers.Add(new MockSdkResolverWithAssemblyPath(resolverPath));
                         }
                     };
-                    var resolvers = loader.LoadResolvers(_loggingContext, new MockElementLocation("file"));
+                    IList<SdkResolverBase> resolvers = loader.LoadResolvers(_loggingContext, new MockElementLocation("file"));
 
                     resolvers.Count.ShouldBe(0);
                 }
@@ -327,7 +327,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     Environment.SetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER", additionalRoot);
 
                     SdkResolverLoader loader = new SdkResolverLoader();
-                    var resolvers = loader.FindPotentialSdkResolvers(testRoot, new MockElementLocation("file"));
+                    IList<string> resolvers = loader.FindPotentialSdkResolvers(testRoot, new MockElementLocation("file"));
 
                     resolvers.ShouldBeSameIgnoringOrder(new[] { resolver1Path, resolver2Path, resolver3Path });
                 }

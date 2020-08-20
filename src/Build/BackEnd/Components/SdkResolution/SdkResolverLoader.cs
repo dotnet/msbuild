@@ -63,7 +63,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 return assembliesList;
             }
 
-            var subfolders = GetSubfolders(rootFolder, AdditionalResolversFolder);
+            DirectoryInfo[] subfolders = GetSubfolders(rootFolder, AdditionalResolversFolder);
 
             foreach (var subfolder in subfolders)
             {
@@ -98,9 +98,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 var resolversDirInfo = new DirectoryInfo(additionalResolversFolder);
                 if (resolversDirInfo.Exists)
                 {
-                    var overrideFolders = resolversDirInfo.GetDirectories();
-                    var foldersSet = overrideFolders.ToHashSet(new DirInfoNameComparer());
-                    return overrideFolders.Concat(subfolders.Where(subfolder => foldersSet.Add(subfolder))).ToArray();
+                    HashSet<DirectoryInfo> overrideFolders = resolversDirInfo.GetDirectories().ToHashSet(new DirInfoNameComparer());
+                    if (subfolders != null)
+                    {
+                        overrideFolders.UnionWith(subfolders);
+                    }
+                    return overrideFolders.ToArray();
                 }
             }
 
