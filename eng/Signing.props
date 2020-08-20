@@ -1,6 +1,6 @@
 <Project>
     <ItemGroup>
-		<FileSignInfo Include="Nerdbank.Streams.dll" CertificateName="3PartySHA2" />
+		<FileSignInfo Include="Nerdbank.Streams.dll" CertificateName="3PartySHA2" /> 
 		<ItemsToSign Include="$(VisualStudioSetupOutputPath)DevDivPackages\*.nupkg" />
 	</ItemGroup>
 </Project>
