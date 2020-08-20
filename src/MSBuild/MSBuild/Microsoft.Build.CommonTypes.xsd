@@ -1541,6 +1541,7 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="InstallFrom" _locComment="" -->Web, Unc, or Disk</xs:documentation>
         </xs:annotation>
     </xs:element>
+    <xs:element name="AnalysisLevel" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="InstallUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="IsCodeSharingProject" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="IsWebBootstrapper" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
