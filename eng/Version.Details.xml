@@ -41,13 +41,13 @@
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>df645299a158c787f9884fca2bcd8c295318193f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.FSharp.Compiler" Version="11.0.0-beta.20418.2">
+    <Dependency Name="Microsoft.FSharp.Compiler" Version="11.0.0-beta.20418.3">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>0dca81c98902f42e943eb03276798688231fc3c4</Sha>
+      <Sha>f2f76773a0af22f5d07948d01ffd34667fcf7400</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="3.8.0-3.20419.6">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="3.8.0-3.20419.10">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>e0437f4126702fe1f53c6c3360646b0769def695</Sha>
+      <Sha>f7c7047d4e7b0d0803f5e9ed4aa09f90da4ae7ab</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="5.0.0-rc.1.20418.28">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
@@ -65,13 +65,13 @@
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
       <Sha>62e098bfb22998fa638ce1a6dff5f91276770500</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.8.0-preview-20200818-02">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.8.0-preview-20200819-01">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>0a5d4d5717b01813e88e9679235f7be86b251f50</Sha>
+      <Sha>b59b50b6cdfd3c36b5e5d526c65597b56716b236</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="5.0.0-preview.3.20417.1">
+    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="5.0.0-preview.3.20418.3">
       <Uri>https://github.com/mono/linker</Uri>
-      <Sha>d3288457fb68c4784f3ca9b327e943caa397c10e</Sha>
+      <Sha>7eae638feafc7dc766f51f440e760220707a87ad</Sha>
     </Dependency>
     <Dependency Name="System.CodeDom" Version="5.0.0-rc.1.20417.14">
       <Uri>https://github.com/dotnet/runtime</Uri>
