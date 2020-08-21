@@ -1036,7 +1036,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to No templates found matching the following input parameter(s): {0}..
+        ///   Looks up a localized string similar to No templates found matching: {0}..
         /// </summary>
         public static string NoTemplatesMatchingInputParameters {
             get {
@@ -1497,7 +1497,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Templates found the following matching input parameter(s): {0}.
+        ///   Looks up a localized string similar to These templates matched your input: {0}..
         /// </summary>
         public static string TemplatesFoundMatchingInputParameters {
             get {
