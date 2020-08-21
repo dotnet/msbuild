@@ -657,7 +657,7 @@ namespace Microsoft.Build.Internal
 
         internal static string GetRarPipeName(bool nodeReuse, bool lowPriority)
         {
-            var context = GetHandshakeOptions(true);
+            var context = GetHandshakeOptions(taskHost: true, nodeReuse: nodeReuse, lowPriority: lowPriority, specialNode: true);
             var userName = $"{Environment.UserDomainName}.{Environment.UserName}";
             return $"MSBuild.RAR.{userName}.{(int)context}";
         }
