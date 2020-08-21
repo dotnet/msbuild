@@ -77,7 +77,7 @@ namespace Microsoft.Build.Internal
             FileMatcher.Default.GetFileSpecInfoWithRegexObject(
                 recombinedFileSpec,
                 out Regex regex,
-                out bool isRecursive,
+                out bool _,
                 out bool isLegal);
 
             return isLegal ? regex : null;
