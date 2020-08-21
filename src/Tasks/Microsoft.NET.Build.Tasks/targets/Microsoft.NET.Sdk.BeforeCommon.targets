@@ -19,14 +19,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Import Project="Microsoft.NET.WindowsSupportedTargetPlatforms.props" />
   </ImportGroup>
 
-  <!--
-    Workaround: https://github.com/microsoft/msbuild/issues/4948
-    Allow opt-out of importing framework's winfx.targets.
-  -->
-  <PropertyGroup>
-    <ImportFrameworkWinFXTargets Condition="'$(ImportFrameworkWinFXTargets)' == ''">true</ImportFrameworkWinFXTargets>
-  </PropertyGroup>
-
   <PropertyGroup>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
     <OutputType Condition="'$(DisableWinExeOutputInference)' != 'true' and '$(OutputType)' == 'Exe' and ('$(UseWindowsForms)' == 'true' or '$(UseWPF)' == 'true')">WinExe</OutputType>
@@ -53,6 +45,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     and adjust intermediate and output paths to include it.
   -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.TargetFrameworkInference.targets" />
+
+  <!-- Related issue: https://github.com/dotnet/sdk/issues/12324-->
+  <PropertyGroup>
+    <!-- Import winfx targets when we're targeting .NETFramework and not importing the newer WindowsDesktop targets via `UseWPF`. -->
+    <ImportFrameworkWinFXTargets Condition="'$(ImportFrameworkWinFXTargets)' == '' and '$(UseWPF)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">true</ImportFrameworkWinFXTargets>
+
+    <!-- Otherwise, don't import. -->
+    <ImportFrameworkWinFXTargets Condition="'$(ImportFrameworkWinFXTargets)' == ''">false</ImportFrameworkWinFXTargets>
+  </PropertyGroup>
 
   <!-- For .NET Framework, reference core assemblies -->
   <PropertyGroup>
@@ -254,5 +255,10 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ItemGroup>
     <ProjectCapability Include="GenerateDocumentationFile" />
   </ItemGroup>
+
+  <!--Workaround for https://github.com/dotnet/sdk/issues/12856-->
+  <PropertyGroup Condition="'$(ReferringTargetFrameworkForProjectReferences)' == ''">
+    <ReferringTargetFrameworkForProjectReferences>$(TargetFramework)</ReferringTargetFrameworkForProjectReferences>
+  </PropertyGroup>
 
 </Project>

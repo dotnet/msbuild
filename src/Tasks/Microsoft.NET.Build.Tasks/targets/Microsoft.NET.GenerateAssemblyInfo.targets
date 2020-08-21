@@ -117,11 +117,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetPlatformIdentifier)' != ''
-                         and '$(MinimumOSPlatform)' != ''
+                         and '$(SupportedOSPlatform)' != ''
                          and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                          and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">
-      <AssemblyAttribute Include="System.Runtime.Versioning.MinimumOSPlatformAttribute">
-        <_Parameter1>$(TargetPlatformIdentifier)$(MinimumOSPlatform)</_Parameter1>
+      <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">
+        <_Parameter1>$(TargetPlatformIdentifier)$(SupportedOSPlatform)</_Parameter1>
       </AssemblyAttribute>
     </ItemGroup>
   </Target>

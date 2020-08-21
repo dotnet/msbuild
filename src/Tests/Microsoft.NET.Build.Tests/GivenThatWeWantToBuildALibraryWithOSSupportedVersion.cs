@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void WhenPropertiesAreNotSetItShouldNotGenerateMinimumOSPlatformAttribute()
+        public void WhenPropertiesAreNotSetItShouldNotGenerateSupportedOSPlatformAttribute()
         {
             TestProject testProject = SetUpProject();
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -32,7 +32,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void WhenPropertiesAreSetItCanGenerateMinimumOSPlatformAttribute()
+        public void WhenPropertiesAreSetItCanGenerateSupportedOSPlatformAttribute()
         {
             TestProject testProject = SetUpProject();
 
@@ -40,7 +40,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
             testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
             testProject.AdditionalProperties["TargetPlatformVersionSupported"] = "true";
-            testProject.AdditionalProperties["MinimumOSPlatform"] = "13.2";
+            testProject.AdditionalProperties["SupportedOSPlatform"] = "13.2";
             testProject.AdditionalProperties["TargetPlatformVersion"] = "14.0";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -53,7 +53,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void WhenMinimumOSPlatformISNotSetTargetPlatformVersionIsSetItCanGenerateMinimumOSPlatformAttribute()
+        public void WhenSupportedOSPlatformISNotSetTargetPlatformVersionIsSetItCanGenerateSupportedOSPlatformAttribute()
         {
             TestProject testProject = SetUpProject();
 
@@ -73,7 +73,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void WhenMinimumOSPlatformIsHigherThanTargetPlatformVersionItShouldError()
+        public void WhenSupportedOSPlatformIsHigherThanTargetPlatformVersionItShouldError()
         {
             TestProject testProject = SetUpProject();
 
@@ -81,7 +81,7 @@ namespace Microsoft.NET.Build.Tests
             testProject.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
             testProject.AdditionalProperties["TargetPlatformVersionSupported"] = "true";
             testProject.AdditionalProperties["TargetPlatformVersion"] = "13.2";
-            testProject.AdditionalProperties["MinimumOSPlatform"] = "14.0";
+            testProject.AdditionalProperties["SupportedOSPlatform"] = "14.0";
             testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -117,10 +117,10 @@ namespace CustomAttributesTestApp
         public static void Main()
         {
             var assembly = typeof(CustomAttributesTestApp).Assembly;
-            object[] attributes = assembly.GetCustomAttributes(typeof(System.Runtime.Versioning.MinimumOSPlatformAttribute), false);
+            object[] attributes = assembly.GetCustomAttributes(typeof(System.Runtime.Versioning.SupportedOSPlatformAttribute), false);
             if (attributes.Length > 0)
             {
-                var attribute = attributes[0] as System.Runtime.Versioning.MinimumOSPlatformAttribute;
+                var attribute = attributes[0] as System.Runtime.Versioning.SupportedOSPlatformAttribute;
                 Console.WriteLine($""PlatformName:{attribute.PlatformName}"");
             }
             else
