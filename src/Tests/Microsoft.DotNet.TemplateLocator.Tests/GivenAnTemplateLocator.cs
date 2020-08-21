@@ -59,7 +59,7 @@ namespace Microsoft.DotNet.TemplateLocator.Tests
         }
 
         [Fact]
-        public void GivenNoNanifestDirectoryItShouldReturnEmpty()
+        public void GivenNoManifestDirectoryItShouldReturnEmpty()
         {
             var fakeDotnetRootDirectory =
                 Path.Combine(TestContext.Current.TestExecutionDirectory, Path.GetRandomFileName());
