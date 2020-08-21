@@ -5,7 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO.Pipes;
+using System.IO;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
@@ -1005,9 +1005,9 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Constructs <seealso cref="NamedPipeClientStream"/>
+        /// Constructs <seealso cref="Stream"/> for RAR client
         /// </summary>
-        NamedPipeClientStream IRarBuildEngine.GetRarClientStream(string pipeName, int timeout)
+        Stream IRarBuildEngine.GetRarClientStream(string pipeName, int timeout)
         {
             return NamedPipeUtil.TryConnectToProcess(pipeName, timeout, null);
         }
