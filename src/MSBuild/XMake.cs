@@ -2650,7 +2650,7 @@ namespace Microsoft.Build.CommandLine
                         string[] lowPriorityInput = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority];
                         bool lowPriority = lowPriorityInput.Length > 0 ? lowPriorityInput[0].Equals("true") : false;
 
-                        shutdownReason = node.Run(nodeReuse, lowPriority, out nodeException);
+                        shutdownReason = node.Run(nodeReuse, lowPriority, out nodeException, s_buildCancellationSource.Token);
                     }
                     else
                     {

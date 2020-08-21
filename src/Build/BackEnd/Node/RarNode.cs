@@ -4,12 +4,10 @@
 using System;
 using System.Diagnostics;
 using System.IO.Pipes;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Server;
@@ -23,10 +21,10 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private const int ClientConnectTimeout = 60000;
 
-        public NodeEngineShutdownReason Run(bool nodeReuse, bool lowPriority, out Exception shutdownException)
+        public NodeEngineShutdownReason Run(bool nodeReuse, bool lowPriority, out Exception shutdownException, CancellationToken cancellationToken = default)
         {
             shutdownException = null;
-            using CancellationTokenSource cts = new CancellationTokenSource();
+            using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             string pipeName = CommunicationsUtilities.GetRarPipeName(nodeReuse, lowPriority);
             RarController controller = new RarController(pipeName, NamedPipeUtil.CreateNamedPipeServer);
 
@@ -36,7 +34,17 @@ namespace Microsoft.Build.Execution
                                                                      enableLowPriority: lowPriority, specialNode: true);
             Task<NodeEngineShutdownReason> msBuildShutdown = RunShutdownCheckAsync(handshake, cts.Token);
 
-            int index = Task.WaitAny(msBuildShutdown, rarTask);
+            int index;
+            try
+            {
+                index = Task.WaitAny(msBuildShutdown, rarTask);
+            }
+            catch (TaskCanceledException e)
+            {
+                shutdownException = e;
+                return NodeEngineShutdownReason.Error;
+            }
+
             cts.Cancel();
 
             if (index == 0)
