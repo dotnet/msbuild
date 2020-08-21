@@ -40,6 +40,10 @@
     <file src="$X86BinPath$/System.Resources.Extensions.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/System.Runtime.CompilerServices.Unsafe.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/System.Threading.Tasks.Dataflow.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/StreamJson.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/Nerdbank.Streams.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/System.IO.Pipelines.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.VisualStudio.Threading.dll" target="v15.0/bin" />
 
     <file src="$X86BinPath$/MSBuild/Microsoft.Build.Core.xsd" target="v15.0/bin/MSBuild" />
     <file src="$X86BinPath$/MSBuild/Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/MSBuild" />
@@ -94,6 +98,10 @@
     <file src="$X86BinPath$/System.Resources.Extensions.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/System.Runtime.CompilerServices.Unsafe.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/System.Threading.Tasks.Dataflow.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/StreamJson.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Nerdbank.Streams.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/System.IO.Pipelines.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.VisualStudio.Threading.dll" target="v15.0/bin/amd64" />
 
     <file src="$X86BinPath$/MSBuild/Microsoft.Build.Core.xsd" target="v15.0/bin/amd64/MSBuild" />
     <file src="$X86BinPath$/MSBuild/Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/amd64/MSBuild" />

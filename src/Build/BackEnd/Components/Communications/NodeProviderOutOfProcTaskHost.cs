@@ -529,7 +529,7 @@ namespace Microsoft.Build.BackEnd
                                         NodeContextTerminated
                                     );
 
-            if (null != context)
+            if (context != null)
             {
                 _nodeContexts[hostContext] = context;
 

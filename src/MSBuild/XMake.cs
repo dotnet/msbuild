@@ -752,7 +752,7 @@ namespace Microsoft.Build.CommandLine
             catch (LoggerException e)
             {
                 // display the localized message from the outer exception in canonical format
-                if (null != e.ErrorCode)
+                if (e.ErrorCode != null)
                 {
                     // Brief prefix to indicate that it's a logger failure, and provide the "error" indication
                     Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggerFailurePrefixNoErrorCode", e.ErrorCode, e.Message));
@@ -764,7 +764,7 @@ namespace Microsoft.Build.CommandLine
                     Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggerFailurePrefixWithErrorCode", e.Message));
                 }
 
-                if (null != e.InnerException)
+                if (e.InnerException != null)
                 {
                     // write out exception details -- don't bother triggering Watson, because most of these exceptions will be coming
                     // from buggy loggers written by users

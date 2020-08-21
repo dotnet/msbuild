@@ -373,7 +373,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 return Task<BuildResult>.FromResult(result);
             }
 
-            if (null != _newRequests)
+            if (_newRequests != null)
             {
                 string[] projectFiles = new string[_newRequests.Length];
                 PropertyDictionary<ProjectPropertyInstance>[] properties = new PropertyDictionary<ProjectPropertyInstance>[_newRequests.Length];

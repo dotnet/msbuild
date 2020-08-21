@@ -265,13 +265,13 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (Verbosity == LoggerVerbosity.Diagnostic && showItemAndPropertyList)
             {
-                if (null != e.Properties)
+                if (e.Properties != null)
                 {
                     var propertyList = ExtractPropertyList(e.Properties);
                     WriteProperties(propertyList);
                 }
 
-                if (null != e.Items)
+                if (e.Items != null)
                 {
                     SortedList itemList = ExtractItemList(e.Items);
                     WriteItems(itemList);

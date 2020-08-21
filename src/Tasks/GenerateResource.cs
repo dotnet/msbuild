@@ -834,7 +834,7 @@ namespace Microsoft.Build.Tasks
                             this.StronglyTypedClassName = process.StronglyTypedClassName; // in case a default was chosen
                             this.StronglyTypedFileName = process.StronglyTypedFilename;   // in case a default was chosen
                             _stronglyTypedResourceSuccessfullyCreated = process.StronglyTypedResourceSuccessfullyCreated;
-                            if (null != process.UnsuccessfullyCreatedOutFiles)
+                            if (process.UnsuccessfullyCreatedOutFiles != null)
                             {
                                 foreach (string item in process.UnsuccessfullyCreatedOutFiles)
                                 {
@@ -1067,7 +1067,7 @@ namespace Microsoft.Build.Tasks
             {
                 _resgenPath = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version35);
 
-                if (null == _resgenPath && ExecuteAsTool)
+                if (_resgenPath == null && ExecuteAsTool)
                 {
                     Log.LogErrorWithCodeFromResources("General.PlatformSDKFileNotFound", "resgen.exe",
                         ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version35),
@@ -1085,7 +1085,7 @@ namespace Microsoft.Build.Tasks
                     ExecuteAsTool);
             }
 
-            if (null == _resgenPath && !ExecuteAsTool)
+            if (_resgenPath == null && !ExecuteAsTool)
             {
                 // if Resgen.exe is not installed, just use the filename
                 _resgenPath = String.Empty;
@@ -2356,7 +2356,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                if (null == _unsuccessfullyCreatedOutFiles)
+                if (_unsuccessfullyCreatedOutFiles == null)
                 {
                     _unsuccessfullyCreatedOutFiles = new ArrayList();
                 }

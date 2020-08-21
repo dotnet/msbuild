@@ -156,9 +156,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             _nodesShutdown = true;
-
             _inProcNodeProvider?.ShutdownConnectedNodes(enableReuse);
-
             _outOfProcNodeProvider?.ShutdownConnectedNodes(enableReuse);
         }
 
@@ -316,7 +314,7 @@ namespace Microsoft.Build.BackEnd
         private int AttemptCreateNode(INodeProvider nodeProvider, NodeConfiguration nodeConfiguration)
         {
             // If no provider was passed in, we obviously can't create a node.
-            if (null == nodeProvider)
+            if (nodeProvider == null)
             {
                 ErrorUtilities.ThrowInternalError("No node provider provided.");
                 return InvalidNodeId;

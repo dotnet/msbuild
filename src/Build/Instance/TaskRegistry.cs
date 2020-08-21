@@ -198,7 +198,7 @@ namespace Microsoft.Build.Execution
         {
             get
             {
-                if (null == _taskRegistrations)
+                if (_taskRegistrations == null)
                 {
                     _taskRegistrations = CreateRegisteredTaskDictionary();
                 }

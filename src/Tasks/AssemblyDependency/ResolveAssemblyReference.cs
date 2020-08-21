@@ -2882,7 +2882,7 @@ namespace Microsoft.Build.Tasks
                     List<AssemblyNameExtension> conflictVictims = reference.GetConflictVictims();
 
                     // Skip any remapping that has no conflict victims since a redirect will not help.
-                    if (null == conflictVictims || 0 == conflictVictims.Count)
+                    if (conflictVictims == null || 0 == conflictVictims.Count)
                     {
                         continue;
                     }

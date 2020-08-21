@@ -906,7 +906,7 @@ namespace Microsoft.Build.BuildEngine
                     object valueFromRegistry = Registry.GetValue(registryKeyName,
                                                                  valueName,
                                                                  null /* default if key or value name is not found */);
-                    if (null != valueFromRegistry)
+                    if (valueFromRegistry != null)
                     {
                         // Convert the result to a string that is reasonable for MSBuild
                         result = ConvertToString(valueFromRegistry);

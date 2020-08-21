@@ -110,7 +110,7 @@ namespace Microsoft.Build.Tasks
             // Fall back and see if we can find it with the toolsLocation helper methods. This is not optimal because 
             // the location they are looking at is based on when the Microsoft.Build.Utilities.dll was compiled
             // but it is better than nothing.
-            if (null == pathToTool || !fileExists(pathToTool))
+            if (pathToTool == null || !fileExists(pathToTool))
             {
                 pathToTool = FindSDKToolUsingToolsLocationHelper(toolName);
 
