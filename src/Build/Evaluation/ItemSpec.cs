@@ -498,5 +498,7 @@ namespace Microsoft.Build.Evaluation
             : base(textFragment, projectDirectory)
         {
         }
+
+        public bool IsFullFileSystemScan => (TextFragment.StartsWith(@"\**\") || TextFragment.StartsWith(@"/**/"));
     }
 }

@@ -406,6 +406,46 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
+        [Theory]
+        [InlineData(@"<i Condition='false' Include='\**\*.cs'/>")]
+        [InlineData(@"<i Condition='false' Include='/**/*.cs'/>")]
+        public void FullFileSystemScanGlobWithFalseCondition(string itemDefinition)
+        {
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(itemDefinition, allItems: false, ignoreCondition: true);
+            items.ShouldBeEmpty();
+        }
+
+        [Theory]
+        [InlineData(@"<i Condition='false' Include='somedir\**\*.cs'/>")]
+        [InlineData(@"<i Condition='false' Include='somedir/**/*.cs'/>")]
+        public void PartialFileSystemScanGlobWithFalseCondition(string itemDefinition)
+        {
+            string directory = null;
+            string file = null;
+
+            try
+            {
+                directory = Path.Combine(Path.GetTempPath(), "somedir");
+                if (File.Exists(directory))
+                {
+                    File.Delete(directory);
+                }
+
+                file = Path.Combine(directory, "a.cs");
+                Directory.CreateDirectory(directory);
+
+                File.WriteAllText(file, String.Empty);
+
+                IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(itemDefinition.Replace("somedir", directory), allItems: false, ignoreCondition: true);
+                items.ShouldNotBeEmpty();
+            }
+            finally
+            {
+                File.Delete(file);
+                FileUtilities.DeleteWithoutTrailingBackslash(directory);
+            }
+        }
+
         /// <summary>
         /// Basic exclude case
         /// </summary>

@@ -1042,11 +1042,11 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Get items of item type "i" with using the item xml fragment passed in
         /// </summary>
-        internal static IList<ProjectItem> GetItemsFromFragment(string fragment, bool allItems = false)
+        internal static IList<ProjectItem> GetItemsFromFragment(string fragment, bool allItems = false, bool ignoreCondition = false)
         {
             string content = FormatProjectContentsWithItemGroupFragment(fragment);
 
-            IList<ProjectItem> items = GetItems(content, allItems);
+            IList<ProjectItem> items = GetItems(content, allItems, ignoreCondition);
             return items;
         }
 
@@ -1058,11 +1058,14 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Get the items of type "i" in the project provided
         /// </summary>
-        internal static IList<ProjectItem> GetItems(string content, bool allItems = false)
+        internal static IList<ProjectItem> GetItems(string content, bool allItems = false, bool ignoreCondition = false)
         {
             var projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(CleanupFileContents(content))));
             Project project = new Project(projectXml);
-            IList<ProjectItem> item = Helpers.MakeList(allItems ? project.Items : project.GetItems("i"));
+            IList<ProjectItem> item = Helpers.MakeList(
+                ignoreCondition ?
+                (allItems ? project.ItemsIgnoringCondition : project.GetItemsIgnoringCondition("i")) :
+                (allItems ? project.Items : project.GetItems("i")));
 
             return item;
         }

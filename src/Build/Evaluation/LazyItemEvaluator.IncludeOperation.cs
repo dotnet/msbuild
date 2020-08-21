@@ -89,34 +89,37 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (fragment is GlobFragment globFragment)
                     {
-                        string glob = globFragment.TextFragment;
+                        if (_conditionResult || !globFragment.IsFullFileSystemScan)
+                        {
+                            string glob = globFragment.TextFragment;
 
-                        if (excludePatternsForGlobs == null)
-                        {
-                            excludePatternsForGlobs = BuildExcludePatternsForGlobs(globsToIgnore, excludePatterns);
-                        }
+                            if (excludePatternsForGlobs == null)
+                            {
+                                excludePatternsForGlobs = BuildExcludePatternsForGlobs(globsToIgnore, excludePatterns);
+                            }
 
-                        string[] includeSplitFilesEscaped;
-                        if (MSBuildEventSource.Log.IsEnabled())
-                        {
-                            MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
-                        }
-                        using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
-                        {
-                            includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
-                                _rootDirectory,
-                                glob,
-                                excludePatternsForGlobs
-                            );
-                        }
-                        if (MSBuildEventSource.Log.IsEnabled())
-                        {
-                            MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
-                        }
+                            string[] includeSplitFilesEscaped;
+                            if (MSBuildEventSource.Log.IsEnabled())
+                            {
+                                MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
+                            }
+                            using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
+                            {
+                                includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
+                                    _rootDirectory,
+                                    glob,
+                                    excludePatternsForGlobs
+                                );
+                            }
+                            if (MSBuildEventSource.Log.IsEnabled())
+                            {
+                                MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
+                            }
 
-                        foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
-                        {
-                            itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
+                            foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
+                            {
+                                itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
+                            }
                         }
                     }
                     else
