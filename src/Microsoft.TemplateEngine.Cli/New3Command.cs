@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -529,7 +530,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (!isCustomHive)
             {
-                string sdkVersion = EnvironmentSettings.Host.Version;
+                string sdkVersion = EnvironmentSettings.Host.Version.Substring(1); // Host.Version (from SDK) has a leading "v" that need to remove.
 
                 try
                 {
@@ -537,8 +538,9 @@ namespace Microsoft.TemplateEngine.Cli
                     Dictionary<string, string> owInstalledPkgs = new Dictionary<string, string>();  // packageId -> packageVersion
                     HashSet<string> owSyncRequestsPackageIds = new HashSet<string>();
                     TemplateLocator optionalWorkloadLocator = new TemplateLocator();
+                    string dotnetPath = Path.GetDirectoryName(Path.GetDirectoryName(_paths.Global.BaseDir));
 
-                    IReadOnlyCollection<IOptionalSdkTemplatePackageInfo> owPkgsToSync = optionalWorkloadLocator.GetDotnetSdkTemplatePackages(sdkVersion);
+                    IReadOnlyCollection<IOptionalSdkTemplatePackageInfo> owPkgsToSync = optionalWorkloadLocator.GetDotnetSdkTemplatePackages(sdkVersion, dotnetPath);
 
                     foreach (IInstallUnitDescriptor descriptor in _settingsLoader.InstallUnitDescriptorCache.Descriptors.Values)
                     {

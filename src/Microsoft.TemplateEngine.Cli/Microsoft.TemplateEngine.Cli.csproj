@@ -18,7 +18,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" />
-        <PackageReference Include="Microsoft.Internal.DotNet.MockTemplateLocator" Version="5.0.100-rc.1.20405.5" />
+        <PackageReference Include="Microsoft.DotNet.TemplateLocator" Version="5.0.100-rc.1.20419.11" />
         <PackageReference Include="System.Diagnostics.Process" />
         <PackageReference Include="Newtonsoft.Json" />
     </ItemGroup>
