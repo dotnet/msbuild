@@ -37,6 +37,7 @@
       <AnalyzerTargetsDirectory>$(AnalyzerAssembliesDirectory)\build</AnalyzerTargetsDirectory>
       <CodeStyleAssembliesCSharpDirectory>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk\codestyle\cs</CodeStyleAssembliesCSharpDirectory>
       <CodeStyleAssembliesVisualBasicDirectory>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk\codestyle\vb</CodeStyleAssembliesVisualBasicDirectory>
+      <AnalyzerConfigDirectory>$(AnalyzerTargetsDirectory)\config</AnalyzerConfigDirectory>
     </PropertyGroup>
     <ItemGroup>
       <AnalyzerAssemblies Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/analyzers/dotnet/cs/**/*.dll" />
@@ -46,6 +47,7 @@
       <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/config/**/*" />
       <CodeStyleCSharpAssemblies Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/analyzers/dotnet/cs/**/*.dll" />
       <CodeStyleVisualBasicAssemblies Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/analyzers/dotnet/vb/**/*.dll" />
+      <AnalyzerConfig Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/config/**/*" />
     </ItemGroup>
     <Error Condition="'@(AnalyzerAssemblies)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
     <Error Condition="'@(AnalyzerTargets)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
@@ -55,6 +57,7 @@
     <Copy SourceFiles="@(AnalyzerTargets)" DestinationFiles="@(AnalyzerTargets->'$(AnalyzerTargetsDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(CodeStyleCSharpAssemblies)" DestinationFiles="@(CodeStyleCSharpAssemblies->'$(CodeStyleAssembliesCSharpDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(CodeStyleVisualBasicAssemblies)" DestinationFiles="@(CodeStyleVisualBasicAssemblies->'$(CodeStyleAssembliesVisualBasicDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(AnalyzerConfig)" DestinationFiles="@(AnalyzerConfig->'$(AnalyzerConfigDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="PublishMSBuildExtensions"
