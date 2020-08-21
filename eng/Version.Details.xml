@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="5.0.0-rc.1.20419.1">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="5.0.0-rc.1.20421.3">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>6a10ce799f42102bee8f8bec9a52c42cca6ed272</Sha>
+      <Sha>8964302e878d00a0161df0ce1c42c535316e339d</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="5.0.0-rc.1.20419.1">
+    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="5.0.0-rc.1.20421.3">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>6a10ce799f42102bee8f8bec9a52c42cca6ed272</Sha>
+      <Sha>8964302e878d00a0161df0ce1c42c535316e339d</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="5.0.0-rc.1.20417.14">
       <Uri>https://github.com/dotnet/runtime</Uri>
