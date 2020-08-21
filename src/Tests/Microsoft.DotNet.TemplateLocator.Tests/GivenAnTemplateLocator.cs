@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.TemplateLocator.Tests
         }
 
         [Fact]
-        public void WhenPassEmptyManifestItShouldReturnListOfTemplates()
+        public void WhenPassEmptyManifestItShouldReturnEmpty()
         {
             File.WriteAllText(Path.Combine(_manifestDirectory, "WorkloadManifest.xml"), emptyManifest);
             var result = _resolver.GetDotnetSdkTemplatePackages("5.0.102", _fakeDotnetRootDirectory);
@@ -51,10 +51,19 @@ namespace Microsoft.DotNet.TemplateLocator.Tests
         }
 
         [Fact]
-        public void GivenNoSdkToBondItShouldReturnListOfTemplates()
+        public void GivenNoSdkToBondItShouldReturnEmpty()
         {
             File.WriteAllText(Path.Combine(_manifestDirectory, "WorkloadManifest.xml"), fakeManifest);
             var result = _resolver.GetDotnetSdkTemplatePackages("5.1.102", _fakeDotnetRootDirectory);
+            result.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void GivenNoNanifestDirectoryItShouldReturnEmpty()
+        {
+            var fakeDotnetRootDirectory =
+                Path.Combine(TestContext.Current.TestExecutionDirectory, Path.GetRandomFileName());
+            var result = _resolver.GetDotnetSdkTemplatePackages("5.1.102", fakeDotnetRootDirectory);
             result.Should().BeEmpty();
         }
 
