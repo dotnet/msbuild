@@ -169,7 +169,7 @@ namespace Microsoft.Build.Tasks
                 {
                     Debug.Assert(false, "Unexpected exception in AssignCulture.Execute. " + 
                         "Please log a MSBuild bug specifying the steps to reproduce the problem. " + 
-                        e.Message);
+                        e);
                     throw;
                 }
 #endif

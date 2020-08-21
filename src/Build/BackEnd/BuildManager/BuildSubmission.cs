@@ -200,7 +200,7 @@ namespace Microsoft.Build.Execution
                 {
                     _completionEvent.Set();
 
-                    if (null != _completionCallback)
+                    if (_completionCallback != null)
                     {
                         void Callback(object state)
                         {

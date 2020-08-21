@@ -499,12 +499,12 @@ namespace Microsoft.Build.BuildEngine
                 {
                     DisplayDeferredProjectStartedEvent(e.BuildEventContext);
                 }
-                if (null != e.Properties)
+                if (e.Properties != null)
                 {
                     WriteProperties(e, e.Properties);          
                 }
 
-                if (null != e.Items)
+                if (e.Items != null)
                 {
                     WriteItems(e, e.Items);
                 }

@@ -312,7 +312,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (!result.HasResultsForTarget(target) || (result[target].ResultCode == TargetResultCode.Skipped && !skippedResultsAreOK))
                 {
-                    if (null != targetsMissingResults)
+                    if (targetsMissingResults != null)
                     {
                         targetsMissingResults.Add(target);
                         returnValue = false;

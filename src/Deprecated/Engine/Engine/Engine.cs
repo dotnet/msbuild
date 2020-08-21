@@ -2080,7 +2080,7 @@ namespace Microsoft.Build.BuildEngine
                 // There should be no projects in the ProjectManager with the same full path, global properties and tools version
                 // as any of the loaded projects.  If there are, something went badly awry, because
                 // we were supposed to have deleted them after the last build.
-                ErrorUtilities.VerifyThrow(null == this.cacheOfBuildingProjects.GetProject(loadedProject.FullFileName, loadedProject.GlobalProperties, loadedProject.ToolsVersion),
+                ErrorUtilities.VerifyThrow(this.cacheOfBuildingProjects.GetProject(loadedProject.FullFileName, loadedProject.GlobalProperties, loadedProject.ToolsVersion) == null,
                     "Project shouldn't be in ProjectManager already.");
 
                 // Add the loaded project to the list of projects being built, just

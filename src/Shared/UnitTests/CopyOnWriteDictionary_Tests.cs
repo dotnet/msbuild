@@ -10,6 +10,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Construction;
 using Xunit;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
@@ -148,22 +149,22 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         {
             var dictionary = new CopyOnWriteDictionary<string, string>();
             dictionary["test"] = "1";
-            Assert.Equal("1", dictionary["test"]);
+            dictionary["test"].ShouldBe("1");
 
             var clone = dictionary.Clone();
             var clone2 = dictionary.Clone();
 
-            Assert.True(dictionary.HasSameBacking(clone));
-            Assert.True(dictionary.HasSameBacking(clone2));
+            dictionary.HasSameBacking(clone).ShouldBeTrue();
+            dictionary.HasSameBacking(clone2).ShouldBeTrue();
 
             dictionary["test"] = "2";
 
-            Assert.False(dictionary.HasSameBacking(clone));
-            Assert.False(dictionary.HasSameBacking(clone2));
-            Assert.True(clone.HasSameBacking(clone2));
+            dictionary.HasSameBacking(clone).ShouldBeFalse();
+            dictionary.HasSameBacking(clone2).ShouldBeFalse();
+            clone.HasSameBacking(clone2).ShouldBeTrue();
 
-            Assert.Equal("1", clone["test"]);
-            Assert.Equal("1", clone2["test"]);
+            clone["test"].ShouldBe("1");
+            clone2["test"].ShouldBe("1");
         }
 
         /// <summary>
@@ -235,10 +236,10 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 formatter.Serialize(stream, dictionary);
                 stream.Position = 0;
 
-                CopyOnWriteDictionary<string, string> dictionary2 = (CopyOnWriteDictionary<string, string>)formatter.Deserialize(stream);
+                CopyOnWriteDictionary<string, string> deserialized = (CopyOnWriteDictionary<string, string>)formatter.Deserialize(stream);
 
-                Assert.Equal(dictionary.Count, dictionary2.Count);
-                Assert.IsType<MSBuildNameIgnoreCaseComparer>(dictionary2.Comparer);
+                deserialized.Count.ShouldBe(dictionary.Count);
+                deserialized.Comparer.ShouldBeOfType<MSBuildNameIgnoreCaseComparer>();
             }
         }
     }

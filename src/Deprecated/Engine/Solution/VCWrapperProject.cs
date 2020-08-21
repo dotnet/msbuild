@@ -265,7 +265,7 @@ namespace Microsoft.Build.BuildEngine
                 string location = TryLocationFromRegistry(baseKey, vs9RegKey, vs9InstallDirValueName,
                     vs9RelativePathToVCBuildLayouts, vs9RelativePathToVCBuildBatch);
 
-                if (null != location)
+                if (location != null)
                 {
                     return location;
                 }
@@ -274,7 +274,7 @@ namespace Microsoft.Build.BuildEngine
                 location = TryLocationFromRegistry(baseKey, vc9RegKey, vc9InstallDirValueName,
                     vc9RelativePathToVCBuildLayouts, vc9RelativePathToVCBuildBatch);
 
-                if (null != location)
+                if (location != null)
                 {
                     return location;
                 }
@@ -325,7 +325,7 @@ namespace Microsoft.Build.BuildEngine
 
                         // if not found in layouts location, try the alternate dir if any,
                         // which contains vcbuild for batch installs
-                        if (null != relativePathFromValueOnBatch)
+                        if (relativePathFromValueOnBatch != null)
                         {
                             vcBuildPath = Path.Combine(rootDir, relativePathFromValueOnBatch);
                             if (File.Exists(vcBuildPath))

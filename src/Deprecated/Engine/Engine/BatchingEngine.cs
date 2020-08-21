@@ -337,7 +337,7 @@ namespace Microsoft.Build.BuildEngine
 
                         // If we didn't find a bucket that matches this item, create a new one, adding
                         // this item to the bucket.
-                        if (null == matchingBucket)
+                        if (matchingBucket == null)
                         {
                             matchingBucket = new ItemBucket(itemListsToBeBatched.Keys, itemMetadataValues, lookup, buckets.Count);
 

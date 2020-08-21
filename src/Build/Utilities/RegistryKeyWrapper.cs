@@ -202,7 +202,7 @@ namespace Microsoft.Build.Internal
         /// <returns></returns>
         public virtual bool Exists()
         {
-            return null != WrappedKey;
+            return WrappedKey != null;
         }
 
         /// <summary>
