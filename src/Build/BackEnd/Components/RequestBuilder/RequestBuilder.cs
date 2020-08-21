@@ -1261,10 +1261,16 @@ namespace Microsoft.Build.BackEnd
             //
             if (project != null && buildEventContext != null && loggingService != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
-                if (String.Equals(project.GetPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
+                string warningsAsErrorsProperty = project.GetPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim();
+                if (String.Equals(warningsAsErrorsProperty, "true", StringComparison.OrdinalIgnoreCase))
                 {
                     // If <MSBuildTreatWarningsAsErrors was specified then an empty ISet<string> signals the IEventSourceSink to treat all warnings as errors
                     //
+                    loggingService.AddWarningsAsErrors(buildEventContext, new HashSet<string>());
+                }
+                else if (warningsAsErrorsProperty.Length == 0 && String.Equals(project.GetPropertyValue(MSBuildConstants.NoWarn)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
+                {
+                    // By default, let NoWarn be the same as WarningsAsErrors.
                     loggingService.AddWarningsAsErrors(buildEventContext, new HashSet<string>());
                 }
                 else

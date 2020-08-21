@@ -32,6 +32,11 @@ namespace Microsoft.Build.Shared
         internal const string TreatWarningsAsErrors = "MSBuildTreatWarningsAsErrors";
 
         /// <summary>
+        /// Alternate name for the MSBuildTreatWarningsAsErrors property to bring MSBuild into line with other repositories.
+        /// </summary>
+        internal const string NoWarn = "NoWarn";
+
+        /// <summary>
         /// Name of the property that indicates a list of warnings to treat as errors.
         /// </summary>
         internal const string WarningsAsErrors = "MSBuildWarningsAsErrors";
