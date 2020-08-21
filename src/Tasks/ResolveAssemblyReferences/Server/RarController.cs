@@ -42,11 +42,17 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         /// </summary>
         private readonly TimeSpan Timeout = TimeSpan.FromMinutes(15);
 
+        /// <summary>
+        /// Construcotr for <see cref="RarController"/>
+        /// </summary>
+        /// <param name="pipeName">Name of pipe over which all comunication should go</param>
+        /// <param name="namedPipeServerFactory">Factor for server stream</param>
+        /// <param name="timeout">Timeout which should be used for communication</param>
         public RarController(
             string pipeName,
             Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory,
             TimeSpan? timeout = null)
-            : this(pipeName, namedPipeServerFactory, timeout: timeout, resolveAssemblyReferenceTaskHandler: new RarTaskHandler())
+            : this(pipeName, namedPipeServerFactory, timeout: timeout, resolveAssemblyReferenceTaskHandler: new ResolveAssemblyReferenceSerializedTaskHandler())
         {
         }
 
@@ -91,7 +97,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
 
         private async Task HandleClientAsync(Stream serverStream, CancellationToken cancellationToken = default)
         {
-            using JsonRpc server = GetRpcServer(serverStream, _resolveAssemblyReferenceTaskHandler);
+            JsonRpc server = GetRpcServer(serverStream, _resolveAssemblyReferenceTaskHandler);
             server.StartListening();
 
             try

@@ -1379,7 +1379,7 @@ namespace Microsoft.Build.Execution
     public sealed partial class RarNode
     {
         public RarNode() { }
-        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool nodeReuse, bool lowPriority, out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
+        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool nodeReuse, bool lowPriority, out System.Exception shutdownException, System.Threading.CancellationToken cancellationToken=default(System.Threading.CancellationToken)) { shutdownException = default(System.Exception); throw null; }
         public Microsoft.Build.Execution.NodeEngineShutdownReason Run(out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
     }
     public partial class RequestedProjectState

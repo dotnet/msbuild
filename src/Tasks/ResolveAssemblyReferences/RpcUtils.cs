@@ -1,8 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.IO;
-
+using MessagePack;
+using MessagePack.Formatters;
+using MessagePack.Resolvers;
+using Microsoft.Build.Framework;
 using Nerdbank.Streams;
 using StreamJsonRpc;
 
@@ -13,7 +17,22 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
     {
         internal static IJsonRpcMessageHandler GetRarMessageHandler(Stream stream)
         {
-            return new LengthHeaderMessageHandler(stream.UsePipe(), new MessagePackFormatter());
+            MessagePackFormatter formatter = new MessagePackFormatter();
+
+            IFormatterResolver resolver = CompositeResolver.Create(
+                new[]
+                {
+                    LazyFromattedBuildEventArgsFormatter.Instance
+                },
+                new[]
+                {
+                    StandardResolver.Instance
+                }
+            );
+            MessagePackSerializerOptions options = MessagePackSerializerOptions.Standard.WithResolver(resolver);
+
+            formatter.SetMessagePackSerializerOptions(options);
+            return new LengthHeaderMessageHandler(stream.UsePipe(), formatter);
         }
     }
 }

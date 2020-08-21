@@ -59,12 +59,6 @@ namespace Microsoft.Build.Tasks
         {
         }
 
-        internal ResolveAssemblyReference(ResolveAssemblyReferenceInput input)
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(input, nameof(input));
-            ResolveAssemblyReferenceInput = input;
-        }
-
         #region Properties
 
         private ITaskItem[] _assemblyFiles = Array.Empty<TaskItem>();
@@ -915,52 +909,51 @@ namespace Microsoft.Build.Tasks
             private set;
         }
 
-        private ResolveAssemblyReferenceInput ResolveAssemblyReferenceInput
+        internal ResolveAssemblyReferenceTaskInput ResolveAssemblyReferenceInput
         {
-            get
+            get => new ResolveAssemblyReferenceTaskInput
             {
-                return new ResolveAssemblyReferenceInput
-                {
-                    AllowedAssemblyExtensions = AllowedAssemblyExtensions,
-                    AllowedRelatedFileExtensions = AllowedRelatedFileExtensions,
-                    AppConfigFile = AppConfigFile,
-                    Assemblies = Assemblies,
-                    AssemblyFiles = AssemblyFiles,
-                    AutoUnify = AutoUnify,
-                    CandidateAssemblyFiles = CandidateAssemblyFiles,
-                    CopyLocalDependenciesWhenParentReferenceInGac = CopyLocalDependenciesWhenParentReferenceInGac,
-                    FindDependencies = FindDependencies,
-                    FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences,
-                    FindRelatedFiles = FindRelatedFiles,
-                    FindSatellites = FindSatellites,
-                    FindSerializationAssemblies = FindSerializationAssemblies,
-                    FullFrameworkAssemblyTables = FullFrameworkAssemblyTables,
-                    FullFrameworkFolders = FullFrameworkFolders,
-                    FullTargetFrameworkSubsetNames = FullTargetFrameworkSubsetNames,
-                    IgnoreDefaultInstalledAssemblySubsetTables = IgnoreDefaultInstalledAssemblySubsetTables,
-                    IgnoreDefaultInstalledAssemblyTables = IgnoreDefaultInstalledAssemblyTables,
-                    IgnoreTargetFrameworkAttributeVersionMismatch = IgnoreTargetFrameworkAttributeVersionMismatch,
-                    IgnoreVersionForFrameworkReferences = IgnoreVersionForFrameworkReferences,
-                    InstalledAssemblySubsetTables = InstalledAssemblySubsetTables,
-                    InstalledAssemblyTables = InstalledAssemblyTables,
-                    LatestTargetFrameworkDirectories = LatestTargetFrameworkDirectories,
-                    ProfileName = ProfileName,
-                    SearchPaths = SearchPaths,
-                    Silent = Silent,
-                    StateFile = StateFile,
-                    SupportsBindingRedirectGeneration = SupportsBindingRedirectGeneration,
-                    TargetedRuntimeVersion = TargetedRuntimeVersion,
-                    TargetFrameworkDirectories = TargetFrameworkDirectories,
-                    TargetFrameworkMoniker = TargetFrameworkMoniker,
-                    TargetFrameworkMonikerDisplayName = TargetFrameworkMonikerDisplayName,
-                    TargetFrameworkSubsets = TargetFrameworkSubsets,
-                    TargetFrameworkVersion = TargetFrameworkVersion,
-                    TargetProcessorArchitecture = TargetProcessorArchitecture,
-                    UnresolveFrameworkAssembliesFromHigherFrameworks = UnresolveFrameworkAssembliesFromHigherFrameworks,
-                    UseResolveAssemblyReferenceService = UseResolveAssemblyReferenceService,
-                    WarnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatch
-                };
-            }
+                AllowedAssemblyExtensions = AllowedAssemblyExtensions,
+                AllowedRelatedFileExtensions = AllowedRelatedFileExtensions,
+                AppConfigFile = AppConfigFile,
+                Assemblies = Assemblies,
+                AssemblyFiles = AssemblyFiles,
+                AutoUnify = AutoUnify,
+                CandidateAssemblyFiles = CandidateAssemblyFiles,
+                CopyLocalDependenciesWhenParentReferenceInGac = CopyLocalDependenciesWhenParentReferenceInGac,
+                DoNotCopyLocalIfInGac = DoNotCopyLocalIfInGac,
+                FindDependencies = FindDependencies,
+                FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences,
+                FindRelatedFiles = FindRelatedFiles,
+                FindSatellites = FindSatellites,
+                FindSerializationAssemblies = FindSerializationAssemblies,
+                FullFrameworkAssemblyTables = FullFrameworkAssemblyTables,
+                FullFrameworkFolders = FullFrameworkFolders,
+                FullTargetFrameworkSubsetNames = FullTargetFrameworkSubsetNames,
+                IgnoreDefaultInstalledAssemblySubsetTables = IgnoreDefaultInstalledAssemblySubsetTables,
+                IgnoreDefaultInstalledAssemblyTables = IgnoreDefaultInstalledAssemblyTables,
+                IgnoreTargetFrameworkAttributeVersionMismatch = IgnoreTargetFrameworkAttributeVersionMismatch,
+                IgnoreVersionForFrameworkReferences = IgnoreVersionForFrameworkReferences,
+                InstalledAssemblySubsetTables = InstalledAssemblySubsetTables,
+                InstalledAssemblyTables = InstalledAssemblyTables,
+                LatestTargetFrameworkDirectories = LatestTargetFrameworkDirectories,
+                ProfileName = ProfileName,
+                ResolvedSDKReferences = ResolvedSDKReferences,
+                SearchPaths = SearchPaths,
+                Silent = Silent,
+                StateFile = StateFile,
+                SupportsBindingRedirectGeneration = SupportsBindingRedirectGeneration,
+                TargetedRuntimeVersion = TargetedRuntimeVersion,
+                TargetFrameworkDirectories = TargetFrameworkDirectories,
+                TargetFrameworkMoniker = TargetFrameworkMoniker,
+                TargetFrameworkMonikerDisplayName = TargetFrameworkMonikerDisplayName,
+                TargetFrameworkSubsets = TargetFrameworkSubsets,
+                TargetFrameworkVersion = TargetFrameworkVersion,
+                TargetProcessorArchitecture = TargetProcessorArchitecture,
+                UnresolveFrameworkAssembliesFromHigherFrameworks = UnresolveFrameworkAssembliesFromHigherFrameworks,
+                UseResolveAssemblyReferenceService = UseResolveAssemblyReferenceService,
+                WarnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatch
+            };
             set
             {
                 AllowedAssemblyExtensions = value.AllowedAssemblyExtensions;
@@ -971,6 +964,7 @@ namespace Microsoft.Build.Tasks
                 AutoUnify = value.AutoUnify;
                 CandidateAssemblyFiles = value.CandidateAssemblyFiles;
                 CopyLocalDependenciesWhenParentReferenceInGac = value.CopyLocalDependenciesWhenParentReferenceInGac;
+                DoNotCopyLocalIfInGac = value.DoNotCopyLocalIfInGac;
                 FindDependencies = value.FindDependencies;
                 FindDependenciesOfExternallyResolvedReferences = value.FindDependenciesOfExternallyResolvedReferences;
                 FindRelatedFiles = value.FindRelatedFiles;
@@ -987,6 +981,7 @@ namespace Microsoft.Build.Tasks
                 InstalledAssemblyTables = value.InstalledAssemblyTables;
                 LatestTargetFrameworkDirectories = value.LatestTargetFrameworkDirectories;
                 ProfileName = value.ProfileName;
+                ResolvedSDKReferences = value.ResolvedSDKReferences;
                 SearchPaths = value.SearchPaths;
                 Silent = value.Silent;
                 StateFile = value.StateFile;
@@ -1001,6 +996,38 @@ namespace Microsoft.Build.Tasks
                 UnresolveFrameworkAssembliesFromHigherFrameworks = value.UnresolveFrameworkAssembliesFromHigherFrameworks;
                 UseResolveAssemblyReferenceService = value.UseResolveAssemblyReferenceService;
                 WarnOrErrorOnTargetArchitectureMismatch = value.WarnOrErrorOnTargetArchitectureMismatch;
+            }
+        }
+
+        internal ResolveAssemblyReferenceTaskOutput ResolveAssemblyReferenceOutput
+        {
+            get => new ResolveAssemblyReferenceTaskOutput
+            {
+                CopyLocalFiles = CopyLocalFiles,
+                DependsOnNETStandard = DependsOnNETStandard,
+                DependsOnSystemRuntime = DependsOnSystemRuntime,
+                FilesWritten = FilesWritten,
+                RelatedFiles = RelatedFiles,
+                ResolvedDependencyFiles = ResolvedDependencyFiles,
+                ResolvedFiles = ResolvedFiles,
+                SatelliteFiles = SatelliteFiles,
+                ScatterFiles = ScatterFiles,
+                SerializationAssemblyFiles = SerializationAssemblyFiles,
+                SuggestedRedirects = SuggestedRedirects,
+            };
+            set
+            {
+                _copyLocalFiles = value.CopyLocalFiles;
+                DependsOnNETStandard = value.DependsOnNETStandard;
+                DependsOnSystemRuntime = value.DependsOnSystemRuntime;
+                FilesWritten = value.FilesWritten;
+                _relatedFiles = value.RelatedFiles;
+                _resolvedDependencyFiles = value.ResolvedDependencyFiles;
+                _resolvedFiles = value.ResolvedFiles;
+                _satelliteFiles = value.SatelliteFiles;
+                _scatterFiles = value.ScatterFiles;
+                _serializationAssemblyFiles = value.SerializationAssemblyFiles;
+                _suggestedRedirects = value.SuggestedRedirects;
             }
         }
 
@@ -3091,7 +3118,10 @@ namespace Microsoft.Build.Tasks
                 if (connected)
                 {
                     // Client is connected to the RAR node, we can execute RAR task remotely
-                    // return client.Execute(); // TODO: Let it do something.
+                    ResolveAssemblyReferenceResult result = client.Execute(ResolveAssemblyReferenceInput);
+                    ResolveAssemblyReferenceOutput = result.Output;
+                    LogEvents(result.BuildEventArgs);
+                    return result.TaskResult;
                 }
             }
 
@@ -3117,6 +3147,49 @@ namespace Microsoft.Build.Tasks
             );
         }
 
+        private void LogEvents(IEnumerable<LazyFormattedBuildEventArgs> buildEventArgs)
+        {
+            foreach (LazyFormattedBuildEventArgs buildEvent in buildEventArgs)
+            {
+                switch (buildEvent)
+                {
+                    case CustomBuildEventArgs customBuildEvent:
+                        BuildEngine.LogCustomEvent(customBuildEvent);
+                        break;
+                    case BuildErrorEventArgs buildErrorEvent:
+                        BuildEngine.LogErrorEvent(buildErrorEvent);
+                        break;
+                    case BuildMessageEventArgs buildMessageEvent:
+                        BuildEngine.LogMessageEvent(buildMessageEvent);
+                        break;
+                    case BuildWarningEventArgs buildWarningEvent:
+                        BuildEngine.LogWarningEvent(buildWarningEvent);
+                        break;
+                    default:
+                        ErrorUtilities.ThrowInternalError("Unexpected build event"); 
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Execute task. This metod is intended to use from RAR as a Service node
+        /// </summary>
+        /// <param name="input">Required input to the task</param>
+        /// <returns>If tasks was executed successfully</returns>
+        internal ResolveAssemblyReferenceResult Execute(ResolveAssemblyReferenceTaskInput input)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(input, nameof(input));
+
+            // Prepare environment
+            ResolveAssemblyReferenceInput = input;
+            // Since this method should be run from RAR node, we prevent it from creating loop.
+            UseResolveAssemblyReferenceService = false;
+
+            bool result = Execute();
+
+            return new ResolveAssemblyReferenceResult(result, ResolveAssemblyReferenceOutput);
+        }
         #endregion
     }
 }
