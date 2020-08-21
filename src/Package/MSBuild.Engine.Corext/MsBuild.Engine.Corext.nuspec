@@ -44,6 +44,9 @@
     <file src="$X86BinPath$/Nerdbank.Streams.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/System.IO.Pipelines.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.VisualStudio.Threading.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.VisualStudio.Validation.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/MessagePack.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/MessagePack.Annotations.dll" target="v15.0/bin" />
 
     <file src="$X86BinPath$/MSBuild/Microsoft.Build.Core.xsd" target="v15.0/bin/MSBuild" />
     <file src="$X86BinPath$/MSBuild/Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/MSBuild" />
@@ -102,6 +105,9 @@
     <file src="$X86BinPath$/Nerdbank.Streams.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/System.IO.Pipelines.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.VisualStudio.Threading.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.VisualStudio.Validation.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/MessagePack.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/MessagePack.Annotations.dll" target="v15.0/bin/amd64" />
 
     <file src="$X86BinPath$/MSBuild/Microsoft.Build.Core.xsd" target="v15.0/bin/amd64/MSBuild" />
     <file src="$X86BinPath$/MSBuild/Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/amd64/MSBuild" />
