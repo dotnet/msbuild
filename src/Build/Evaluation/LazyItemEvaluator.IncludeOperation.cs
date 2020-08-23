@@ -5,6 +5,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -89,7 +90,10 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (fragment is GlobFragment globFragment)
                     {
-                        if (_conditionResult || !globFragment.IsFullFileSystemScan)
+                        // If this item is behind a false condition and represents a full drive/filesystem scan, expanding it is
+                        // almost certainly undesired. It should be skipped to avoid evaluation taking an excessive amount of time.
+                        bool skipGlob = !_conditionResult && globFragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs;
+                        if (!skipGlob)
                         {
                             string glob = globFragment.TextFragment;
 
