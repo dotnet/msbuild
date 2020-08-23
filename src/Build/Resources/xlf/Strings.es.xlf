@@ -104,6 +104,11 @@
         <target state="translated">MSB4258: Error al escribir el archivo de caché de resultados de salida en la ruta de acceso "{0}": {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="IllFormedPropertyWhitespaceInCondition">
+        <source>MSB4088: Condition "{0}" is improperly constructed with whitespace. Remove whitespaces from the property.</source>
+        <target state="new">MSB4088: Condition "{0}" is improperly constructed with whitespace. Remove whitespaces from the property.</target>
+        <note>{StrBegin="MSB4111: "}</note>
+      </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
         <target state="translated">MSB4255: Los siguientes archivos de caché de resultados de entrada no existen: "{0}"</target>

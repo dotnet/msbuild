@@ -104,6 +104,11 @@
         <target state="translated">MSB4258: "{0}" 경로에서 출력 결과 캐시 파일을 쓰는 중 오류가 발생했습니다. {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="IllFormedPropertyWhitespaceInCondition">
+        <source>MSB4088: Condition "{0}" is improperly constructed with whitespace. Remove whitespaces from the property.</source>
+        <target state="new">MSB4088: Condition "{0}" is improperly constructed with whitespace. Remove whitespaces from the property.</target>
+        <note>{StrBegin="MSB4111: "}</note>
+      </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
         <target state="translated">MSB4255: 다음 입력 결과 캐시 파일이 존재하지 않습니다. "{0}"</target>
