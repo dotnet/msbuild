@@ -420,29 +420,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [InlineData(@"<i Condition='false' Include='somedir/**/*.cs'/>")]
         public void PartialFileSystemScanGlobWithFalseCondition(string itemDefinition)
         {
-            string directory = null;
-            string file = null;
-
-            try
+            using (TestEnvironment env = TestEnvironment.Create())
             {
-                directory = Path.Combine(Path.GetTempPath(), "somedir");
-                if (File.Exists(directory))
-                {
-                    File.Delete(directory);
-                }
+                TransientTestFolder directory = env.CreateFolder(createFolder: true);
+                TransientTestFile file = env.CreateFile(directory, "a.cs");
 
-                file = Path.Combine(directory, "a.cs");
-                Directory.CreateDirectory(directory);
+                File.WriteAllText(file.Path, String.Empty);
 
-                File.WriteAllText(file, String.Empty);
-
-                IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(itemDefinition.Replace("somedir", directory), allItems: false, ignoreCondition: true);
+                IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(itemDefinition.Replace("somedir", directory.Path), allItems: false, ignoreCondition: true);
                 items.ShouldNotBeEmpty();
-            }
-            finally
-            {
-                File.Delete(file);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
             }
         }
 
