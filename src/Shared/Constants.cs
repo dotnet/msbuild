@@ -32,11 +32,6 @@ namespace Microsoft.Build.Shared
         internal const string TreatWarningsAsErrors = "MSBuildTreatWarningsAsErrors";
 
         /// <summary>
-        /// Alternate name for the MSBuildTreatWarningsAsErrors property to bring MSBuild into line with other repositories.
-        /// </summary>
-        internal const string NoWarn = "NoWarn";
-
-        /// <summary>
         /// Name of the property that indicates a list of warnings to treat as errors.
         /// </summary>
         internal const string WarningsAsErrors = "MSBuildWarningsAsErrors";
@@ -45,6 +40,11 @@ namespace Microsoft.Build.Shared
         /// Name of the property that indicates the list of warnings to treat as messages.
         /// </summary>
         internal const string WarningsAsMessages = "MSBuildWarningsAsMessages";
+
+        /// <summary>
+        /// Alternate name for the MSBuildTreatWarningsAsMessages property to bring MSBuild into line with other repositories.
+        /// </summary>
+        internal const string NoWarn = "NoWarn";
 
         /// <summary>
         /// The name of the environment variable that users can specify to override where NuGet assemblies are loaded from in the NuGetSdkResolver.
