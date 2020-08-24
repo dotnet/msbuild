@@ -423,9 +423,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 TransientTestFolder directory = env.CreateFolder(createFolder: true);
-                TransientTestFile file = env.CreateFile(directory, "a.cs");
-
-                File.WriteAllText(file.Path, String.Empty);
+                TransientTestFile file = env.CreateFile(directory, "a.cs", String.Empty);
 
                 IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(itemDefinition.Replace("somedir", directory.Path), allItems: false, ignoreCondition: true);
                 items.ShouldNotBeEmpty();
