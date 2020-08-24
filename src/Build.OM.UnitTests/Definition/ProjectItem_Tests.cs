@@ -409,6 +409,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Theory]
         [InlineData(@"<i Condition='false' Include='\**\*.cs'/>")]
         [InlineData(@"<i Condition='false' Include='/**/*.cs'/>")]
+        [InlineData(@"<i Condition='false' Include='/**\*.cs'/>")]
+        [InlineData(@"<i Condition='false' Include='\**/*.cs'/>")]
         public void FullFileSystemScanGlobWithFalseCondition(string itemDefinition)
         {
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(itemDefinition, allItems: false, ignoreCondition: true);
@@ -418,6 +420,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Theory]
         [InlineData(@"<i Condition='false' Include='somedir\**\*.cs'/>")]
         [InlineData(@"<i Condition='false' Include='somedir/**/*.cs'/>")]
+        [InlineData(@"<i Condition='false' Include='somedir/**\*.cs'/>")]
+        [InlineData(@"<i Condition='false' Include='somedir\**/*.cs'/>")]
         public void PartialFileSystemScanGlobWithFalseCondition(string itemDefinition)
         {
             using (TestEnvironment env = TestEnvironment.Create())
