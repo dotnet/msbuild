@@ -1544,6 +1544,11 @@ elementFormDefault="qualified">
     <xs:element name="AnalysisLevel" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="InstallUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="IsCodeSharingProject" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="IsPackable" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="EnableNETAnalyzers" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="EnableDefaultCompileItems" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="EnableDefaultNoneItems" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="EnableDefaultItems" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="IsWebBootstrapper" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="JCPA" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="Keyword" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
