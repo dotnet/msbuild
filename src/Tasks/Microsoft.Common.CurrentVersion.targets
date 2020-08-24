@@ -1826,7 +1826,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
       <MSBuildGlobalPropertiesToRemoveFromProjectReferences>%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
-      <MSBuildGlobalPropertiesToRemoveFromProjectReferences Condition="$(DoNotPassOutputPathToReferencedProjects)">%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
+      <MSBuildGlobalPropertiesToRemoveFromProjectReferences Condition="'$(DoNotPassOutputPathToReferencedProjects)'=='true'">%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
     </PropertyGroup>
 
     <MSBuild
