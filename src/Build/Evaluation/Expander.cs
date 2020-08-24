@@ -738,11 +738,6 @@ namespace Microsoft.Build.Evaluation
                         return expression;
                     }
 
-                    if (expression.Length == 0)
-                    {
-                        return expression;
-                    }
-
                     ErrorUtilities.VerifyThrow(metadata != null, "Cannot expand metadata without providing metadata");
 
                     // PERF NOTE: Regex matching is expensive, so if the string doesn't contain any item metadata references, just bail
@@ -1938,7 +1933,7 @@ namespace Microsoft.Build.Evaluation
             internal static string ExpandItemVectorsIntoString<T>(Expander<P, I> expander, string expression, IItemProvider<T> items, ExpanderOptions options, IElementLocation elementLocation)
                 where T : class, IItem
             {
-                if (((options & ExpanderOptions.ExpandItems) == 0) || (expression.Length == 0))
+                if ((options & ExpanderOptions.ExpandItems) == 0)
                 {
                     return expression;
                 }
