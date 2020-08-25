@@ -36,6 +36,7 @@ namespace Microsoft.Build.Shared
         /// by the hexadecimal number XX.
         /// </summary>
         /// <param name="escapedString">The string to unescape.</param>
+        /// <param name="trim">If the string should be trimmed before being unescaped.</param>
         /// <returns>unescaped string</returns>
         internal static string UnescapeAll(string escapedString, bool trim = false)
         {
