@@ -498,5 +498,14 @@ namespace Microsoft.Build.Evaluation
             : base(textFragment, projectDirectory)
         {
         }
+
+        /// <summary>
+        /// True if TextFragment starts with /**/ or a variation thereof with backslashes.
+        /// </summary>
+        public bool IsFullFileSystemScan => TextFragment.Length >= 4
+            && FileUtilities.IsAnySlash(TextFragment[0])
+            && TextFragment[1] == '*'
+            && TextFragment[2] == '*'
+            && FileUtilities.IsAnySlash(TextFragment[3]);
     }
 }
