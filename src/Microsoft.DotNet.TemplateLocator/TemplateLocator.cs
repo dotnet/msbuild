@@ -55,7 +55,13 @@ namespace Microsoft.DotNet.TemplateLocator
                        (directoryVersion.Revision / 100) == (sdkVersionParsed.Revision / 100);
             }
 
-            var bondManifestDirectory = new DirectoryInfo(Path.Combine(dotnetRootPath, "workloadmanifests")).GetDirectories().Where(FindSameVersionBand)
+            var manifestsDirectory = Path.Combine(dotnetRootPath, "workloadmanifests");
+            if (!Directory.Exists(manifestsDirectory))
+            {
+                return Array.Empty<IOptionalSdkTemplatePackageInfo>();
+            }
+
+            var bondManifestDirectory = new DirectoryInfo(manifestsDirectory).GetDirectories().Where(FindSameVersionBand)
                 .OrderByDescending(d => Version.Parse(d.Name)).FirstOrDefault();
 
             if (bondManifestDirectory == null)

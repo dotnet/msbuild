@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.New.Tests
 
             if (!TestContext.IsLocalized())
             {
-                cmd.StdErr.Should().StartWith("No templates matched the input template name: Web1.1.");
+                cmd.StdErr.Should().StartWith("No templates found");
             }
         }
 
