@@ -21,7 +21,7 @@ namespace dotnet_new3
     public class Program
     {
         private const string HostIdentifier = "dotnetcli-preview";
-        private const string HostVersion = "1.0.0";
+        private const string HostVersion = "v1.0.0";
         private const string CommandName = "new3";
 
         public static int Main(string[] args)

@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
     class Program
     {
         private const string HostIdentifier = "endtoendtestharness";
-        private const string HostVersion = "1.0.0";
+        private const string HostVersion = "v1.0.0";
         private const string CommandName = "test-test";
         private static readonly Dictionary<string, Func<IPhysicalFileSystem, JObject, string, bool>> VerificationLookup = new Dictionary<string, Func<IPhysicalFileSystem, JObject, string, bool>>(StringComparer.OrdinalIgnoreCase);
 
