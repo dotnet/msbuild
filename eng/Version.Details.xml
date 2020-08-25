@@ -121,6 +121,14 @@
       <Uri>https://github.com/dotnet/wpf</Uri>
       <Sha>43da04c01e8506fe4e34b0b7ec76030aaa24fb78</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="5.0.0-rc.1.20424.1" CoherentParentDependency="Microsoft.WindowsDesktop.App">
+      <Uri>https://github.com/dotnet/wpf</Uri>
+      <Sha>43da04c01e8506fe4e34b0b7ec76030aaa24fb78</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.Dotnet.WinForms.ProjectTemplates" Version="5.0.0-rc.1.20424.1" CoherentParentDependency="Microsoft.WindowsDesktop.App">
+      <Uri>https://github.com/dotnet/winforms</Uri>
+      <Sha>7ad393f0e830d91b1c4ebc77500c23acb82d10bb</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.AspNetCore.App.Ref" Version="5.0.0-rc.1.20424.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>f2c3c11a2d5cc6006b2dd79b686c3057fefc1ae6</Sha>
@@ -154,6 +162,10 @@
       <Sha>f2c3c11a2d5cc6006b2dd79b686c3057fefc1ae6</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.Mvc.Api.Analyzers" Version="5.0.0-rc.1.20424.9">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>f2c3c11a2d5cc6006b2dd79b686c3057fefc1ae6</Sha>
+    </Dependency>
+    <Dependency Name="VS.Redist.Common.AspNetCore.TargetingPack.x64.5.0" Version="5.0.0-rc.1.20424.9">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>f2c3c11a2d5cc6006b2dd79b686c3057fefc1ae6</Sha>
     </Dependency>
