@@ -135,7 +135,7 @@ namespace Microsoft.NET.Build.Tests
             //  Use a test-specific packages folder
             testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod: callingMethod)
                 .WithProjectChanges(p =>
                 {
                     var ns = p.Root.Name.Namespace;

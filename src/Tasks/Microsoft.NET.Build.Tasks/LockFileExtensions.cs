@@ -13,13 +13,13 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal static class LockFileExtensions
     {
-        public static LockFileTarget GetTargetAndThrowIfNotFound(this LockFile lockFile, NuGetFramework framework, string runtime)
+        public static LockFileTarget GetTargetAndThrowIfNotFound(this LockFile lockFile, string frameworkAlias, string runtime)
         {
-            LockFileTarget lockFileTarget = lockFile.GetTarget(framework, runtime);
+            LockFileTarget lockFileTarget = lockFile.GetTarget(frameworkAlias, runtime);
 
             if (lockFileTarget == null)
             {
-                string frameworkString = framework.DotNetFrameworkName;
+                string frameworkString = frameworkAlias;
                 string targetMoniker = string.IsNullOrEmpty(runtime) ?
                     frameworkString :
                     $"{frameworkString}/{runtime}";
@@ -27,11 +27,11 @@ namespace Microsoft.NET.Build.Tasks
                 string message;
                 if (string.IsNullOrEmpty(runtime))
                 {
-                    message = string.Format(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, framework.GetShortFolderName());
+                    message = string.Format(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, frameworkString);
                 }
                 else
                 {
-                    message = string.Format(Strings.AssetsFileMissingRuntimeIdentifier, lockFile.Path, targetMoniker, framework.GetShortFolderName(), runtime);
+                    message = string.Format(Strings.AssetsFileMissingRuntimeIdentifier, lockFile.Path, targetMoniker, frameworkString, runtime);
                 }
 
                 throw new BuildErrorException(message);
@@ -42,7 +42,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public static ProjectContext CreateProjectContext(
             this LockFile lockFile,
-            NuGetFramework framework,
+            string frameworkAlias,
             string runtime,
             //  Trimmed from publish output, and if there are no runtimeFrameworks, written to runtimeconfig.json
             string platformLibraryName,
@@ -54,12 +54,12 @@ namespace Microsoft.NET.Build.Tasks
             {
                 throw new ArgumentNullException(nameof(lockFile));
             }
-            if (framework == null)
+            if (frameworkAlias == null)
             {
-                throw new ArgumentNullException(nameof(framework));
+                throw new ArgumentNullException(nameof(frameworkAlias));
             }
 
-            var lockFileTarget = lockFile.GetTargetAndThrowIfNotFound(framework, runtime);
+            var lockFileTarget = lockFile.GetTargetAndThrowIfNotFound(frameworkAlias, runtime);
 
             LockFileTargetLibrary platformLibrary = lockFileTarget.GetLibrary(platformLibraryName);
             bool isFrameworkDependent = IsFrameworkDependent(runtimeFrameworks, isSelfContained, lockFileTarget.RuntimeIdentifier, platformLibrary != null);

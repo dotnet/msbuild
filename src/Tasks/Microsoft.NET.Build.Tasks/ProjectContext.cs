@@ -79,7 +79,12 @@ namespace Microsoft.NET.Build.Tasks
             }
             else
             {
-                CompilationLockFileTarget = lockFile.GetTargetAndThrowIfNotFound(lockFileTarget.TargetFramework, null);
+                var frameworkAlias = lockFile.PackageSpec.TargetFrameworks.FirstOrDefault(tfi => tfi.FrameworkName == lockFileTarget.TargetFramework).TargetAlias;
+                if (frameworkAlias == null)
+                {
+                    throw new ArgumentException("Could not find TargetFramework alias in lock file for " + lockFileTarget.TargetFramework);
+                }
+                CompilationLockFileTarget = lockFile.GetTargetAndThrowIfNotFound(frameworkAlias, null);
             }
 
             PlatformLibrary = platformLibrary;

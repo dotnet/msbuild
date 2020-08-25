@@ -421,7 +421,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                           ResolvedFiles ="@(_ResolvedCopyLocalPublishAssets)"
                           PackagesToPrune="$(PackagesToPrune)"
                           TargetFramework="$(TargetFrameworkMoniker)"
-                          TargetPlatformMoniker="$(TargetPlatformMoniker)"
                           RuntimeIdentifier="$(RuntimeIdentifier)"
                           IsSelfContained="$(SelfContained)" >
       <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedFileToPublish" />
