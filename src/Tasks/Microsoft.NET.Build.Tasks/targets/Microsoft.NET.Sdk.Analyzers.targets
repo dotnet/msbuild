@@ -37,9 +37,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
 
     <!-- EnforceCodeStyleInBuild Allows code style analyzers to be disabled in bulk via msbuild if the user wants to -->
-    <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == '' And 
-                                         '$(EffectiveAnalysisLevel)' != '' And
-                                          $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '5.0'))">true</EnforceCodeStyleInBuild>
     <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
     
     <!-- Compiler warning level, defaulted to 4. We promote it to 5 if the user has set analysis level to 5 or higher
