@@ -40,7 +40,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
             ResolvedSDKReferences = ReadOnlyTaskItem.CreateArray(input.ResolvedSDKReferences);
             SearchPaths = input.SearchPaths;
             Silent = input.Silent;
-            StateFile = Path.GetFullPath(input.StateFile);
+            StateFile = input.StateFile == null ? input.StateFile : Path.GetFullPath(input.StateFile);
             SupportsBindingRedirectGeneration = input.SupportsBindingRedirectGeneration;
             TargetedRuntimeVersion = input.TargetedRuntimeVersion;
             TargetFrameworkDirectories = input.TargetFrameworkDirectories;

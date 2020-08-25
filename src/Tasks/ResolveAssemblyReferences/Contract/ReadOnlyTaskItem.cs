@@ -13,7 +13,7 @@ using System.Windows;
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 {
     [MessagePackObject]
-    public partial class ReadOnlyTaskItem : ITaskItem2
+    public sealed class ReadOnlyTaskItem : ITaskItem2
     {
         [IgnoreMember]
         public ICollection MetadataNames { get; }

@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         /// 4. arg. number of allow clients
         /// 5. arg. add right to CreateNewInstance
         /// </summary>
-        private readonly Func<string, int?, int?, int, bool, NamedPipeServerStream> _namedPipeServerFactory;
+        private readonly Func<string, int?, int?, int, bool, Stream> _streamFactory;
 
         /// <summary>
         /// Handler for all incoming tasks
@@ -46,20 +46,20 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         /// Construcotr for <see cref="RarController"/>
         /// </summary>
         /// <param name="pipeName">Name of pipe over which all comunication should go</param>
-        /// <param name="namedPipeServerFactory">Factor for server stream</param>
+        /// <param name="streamFactory">Factor for server stream</param>
         /// <param name="timeout">Timeout which should be used for communication</param>
         public RarController(
             string pipeName,
-            Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory,
+            Func<string, int?, int?, int, bool, Stream> streamFactory,
             TimeSpan? timeout = null)
-            : this(pipeName, namedPipeServerFactory, timeout: timeout, resolveAssemblyReferenceTaskHandler: new ResolveAssemblyReferenceSerializedTaskHandler())
+            : this(pipeName, streamFactory, timeout: timeout, resolveAssemblyReferenceTaskHandler: new ResolveAssemblyReferenceSerializedTaskHandler())
         {
         }
 
-        internal RarController(string pipeName, Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory, IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler, TimeSpan? timeout = null)
+        internal RarController(string pipeName, Func<string, int?, int?, int, bool, Stream> streamFactory, IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler, TimeSpan? timeout = null)
         {
             _pipeName = pipeName;
-            _namedPipeServerFactory = namedPipeServerFactory;
+            _streamFactory = streamFactory;
             _resolveAssemblyReferenceTaskHandler = resolveAssemblyReferenceTaskHandler;
 
             if (timeout.HasValue)
@@ -83,8 +83,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
             while (!token.IsCancellationRequested)
             {
                 // server will dispose stream too.
-                NamedPipeServerStream serverStream = GetStream(_pipeName);
-                await serverStream.WaitForConnectionAsync(token).ConfigureAwait(false);
+                Stream serverStream = await ConnectAsync(token).ConfigureAwait(false);
 
                 // Connected! Refresh timeout for incoming request
                 cancellationTokenSource.CancelAfter(Timeout);
@@ -95,7 +94,20 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
             return 0;
         }
 
-        private async Task HandleClientAsync(Stream serverStream, CancellationToken cancellationToken = default)
+        private async Task<Stream> ConnectAsync(CancellationToken cancellationToken = default)
+        {
+            Stream serverStream = GetStream(_pipeName);
+
+            if (serverStream is NamedPipeServerStream pipeServerStream)
+            {
+                await pipeServerStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
+                return pipeServerStream;
+            }
+
+            return serverStream;
+        }
+
+        internal async Task HandleClientAsync(Stream serverStream, CancellationToken cancellationToken = default)
         {
             JsonRpc server = GetRpcServer(serverStream, _resolveAssemblyReferenceTaskHandler);
             server.StartListening();
@@ -122,9 +134,9 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         /// Instantiates an endpoint to act as a client
         /// </summary>
         /// <param name="pipeName">The name of the pipe to which we should connect.</param>
-        private NamedPipeServerStream GetStream(string pipeName)
+        private Stream GetStream(string pipeName)
         {
-            return _namedPipeServerFactory(pipeName,
+            return _streamFactory(pipeName,
                 null, // Use default size
                 null, // Use default size
                 NamedPipeServerStream.MaxAllowedServerInstances,
