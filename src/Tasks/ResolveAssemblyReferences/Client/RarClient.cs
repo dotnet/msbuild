@@ -3,7 +3,7 @@
 
 using System;
 using System.IO.Pipes;
-
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
@@ -35,7 +35,10 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
                 return true;
 
             string pipeName = _rarBuildEngine.GetRarPipeName();
+
+            MSBuildEventSource.Log.ResolveAssemblyReferenceNodeConnectStart();
             NamedPipeClientStream stream = _rarBuildEngine.GetRarClientStream(pipeName, timeout);
+            MSBuildEventSource.Log.ResolveAssemblyReferenceNodeConnectStop();
 
             if (stream == null)
                 return false; // We couldn't connect

@@ -2986,6 +2986,7 @@ namespace Microsoft.Build.Tasks
                 var connected = client.Connect();
                 if (!connected)
                 {
+                    Log.LogMessage(MessageImportance.Low, "Couldn't connect to RAR node, starting new one");
                     if (client.CreateNode())
                     {
                         connected = client.Connect(5000);
