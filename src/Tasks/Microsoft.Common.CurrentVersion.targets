@@ -1653,11 +1653,26 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <!-- For each reference, get closest match -->
+
+    <!-- Pass the CurrentProjectTargetPlatform parameter to the task only if GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter is true.  This means
+         that we are using a version of NuGet which supports that parameter on this task. -->
+    
+    <GetReferenceNearestTargetFrameworkTask AnnotatedProjectReferences="@(_ProjectReferenceTargetFrameworkPossibilities)"
+                                            CurrentProjectTargetFramework="$(ReferringTargetFrameworkForProjectReferences)"
+                                            CurrentProjectTargetPlatform="$(TargetPlatformMoniker)"
+                                            CurrentProjectName="$(MSBuildProjectName)"
+                                            FallbackTargetFrameworks="$(AssetTargetFallback)"
+                                            Condition="'@(_ProjectReferenceTargetFrameworkPossibilities->Count())' != '0' and '$(ReferringTargetFrameworkForProjectReferences)' != ''
+                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter)' == 'true'">
+      <Output ItemName="AnnotatedProjects" TaskParameter="AssignedProjects" />
+    </GetReferenceNearestTargetFrameworkTask>
+
     <GetReferenceNearestTargetFrameworkTask AnnotatedProjectReferences="@(_ProjectReferenceTargetFrameworkPossibilities)"
                                             CurrentProjectTargetFramework="$(ReferringTargetFrameworkForProjectReferences)"
                                             CurrentProjectName="$(MSBuildProjectName)"
                                             FallbackTargetFrameworks="$(AssetTargetFallback)"
-                                            Condition="'@(_ProjectReferenceTargetFrameworkPossibilities->Count())' != '0' and '$(ReferringTargetFrameworkForProjectReferences)' != ''">
+                                            Condition="'@(_ProjectReferenceTargetFrameworkPossibilities->Count())' != '0' and '$(ReferringTargetFrameworkForProjectReferences)' != ''
+                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter)' != 'true'">
       <Output ItemName="AnnotatedProjects" TaskParameter="AssignedProjects" />
     </GetReferenceNearestTargetFrameworkTask>
 
@@ -1697,18 +1712,39 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </Target>
 
   <Target Name="GetTargetFrameworks"
+          DependsOnTargets="GetTargetFrameworksWithPlatformForSingleTargetFramework"
           Returns="@(_ThisProjectBuildMetadata)">
+
+    <Error Condition="'$(IsCrossTargetingBuild)' == 'true'"
+           Text="Internal MSBuild error: Non-CrossTargeting GetTargetFrameworks target should not be used in cross targeting (outer) build" />
+
     <ItemGroup>
       <_ThisProjectBuildMetadata Include="$(MSBuildProjectFullPath)">
-        <TargetFrameworks Condition="'$(TargetFrameworks)' != ''">$(TargetFrameworks)</TargetFrameworks>
-        <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">$(TargetFramework)</TargetFrameworks>
+        <TargetFrameworks>@(_TargetFrameworkInfo)</TargetFrameworks>
+        <TargetFrameworkMonikers>@(_TargetFrameworkInfo->'%(TargetFrameworkMonikers)')</TargetFrameworkMonikers>
+        <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
+
         <HasSingleTargetFramework>true</HasSingleTargetFramework>
-        <HasSingleTargetFramework Condition="'$(IsCrossTargetingBuild)' == 'true'">false</HasSingleTargetFramework>
+        
         <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
-      <IsRidAgnostic>false</IsRidAgnostic>
-      <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <IsRidAgnostic>false</IsRidAgnostic>
+        <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
+  </Target>
+
+  <Target Name="GetTargetFrameworksWithPlatformForSingleTargetFramework"
+        Returns="@(_TargetFrameworkInfo)">
+
+    <ItemGroup>
+      <_TargetFrameworkInfo Include="$(TargetFramework)">
+        <TargetFrameworks>$(TargetFramework)</TargetFrameworks>
+        <TargetFrameworkMonikers>$(TargetFrameworkMoniker)</TargetFrameworkMonikers>
+        <TargetPlatformMonikers>$(TargetPlatformMoniker)</TargetPlatformMonikers>
+        <TargetPlatformMonikers Condition="'$(TargetPlatformMoniker)' == ''">None</TargetPlatformMonikers>
+      </_TargetFrameworkInfo>
+    </ItemGroup>
+
   </Target>
 
   <!--

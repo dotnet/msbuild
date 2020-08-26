@@ -11,7 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using Task = System.Threading.Tasks.Task;
 
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -225,7 +224,7 @@ namespace Microsoft.Build.BackEnd
                 string taskHostNameForClr2TaskHost = Path.GetFileNameWithoutExtension(NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost);
                 if (Path.GetFileNameWithoutExtension(msbuildLocation).Equals(taskHostNameForClr2TaskHost, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (FrameworkLocationHelper.GetPathToDotNetFrameworkV35(Shared.DotNetFrameworkArchitecture.Current) == null)
+                    if (FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) == null)
                     {
                         CommunicationsUtilities.Trace
                             (

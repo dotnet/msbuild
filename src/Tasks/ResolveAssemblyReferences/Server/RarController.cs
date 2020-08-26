@@ -7,6 +7,9 @@ using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Services;
 using Microsoft.VisualStudio.Threading;
@@ -16,7 +19,7 @@ using StreamJsonRpc;
 #nullable enable
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
 {
-    public sealed class RarController
+    internal sealed class RarController : IRarController
     {
         /// <summary>
         /// Name of <see cref="NamedPipeServerStream"/>
@@ -31,7 +34,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         /// 4. arg. number of allow clients
         /// 5. arg. add right to CreateNewInstance
         /// </summary>
-        private readonly Func<string, int?, int?, int, bool, Stream> _streamFactory;
+        private Func<string, int?, int?, int, bool, Stream>? _streamFactory;
 
         /// <summary>
         /// Handler for all incoming tasks
@@ -47,20 +50,17 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         /// Construcotr for <see cref="RarController"/>
         /// </summary>
         /// <param name="pipeName">Name of pipe over which all comunication should go</param>
-        /// <param name="streamFactory">Factor for server stream</param>
         /// <param name="timeout">Timeout which should be used for communication</param>
         public RarController(
             string pipeName,
-            Func<string, int?, int?, int, bool, Stream> streamFactory,
             TimeSpan? timeout = null)
-            : this(pipeName, streamFactory, timeout: timeout, resolveAssemblyReferenceTaskHandler: new ResolveAssemblyReferenceSerializedTaskHandler())
+            : this(pipeName, timeout: timeout, resolveAssemblyReferenceTaskHandler: new ResolveAssemblyReferenceSerializedTaskHandler())
         {
         }
 
-        internal RarController(string pipeName, Func<string, int?, int?, int, bool, Stream> streamFactory, IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler, TimeSpan? timeout = null)
+        internal RarController(string pipeName, IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler, TimeSpan? timeout = null)
         {
             _pipeName = pipeName;
-            _streamFactory = streamFactory;
             _resolveAssemblyReferenceTaskHandler = resolveAssemblyReferenceTaskHandler;
 
             if (timeout.HasValue)
@@ -71,8 +71,8 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
 
         public async Task<int> StartAsync(CancellationToken cancellationToken = default)
         {
-            using ServerMutex mutex = new ServerMutex(_pipeName);
 
+            using ServerMutex mutex = new ServerMutex(_pipeName);
             if (!mutex.IsLocked)
             {
                 return 1;
@@ -152,11 +152,19 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         /// <param name="pipeName">The name of the pipe to which we should connect.</param>
         private Stream GetStream(string pipeName)
         {
-            return _streamFactory(pipeName,
+            ErrorUtilities.VerifyThrow(_streamFactory != null, "Stream factory is not set");
+
+            return _streamFactory!(pipeName,
                 null, // Use default size
                 null, // Use default size
                 NamedPipeServerStream.MaxAllowedServerInstances,
                 true);
+        }
+
+        public void SetStreamFactory(Func<string, int?, int?, int, bool, Stream> streamFactory)
+        {
+            ErrorUtilities.VerifyThrow(_streamFactory == null, "Stream factory is already set");
+            _streamFactory = streamFactory;
         }
     }
 }

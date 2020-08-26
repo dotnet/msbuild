@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 {
-    public interface IResolveAssemblyReferenceTaskHandler : IDisposable
+    internal interface IResolveAssemblyReferenceTaskHandler : IDisposable
     {
         Task<ResolveAssemblyReferenceResult> ExecuteAsync(ResolveAssemblyReferenceRequest input, CancellationToken cancellationToken = default);
     }

@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks
                         formatter.Serialize(s, this);
                     }
                 }
-            }
+            } 
             catch (Exception e)
             {
                 // If there was a problem writing the file (like it's read-only or locked on disk, for

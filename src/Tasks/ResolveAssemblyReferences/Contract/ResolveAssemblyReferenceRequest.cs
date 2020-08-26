@@ -6,8 +6,9 @@ using System.IO;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 {
+    // MessagePack requires transported objects to be public
     [MessagePackObject]
-    public class ResolveAssemblyReferenceRequest
+    public sealed class ResolveAssemblyReferenceRequest
     {
         public ResolveAssemblyReferenceRequest() { }
         internal ResolveAssemblyReferenceRequest(ResolveAssemblyReferenceTaskInput input)

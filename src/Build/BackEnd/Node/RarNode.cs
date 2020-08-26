@@ -8,9 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Tasks.ResolveAssemblyReferences.Server;
 
 namespace Microsoft.Build.Execution
 {
@@ -26,7 +26,7 @@ namespace Microsoft.Build.Execution
             shutdownException = null;
             using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             string pipeName = CommunicationsUtilities.GetRarPipeName(nodeReuse, lowPriority);
-            RarController controller = new RarController(pipeName, NamedPipeUtil.CreateNamedPipeServer);
+            IRarController controller = GetController(pipeName);
 
             Task<int> rarTask = controller.StartAsync(cts.Token);
 
@@ -37,6 +37,9 @@ namespace Microsoft.Build.Execution
             int index;
             try
             {
+                // Wait for any of these task to finish:
+                // - rarTask can timeout (default is 15 mins)
+                // - msBuildShutdown ends when it recieves command to shutdown
                 index = Task.WaitAny(msBuildShutdown, rarTask);
             }
             catch (TaskCanceledException e)
@@ -58,6 +61,19 @@ namespace Microsoft.Build.Execution
                 return NodeEngineShutdownReason.ConnectionFailed;
             }
         }
+
+        private static IRarController GetController(string pipeName)
+        {
+            const string rarControllerName = "Microsoft.Build.Tasks.ResolveAssemblyReferences.Server.RarController, Microsoft.Build.Tasks.Core";
+            Type rarControllerType = Type.GetType(rarControllerName);
+
+            IRarController controller = (IRarController)Activator.CreateInstance(rarControllerType, pipeName, null);
+            ErrorUtilities.VerifyThrow(controller != null, "Couldn't create instace of IRarController for '{0}' type", rarControllerName);
+
+            controller.SetStreamFactory(NamedPipeUtil.CreateNamedPipeServer);
+            return controller;
+        }
+
 
         public NodeEngineShutdownReason Run(out Exception shutdownException)
         {

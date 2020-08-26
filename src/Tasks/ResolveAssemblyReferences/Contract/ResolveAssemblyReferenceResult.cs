@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 {
+    // MessagePack requires transported objects to be public
     [MessagePackObject]
     public sealed class ResolveAssemblyReferenceResult
     {
