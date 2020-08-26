@@ -58,8 +58,8 @@ namespace Microsoft.Build.Execution
             const string rarControllerName = "Microsoft.Build.Tasks.ResolveAssemblyReferences.Server.RarController, Microsoft.Build.Tasks.Core";
             Type rarControllerType = Type.GetType(rarControllerName);
 
-            IRarController controller = (IRarController)Activator.CreateInstance(rarControllerType, pipeName);
-            ErrorUtilities.VerifyThrow(controller == null, "Couldn't create instace of IRarController for '{0}' type", rarControllerName);
+            IRarController controller = (IRarController)Activator.CreateInstance(rarControllerType, pipeName, null);
+            ErrorUtilities.VerifyThrow(controller != null, "Couldn't create instace of IRarController for '{0}' type", rarControllerName);
 
             controller.SetStreamFactory(NamedPipeUtil.CreateNamedPipeServer);
             return controller;
