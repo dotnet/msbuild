@@ -525,7 +525,7 @@ namespace Microsoft.Build.CommandLine
                 MSBuildEventSource.Log.MSBuildExeStart(commandLine);
 #else
                 if (MSBuildEventSource.Log.IsEnabled()) {
-                    MSBuildEventSource.Log.MSBuildExeStop(string.Join(" ", commandLine));
+                    MSBuildEventSource.Log.MSBuildExeStart(string.Join(" ", commandLine));
                 }
 #endif
                 Console.CancelKeyPress += cancelHandler;
