@@ -8,6 +8,11 @@ namespace Microsoft.Build.Eventing
     [EventSource(Name = "Microsoft-Build")]
     internal sealed class MSBuildEventSource : EventSource
     {
+        public static class Keywords
+        {
+            public const EventKeywords PerformanceLog = (EventKeywords)0x1;
+        }
+
         /// <summary>
         /// define the singleton instance of the event source
         /// </summary>
@@ -244,14 +249,14 @@ namespace Microsoft.Build.Eventing
         /// Call this method to notify listeners of timing related to loading an XmlDocumentWithLocation from a path.
         /// <param name="fullPath">Path to the document to load.</param>
         /// </summary>
-        [Event(29)]
+        [Event(29, Keywords = Keywords.PerformanceLog)]
         public void LoadDocumentStart(string fullPath)
         {
             WriteEvent(29, fullPath);
         }
 
         /// <param name="fullPath">Path to the document to load.</param>
-        [Event(30)]
+        [Event(30, Keywords = Keywords.PerformanceLog)]
         public void LoadDocumentStop(string fullPath)
         {
             WriteEvent(30, fullPath);
@@ -273,14 +278,14 @@ namespace Microsoft.Build.Eventing
         /// Call this method to notify listeners of profiling for the function that parses an XML document into a ProjectRootElement.
         /// </summary>
         /// <param name="projectFileName">Relevant information about where in the run of the progam it is.</param>
-        [Event(33)]
+        [Event(33, Keywords = Keywords.PerformanceLog)]
         public void ParseStart(string projectFileName)
         {
             WriteEvent(33, projectFileName);
         }
 
         /// <param name="projectFileName">Relevant information about where in the run of the progam it is.</param>
-        [Event(34)]
+        [Event(34, Keywords = Keywords.PerformanceLog)]
         public void ParseStop(string projectFileName)
         {
             WriteEvent(34, projectFileName);
@@ -301,13 +306,13 @@ namespace Microsoft.Build.Eventing
             WriteEvent(36);
         }
 
-        [Event(37)]
+        [Event(37, Keywords = Keywords.PerformanceLog)]
         public void RequestThreadProcStart()
         {
             WriteEvent(37);
         }
 
-        [Event(38)]
+        [Event(38, Keywords = Keywords.PerformanceLog)]
         public void RequestThreadProcStop()
         {
             WriteEvent(38);
@@ -328,14 +333,14 @@ namespace Microsoft.Build.Eventing
         }
 
         /// <param name="targetName">The name of the target being executed.</param>
-        [Event(43)]
+        [Event(43, Keywords = Keywords.PerformanceLog)]
         public void TargetStart(string targetName)
         {
             WriteEvent(43, targetName);
         }
 
         /// <param name="targetName">The name of the target being executed.</param>
-        [Event(44)]
+        [Event(44, Keywords = Keywords.PerformanceLog)]
         public void TargetStop(string targetName)
         {
             WriteEvent(44, targetName);
@@ -345,14 +350,14 @@ namespace Microsoft.Build.Eventing
         /// Call this method to notify listeners of the start of a build as called from the command line.
         /// </summary>
         /// <param name="commandLine">The command line used to run MSBuild.</param>
-        [Event(45)]
+        [Event(45, Keywords = Keywords.PerformanceLog)]
         public void MSBuildExeStart(string commandLine)
         {
             WriteEvent(45, commandLine);
         }
 
         /// <param name="commandLine">The command line used to run MSBuild.</param>
-        [Event(46)]
+        [Event(46, Keywords = Keywords.PerformanceLog)]
         public void MSBuildExeStop(string commandLine)
         {
             WriteEvent(46, commandLine);
