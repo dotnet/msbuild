@@ -4,7 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.IO.Pipes;
-using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,7 +12,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Tasks.ResolveAssemblyReferences.Server;
 
 namespace Microsoft.Build.Execution
 {
@@ -28,7 +27,7 @@ namespace Microsoft.Build.Execution
             shutdownException = null;
             using CancellationTokenSource cts = new CancellationTokenSource();
             string pipeName = CommunicationsUtilities.GetRarPipeName(nodeReuse, lowPriority);
-            RarController controller = new RarController(pipeName, NamedPipeUtil.CreateNamedPipeServer);
+            IRarController controller = GetController(pipeName);
 
             Task<int> rarTask = controller.StartAsync(cts.Token);
 
@@ -36,6 +35,9 @@ namespace Microsoft.Build.Execution
                                                                      enableLowPriority: lowPriority, specialNode: true);
             Task<NodeEngineShutdownReason> msBuildShutdown = RunShutdownCheckAsync(handshake, cts.Token);
 
+            // Wait for any of these task to finish:
+            // - rarTask can timeout (default is 15 mins)
+            // - msBuildShutdown ends when it recieves command to shutdown
             int index = Task.WaitAny(msBuildShutdown, rarTask);
             cts.Cancel();
 
@@ -50,6 +52,19 @@ namespace Microsoft.Build.Execution
                 return NodeEngineShutdownReason.ConnectionFailed;
             }
         }
+
+        private static IRarController GetController(string pipeName)
+        {
+            const string rarControllerName = "Microsoft.Build.Tasks.ResolveAssemblyReferences.Server.RarController, Microsoft.Build.Tasks.Core";
+            Type rarControllerType = Type.GetType(rarControllerName);
+
+            IRarController controller = (IRarController)Activator.CreateInstance(rarControllerType, pipeName);
+            ErrorUtilities.VerifyThrow(controller == null, "Couldn't create instace of IRarController for '{0}' type", rarControllerName);
+
+            controller.SetStreamFactory(NamedPipeUtil.CreateNamedPipeServer);
+            return controller;
+        }
+
 
         public NodeEngineShutdownReason Run(out Exception shutdownException)
         {

@@ -6,6 +6,9 @@ using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Services;
 using Microsoft.VisualStudio.Threading;
@@ -15,7 +18,7 @@ using StreamJsonRpc;
 #nullable enable
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
 {
-    public sealed class RarController
+    internal sealed class RarController : IRarController
     {
         /// <summary>
         /// Name of <see cref="NamedPipeServerStream"/>
@@ -30,7 +33,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         /// 4. arg. number of allow clients
         /// 5. arg. add right to CreateNewInstance
         /// </summary>
-        private readonly Func<string, int?, int?, int, bool, NamedPipeServerStream> _namedPipeServerFactory;
+        private Func<string, int?, int?, int, bool, NamedPipeServerStream>? _namedPipeServerFactory;
 
         /// <summary>
         /// Handler for all incoming tasks
@@ -44,16 +47,14 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
 
         public RarController(
             string pipeName,
-            Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory,
             TimeSpan? timeout = null)
-            : this(pipeName, namedPipeServerFactory, timeout: timeout, resolveAssemblyReferenceTaskHandler: new RarTaskHandler())
+            : this(pipeName, timeout: timeout, resolveAssemblyReferenceTaskHandler: new RarTaskHandler())
         {
         }
 
-        internal RarController(string pipeName, Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory, IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler, TimeSpan? timeout = null)
+        internal RarController(string pipeName, IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler, TimeSpan? timeout = null)
         {
             _pipeName = pipeName;
-            _namedPipeServerFactory = namedPipeServerFactory;
             _resolveAssemblyReferenceTaskHandler = resolveAssemblyReferenceTaskHandler;
 
             if (timeout.HasValue)
@@ -64,8 +65,8 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
 
         public async Task<int> StartAsync(CancellationToken cancellationToken = default)
         {
-            using ServerMutex mutex = new ServerMutex(_pipeName);
 
+            using ServerMutex mutex = new ServerMutex(_pipeName);
             if (!mutex.IsLocked)
             {
                 return 1;
@@ -118,11 +119,19 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         /// <param name="pipeName">The name of the pipe to which we should connect.</param>
         private NamedPipeServerStream GetStream(string pipeName)
         {
-            return _namedPipeServerFactory(pipeName,
+            ErrorUtilities.VerifyThrow(_namedPipeServerFactory != null, "Stream factory is not set");
+
+            return _namedPipeServerFactory!(pipeName,
                 null, // Use default size
                 null, // Use default size
                 NamedPipeServerStream.MaxAllowedServerInstances,
                 true);
+        }
+
+        public void SetStreamFactory(Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory)
+        {
+            ErrorUtilities.VerifyThrow(_namedPipeServerFactory == null, "Stream factory is already set");
+            _namedPipeServerFactory = namedPipeServerFactory;
         }
     }
 }

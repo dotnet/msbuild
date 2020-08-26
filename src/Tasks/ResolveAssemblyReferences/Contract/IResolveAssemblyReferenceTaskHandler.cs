@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 {
-    public interface IResolveAssemblyReferenceTaskHandler : IDisposable
+    internal interface IResolveAssemblyReferenceTaskHandler : IDisposable
     {
     }
 }

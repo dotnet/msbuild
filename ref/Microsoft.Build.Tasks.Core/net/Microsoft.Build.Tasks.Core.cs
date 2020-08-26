@@ -2544,20 +2544,6 @@ namespace Microsoft.Build.Tasks.Hosting
         bool Compile();
     }
 }
-namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
-{
-    public partial interface IResolveAssemblyReferenceTaskHandler : System.IDisposable
-    {
-    }
-}
-namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
-{
-    public sealed partial class RarController
-    {
-        public RarController(string pipeName, System.Func<string, System.Nullable<int>, System.Nullable<int>, int, bool, System.IO.Pipes.NamedPipeServerStream> namedPipeServerFactory, System.Nullable<System.TimeSpan> timeout=default(System.Nullable<System.TimeSpan>)) { }
-        public System.Threading.Tasks.Task<int> StartAsync(System.Threading.CancellationToken cancellationToken=default(System.Threading.CancellationToken)) { throw null; }
-    }
-}
 namespace Microsoft.Build.Tasks.Xaml
 {
     public partial class CommandLineArgumentRelation : Microsoft.Build.Tasks.Xaml.PropertyRelation
