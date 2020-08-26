@@ -161,7 +161,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       />
   </Target>
 
-  <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
+  <!--C++/CLI has its own logic of determine TargetPlatformIdentifier and TargetPlatformVersion-->
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and '$(Language)' != 'C++'">
     <_EnableDefaultWindowsPlatform>false</_EnableDefaultWindowsPlatform>
     <UseOSWinMdReferences>false</UseOSWinMdReferences>
   </PropertyGroup>
@@ -198,9 +199,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                  FormatArguments="$(SupportedOSPlatform);$(TargetPlatformVersion)"/>
   </Target>
 
+  <!--C++/CLI targets rely on the patch version of the Windows SDK version as TargetPlatformVersion. Skip the normalization.-->
   <Target Name="_NormalizeTargetPlatformVersion"
     BeforeTargets="ProcessFrameworkReferences"
-    Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
+    Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and '$(Language)' != 'C++'">
     <ItemGroup>
       <_ValidTargetPlatformVersion Include="@(SdkSupportedTargetPlatform)" Condition="'@(SdkSupportedTargetPlatform)' != '' and $([MSBuild]::VersionEquals(%(Identity), $(TargetPlatformVersion)))" />
     </ItemGroup>
@@ -213,7 +215,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_CheckForInvalidTargetPlatformVersion"
       BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
       DependsOnTargets="_NormalizeTargetPlatformVersion"
-      Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
+      Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and '$(Language)' != 'C++'">
     <PropertyGroup>
       <TargetPlatformVersionSupported Condition="'$(TargetPlatformVersionSupported)' == '' and '@(_ValidTargetPlatformVersion)' != ''" >true</TargetPlatformVersionSupported>
       <_ValidTargetPlatformVersions Condition="'@(SdkSupportedTargetPlatform)' != ''" >@(SdkSupportedTargetPlatform, '%0a')</_ValidTargetPlatformVersions>
