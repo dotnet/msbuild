@@ -30,11 +30,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And 
                                        '$(AnalysisLevel)' != ''">$(AnalysisLevel)</EffectiveAnalysisLevel>
 
-    <!-- EnableNETAnalyzers Allows analyzes to be disabled in bulk via msbuild if the user wants to -->
+    <!-- EnableNETAnalyzers Allows analyzers to be disabled in bulk via msbuild if the user wants to -->
     <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == '' And 
                                    '$(EffectiveAnalysisLevel)' != '' And
                                     $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '5.0'))">true</EnableNETAnalyzers>
     <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
+
+    <!-- EnforceCodeStyleInBuild Allows code style analyzers to be disabled in bulk via msbuild if the user wants to -->
+    <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
     
     <!-- Compiler warning level, defaulted to 4. We promote it to 5 if the user has set analysis level to 5 or higher
          NOTE: at this time only the C# compiler supports warning waves -->
@@ -52,6 +55,8 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="$(EnableNETAnalyzers)" />
   <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
           Condition="$(EnableNETAnalyzers)" />
+
+  <!-- .NET Analyzers -->
   <ItemGroup Condition="$(EnableNETAnalyzers)">
     <Analyzer
       Condition="'$(Language)' == 'VB'"
@@ -63,6 +68,38 @@ Copyright (c) .NET Foundation. All rights reserved.
       IsImplicitlyDefined="true" />
     <Analyzer
       Include="$(MSBuildThisFileDirectory)..\analyzers\Microsoft.CodeAnalysis.NetAnalyzers.dll"
+      IsImplicitlyDefined="true" />
+  </ItemGroup>
+
+  <!-- C# Code Style Analyzers -->
+  <ItemGroup Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'C#'">
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\cs\Microsoft.CodeAnalysis.CodeStyle.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\cs\Microsoft.CodeAnalysis.CodeStyle.Fixes.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\cs\Microsoft.CodeAnalysis.CSharp.CodeStyle.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\cs\Microsoft.CodeAnalysis.CSharp.CodeStyle.Fixes.dll"
+      IsImplicitlyDefined="true" />
+  </ItemGroup>
+
+  <!-- Visual Basic Code Style Analyzers -->
+  <ItemGroup Condition="$(EnforceCodeStyleInBuild) And '$(Language)' == 'VB'">
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\vb\Microsoft.CodeAnalysis.CodeStyle.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\vb\Microsoft.CodeAnalysis.CodeStyle.Fixes.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\vb\Microsoft.CodeAnalysis.VisualBasic.CodeStyle.dll"
+      IsImplicitlyDefined="true" />
+    <Analyzer
+      Include="$(MSBuildThisFileDirectory)..\codestyle\vb\Microsoft.CodeAnalysis.VisualBasic.CodeStyle.Fixes.dll"
       IsImplicitlyDefined="true" />
   </ItemGroup>
 </Project>
