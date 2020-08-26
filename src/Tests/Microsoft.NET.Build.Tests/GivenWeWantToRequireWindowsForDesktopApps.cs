@@ -130,7 +130,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "WindowsDesktopSdkTest_50";
 
-            const string tfm = "net5.0";
+            const string tfm = "net5.0-windows";
 
             var testProject = new TestProject()
             {
