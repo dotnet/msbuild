@@ -2689,8 +2689,16 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
     public sealed partial class ResolveAssemblyReferenceResult
     {
         public ResolveAssemblyReferenceResult() { }
+        [MessagePack.KeyAttribute(4)]
+        public System.Collections.Generic.List<Microsoft.Build.Framework.BuildErrorEventArgs> BuildErrorEvents { get { throw null; } set { } }
+        [MessagePack.KeyAttribute(5)]
+        public System.Collections.Generic.List<Microsoft.Build.Framework.BuildMessageEventArgs> BuildMessageEvents { get { throw null; } set { } }
+        [MessagePack.KeyAttribute(6)]
+        public System.Collections.Generic.List<Microsoft.Build.Framework.BuildWarningEventArgs> BuildWarningEvents { get { throw null; } set { } }
+        [MessagePack.KeyAttribute(3)]
+        public System.Collections.Generic.List<Microsoft.Build.Framework.CustomBuildEventArgs> CustomBuildEvents { get { throw null; } set { } }
         [MessagePack.KeyAttribute(2)]
-        public System.Collections.Generic.List<Microsoft.Build.Framework.LazyFormattedBuildEventArgs> BuildEventArgs { get { throw null; } set { } }
+        public int EventCount { get { throw null; } set { } }
         [MessagePack.KeyAttribute(1)]
         public Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract.ResolveAssemblyReferenceResponse Response { get { throw null; } set { } }
         [MessagePack.KeyAttribute(0)]

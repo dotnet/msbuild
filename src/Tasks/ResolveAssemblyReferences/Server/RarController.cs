@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
@@ -123,10 +124,25 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
             }
         }
 
+        private class ConsoleLogger : TraceListener
+        {
+            public override void Write(string message)
+            {
+                Console.Write(message);
+            }
+
+            public override void WriteLine(string message)
+            {
+                Console.WriteLine(message);
+            }
+        }
+
         private JsonRpc GetRpcServer(Stream stream, IResolveAssemblyReferenceTaskHandler handler)
         {
             IJsonRpcMessageHandler serverHandler = RpcUtils.GetRarMessageHandler(stream);
             JsonRpc rpc = new JsonRpc(serverHandler, handler);
+            //rpc.TraceSource = new TraceSource("Server", SourceLevels.Verbose);
+            //rpc.TraceSource.Listeners.Add(new ConsoleLogger());
             return rpc;
         }
 

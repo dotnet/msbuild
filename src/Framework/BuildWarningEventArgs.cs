@@ -25,7 +25,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Default constructor
         /// </summary>
-        protected BuildWarningEventArgs()
+        internal BuildWarningEventArgs()
             : base()
         {
             // do nothing
@@ -213,7 +213,9 @@ namespace Microsoft.Build.Framework
         {
             base.CreateFromStream(reader, version);
 
-            subcategory = reader.ReadByte() == 0 ? null : reader.ReadString();
+            int b = reader.ReadByte();
+
+            subcategory = b == 0 ? null : reader.ReadString();
             code = reader.ReadByte() == 0 ? null : reader.ReadString();
             file = reader.ReadByte() == 0 ? null : reader.ReadString();
 

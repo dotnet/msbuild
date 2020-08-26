@@ -20,9 +20,12 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
             MessagePackFormatter formatter = new MessagePackFormatter();
 
             IFormatterResolver resolver = CompositeResolver.Create(
-                new[]
+                new IMessagePackFormatter[]
                 {
-                    LazyFromattedBuildEventArgsFormatter.Instance
+                    BuildEventArgsFormatter<CustomBuildEventArgs>.CustomFormatter,
+                    BuildEventArgsFormatter<BuildErrorEventArgs>.ErrorFormatter,
+                    BuildEventArgsFormatter<BuildWarningEventArgs>.WarningFormatter,
+                    BuildEventArgsFormatter<BuildMessageEventArgs>.MessageFormatter
                 },
                 new[]
                 {

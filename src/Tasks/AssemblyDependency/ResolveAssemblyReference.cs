@@ -3120,7 +3120,10 @@ namespace Microsoft.Build.Tasks
                     // Client is connected to the RAR node, we can execute RAR task remotely
                     ResolveAssemblyReferenceResult result = client.Execute(ResolveAssemblyReferenceInput);
                     ResolveAssemblyReferenceOutput = result.Output;
-                    LogEvents(result.BuildEventArgs);
+                    LogEvents(result.BuildWarningEvents);
+                    LogEvents(result.BuildMessageEvents);
+                    LogEvents(result.BuildErrorEvents);
+                    LogEvents(result.CustomBuildEvents);
                     return result.TaskResult;
                 }
             }
@@ -3149,6 +3152,11 @@ namespace Microsoft.Build.Tasks
 
         private void LogEvents(IEnumerable<LazyFormattedBuildEventArgs> buildEventArgs)
         {
+            if (buildEventArgs == null)
+            {
+                return;
+            }
+
             foreach (LazyFormattedBuildEventArgs buildEvent in buildEventArgs)
             {
                 switch (buildEvent)

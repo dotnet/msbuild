@@ -26,7 +26,19 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
         public ResolveAssemblyReferenceResponse Response { get; set; }
 
         [Key(2)]
-        public List<LazyFormattedBuildEventArgs> BuildEventArgs { get; set; }
+        public int EventCount { get; set; }
+
+        [Key(3)]
+        public List<CustomBuildEventArgs> CustomBuildEvents { get; set; }
+
+        [Key(4)]
+        public List<BuildErrorEventArgs> BuildErrorEvents {get;set;}
+
+        [Key(5)]
+        public List<BuildMessageEventArgs> BuildMessageEvents {get;set;}
+
+        [Key(6)]
+        public List<BuildWarningEventArgs> BuildWarningEvents {get;set;}
 
         [IgnoreMember]
         internal ResolveAssemblyReferenceTaskOutput Output => new ResolveAssemblyReferenceTaskOutput(Response);

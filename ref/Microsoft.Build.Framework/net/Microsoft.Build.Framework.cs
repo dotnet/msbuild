@@ -12,7 +12,6 @@ namespace Microsoft.Build.Framework
     }
     public partial class BuildErrorEventArgs : Microsoft.Build.Framework.LazyFormattedBuildEventArgs
     {
-        protected BuildErrorEventArgs() { }
         public BuildErrorEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName) { }
         public BuildErrorEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp) { }
         public BuildErrorEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
@@ -78,7 +77,6 @@ namespace Microsoft.Build.Framework
     public delegate void BuildFinishedEventHandler(object sender, Microsoft.Build.Framework.BuildFinishedEventArgs e);
     public partial class BuildMessageEventArgs : Microsoft.Build.Framework.LazyFormattedBuildEventArgs
     {
-        protected BuildMessageEventArgs() { }
         public BuildMessageEventArgs(string message, string helpKeyword, string senderName, Microsoft.Build.Framework.MessageImportance importance) { }
         public BuildMessageEventArgs(string message, string helpKeyword, string senderName, Microsoft.Build.Framework.MessageImportance importance, System.DateTime eventTimestamp) { }
         public BuildMessageEventArgs(string message, string helpKeyword, string senderName, Microsoft.Build.Framework.MessageImportance importance, System.DateTime eventTimestamp, params object[] messageArgs) { }
@@ -116,7 +114,6 @@ namespace Microsoft.Build.Framework
     public delegate void BuildStatusEventHandler(object sender, Microsoft.Build.Framework.BuildStatusEventArgs e);
     public partial class BuildWarningEventArgs : Microsoft.Build.Framework.LazyFormattedBuildEventArgs
     {
-        protected BuildWarningEventArgs() { }
         public BuildWarningEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName) { }
         public BuildWarningEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp) { }
         public BuildWarningEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
@@ -134,10 +131,10 @@ namespace Microsoft.Build.Framework
     public delegate void BuildWarningEventHandler(object sender, Microsoft.Build.Framework.BuildWarningEventArgs e);
     public partial class CriticalBuildMessageEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
-        protected CriticalBuildMessageEventArgs() { }
-        public CriticalBuildMessageEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName) { }
-        public CriticalBuildMessageEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp) { }
-        public CriticalBuildMessageEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
+        protected CriticalBuildMessageEventArgs() : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
+        public CriticalBuildMessageEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName) : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
+        public CriticalBuildMessageEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp) : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
+        public CriticalBuildMessageEventArgs(string subcategory, string code, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
     }
     public abstract partial class CustomBuildEventArgs : Microsoft.Build.Framework.LazyFormattedBuildEventArgs
     {
@@ -149,13 +146,12 @@ namespace Microsoft.Build.Framework
     public delegate void CustomBuildEventHandler(object sender, Microsoft.Build.Framework.CustomBuildEventArgs e);
     public partial class EnvironmentVariableReadEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
-        public EnvironmentVariableReadEventArgs() { }
-        public EnvironmentVariableReadEventArgs(string environmentVariableName, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) { }
+        public EnvironmentVariableReadEventArgs() : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
+        public EnvironmentVariableReadEventArgs(string environmentVariableName, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
         public string EnvironmentVariableName { get { throw null; } set { } }
     }
     public partial class ExternalProjectFinishedEventArgs : Microsoft.Build.Framework.CustomBuildEventArgs
     {
-        protected ExternalProjectFinishedEventArgs() { }
         public ExternalProjectFinishedEventArgs(string message, string helpKeyword, string senderName, string projectFile, bool succeeded) { }
         public ExternalProjectFinishedEventArgs(string message, string helpKeyword, string senderName, string projectFile, bool succeeded, System.DateTime eventTimestamp) { }
         public string ProjectFile { get { throw null; } }
@@ -163,7 +159,6 @@ namespace Microsoft.Build.Framework
     }
     public partial class ExternalProjectStartedEventArgs : Microsoft.Build.Framework.CustomBuildEventArgs
     {
-        protected ExternalProjectStartedEventArgs() { }
         public ExternalProjectStartedEventArgs(string message, string helpKeyword, string senderName, string projectFile, string targetNames) { }
         public ExternalProjectStartedEventArgs(string message, string helpKeyword, string senderName, string projectFile, string targetNames, System.DateTime eventTimestamp) { }
         public string ProjectFile { get { throw null; } }
@@ -364,7 +359,7 @@ namespace Microsoft.Build.Framework
     public partial class MetaprojectGeneratedEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
         public string metaprojectXml;
-        public MetaprojectGeneratedEventArgs(string metaprojectXml, string metaprojectPath, string message) { }
+        public MetaprojectGeneratedEventArgs(string metaprojectXml, string metaprojectPath, string message) : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(128), AllowMultiple=false, Inherited=false)]
     public sealed partial class OutputAttribute : System.Attribute
@@ -395,8 +390,8 @@ namespace Microsoft.Build.Framework
     public delegate void ProjectFinishedEventHandler(object sender, Microsoft.Build.Framework.ProjectFinishedEventArgs e);
     public partial class ProjectImportedEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
-        public ProjectImportedEventArgs() { }
-        public ProjectImportedEventArgs(int lineNumber, int columnNumber, string message, params object[] messageArgs) { }
+        public ProjectImportedEventArgs() : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
+        public ProjectImportedEventArgs(int lineNumber, int columnNumber, string message, params object[] messageArgs) : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
         public string ImportedProjectFile { get { throw null; } set { } }
         public bool ImportIgnored { get { throw null; } set { } }
         public string UnexpandedProject { get { throw null; } set { } }
@@ -422,16 +417,16 @@ namespace Microsoft.Build.Framework
     public delegate void ProjectStartedEventHandler(object sender, Microsoft.Build.Framework.ProjectStartedEventArgs e);
     public partial class PropertyInitialValueSetEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
-        public PropertyInitialValueSetEventArgs() { }
-        public PropertyInitialValueSetEventArgs(string propertyName, string propertyValue, string propertySource, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) { }
+        public PropertyInitialValueSetEventArgs() : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
+        public PropertyInitialValueSetEventArgs(string propertyName, string propertyValue, string propertySource, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
         public string PropertyName { get { throw null; } set { } }
         public string PropertySource { get { throw null; } set { } }
         public string PropertyValue { get { throw null; } set { } }
     }
     public partial class PropertyReassignmentEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
-        public PropertyReassignmentEventArgs() { }
-        public PropertyReassignmentEventArgs(string propertyName, string previousValue, string newValue, string location, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) { }
+        public PropertyReassignmentEventArgs() : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
+        public PropertyReassignmentEventArgs(string propertyName, string previousValue, string newValue, string location, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
         public string Location { get { throw null; } set { } }
         public string NewValue { get { throw null; } set { } }
         public string PreviousValue { get { throw null; } set { } }
@@ -548,8 +543,8 @@ namespace Microsoft.Build.Framework
     public delegate void TargetFinishedEventHandler(object sender, Microsoft.Build.Framework.TargetFinishedEventArgs e);
     public partial class TargetSkippedEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
-        public TargetSkippedEventArgs() { }
-        public TargetSkippedEventArgs(string message, params object[] messageArgs) { }
+        public TargetSkippedEventArgs() : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
+        public TargetSkippedEventArgs(string message, params object[] messageArgs) : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
         public Microsoft.Build.Framework.TargetBuiltReason BuildReason { get { throw null; } set { } }
         public string ParentTarget { get { throw null; } set { } }
         public string TargetFile { get { throw null; } set { } }
@@ -570,9 +565,9 @@ namespace Microsoft.Build.Framework
     public delegate void TargetStartedEventHandler(object sender, Microsoft.Build.Framework.TargetStartedEventArgs e);
     public partial class TaskCommandLineEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
-        protected TaskCommandLineEventArgs() { }
-        public TaskCommandLineEventArgs(string commandLine, string taskName, Microsoft.Build.Framework.MessageImportance importance) { }
-        public TaskCommandLineEventArgs(string commandLine, string taskName, Microsoft.Build.Framework.MessageImportance importance, System.DateTime eventTimestamp) { }
+        protected TaskCommandLineEventArgs() : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
+        public TaskCommandLineEventArgs(string commandLine, string taskName, Microsoft.Build.Framework.MessageImportance importance) : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
+        public TaskCommandLineEventArgs(string commandLine, string taskName, Microsoft.Build.Framework.MessageImportance importance, System.DateTime eventTimestamp) : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
         public string CommandLine { get { throw null; } }
         public string TaskName { get { throw null; } }
     }
@@ -616,8 +611,8 @@ namespace Microsoft.Build.Framework
     public delegate void TelemetryEventHandler(object sender, Microsoft.Build.Framework.TelemetryEventArgs e);
     public partial class UninitializedPropertyReadEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
-        public UninitializedPropertyReadEventArgs() { }
-        public UninitializedPropertyReadEventArgs(string propertyName, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) { }
+        public UninitializedPropertyReadEventArgs() : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
+        public UninitializedPropertyReadEventArgs(string propertyName, string message, string helpKeyword=null, string senderName=null, Microsoft.Build.Framework.MessageImportance importance=(Microsoft.Build.Framework.MessageImportance)(2)) : base (default(string), default(string), default(string), default(Microsoft.Build.Framework.MessageImportance)) { }
         public string PropertyName { get { throw null; } set { } }
     }
 }

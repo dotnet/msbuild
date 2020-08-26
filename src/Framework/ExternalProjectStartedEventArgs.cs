@@ -23,7 +23,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Default constructor
         /// </summary>
-        protected ExternalProjectStartedEventArgs()
+        internal ExternalProjectStartedEventArgs()
             : base()
         {
             // nothing to do here, move along.
