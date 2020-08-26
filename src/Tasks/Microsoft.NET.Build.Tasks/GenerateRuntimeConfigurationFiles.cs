@@ -29,8 +29,6 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string TargetFrameworkMoniker { get; set; }
 
-        public string TargetPlatformMoniker { get; set; }
-
         [Required]
         public string RuntimeConfigPath { get; set; }
 

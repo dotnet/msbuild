@@ -305,11 +305,6 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (_projectFileDependencies.Contains(package.Name))
                 {
-                    if (!_targetNameToAliasMap.ContainsKey(target.Name))
-                    {
-
-                    }
-
                     string frameworkAlias = _targetNameToAliasMap[target.Name];
 
                     TaskItem item = new TaskItem(packageId);
