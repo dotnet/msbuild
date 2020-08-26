@@ -1933,7 +1933,7 @@ namespace Microsoft.Build.Evaluation
             internal static string ExpandItemVectorsIntoString<T>(Expander<P, I> expander, string expression, IItemProvider<T> items, ExpanderOptions options, IElementLocation elementLocation)
                 where T : class, IItem
             {
-                if ((options & ExpanderOptions.ExpandItems) == 0)
+                if ((options & ExpanderOptions.ExpandItems) == 0 || expression.Length == 0)
                 {
                     return expression;
                 }

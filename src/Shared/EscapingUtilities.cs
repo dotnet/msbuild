@@ -52,7 +52,7 @@ namespace Microsoft.Build.Shared
             int indexOfPercent = escapedString.IndexOf('%');
             if (indexOfPercent == -1)
             {
-                return escapedString;
+                return trim ? escapedString.Trim() : escapedString;
             }
 
             // This is where we're going to build up the final string to return to the caller.
@@ -70,7 +70,7 @@ namespace Microsoft.Build.Shared
                 {
                     return String.Empty;
                 }
-                while (Char.IsWhiteSpace(escapedString[escapedStringLength]))
+                while (Char.IsWhiteSpace(escapedString[escapedStringLength - 1]))
                 {
                     escapedStringLength--;
                 }
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Shared
                 // There must be two hex characters following the percent sign
                 // for us to even consider doing anything with this.
                 if (
-                        (indexOfPercent <= (escapedString.Length - 3)) &&
+                        (indexOfPercent <= (escapedStringLength - 3)) &&
                         IsHexDigit(escapedString[indexOfPercent + 1]) &&
                         IsHexDigit(escapedString[indexOfPercent + 2])
                     )

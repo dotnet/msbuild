@@ -234,7 +234,7 @@ namespace Microsoft.Build.Shared
             }
             int start = IsSlash(path[0]) ? 1 : 0;
             int end = IsSlash(path[path.Length - 1]) ? 1 : 0;
-            return path.Substring(start, path.Length - start - end);
+            return path.Length - start - end > 0 ? path.Substring(start, path.Length - start - end) : String.Empty;
         }
 
         /// <summary>
