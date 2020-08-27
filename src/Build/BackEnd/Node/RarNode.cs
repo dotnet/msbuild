@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CodeDom;
 using System.Diagnostics;
 using System.IO.Pipes;
 using System.Reflection;
@@ -58,10 +59,10 @@ namespace Microsoft.Build.Execution
             const string rarControllerName = "Microsoft.Build.Tasks.ResolveAssemblyReferences.Server.RarController, Microsoft.Build.Tasks.Core";
             Type rarControllerType = Type.GetType(rarControllerName);
 
-            IRarController controller = (IRarController)Activator.CreateInstance(rarControllerType, pipeName, null);
-            ErrorUtilities.VerifyThrow(controller != null, "Couldn't create instace of IRarController for '{0}' type", rarControllerName);
+            Func<string, int?, int?, int, bool, NamedPipeServerStream> streamFactory = NamedPipeUtil.CreateNamedPipeServer;
+            IRarController controller = (IRarController)Activator.CreateInstance(rarControllerType, pipeName, streamFactory, null);
 
-            controller.SetStreamFactory(NamedPipeUtil.CreateNamedPipeServer);
+            ErrorUtilities.VerifyThrow(controller != null, "Couldn't create instace of IRarController for '{0}' type", rarControllerName);
             return controller;
         }
 
@@ -78,7 +79,7 @@ namespace Microsoft.Build.Execution
             while (true)
             {
                 if (cancellationToken.IsCancellationRequested)
-                    return NodeEngineShutdownReason.Error;
+                    return NodeEngineShutdownReason.BuildComplete;
 
                 using NamedPipeServerStream serverStream = NamedPipeUtil.CreateNamedPipeServer(pipeName, maxNumberOfServerInstances: NamedPipeServerStream.MaxAllowedServerInstances);
                 await serverStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);

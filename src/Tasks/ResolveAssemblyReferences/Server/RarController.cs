@@ -33,7 +33,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         /// 4. arg. number of allow clients
         /// 5. arg. add right to CreateNewInstance
         /// </summary>
-        private Func<string, int?, int?, int, bool, NamedPipeServerStream>? _namedPipeServerFactory;
+        private readonly Func<string, int?, int?, int, bool, NamedPipeServerStream> _namedPipeServerFactory;
 
         /// <summary>
         /// Handler for all incoming tasks
@@ -46,15 +46,17 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         private readonly TimeSpan Timeout = TimeSpan.FromMinutes(15);
 
         public RarController(
-            string pipeName,
+            string pipeName, Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory,
             TimeSpan? timeout = null)
-            : this(pipeName, timeout: timeout, resolveAssemblyReferenceTaskHandler: new RarTaskHandler())
+            : this(pipeName, namedPipeServerFactory, timeout: timeout, resolveAssemblyReferenceTaskHandler: new RarTaskHandler())
         {
         }
 
-        internal RarController(string pipeName, IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler, TimeSpan? timeout = null)
+        internal RarController(string pipeName, Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory,
+            IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler, TimeSpan? timeout = null)
         {
             _pipeName = pipeName;
+            _namedPipeServerFactory = namedPipeServerFactory;
             _resolveAssemblyReferenceTaskHandler = resolveAssemblyReferenceTaskHandler;
 
             if (timeout.HasValue)
@@ -126,12 +128,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
                 null, // Use default size
                 NamedPipeServerStream.MaxAllowedServerInstances,
                 true);
-        }
-
-        public void SetStreamFactory(Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory)
-        {
-            ErrorUtilities.VerifyThrow(_namedPipeServerFactory == null, "Stream factory is already set");
-            _namedPipeServerFactory = namedPipeServerFactory;
         }
     }
 }
