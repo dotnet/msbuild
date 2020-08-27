@@ -419,7 +419,7 @@ namespace Microsoft.Build.Evaluation
         protected string ProjectDirectory { get; }
 
         // not a Lazy to reduce memory
-        private FileSpecMatcherTester FileMatcher
+        private ref FileSpecMatcherTester FileMatcher
         {
             get
             {
@@ -429,7 +429,7 @@ namespace Microsoft.Build.Evaluation
                     _fileMatcherInitialized = true;
                 }
 
-                return _fileMatcher;
+                return ref _fileMatcher;
             }
         }
 
