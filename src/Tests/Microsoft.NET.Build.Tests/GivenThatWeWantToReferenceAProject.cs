@@ -48,7 +48,7 @@ namespace Microsoft.NET.Build.Tests
             FailsBuild
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0.42407")]
         [InlineData("net5.0-windows", "net5.0", true)]
         [InlineData("net5.0", "net5.0-windows", false)]
         [InlineData("net5.0-windows", "net5.0-windows", true)]
