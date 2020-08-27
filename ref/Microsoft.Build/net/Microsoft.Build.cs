@@ -2054,3 +2054,17 @@ namespace Microsoft.Build.ObjectModelRemoting
         public string Value { get { throw null; } }
     }
 }
+namespace Microsoft.Build.Utilities
+{
+    public partial class ChangeWaves
+    {
+        public ChangeWaves() { }
+        public static bool IsChangeWaveEnabled(Microsoft.Build.Utilities.MSBuildChangeWaveVersion version) { throw null; }
+    }
+    public enum MSBuildChangeWaveVersion
+    {
+        v16_10 = 1,
+        v16_8 = 0,
+        v17_0 = 2,
+    }
+}

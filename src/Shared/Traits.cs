@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Utilities
@@ -30,6 +31,8 @@ namespace Microsoft.Build.Utilities
         }
 
         public EscapeHatches EscapeHatches { get; }
+
+        public readonly string MSBuildChangeWave = Environment.GetEnvironmentVariable("MSBUILDCHANGEWAVE");
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern
