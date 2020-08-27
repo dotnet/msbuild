@@ -1278,15 +1278,6 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 ISet<string> warningsAsMessages = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsAsMessages));
-                ISet<string> noWarn = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.NoWarn));
-                if (warningsAsMessages is null)
-                {
-                    warningsAsMessages = noWarn;
-                }
-                else if (noWarn is object)
-                {
-                    warningsAsMessages.UnionWith(noWarn);
-                }
 
                 if (warningsAsMessages?.Count > 0)
                 {

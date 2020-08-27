@@ -611,6 +611,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ContinueOnError Condition="'$(ContinueOnError)' == ''">false</ContinueOnError>
   </PropertyGroup>
 
+  <!-- Users familiar with how some other repos work try to use NoWarn with MSBuild in place of MSBuildWarningsAsMessages. -->
+  <PropertyGroup Condition="'$(MSBuildWarningsAsMessages)'=='' And '$(changewave168)'=='true'">
+    <MSBuildWarningsAsMessages>$(NoWarn)</MSBuildWarningsAsMessages>
+  </PropertyGroup>
+
   <!-- Common Project System support -->
   <PropertyGroup>
     <CommonXamlResourcesDirectory Condition=" '$(CommonXamlResourcesDirectory)' == '' ">$(MSBuildThisFileDirectory)$(LangName)\</CommonXamlResourcesDirectory>
