@@ -203,7 +203,7 @@
     <value>Generators</value>
   </data>
   <data name="GenericPlaceholderTemplateContextError" xml:space="preserve">
-    <value>{0} cannot be created in the target location.</value>
+    <value>Cannot retrieve the type for {0}.</value>
   </data>
   <data name="GettingReady" xml:space="preserve">
     <value>Getting ready...</value>
@@ -345,9 +345,6 @@ See https://aka.ms/dotnet-install-templates to learn how to install additional t
   </data>
   <data name="TemplateMultiplePartialNameMatches" xml:space="preserve">
     <value>The following templates partially match the input. Be more specific with the template name and/or language.</value>
-  </data>
-  <data name="TemplateNotValidGivenTheSpecifiedFilter" xml:space="preserve">
-    <value>{0} matches the specified name, but has been excluded by the --type parameter. Remove or change the --type parameter to use that template.</value>
   </data>
   <data name="Templates" xml:space="preserve">
     <value>Templates</value>
@@ -675,5 +672,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   </data>
   <data name="InteractiveHelp" xml:space="preserve">
     <value>Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication).</value>
+  </data>
+  <data name="TemplatesNotValidGivenTheSpecifiedFilter" xml:space="preserve">
+    <value>{0} template(s) partially matched, but failed on {1}.</value>
   </data>
 </root>
