@@ -142,6 +142,11 @@ namespace Microsoft.Build.Utilities
         public readonly bool DoNotTruncateConditions = Environment.GetEnvironmentVariable("MSBuildDoNotTruncateConditions") == "1";
 
         /// <summary>
+        /// Disables skipping full drive/filesystem globs that are behind a false condition.
+        /// </summary>
+        public readonly bool AlwaysEvaluateDangerousGlobs = Environment.GetEnvironmentVariable("MSBuildAlwaysEvaluateDangerousGlobs") == "1";
+
+        /// <summary>
         /// Emit events for project imports.
         /// </summary>
         private bool? _logProjectImports;
