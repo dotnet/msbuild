@@ -1033,6 +1033,7 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] SatelliteAssemblies { get { throw null; } set { } }
         public bool SigningManifests { get { throw null; } set { } }
         public string TargetCulture { get { throw null; } set { } }
+        public string TargetFrameworkIdentifier { get { throw null; } set { } }
         public string TargetFrameworkVersion { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }

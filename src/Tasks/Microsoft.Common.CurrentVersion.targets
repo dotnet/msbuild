@@ -3792,6 +3792,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <ResolveManifestFiles
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         SigningManifests="$(SignManifests)"
         DeploymentManifestEntryPoint="@(ApplicationManifest)"
         PublishFiles="@(_DeploymentPublishFileOfTypeManifestEntryPoint)">
@@ -3944,6 +3945,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     </GenerateLauncher>
 
+    <!-- Sign Launcher EXE -->
+    <SignFile
+        CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
+        TimestampUrl="$(ManifestTimestampUrl)"
+        SigningTarget="@(_DeploymentManifestLauncherEntryPoint)"
+        TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        Condition="'$(_DeploymentSignClickOnceManifests)'=='true'" />
+
     <!--
       Replace entry-point with Launcher and move original project's entry-point to content group.
     -->
@@ -4043,10 +4052,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Create list of items for manifest generation -->
     <ResolveManifestFiles
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         SigningManifests="$(SignManifests)"
         EntryPoint="@(_DeploymentClickOnceApplicationExecutable)"
         ExtraFiles="@(_DebugSymbolsIntermediatePath);$(IntermediateOutputPath)$(TargetName).xml;@(_ReferenceRelatedPaths)"
         Files="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath)"
+        Files="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce)"
         ManagedAssemblies="@(_ManifestManagedReferences)"
         NativeAssemblies="@(NativeReferenceFile);@(_DeploymentNativePrerequisite)"
         PublishFiles="@(PublishFile)"
