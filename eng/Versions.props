@@ -27,7 +27,7 @@
     <NewtonsoftJsonVersion>$(NewtonsoftJsonPackageVersion)</NewtonsoftJsonVersion>
     <SystemDiagnosticsFileVersionInfoVersion>4.0.0</SystemDiagnosticsFileVersionInfoVersion>
     <SystemReflectionMetadataVersion>1.8.0</SystemReflectionMetadataVersion>
-    <MicrosoftDotNetSignToolVersion>5.0.0-beta.20424.23</MicrosoftDotNetSignToolVersion>
+    <MicrosoftDotNetSignToolVersion>5.0.0-beta.20426.1</MicrosoftDotNetSignToolVersion>
     <MicrosoftWebXdtPackageVersion>3.1.0</MicrosoftWebXdtPackageVersion>
     <SystemSecurityCryptographyProtectedDataPackageVersion>5.0.0-rc.1.20427.1</SystemSecurityCryptographyProtectedDataPackageVersion>
     <SystemCollectionsSpecializedPackageVersion>4.3.0</SystemCollectionsSpecializedPackageVersion>
@@ -141,7 +141,7 @@
   <PropertyGroup>
     <FluentAssertionsVersion>4.19.2</FluentAssertionsVersion>
     <FluentAssertionsJsonVersion>4.19.0</FluentAssertionsJsonVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>5.0.0-beta.20424.23</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>5.0.0-beta.20426.1</MicrosoftDotNetXUnitExtensionsVersion>
   </PropertyGroup>
   <PropertyGroup>
     <ExeExtension>.exe</ExeExtension>
