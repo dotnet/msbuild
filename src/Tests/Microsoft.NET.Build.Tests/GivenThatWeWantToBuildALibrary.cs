@@ -454,8 +454,8 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData(new[] { "1.0", "1.1" }, "ios", "1.1", new[] { "IOS", "IOS1_1", "IOS1_0" })]
         [InlineData(new[] { "11.11", "12.12", "13.13" }, "android", "12.12", new[] { "ANDROID", "ANDROID11_11", "ANDROID12_12" })]
-        [InlineData(new string[] { /* Use the built in SupportedTargetPlatform items */}, "windows", "10.0.19041", new[] { "WINDOWS", "WINDOWS7_0", "WINDOWS8_0", "WINDOWS10_0_17763", "WINDOWS10_0_18362", "WINDOWS10_0_19041" })]
-        public void It_implicitly_defines_compilation_constants_for_the_target_platform_with_backwards_compatibility(string[] supportedTargetPlatform, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
+        [InlineData(new string[] { /* Use the built in SdkSupportedTargetPlatform items */}, "windows", "10.0.19041", new[] { "WINDOWS", "WINDOWS7_0", "WINDOWS8_0", "WINDOWS10_0_17763", "WINDOWS10_0_18362", "WINDOWS10_0_19041" })]
+        public void It_implicitly_defines_compilation_constants_for_the_target_platform_with_backwards_compatibility(string[] sdkSupportedTargetPlatform, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
         {
             var targetFramework = "net5.0";
             var testAsset = _testAssetsManager
@@ -480,9 +480,9 @@ namespace Microsoft.NET.Build.Tests
 
                     var itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
-                    foreach (var targetPlatform in supportedTargetPlatform)
+                    foreach (var targetPlatform in sdkSupportedTargetPlatform)
                     {
-                        itemGroup.Add(new XElement(ns + "SupportedTargetPlatform", new XAttribute("Include", targetPlatform)));
+                        itemGroup.Add(new XElement(ns + "SdkSupportedTargetPlatform", new XAttribute("Include", targetPlatform)));
                     }
                 });
 
@@ -948,6 +948,64 @@ class Program
             }
 
 
+        }
+
+        [Theory]
+        [InlineData("netcoreapp3.1")]
+        [InlineData("netcoreapp5.0")]
+        public void It_makes_RootNamespace_safe_when_project_name_has_spaces(string targetFramework)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "Project Name With Spaces",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            // Overwrite the default file. CreateTestProject uses the defined project name for the namespace.
+            // We need a buildable project to extract the property to verify it
+            // since this issue only surfaces in VS when adding a new class through an item template.
+            File.WriteAllText(Path.Combine(testAsset.Path, testProject.Name, $"{testProject.Name}.cs"), @"
+using System;
+using System.Collections.Generic;
+
+namespace ProjectNameWithSpaces
+{
+    public class ProjectNameWithSpacesClass
+    {
+        public static string Name { get { return ""Project Name With Spaces""; } }
+        public static List<string> List { get { return null; } }
+    }
+}");
+            string projectFolder = Path.Combine(testAsset.Path, testProject.Name);
+
+            var buildCommand = new BuildCommand(testAsset, $"{ testProject.Name}");
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string GetPropertyValue(string propertyName)
+            {
+                var getValuesCommand = new GetValuesCommand(Log, projectFolder,
+                    testProject.TargetFrameworks, propertyName, GetValuesCommand.ValueType.Property)
+                {
+                    Configuration = "Debug"
+                };
+
+                getValuesCommand
+                    .Execute()
+                    .Should()
+                    .Pass();
+
+                var values = getValuesCommand.GetValues();
+                values.Count.Should().Be(1);
+                return values[0];
+            }
+
+            GetPropertyValue("RootNamespace").Should().Be("Project_Name_With_Spaces");
         }
     }
 }

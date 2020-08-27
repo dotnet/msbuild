@@ -40,7 +40,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
                 TargetFrameworkMoniker = ".NETCoreApp,Version=v3.0",
-                TargetFramework = "netcoreapp3.0",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]
@@ -82,7 +81,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
                 TargetFrameworkMoniker = ".NETCoreApp,Version=v3.0",
-                TargetFramework = "netcoreapp3.0",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]
@@ -143,7 +141,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 BuildEngine = new MockNeverCacheBuildEngine4(),
                 TargetFrameworkMoniker = ".NETCoreApp,Version=v3.0",
-                TargetFramework = "netcoreapp3.0",
                 RuntimeConfigPath = _runtimeConfigPath,
                 RuntimeConfigDevPath = _runtimeConfigDevPath,
                 RuntimeFrameworks = new[]
@@ -184,6 +181,44 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     "There is no Microsoft.NETCore.App.");
         }
 
+        [Fact]
+        public void GivenTargetMonikerItGeneratesShortName()
+        {
+            var task = new TestableGenerateRuntimeConfigurationFiles
+            {
+                BuildEngine = new MockNeverCacheBuildEngine4(),
+                TargetFrameworkMoniker = ".NETCoreApp,Version=v5.0",
+                RuntimeConfigPath = _runtimeConfigPath,
+                RuntimeConfigDevPath = _runtimeConfigDevPath,
+                RuntimeFrameworks = new[]
+                {
+                    new MockTaskItem(
+                        "Microsoft.NETCore.App",
+                        new Dictionary<string, string>
+                        {
+                            {"FrameworkName", "Microsoft.NETCore.App"}, {"Version", "5.0.0"}
+                        }
+                    )
+                },
+                RollForward = "LatestMinor"
+            };
+
+            Action a = () => task.PublicExecuteCore();
+            a.ShouldNotThrow();
+
+            File.ReadAllText(_runtimeConfigPath).Should()
+                .Be(
+                    @"{
+  ""runtimeOptions"": {
+    ""tfm"": ""net5.0"",
+    ""rollForward"": ""LatestMinor"",
+    ""framework"": {
+      ""name"": ""Microsoft.NETCore.App"",
+      ""version"": ""5.0.0""
+    }
+  }
+}");
+        }
 
         private class TestableGenerateRuntimeConfigurationFiles : GenerateRuntimeConfigurationFiles
         {

@@ -7,6 +7,11 @@
         <target state="translated">Permet à la commande de s'arrêter et d'attendre une entrée ou une action de l'utilisateur (par exemple pour effectuer une authentification).</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandPrereleaseOptionDescription">
+        <source>Allows prerelease packages to be installed.</source>
+        <target state="new">Allows prerelease packages to be installed.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">Projet introuvable dans '{0}'.</target>

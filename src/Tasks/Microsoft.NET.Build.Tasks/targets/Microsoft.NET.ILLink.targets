@@ -38,6 +38,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkInformation ResourceName="ILLink_Info" />
 
+    <NETSdkError Condition="'$(_ILLinkExitCode)' != '' And '$(_ILLinkExitCode)' != '0'" ResourceName="ILLinkFailed" />
+
     <ItemGroup>
       <_LinkedResolvedFileToPublish Include="@(_LinkedResolvedFileToPublishCandidate)" Condition="Exists('%(Identity)')" />
       <ResolvedFileToPublish Remove="@(ManagedAssemblyToLink)" />
@@ -98,15 +100,24 @@ Copyright (c) .NET Foundation. All rights reserved.
             IPConstProp="$(_TrimmerIPConstProp)"
             Sealer="$(_TrimmerSealer)"
 
+            Warn="$(ILLinkWarningLevel)"
+            NoWarn="$(NoWarn)"
+            TreatWarningsAsErrors="$(ILLinkTreatWarningsAsErrors)"
+            WarningsAsErrors="$(WarningsAsErrors)"
+            WarningsNotAsErrors="$(WarningsNotAsErrors)"
+
             CustomSteps="@(_TrimmerCustomSteps)"
             RootDescriptorFiles="@(TrimmerRootDescriptor)"
             OutputDirectory="$(IntermediateLinkDir)"
             DumpDependencies="$(_TrimmerDumpDependencies)"
             ExtraArgs="$(_ExtraTrimmerArgs)"
             ToolExe="$(_DotNetHostFileName)"
-            ToolPath="$(_DotNetHostDirectory)" />
+            ToolPath="$(_DotNetHostDirectory)"
+            ContinueOnError="ErrorAndContinue">
+        <Output TaskParameter="ExitCode" PropertyName="_ILLinkExitCode" />
+      </ILLink>
 
-     <Touch Files="$(_LinkSemaphore)" AlwaysCreate="true" />
+     <Touch Files="$(_LinkSemaphore)" AlwaysCreate="true" Condition=" '$(_ILLinkExitCode)' == '0' " />
 
   </Target>
 
@@ -132,8 +143,46 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(SelfContained)' != 'true'" ResourceName="ILLinkNotSupportedError" />
 
     <PropertyGroup>
+      <ILLinkWarningLevel Condition=" '$(ILLinkWarningLevel)' == '' And
+                                      '$(EffectiveAnalysisLevel)' != '' And
+                                       $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '5.0')) ">5</ILLinkWarningLevel>
+      <ILLinkWarningLevel Condition=" '$(ILLinkWarningLevel)' == '' ">0</ILLinkWarningLevel>
+      <ILLinkTreatWarningsAsErrors Condition=" '$(ILLinkTreatWarningsAsErrors)' == '' ">$(TreatWarningsAsErrors)</ILLinkTreatWarningsAsErrors>
+      <SuppressTrimAnalysisWarnings Condition=" '$(SuppressTrimAnalysisWarnings)' == '' ">true</SuppressTrimAnalysisWarnings>
       <_ExtraTrimmerArgs>--skip-unresolved true $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
       <TrimMode Condition=" '$(TrimMode)' == '' ">copyused</TrimMode>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition=" '$(SuppressTrimAnalysisWarnings)' == 'true' ">
+      <!-- RequiresUnreferenceCodeAttribute method called -->
+      <NoWarn>$(NoWarn);IL2026</NoWarn>
+      <!-- Invalid use of DynamicallyAccessedMembersAttribute -->
+      <NoWarn>$(NoWarn);IL2041;IL2042;IL2043;IL2056</NoWarn>
+      <!-- Reference to removed attribute type -->
+      <NoWarn>$(NoWarn);IL2045</NoWarn>
+      <!-- RequiresUnreferencedCodeAttribute mismatch on virtual override -->
+      <NoWarn>$(NoWarn);IL2046</NoWarn>
+      <!-- COM marshalling warning -->
+      <NoWarn>$(NoWarn);IL2050</NoWarn>
+      <!-- Reflection intrinsics with unknown arguments -->
+      <NoWarn>$(NoWarn);IL2032;IL2055;IL2057;IL2058;IL2059;IL2060;IL2061;IL2096</NoWarn>
+      <!-- Unknown values passed to locations with DynamicallyAccessedMemberTypes -->
+      <NoWarn>$(NoWarn);IL2062;IL2063;IL2064;IL2065;IL2066</NoWarn>
+      <!-- Unsatisfied DynamicallyAccessedMembers requirements -->
+      <NoWarn>$(NoWarn);IL2067;IL2068;IL2069;IL2070;IL2071;IL2072;IL2073;IL2074;IL2075;IL2076;IL2077;IL2078;IL2079;IL2080;IL2081;IL2082;IL2083;IL2084;IL2085;IL2086;IL2087;IL2088;IL2089;IL2090;IL2091</NoWarn>
+      <!-- DynamicallyAccessedMembersAttribute mismatch on virtual override -->
+      <NoWarn>$(NoWarn);IL2092;IL2093;IL2094;IL2095</NoWarn>
+      <!-- DynamicallyAccessedMembersAttribute used on unsupported member -->
+      <NoWarn>$(NoWarn);IL2097;IL2098;IL2099</NoWarn>
+
+      <!-- Warnings from the framework. Can be removed once https://github.com/dotnet/runtime/issues/40336 is fixed. -->
+      <!-- Framework embedded XML descriptors reference windows-only members. -->
+      <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2008</NoWarn> <!-- Unresolved type referenced in XML. -->
+      <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2009</NoWarn> <!-- Unresolved member on type referenced in XML. -->
+      <!-- Framework has DynamicDependencyAttributes that reference windows-only members. -->
+      <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2037</NoWarn> <!-- Unresolved member for DynamicDependencyAttribute -->
+      <!-- Framework embedded XML descriptors reference 32-bit-only members. -->
+      <NoWarn Condition=" '$(PlatformTarget)' != 'x64' AND '$(PlatformTarget)' != 'arm64'">$(NoWarn);IL2009;IL2012</NoWarn> <!-- Unresolved field referenced in XML -->
     </PropertyGroup>
 
     <!-- Set a default value for TrimmerRemoveSymbols unless set explicitly. -->

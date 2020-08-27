@@ -11,12 +11,15 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--C++/CLI does not support nuget restore which is required for Windows SDK Ref. Also these are C# projections.-->
   <PropertyGroup Condition=" '$(DisableImplicitFrameworkReferences)' != 'true'
                              and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                              and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))
                              and '$(TargetPlatformIdentifier)' == 'Windows'
                              and '$(TargetPlatformVersion)' != ''
-                             and $([MSBuild]::VersionGreaterThanOrEquals($(TargetPlatformVersion), '10.0')) ">
+                             and $([MSBuild]::VersionGreaterThanOrEquals($(TargetPlatformVersion), '10.0'))
+                             and '$(Language)' != 'C++'">
     <_IncludeWindowsSDKRefFrameworkReferences>true</_IncludeWindowsSDKRefFrameworkReferences>
   </PropertyGroup>
 

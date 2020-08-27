@@ -7,6 +7,11 @@
         <target state="translated">Permite que o comando seja interrompido e aguarde a ação ou entrada do usuário (por exemplo, para concluir a autenticação).</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommandPrereleaseOptionDescription">
+        <source>Allows prerelease packages to be installed.</source>
+        <target state="new">Allows prerelease packages to be installed.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">Não foi possível encontrar nenhum projeto em ‘{0}’.</target>

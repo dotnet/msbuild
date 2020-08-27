@@ -96,65 +96,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining(Strings.WindowsDesktopFrameworkRequiresWindows);
         }
 
-        [Fact]
-        public void It_does_not_download_desktop_targeting_packs_on_unix()
-        {
-            const string ProjectName = "NoDownloadTargetingPackTest";
-
-            var testProject = new TestProject()
-            {
-                Name = ProjectName,
-                TargetFrameworks = "net5.0",
-                IsSdkProject = true,
-                IsExe = true,
-            };
-
-            testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
-
-            var asset = _testAssetsManager.CreateTestProject(testProject);
-
-            var command = new BuildCommand(asset);
-
-            command
-                .Execute()
-                .Should()
-                .Pass();
-
-            Directory.Exists(Path.Combine(asset.Path, ProjectName, "packages")).Should().BeFalse();
-        }
-
-        [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
-        public void It_does_not_download_desktop_runtime_packs_on_unix()
-        {
-            const string ProjectName = "NoDownloadRuntimePackTest";
-            const string Rid = "win-x64";
-
-            var testProject = new TestProject()
-            {
-                Name = ProjectName,
-                TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
-                IsExe = true,
-                RuntimeIdentifier = Rid
-            };
-
-            testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
-
-            var asset = _testAssetsManager.CreateTestProject(testProject);
-
-            var command = new PublishCommand(Log, Path.Combine(asset.Path, ProjectName));
-
-            command
-                .Execute()
-                .Should()
-                .Pass();
-
-            new DirectoryInfo(Path.Combine(asset.Path, ProjectName, "packages"))
-                .Should()
-                .NotHaveSubDirectories($"runtime.{Rid}.microsoft.windowsdesktop.app");
-        }
-
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0", "TargetPlatformIdentifier", "Windows", "Exe")]
         [InlineData("netcoreapp3.1", "UseWindowsForms", "true", "WinExe")]
         [InlineData("netcoreapp3.1", "UseWPF", "true", "WinExe")]
@@ -183,7 +125,7 @@ namespace Microsoft.NET.Build.Tests
             values.First().Should().Be(expectedOutputType);
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_builds_on_windows_with_the_windows_desktop_sdk_5_0_with_ProjectSdk_set()
         {
             const string ProjectName = "WindowsDesktopSdkTest_50";
@@ -212,7 +154,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_builds_on_windows_with_the_windows_desktop_sdk_5_0_without_ProjectSdk_set()
         {
             const string ProjectName = "WindowsDesktopSdkTest_without_ProjectSdk_set";
@@ -241,7 +183,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void When_TargetPlatformVersion_is_set_higher_than_10_It_can_reference_cswinrt_api()
         {
             const string ProjectName = "WindowsDesktopSdkTest_without_ProjectSdk_set";

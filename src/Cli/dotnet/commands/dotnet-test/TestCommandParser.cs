@@ -141,7 +141,7 @@ namespace Microsoft.DotNet.Cli
                               })),
 
                   Create.Option(
-                        "--nologo|/nologo",
+                        "--nologo",
                         LocalizableStrings.CmdNoLogo,
                         Accept.NoArguments()
                               .ForwardAsSingle(o => "-property:VSTestNoLogo=nologo")),

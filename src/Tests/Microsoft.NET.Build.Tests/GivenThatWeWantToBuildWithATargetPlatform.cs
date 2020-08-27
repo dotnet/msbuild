@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [WindowsOnlyRequiresMSBuildVersionTheory("16.8.0-preview-20411-03")]
+        [WindowsOnlyRequiresMSBuildVersionTheory("16.8.0.41402")]
         [InlineData("netcoreapp3.1", ".NETCoreApp", "v3.1", "Windows", "7.0")] // Default values pre-5.0
         [InlineData("net5.0", ".NETCoreApp", "v5.0", "", "")]
         [InlineData("net5.0-Windows7.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
@@ -31,7 +31,7 @@ namespace Microsoft.NET.Build.Tests
             var testProj = new TestProject()
             {
                 Name = "TargetPlatformTests",
-                IsSdkProject = true, 
+                IsSdkProject = true,
                 TargetFrameworks = targetFramework
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProj);
@@ -45,11 +45,11 @@ namespace Microsoft.NET.Build.Tests
                     .Pass();
                 if (expected.Trim().Equals(string.Empty))
                 {
-                    getValuesCommand.GetValues().Count.Should().Be(0);
+                    getValuesCommand.GetValues().Count.Should().Be(0, $"expect '{valueName}' to be '{expected}'. But get {string.Join(";", getValuesCommand.GetValues())}");
                 }
                 else
                 {
-                    getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { expected });
+                    getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { expected }, $"Asserting \"{valueName}\"'s value");
                 }
             };
 
@@ -58,7 +58,7 @@ namespace Microsoft.NET.Build.Tests
             assertValue("TargetPlatformIdentifier", expectedTargetPlatformIdentifier);
             assertValue("TargetPlatformIdentifier", expectedTargetPlatformIdentifier);
             assertValue("TargetPlatformVersion", expectedTargetPlatformVersion);
-            assertValue("TargetPlatformMoniker", expectedTargetPlatformIdentifier.Equals(string.Empty) && expectedTargetPlatformVersion.Equals(string.Empty) ? 
+            assertValue("TargetPlatformMoniker", expectedTargetPlatformIdentifier.Equals(string.Empty) && expectedTargetPlatformVersion.Equals(string.Empty) ?
                 string.Empty : $"{expectedTargetPlatformIdentifier},Version={expectedTargetPlatformVersion}");
             assertValue("TargetPlatformDisplayName", $"{expectedTargetPlatformIdentifier} {expectedTargetPlatformVersion}");
         }
@@ -79,7 +79,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("NETSDK1136");
+                .HaveStdOutContaining("NETSDK1139");
         }
     }
 }

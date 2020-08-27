@@ -1,6 +1,6 @@
 ## Welcome to dotnet sdk
 
-This repo contains core functionality needed to create .NET Core projects, that is shared between VisualStudio and CLI.
+This repo contains core functionality needed to create .NET projects that is shared between VisualStudio and CLI.
 
 * MSBuild tasks can be found under [/src/Tasks/Microsoft.NET.Build.Tasks/](src/Tasks/Microsoft.NET.Build.Tasks).
 
@@ -29,6 +29,6 @@ From that shell your SDK will be available in:
 
 ## How do I engage and contribute?
 
-We welcome you to try things out, [file issues](https://github.com/dotnet/sdk/issues), make feature requests and join us in design conversations. Also be sure to check out our [project documentation](toolset/Documentation) and [Developer Guide](toolset/Documentation/project-docs/developer-guide.md).
+We welcome you to try things out, [file issues](https://github.com/dotnet/sdk/issues), make feature requests and join us in design conversations. Also be sure to check out our [project documentation](documentation) and [Developer Guide](documentation/project-docs/developer-guide.md).
 
-This project has adopted a code of conduct adapted from the [Contributor Covenant](http://contributor-covenant.org/) to clarify expected behavior in our community. This code of conduct has been [adopted by many other projects](http://contributor-covenant.org/adopters/). For more information see [Contributors Code of conduct](https://github.com/dotnet/home/blob/master/guidance/be-nice.md).
+This project has adopted the [.NET Foundation Code of Conduct](https://dotnetfoundation.org/code-of-conduct) to clarify expected behavior in our community.

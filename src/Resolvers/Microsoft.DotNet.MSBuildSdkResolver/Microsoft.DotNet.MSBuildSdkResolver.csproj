@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard2.0</TargetFrameworks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <RuntimeIdentifiers Condition="'$(OS)' == 'Windows_NT'">win-x86;win-x64</RuntimeIdentifiers>
+    <WarningsAsErrors>true</WarningsAsErrors>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <IsPackable>true</IsPackable>
+
+    <!--https://github.com/NuGet/Home/issues/3891#issuecomment-377319939-->
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+
+  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildPackageVersion)" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion)" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.DotNet.SdkResolver\Microsoft.DotNet.SdkResolver.csproj" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

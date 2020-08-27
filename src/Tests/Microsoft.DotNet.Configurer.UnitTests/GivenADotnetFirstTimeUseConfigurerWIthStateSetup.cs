@@ -48,18 +48,27 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         }
 
         [Theory]
-        [InlineData(false, false, false, Never, FirstRun, FirstRun, true, true)]
-        [InlineData(true, false, false, FirstRun, FirstRun, FirstRun, true, true)]
-        [InlineData(false, true, false, Never, FirstRun, Never, false, false)]
-        [InlineData(true, true, false, FirstRun, FirstRun, Never, false, false)]
-        [InlineData(false, false, true, Never, SecondRun, SecondRun, true, true)]
-        [InlineData(true, false, true, SecondRun, SecondRun, SecondRun, true, true)]
-        [InlineData(false, true, true, Never, SecondRun, Never, false, false)]
-        [InlineData(true, true, true, SecondRun, SecondRun, Never, false, false)]
+        [InlineData(false, false, false, false, Never, FirstRun, FirstRun, true, true)]
+        [InlineData(true, false, false, false, FirstRun, FirstRun, FirstRun, true, true)]
+        [InlineData(false, true, false, false, Never, FirstRun, Never, false, false)]
+        [InlineData(true, true, false, false, FirstRun, FirstRun, Never, false, false)]
+        [InlineData(false, false, true, false, Never, Never, Never, true, true)]
+        [InlineData(true, false, true, false, FirstRun, Never, Never, true, true)]
+        [InlineData(false, true, true, false, Never, Never, Never, false, false)]
+        [InlineData(true, true, true, false, FirstRun, Never, Never, false, false)]
+        [InlineData(false, false, false, true, Never, SecondRun, SecondRun, true, true)]
+        [InlineData(true, false, false, true, SecondRun, SecondRun, SecondRun, true, true)]
+        [InlineData(false, true, false, true, Never, SecondRun, Never, false, false)]
+        [InlineData(true, true, false, true, SecondRun, SecondRun, Never, false, false)]
+        [InlineData(false, false, true, true, Never, Never, Never, true, true)]
+        [InlineData(true, false, true, true, SecondRun, Never, Never, true, true)]
+        [InlineData(false, true, true, true, Never, Never, Never, false, false)]
+        [InlineData(true, true, true, true, SecondRun, Never, Never, false, false)]
         public void FlagsCombinationAndAction(
             // Inputs
             bool DOTNET_GENERATE_ASPNET_CERTIFICATE,
             bool DOTNET_CLI_TELEMETRY_OPTOUT,
+            bool DOTNET_NOLOGO,
             //   true to simulate install via installer. The first run is during installer,
             //   silent but has sudo permission
             //   false to simulate install via zip/tar.gz
@@ -75,11 +84,14 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             ResetObjectState();
 
             _environmentProvider
-            .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", It.IsAny<bool>()))
-            .Returns(DOTNET_GENERATE_ASPNET_CERTIFICATE);
+                .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", It.IsAny<bool>()))
+                .Returns(DOTNET_GENERATE_ASPNET_CERTIFICATE);
             _environmentProvider
                 .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_CLI_TELEMETRY_OPTOUT", It.IsAny<bool>()))
                 .Returns(DOTNET_CLI_TELEMETRY_OPTOUT);
+            _environmentProvider
+                .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_NOLOGO", It.IsAny<bool>()))
+                .Returns(DOTNET_NOLOGO);
             _environmentProvider
                 .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", It.IsAny<bool>()))
                 .Returns(true);
@@ -206,6 +218,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 _environmentProviderObject.GetEnvironmentVariableAsBool("DOTNET_CLI_TELEMETRY_OPTOUT", false);
             bool addGlobalToolsToPath =
                 _environmentProviderObject.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", defaultValue: true);
+            bool nologo =
+                _environmentProviderObject.GetEnvironmentVariableAsBool("DOTNET_NOLOGO", defaultValue: false);
 
             IAspNetCertificateSentinel aspNetCertificateSentinel;
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel;
@@ -233,7 +247,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                  (
                      generateAspNetCertificate: generateAspNetCertificate,
                      telemetryOptout: telemetryOptout,
-                     addGlobalToolsToPath: addGlobalToolsToPath
+                     addGlobalToolsToPath: addGlobalToolsToPath,
+                     nologo: nologo
                  ),
                  reporter: _reporterMock,
                  cliFallbackFolderPath: CliFallbackFolderPath,

@@ -8,7 +8,9 @@ using System.Xml.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
@@ -99,7 +101,33 @@ namespace Microsoft.NET.Publish.Tests
             DoesDepsFileHaveAssembly(depsFile, unusedFrameworkAssembly).Should().BeFalse();
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("netcoreapp3.0", "copyused")]
+        [InlineData("net5.0", "copyused")]
+        [InlineData("net5.0", "link")]
+        public void ILLink_links_simple_app_without_analysis_warnings_and_it_runs(string targetFramework, string trimMode)
+        {
+            var projectName = "HelloWorld";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true", "/p:PublishTrimmed=true", $"/p:TrimMode={trimMode}")
+                .Should().Pass()
+                .And.NotHaveStdOutContaining("warning IL2075")
+                .And.NotHaveStdOutContaining("warning IL2026");
+
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid);
+            var exe = Path.Combine(publishDirectory.FullName, $"{testProject.Name}{Constants.ExeSuffix}");
+
+            var command = new RunExeCommand(Log, exe)
+                .Execute().Should().Pass()
+                .And.HaveStdOutContaining("Hello world");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         public void PrepareForILLink_can_set_IsTrimmable(string targetFramework)
         {
@@ -124,7 +152,7 @@ namespace Microsoft.NET.Publish.Tests
             File.Exists(unusedIsTrimmableDll).Should().BeFalse();
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         public void PrepareForILLink_can_set_TrimMode(string targetFramework)
         {
@@ -149,7 +177,7 @@ namespace Microsoft.NET.Publish.Tests
             File.Exists(unusedTrimModeLinkDll).Should().BeFalse();
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         public void ILLink_respects_global_TrimMode(string targetFramework)
         {
@@ -178,6 +206,81 @@ namespace Microsoft.NET.Publish.Tests
             DoesImageHaveMethod(isTrimmableDll, "UnusedMethod").Should().BeFalse();
         }
 
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        public void ILLink_analysis_warnings_are_disabled_by_default(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true")
+                .Should().Pass()
+                // trim analysis warnings are disabled
+                .And.NotHaveStdOutContaining("warning IL2075")
+                .And.NotHaveStdOutContaining("warning IL2026")
+                .And.NotHaveStdOutContaining("warning IL2043")
+                .And.NotHaveStdOutContaining("warning IL2046")
+                .And.NotHaveStdOutContaining("warning IL2093");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        public void ILLink_accepts_option_to_enable_analysis_warnings(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false")
+                .Should().Pass()
+                .And.HaveStdOutMatching("warning IL2075.*Program.IL_2075")
+                .And.HaveStdOutMatching("warning IL2026.*Program.IL_2026.*Testing analysis warning IL2026")
+                .And.HaveStdOutMatching("warning IL2043.*Program.get_IL_2043")
+                .And.HaveStdOutMatching("warning IL2046.*Program.Derived.IL_2046")
+                .And.HaveStdOutMatching("warning IL2093.*Program.Derived.IL_2093");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        public void ILLink_errors_fail_the_build(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            // Set up a project with an invalid feature substitution, just to produce an error.
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            testProject.SourceFiles[$"{projectName}.xml"] = $@"
+<linker>
+  <assembly fullname=""{projectName}"">
+    <type fullname=""Program"" feature=""featuremissingvalue"" />
+  </assembly>
+</linker>
+";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => AddRootDescriptor(project, $"{projectName}.xml"));
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false")
+                .Should().Fail()
+                .And.HaveStdOutContaining("error IL1001")
+                .And.HaveStdOutContaining(Strings.ILLinkFailed);
+
+            var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+
+            var linkSemaphore = Path.Combine(intermediateDirectory, "Link.semaphore");
+            var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
+
+            File.Exists(linkSemaphore).Should().BeFalse();
+            File.Exists(publishedDll).Should().BeFalse();
+        }
 
         [Theory]
         [InlineData("netcoreapp3.0")]
@@ -214,7 +317,7 @@ namespace Microsoft.NET.Publish.Tests
             DoesImageHaveMethod(unusedDll, "UnusedMethodToRoot").Should().BeTrue();
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("_TrimmerBeforeFieldInit")]
         [InlineData("_TrimmerOverrideRemoval")]
         [InlineData("_TrimmerUnreachableBodies")]
@@ -235,7 +338,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should().Fail().And.HaveStdOutContaining("MSB4030");
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void ILLink_respects_feature_settings_from_host_config()
         {
             var projectName = "HelloWorld";
@@ -267,7 +370,7 @@ namespace Microsoft.NET.Publish.Tests
             DoesImageHaveMethod(referenceDll, "FeatureImplementation").Should().BeFalse();
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void ILLink_ignores_host_config_settings_with_link_false()
         {
             var projectName = "HelloWorld";
@@ -538,6 +641,112 @@ namespace Microsoft.NET.Publish.Tests
             publishPdbSize.Should().Be(linkedPdbSize);
         }
 
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        public void ILLink_can_treat_warnings_as_errors(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+                                    "/p:WarningsAsErrors=IL2075")
+                .Should().Fail()
+                .And.HaveStdOutContaining("error IL2075")
+                .And.HaveStdOutContaining("warning IL2026");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        public void ILLink_can_treat_warnings_not_as_errors(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+                                    "/p:TreatWarningsAsErrors=true", "/p:WarningsNotAsErrors=IL2075")
+                .Should().Fail()
+                .And.HaveStdOutContaining("error IL2026")
+                .And.HaveStdOutContaining("warning IL2075");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        public void ILLink_can_ignore_warnings(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+                                    "/p:NoWarn=IL2075", "/p:WarnAsError=IL2075")
+                .Should().Pass()
+                .And.NotHaveStdOutContaining("warning IL2075")
+                .And.NotHaveStdOutContaining("error IL2075")
+                .And.HaveStdOutContaining("warning IL2026");
+        }
+
+        [Theory]
+        [InlineData("net5.0")]
+        public void ILLink_respects_analysis_level(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+                                    "/p:AnalysisLevel=0.0")
+                .Should().Pass()
+                .And.NotHaveStdOutMatching(@"warning IL\d\d\d\d");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        public void ILLink_respects_warning_level_independently(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+                                    "/p:ILLinkWarningLevel=0")
+                .Should().Pass()
+                .And.NotHaveStdOutContaining("warning IL2075");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        public void ILLink_can_treat_warnings_as_errors_independently(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
+                                    "/p:TreatWarningsAsErrors=true", "/p:ILLinkTreatWarningsAsErrors=false")
+                .Should().Pass()
+                .And.HaveStdOutContaining("warning IL2075");
+        }
+
         [Theory]
         [InlineData("netcoreapp3.0")]
         public void ILLink_error_on_portable_app(string targetFramework)
@@ -551,7 +760,7 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand.Execute("/p:PublishTrimmed=true")
                 .Should().Fail()
-                .And.HaveStdOutContainingIgnoreCase("NETSDK1102");
+                .And.HaveStdOutContaining(Strings.ILLinkNotSupportedError);
         }
 
         [Theory]
@@ -560,12 +769,13 @@ namespace Microsoft.NET.Publish.Tests
         {
             var projectName = "HelloWorld";
             var referenceProjectName = "ClassLibForILLink";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:SelfContained=true", "/p:PublishTrimmed=true")
+            publishCommand.Execute("/p:PublishTrimmed=true", $"/p:RuntimeIdentifier={rid}", "/p:SelfContained=true", "/p:PublishTrimmed=true")
                 .Should().Pass().And.HaveStdOutContainingIgnoreCase("https://aka.ms/dotnet-illink");
         }
 
@@ -794,6 +1004,70 @@ namespace Microsoft.NET.Publish.Tests
                                     new XAttribute("Trim", trim.ToString ()))));
         }
 
+        private TestProject CreateTestProjectWithAnalysisWarnings(string targetFramework, string projectName)
+        {
+            var testProject = new TestProject()
+            {
+                Name = projectName,
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true,
+            };
+
+            testProject.SourceFiles[$"{projectName}.cs"] = @"
+using System;
+using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
+public class Program
+{
+    public static void Main()
+    {
+        IL_2075();
+        IL_2026();
+        _ = IL_2043;
+        new Derived().IL_2046();
+        new Derived().IL_2093();
+    }
+
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
+    public static string typeName;
+
+    public static void IL_2075()
+    {
+        _ = Type.GetType(typeName).GetMethod(""SomeMethod"");
+    }
+
+    [RequiresUnreferencedCode(""Testing analysis warning IL2026"")]
+    public static void IL_2026()
+    {
+    }
+
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
+    public static string IL_2043 {
+        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
+        get => null;
+    }
+
+    public class Base
+    {
+        [RequiresUnreferencedCode(""Testing analysis warning IL2046"")]
+        public virtual void IL_2046() {}
+
+        public virtual string IL_2093() => null;
+    }
+
+    public class Derived : Base
+    {
+        public override void IL_2046() {}
+
+        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
+        public override string IL_2093() => null;
+    }
+}
+";
+
+            return testProject;
+        }
+
         private TestProject CreateTestProjectForILLinkTesting(
             string targetFramework,
             string mainProjectName,
@@ -807,6 +1081,7 @@ namespace Microsoft.NET.Publish.Tests
                 Name = mainProjectName,
                 TargetFrameworks = targetFramework,
                 IsSdkProject = true,
+                IsExe = true
             };
 
             testProject.SourceFiles[$"{mainProjectName}.cs"] = @"

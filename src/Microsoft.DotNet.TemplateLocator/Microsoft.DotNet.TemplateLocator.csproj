@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard2.0</TargetFrameworks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <RuntimeIdentifiers Condition="'$(OS)' == 'Windows_NT'">win-x86;win-x64</RuntimeIdentifiers>
+    <WarningsAsErrors>true</WarningsAsErrors>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <IsPackable>true</IsPackable>
+    <!-- Create FileDefinitions items for ResolveHostfxrCopyLocalContent target -->
+    <EmitLegacyAssetsFileItems>true</EmitLegacyAssetsFileItems>
+
+    <PackageId>microsoft.dotnet.templateLocator</PackageId>
+
+    <!--https://github.com/NuGet/Home/issues/3891#issuecomment-377319939-->
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+
+  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="LinkVSEmbeddableAssemblies" DependsOnTargets="ResolveReferences" AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <ReferencePath Condition="'%(ReferencePath.FileName)' == 'Microsoft.VisualStudio.Setup.Configuration.Interop'">
+        <EmbedInteropTypes>true</EmbedInteropTypes>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Resolvers\Microsoft.DotNet.SdkResolver\Microsoft.DotNet.SdkResolver.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\Resolvers\Microsoft.DotNet.WorkloadManifestReader\Microsoft.DotNet.WorkloadManifestReader.csproj" PrivateAssets="All" />
+  </ItemGroup>
+</Project>

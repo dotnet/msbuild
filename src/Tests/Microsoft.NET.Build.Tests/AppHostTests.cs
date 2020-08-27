@@ -287,7 +287,7 @@ namespace Microsoft.NET.Build.Tests
                     testProject.Name + ".dll"),
                 DateTime.UtcNow.AddSeconds(5));
 
-            var intermediateAppHost = Path.Combine(intermediateDirectory, testProject.Name + Constants.ExeSuffix);
+            var intermediateAppHost = Path.Combine(intermediateDirectory, "apphost" + Constants.ExeSuffix);
 
             using (var stream = new FileStream(intermediateAppHost, FileMode.Open, FileAccess.Read, FileShare.None))
             {

@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputDll = Path.Combine(testInstance.Path, "bin", configuration, "netcoreapp3.0", $"{testAppName}.dll");
+            var outputDll = Path.Combine(testInstance.Path, "bin", configuration, "netcoreapp3.1", $"{testAppName}.dll");
 
             var outputRunCommand = new DotnetCommand(Log);
 
@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             string projectDirectory = Path.Combine(testInstance.Path, "MultiTFMTestApp");
 
             new DotnetBuildCommand(Log, projectDirectory)
-                .Execute("--framework", "netcoreapp3.0")
+                .Execute("--framework", "netcoreapp3.1")
                 .Should().Pass();
         }
 
@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputDll = Directory.EnumerateFiles(
-                Path.Combine(rootPath, "bin", configuration, "netcoreapp3.0"), "*.dll",
+                Path.Combine(rootPath, "bin", configuration, "netcoreapp3.1"), "*.dll",
                 SearchOption.TopDirectoryOnly)
                 .Single();
 

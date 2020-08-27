@@ -16,7 +16,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ImportGroup Condition="'$(UsingNETSdkDefaults)' != 'true'">
     <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
     <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />
-    <Import Project="Microsoft.NET.WindowsSupportedTargetPlatforms.props" />
+    <Import Project="Microsoft.NET.SupportedPlatforms.props" />
+    <Import Project="Microsoft.NET.WindowsSdkSupportedTargetPlatforms.props" />
   </ImportGroup>
 
   <PropertyGroup>
@@ -65,6 +66,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     Also, enforce that RuntimeIdentifier is always specified for .NETFramework executables.
   -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.RuntimeIdentifierInference.targets" />
+  
+  <!-- Checks for EOL frameworks -->
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.EolTargetFrameworks.targets" />
 
   <!-- Check if the Target Framework is coreclr based -->
   <PropertyGroup Condition="'$(_IsNETCoreOrNETStandard)' == ''">
@@ -211,7 +215,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GeneratePlatformCompatibleDefineConstants"
           Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) " >
     <ItemGroup>
-      <_SupportedPlatformCompatibleVersions Include="@(SupportedTargetPlatform)" Condition=" %(Identity) != '' and $([MSBuild]::VersionLessThan(%(Identity), $(TargetPlatformVersion))) " />
+      <_SupportedPlatformCompatibleVersions Include="@(SdkSupportedTargetPlatform)" Condition=" %(Identity) != '' and $([MSBuild]::VersionLessThan(%(Identity), $(TargetPlatformVersion))) " />
       <_ImplicitDefineConstant Include="@(_SupportedPlatformCompatibleVersions->'$(TargetPlatformIdentifier.ToUpper())%(Identity)'->Replace('.', '_'))" />
     </ItemGroup>
   </Target>
@@ -252,10 +256,5 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ItemGroup>
     <ProjectCapability Include="GenerateDocumentationFile" />
   </ItemGroup>
-
-  <!--Workaround for https://github.com/dotnet/sdk/issues/12856-->
-  <PropertyGroup Condition="'$(ReferringTargetFrameworkForProjectReferences)' == ''">
-    <ReferringTargetFrameworkForProjectReferences>$(TargetFramework)</ReferringTargetFrameworkForProjectReferences>
-  </PropertyGroup>
 
 </Project>
