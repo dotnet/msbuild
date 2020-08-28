@@ -179,7 +179,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          compile errors. -->
     <CheckForTargetInAssetsFile
       AssetsFilePath="$(ProjectAssetsFile)"
-      TargetFrameworkMoniker="$(NuGetTargetMoniker)"
+      TargetFramework="$(TargetFramework)"
       RuntimeIdentifier="$(RuntimeIdentifier)"
       Condition=" '$(DesignTimeBuild)' != 'true'"/>
 
@@ -244,8 +244,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ProjectPath="$(MSBuildProjectFullPath)"
       ProjectLanguage="$(Language)"
       EmitAssetsLogMessages="$(EmitAssetsLogMessages)"
-      TargetFrameworkMoniker="$(NuGetTargetMoniker)"
-      TargetPlatformMoniker="$(TargetPlatformMoniker)"
+      TargetFramework="$(TargetFramework)"
       RuntimeIdentifier="$(RuntimeIdentifier)"
       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
       RuntimeFrameworks="@(RuntimeFramework)"
@@ -314,7 +313,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           PackageDefinitions="@(PackageDefinitions)"
           PackageDependencies="@(PackageDependencies)"
           DefaultImplicitPackages="$(DefaultImplicitPackages)"
-          TargetFrameworkMoniker="$(NuGetTargetMoniker)">
+          TargetFramework="$(TargetFramework)">
 
       <Output TaskParameter="PackageDependenciesDesignTime" ItemName="_PackageDependenciesDesignTime" />
     </PreprocessPackageDependenciesDesignTime>

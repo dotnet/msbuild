@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml.Linq;
+using FluentAssertions;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -79,6 +80,37 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
+        [Theory]
+        [InlineData("netcoreapp3.0")]
+        [InlineData("net5.0")]
+        [InlineData("net5.0-windows")]
+        [InlineData("net5.0-windows7.0")]
+        public void DesignTimePackageDependenciesAreResolved(string targetFramework)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesignTimePackageDependencies",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.2", privateAssets: "All"));
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.6.2"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+
+            var getValuesCommand = new GetValuesCommand(testAsset, "_PackageDependenciesDesignTime", GetValuesCommand.ValueType.Item);
+            getValuesCommand.DependsOnTargets = "ResolvePackageDependenciesDesignTime";
+
+            getValuesCommand.Execute()
+                .Should()
+                .Pass();
+
+            getValuesCommand.GetValues()
+                .Should()
+                .BeEquivalentTo("Newtonsoft.Json/12.0.2", "Humanizer/2.6.2");
+        }
+
         private void TestDesignTimeBuildAfterChange(Action<XDocument> projectChange, [CallerMemberName] string callingMethod = "")
         {
             var designTimeArgs = GetDesignTimeMSBuildArgs();
@@ -103,7 +135,7 @@ namespace Microsoft.NET.Build.Tests
             //  Use a test-specific packages folder
             testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod: callingMethod)
                 .WithProjectChanges(p =>
                 {
                     var ns = p.Root.Name.Namespace;

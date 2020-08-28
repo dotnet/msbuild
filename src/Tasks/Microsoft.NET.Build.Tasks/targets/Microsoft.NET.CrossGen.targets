@@ -279,7 +279,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ResolveCopyLocalAssets Condition="'$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
                             AssetsFilePath="$(_CrossProjAssetsFile)"
                             TargetFramework="$(_TFM)"
-                            TargetPlatformMoniker="$(TargetPlatformMoniker)"
                             RuntimeIdentifier="$(RuntimeIdentifier)"
                             PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                             RuntimeFrameworks="@(RuntimeFramework)"

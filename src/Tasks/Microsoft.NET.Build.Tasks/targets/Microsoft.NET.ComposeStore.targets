@@ -420,8 +420,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <FilterResolvedFiles  AssetsFilePath="$(ProjectAssetsFile)"
                           ResolvedFiles ="@(_ResolvedCopyLocalPublishAssets)"
                           PackagesToPrune="$(PackagesToPrune)"
-                          TargetFramework="$(TargetFrameworkMoniker)"
-                          TargetPlatformMoniker="$(TargetPlatformMoniker)"
+                          TargetFramework="$(TargetFramework)"
                           RuntimeIdentifier="$(RuntimeIdentifier)"
                           IsSelfContained="$(SelfContained)" >
       <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedFileToPublish" />
