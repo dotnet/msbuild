@@ -51,8 +51,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                              '$(AnalysisLevel)' == 'preview'">9999</WarningLevel>
 
   </PropertyGroup>
-  <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.props"
-          Condition="$(EnableNETAnalyzers)" />
+  <!-- Unconditionally import 'Microsoft.CodeAnalysis.NetAnalyzers.props' for supporting https://github.com/dotnet/roslyn-analyzers/issues/3977 -->
+  <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.props"/>
   <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.targets"
           Condition="$(EnableNETAnalyzers)" />
 
