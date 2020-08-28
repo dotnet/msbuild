@@ -1181,7 +1181,7 @@ namespace Microsoft.Build.Evaluation
 
                 int rootLength = Path.GetPathRoot(projectDirectory).Length;
                 string projectDirectoryNoRoot = projectDirectory.Substring(rootLength);
-                projectDirectoryNoRoot = projectDirectoryNoRoot.Trim(new char[] { '\\', '/' });
+                projectDirectoryNoRoot = projectDirectoryNoRoot.Trim(FileUtilities.Slashes);
 
                 // ReservedPropertyNames.projectDefaultTargets is already set
                 SetBuiltInProperty(ReservedPropertyNames.projectFile, projectFile);
