@@ -5629,7 +5629,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Update entry point path in deploy manifest -->
     <UpdateManifest
         ApplicationPath="$(_DeploymentApplicationFolderName)\$(_DeploymentTargetApplicationManifestFileName)"
-        TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        TargetFrameworkVersion="$(_DeploymentManifestTargetFrameworkVersion)"
         ApplicationManifest="$(_DeploymentApplicationDir)$(_DeploymentTargetApplicationManifestFileName)"
         InputManifest="$(OutDir)$(TargetDeployManifestFileName)"
         OutputManifest="$(PublishDir)$(TargetDeployManifestFileName)">
