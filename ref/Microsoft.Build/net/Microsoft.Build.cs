@@ -869,6 +869,7 @@ namespace Microsoft.Build.Evaluation.Context
     {
         internal EvaluationContext() { }
         public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy) { throw null; }
+        public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy, Microsoft.Build.FileSystem.MSBuildFileSystemBase fileSystem) { throw null; }
         public enum SharingPolicy
         {
             Isolated = 1,

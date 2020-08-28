@@ -100,6 +100,11 @@
         <target state="translated">Sürüm dizesi doğru biçimde değildi.</target>
         <note />
       </trans-unit>
+      <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
+        <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
+        <target state="new">"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">Günlük kaydı ayrıntı düzeyi {0} olarak ayarlandı.</target>
