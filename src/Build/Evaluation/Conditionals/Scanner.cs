@@ -320,6 +320,7 @@ namespace Microsoft.Build.Evaluation
         private static bool ScanForPropertyExpressionEnd(string expression, int index, out int indexResult)
         {
             int nestLevel = 0;
+            bool whitespaceCheck = false;
 
             unsafe
             {
@@ -331,12 +332,14 @@ namespace Microsoft.Build.Evaluation
                         if (character == '(')
                         {
                             nestLevel++;
+                            whitespaceCheck = true;
                         }
                         else if (character == ')')
                         {
                             nestLevel--;
+                            whitespaceCheck = false;
                         }
-                        else if (char.IsWhiteSpace(character))
+                        else if (whitespaceCheck && char.IsWhiteSpace(character))
                         {
                             indexResult = index;
                             return false;
