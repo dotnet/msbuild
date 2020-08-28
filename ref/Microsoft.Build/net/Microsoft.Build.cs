@@ -1402,6 +1402,25 @@ namespace Microsoft.Build.Execution
         Success = (byte)1,
     }
 }
+namespace Microsoft.Build.FileSystem
+{
+    public abstract partial class MSBuildFileSystemBase
+    {
+        protected MSBuildFileSystemBase() { }
+        public abstract bool DirectoryExists(string path);
+        public abstract System.Collections.Generic.IEnumerable<string> EnumerateDirectories(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        public abstract System.Collections.Generic.IEnumerable<string> EnumerateFiles(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        public abstract System.Collections.Generic.IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        public abstract bool FileExists(string path);
+        public abstract bool FileOrDirectoryExists(string path);
+        public abstract System.IO.FileAttributes GetAttributes(string path);
+        public abstract System.IO.Stream GetFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share);
+        public abstract System.DateTime GetLastWriteTimeUtc(string path);
+        public abstract System.IO.TextReader ReadFile(string path);
+        public abstract byte[] ReadFileAllBytes(string path);
+        public abstract string ReadFileAllText(string path);
+    }
+}
 namespace Microsoft.Build.Globbing
 {
     public partial class CompositeGlob : Microsoft.Build.Globbing.IMSBuildGlob
