@@ -24,3 +24,5 @@
 
 /src/Cli/dotnet/commands/dotnet-new @DonJoseLuis
 /src/Tests/dotnet-new.Tests @DonJoseLuis
+
+/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.ClickOnce.targets @sujitnayak

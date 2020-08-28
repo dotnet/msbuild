@@ -34,6 +34,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
 
+  <Import Project="Microsoft.NET.$(PublishProtocol).targets" Condition="'$(PublishProtocol)' != '' and Exists('Microsoft.NET.$(PublishProtocol).targets')" />
+
   <PropertyGroup>
     <!-- We still need to resolve references even if we are not building during publish. -->
     <!-- BuildOnlySettings are required for RAR to find satellites and dependencies -->
@@ -49,6 +51,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_CorePublishTargets>
       PrepareForPublish;
       ComputeAndCopyFilesToPublishDirectory;
+      $(PublishProtocolProviderTargets);
     </_CorePublishTargets>
 
     <_PublishNoBuildAlternativeDependsOn>$(_BeforePublishNoBuildTargets);$(_CorePublishTargets)</_PublishNoBuildAlternativeDependsOn>
