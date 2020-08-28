@@ -170,11 +170,13 @@ namespace Microsoft.Build.Tasks
             }
 
             XPathNodeIterator iter = nav.Select(expr);
+            int count = 0;
 
             while (iter.MoveNext())
             {
                 try
                 {
+                    count++;
                     iter.Current.InnerXml = _value.ItemSpec;
                     Log.LogMessageFromResources(MessageImportance.Low, "XmlPoke.Replaced", iter.Current.Name, _value.ItemSpec);
                 }
@@ -190,9 +192,9 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            Log.LogMessageFromResources(MessageImportance.Normal, "XmlPoke.Count", iter.Count);
+            Log.LogMessageFromResources(MessageImportance.Normal, "XmlPoke.Count", count);
 
-            if (iter.Count > 0)
+            if (count > 0)
             {
 #if RUNTIME_TYPE_NETCORE
                 using (Stream stream = File.Create(_xmlInputPath.ItemSpec))
