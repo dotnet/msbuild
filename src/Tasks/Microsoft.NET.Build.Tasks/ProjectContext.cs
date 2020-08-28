@@ -79,11 +79,7 @@ namespace Microsoft.NET.Build.Tasks
             }
             else
             {
-                var frameworkAlias = lockFile.PackageSpec.TargetFrameworks.FirstOrDefault(tfi => tfi.FrameworkName == lockFileTarget.TargetFramework)?.TargetAlias;
-                if (frameworkAlias == null)
-                {
-                    throw new ArgumentException("Could not find TargetFramework alias in lock file for " + lockFileTarget.TargetFramework);
-                }
+                var frameworkAlias = lockFile.GetLockFileTargetAlias(lockFileTarget);
                 CompilationLockFileTarget = lockFile.GetTargetAndThrowIfNotFound(frameworkAlias, null);
             }
 
@@ -194,10 +190,12 @@ namespace Microsoft.NET.Build.Tasks
             Dictionary<string, LockFileTargetLibrary> libraryLookup =
                 lockFileTarget.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
 
+            var frameworkAlias = lockFile.GetLockFileTargetAlias(lockFileTarget);
+
             return lockFile
                 .ProjectFileDependencyGroups
                 .Where(dg => dg.FrameworkName == string.Empty ||
-                             dg.FrameworkName == lockFileTarget.TargetFramework.DotNetFrameworkName)
+                             dg.FrameworkName == frameworkAlias)
                 .SelectMany(g => g.Dependencies)
                 .Select(projectFileDependency =>
                 {

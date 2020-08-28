@@ -40,6 +40,16 @@ namespace Microsoft.NET.Build.Tasks
             return lockFileTarget;
         }
 
+        public static string GetLockFileTargetAlias(this LockFile lockFile, LockFileTarget lockFileTarget)
+        {
+            var frameworkAlias = lockFile.PackageSpec.TargetFrameworks.FirstOrDefault(tfi => tfi.FrameworkName == lockFileTarget.TargetFramework)?.TargetAlias;
+            if (frameworkAlias == null)
+            {
+                throw new ArgumentException("Could not find TargetFramework alias in lock file for " + lockFileTarget.TargetFramework);
+            }
+            return frameworkAlias;
+        }
+
         public static ProjectContext CreateProjectContext(
             this LockFile lockFile,
             string frameworkAlias,
