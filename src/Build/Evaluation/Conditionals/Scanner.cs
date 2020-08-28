@@ -283,17 +283,17 @@ namespace Microsoft.Build.Evaluation
                 return null;
             }
 
-            var result = ScanForPropertyExpressionEnd(_expression, _parsePoint++);
-            if (!result.result)
+            var result = ScanForPropertyExpressionEnd(_expression, _parsePoint++, out int indexResult);
+            if (!result)
             {
                 _errorState = true;
-                _errorPosition = result.index;
+                _errorPosition = indexResult;
                 _errorResource = "IllFormedPropertyWhitespaceInCondition";
-                _unexpectedlyFound = Convert.ToString(_expression[result.index], CultureInfo.InvariantCulture);
+                _unexpectedlyFound = Convert.ToString(_expression[indexResult], CultureInfo.InvariantCulture);
                 return null;
             }
 
-            _parsePoint = result.index;
+            _parsePoint = indexResult;
             // Maybe we need to generate an error for invalid characters in property/metadata name?
             // For now, just wait and let the property/metadata evaluation handle the error case.
             if (_parsePoint >= _expression.Length)
@@ -314,10 +314,10 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="expression">property expression to parse</param>
         /// <param name="index">current index to start from</param>
-        /// <returns>A tuple result indicating whether the scan was successful. If successful, the index corresponds to the end of the property expression.
-        /// In case of scan failure, it is the error position index.
-        /// </returns>
-        private static (bool result, int index) ScanForPropertyExpressionEnd(string expression, int index)
+        /// <param name="indexResult">If successful, the index corresponds to the end of the property expression.
+        /// In case of scan failure, it is the error position index.</param>
+        /// <returns>result indicating whether or not the scan was successful.</returns>
+        private static bool ScanForPropertyExpressionEnd(string expression, int index, out int indexResult)
         {
             int nestLevel = 0;
 
@@ -336,9 +336,10 @@ namespace Microsoft.Build.Evaluation
                         {
                             nestLevel--;
                         }
-                        else if (character == ' ')
+                        else if (char.IsWhiteSpace(character))
                         {
-                            return (false, index);
+                            indexResult = index;
+                            return false;
                         }
 
                         // We have reached the end of the parenthesis nesting
@@ -346,7 +347,8 @@ namespace Microsoft.Build.Evaluation
                         // If it is not then the calling code will determine that
                         if (nestLevel == 0)
                         {
-                            return (true, index);
+                            indexResult = index;
+                            return true;
                         }
                         else
                         {
@@ -355,7 +357,8 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
             }
-            return (true, index);
+            indexResult = index;
+            return true;
         }
 
         /// <summary>
