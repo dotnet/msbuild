@@ -190,12 +190,12 @@ namespace Microsoft.NET.Build.Tasks
             Dictionary<string, LockFileTargetLibrary> libraryLookup =
                 lockFileTarget.Libraries.ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
 
-            var frameworkAlias = lockFile.GetLockFileTargetAlias(lockFileTarget);
+            string lockFileTargetFramework = lockFileTarget.Name.Split('/')[0];
 
             return lockFile
                 .ProjectFileDependencyGroups
                 .Where(dg => dg.FrameworkName == string.Empty ||
-                             dg.FrameworkName == frameworkAlias)
+                             dg.FrameworkName == lockFileTargetFramework)
                 .SelectMany(g => g.Dependencies)
                 .Select(projectFileDependency =>
                 {
