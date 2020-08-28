@@ -652,7 +652,7 @@ namespace Microsoft.Build.Evaluation
                 List<string> initialTargets = new List<string>(_initialTargetsList.Count);
                 foreach (var initialTarget in _initialTargetsList)
                 {
-                    initialTargets.Add(EscapingUtilities.UnescapeAll(initialTarget, true));
+                    initialTargets.Add(EscapingUtilities.UnescapeAll(initialTarget, trim: true));
                 }
 
                 _data.InitialTargets = initialTargets;
@@ -964,7 +964,7 @@ namespace Microsoft.Build.Evaluation
 
                     for (int i = 0; i < temp.Count; i++)
                     {
-                        string target = EscapingUtilities.UnescapeAll(temp[i], true);
+                        string target = EscapingUtilities.UnescapeAll(temp[i], trim: true);
                         if (target.Length > 0)
                         {
                             _data.DefaultTargets ??= new List<string>(temp.Count);
@@ -1181,7 +1181,7 @@ namespace Microsoft.Build.Evaluation
 
                 int rootLength = Path.GetPathRoot(projectDirectory).Length;
                 string projectDirectoryNoRoot = projectDirectory.Substring(rootLength);
-                projectDirectoryNoRoot = FileUtilities.EnsureNoLeadingOrTrailingSlash(projectDirectoryNoRoot);
+                projectDirectoryNoRoot = projectDirectoryNoRoot.Trim(new char[] { '\\', '/' });
 
                 // ReservedPropertyNames.projectDefaultTargets is already set
                 SetBuiltInProperty(ReservedPropertyNames.projectFile, projectFile);

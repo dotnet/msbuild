@@ -224,20 +224,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Ensures the path does not have a leading or trailing slash.
-        /// </summary>
-        internal static string EnsureNoLeadingOrTrailingSlash(string path)
-        {
-            if (String.IsNullOrEmpty(path))
-            {
-                return path;
-            }
-            int start = IsSlash(path[0]) ? 1 : 0;
-            int end = IsSlash(path[path.Length - 1]) ? 1 : 0;
-            return path.Length - start - end > 0 ? path.Substring(start, path.Length - start - end) : String.Empty;
-        }
-
-        /// <summary>
         /// Indicates if the given file-spec ends with a slash.
         /// </summary>
         /// <param name="fileSpec">The file spec.</param>
