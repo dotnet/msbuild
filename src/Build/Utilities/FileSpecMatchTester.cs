@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Internal
 {
-    internal struct FileSpecMatcherTester
+    internal readonly struct FileSpecMatcherTester
     {
         private readonly string _currentDirectory;
         private readonly string _unescapedFileSpec;
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Internal
             FileMatcher.Default.GetFileSpecInfoWithRegexObject(
                 recombinedFileSpec,
                 out Regex regex,
-                out bool isRecursive,
+                out bool _,
                 out bool isLegal);
 
             return isLegal ? regex : null;
