@@ -98,7 +98,6 @@ namespace Microsoft.Build.UnitTests
             lexer = new Scanner("$x", ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
             Assert.Equal("IllFormedPropertyOpenParenthesisInCondition", lexer.GetErrorResource());
-
         }
 
         /// <summary>
