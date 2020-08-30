@@ -2029,7 +2029,7 @@ namespace Microsoft.Build.Execution
 
             bool nodeReuse = _buildParameters?.EnableNodeReuse ?? true;
             bool lowPriority = _buildParameters?.LowPriority ?? false;
-            string commandLineArgs = $"/nologo /nodemode:3 /nodeReuse:{nodeReuse.ToString().ToLower()} /low:{lowPriority.ToString().ToLower()}";
+            string commandLineArgs = $"/nologo /nodemode:3 /nodeReuse:{nodeReuse} /low:{lowPriority}";
             try
             {
                 int nodeId = NodeProviderOutOfProcBase.LaunchNode(nodeLocation, commandLineArgs);
