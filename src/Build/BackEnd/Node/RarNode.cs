@@ -66,7 +66,7 @@ namespace Microsoft.Build.Execution
             Func<string, int?, int?, int, bool, NamedPipeServerStream> streamFactory = NamedPipeUtil.CreateNamedPipeServer;
             IRarController controller = (IRarController)Activator.CreateInstance(rarControllerType, pipeName, streamFactory, null);
 
-            ErrorUtilities.VerifyThrow(controller != null, "Couldn't create instace of IRarController for '{0}' type", RarControllerName);
+            ErrorUtilities.VerifyThrow(controller != null, ResourceUtilities.GetResourceString("RarControllerReflectionError"), RarControllerName);
             return controller;
         }
 
