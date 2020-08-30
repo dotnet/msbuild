@@ -46,14 +46,18 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         private readonly TimeSpan Timeout = TimeSpan.FromMinutes(15);
 
         public RarController(
-            string pipeName, Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory,
+            string pipeName,
+            Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory,
             TimeSpan? timeout = null)
             : this(pipeName, namedPipeServerFactory, timeout: timeout, resolveAssemblyReferenceTaskHandler: new RarTaskHandler())
         {
         }
 
-        internal RarController(string pipeName, Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory,
-            IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler, TimeSpan? timeout = null)
+        internal RarController(
+            string pipeName,
+            Func<string, int?, int?, int, bool, NamedPipeServerStream> namedPipeServerFactory,
+            IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler,
+            TimeSpan? timeout = null)
         {
             _pipeName = pipeName;
             _namedPipeServerFactory = namedPipeServerFactory;
