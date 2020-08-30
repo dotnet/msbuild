@@ -2023,7 +2023,7 @@ namespace Microsoft.Build.Execution
             string nodeLocation = _buildParameters?.NodeExeLocation ?? BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
             if (string.IsNullOrEmpty(nodeLocation))
             {
-                // Couldn't find any path to MsBuild, not creating new node.
+                // Couldn't find a path to MSBuild.exe; can't create a new node.
                 return -1;
             }
 

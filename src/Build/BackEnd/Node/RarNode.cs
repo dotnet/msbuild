@@ -44,7 +44,7 @@ namespace Microsoft.Build.Execution
 
             if (index == 0)
             {
-                // We know that this task is completed so we can get Result without worring about waiting for it
+                // We know that the task completed, so we can get Result without waiting for it.
                 return msBuildShutdown.Result;
             }
             else
