@@ -23,6 +23,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private const int ClientConnectTimeout = 60000;
 
+        /// <summary>
+        /// Fully qualified name of RarController, used for providing <see cref="IRarController" /> instance to <see cref="RarNode" />
+        /// </summary>
+        const string RarControllerName = "Microsoft.Build.Tasks.ResolveAssemblyReferences.Server.RarController, Microsoft.Build.Tasks.Core";
+
         public NodeEngineShutdownReason Run(bool nodeReuse, bool lowPriority, out Exception shutdownException)
         {
             shutdownException = null;
@@ -56,13 +61,12 @@ namespace Microsoft.Build.Execution
 
         private static IRarController GetController(string pipeName)
         {
-            const string rarControllerName = "Microsoft.Build.Tasks.ResolveAssemblyReferences.Server.RarController, Microsoft.Build.Tasks.Core";
-            Type rarControllerType = Type.GetType(rarControllerName);
+            Type rarControllerType = Type.GetType(RarControllerName);
 
             Func<string, int?, int?, int, bool, NamedPipeServerStream> streamFactory = NamedPipeUtil.CreateNamedPipeServer;
             IRarController controller = (IRarController)Activator.CreateInstance(rarControllerType, pipeName, streamFactory, null);
 
-            ErrorUtilities.VerifyThrow(controller != null, "Couldn't create instace of IRarController for '{0}' type", rarControllerName);
+            ErrorUtilities.VerifyThrow(controller != null, "Couldn't create instace of IRarController for '{0}' type", RarControllerName);
             return controller;
         }
 
