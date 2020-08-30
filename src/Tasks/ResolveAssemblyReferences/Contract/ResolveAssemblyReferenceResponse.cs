@@ -6,7 +6,7 @@ using MessagePack;
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 {
     [MessagePackObject]
-    internal sealed class ResolveAssemblyReferenceResponse
+    public sealed class ResolveAssemblyReferenceResponse
     {
         public ResolveAssemblyReferenceResponse()
         {
