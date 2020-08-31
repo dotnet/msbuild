@@ -168,6 +168,7 @@ stages:
       enableSigningValidation: false
       enableNugetValidation: false
       enableSourceLinkValidation: false
+      publishInstallersAndChecksums: true
       SDLValidationParameters:
         enable: false
         params: ' -SourceToolsList @("policheck","credscan")
