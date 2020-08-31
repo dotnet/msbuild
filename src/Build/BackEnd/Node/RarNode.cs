@@ -34,12 +34,13 @@ namespace Microsoft.Build.Execution
             shutdownException = null;
             using CancellationTokenSource cts = new CancellationTokenSource();
             string pipeName = CommunicationsUtilities.GetRarPipeName(nodeReuse, lowPriority);
-            IRarController controller = GetController(pipeName);
+            Handshake handshake = NodeProviderOutOfProc.GetHandshake(enableNodeReuse: nodeReuse,
+                                                                     enableLowPriority: lowPriority, specialNode: true);
+
+            IRarController controller = GetController(pipeName, handshake);
 
             Task<int> rarTask = controller.StartAsync(cts.Token);
 
-            Handshake handshake = NodeProviderOutOfProc.GetHandshake(enableNodeReuse: nodeReuse,
-                                                                     enableLowPriority: lowPriority, specialNode: true);
             Task<NodeEngineShutdownReason> msBuildShutdown = RunShutdownCheckAsync(handshake, cts.Token);
 
             // Wait for any of these task to finish:
@@ -60,12 +61,13 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private static IRarController GetController(string pipeName)
+        private static IRarController GetController(string pipeName, Handshake handshake)
         {
             Type rarControllerType = Type.GetType(RarControllerName);
 
             Func<string, int?, int?, int, bool, NamedPipeServerStream> streamFactory = NamedPipeUtil.CreateNamedPipeServer;
-            IRarController controller = Activator.CreateInstance(rarControllerType, pipeName, streamFactory, null) as IRarController;
+            Func<Handshake, NamedPipeServerStream, int, bool> validateCallback = NamedPipeUtil.ValidateHandshake;
+            IRarController controller = Activator.CreateInstance(rarControllerType, pipeName, handshake, streamFactory, validateCallback, null) as IRarController;
 
             ErrorUtilities.VerifyThrow(controller != null, ResourceUtilities.GetResourceString("RarControllerReflectionError"), RarControllerName);
             return controller;

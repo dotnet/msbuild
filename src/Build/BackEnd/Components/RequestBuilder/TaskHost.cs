@@ -1009,7 +1009,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         NamedPipeClientStream IRarBuildEngine.GetRarClientStream(string pipeName, int timeout)
         {
-            return NamedPipeUtil.TryConnectToProcess(pipeName, timeout, null);
+            BuildParameters parameters = _host.BuildParameters;
+            Handshake handshake = NodeProviderOutOfProc.GetHandshake(enableNodeReuse: parameters.EnableNodeReuse,
+                                                         enableLowPriority: parameters.LowPriority, specialNode: true);
+
+            return NamedPipeUtil.TryConnectToProcess(pipeName, timeout, handshake);
         }
     }
 }
