@@ -3970,7 +3970,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="_DeploymentGenerateLauncher"
       Condition="'$(GenerateClickOnceManifests)'=='true' and '$(_DeploymentLauncherBased)' == 'true'">
 
-    <-- 
+    <!-- 
       If apphost based built EXE is found, use that as the Launcher.exe's entry point otherwise
       use the built DLL as the entry point
     -->
