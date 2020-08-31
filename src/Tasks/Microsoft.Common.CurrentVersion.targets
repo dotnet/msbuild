@@ -3933,9 +3933,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="_DeploymentGenerateLauncher"
       Condition="'$(GenerateClickOnceManifests)'=='true' and '$(_DeploymentLauncherBased)' == 'true'">
 
+    <-- 
+      If apphost based built EXE is found, use that as the Launcher.exe's entry point otherwise
+      use the built DLL as the entry point
+    -->
+    <ItemGroup Condition="'$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true' and exists('$(AppHostIntermediatePath)')">
+      <EntryPointForLauncher Include="$(AppHostIntermediatePath)"/>
+      <ContentWithTargetPath Include="@(EntryPointForLauncher)"/>
+    </ItemGroup>
+    <ItemGroup Condition="'$(EntryPointForLauncher)'==''">
+      <EntryPointForLauncher Include="$(_DeploymentManifestEntryPoint)"/>
+    </ItemGroup>
+
     <!-- Generates Launcher and obtains its Framework version and moniker -->
     <GenerateLauncher
-        EntryPoint="@(_DeploymentManifestEntryPoint)"
+        EntryPoint="@(EntryPointForLauncher)"
         OutputPath="$(IntermediateOutputPath)"
         VisualStudioVersion="$(VisualStudioVersion)">
 
