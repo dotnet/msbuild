@@ -7,7 +7,6 @@ using System.IO.Pipes;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Shared
@@ -36,6 +35,7 @@ namespace Microsoft.Build.Shared
                 return pipeName;
             }
         }
+
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         //  This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
         //  on non-Windows operating systems

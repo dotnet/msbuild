@@ -4,6 +4,7 @@
 using System;
 using System.CodeDom;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Pipes;
 using System.Reflection;
 using System.Threading;
@@ -79,6 +80,21 @@ namespace Microsoft.Build.Execution
         {
             string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + Process.GetCurrentProcess().Id);
 
+            static async Task<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
+            {
+                int totalBytesRead = 0;
+                while (totalBytesRead < bytesToRead)
+                {
+                    int bytesRead = await stream.ReadAsync(buffer, totalBytesRead, bytesToRead - totalBytesRead);
+                    if (bytesRead == 0)
+                    {
+                        return totalBytesRead;
+                    }
+                    totalBytesRead += bytesRead;
+                }
+                return totalBytesRead;
+            }
+
             // Most common path in this while loop in long run will be over the continue statement.
             // This is happeing because the MSBuild when starting new nodes is trying in some cases to reuse nodes (see nodeReuse switch).
             // It is done by listing the MSBuild processes and then connecting to them and validating the handshake.
@@ -100,7 +116,7 @@ namespace Microsoft.Build.Execution
                 // 1 byte - Packet type
                 // 4 bytes - packet length
                 byte[] header = new byte[5];
-                int bytesRead = await CommunicationsUtilities.ReadAsync(serverStream, header, header.Length).ConfigureAwait(false);
+                int bytesRead = await ReadAsync(serverStream, header, header.Length).ConfigureAwait(false);
                 if (bytesRead != header.Length)
                 {
                     continue;
