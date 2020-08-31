@@ -30,7 +30,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("net5.0-windows")]
         public void It_provides_runtime_configuration_and_shadow_copy_files_via_outputgroup(string targetFramework)
         {
-            if (targetFramework == "net5.0-windows" && (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || TestContext.Current.ToolsetUnderTest.ShouldUseFullFrameworkMSBuild))
+            if (targetFramework == "net5.0-windows" && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // net5.0-windows is windows only scenario
                 return;

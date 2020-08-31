@@ -14,7 +14,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             var task = new PreprocessPackageDependenciesDesignTime
             {
-                TargetFrameworkMoniker = ".Net Framework,Version=v4.5",
+                TargetFramework = "net45",
                 DefaultImplicitPackages = string.Empty,
                 PackageDefinitions = new ITaskItem[]
                 {
@@ -44,13 +44,13 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         itemSpec: "mockPackageNoType/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                            { MetadataKeys.ParentTarget, "net45" }
                         }),
                     new MockTaskItem(
                         itemSpec: "mockPackageUnknown/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                            { MetadataKeys.ParentTarget, "net45" }
                         })
                 }
             };
@@ -65,7 +65,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             var task = new PreprocessPackageDependenciesDesignTime
             {
-                TargetFrameworkMoniker = ".Net Framework,Version=v4.5",
+                TargetFramework = "net45",
                 DefaultImplicitPackages = string.Empty,
                 PackageDefinitions = new ITaskItem[]
                 {
@@ -87,7 +87,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         itemSpec: "mockPackageUnresolved/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                            { MetadataKeys.ParentTarget, "net45" }
                         })
                 }
             };
@@ -111,7 +111,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             var task = new PreprocessPackageDependenciesDesignTime
             {
-                TargetFrameworkMoniker = ".Net Framework,Version=v4.5",
+                TargetFramework = "net45",
                 DefaultImplicitPackages = "DefaultImplicit",
                 PackageDefinitions = new ITaskItem[]
                 {
@@ -132,7 +132,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         itemSpec: "DefaultImplicit/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                            { MetadataKeys.ParentTarget, "net45" }
                         })
                 }
             };
@@ -150,7 +150,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             var task = new PreprocessPackageDependenciesDesignTime
             {
-                TargetFrameworkMoniker = ".Net Framework,Version=v4.5",
+                TargetFramework = "net45",
                 DefaultImplicitPackages = string.Empty,
                 PackageDefinitions = new ITaskItem[] {
                     new MockTaskItem(
@@ -239,49 +239,49 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         itemSpec: "mockPackageExternalProject/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                            { MetadataKeys.ParentTarget, "net45" }
                         }),
                     new MockTaskItem(
                         itemSpec: "mockPackageProject/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                            { MetadataKeys.ParentTarget, "net45" }
                         }),
                     new MockTaskItem(
                         itemSpec: "mockPackageContent/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                            { MetadataKeys.ParentTarget, "net45" }
                         }),
                     new MockTaskItem(
                         itemSpec: "mockPackageAssembly/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                            { MetadataKeys.ParentTarget, "net45" }
                         }),
                     new MockTaskItem(
                         itemSpec: "mockPackageFrameworkAssembly/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                            { MetadataKeys.ParentTarget, "net45" }
                         }),
                     new MockTaskItem(
                         itemSpec: "mockPackageDiagnostic/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                            { MetadataKeys.ParentTarget, "net45" }
                         }),
                     new MockTaskItem(
                         itemSpec: "mockPackageWinmd/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                            { MetadataKeys.ParentTarget, "net45" }
                         }),
                     new MockTaskItem(
                         itemSpec: "mockPackageReference/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                            { MetadataKeys.ParentTarget, "net45" }
                         })
                 }
             };
@@ -296,7 +296,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             var task = new PreprocessPackageDependenciesDesignTime
             {
-                TargetFrameworkMoniker = ".Net Framework,Version=v4.5",
+                TargetFramework = "net45",
                 DefaultImplicitPackages = string.Empty,
                 PackageDefinitions = new ITaskItem[] {
                     new MockTaskItem(
@@ -325,13 +325,13 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         itemSpec: "Package1/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                            { MetadataKeys.ParentTarget, "net45" }
                         }),
                     new MockTaskItem(
                         itemSpec: "Package2/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.6" }
+                            { MetadataKeys.ParentTarget, "net46" }
                         })
                 }
             };
@@ -348,7 +348,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         {
             var task = new PreprocessPackageDependenciesDesignTime
             {
-                TargetFrameworkMoniker = ".Net Framework,Version=v4.5",
+                TargetFramework = "net45",
                 DefaultImplicitPackages = string.Empty,
                 PackageDefinitions = new ITaskItem[] {
                     new MockTaskItem(
@@ -377,13 +377,13 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         itemSpec: "Package1/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" }
+                            { MetadataKeys.ParentTarget, "net45" }
                         }),
                     new MockTaskItem(
                         itemSpec: "ChildPackage1/1.0.0",
                         metadata: new Dictionary<string, string>
                         {
-                            { MetadataKeys.ParentTarget, ".Net Framework,Version=v4.5" },
+                            { MetadataKeys.ParentTarget, "net45" },
                             { MetadataKeys.ParentPackage, "Package1/1.0.0" }
                         })
                 }

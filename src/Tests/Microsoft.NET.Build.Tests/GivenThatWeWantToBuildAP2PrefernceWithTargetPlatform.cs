@@ -17,7 +17,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_builds_successfully()
         {
             var appProject = new TestProject()

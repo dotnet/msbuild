@@ -195,8 +195,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
                       AssetsFilePath="$(ProjectAssetsFile)"
                       DepsFilePath="$(ProjectDepsFilePath)"
-                      TargetFramework="$(TargetFrameworkMoniker)"
-                      TargetPlatformMoniker="$(TargetPlatformMoniker)"
+                      TargetFramework="$(TargetFramework)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyExtension="$(TargetExt)"
                       AssemblyVersion="$(Version)"
@@ -289,8 +288,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
     <GenerateRuntimeConfigurationFiles AssetsFilePath="$(ProjectAssetsFile)"
+                                       TargetFramework="$(TargetFramework)"
                                        TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
-                                       TargetPlatformMoniker="$(TargetPlatformMoniker)"
                                        RuntimeConfigPath="$(ProjectRuntimeConfigFilePath)"
                                        RuntimeConfigDevPath="$(ProjectRuntimeConfigDevFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
