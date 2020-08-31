@@ -21,6 +21,16 @@ namespace Microsoft.Build.Shared.FileSystem
             return NativeMethodsShared.FileOrDirectoryExists(path);
         }
 
+        public FileAttributes GetAttributes(string path)
+        {
+            return File.GetAttributes(path);
+        }
+
+        public DateTime GetLastWriteTimeUtc(string path)
+        {
+            return File.GetLastWriteTimeUtc(path);
+        }
+
         public bool DirectoryExists(string path)
         {
             return NativeMethodsShared.DirectoryExists(path);
@@ -29,6 +39,26 @@ namespace Microsoft.Build.Shared.FileSystem
         public IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             return Directory.GetDirectories(path, searchPattern, searchOption);
+        }
+
+        public TextReader ReadFile(string path)
+        {
+            return new StreamReader(path);
+        }
+
+        public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share)
+        {
+            return new FileStream(path, mode, access, share);
+        }
+
+        public string ReadFileAllText(string path)
+        {
+            return File.ReadAllText(path);
+        }
+
+        public byte[] ReadFileAllBytes(string path)
+        {
+            return File.ReadAllBytes(path);
         }
 
         public IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)

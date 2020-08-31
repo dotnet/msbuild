@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CodeDom;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,17 +23,23 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private const int ClientConnectTimeout = 60000;
 
+        /// <summary>
+        /// Fully qualified name of RarController, used for providing <see cref="IRarController" /> instance to <see cref="RarNode" />
+        /// </summary>
+        private const string RarControllerName = "Microsoft.Build.Tasks.ResolveAssemblyReferences.Server.RarController, Microsoft.Build.Tasks.Core";
+
         public NodeEngineShutdownReason Run(bool nodeReuse, bool lowPriority, out Exception shutdownException, CancellationToken cancellationToken = default)
         {
             shutdownException = null;
             using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             string pipeName = CommunicationsUtilities.GetRarPipeName(nodeReuse, lowPriority);
-            IRarController controller = GetController(pipeName);
+            Handshake handshake = NodeProviderOutOfProc.GetHandshake(enableNodeReuse: nodeReuse,
+                                                                     enableLowPriority: lowPriority, specialNode: true);
+
+            IRarController controller = GetController(pipeName, handshake);
 
             Task<int> rarTask = controller.StartAsync(cts.Token);
 
-            Handshake handshake = NodeProviderOutOfProc.GetHandshake(enableNodeReuse: nodeReuse,
-                                                                     enableLowPriority: lowPriority, specialNode: true);
             Task<NodeEngineShutdownReason> msBuildShutdown = RunShutdownCheckAsync(handshake, cts.Token);
 
             int index;
@@ -52,7 +60,7 @@ namespace Microsoft.Build.Execution
 
             if (index == 0)
             {
-                // We know that this task is completed so we can get Result without worring about waiting for it
+                // We know that the task completed, so we can get Result without waiting for it.
                 return msBuildShutdown.Result;
             }
             else
@@ -62,18 +70,17 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private static IRarController GetController(string pipeName)
+        private static IRarController GetController(string pipeName, Handshake handshake)
         {
-            const string rarControllerName = "Microsoft.Build.Tasks.ResolveAssemblyReferences.Server.RarController, Microsoft.Build.Tasks.Core";
-            Type rarControllerType = Type.GetType(rarControllerName);
+            Type rarControllerType = Type.GetType(RarControllerName);
 
-            IRarController controller = (IRarController)Activator.CreateInstance(rarControllerType, pipeName, null);
-            ErrorUtilities.VerifyThrow(controller != null, "Couldn't create instace of IRarController for '{0}' type", rarControllerName);
+            Func<string, int?, int?, int, bool, NamedPipeServerStream> streamFactory = NamedPipeUtil.CreateNamedPipeServer;
+            Func<Handshake, NamedPipeServerStream, int, bool> validateCallback = NamedPipeUtil.ValidateHandshake;
+            IRarController controller = Activator.CreateInstance(rarControllerType, pipeName, handshake, streamFactory, validateCallback, null) as IRarController;
 
-            controller.SetStreamFactory(NamedPipeUtil.CreateNamedPipeServer);
+            ErrorUtilities.VerifyThrow(controller != null, ResourceUtilities.GetResourceString("RarControllerReflectionError"), RarControllerName);
             return controller;
         }
-
 
         public NodeEngineShutdownReason Run(out Exception shutdownException)
         {
@@ -84,10 +91,30 @@ namespace Microsoft.Build.Execution
         {
             string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + Process.GetCurrentProcess().Id);
 
+            static async Task<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
+            {
+                int totalBytesRead = 0;
+                while (totalBytesRead < bytesToRead)
+                {
+                    int bytesRead = await stream.ReadAsync(buffer, totalBytesRead, bytesToRead - totalBytesRead);
+                    if (bytesRead == 0)
+                    {
+                        return totalBytesRead;
+                    }
+                    totalBytesRead += bytesRead;
+                }
+                return totalBytesRead;
+            }
+
+            // Most common path in this while loop in long run will be over the continue statement.
+            // This is happeing because the MSBuild when starting new nodes is trying in some cases to reuse nodes (see nodeReuse switch).
+            // It is done by listing the MSBuild processes and then connecting to them and validating the handshake.
+            // In most cases for this loop it will fail, which will lead to hitting the continue statement.
+            // If we get over that, the MSBuild should send NodeBuildComplete packet, which will indicate that the engine is requesting to shtudown this node.
             while (true)
             {
                 if (cancellationToken.IsCancellationRequested)
-                    return NodeEngineShutdownReason.Error;
+                    return NodeEngineShutdownReason.BuildComplete;
 
                 using NamedPipeServerStream serverStream = NamedPipeUtil.CreateNamedPipeServer(pipeName, maxNumberOfServerInstances: NamedPipeServerStream.MaxAllowedServerInstances);
                 await serverStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
@@ -100,7 +127,7 @@ namespace Microsoft.Build.Execution
                 // 1 byte - Packet type
                 // 4 bytes - packet length
                 byte[] header = new byte[5];
-                int bytesRead = await serverStream.ReadAsync(header, 0, header.Length).ConfigureAwait(false);
+                int bytesRead = await ReadAsync(serverStream, header, header.Length).ConfigureAwait(false);
                 if (bytesRead != header.Length)
                 {
                     continue;

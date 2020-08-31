@@ -80,7 +80,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             using CancellationTokenSource cts = new CancellationTokenSource();
             (Stream serverStream, Stream clientStream) = FullDuplexStream.CreatePair();
 
-            RarController controller = new RarController(string.Empty);
+            RarController controller = new RarController(string.Empty, new Build.Internal.Handshake(), null, null);
             Task serverTask = controller.HandleClientAsync(serverStream, cts.Token);
             RarClient client = new RarClient(new RarTestEngine(clientStream));
             ITaskItem[] assemblyNames = new TaskItem[]

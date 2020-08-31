@@ -13,7 +13,6 @@ using System.Security.Principal;
 using System.Threading;
 
 using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd.Logging;
 
 #if !FEATURE_APM
 using System.Threading.Tasks;

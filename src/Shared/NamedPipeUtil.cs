@@ -6,7 +6,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Security.AccessControl;
 using System.Security.Principal;
-
+using System.Threading;
 using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Shared
@@ -35,6 +35,7 @@ namespace Microsoft.Build.Shared
                 return pipeName;
             }
         }
+
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         //  This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
         //  on non-Windows operating systems
@@ -59,7 +60,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
-        internal static NamedPipeClientStream TryConnectToProcess(int nodeProcessId, int timeout, Handshake? handshake)
+        internal static NamedPipeClientStream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake)
         {
             string pipeName = GetPipeNameOrPath("MSBuild" + nodeProcessId);
             return TryConnectToProcess(pipeName, nodeProcessId, timeout, handshake);
@@ -68,19 +69,19 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
-        internal static NamedPipeClientStream TryConnectToProcess(string pipeName, int timeout, Handshake? handshake)
+        internal static NamedPipeClientStream TryConnectToProcess(string pipeName, int timeout, Handshake handshake)
         {
             return TryConnectToProcess(pipeName, null, timeout, handshake);
         }
 
-        private static NamedPipeClientStream TryConnectToProcess(string pipeName, int? nodeProcessId, int timeout, Handshake? handshake)
+        private static NamedPipeClientStream TryConnectToProcess(string pipeName, int? nodeProcessId, int timeout, Handshake handshake)
         {
             NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
                                                                          | PipeOptions.CurrentUserOnly
 #endif
                                                                          );
-           CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId.HasValue ? nodeProcessId.Value.ToString() : pipeName, pipeName, timeout);
+            CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId.HasValue ? nodeProcessId.Value.ToString() : pipeName, pipeName, timeout);
 
             try
             {
@@ -98,27 +99,24 @@ namespace Microsoft.Build.Shared
                     ValidateRemotePipeSecurityOnWindows(nodeStream);
                 }
 #endif
-                if (handshake.HasValue)
+
+                int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
+                for (int i = 0; i < handshakeComponents.Length; i++)
                 {
+                    CommunicationsUtilities.Trace("Writing handshake part {0} to pipe {1}", i, pipeName);
+                    nodeStream.WriteIntForHandshake(handshakeComponents[i]);
+                }
 
-                    int[] handshakeComponents = handshake.Value.RetrieveHandshakeComponents();
-                    for (int i = 0; i < handshakeComponents.Length; i++)
-                    {
-                        CommunicationsUtilities.Trace("Writing handshake part {0} to pipe {1}", i, pipeName);
-                        nodeStream.WriteIntForHandshake(handshakeComponents[i]);
-                    }
+                // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
+                nodeStream.WriteEndOfHandshakeSignal();
 
-                    // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
-                    nodeStream.WriteEndOfHandshakeSignal();
-
-                    CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
+                CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
 
 #if NETCOREAPP2_1 || MONO
                     nodeStream.ReadEndOfHandshakeSignal(true, timeout);
 #else
-                    nodeStream.ReadEndOfHandshakeSignal(true);
+                nodeStream.ReadEndOfHandshakeSignal(true);
 #endif
-                }
 
                 // We got a connection.
                 CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);

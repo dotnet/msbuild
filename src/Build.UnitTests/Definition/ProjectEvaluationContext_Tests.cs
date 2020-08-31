@@ -86,6 +86,51 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
+        [Fact]
+        public void PassedInFileSystemShouldBeReusedInSharedContext()
+        {
+            var projectFiles = new[]
+            {
+                _env.CreateFile("1.proj", @"<Project> <PropertyGroup Condition=`Exists('1.file')`></PropertyGroup> </Project>".Cleanup()).Path,
+                _env.CreateFile("2.proj", @"<Project> <PropertyGroup Condition=`Exists('2.file')`></PropertyGroup> </Project>".Cleanup()).Path
+            };
+
+            var projectCollection = _env.CreateProjectCollection().Collection;
+            var fileSystem = new Helpers.LoggingFileSystem();
+            var evaluationContext = EvaluationContext.Create(EvaluationContext.SharingPolicy.Shared, fileSystem);
+
+            foreach (var projectFile in projectFiles)
+            {
+                Project.FromFile(
+                    projectFile,
+                    new ProjectOptions
+                    {
+                        ProjectCollection = projectCollection,
+                        EvaluationContext = evaluationContext
+                    }
+                );
+            }
+
+            fileSystem.ExistenceChecks.OrderBy(kvp => kvp.Key)
+                .ShouldBe(
+                    new Dictionary<string, int>
+                    {
+                        {Path.Combine(_env.DefaultTestDirectory.Path, "1.file"), 1},
+                        {Path.Combine(_env.DefaultTestDirectory.Path, "2.file"), 1}
+                    }.OrderBy(kvp => kvp.Key));
+
+            fileSystem.DirectoryEntryExistsCalls.ShouldBe(2);
+        }
+
+        [Fact]
+        public void IsolatedContextShouldNotSupportBeingPassedAFileSystem()
+        {
+            _env.DoNotLaunchDebugger();
+
+            var fileSystem = new Helpers.LoggingFileSystem();
+            Should.Throw<ArgumentException>(() => EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated, fileSystem));
+        }
+
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]

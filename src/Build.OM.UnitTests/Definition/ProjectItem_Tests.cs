@@ -406,6 +406,34 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
+        [Theory]
+        [InlineData(@"<i Condition='false' Include='\**\*.cs'/>")]
+        [InlineData(@"<i Condition='false' Include='/**/*.cs'/>")]
+        [InlineData(@"<i Condition='false' Include='/**\*.cs'/>")]
+        [InlineData(@"<i Condition='false' Include='\**/*.cs'/>")]
+        public void FullFileSystemScanGlobWithFalseCondition(string itemDefinition)
+        {
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(itemDefinition, allItems: false, ignoreCondition: true);
+            items.ShouldBeEmpty();
+        }
+
+        [Theory]
+        [InlineData(@"<i Condition='false' Include='somedir\**\*.cs'/>")]
+        [InlineData(@"<i Condition='false' Include='somedir/**/*.cs'/>")]
+        [InlineData(@"<i Condition='false' Include='somedir/**\*.cs'/>")]
+        [InlineData(@"<i Condition='false' Include='somedir\**/*.cs'/>")]
+        public void PartialFileSystemScanGlobWithFalseCondition(string itemDefinition)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder directory = env.CreateFolder(createFolder: true);
+                TransientTestFile file = env.CreateFile(directory, "a.cs", String.Empty);
+
+                IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(itemDefinition.Replace("somedir", directory.Path), allItems: false, ignoreCondition: true);
+                items.ShouldNotBeEmpty();
+            }
+        }
+
         /// <summary>
         /// Basic exclude case
         /// </summary>

@@ -4,12 +4,11 @@
 using System;
 using System.IO;
 using System.IO.Pipes;
-
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 using StreamJsonRpc;
-
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
 {
@@ -35,7 +34,10 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
                 return true;
 
             string pipeName = _rarBuildEngine.GetRarPipeName();
+
+            MSBuildEventSource.Log.ResolveAssemblyReferenceNodeConnectStart();
             Stream stream = _rarBuildEngine.GetRarClientStream(pipeName, timeout);
+            MSBuildEventSource.Log.ResolveAssemblyReferenceNodeConnectStop();
 
             if (stream == null)
                 return false; // We couldn't connect
@@ -61,7 +63,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
 
         private IResolveAssemblyReferenceTaskHandler GetRpcClient()
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(_clientStream != null, nameof(_clientStream));
+            ErrorUtilities.VerifyThrowInternalErrorUnreachable(_clientStream != null);
 
             IJsonRpcMessageHandler handler = RpcUtils.GetRarMessageHandler(_clientStream);
             return JsonRpc.Attach<IResolveAssemblyReferenceTaskHandler>(handler);

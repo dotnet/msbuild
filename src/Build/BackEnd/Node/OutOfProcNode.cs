@@ -134,11 +134,6 @@ namespace Microsoft.Build.Execution
         private readonly ISdkResolverService _sdkResolverService;
 
         /// <summary>
-        /// Path to the MSBuild executable or dll.
-        /// </summary>
-        internal static string MsBuildPath { get; private set; }
-
-        /// <summary>
         /// Constructor.
         /// </summary>
         public OutOfProcNode()
@@ -648,7 +643,6 @@ namespace Microsoft.Build.Execution
         {
             // Grab the system parameters.
             _buildParameters = configuration.BuildParameters;
-            MsBuildPath = _buildParameters.NodeExeLocation;
 
             _buildParameters.ProjectRootElementCache = s_projectRootElementCacheBase;
 

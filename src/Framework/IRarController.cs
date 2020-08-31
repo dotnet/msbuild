@@ -11,7 +11,5 @@ namespace Microsoft.Build.Framework
     internal interface IRarController
     {
         Task<int> StartAsync(CancellationToken token);
-
-        void SetStreamFactory(Func<string, int?, int?, int, bool, Stream> streamFactory);
     }
 }

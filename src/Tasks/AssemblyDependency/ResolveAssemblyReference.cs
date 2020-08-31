@@ -3109,7 +3109,18 @@ namespace Microsoft.Build.Tasks
                 var connected = client.Connect();
                 if (!connected)
                 {
-                    if (client.CreateNode())
+                    Log.LogMessageFromResources(MessageImportance.Low, "RarCouldntConnect");
+                    bool nodeCreated = false;
+                    try
+                    {
+                        nodeCreated = client.CreateNode();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.LogWarningFromException(e);
+                    }
+
+                    if (nodeCreated)
                     {
                         connected = client.Connect(5000);
                     }

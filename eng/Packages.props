@@ -53,6 +53,7 @@
     <PackageReference Update="xunit.console" Version="$(XUnitVersion)" />
     <PackageReference Update="xunit.core" Version="$(XUnitVersion)" />
     <PackageReference Update="StreamJsonRpc" Version="2.4.48" />
+    <PackageReference Update="Newtonsoft.Json" Version="12.*" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">

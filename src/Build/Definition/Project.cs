@@ -2700,74 +2700,25 @@ namespace Microsoft.Build.Evaluation
                     .ToList();
             }
 
+            // TODO: cache result?
             private ProvenanceResult ComputeProvenanceResult(string itemToMatch, ProjectItemElement itemElement)
             {
                 ProvenanceResult SingleItemSpecProvenance(string itemSpec, IElementLocation elementLocation, Operation operation)
                 {
-                    if (elementLocation == null)
+                    if (elementLocation != null && !string.IsNullOrEmpty(itemSpec))
                     {
-                        return null;
-                    }
-
-                    var matchOccurrences = ItemMatchesInItemSpecString(itemToMatch, itemSpec, elementLocation, itemElement.ContainingProject.DirectoryPath, _data.Expander, out Provenance provenance);
-                    if (matchOccurrences > 0)
-                    {
-                        return new ProvenanceResult(itemElement, operation, provenance, matchOccurrences);
+                        EvaluationItemSpec expandedItemSpec = new EvaluationItemSpec(itemSpec, _data.Expander, elementLocation, itemElement.ContainingProject.DirectoryPath, expandProperties: true);
+                        int matchOccurrences = ItemMatchesInItemSpec(itemToMatch, expandedItemSpec, out Provenance provenance);
+                        return matchOccurrences > 0 ? new ProvenanceResult(itemElement, operation, provenance, matchOccurrences) : null;
                     }
 
                     return null;
                 }
 
-                var includeResult = SingleItemSpecProvenance(itemElement.Include, itemElement.IncludeLocation, Operation.Include);
-                if (includeResult != null)
-                {
-                    var excludeResult = SingleItemSpecProvenance(itemElement.Exclude, itemElement.ExcludeLocation, Operation.Exclude);
-                    if (excludeResult != null)
-                    {
-                        return excludeResult;
-                    }
-
-                    if (includeResult != null)
-                    {
-                        return includeResult;
-                    }
-                }
-
-                var result = SingleItemSpecProvenance(itemElement.Update, itemElement.UpdateLocation, Operation.Update);
-                if (result != null)
-                {
-                    return result;
-                }
-
-                return SingleItemSpecProvenance(itemElement.Remove, itemElement.RemoveLocation, Operation.Remove);
-            }
-
-            /// <summary>
-            /// Since:
-            ///     - we have no proper AST and interpreter for itemspecs that we can do analysis on
-            ///     - GetItemProvenance needs to have correct counts for exclude strings (as correct as it can get while doing it after evaluation)
-            ///
-            /// The temporary hack is to use the expander to expand the strings, and if any property or item references were encountered, return Provenance.Inconclusive
-            /// </summary>
-            private static int ItemMatchesInItemSpecString(string itemToMatch, string itemSpec, IElementLocation elementLocation, string projectDirectory, Expander<ProjectProperty, ProjectItem> expander, out Provenance provenance)
-            {
-                if (string.IsNullOrEmpty(itemSpec))
-                {
-                    provenance = Provenance.Undefined;
-                    return 0;
-                }
-
-                // expand the properties
-                var expandedItemSpec = new EvaluationItemSpec(itemSpec, expander, elementLocation, projectDirectory, expandProperties: true);
-                var numberOfMatches = ItemMatchesInItemSpec(itemToMatch, expandedItemSpec, out provenance);
-
-                // Result is inconclusive if properties are present
-                if (itemSpec.Contains("$("))
-                {
-                    provenance |= Provenance.Inconclusive;
-                }
-
-                return numberOfMatches;
+                ProvenanceResult result = SingleItemSpecProvenance(itemElement.Include, itemElement.IncludeLocation, Operation.Include);
+                return result == null ?
+                    SingleItemSpecProvenance(itemElement.Update, itemElement.UpdateLocation, Operation.Update) ?? SingleItemSpecProvenance(itemElement.Remove, itemElement.RemoveLocation, Operation.Remove) :
+                    SingleItemSpecProvenance(itemElement.Exclude, itemElement.ExcludeLocation, Operation.Exclude) ?? result;
             }
 
             private static int ItemMatchesInItemSpec(string itemToMatch, EvaluationItemSpec itemSpec, out Provenance provenance)
@@ -2792,6 +2743,12 @@ namespace Microsoft.Build.Evaluation
                     else
                     {
                         ErrorUtilities.ThrowInternalErrorUnreachable();
+                    }
+
+                    // Result is inconclusive if properties are present
+                    if (itemSpec.ItemSpecString.Contains("$("))
+                    {
+                        provenance |= Provenance.Inconclusive;
                     }
                 }
 
