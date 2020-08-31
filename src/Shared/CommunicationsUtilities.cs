@@ -11,13 +11,11 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
 
-#if !FEATURE_APM
-using System.Threading.Tasks;
-#endif
 
 namespace Microsoft.Build.Internal
 {
@@ -461,7 +459,6 @@ namespace Microsoft.Build.Internal
         }
 #nullable disable
 
-#if !FEATURE_APM
         internal static async Task<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
         {
             int totalBytesRead = 0;
@@ -476,7 +473,6 @@ namespace Microsoft.Build.Internal
             }
             return totalBytesRead;
         }
-#endif
 
         /// <summary>
         /// Given the appropriate information, return the equivalent HandshakeOptions.

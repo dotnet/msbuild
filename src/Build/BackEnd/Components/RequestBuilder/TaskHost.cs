@@ -992,7 +992,7 @@ namespace Microsoft.Build.BackEnd
         bool IRarBuildEngine.CreateRarNode()
         {
             int nodeId = BuildManager.DefaultBuildManager.CreateRarNode();
-            return nodeId != -1;
+            return nodeId != BuildManager.RarNodeStartFailed;
         }
 
         /// <summary>

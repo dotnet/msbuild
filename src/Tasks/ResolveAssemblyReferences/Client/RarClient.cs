@@ -7,9 +7,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
-using Microsoft.Build.Tasks.ResolveAssemblyReferences.Server;
 using StreamJsonRpc;
-
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
 {
@@ -63,7 +61,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
 
         private IResolveAssemblyReferenceTaskHandler GetRpcClient()
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(_clientStream != null, nameof(_clientStream));
+            ErrorUtilities.VerifyThrowInternalErrorUnreachable(_clientStream != null);
 
             IJsonRpcMessageHandler handler = RpcUtils.GetRarMessageHandler(_clientStream);
             return JsonRpc.Attach<IResolveAssemblyReferenceTaskHandler>(handler);

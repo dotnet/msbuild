@@ -26,7 +26,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Fully qualified name of RarController, used for providing <see cref="IRarController" /> instance to <see cref="RarNode" />
         /// </summary>
-        const string RarControllerName = "Microsoft.Build.Tasks.ResolveAssemblyReferences.Server.RarController, Microsoft.Build.Tasks.Core";
+        private const string RarControllerName = "Microsoft.Build.Tasks.ResolveAssemblyReferences.Server.RarController, Microsoft.Build.Tasks.Core";
 
         public NodeEngineShutdownReason Run(bool nodeReuse, bool lowPriority, out Exception shutdownException)
         {
@@ -43,7 +43,7 @@ namespace Microsoft.Build.Execution
 
             // Wait for any of these task to finish:
             // - rarTask can timeout (default is 15 mins)
-            // - msBuildShutdown ends when it recieves command to shutdown
+            // - msBuildShutdown ends when it receives command to shutdown
             int index = Task.WaitAny(msBuildShutdown, rarTask);
             cts.Cancel();
 
@@ -70,7 +70,6 @@ namespace Microsoft.Build.Execution
             return controller;
         }
 
-
         public NodeEngineShutdownReason Run(out Exception shutdownException)
         {
             return Run(false, false, out shutdownException);
@@ -80,6 +79,11 @@ namespace Microsoft.Build.Execution
         {
             string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + Process.GetCurrentProcess().Id);
 
+            // Most common path in this while loop in long run will be over the continue statement.
+            // This is happeing because the MSBuild when starting new nodes is trying in some cases to reuse nodes (see nodeReuse switch).
+            // It is done by listing the MSBuild processes and then connecting to them and validating the handshake.
+            // In most cases for this loop it will fail, which will lead to hitting the continue statement.
+            // If we get over that, the MSBuild should send NodeBuildComplete packet, which will indicate that the engine is requesting to shtudown this node.
             while (true)
             {
                 if (cancellationToken.IsCancellationRequested)
@@ -96,7 +100,7 @@ namespace Microsoft.Build.Execution
                 // 1 byte - Packet type
                 // 4 bytes - packet length
                 byte[] header = new byte[5];
-                int bytesRead = await serverStream.ReadAsync(header, 0, header.Length).ConfigureAwait(false);
+                int bytesRead = await CommunicationsUtilities.ReadAsync(serverStream, header, header.Length).ConfigureAwait(false);
                 if (bytesRead != header.Length)
                 {
                     continue;
