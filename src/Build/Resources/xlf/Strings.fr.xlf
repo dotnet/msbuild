@@ -179,8 +179,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RarControllerReflectionError">
-        <source>Couldn't create instace of IRarController for '{0}' type</source>
-        <target state="new">Couldn't create instace of IRarController for '{0}' type</target>
+        <source>Couldn't create instance of IRarController for '{0}' type</source>
+        <target state="new">Couldn't create instance of IRarController for '{0}' type</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
