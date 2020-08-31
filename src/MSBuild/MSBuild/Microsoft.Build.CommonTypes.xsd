@@ -1544,11 +1544,31 @@ elementFormDefault="qualified">
     <xs:element name="AnalysisLevel" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="InstallUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="IsCodeSharingProject" type="msb:boolean" substitutionGroup="msb:Property"/>
-    <xs:element name="IsPackable" type="msb:boolean" substitutionGroup="msb:Property"/>
-    <xs:element name="EnableNETAnalyzers" type="msb:boolean" substitutionGroup="msb:Property"/>
-    <xs:element name="EnableDefaultCompileItems" type="msb:boolean" substitutionGroup="msb:Property"/>
-    <xs:element name="EnableDefaultNoneItems" type="msb:boolean" substitutionGroup="msb:Property"/>
-    <xs:element name="EnableDefaultItems" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="IsPackable" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="IsPackable" _locComment="" -->Indicates whether the project can be used to create a NuGet package.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableNETAnalyzers" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableNETAnalyzers" _locComment="" -->Indicates whether the CAxxxx are enabled. They are enabled by default only in .NET 5.0 and later versions.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableDefaultCompileItems" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableDefaultCompileItems" _locComment="" -->Enable default Compile item globs for source files.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableDefaultNoneItems" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableDefaultNoneItems" _locComment="" -->Enable default None item globs (which cover most files in the project not covered by other globs).</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableDefaultItems" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableDefaultItems" _locComment="" -->Defaults to true, and if set to false will disable all default item globs.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="IsWebBootstrapper" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="JCPA" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="Keyword" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
