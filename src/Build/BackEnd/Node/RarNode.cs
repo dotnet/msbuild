@@ -29,7 +29,13 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private const string RarControllerName = "Microsoft.Build.Tasks.ResolveAssemblyReferences.Server.RarController, Microsoft.Build.Tasks.Core";
 
-        public NodeEngineShutdownReason Run(bool nodeReuse, bool lowPriority, out Exception shutdownException)
+
+        /// <summary>
+        /// Timeout for node shutdwon
+        /// </summary>
+        private static readonly TimeSpan NodeShutdownTimeout = TimeSpan.FromHours(1);
+
+        public NodeEngineShutdownReason Run(bool nodeReuse, bool lowPriority, out Exception shutdownException, CancellationToken cancellationToken = default)
         {
             shutdownException = null;
             using CancellationTokenSource cts = new CancellationTokenSource();
@@ -43,10 +49,23 @@ namespace Microsoft.Build.Execution
 
             Task<NodeEngineShutdownReason> msBuildShutdown = RunShutdownCheckAsync(handshake, cts.Token);
 
-            // Wait for any of these task to finish:
-            // - rarTask can timeout (default is 15 mins)
-            // - msBuildShutdown ends when it receives command to shutdown
-            int index = Task.WaitAny(msBuildShutdown, rarTask);
+            // Timeout for node, limits lifetime of node to 1 hour
+            cts.CancelAfter(NodeShutdownTimeout);
+            int index;
+            try
+            {
+                // Wait for any of these task to finish:
+                // - rarTask can timeout (default is 15 mins)
+                // - msBuildShutdown ends when it recieves command to shutdown
+                // - node lifetime expires
+                index = Task.WaitAny(new Task[] { msBuildShutdown, rarTask }, cts.Token);
+            }
+            catch (OperationCanceledException e)
+            {
+                shutdownException = e;
+                return NodeEngineShutdownReason.Error;
+            }
+
             cts.Cancel();
 
             if (index == 0)
