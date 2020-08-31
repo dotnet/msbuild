@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests
 
             nodes.Count.ShouldBe(3, $"There should be 3 <variable /> elements with a Name attribute {Environment.NewLine}{xmlDocument.OuterXml}");
 
-            nodes.All(i => i.Value.Equals("Mert")).ShouldBeTrue($"All <variable /> elements should have Name=\"Mert\" {Environment.NewLine}{xmlDocument.OuterXml}");
+            nodes.ShouldAllBe(i => i.Value.Equals("Megt"), $"All <variable /> elements should have Name=\"Mert\" {Environment.NewLine}{xmlDocument.OuterXml}");
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests
 
             nodes.Count.ShouldBe(3, $"There should be 3 <variable /> elements with a Name attribute {Environment.NewLine}{xmlDocument.OuterXml}");
 
-            nodes.All(i => i.Value.Equals(value)).ShouldBeTrue($"All <variable /> elements should have Name=\"{value}\" {Environment.NewLine}{xmlDocument.OuterXml}");
+            nodes.ShouldAllBe(i => i.Value.Equals(value), $"All <variable /> elements should have Name=\"{value}\" {Environment.NewLine}{xmlDocument.OuterXml}");
         }
 
         [Fact]
@@ -188,7 +188,7 @@ namespace Microsoft.Build.UnitTests
             p.Value = new TaskItem("Nur");
 
             p.Execute().ShouldBeFalse(); // "Execution should've failed"
-            engine.Log.ShouldContain("MSB3731");
+            engine.AssertLogContains("MSB3731");
         }
 
         [Fact]
@@ -205,7 +205,7 @@ namespace Microsoft.Build.UnitTests
             p.Query = "//s:variable/@Name";
             p.Value = new TaskItem("Nur");
             p.Execute().ShouldBeFalse(); // "Test should've failed"
-            engine.Log.ShouldContain("MSB3732", "Engine log should contain error code MSB3732 " + engine.Log);
+            engine.AssertLogContains("MSB3732");
         }
 
         [Fact]
