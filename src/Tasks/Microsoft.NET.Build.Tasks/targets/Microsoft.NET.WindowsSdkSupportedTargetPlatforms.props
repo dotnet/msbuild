@@ -13,9 +13,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 <!-- This file contains a list of the windows target platform versions that are supported by this SDK for .NET. Supported versions are processed in _NormalizeTargetPlatformVersion -->
 <Project>
     <ItemGroup>
-        <WindowsSdkSupportedTargetPlatform Include="10.0.19041" />
-        <WindowsSdkSupportedTargetPlatform Include="10.0.18362" />
-        <WindowsSdkSupportedTargetPlatform Include="10.0.17763" />
+        <WindowsSdkSupportedTargetPlatform Include="10.0.19041.0" />
+        <WindowsSdkSupportedTargetPlatform Include="10.0.18362.0" />
+        <WindowsSdkSupportedTargetPlatform Include="10.0.17763.0" />
         <WindowsSdkSupportedTargetPlatform Include="8.0" />
         <WindowsSdkSupportedTargetPlatform Include="7.0" />
     </ItemGroup>

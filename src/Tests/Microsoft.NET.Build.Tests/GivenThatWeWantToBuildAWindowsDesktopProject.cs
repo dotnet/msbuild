@@ -122,17 +122,22 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1140");
         }
 
-        [WindowsOnlyFact]
-        public void It_succeeds_if_windows_target_platform_version_has_trailing_zeros()
+        [WindowsOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_succeeds_if_windows_target_platform_version_does_not_have_trailing_zeros(bool setInTargetframework)
         {
             var testProject = new TestProject()
             {
                 Name = "ValidWindowsVersion",
                 IsSdkProject = true,
-                TargetFrameworks = "net5.0"
+                TargetFrameworks = setInTargetframework ? "net5.0-windows10.0.18362" : "net5.0"
             };
-            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "Windows"; 
-            testProject.AdditionalProperties["TargetPlatformVersion"] = "10.0.18362.0"; // We must set this manually because if we set it in the TFM we remove the trailing zeroes. 
+            if (!setInTargetframework)
+            {
+                testProject.AdditionalProperties["TargetPlatformIdentifier"] = "Windows";
+                testProject.AdditionalProperties["TargetPlatformVersion"] = "10.0.18362";
+            }
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testAsset);
@@ -144,7 +149,7 @@ namespace Microsoft.NET.Build.Tests
             getValuesCommand.Execute()
                 .Should()
                 .Pass();
-            getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "10.0.18362" });
+            getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "10.0.18362.0" });
         }
 
         [Fact]
