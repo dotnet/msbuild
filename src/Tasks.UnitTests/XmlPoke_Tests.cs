@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests
 
             nodes.Count.ShouldBe(3, $"There should be 3 <variable /> elements with a Name attribute {Environment.NewLine}{xmlDocument.OuterXml}");
 
-            nodes.ShouldAllBe(i => i.Value.Equals("Megt"), $"All <variable /> elements should have Name=\"Mert\" {Environment.NewLine}{xmlDocument.OuterXml}");
+            nodes.ShouldAllBe(i => i.Value.Equals("Mert"), $"All <variable /> elements should have Name=\"Mert\" {Environment.NewLine}{xmlDocument.OuterXml}");
         }
 
         [Fact]
