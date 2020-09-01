@@ -54,7 +54,7 @@ namespace Microsoft.Build.Execution
             int index;
             try
             {
-                // Wait for any of these task to finish:
+                // Wait for any of these tasks to finish:
                 // - rarTask can timeout (default is 15 mins)
                 // - msBuildShutdown ends when it recieves command to shutdown
                 // - node lifetime expires

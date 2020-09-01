@@ -1835,6 +1835,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</value>
   </data>
   <data name="RarControllerReflectionError" xml:space="preserve">
-    <value>Couldn't create instance of IRarController for '{0}' type</value>
+    <value>Couldn't create an instance of IRarController for '{0}' type</value>
   </data>
 </root>
