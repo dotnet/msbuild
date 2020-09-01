@@ -65,11 +65,6 @@ namespace Microsoft.Build.Execution
         private static int s_nextBuildRequestConfigurationId;
 
         /// <summary>
-        /// If this value is returened by <see cref="IRarBuildEngine.CreateRarNode"/> then RAR node wasn't started
-        /// </summary>
-        internal const int RarNodeStartFailed = -1;
-
-        /// <summary>
         /// The cache for build request configurations.
         /// </summary>
         private IConfigCache _configCache;
@@ -2023,24 +2018,24 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        internal int CreateRarNode()
+        internal bool CreateRarNode()
         {
             // If the _buildParametrs is not set, we are in OutOfProc mode, so continue
             // Else check if users specified that he want to use multiple nodes, if so use RARaaS
             if (_buildParameters?.MaxNodeCount == 1)
-                return RarNodeStartFailed;
+                return false;
 
             string nodeLocation = _buildParameters?.NodeExeLocation ?? BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
             if (string.IsNullOrEmpty(nodeLocation))
             {
                 // Couldn't find a path to MSBuild.exe; can't create a new node.
-                return RarNodeStartFailed;
+                return false;
             }
 
             bool nodeReuse = _buildParameters?.EnableNodeReuse ?? true;
             bool lowPriority = _buildParameters?.LowPriority ?? false;
             string commandLineArgs = $"/nologo /nodemode:3 /nodeReuse:{nodeReuse} /low:{lowPriority}";
-            return NodeProviderOutOfProcBase.LaunchNode(nodeLocation, commandLineArgs);
+            return NodeProviderOutOfProcBase.LaunchNode(nodeLocation, commandLineArgs) != -1;
         }
 
         /// <summary>

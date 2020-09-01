@@ -31,7 +31,7 @@ namespace Microsoft.Build.Execution
 
 
         /// <summary>
-        /// Timeout for node shutdwon
+        /// Timeout for node shutdown
         /// </summary>
         private static readonly TimeSpan NodeShutdownTimeout = TimeSpan.FromHours(1);
 
@@ -55,8 +55,8 @@ namespace Microsoft.Build.Execution
             try
             {
                 // Wait for any of these tasks to finish:
-                // - rarTask can timeout (default is 15 mins)
-                // - msBuildShutdown ends when it recieves command to shutdown
+                // - rarTask can timeout (default is 15 minutes)
+                // - msBuildShutdown ends when it receives command to shutdown
                 // - node lifetime expires
                 index = Task.WaitAny(new Task[] { msBuildShutdown, rarTask }, cts.Token);
             }
@@ -117,10 +117,10 @@ namespace Microsoft.Build.Execution
             }
 
             // Most common path in this while loop in long run will be over the continue statement.
-            // This is happeing because the MSBuild when starting new nodes is trying in some cases to reuse nodes (see nodeReuse switch).
+            // This is happening because the MSBuild when starting new nodes is trying in some cases to reuse nodes (see nodeReuse switch).
             // It is done by listing the MSBuild processes and then connecting to them and validating the handshake.
             // In most cases for this loop it will fail, which will lead to hitting the continue statement.
-            // If we get over that, the MSBuild should send NodeBuildComplete packet, which will indicate that the engine is requesting to shtudown this node.
+            // If we get over that, the MSBuild should send NodeBuildComplete packet, which will indicate that the engine is requesting to shutdown this node.
             while (true)
             {
                 if (cancellationToken.IsCancellationRequested)
@@ -133,7 +133,7 @@ namespace Microsoft.Build.Execution
                 if (!connected)
                     continue;
 
-                // Header consits of:
+                // Header consists of:
                 // 1 byte - Packet type
                 // 4 bytes - packet length
                 byte[] header = new byte[5];
