@@ -7,12 +7,12 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
 
 using Microsoft.Build.Shared;
-using System.Reflection;
 
 #if !FEATURE_APM
 using System.Threading.Tasks;
@@ -56,7 +56,12 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Building with administrator privileges
         /// </summary>
-        Administrator = 32
+        Administrator = 32,
+
+        /// <summary>
+        /// Is a special node. Special nodes cannot accept normal build requests.
+        /// </summary>
+        Special = 64
     }
 
     internal readonly struct Handshake
@@ -152,6 +157,22 @@ namespace Microsoft.Build.Internal
         static internal int NodeConnectionTimeout
         {
             get { return GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout); }
+        }
+
+        private static int? _clrVersion = null;
+        /// <summary>
+        /// Provides cached value of current CLR version
+        /// </summary>
+        private static int ClrVersion
+        {
+            get
+            {
+                if (!_clrVersion.HasValue)
+                {
+                    _clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
+                }
+                return _clrVersion.Value;
+            }
         }
 
         /// <summary>
@@ -459,7 +480,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Given the appropriate information, return the equivalent HandshakeOptions.
         /// </summary>
-        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, bool is64Bit = false, bool nodeReuse = false, bool lowPriority = false, IDictionary<string, string> taskHostParameters = null)
+        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, bool is64Bit = false, bool nodeReuse = false, bool lowPriority = false, bool specialNode = false, IDictionary<string, string> taskHostParameters = null)
         {
             HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
 
@@ -471,7 +492,7 @@ namespace Microsoft.Build.Internal
                 // Take the current TaskHost context
                 if (taskHostParameters == null)
                 {
-                    clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
+                    clrVersion = ClrVersion;
                     is64Bit = XMakeAttributes.GetCurrentMSBuildArchitecture().Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
                 }
                 else
@@ -510,6 +531,10 @@ namespace Microsoft.Build.Internal
                 context |= HandshakeOptions.Administrator;
             }
 #endif
+            if (specialNode)
+            {
+                context |= HandshakeOptions.Special;
+            }
             return context;
         }
 
@@ -627,6 +652,13 @@ namespace Microsoft.Build.Internal
         internal static int AvoidEndOfHandshakeSignal(int x)
         {
             return x == EndOfHandshakeSignal ? ~x : x;
+        }
+
+        internal static string GetRarPipeName(bool nodeReuse, bool lowPriority)
+        {
+            var context = GetHandshakeOptions(taskHost: true, nodeReuse: nodeReuse, lowPriority: lowPriority, specialNode: true);
+            var userName = $"{Environment.UserDomainName}.{Environment.UserName}";
+            return $"MSBuild.RAR.{userName}.{(int)context}";
         }
     }
 }

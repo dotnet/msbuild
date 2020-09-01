@@ -1412,6 +1412,11 @@
         <target state="translated">Vlastnost StopOnFirstFailure nebude mít žádný účinek, jsou-li splněny všechny následující podmínky: 1) systém pracuje v režimu více procesů, 2) vlastnost BuildInParallel má hodnotu True, 3) vlastnost RunEachTargetSeparately má hodnotu False.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
+      <trans-unit id="RarCouldntConnect">
+        <source>Couldn't connect to the RAR node, starting a new one.</source>
+        <target state="new">Couldn't connect to the RAR node, starting a new one.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
         <target state="translated">MSB3501: Nelze číst řádky ze souboru {0}. {1}</target>

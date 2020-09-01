@@ -2931,4 +2931,7 @@
         error codes, because those exceptions should ideally be caught at a higher scope and logged with a wrapper message that
         DOES have an error code.
   -->
+  <data name="RarCouldntConnect" xml:space="preserve">
+    <value>Couldn't connect to the RAR node, starting a new one.</value>
+  </data>
 </root>

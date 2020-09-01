@@ -1412,6 +1412,11 @@
         <target state="translated">StopOnFirstFailure は、次のすべての条件に該当する場合に無効となります。1) システムがマルチプロセッサ モードで実行されている。2) BuildInParallel プロパティが true に設定されている。3) RunEachTargetSeparately プロパティが false に設定されている。</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
+      <trans-unit id="RarCouldntConnect">
+        <source>Couldn't connect to the RAR node, starting a new one.</source>
+        <target state="new">Couldn't connect to the RAR node, starting a new one.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
         <target state="translated">MSB3501: ファイル "{0}" からの行を読み取れませんでした。{1}</target>

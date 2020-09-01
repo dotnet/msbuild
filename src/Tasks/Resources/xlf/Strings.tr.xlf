@@ -1412,6 +1412,11 @@
         <target state="translated">Şu koşulların tümü doğru olduğunda StopOnFirstFailure etkisiz olur: 1) Sistem çoklu işlem modunda çalışıyorsa. 2) BuildInParallel özelliği true ise. 3) RunEachTargetSeparately özelliği false ise.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
+      <trans-unit id="RarCouldntConnect">
+        <source>Couldn't connect to the RAR node, starting a new one.</source>
+        <target state="new">Couldn't connect to the RAR node, starting a new one.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
         <target state="translated">MSB3501: "{0}" dosyasındaki satırlar okunamadı. {1}</target>

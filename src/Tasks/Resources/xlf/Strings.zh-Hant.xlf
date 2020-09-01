@@ -1412,6 +1412,11 @@
         <target state="translated">當下列條件全部成立時，StopOnFirstFailure 將沒有作用: 1) 系統正在多處理程序模式中執行 2) BuildInParallel 屬性為 true。3) RunEachTargetSeparately 屬性為 false。</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
+      <trans-unit id="RarCouldntConnect">
+        <source>Couldn't connect to the RAR node, starting a new one.</source>
+        <target state="new">Couldn't connect to the RAR node, starting a new one.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
         <target state="translated">MSB3501: 無法從檔案 "{0}" 讀取行。{1}</target>
