@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 
+using Microsoft.NET.Sdk.WorkloadManifestReader;
+
 namespace Microsoft.Net.Sdk.WorkloadManifestReader
 {
     partial class WorkloadManifestReader
@@ -27,7 +29,7 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
             {
                 return;
             }
-            throw new WorkloadManifestFormatException($"Expected '{expected}' at offset {reader.TokenStartIndex}");
+            throw new WorkloadManifestFormatException(Strings.ExpectedTokenAtOffset, expected, reader.TokenStartIndex);
         }
 
         static string ReadString(ref Utf8JsonStreamReader reader)
@@ -37,7 +39,7 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                 return reader.GetString();
             }
 
-            throw new WorkloadManifestFormatException($"Expected string value at offset {reader.TokenStartIndex}");
+            throw new WorkloadManifestFormatException(Strings.ExpectedStringAtOffset, reader.TokenStartIndex);
         }
 
         static bool ReadBool(ref Utf8JsonStreamReader reader)
@@ -47,11 +49,11 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                 return reader.TokenType == JsonTokenType.True;
             }
 
-            throw new WorkloadManifestFormatException($"Expected boolean value at offset {reader.TokenStartIndex}");
+            throw new WorkloadManifestFormatException(Strings.ExpectedBoolAtOffset, reader.TokenStartIndex);
         }
 
         static void ThrowDuplicateKeyException (ref Utf8JsonStreamReader reader, string key)
-            => throw new WorkloadManifestFormatException($"Duplicate key '{key}' at offset {reader.TokenStartIndex}");
+            => throw new WorkloadManifestFormatException(Strings.DuplicateKeyAtOffset, key, reader.TokenStartIndex);
 
         static WorkloadManifest ReadWorkloadManifest(ref Utf8JsonStreamReader reader)
         {
@@ -72,7 +74,7 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                         if (string.Equals("version", propName, StringComparison.OrdinalIgnoreCase))
                         {
                             if (version != null) ThrowDuplicateKeyException(ref reader, propName);
-                            if (!reader.Read() || reader.TokenType != JsonTokenType.Number) throw new WorkloadManifestFormatException("Could not read manifest version");
+                            if (!reader.Read() || reader.TokenType != JsonTokenType.Number) throw new WorkloadManifestFormatException(Strings.MissingOrInvalidManifestVersion);
                             version = reader.GetInt64();
                             continue;
                         }
@@ -109,12 +111,12 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                         }
 
                         // it would be more robust to ignore unknown keys but right now we're pretty unforgiving
-                        throw new WorkloadManifestFormatException($"Unknown key '{propName}' at offset {reader.TokenStartIndex}");
+                        throw new WorkloadManifestFormatException(Strings.UnknownKeyAtOffset, propName, reader.TokenStartIndex);
                     case JsonTokenType.EndObject:
 
                         if (version == null || version < 0)
                         {
-                            throw new WorkloadManifestFormatException("Missing or invalid manifest version");
+                            throw new WorkloadManifestFormatException(Strings.MissingOrInvalidManifestVersion);
                         }
 
                         return new WorkloadManifest (
@@ -124,11 +126,11 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                             packs ?? new Dictionary<string, WorkloadPack> ()
                         );
                     default:
-                        throw new WorkloadManifestFormatException($"Unexpected token '{reader.TokenType}' at offset {reader.TokenStartIndex}");
+                        throw new WorkloadManifestFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
                 }
             }
 
-            throw new WorkloadManifestFormatException($"Incomplete document");
+            throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
         /// <summary>
@@ -178,11 +180,11 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                     case JsonTokenType.EndObject:
                         return workloads;
                     default:
-                        throw new WorkloadManifestFormatException($"Unexpected token '{reader.TokenType}' at offset {reader.TokenStartIndex}");
+                        throw new WorkloadManifestFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
                 }
             }
 
-            throw new WorkloadManifestFormatException($"Incomplete document");
+            throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
         static Dictionary<string, WorkloadPack> ReadWorkloadPacks(ref Utf8JsonStreamReader reader)
@@ -204,11 +206,11 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                     case JsonTokenType.EndObject:
                         return packs;
                     default:
-                        throw new WorkloadManifestFormatException($"Unexpected token '{reader.TokenType}' at offset {reader.TokenStartIndex}");
+                        throw new WorkloadManifestFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
                 }
             }
 
-            throw new WorkloadManifestFormatException($"Incomplete document");
+            throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
         static List<string> ReadStringArray(ref Utf8JsonStreamReader reader)
@@ -227,11 +229,11 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                     case JsonTokenType.EndArray:
                         return list;
                     default:
-                        throw new WorkloadManifestFormatException($"Unexpected token '{reader.TokenType}' at offset {reader.TokenStartIndex}");
+                        throw new WorkloadManifestFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
                 }
             }
 
-            throw new WorkloadManifestFormatException($"Incomplete document");
+            throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
         static Dictionary<string,string> ReadStringDictionary(ref Utf8JsonStreamReader reader)
@@ -253,11 +255,11 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                     case JsonTokenType.EndObject:
                         return dictionary;
                     default:
-                        throw new WorkloadManifestFormatException($"Unexpected token '{reader.TokenType}' at offset {reader.TokenStartIndex}");
+                        throw new WorkloadManifestFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
                 }
             }
 
-            throw new WorkloadManifestFormatException($"Incomplete document");
+            throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
         static WorkloadDefinition ReadWorkloadDefinition(string id, ref Utf8JsonStreamReader reader)
@@ -295,7 +297,7 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                             }
                             else
                             {
-                                throw new WorkloadManifestFormatException($"Unknown workload definition kind '{kindStr}' at offset {reader.TokenStartIndex}");
+                                throw new WorkloadManifestFormatException(Strings.UnknownWorkloadDefinitionKind, kindStr, reader.TokenStartIndex);
 
                             }
                             continue;
@@ -329,20 +331,20 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                             continue;
                         }
 
-                        throw new WorkloadManifestFormatException($"Unknown key '{propName}' at  offset {reader.TokenStartIndex}");
+                        throw new WorkloadManifestFormatException(Strings.UnknownKeyAtOffset, propName, reader.TokenStartIndex);
                     case JsonTokenType.EndObject:
                         var isAbstract = isAbstractOrNull ?? false;
                         if (!isAbstract && kind == WorkloadDefinitionKind.Dev && string.IsNullOrEmpty (description))
                         {
-                            throw new WorkloadManifestFormatException($"Workload definition '{id}' is a concrete dev workload but has no description");
+                            throw new WorkloadManifestFormatException(Strings.ConcreteWorkloadHasNoDescription, id);
                         }
                         return new WorkloadDefinition (id, isAbstract, description, kind ?? WorkloadDefinitionKind.Dev, extends, packs, platforms);
                     default:
-                        throw new WorkloadManifestFormatException($"Unexpected token '{reader.TokenType}' at offset {reader.TokenStartIndex}");
+                        throw new WorkloadManifestFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
                 }
             }
 
-            throw new WorkloadManifestFormatException("Incomplete decument");
+            throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
         static WorkloadPack ReadWorkloadPack(string id, ref Utf8JsonStreamReader reader)
@@ -377,7 +379,7 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                             }
                             else
                             {
-                                throw new WorkloadManifestFormatException($"Unknown workload pack kind '{kindStr}' at offset {reader.TokenStartIndex}");
+                                throw new WorkloadManifestFormatException(Strings.UnknownWorkloadPackKind, kindStr, reader.TokenStartIndex);
 
                             }
                             continue;
@@ -390,23 +392,23 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                             continue;
                         }
 
-                        throw new WorkloadManifestFormatException($"Unknown key '{propName}' at offset {reader.TokenStartIndex}");
+                        throw new WorkloadManifestFormatException(Strings.UnknownKeyAtOffset, propName, reader.TokenStartIndex);
                     case JsonTokenType.EndObject:
                         if (version == null)
                         {
-                            throw new WorkloadManifestFormatException($"Missing version for workload pack '{id}'");
+                            throw new WorkloadManifestFormatException(Strings.MissingWorkloadPackVersion, id);
                         }
                         if (kind == null)
                         {
-                            throw new WorkloadManifestFormatException($"Missing kind for workload pack '{id}'");
+                            throw new WorkloadManifestFormatException(Strings.MissingWorkloadPackKind, id);
                         }
                         return new WorkloadPack (id, version, kind.Value, aliasTo);
                     default:
-                        throw new WorkloadManifestFormatException($"Unexpected token '{reader.TokenType}' at offset {reader.TokenStartIndex}");
+                        throw new WorkloadManifestFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
                 }
             }
 
-            throw new WorkloadManifestFormatException($"Incomplete document");
+            throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
     }
 }

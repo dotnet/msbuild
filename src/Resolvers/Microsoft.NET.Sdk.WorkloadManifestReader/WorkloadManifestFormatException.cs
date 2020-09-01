@@ -6,6 +6,7 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
     class WorkloadManifestFormatException: Exception
     {
         public WorkloadManifestFormatException() { }
+        public WorkloadManifestFormatException(string messageFormat, params object[] args) : base(string.Format (messageFormat, args)) { }
         public WorkloadManifestFormatException(string message) : base(message) { }
         public WorkloadManifestFormatException(string message, Exception inner) : base(message, inner) { }
         protected WorkloadManifestFormatException(
