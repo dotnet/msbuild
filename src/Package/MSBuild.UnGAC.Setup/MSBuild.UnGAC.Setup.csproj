@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net45</TargetFramework>
     <OutputType>Exe</OutputType>
+    <TargetVsixContainerName>MSBuild.UnGAC.Setup.json</TargetVsixContainerName>
     <!-- VS Insertion -->
     <!-- <TargetVsixContainerName>Microsoft.Build.UnGAC.vsix</TargetVsixContainerName> -->
     <VisualStudioInsertionComponent>Microsoft.Build.UnGAC.Setup</VisualStudioInsertionComponent>
