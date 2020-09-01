@@ -59,7 +59,11 @@ namespace Microsoft.Build.Execution
                 // - node lifetime expires
                 index = Task.WaitAny(new Task[] { msBuildShutdown, rarTask }, cts.Token);
             }
-            catch (OperationCanceledException e)
+            catch (OperationCanceledException)
+            {
+                return NodeEngineShutdownReason.BuildComplete;
+            }
+            catch (Exception e)
             {
                 shutdownException = e;
                 return NodeEngineShutdownReason.Error;
@@ -83,9 +87,10 @@ namespace Microsoft.Build.Execution
         {
             Type rarControllerType = Type.GetType(RarControllerName);
 
-            Func<string, int?, int?, int, bool, NamedPipeServerStream> streamFactory = NamedPipeUtil.CreateNamedPipeServer;
-            Func<Handshake, NamedPipeServerStream, int, bool> validateCallback = NamedPipeUtil.ValidateHandshake;
-            IRarController controller = Activator.CreateInstance(rarControllerType, pipeName, handshake, streamFactory, validateCallback, null) as IRarController;
+            Func<string, int?, int?, int, bool, Stream> streamFactory = NamedPipeUtil.CreateNamedPipeServer;
+            Func<NamedPipeServerStream, int, bool> validateCallback = (pipeStream, timeout) => NamedPipeUtil.ValidateHandshake(handshake, pipeStream, timeout);
+
+            IRarController controller = Activator.CreateInstance(rarControllerType, pipeName, streamFactory, validateCallback, null) as IRarController;
 
             ErrorUtilities.VerifyThrow(controller != null, ResourceUtilities.GetResourceString("RarControllerReflectionError"), RarControllerName);
             return controller;

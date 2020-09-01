@@ -22,10 +22,10 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
             IFormatterResolver resolver = CompositeResolver.Create(
                 new IMessagePackFormatter[]
                 {
-                    BuildEventArgsFormatter<CustomBuildEventArgs>.CustomFormatter,
-                    BuildEventArgsFormatter<BuildErrorEventArgs>.ErrorFormatter,
-                    BuildEventArgsFormatter<BuildWarningEventArgs>.WarningFormatter,
-                    BuildEventArgsFormatter<BuildMessageEventArgs>.MessageFormatter
+                    BuildEventArgsFormatter.CustomFormatter,
+                    BuildEventArgsFormatter.ErrorFormatter,
+                    BuildEventArgsFormatter.WarningFormatter,
+                    BuildEventArgsFormatter.MessageFormatter
                 },
                 new[]
                 {

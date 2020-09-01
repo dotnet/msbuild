@@ -33,12 +33,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         private readonly string _pipeName;
 
         /// <summary>
-        /// Handshake used for validation of incoming connections
-        /// </summary>
-        private readonly Handshake _handshake;
-
-
-        /// <summary>
         /// Factory callback to NamedPipeUtils.CreateNamedPipeServer
         /// 1. arg: pipe name
         /// 2. arg: input buffer size
@@ -54,7 +48,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         /// 2. arg: named pipe over which we should validate the handshake
         /// 3. arg: timeout for validation
         /// </summary>
-        private readonly Func<Handshake, NamedPipeServerStream, int, bool> _validateHandshakeCallback;
+        private readonly Func<NamedPipeServerStream, int, bool> _validateHandshakeCallback;
 
         /// <summary>
         /// Handler for all incoming tasks
@@ -67,38 +61,33 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         private readonly TimeSpan Timeout = TimeSpan.FromMinutes(15);
 
         /// <summary>
-        /// Construcotr for <see cref="RarController"/>
+        /// Constructor for <see cref="RarController"/>
         /// </summary>
-        /// <param name="pipeName">Name of pipe over which all comunication should go</param>
-        /// <param name="handshake">Handshake which will be used for validation of connection if <seealso cref="NamedPipeServerStream" /> is provided</param>
+        /// <param name="pipeName">Name of pipe over which all communication should go</param>
         /// <param name="streamFactory">Factory for stream used in connection</param>
         /// <param name="validateHandshakeCallback">Callback to validation of connection</param>
         /// <param name="timeout">Timeout which should be used for communication</param>
         public RarController(
             string pipeName,
-            Handshake handshake,
-            Func<string, int?, int?, int, bool, NamedPipeServerStream> streamFactory,
-            Func<Handshake, NamedPipeServerStream, int, bool> validateHandshakeCallback,
+            Func<string, int?, int?, int, bool, Stream> streamFactory,
+            Func<NamedPipeServerStream, int, bool> validateHandshakeCallback,
             TimeSpan? timeout = null)
             : this(pipeName,
-                  handshake,
                   streamFactory,
                   validateHandshakeCallback,
                   timeout: timeout,
-                  resolveAssemblyReferenceTaskHandler: new ResolveAssemblyReferenceTaskHandler())
+                  resolveAssemblyReferenceTaskHandler: new ResolveAssemlyReferenceCacheHandler(new ResolveAssemblyReferenceTaskHandler()))
         {
         }
 
         internal RarController(
             string pipeName,
-            Handshake handshake,
-            Func<string, int?, int?, int, bool, NamedPipeServerStream> streamFactory,
-            Func<Handshake, NamedPipeServerStream, int, bool> validateHandshakeCallback,
+            Func<string, int?, int?, int, bool, Stream> streamFactory,
+            Func<NamedPipeServerStream, int, bool> validateHandshakeCallback,
             IResolveAssemblyReferenceTaskHandler resolveAssemblyReferenceTaskHandler,
             TimeSpan? timeout = null)
         {
             _pipeName = pipeName;
-            _handshake = handshake;
             _streamFactory = streamFactory;
             _validateHandshakeCallback = validateHandshakeCallback;
             _resolveAssemblyReferenceTaskHandler = resolveAssemblyReferenceTaskHandler;
@@ -142,21 +131,22 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         {
             Stream serverStream = GetStream(_pipeName);
 
-            if (serverStream is NamedPipeServerStream pipeServerStream)
+            if (!(serverStream is NamedPipeServerStream pipeServerStream))
             {
-                await pipeServerStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
+                return serverStream;
+            }
 
-                if (!_validateHandshakeCallback(_handshake, pipeServerStream, ValidationTimeout))
-                {
-                    // We couldn't validate connection, so don't use this connection at all.
-                    pipeServerStream.Dispose();
-                    return null;
-                }
+            await pipeServerStream.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
 
+            if (_validateHandshakeCallback(pipeServerStream, ValidationTimeout))
+            {
                 return pipeServerStream;
             }
 
-            return serverStream;
+            // We couldn't validate connection, so don't use this connection at all.
+            pipeServerStream.Dispose();
+            return null;
+
         }
 
         internal async Task HandleClientAsync(Stream serverStream, CancellationToken cancellationToken = default)
