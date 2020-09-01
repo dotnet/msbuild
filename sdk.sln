@@ -256,11 +256,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.SdkResolve
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.WorkloadManifestReader", "src\Resolvers\Microsoft.DotNet.WorkloadManifestReader\Microsoft.DotNet.WorkloadManifestReader.csproj", "{7CB05F08-1674-44CE-93E3-6C6026154EE0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Net.Sdk.WorkloadManifestReader", "src\Resolvers\Microsoft.Net.Sdk.ManifestReader\Microsoft.Net.Sdk.WorkloadManifestReader.csproj", "{C22A85E0-C09F-4E2D-81F6-82AB97932FE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.WorkloadManifestReader", "src\Resolvers\Microsoft.NET.Sdk.WorkloadManifestReader\Microsoft.NET.Sdk.WorkloadManifestReader.csproj", "{C22A85E0-C09F-4E2D-81F6-82AB97932FE2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkloadManifestValidator", "src\Resolvers\WorkloadManifestValidator\WorkloadManifestValidator.csproj", "{565411E4-E89D-4DF3-ADD5-55D3295F30EE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkloadManifestReader.Tests", "src\Tests\WorkloadManifestReader.Tests\WorkloadManifestReader.Tests.csproj", "{988D4839-B97F-42BB-A045-C79157CA7780}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.WorkloadManifestReader.Tests", "src\Tests\Microsoft.NET.Sdk.WorkloadManifestReader.Tests\Microsoft.NET.Sdk.WorkloadManifestReader.Tests.csproj", "{988D4839-B97F-42BB-A045-C79157CA7780}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
