@@ -5,16 +5,11 @@
     <OutputType>Exe</OutputType>
     <TargetVsixContainerName>MSBuild.UnGAC.Setup.json</TargetVsixContainerName>
     <!-- VS Insertion -->
-    <!-- <TargetVsixContainerName>Microsoft.Build.UnGAC.vsix</TargetVsixContainerName> -->
     <VisualStudioInsertionComponent>Microsoft.Build.UnGAC.Setup</VisualStudioInsertionComponent>
 
     <ShouldSkipProject>false</ShouldSkipProject>
     <ShouldSkipProject Condition="'$(MonoBuild)' == 'true' or '$(MSBuildRuntimeType)' != 'Full'">true</ShouldSkipProject>
   </PropertyGroup>
-
-  <ItemGroup>
-    <!-- <ProjectReference Include="..\..\Build\Microsoft.Build.csproj" PrivateAssets="All"/> -->
-  </ItemGroup>
 
   <ItemGroup>
     <_SwixArgs Include="PackageType=manifest"/>
@@ -24,30 +19,11 @@
 
   <ItemGroup>
     <SwrProperty Include="ThirdPartyNotice=$(ThirdPartyNotice)" />
-    <SwrProperty Include="SourceDir=$(RepoRoot)\src\" />
+    <SwrProperty Include="SourceDir=$(RepoRoot)\src\" /> <!--potentially remove-->
     <SwrProperty Include="BinDir=$(OutDir)" />
     <SwrProperty Include="Version=$(VsixVersion)" />
-    <!-- Only add the swr file when building on full framework msbuild, otherwise,
-    this triggers a build of the swixproj, which is not supported in core msbuild. -->
     <SwrFile Include="exe.swr" Condition=" '$(MSBuildRuntimeType)' == 'Full' " />
   </ItemGroup>
-
-  <!-- GetBinPaths depends on GetBuildVersion which does not get imported if ProducesNoOutput.Settings.props is imported-->
-  <!--<Import Project="..\GetBinPaths.targets" Condition="!$(ShouldSkipProject)"/>-->
-
-  <!--<Target Name="SetVsixProperties"
-    BeforeTargets="Build"
-    Condition="!$(ShouldSkipProject)">
-    <ItemGroup>
-      <SwrProperty Include="Version=$(VsixVersion)" />
-       <SwrProperty Include="X86BinPath=$(X86BinPath)" />
-      <SwrProperty Include="X64BinPath=$(X64BinPath)" />
-      <SwrProperty Include="FrameworkBinPath=$(FrameworkBinPath)" />
-      <SwrProperty Include="TaskHostBinPath=$(MSBuildTaskHostBinPath)" />
-      <SwrProperty Include="TaskHostX64BinPath=$(MSBuildTaskHostX64BinPath)" />
-      <SwrProperty Include="MSBuildConversionBinPath=$(MSBuildConversionBinPath)" /> 
-    </ItemGroup>
-  </Target>-->
 
   <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
 </Project>
