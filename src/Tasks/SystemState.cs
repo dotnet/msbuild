@@ -10,9 +10,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
-using System.Runtime.Serialization;
+using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
-using System.Security.Permissions;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
@@ -23,7 +25,7 @@ namespace Microsoft.Build.Tasks
     /// Class is used to cache system state.
     /// </summary>
     [Serializable]
-    internal sealed class SystemState : StateFileBase, ISerializable
+    internal sealed class SystemState
     {
         /// <summary>
         /// Cache at the SystemState instance level. Has the same contents as <see cref="instanceLocalFileStateCache"/>.
@@ -113,18 +115,8 @@ namespace Microsoft.Build.Tasks
         /// Class that holds the current file state.
         /// </summary>
         [Serializable]
-        private sealed class FileState : ISerializable
+        private sealed class FileState
         {
-            /// <summary>
-            /// The last modified time for this file.
-            /// </summary>
-            internal DateTime lastModified;
-
-            /// <summary>
-            /// The fusion name of this file.
-            /// </summary>
-            private AssemblyNameExtension assemblyName;
-
             /// <summary>
             /// The assemblies that this file depends on.
             /// </summary>
@@ -141,93 +133,37 @@ namespace Microsoft.Build.Tasks
             internal FrameworkName frameworkName;
 
             /// <summary>
-            /// The CLR runtime version for the assembly.
-            /// </summary>
-            internal string runtimeVersion;
-
-            /// <summary>
             /// Default construct.
             /// </summary>
             internal FileState(DateTime lastModified)
             {
-                this.lastModified = lastModified;
+                this.LastModified = lastModified;
             }
 
             /// <summary>
-            /// Deserializing constuctor.
+            /// Simplified constructor for deserialization.
             /// </summary>
-            internal FileState(SerializationInfo info, StreamingContext context)
+            internal FileState()
             {
-                ErrorUtilities.VerifyThrowArgumentNull(info, "info");
-
-                lastModified = new DateTime(info.GetInt64("mod"), (DateTimeKind)info.GetInt32("modk"));
-                assemblyName = (AssemblyNameExtension)info.GetValue("an", typeof(AssemblyNameExtension));
-                dependencies = (AssemblyNameExtension[])info.GetValue("deps", typeof(AssemblyNameExtension[]));
-                scatterFiles = (string[])info.GetValue("sfiles", typeof(string[]));
-                runtimeVersion = (string)info.GetValue("rtver", typeof(string));
-                if (info.GetBoolean("fn"))
-                {
-                    var frameworkNameVersion = (Version) info.GetValue("fnVer", typeof(Version));
-                    var frameworkIdentifier = info.GetString("fnId");
-                    var frameworkProfile = info.GetString("fmProf");
-                    frameworkName = new FrameworkName(frameworkIdentifier, frameworkNameVersion, frameworkProfile);
-                }
-                ModuleVersionID = (Guid)info.GetValue("mvid", typeof(Guid));
-            }
-
-            /// <summary>
-            /// Serialize the contents of the class.
-            /// </summary>
-            [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-            public void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                ErrorUtilities.VerifyThrowArgumentNull(info, "info");
-
-                info.AddValue("mod", lastModified.Ticks);
-                info.AddValue("modk", (int)lastModified.Kind);
-                info.AddValue("an", assemblyName);
-                info.AddValue("deps", dependencies);
-                info.AddValue("sfiles", scatterFiles);
-                info.AddValue("rtver", runtimeVersion);
-                info.AddValue("fn", frameworkName != null);
-                if (frameworkName != null)
-                {
-                    info.AddValue("fnVer", frameworkName.Version);
-                    info.AddValue("fnId", frameworkName.Identifier);
-                    info.AddValue("fmProf", frameworkName.Profile);
-                }
-                info.AddValue("mvid", ModuleVersionID);
             }
 
             /// <summary>
             /// Gets the last modified date.
             /// </summary>
             /// <value></value>
-            public DateTime LastModified
-            {
-                get { return lastModified; }
-                set { lastModified = value; }
-            }
+            public DateTime LastModified { get; set; }
 
             /// <summary>
             /// Get or set the assemblyName.
             /// </summary>
             /// <value></value>
-            public AssemblyNameExtension Assembly
-            {
-                get { return assemblyName; }
-                set { assemblyName = value; }
-            }
+            public AssemblyNameExtension Assembly { get; set; }
 
             /// <summary>
             /// Get or set the runtimeVersion
             /// </summary>
             /// <value></value>
-            public string RuntimeVersion
-            {
-                get { return runtimeVersion; }
-                set { runtimeVersion = value; }
-            }
+            public string RuntimeVersion { get; set; }
 
             /// <summary>
             /// Get or set the framework name the file was built against
@@ -245,22 +181,222 @@ namespace Microsoft.Build.Tasks
             public Guid ModuleVersionID { get; set; }
         }
 
+        internal sealed class Converter : JsonConverter<SystemState>
+        {
+            public override SystemState Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                SystemState systemState = new SystemState();
+                if (reader.TokenType != JsonTokenType.StartObject)
+                {
+                    throw new JsonException();
+                }
+                while (reader.Read())
+                {
+                    if (reader.TokenType == JsonTokenType.EndObject)
+                    {
+                        return systemState;
+                    }
+                    if (reader.TokenType != JsonTokenType.PropertyName)
+                    {
+                        throw new JsonException();
+                    }
+                    systemState.instanceLocalFileStateCache.Add(reader.GetString(), ParseFileState(ref reader));
+                }
+
+                throw new JsonException();
+            }
+
+            private FileState ParseFileState(ref Utf8JsonReader reader)
+            {
+                FileState state = new FileState();
+                reader.Read();
+                if (reader.TokenType != JsonTokenType.StartObject)
+                {
+                    throw new JsonException();
+                }
+                while (reader.Read())
+                {
+                    if (reader.TokenType == JsonTokenType.EndObject)
+                    {
+                        return state;
+                    }
+                    if (reader.TokenType != JsonTokenType.PropertyName)
+                    {
+                        throw new JsonException();
+                    }
+                    AssemblyNameExtension.Converter converter = new AssemblyNameExtension.Converter();
+                    string parameter = reader.GetString();
+                    reader.Read();
+                    if (reader.TokenType == JsonTokenType.Null)
+                    {
+                        continue;
+                    }
+                    switch (parameter)
+                    {
+                        case nameof(state.dependencies):
+                            state.dependencies = ParseArray<AssemblyNameExtension>(ref reader, converter);
+                            break;
+                        case nameof(state.scatterFiles):
+                            state.scatterFiles = ParseArray<string>(ref reader, s => s);
+                            break;
+                        case nameof(state.LastModified):
+                            state.LastModified = DateTime.Parse(reader.GetString());
+                            break;
+                        case nameof(state.Assembly):
+                            state.Assembly = converter.Read(ref reader, typeof(AssemblyNameExtension), new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+                            break;
+                        case nameof(state.RuntimeVersion):
+                            state.RuntimeVersion = reader.GetString();
+                            break;
+                        case nameof(state.FrameworkNameAttribute):
+                            string version = string.Empty;
+                            string identifier = string.Empty;
+                            string profile = string.Empty;
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonTokenType.EndObject)
+                                {
+                                    state.FrameworkNameAttribute = new FrameworkName(identifier, Version.Parse(version), profile);
+                                    break;
+                                }
+                                switch (reader.GetString())
+                                {
+                                    case "Version":
+                                        reader.Read();
+                                        version = reader.GetString();
+                                        break;
+                                    case "Identifier":
+                                        reader.Read();
+                                        identifier = reader.GetString();
+                                        break;
+                                    case "Profile":
+                                        reader.Read();
+                                        profile = reader.GetString();
+                                        break;
+                                }
+                            }
+                            break;
+                        case nameof(state.ModuleVersionID):
+                            state.ModuleVersionID = Guid.Parse(reader.GetString());
+                            break;
+                        default:
+                            throw new JsonException();
+                    }
+                }
+                throw new JsonException();
+            }
+
+            private T[] ParseArray<T>(ref Utf8JsonReader reader, JsonConverter<T> converter)
+            {
+                if (reader.TokenType != JsonTokenType.StartArray)
+                {
+                    return null;
+                }
+                List<T> list = new List<T>();
+                JsonSerializerOptions options = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                while (reader.Read())
+                {
+                    if (reader.TokenType == JsonTokenType.EndArray)
+                    {
+                        return list.ToArray();
+                    }
+                    else if (reader.TokenType == JsonTokenType.StartObject)
+                    {
+                        list.Add(converter.Read(ref reader, typeof(T), options));
+                    }
+                }
+                throw new JsonException();
+            }
+
+            public override void Write(Utf8JsonWriter writer, SystemState stateFile, JsonSerializerOptions options)
+            {
+                Hashtable cache = stateFile.instanceLocalFileStateCache;
+                writer.WriteStartObject();
+                JsonSerializerOptions aneOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                AssemblyNameExtension.Converter converter = new AssemblyNameExtension.Converter();
+                foreach (string fileInfoKey in cache.Keys)
+                {
+                    writer.WritePropertyName(fileInfoKey);
+                    FileState fileInfo = (FileState)cache[fileInfoKey];
+                    writer.WriteStartObject();
+                    if (fileInfo.dependencies != null)
+                    {
+                        writer.WritePropertyName(nameof(fileInfo.dependencies));
+                        writer.WriteStartArray();
+                        for (int i = 0; i < fileInfo.dependencies.Length; i++)
+                        {
+                            if (i != 0)
+                            {
+                                writer.WriteStringValue(string.Empty);
+                            }
+                            converter.Write(writer, fileInfo.dependencies[i], aneOptions);
+                        }
+                        foreach (AssemblyNameExtension e in fileInfo.dependencies)
+                        {
+                            converter.Write(writer, e, aneOptions);
+                        }
+                        writer.WriteEndArray();
+                    }
+                    if (fileInfo.scatterFiles != null)
+                    {
+                        writer.WritePropertyName(nameof(fileInfo.scatterFiles));
+                        writer.WriteStartArray();
+                        foreach (string s in fileInfo.scatterFiles)
+                        {
+                            writer.WriteStringValue(s);
+                        }
+                        writer.WriteEndArray();
+                    }
+                    writer.WriteString(nameof(fileInfo.LastModified), fileInfo.LastModified.ToString());
+                    if (fileInfo.Assembly is null)
+                    {
+                        writer.WriteNull(nameof(fileInfo.Assembly));
+                    }
+                    else
+                    {
+                        writer.WritePropertyName(nameof(fileInfo.Assembly));
+                        converter.Write(writer, fileInfo.Assembly, aneOptions);
+                    }
+                    writer.WriteString(nameof(fileInfo.RuntimeVersion), fileInfo.RuntimeVersion);
+                    if (fileInfo.FrameworkNameAttribute != null)
+                    {
+                        writer.WritePropertyName(nameof(fileInfo.FrameworkNameAttribute));
+                        writer.WriteStartObject();
+                        writer.WriteString("Version", fileInfo.FrameworkNameAttribute.Version.ToString());
+                        writer.WriteString("Identifier", fileInfo.FrameworkNameAttribute.Identifier);
+                        writer.WriteString("Profile", fileInfo.FrameworkNameAttribute.Profile);
+                        writer.WriteEndObject();
+                    }
+                    writer.WriteString(nameof(fileInfo.ModuleVersionID), fileInfo.ModuleVersionID.ToString());
+                    writer.WriteEndObject();
+                }
+                writer.WriteEndObject();
+            }
+
+            private T[] ParseArray<T>(ref Utf8JsonReader reader, Func<string, T> converter)
+            {
+                if (reader.TokenType != JsonTokenType.StartArray)
+                {
+                    return null;
+                }
+                List<T> list = new List<T>();
+                while (reader.Read())
+                {
+                    if (reader.TokenType == JsonTokenType.EndArray)
+                    {
+                        return list.ToArray();
+                    }
+                    list.Add(converter(reader.GetString()));
+                }
+                throw new JsonException();
+            }
+        }
+
         /// <summary>
         /// Construct.
         /// </summary>
         public SystemState()
         {
-        }
-
-        /// <summary>
-        /// Deserialize the contents of the class.
-        /// </summary>
-        internal SystemState(SerializationInfo info, StreamingContext context)
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(info, "info");
-
-            instanceLocalFileStateCache = (Hashtable)info.GetValue("fileState", typeof(Hashtable));
-            isDirty = false;
         }
 
         /// <summary>
@@ -276,17 +412,6 @@ namespace Microsoft.Build.Tasks
         )
         {
             redistList = RedistList.GetRedistList(installedAssemblyTableInfos);
-        }
-
-        /// <summary>
-        /// Serialize the contents of the class.
-        /// </summary>
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(info, "info");
-
-            info.AddValue("fileState", instanceLocalFileStateCache);
         }
 
         /// <summary>
@@ -555,7 +680,7 @@ namespace Microsoft.Build.Tasks
 
             dependencies = fileState.dependencies;
             scatterFiles = fileState.scatterFiles;
-            frameworkName = fileState.frameworkName;
+            frameworkName = fileState.FrameworkNameAttribute;
         }
 
         /// <summary>
@@ -572,12 +697,14 @@ namespace Microsoft.Build.Tasks
             foreach (string stateFile in stateFiles)
             {
                 // Verify that it's a real stateFile; log message but do not error if not
-                SystemState sfBase = (SystemState)DeserializeCache(stateFile, log, requiredReturnType, false);
-                foreach (string relativePath in sfBase.instanceLocalFileStateCache.Keys)
+                var deserializeOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                deserializeOptions.Converters.Add(new SystemState.Converter());
+                SystemState sysBase = JsonSerializer.Deserialize<SystemState>(File.ReadAllText(stateFile), deserializeOptions);
+                foreach (string relativePath in sysBase.instanceLocalFileStateCache.Keys)
                 {
                     if (!assembliesFound.Contains(relativePath))
                     {
-                        FileState fileState = (FileState)sfBase.instanceLocalFileStateCache[relativePath];
+                        FileState fileState = (FileState)sysBase.instanceLocalFileStateCache[relativePath];
                         // Verify that the assembly is correct
                         Guid mvid;
                         string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stateFile), relativePath));
@@ -628,7 +755,9 @@ namespace Microsoft.Build.Tasks
             {
                 log.LogWarningWithCodeFromResources("General.StateFileAlreadyPresent", stateFile);
             }
-            SerializeCache(stateFile, log);
+            JsonSerializerOptions options = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+            options.Converters.Add(new SystemState.Converter());
+            File.WriteAllText(stateFile, JsonSerializer.Serialize(this, options));
         }
 
             /// <summary>
