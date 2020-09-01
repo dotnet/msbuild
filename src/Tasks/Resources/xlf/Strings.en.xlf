@@ -1458,8 +1458,8 @@
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
       <trans-unit id="RarCouldntConnect">
-        <source>Couldn't connect to RAR node, starting new one.</source>
-        <target state="new">Couldn't connect to RAR node, starting new one.</target>
+        <source>Couldn't connect to the RAR node, starting a new one.</source>
+        <target state="new">Couldn't connect to the RAR node, starting a new one.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">

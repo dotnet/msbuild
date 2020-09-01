@@ -2932,6 +2932,6 @@
         DOES have an error code.
   -->
   <data name="RarCouldntConnect" xml:space="preserve">
-    <value>Couldn't connect to RAR node, starting new one.</value>
+    <value>Couldn't connect to the RAR node, starting a new one.</value>
   </data>
 </root>

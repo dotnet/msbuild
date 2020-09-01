@@ -33,7 +33,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         private readonly string _pipeName;
 
         /// <summary>
-        /// Handshake used for validaion of incoming connections
+        /// Handshake used for validation of incoming connections
         /// </summary>
         private readonly Handshake _handshake;
 

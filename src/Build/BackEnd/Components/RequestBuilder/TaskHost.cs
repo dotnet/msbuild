@@ -987,12 +987,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Inialize new RAR node
+        /// Initialize new RAR node
         /// </summary>
         bool IRarBuildEngine.CreateRarNode()
         {
-            int nodeId = BuildManager.DefaultBuildManager.CreateRarNode();
-            return nodeId != BuildManager.RarNodeStartFailed;
+            return BuildManager.DefaultBuildManager.CreateRarNode();
         }
 
         /// <summary>
