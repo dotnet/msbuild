@@ -1,34 +1,49 @@
 using System;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Utilities
 {
-    public enum MSBuildChangeWaveVersion
-    {
-        //ensure these enums maps to _mapping
-        v16_8 = 0,
-        v16_10,
-        v17_0
-    }
     public class ChangeWaves
     {
-        private static float[] _mapping =
-        {
-            16.8f,
-            16.10f,
-            17.0f
-        };
+        public const string Wave16_8 = "16.8";
+        public const string Wave16_10 = "16.10";
+        public const string Wave17_0 = "17.0";
 
-        public static bool IsChangeWaveEnabled(MSBuildChangeWaveVersion version)
+        /// <summary>
+        /// Compares version against the MSBuildChangeWave environment variable.
+        /// Version MUST be of the format: "xx.yy.zz", else Version.TryParse will fail.
+        /// </summary>
+        /// <param name="version">The version to compare.</param>
+        /// <returns>A bool indicating whether the version is enabled.</returns>
+        public static bool IsChangeWaveEnabled(string version)
         {
-            if(string.IsNullOrEmpty(Traits.Instance.MSBuildChangeWave))
+            // This is opt out behavior, all waves are enabled by default.
+            if (string.IsNullOrEmpty(Traits.Instance.MSBuildChangeWave))
             {
-                return false;
+                return true;
             }
 
-            bool isEnabled = _mapping[(int)version] <= float.Parse(Traits.Instance.MSBuildChangeWave);
+            Version currentEnabledWave;
 
-            if(!isEnabled)
+            if (!Version.TryParse(Traits.Instance.MSBuildChangeWave, out currentEnabledWave))
+            {
+                // throw a warning or error stating the user set the environment variable
+                // to an incorrectly formatted change wave
+
+                return true;
+            }
+
+            Version versionToCheck;
+            
+            if (!Version.TryParse(version.ToString(), out versionToCheck))
+            {
+                // throw a warning or error stating the caller input an incorrectly formatted change wave
+
+                return true;
+            }
+
+            bool isEnabled = versionToCheck.CompareTo(currentEnabledWave) <= 0;
+
+            if (!isEnabled)
             {
                 // Log some sort of message?
             }
