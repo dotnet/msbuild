@@ -6,9 +6,6 @@
     <TargetVsixContainerName>MSBuild.UnGAC.Setup.json</TargetVsixContainerName>
     <!-- VS Insertion -->
     <VisualStudioInsertionComponent>Microsoft.Build.UnGAC.Setup</VisualStudioInsertionComponent>
-
-    <ShouldSkipProject>false</ShouldSkipProject>
-    <ShouldSkipProject Condition="'$(MonoBuild)' == 'true' or '$(MSBuildRuntimeType)' != 'Full'">true</ShouldSkipProject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,14 +13,9 @@
     <_SwixArgs Include="TargetExt=.json"/>
   </ItemGroup>
 
-
   <ItemGroup>
-    <SwrProperty Include="ThirdPartyNotice=$(ThirdPartyNotice)" />
-    <SwrProperty Include="SourceDir=$(RepoRoot)\src\" /> <!--potentially remove-->
     <SwrProperty Include="BinDir=$(OutDir)" />
     <SwrProperty Include="Version=$(VsixVersion)" />
     <SwrFile Include="exe.swr" Condition=" '$(MSBuildRuntimeType)' == 'Full' " />
   </ItemGroup>
-
-  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
 </Project>
