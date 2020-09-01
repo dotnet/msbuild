@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Resolvers\Microsoft.Net.Sdk.ManifestReader\Microsoft.Net.Sdk.WorkloadManifestReader.csproj" />
+    <ProjectReference Include="..\..\Resolvers\Microsoft.NET.Sdk.WorkloadManifestReader\Microsoft.NET.Sdk.WorkloadManifestReader.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
 

@@ -5,7 +5,7 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
     /// <summary>
     /// An SDK workload manifest
     /// </summary>
-    public class WorkloadManifest
+    class WorkloadManifest
     {
         public WorkloadManifest(long version, string? description, Dictionary<string, WorkloadDefinition> workloads, Dictionary<string, WorkloadPack> packs)
         {

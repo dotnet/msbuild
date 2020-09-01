@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Microsoft.Net.Sdk.WorkloadManifestReader
 {
-    public partial class WorkloadManifestReader
+    partial class WorkloadManifestReader
     {
         static ReadOnlySpan<byte> utf8Bom => new byte[] { 0xEF, 0xBB, 0xBF };
 
@@ -336,7 +336,7 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                         {
                             throw new WorkloadManifestFormatException($"Workload definition '{id}' is a concrete dev workload but has no description");
                         }
-                        return new WorkloadDefinition (id, isAbstract, description, kind ?? WorkloadDefinitionKind.Dev, extends!, packs!, platforms!);
+                        return new WorkloadDefinition (id, isAbstract, description, kind ?? WorkloadDefinitionKind.Dev, extends, packs, platforms);
                     default:
                         throw new WorkloadManifestFormatException($"Unexpected token '{reader.TokenType}' at offset {reader.TokenStartIndex}");
                 }
