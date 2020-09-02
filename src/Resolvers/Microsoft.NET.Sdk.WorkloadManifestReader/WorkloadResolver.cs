@@ -48,7 +48,7 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
         /// </summary>
         /// <remarks>
         /// Used by MSBuild resolver to scan SDK packs for AutoImport.props files to be imported.
-        /// Used by template engine to find templatees to be added to hive.
+        /// Used by template engine to find templates to be added to hive.
         /// </remarks>
         public IEnumerable<PackInfo> GetInstalledWorkloadPacksOfKind(WorkloadPackKind kind)
         {
