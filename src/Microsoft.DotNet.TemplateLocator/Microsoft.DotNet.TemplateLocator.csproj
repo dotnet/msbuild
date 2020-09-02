@@ -19,7 +19,7 @@
 
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
     <ItemGroup>
-      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
     </ItemGroup>
   </Target>
 
@@ -33,6 +33,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Resolvers\Microsoft.DotNet.SdkResolver\Microsoft.DotNet.SdkResolver.csproj" PrivateAssets="All" />
-    <ProjectReference Include="..\Resolvers\Microsoft.DotNet.WorkloadManifestReader\Microsoft.DotNet.WorkloadManifestReader.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\Resolvers\Microsoft.NET.Sdk.WorkloadManifestReader\Microsoft.NET.Sdk.WorkloadManifestReader.csproj" PrivateAssets="All" />
   </ItemGroup>
 </Project>
