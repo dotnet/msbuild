@@ -105,17 +105,17 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>54e597d3a5c2b6c0e9dc556a79bba08fb0c67eb9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="5.0.0-rc.1.20451.7">
+    <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="5.0.0-rc.1.20451.8">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>036dc2b705089041faadb5287a32b67924ab8533</Sha>
+      <Sha>87fcf57e1a6f89253de3620c5e9c8b738bc692b5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.0-rc.1.20451.7">
+    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.0-rc.1.20451.8">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>036dc2b705089041faadb5287a32b67924ab8533</Sha>
+      <Sha>87fcf57e1a6f89253de3620c5e9c8b738bc692b5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="5.0.0-rc.1.20451.7">
+    <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="5.0.0-rc.1.20451.8">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>036dc2b705089041faadb5287a32b67924ab8533</Sha>
+      <Sha>87fcf57e1a6f89253de3620c5e9c8b738bc692b5</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="5.0.0-rc.1.20451.4" CoherentParentDependency="Microsoft.WindowsDesktop.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
