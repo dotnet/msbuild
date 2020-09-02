@@ -84,7 +84,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_warns_when_specifying_windows_desktop_sdk()
         {
-            var targetFramework = "net5.0";
+            var targetFramework = "net5.0-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "windowsDesktopSdk",

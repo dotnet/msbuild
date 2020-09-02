@@ -274,9 +274,9 @@ namespace Microsoft.DotNet.CommandFactory
                     .ReadWithLock(lockFilePath)
                     .Result;
             }
-            catch (FileFormatException ex)
+            catch (FileFormatException)
             {
-                throw ex;
+                throw;
             }
 
             return true;
