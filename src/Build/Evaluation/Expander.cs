@@ -2068,7 +2068,7 @@ namespace Microsoft.Build.Evaluation
                             return false;
                         }
                         int currentLength = builder.Length - startLength;
-                        if (currentLength + item.Key.Length > CharacterLimitPerExpansion)
+                        if (!string.IsNullOrEmpty(item.Key) && currentLength + item.Key.Length > CharacterLimitPerExpansion)
                         {
                             int truncateIndex = CharacterLimitPerExpansion - currentLength - 3;
                             if (truncateIndex > 0)

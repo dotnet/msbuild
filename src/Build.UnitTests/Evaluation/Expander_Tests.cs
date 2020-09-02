@@ -1530,7 +1530,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(lookup, lookup, itemMetadata, FileSystems.Default);
 
             XmlAttribute xmlattribute = (new XmlDocument()).CreateAttribute("dummy");
-            xmlattribute.Value = "'%(ManySpacesMetadata)' != '' and '$(ManySpacesProperty)' != '' and '@(ManySpacesItem)' != '' and '@(Exactly1024)' != '' and '@(ManyItems)' != '' and '@(ManyItems->'%(Foo)')' != ''";
+            xmlattribute.Value = "'%(ManySpacesMetadata)' != '' and '$(ManySpacesProperty)' != '' and '@(ManySpacesItem)' != '' and '@(Exactly1024)' != '' and '@(ManyItems)' != '' and '@(ManyItems->'%(Foo)')' != '' and '@(ManyItems->'%(Nonexistent)')' != ''";
 
             var expected =
                 $"'{"",1021}...' != '' and " +
@@ -1538,7 +1538,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 $"'Foo;{"",1017}...' != '' and " +
                 $"'{"",1024};...' != '' and " +
                 "'ThisIsAFairlyLongFileName_0.bmp;ThisIsAFairlyLongFileName_1.bmp;ThisIsAFairlyLongFileName_2.bmp;...' != '' and " +
-                "'ThisIsAFairlyLongMetadataValue_0;ThisIsAFairlyLongMetadataValue_1;ThisIsAFairlyLongMetadataValue_2;...' != ''";
+                "'ThisIsAFairlyLongMetadataValue_0;ThisIsAFairlyLongMetadataValue_1;ThisIsAFairlyLongMetadataValue_2;...' != '' and " +
+                $"';;;...' != ''";
+            // NOTE: semicolons in the last part are *weird* because they don't actually mean anything and you get logging like
+            //     Target "Build" skipped, due to false condition; ( '@(I->'%(nonexistent)')' == '' ) was evaluated as ( ';' == '' ).
+            // but that goes back to MSBuild 4.something so I'm codifying it in this test. If you're here because you cleaned it up
+            // and want to fix the test my current opinion is that's fine.
+
             Assert.Equal(expected, expander.ExpandIntoStringAndUnescape(xmlattribute.Value, ExpanderOptions.ExpandAll | ExpanderOptions.Truncate, MockElementLocation.Instance));
         }
 
