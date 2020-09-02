@@ -16,4 +16,4 @@ vs.installSize
   SharedDrive=0
 
 vs.payloads
-    vs.payload source=$(BinDir)MSBuild.UnGAC.Setup.exe
+    vs.payload source=$(BinDir)Microsoft.Build.UnGAC.exe

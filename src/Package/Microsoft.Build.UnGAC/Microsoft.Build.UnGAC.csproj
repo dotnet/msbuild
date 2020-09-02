@@ -1,14 +1,13 @@
-﻿<!-- Copyright (c)  Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information. -->
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <!-- The project MUST be net45. -->
+    <!-- Setup runs on net45 and may not have installed newer yet. -->
     <TargetFramework>net45</TargetFramework>
     <!-- Set as an exe because this project publishes its own output. -->
     <OutputType>Exe</OutputType>
     <!-- Forcing the 'vsix' output to be json output. -->
-    <TargetVsixContainerName>MSBuild.UnGAC.Setup.json</TargetVsixContainerName>
+    <TargetVsixContainerName>Microsoft.Build.UnGAC.exe</TargetVsixContainerName>
     <!-- VS Insertion -->
-    <VisualStudioInsertionComponent>Microsoft.Build.UnGAC.Setup</VisualStudioInsertionComponent>
+    <VisualStudioInsertionComponent>Microsoft.Build.UnGAC</VisualStudioInsertionComponent>
   </PropertyGroup>
 
   <ItemGroup>

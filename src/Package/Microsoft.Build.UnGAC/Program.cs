@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 
 namespace Microsoft.Build.UnGAC
 {
@@ -30,7 +33,7 @@ namespace Microsoft.Build.UnGAC
 
                 for (int i = 0; i < assembliesToUnGAC.Length; i++)
                 {
-                    hresult = assemblyCache.UninstallAssembly(0, assembliesToUnGAC[i], IntPtr.Zero, 0);
+                    hresult = assemblyCache.UninstallAssembly(dwFlags: 0, pszAssemblyName: assembliesToUnGAC[i], refData: IntPtr.Zero, pulDisposition: 0);
 
                     // If we hit an error with an assembly, keep trying the others.
                     if ((hresult >> 31) == 1)
@@ -41,10 +44,7 @@ namespace Microsoft.Build.UnGAC
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Caught an exception! We don't want to throw because we want MSBuild to install." +
-                                    $"Message: {e.Message}" +
-                                    $"Inner Exception: {e.InnerException}" +
-                                    $"Stack Trace: {e.StackTrace}");
+                Console.WriteLine($"Caught an exception! We don't want to throw because we want MSBuild to install.\n" + e.ToString());
             }
         }
     }
