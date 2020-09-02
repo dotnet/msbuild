@@ -1,3 +1,4 @@
+using Microsoft.Build.Shared;
 using System;
 
 namespace Microsoft.Build.Utilities
@@ -12,19 +13,20 @@ namespace Microsoft.Build.Utilities
         /// Compares version against the MSBuildChangeWave environment variable.
         /// Version MUST be of the format: "xx.yy.zz", else Version.TryParse will fail.
         /// </summary>
-        /// <param name="version">The version to compare.</param>
+        /// <param name="wave">The version to compare.</param>
         /// <returns>A bool indicating whether the version is enabled.</returns>
-        public static bool IsChangeWaveEnabled(string version)
+        public static bool IsChangeWaveEnabled(string wave)
         {
             // This is opt out behavior, all waves are enabled by default.
+            // If version is invalid, 
             if (string.IsNullOrEmpty(Traits.Instance.MSBuildChangeWave))
             {
                 return true;
             }
 
-            Version currentEnabledWave;
+            Version currentDisabledWave;
 
-            if (!Version.TryParse(Traits.Instance.MSBuildChangeWave, out currentEnabledWave))
+            if (!Version.TryParse(Traits.Instance.MSBuildChangeWave, out currentDisabledWave))
             {
                 // throw a warning or error stating the user set the environment variable
                 // to an incorrectly formatted change wave
@@ -32,23 +34,15 @@ namespace Microsoft.Build.Utilities
                 return true;
             }
 
-            Version versionToCheck;
+            Version waveToCheck;
             
-            if (!Version.TryParse(version.ToString(), out versionToCheck))
+            if (!Version.TryParse(wave.ToString(), out waveToCheck))
             {
                 // throw a warning or error stating the caller input an incorrectly formatted change wave
-
                 return true;
             }
-
-            bool isEnabled = versionToCheck.CompareTo(currentEnabledWave) <= 0;
-
-            if (!isEnabled)
-            {
-                // Log some sort of message?
-            }
             
-            return isEnabled;
+            return waveToCheck < currentDisabledWave;
         }
     }
 }

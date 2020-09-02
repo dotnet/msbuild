@@ -2062,6 +2062,6 @@ namespace Microsoft.Build.Utilities
         public const string Wave16_8 = "16.8";
         public const string Wave17_0 = "17.0";
         public ChangeWaves() { }
-        public static bool IsChangeWaveEnabled(string version) { throw null; }
+        public static bool IsChangeWaveEnabled(string wave) { throw null; }
     }
 }
