@@ -3918,7 +3918,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         MaxTargetPath="$(MaxTargetPath)"
         OutputManifest="@(ApplicationManifest)"
         OSVersion="$(OSVersion)"
-        Platform="$(PlatformTarget)"
+        Platform="$(_DeploymentPlatformTarget)"
         Product="$(ProductName)"
         Publisher="$(PublisherName)"
         RequiresMinimumFramework35SP1="$(_DeploymentRequiresMinimumFramework35SP1)"
@@ -4129,6 +4129,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_DeploymentManifestType>ClickOnce</_DeploymentManifestType>
     </PropertyGroup>
 
+    <!--
+      Manifest platform should always be MSIL for Launcher-based deployments, as the Launcher is MSIL.
+      Do not set _DeploymentPlatformTarget property in Launcher case - this is interpreted as MSIL,
+      by GenerateApplicationManifest and GenerateDeploymentManifest tasks.
+      Otherwise, set it to PlatformTarget.
+    -->
+    <PropertyGroup>
+      <_DeploymentPlatformTarget Condition="'$(_DeploymentLauncherBased)' != 'true'">$(PlatformTarget)</_DeploymentPlatformTarget>
+    </PropertyGroup>
+
     <!-- Obtain manifest version from ApplicationVersion and ApplicationRevision properties -->
     <FormatVersion Version="$(ApplicationVersion)" Revision="$(ApplicationRevision)">
       <Output TaskParameter="OutputVersion" PropertyName="_DeploymentManifestVersion"/>
@@ -4210,7 +4220,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           MaxTargetPath="$(MaxTargetPath)"
           MinimumRequiredVersion="$(_DeploymentBuiltMinimumRequiredVersion)"
           OutputManifest="@(DeployManifest)"
-          Platform="$(PlatformTarget)"
+          Platform="$(_DeploymentPlatformTarget)"
           Product="$(ProductName)"
           Publisher="$(PublisherName)"
           SuiteName="$(SuiteName)"
