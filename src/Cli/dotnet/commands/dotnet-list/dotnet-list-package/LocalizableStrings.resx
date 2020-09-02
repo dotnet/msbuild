@@ -126,9 +126,6 @@
   <data name="CmdFrameworkDescription" xml:space="preserve">
     <value>Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</value>
   </data>
-  <data name="CmdOutdatedDescription" xml:space="preserve">
-    <value>Lists packages that have newer versions.</value>
-  </data>
   <data name="CmdTransitiveDescription" xml:space="preserve">
     <value>Lists transitive and top-level packages.</value>
   </data>
@@ -139,33 +136,36 @@
     <value>CONFIG_FILE</value>
   </data>
   <data name="CmdConfigDescription" xml:space="preserve">
-    <value>The path to the NuGet config file to use. Requires the '--outdated' or '--deprecated' option.</value>
+    <value>The path to the NuGet config file to use. Requires the '--outdated', '--deprecated' or '--vulnerable' option.</value>
   </data>
   <data name="CmdHighestMinorDescription" xml:space="preserve">
-    <value>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</value>
+    <value>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</value>
   </data>
   <data name="CmdHighestPatchDescription" xml:space="preserve">
-    <value>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</value>
+    <value>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</value>
   </data>
   <data name="CmdPrereleaseDescription" xml:space="preserve">
-    <value>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</value>
+    <value>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</value>
   </data>
   <data name="CmdSource" xml:space="preserve">
     <value>SOURCE</value>
   </data>
   <data name="CmdSourceDescription" xml:space="preserve">
-    <value>The NuGet sources to use when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</value>
+    <value>The NuGet sources to use when searching for newer packages. Requires the '--outdated', '--deprecated' or '--vulnerable' option.</value>
   </data>
   <data name="FileNotFound" xml:space="preserve">
     <value>Could not find file or directory '{0}'.</value>
   </data>
-  <data name="OutdatedAndDeprecatedOptionsCannotBeCombined" xml:space="preserve">
-    <value>Option '--outdated' and '--deprecated' cannot be combined.</value>
+  <data name="OptionsCannotBeCombined" xml:space="preserve">
+    <value>Options '--outdated', '--deprecated' and '--vulnerable' cannot be combined.</value>
+  </data>
+  <data name="CmdOutdatedDescription" xml:space="preserve">
+    <value>Lists packages that have newer versions. Cannot be combined with '--deprecated' or '--vulnerable' options.</value>
   </data>
   <data name="CmdDeprecatedDescription" xml:space="preserve">
-    <value>Lists packages that have been deprecated.</value>
+    <value>Lists packages that have been deprecated. Cannot be combined with '--vulnerable' or '--outdated' options.</value>
   </data>
-  <data name="OutdatedOrDeprecatedOptionOnly" xml:space="preserve">
-    <value>Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</value>
+  <data name="CmdVulnerableDescription" xml:space="preserve">
+    <value>Lists packages that have known vulnerabilities. Cannot be combined with '--deprecated' or '--outdated' options.</value>
   </data>
 </root>

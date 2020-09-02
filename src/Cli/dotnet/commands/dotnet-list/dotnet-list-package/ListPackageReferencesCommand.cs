@@ -39,6 +39,18 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
             return NuGetCommand.Run(TransformArgs());
         }
 
+        internal static void EnforceOptionRules(AppliedOption appliedCommand)
+        {
+            var mutexOptionCount = 0;
+            mutexOptionCount += appliedCommand.HasOption("deprecated") ? 1 : 0;
+            mutexOptionCount += appliedCommand.HasOption("outdated") ? 1 : 0;
+            mutexOptionCount += appliedCommand.HasOption("vulnerable") ? 1 : 0;
+            if (mutexOptionCount > 1)
+            {
+                throw new GracefulException(LocalizableStrings.OptionsCannotBeCombined);
+            }
+        }
+
         private string[] TransformArgs()
         {
             var args = new List<string>
@@ -51,50 +63,9 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
 
             args.AddRange(_appliedCommand.OptionValuesToBeForwarded());
 
-            if (_appliedCommand.HasOption("include-prerelease"))
-            {
-                CheckForOutdatedOrDeprecated("--include-prerelease");
-            }
-
-            if (_appliedCommand.HasOption("highest-patch"))
-            {
-                CheckForOutdatedOrDeprecated("--highest-patch");
-            }
-
-            if (_appliedCommand.HasOption("highest-minor"))
-            {
-                CheckForOutdatedOrDeprecated("--highest-minor");
-            }
-
-            if (_appliedCommand.HasOption("config"))
-            {
-                CheckForOutdatedOrDeprecated("--config");
-            }
-
-            if (_appliedCommand.HasOption("source"))
-            {
-                CheckForOutdatedOrDeprecated("--source");
-            }
-
-            if (_appliedCommand.HasOption("deprecated") && _appliedCommand.HasOption("outdated"))
-            {
-                throw new GracefulException(LocalizableStrings.OutdatedAndDeprecatedOptionsCannotBeCombined);
-            }
+            EnforceOptionRules(_appliedCommand);
 
             return args.ToArray();
-        }
-
-        /// <summary>
-        /// A check for the outdated and deprecated specific options. If --outdated or --deprecated not present,
-        /// these options must not be used, so error is thrown.
-        /// </summary>
-        /// <param name="option"></param>
-        private void CheckForOutdatedOrDeprecated(string option)
-        {
-            if (!_appliedCommand.HasOption("deprecated") && !_appliedCommand.HasOption("outdated"))
-            {
-                throw new GracefulException(LocalizableStrings.OutdatedOrDeprecatedOptionOnly, option);
-            }
         }
 
         /// <summary>

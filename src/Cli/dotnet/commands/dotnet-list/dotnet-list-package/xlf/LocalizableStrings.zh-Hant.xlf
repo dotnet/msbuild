@@ -8,8 +8,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdDeprecatedDescription">
-        <source>Lists packages that have been deprecated.</source>
-        <target state="translated">列出已取代的套件。</target>
+        <source>Lists packages that have been deprecated. Cannot be combined with '--vulnerable' or '--outdated' options.</source>
+        <target state="needs-review-translation">列出已取代的套件。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -23,13 +23,18 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutdatedDescription">
-        <source>Lists packages that have newer versions.</source>
-        <target state="translated">列出有較新版本的套件。</target>
+        <source>Lists packages that have newer versions. Cannot be combined with '--deprecated' or '--vulnerable' options.</source>
+        <target state="needs-review-translation">列出有較新版本的套件。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
         <source>Lists transitive and top-level packages.</source>
         <target state="translated">列出可轉移和頂層套件。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdVulnerableDescription">
+        <source>Lists packages that have known vulnerabilities. Cannot be combined with '--deprecated' or '--outdated' options.</source>
+        <target state="new">Lists packages that have known vulnerabilities. Cannot be combined with '--deprecated' or '--outdated' options.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsOrSolutions">
@@ -43,23 +48,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
-        <source>The path to the NuGet config file to use. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="translated">要使用的 NuGet 組態檔路徑。需要使用 '--outdated’ 或 '--deprecated' 選項。</target>
+        <source>The path to the NuGet config file to use. Requires the '--outdated', '--deprecated' or '--vulnerable' option.</source>
+        <target state="needs-review-translation">要使用的 NuGet 組態檔路徑。需要使用 '--outdated’ 或 '--deprecated' 選項。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
-        <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="translated">在搜尋較新的套件時，建議只搜尋主要版本號碼相符的套件。需要使用 '--outdated' 或 '--deprecated' 選項。</target>
+        <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</source>
+        <target state="needs-review-translation">在搜尋較新的套件時，建議只搜尋主要版本號碼相符的套件。需要使用 '--outdated' 或 '--deprecated' 選項。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
-        <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="translated">在搜尋較新的套件時，建議只搜尋主要和次要版本號碼相符的套件。需要使用 '--outdated’ 或 '--deprecated' 選項。</target>
+        <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</source>
+        <target state="needs-review-translation">在搜尋較新的套件時，建議只搜尋主要和次要版本號碼相符的套件。需要使用 '--outdated’ 或 '--deprecated' 選項。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
-        <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="translated">在搜尋較新的套件時，建議搜尋具有發行前版本的套件。需要使用 '--outdated' 或 '--deprecated' 選項。</target>
+        <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</source>
+        <target state="needs-review-translation">在搜尋較新的套件時，建議搜尋具有發行前版本的套件。需要使用 '--outdated' 或 '--deprecated' 選項。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
@@ -68,13 +73,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' or '--deprecated' option.</source>
-        <target state="translated">搜尋較新套件時要使用的 NuGet 來源。需要使用 '--outdated' 或 '--deprecated' 選項。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OutdatedAndDeprecatedOptionsCannotBeCombined">
-        <source>Option '--outdated' and '--deprecated' cannot be combined.</source>
-        <target state="translated">無法結合選項 '--outdated' 和 '--deprecated'。</target>
+        <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated', '--deprecated' or '--vulnerable' option.</source>
+        <target state="needs-review-translation">搜尋較新套件時要使用的 NuGet 來源。需要使用 '--outdated' 或 '--deprecated' 選項。</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
@@ -82,9 +82,9 @@
         <target state="translated">找不到檔案或目錄 ‘{0}’。</target>
         <note />
       </trans-unit>
-      <trans-unit id="OutdatedOrDeprecatedOptionOnly">
-        <source>Option '{0}' requires the '--outdated' or '--deprecated' option to be specified.</source>
-        <target state="translated">選項 '{0}' 需要指定 '--outdated' 或 '--deprecated' 選項。</target>
+      <trans-unit id="OptionsCannotBeCombined">
+        <source>Options '--outdated', '--deprecated' and '--vulnerable' cannot be combined.</source>
+        <target state="new">Options '--outdated', '--deprecated' and '--vulnerable' cannot be combined.</target>
         <note />
       </trans-unit>
     </body>
