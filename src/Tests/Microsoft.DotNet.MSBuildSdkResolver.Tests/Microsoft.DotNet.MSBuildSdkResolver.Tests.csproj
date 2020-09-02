@@ -13,7 +13,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Microsoft.DotNet.TemplateLocator\Microsoft.DotNet.TemplateLocator.csproj" />
     <ProjectReference Include="..\..\Resolvers\Microsoft.DotNet.MSBuildSdkResolver\Microsoft.DotNet.MSBuildSdkResolver.csproj" />
-    <ProjectReference Include="..\..\Resolvers\Microsoft.DotNet.SdkResolver\Microsoft.DotNet.SdkResolver.csproj" />
+
+    <!-- Microsoft.DotNet.MSBuildSdkResolver compiles source of Microsoft.DotNet.SdkResolver to reduce dll load. There are duplicated types-->
+    <ProjectReference Include="..\..\Resolvers\Microsoft.DotNet.SdkResolver\Microsoft.DotNet.SdkResolver.csproj">
+      <Aliases>sdkResolver</Aliases>
+    </ProjectReference>
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
     <!--<ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />-->
   </ItemGroup>
