@@ -38,8 +38,6 @@ namespace Microsoft.Build.UnGAC
                         Console.WriteLine($"Could not remove {assembliesToUnGAC[i]} from the GAC. HResult: {hresult}");
                     }
                 }
-
-                Console.ReadKey();
             }
             catch (Exception e)
             {
