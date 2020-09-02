@@ -9,6 +9,8 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Xml.Linq;
 
 using Microsoft.Build.Eventing;
@@ -1859,7 +1861,16 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
         {
-            _cache = (SystemState)StateFileBase.DeserializeCache(_stateFile, Log, typeof(SystemState));
+            var deserializeOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+            deserializeOptions.Converters.Add(new SystemState.Converter());
+            try
+            {
+                _cache = JsonSerializer.Deserialize<SystemState>(File.ReadAllText(_stateFile), deserializeOptions);
+            }
+            catch (Exception)
+            {
+                // log message
+            }
 
             if (_cache == null)
             {
@@ -1883,7 +1894,9 @@ namespace Microsoft.Build.Tasks
             }
             else if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
-                _cache.SerializeCache(_stateFile, Log);
+                var deserializeOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                deserializeOptions.Converters.Add(new SystemState.Converter());
+                File.WriteAllText(_stateFile, JsonSerializer.Serialize<SystemState>(_cache, deserializeOptions));
             }
         }
         #endregion
