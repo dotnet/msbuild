@@ -496,7 +496,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
 
             var resolver = new TemplateLocator.TemplateLocator(environment.GetEnvironmentVariable,
-                new VSSettings(environment.VSSettingsFile?.FullName, environment.DisallowPrereleaseByDefault), null);
+                new VSSettings(environment.VSSettingsFile?.FullName, environment.DisallowPrereleaseByDefault), null, null);
             resolver.TryGetDotnetSdkVersionUsedInVs("15.8", out var version).Should().BeTrue();
 
             version.Should().Be(sdkVersion);

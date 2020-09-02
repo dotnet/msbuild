@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
+using System.Linq;
 using Microsoft.DotNet.DotNetSdkResolver;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 
@@ -13,10 +13,11 @@ namespace Microsoft.DotNet.TemplateLocator
     public sealed class TemplateLocator
     {
         private IWorkloadManifestProvider _workloadManifestProvider;
+        private IWorkloadResolver _workloadResolver;
         private readonly Lazy<NETCoreSdkResolver> _netCoreSdkResolver;
 
         public TemplateLocator()
-            : this(Environment.GetEnvironmentVariable, VSSettings.Ambient, null)
+            : this(Environment.GetEnvironmentVariable, VSSettings.Ambient, null, null)
         {
         }
 
@@ -24,12 +25,13 @@ namespace Microsoft.DotNet.TemplateLocator
         /// Test constructor
         /// </summary>
         public TemplateLocator(Func<string, string> getEnvironmentVariable, VSSettings vsSettings,
-            IWorkloadManifestProvider workloadManifestProvider)
+            IWorkloadManifestProvider workloadManifestProvider, IWorkloadResolver workloadResolver)
         {
             _netCoreSdkResolver =
                 new Lazy<NETCoreSdkResolver>(() => new NETCoreSdkResolver(getEnvironmentVariable, vsSettings));
 
             _workloadManifestProvider = workloadManifestProvider;
+            _workloadResolver = workloadResolver;
         }
 
         public IReadOnlyCollection<IOptionalSdkTemplatePackageInfo> GetDotnetSdkTemplatePackages(
@@ -52,27 +54,19 @@ namespace Microsoft.DotNet.TemplateLocator
                 throw new ArgumentException($"'{nameof(sdkVersion)}' should be a version, but get {sdkVersion}");
             }
 
-            // set the patch version to be x00
-            var sdkVersionBand =
-                $"{sdkVersionParsed.Major}.{sdkVersionParsed.Minor}.{(sdkVersionParsed.Revision / 100) * 100}";
-
-            _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersionBand);
-
-            var workloadResolver = new WorkloadResolver(_workloadManifestProvider, dotnetRootPath);
-            var templates = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template);
-
-            var dotnetSdkTemplatePackages = new List<IOptionalSdkTemplatePackageInfo>();
-            foreach (var pack in templates)
+            static int Last2DigitsTo0(int versionBuild)
             {
-                var optionalSdkTemplatePackageInfo = new OptionalSdkTemplatePackageInfo(
-                    pack.Id,
-                    pack.Version,
-                    Path.Combine(dotnetRootPath, "template-packs",
-                        pack.Id.ToLower() + "." + pack.Version.ToLower() + ".nupkg"));
-                dotnetSdkTemplatePackages.Add(optionalSdkTemplatePackageInfo);
+                return (versionBuild / 100) * 100;
             }
 
-            return dotnetSdkTemplatePackages;
+            var sdkVersionBand =
+                $"{sdkVersionParsed.Major}.{sdkVersionParsed.Minor}.{Last2DigitsTo0(sdkVersionParsed.Build)}";
+
+            _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersionBand);
+            _workloadResolver ??= new WorkloadResolver(_workloadManifestProvider, dotnetRootPath);
+
+            return _workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template)
+                .Select(pack => new OptionalSdkTemplatePackageInfo(pack.Id, pack.Version, pack.Path)).ToList();
         }
 
         public bool TryGetDotnetSdkVersionUsedInVs(string vsVersion, out string sdkVersion)

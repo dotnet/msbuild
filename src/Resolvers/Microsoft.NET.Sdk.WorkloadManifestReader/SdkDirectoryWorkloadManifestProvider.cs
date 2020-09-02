@@ -18,10 +18,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         {
             var manifestDirectory = Path.Combine(sdkRootPath, "sdk-manifests", sdkVersionBand);
 
-            foreach (var workloadName in Directory.EnumerateDirectories(manifestDirectory))
+            if (Directory.Exists(manifestDirectory))
             {
-                var workloadManifest = Path.Combine(workloadName, "WorkloadManifest.json");
-                yield return File.OpenRead(workloadManifest);
+                foreach (var workloadName in Directory.EnumerateDirectories(manifestDirectory))
+                {
+                    var workloadManifest = Path.Combine(workloadName, "WorkloadManifest.json");
+                    yield return File.OpenRead(workloadManifest);
+                }
             }
         }
     }
