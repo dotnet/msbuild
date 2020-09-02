@@ -2068,12 +2068,12 @@ namespace Microsoft.Build.Evaluation
                             return false;
                         }
                         int currentLength = builder.Length - startLength;
-                        if (item.Key is string keyToTruncate && currentLength + keyToTruncate.Length > CharacterLimitPerExpansion)
+                        if (!string.IsNullOrEmpty(item.Key) && currentLength + item.Key.Length > CharacterLimitPerExpansion)
                         {
                             int truncateIndex = CharacterLimitPerExpansion - currentLength - 3;
                             if (truncateIndex > 0)
                             {
-                                builder.Append(keyToTruncate, 0, truncateIndex);
+                                builder.Append(item.Key, 0, truncateIndex);
                             }
                             builder.Append("...");
                             return false;
