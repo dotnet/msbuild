@@ -40,8 +40,8 @@ namespace Microsoft.Build.BuildEngine
         /// May be null, in which case an empty property group will be used.</param>
         public Toolset(string toolsVersion, string toolsPath, BuildPropertyGroup buildProperties)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, "toolsVersion");
-            ErrorUtilities.VerifyThrowArgumentLength(toolsPath, "toolsPath");
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
+            ErrorUtilities.VerifyThrowArgumentLength(toolsPath, nameof(toolsPath));
 
             this.toolsVersion = toolsVersion;
             this.ToolsPath = toolsPath;

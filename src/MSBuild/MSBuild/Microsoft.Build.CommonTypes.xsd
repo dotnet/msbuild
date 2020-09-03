@@ -1541,6 +1541,7 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="InstallFrom" _locComment="" -->Web, Unc, or Disk</xs:documentation>
         </xs:annotation>
     </xs:element>
+    <xs:element name="AnalysisLevel" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="InstallUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="IsCodeSharingProject" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="IsWebBootstrapper" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1651,6 +1652,14 @@ elementFormDefault="qualified">
       <xs:annotation>
         <xs:documentation><!-- _locID_text="Nullable" _locComment="" -->Set the nullable annotations and warnings context for the C# project. Possible values are enable, disable, warnings and annotations.</xs:documentation>
       </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="enable" />
+          <xs:enumeration value="disable" />
+          <xs:enumeration value="warnings" />
+          <xs:enumeration value="annotations" />
+        </xs:restriction>
+      </xs:simpleType>
     </xs:element>
     <xs:element name="Platform" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="PlatformName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1808,7 +1817,7 @@ elementFormDefault="qualified">
     <xs:element name="VSTO_TrustAssembliesLocation" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="WarningLevel" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="WarningLevel" _locComment="" -->integer between 0 and 4 inclusive</xs:documentation>
+            <xs:documentation><!-- _locID_text="WarningLevel" _locComment="" -->integer between 0 and 5 inclusive</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="WarningsAsErrors" type="msb:StringPropertyType" substitutionGroup="msb:Property">

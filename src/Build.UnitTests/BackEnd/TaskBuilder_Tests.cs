@@ -325,7 +325,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verifies that we can add "recursivedir" built-in metadata as target outputs. 
+        /// Verifies that we can add "recursivedir" built-in metadata as target outputs.
         /// This is to support wildcards in CreateItem. Allowing anything
         /// else could let the item get corrupt (inconsistent values for Filename and FullPath, for example)
         /// </summary>
@@ -408,7 +408,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that properties can be passed in to a task and out as items, despite the 
+        /// Verify that properties can be passed in to a task and out as items, despite the
         /// built-in metadata restrictions.
         /// </summary>
         [Fact]
@@ -468,7 +468,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// If an item being output from a task has null metadata, we shouldn't crash. 
+        /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -493,7 +493,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// If an item being output from a task has null metadata, we shouldn't crash. 
+        /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -551,7 +551,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 #if FEATURE_CODETASKFACTORY
         /// <summary>
-        /// If an item being output from a task has null metadata, we shouldn't crash. 
+        /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
         [Fact]
         public void NullMetadataOnOutputItems_InlineTask()
@@ -591,7 +591,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// If an item being output from a task has null metadata, we shouldn't crash. 
+        /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
         [Fact]
         [Trait("Category", "non-mono-tests")]
@@ -633,9 +633,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
 
         /// <summary>
-        /// Validates that the defining project metadata is set (or not set) as expected in 
-        /// various task output-related operations, using a task built against the current 
-        /// version of MSBuild.  
+        /// Validates that the defining project metadata is set (or not set) as expected in
+        /// various task output-related operations, using a task built against the current
+        /// version of MSBuild.
         /// </summary>
         [Fact]
         public void ValidateDefiningProjectMetadataOnTaskOutputs()
@@ -645,9 +645,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Validates that the defining project metadata is set (or not set) as expected in 
-        /// various task output-related operations, using a task built against V4 MSBuild, 
-        /// which didn't support the defining project metadata.  
+        /// Validates that the defining project metadata is set (or not set) as expected in
+        /// various task output-related operations, using a task built against V4 MSBuild,
+        /// which didn't support the defining project metadata.
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
@@ -786,7 +786,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  *********************************************************************************/
 
         /// <summary>
-        /// Helper method for validating the setting of defining project metadata on items 
+        /// Helper method for validating the setting of defining project metadata on items
         /// coming from task outputs
         /// </summary>
         private void ValidateDefiningProjectMetadataOnTaskOutputsHelper(string customTaskPath)
@@ -859,7 +859,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             MockLogger logger = new MockLogger();
             logger.AllowTaskCrashes = throwException;
 
-            string taskAssemblyName = null;
+            string taskAssemblyName;
             Project project = CreateSTATestProject(requireSTA, failTask, throwException, out taskAssemblyName);
 
             List<ILogger> loggers = new List<ILogger>();
@@ -1116,7 +1116,7 @@ namespace ClassLibrary2
 
             /// <summary>
             /// Constructor
-            /// 
+            ///
             /// UNDONE: Refactor this, and the other MockHosts, to use a common base implementation.  The duplication of the
             /// logging implementation alone is unfortunate.
             /// </summary>
@@ -1194,29 +1194,16 @@ namespace ClassLibrary2
             /// <returns>The component</returns>
             public IBuildComponent GetComponent(BuildComponentType type)
             {
-                switch (type)
+                return type switch
                 {
-                    case BuildComponentType.ConfigCache:
-                        return (IBuildComponent)_configCache;
-
-                    case BuildComponentType.LoggingService:
-                        return (IBuildComponent)_loggingService;
-
-                    case BuildComponentType.ResultsCache:
-                        return (IBuildComponent)_resultsCache;
-
-                    case BuildComponentType.RequestBuilder:
-                        return (IBuildComponent)_requestBuilder;
-
-                    case BuildComponentType.TargetBuilder:
-                        return (IBuildComponent)_targetBuilder;
-
-                    case BuildComponentType.SdkResolverService:
-                        return (IBuildComponent)_sdkResolverService;
-
-                    default:
-                        throw new ArgumentException("Unexpected type " + type);
-                }
+                    BuildComponentType.ConfigCache => (IBuildComponent)_configCache,
+                    BuildComponentType.LoggingService => (IBuildComponent)_loggingService,
+                    BuildComponentType.ResultsCache => (IBuildComponent)_resultsCache,
+                    BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
+                    BuildComponentType.TargetBuilder => (IBuildComponent)_targetBuilder,
+                    BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,
+                    _ => throw new ArgumentException("Unexpected type " + type),
+                };
             }
 
             /// <summary>

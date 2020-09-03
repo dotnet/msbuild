@@ -95,7 +95,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             get => _path;
             set
             {
-                if (!_fInitialized || string.Compare(_path, value, StringComparison.OrdinalIgnoreCase) != 0)
+                if (!_fInitialized || !string.Equals(_path, value, StringComparison.OrdinalIgnoreCase))
                 {
                     _path = value;
                     Refresh();
@@ -510,7 +510,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 StringBuilder productsOrder = new StringBuilder();
                 foreach (Product p in Products)
                 {
-                    productsOrder.Append(p.ProductCode + Environment.NewLine);
+                    productsOrder.Append(p.ProductCode).Append(Environment.NewLine);
                 }
                 DumpStringToFile(productsOrder.ToString(), "BootstrapperInstallOrder.txt", false);
             }
@@ -597,7 +597,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         int nStartIndex = packagePath.Length;
                         if ((strSubDirectory.ToCharArray())[nStartIndex] == System.IO.Path.DirectorySeparatorChar)
                         {
-                            nStartIndex = nStartIndex + 1;
+                            nStartIndex++;
                         }
 
                         ExploreDirectory(strSubDirectory.Substring(nStartIndex), rootElement, packagePath);
@@ -1460,7 +1460,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     }
 
                     if ((packageFileSource != null) && (packageFileDestination != null) &&
-                        ((packageFileCopy == null) || (String.Compare(packageFileCopy.Value, "False", StringComparison.InvariantCulture) != 0)))
+                        ((packageFileCopy == null) || (!String.Equals(packageFileCopy.Value, "False", StringComparison.InvariantCulture))))
                     {
                         // if this is the key for an external check, we will add it to the Resource Updater instead of copying the file
                         XmlNode subNode = null;
@@ -1612,7 +1612,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             FileAttributes attribs = File.GetAttributes(strFileName);
             if ((attribs & FileAttributes.ReadOnly) != 0)
             {
-                attribs = attribs & (~FileAttributes.ReadOnly);
+                attribs &= (~FileAttributes.ReadOnly);
                 File.SetAttributes(strFileName, attribs);
             }
         }
@@ -1945,8 +1945,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         {
                             // HACKHACK
                             string str = r.ReadToEnd();
-                            str = str.Replace("%NEWLINE%", Environment.NewLine);
-                            return str;
+                            return str.Replace("%NEWLINE%", Environment.NewLine);
                         }
                     }
                 }
@@ -2092,7 +2091,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     }
 
                     // If the public key in the file doesn't match the public key on disk, issue a build warning
-                    if (publicKey == null || !publicKey.ToLowerInvariant().Equals(publicKeyAttribute.Value.ToLowerInvariant()))
+                    if (publicKey?.Equals(publicKeyAttribute.Value, StringComparison.OrdinalIgnoreCase) == false)
                     {
                         results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.DifferingPublicKeys", PUBLICKEY_ATTRIBUTE, builder.Name, fileSource));
                     }
@@ -2105,7 +2104,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     ReplaceAttribute(packageFileNode, HASH_ATTRIBUTE, fileHash);
 
                     // If the public key in the file doesn't match the public key on disk, issue a build warning
-                    if (!fileHash.ToLowerInvariant().Equals(hashAttribute.Value.ToLowerInvariant()))
+                    if (!fileHash.Equals(hashAttribute.Value, StringComparison.OrdinalIgnoreCase))
                     {
                         results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.DifferingPublicKeys", "Hash", builder.Name, fileSource));
                     }

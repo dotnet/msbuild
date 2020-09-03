@@ -126,7 +126,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return ((this.flags & 1) == 0 ? false : true) ;
+                return (this.flags & 1) == 0 ? false : true;
             }
         }
 
@@ -166,7 +166,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return ((this.flags & 2) == 0 ? false : true);
+                return (this.flags & 2) == 0 ? false : true;
             }
         }
 
@@ -232,7 +232,7 @@ namespace Microsoft.Build.BuildEngine
         internal void ConvertToTaskItems()
         {
             // If outputsByTarget was null then we dont have to re-create anything as nothing was passed over
-            if (null != outputsByTarget)
+            if (outputsByTarget != null)
             {
                 string[] keys = new string[outputsByTarget.Count];
                 outputsByTarget.Keys.CopyTo(keys, 0);
@@ -342,7 +342,6 @@ namespace Microsoft.Build.BuildEngine
             writer.Write((Int32)taskTime);
             #endregion
         }
-
 
         internal static BuildResult CreateFromStream(BinaryReader reader)
         {

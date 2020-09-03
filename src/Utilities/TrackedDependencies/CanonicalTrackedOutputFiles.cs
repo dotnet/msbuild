@@ -93,7 +93,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         private void ConstructOutputTable()
         {
-            string tLogRootingMarker = null;
+            string tLogRootingMarker;
             try
             {
                 // construct a rooting marker from the tlog files

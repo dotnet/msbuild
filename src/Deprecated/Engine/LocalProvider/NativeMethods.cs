@@ -67,15 +67,12 @@ namespace Microsoft.Build.BuildEngine
         {
             int SECURITY_BUILTIN_DOMAIN_RID = 0x00000020;
             int DOMAIN_ALIAS_RID_ADMINS  = 0x00000220;
-            bool bRet = false;
-
-            IntPtr psidRidGroup = NullPtr;
             IntPtr pNtAuthority = Marshal.AllocHGlobal(6);
             Marshal.WriteInt32(pNtAuthority, 0, 0);
             Marshal.WriteByte(pNtAuthority, 4, 0);
             Marshal.WriteByte(pNtAuthority, 5, 5);
-
-            bRet = AllocateAndInitializeSid(pNtAuthority, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, out psidRidGroup);
+            IntPtr psidRidGroup;
+            bool bRet = AllocateAndInitializeSid(pNtAuthority, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, out psidRidGroup);
             try
             {
                 if (bRet)
@@ -92,7 +89,6 @@ namespace Microsoft.Build.BuildEngine
             }
 
             return bRet;
-            
         }
 
         [DllImport("advapi32.dll", SetLastError = true)]

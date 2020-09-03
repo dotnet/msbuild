@@ -29,12 +29,13 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using Constants = Microsoft.Build.Internal.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+using SdkReferencePropertyExpansionMode = Microsoft.Build.Utilities.EscapeHatches.SdkReferencePropertyExpansionMode;
 
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
     /// Evaluates a ProjectRootElement, updating the fresh Project.Data passed in.
-    /// Handles evaluating conditions, expanding expressions, and building up the 
+    /// Handles evaluating conditions, expanding expressions, and building up the
     /// lists of applicable properties, items, and itemdefinitions, as well as gathering targets and tasks
     /// and creating a TaskRegistry from the using tasks.
     /// </summary>
@@ -88,7 +89,7 @@ namespace Microsoft.Build.Evaluation
         private readonly List<Pair<string, ProjectUsingTaskElement>> _usingTaskElements;
 
         /// <summary>
-        /// List of ProjectTargetElement's traversing into imports. 
+        /// List of ProjectTargetElement's traversing into imports.
         /// Gathered during the first pass to avoid traversing again.
         /// </summary>
         private readonly List<ProjectTargetElement> _targetElements;
@@ -99,14 +100,14 @@ namespace Microsoft.Build.Evaluation
         private readonly Dictionary<string, ProjectImportElement> _importsSeen;
 
         /// <summary>
-        /// Depth first collection of InitialTargets strings declared in the main 
+        /// Depth first collection of InitialTargets strings declared in the main
         /// Project and all its imported files, split on semicolons.
         /// </summary>
         private readonly List<string> _initialTargetsList;
 
         /// <summary>
-        /// Dictionary of project full paths and a boolean that indicates whether at least one 
-        /// of their targets has the "Returns" attribute set.  
+        /// Dictionary of project full paths and a boolean that indicates whether at least one
+        /// of their targets has the "Returns" attribute set.
         /// </summary>
         private readonly Dictionary<ProjectRootElement, NGen<bool>> _projectSupportsReturnsAttribute;
 
@@ -139,7 +140,7 @@ namespace Microsoft.Build.Evaluation
         /// The current build submission ID.
         /// </summary>
         private readonly int _submissionId;
-        
+
         private readonly EvaluationContext _evaluationContext;
 
         /// <summary>
@@ -177,6 +178,8 @@ namespace Microsoft.Build.Evaluation
         private List<string> _streamImports;
 
         private readonly bool _interactive;
+
+        private readonly bool _isRunningInVisualStudio;
 
         /// <summary>
         /// Private constructor called by the static Evaluate method.
@@ -240,6 +243,7 @@ namespace Microsoft.Build.Evaluation
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
+            _isRunningInVisualStudio = String.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("BuildingInsideVisualStudio")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
 
             // In 15.9 we added support for the global property "NuGetInteractive" to allow SDK resolvers to be interactive.
             // In 16.0 we added the /interactive command-line argument so the line below keeps back-compat
@@ -320,7 +324,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(unevaluatedIncludeEscaped, "unevaluatedIncludeEscaped");
+            ErrorUtilities.VerifyThrowArgumentLength(unevaluatedIncludeEscaped, nameof(unevaluatedIncludeEscaped));
 
             List<I> items = new List<I>();
             itemFactory.ItemElement = itemElement;
@@ -644,7 +648,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 SetAllProjectsProperty();
-                
+
                 List<string> initialTargets = new List<string>(_initialTargetsList.Count);
                 foreach (var initialTarget in _initialTargetsList)
                 {
@@ -843,92 +847,47 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (ProjectElement element in currentProjectOrImport.Children)
                 {
-                    ProjectPropertyGroupElement propertyGroup = element as ProjectPropertyGroupElement;
-
-                    if (propertyGroup != null)
+                    switch (element)
                     {
-                        EvaluatePropertyGroupElement(propertyGroup);
-                        continue;
+                        case ProjectPropertyGroupElement propertyGroup:
+                            EvaluatePropertyGroupElement(propertyGroup);
+                            break;
+                        case ProjectItemGroupElement itemGroup:
+                            _itemGroupElements.Add(itemGroup);
+                            break;
+                        case ProjectItemDefinitionGroupElement itemDefinitionGroup:
+                            _itemDefinitionGroupElements.Add(itemDefinitionGroup);
+                            break;
+                        case ProjectTargetElement target:
+                            if (_projectSupportsReturnsAttribute.ContainsKey(currentProjectOrImport))
+                            {
+                                _projectSupportsReturnsAttribute[currentProjectOrImport] |= (target.Returns != null);
+                            }
+                            else
+                            {
+                                _projectSupportsReturnsAttribute[currentProjectOrImport] = (target.Returns != null);
+                            }
+                            _targetElements.Add(target);
+                            break;
+                        case ProjectImportElement import:
+                            EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
+                            break;
+                        case ProjectImportGroupElement importGroup:
+                            EvaluateImportGroupElement(currentProjectOrImport.DirectoryPath, importGroup);
+                            break;
+                        case ProjectUsingTaskElement usingTask:
+                            _usingTaskElements.Add(new Pair<string, ProjectUsingTaskElement>(currentProjectOrImport.DirectoryPath, usingTask));
+                            break;
+                        case ProjectChooseElement choose:
+                            EvaluateChooseElement(choose);
+                            break;
+                        case ProjectExtensionsElement extension:
+                        case ProjectSdkElement sdk: // This case is handled by implicit imports.
+                            break;
+                        default:
+                            ErrorUtilities.ThrowInternalError("Unexpected child type");
+                            break;
                     }
-
-                    ProjectItemGroupElement itemGroup = element as ProjectItemGroupElement;
-
-                    if (itemGroup != null)
-                    {
-                        _itemGroupElements.Add(itemGroup);
-
-                        continue;
-                    }
-
-                    ProjectItemDefinitionGroupElement itemDefinitionGroup = element as ProjectItemDefinitionGroupElement;
-
-                    if (itemDefinitionGroup != null)
-                    {
-                        _itemDefinitionGroupElements.Add(itemDefinitionGroup);
-
-                        continue;
-                    }
-
-                    ProjectTargetElement target = element as ProjectTargetElement;
-
-                    if (target != null)
-                    {
-                        if (_projectSupportsReturnsAttribute.ContainsKey(currentProjectOrImport))
-                        {
-                            _projectSupportsReturnsAttribute[currentProjectOrImport] |= (target.Returns != null);
-                        }
-                        else
-                        {
-                            _projectSupportsReturnsAttribute[currentProjectOrImport] = (target.Returns != null);
-                        }
-
-                        _targetElements.Add(target);
-
-                        continue;
-                    }
-
-                    ProjectImportElement import = element as ProjectImportElement;
-                    if (import != null)
-                    {
-                        EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
-                        continue;
-                    }
-
-                    ProjectImportGroupElement importGroup = element as ProjectImportGroupElement;
-
-                    if (importGroup != null)
-                    {
-                        EvaluateImportGroupElement(currentProjectOrImport.DirectoryPath, importGroup);
-                        continue;
-                    }
-
-                    ProjectUsingTaskElement usingTask = element as ProjectUsingTaskElement;
-
-                    if (usingTask != null)
-                    {
-                        _usingTaskElements.Add(new Pair<string, ProjectUsingTaskElement>(currentProjectOrImport.DirectoryPath, usingTask));
-                        continue;
-                    }
-
-                    ProjectChooseElement choose = element as ProjectChooseElement;
-
-                    if (choose != null)
-                    {
-                        EvaluateChooseElement(choose);
-                        continue;
-                    }
-
-                    if (element is ProjectExtensionsElement)
-                    {
-                        continue;
-                    }
-
-                    if (element is ProjectSdkElement)
-                    {
-                        continue; // This case is handled by implicit imports.
-                    }
-
-                    ErrorUtilities.ThrowInternalError("Unexpected child type");
                 }
 
                 // Evaluate the "bottom" implicit imports as if they were the last entry in the file.
@@ -963,7 +922,7 @@ namespace Microsoft.Build.Evaluation
                         string target = EscapingUtilities.UnescapeAll(temp[i].Trim());
                         if (target.Length > 0)
                         {
-                            _data.DefaultTargets = _data.DefaultTargets ?? new List<string>(temp.Count);
+                            _data.DefaultTargets ??= new List<string>(temp.Count);
                             _data.DefaultTargets.Add(target);
                         }
                     }
@@ -977,7 +936,7 @@ namespace Microsoft.Build.Evaluation
         private void EvaluatePropertyGroupElement(ProjectPropertyGroupElement propertyGroupElement)
         {
             using (_evaluationProfiler.TrackElement(propertyGroupElement))
-            { 
+            {
                 if (EvaluateConditionCollectingConditionedProperties(propertyGroupElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties))
                 {
                     foreach (ProjectPropertyElement propertyElement in propertyGroupElement.Properties)
@@ -1049,15 +1008,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void ReadTargetElement(ProjectTargetElement targetElement, LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder, Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets)
         {
-            ProjectTargetInstance targetInstance = null;
-
             // If we already have read a target instance for this element, use that. 
-            targetInstance = targetElement.TargetInstance;
-
-            if (targetInstance == null)
-            {
-                targetInstance = ReadNewTargetElement(targetElement, _projectSupportsReturnsAttribute[(ProjectRootElement)targetElement.Parent], _evaluationProfiler);
-            }
+            ProjectTargetInstance targetInstance = targetElement.TargetInstance ?? ReadNewTargetElement(targetElement, _projectSupportsReturnsAttribute[(ProjectRootElement)targetElement.Parent], _evaluationProfiler);
 
             string targetName = targetElement.Name;
             ProjectTargetInstance otherTarget = _data.GetTarget(targetName);
@@ -1066,8 +1018,7 @@ namespace Microsoft.Build.Evaluation
                 _evaluationLoggingContext.LogComment(MessageImportance.Low, "OverridingTarget", otherTarget.Name, otherTarget.Location.File, targetName, targetElement.Location.File);
             }
 
-            LinkedListNode<ProjectTargetElement> node;
-            if (activeTargets.TryGetValue(targetName, out node))
+            if (activeTargets.TryGetValue(targetName, out LinkedListNode<ProjectTargetElement> node))
             {
                 activeTargetsByEvaluationOrder.Remove(node);
             }
@@ -1090,7 +1041,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (activeTargets.ContainsKey(unescapedBeforeTarget))
                 {
-                    List<TargetSpecification> beforeTargetsForTarget = null;
+                    List<TargetSpecification> beforeTargetsForTarget;
                     if (!targetsWhichRunBeforeByTarget.TryGetValue(unescapedBeforeTarget, out beforeTargetsForTarget))
                     {
                         beforeTargetsForTarget = new List<TargetSpecification>();
@@ -1113,7 +1064,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (activeTargets.ContainsKey(unescapedAfterTarget))
                 {
-                    List<TargetSpecification> afterTargetsForTarget = null;
+                    List<TargetSpecification> afterTargetsForTarget;
                     if (!targetsWhichRunAfterByTarget.TryGetValue(unescapedAfterTarget, out afterTargetsForTarget))
                     {
                         afterTargetsForTarget = new List<TargetSpecification>();
@@ -1132,7 +1083,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Set the built-in properties, most of which are read-only 
+        /// Set the built-in properties, most of which are read-only
         /// </summary>
         private ICollection<P> AddBuiltInProperties()
         {
@@ -1248,7 +1199,6 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                SubToolset subToolset = null;
 
                 // Make the subtoolset version itself available as a property -- but only if it's not already set. 
                 // Because some people may be depending on this value even if there isn't a matching sub-toolset,
@@ -1259,6 +1209,7 @@ namespace Microsoft.Build.Evaluation
                     toolsetProperties.Add(subToolsetVersionProperty);
                 }
 
+                SubToolset subToolset;
                 if (_data.Toolset.SubToolsets.TryGetValue(_data.SubToolsetVersion, out subToolset))
                 {
                     foreach (ProjectPropertyInstance subToolsetProperty in subToolset.Properties.Values)
@@ -1340,7 +1291,7 @@ namespace Microsoft.Build.Evaluation
                 if (evaluatedValue.Length > 0 && _expander.WarnForUninitializedProperties)
                 {
                     // Is the property we are currently setting in the list of properties which have been used but not initialized
-                    IElementLocation elementWhichUsedProperty = null;
+                    IElementLocation elementWhichUsedProperty;
                     bool isPropertyInList = _expander.UsedUninitializedProperties.Properties.TryGetValue(propertyElement.Name, out elementWhichUsedProperty);
 
                     if (isPropertyInList)
@@ -1471,7 +1422,7 @@ namespace Microsoft.Build.Evaluation
                 foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
                 {
                     _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version, sdkResult);
-                    
+
                     PerformDepthFirstPass(importedProjectRootElement);
                 }
             }
@@ -1503,7 +1454,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <remarks>
         /// We enter here in both the property and item passes, since Chooses can contain both.
-        /// However, we only evaluate the When conditions on the first pass, so we only pulse 
+        /// However, we only evaluate the When conditions on the first pass, so we only pulse
         /// those states on that pass. On the other pass, it's as if they're not there.
         /// </remarks>
         private void EvaluateChooseElement(ProjectChooseElement chooseElement)
@@ -1538,31 +1489,21 @@ namespace Microsoft.Build.Evaluation
             {
                 using (_evaluationProfiler.TrackElement(element))
                 {
-                    ProjectPropertyGroupElement propertyGroup = element as ProjectPropertyGroupElement;
-
-                    if (propertyGroup != null)
+                    switch (element)
                     {
-                        EvaluatePropertyGroupElement(propertyGroup);
-                        continue;
+                        case ProjectPropertyGroupElement propertyGroup:
+                            EvaluatePropertyGroupElement(propertyGroup);
+                            break;
+                        case ProjectItemGroupElement itemGroup:
+                            _itemGroupElements.Add(itemGroup);
+                            break;
+                        case ProjectChooseElement choose:
+                            EvaluateChooseElement(choose);
+                            break;
+                        default:
+                            ErrorUtilities.ThrowInternalError("Unexpected child type");
+                            break;
                     }
-
-                    ProjectItemGroupElement itemGroup = element as ProjectItemGroupElement;
-
-                    if (itemGroup != null)
-                    {
-                        _itemGroupElements.Add(itemGroup);
-                        continue;
-                    }
-
-                    ProjectChooseElement choose = element as ProjectChooseElement;
-
-                    if (choose != null)
-                    {
-                        EvaluateChooseElement(choose);
-                        continue;
-                    }
-
-                    ErrorUtilities.ThrowInternalError("Unexpected child type");
                 }
             }
 
@@ -1572,7 +1513,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Expands and loads project imports.
         /// <remarks>
-        /// Imports may contain references to "projectImportSearchPaths" defined in the app.config 
+        /// Imports may contain references to "projectImportSearchPaths" defined in the app.config
         /// toolset section. If this is the case, this method will search for the imported project
         /// in those additional paths if the default fails.
         /// </remarks>
@@ -1639,7 +1580,7 @@ namespace Microsoft.Build.Evaluation
             var pathsToSearch = new string[fallbackSearchPathMatch.SearchPaths.Count + 1];
             pathsToSearch[0] = prop?.EvaluatedValue;                       // The actual value of the property, with no fallbacks
             fallbackSearchPathMatch.SearchPaths.CopyTo(pathsToSearch, 1);  // The list of fallbacks, in order
-            
+
             string extensionPropertyRefAsString = fallbackSearchPathMatch.MsBuildPropertyFormat;
 
             _evaluationLoggingContext.LogComment(MessageImportance.Low, "SearchPathsForMSBuildExtensionsPath",
@@ -1750,7 +1691,7 @@ namespace Microsoft.Build.Evaluation
                 if (_logProjectImportedEvents)
                 {
                     // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
-                    string expanded = _expander.ExpandIntoStringAndUnescape(importElement.Condition, ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError, importElement.ConditionLocation);
+                    string expanded = _expander.ExpandIntoStringAndUnescape(importElement.Condition, ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, importElement.ConditionLocation);
 
                     ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
                         importElement.Location.Line,
@@ -1776,7 +1717,8 @@ namespace Microsoft.Build.Evaluation
 
             string project = importElement.Project;
 
-            if (importElement.SdkReference != null)
+            SdkReference sdkReference = importElement.SdkReference;
+            if (sdkReference != null)
             {
                 // Try to get the path to the solution and project being built. The solution path is not directly known
                 // in MSBuild. It is passed in as a property either by the VS project system or by MSBuild's solution
@@ -1787,8 +1729,58 @@ namespace Microsoft.Build.Evaluation
                 if (solutionPath == "*Undefined*") solutionPath = null;
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
+                CompareInfo compareInfo = CultureInfo.InvariantCulture.CompareInfo;
+
+                static bool HasProperty(string value, CompareInfo compareInfo) =>
+                    value != null && compareInfo.IndexOf(value, "$(") != -1;
+
+                if (HasProperty(sdkReference.Name, compareInfo) ||
+                    HasProperty(sdkReference.Version, compareInfo) ||
+                    HasProperty(sdkReference.MinimumVersion, compareInfo))
+                {
+                    SdkReferencePropertyExpansionMode mode =
+                        Traits.Instance.EscapeHatches.SdkReferencePropertyExpansion ??
+                        SdkReferencePropertyExpansionMode.DefaultExpand;
+
+                    if (mode != SdkReferencePropertyExpansionMode.NoExpansion)
+                    {
+                        if (mode == SdkReferencePropertyExpansionMode.DefaultExpand)
+                            mode = SdkReferencePropertyExpansionMode.ExpandUnescape;
+
+                        static string EvaluateProperty(string value, IElementLocation location,
+                            Expander<P, I> expander, SdkReferencePropertyExpansionMode mode)
+                        {
+                            if (value == null)
+                                return null;
+
+                            const ExpanderOptions Options = ExpanderOptions.ExpandProperties;
+
+                            switch (mode)
+                            {
+                                case SdkReferencePropertyExpansionMode.ExpandUnescape:
+                                    return expander.ExpandIntoStringAndUnescape(value, Options, location);
+                                case SdkReferencePropertyExpansionMode.ExpandLeaveEscaped:
+                                    return expander.ExpandIntoStringLeaveEscaped(value, Options, location);
+                                case SdkReferencePropertyExpansionMode.NoExpansion:
+                                case SdkReferencePropertyExpansionMode.DefaultExpand:
+                                default:
+                                    ErrorUtilities.ThrowArgumentOutOfRange(nameof(mode));
+                                    return value;
+                            }
+                        }
+
+                        IElementLocation sdkReferenceOrigin = importElement.SdkLocation;
+
+                        sdkReference = new SdkReference(
+                            EvaluateProperty(sdkReference.Name, sdkReferenceOrigin, _expander, mode),
+                            EvaluateProperty(sdkReference.Version, sdkReferenceOrigin, _expander, mode),
+                            EvaluateProperty(sdkReference.MinimumVersion, sdkReferenceOrigin, _expander, mode)
+                        );
+                    }
+                }
+
                 // Combine SDK path with the "project" relative path
-                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.SdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive);
+                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio);
 
                 if (!sdkResult.Success)
                 {
@@ -1798,7 +1790,7 @@ namespace Microsoft.Build.Evaluation
                             importElement.Location.Line,
                             importElement.Location.Column,
                             ResourceUtilities.GetResourceString("CouldNotResolveSdk"),
-                            importElement.SdkReference.ToString())
+                            sdkReference.ToString())
                         {
                             BuildEventContext = _evaluationLoggingContext.BuildEventContext,
                             UnexpandedProject = importElement.Project,
@@ -1814,7 +1806,7 @@ namespace Microsoft.Build.Evaluation
                         return;
                     }
 
-                    ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", importElement.SdkReference.ToString());
+                    ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "CouldNotResolveSdk", sdkReference.ToString());
                 }
 
                 if (sdkResult.Path == null)
@@ -1838,8 +1830,8 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                if ((sdkResult.PropertiesToAdd != null && sdkResult.PropertiesToAdd.Any()) ||
-                    (sdkResult.ItemsToAdd != null && sdkResult.ItemsToAdd.Any()))
+                if ((sdkResult.PropertiesToAdd?.Any() == true) ||
+                    (sdkResult.ItemsToAdd?.Any() == true))
                 {
                     //  Inserting at the beginning will mean that the properties or items from the SdkResult will be evaluated before
                     //  any projects from paths returned by the SDK Resolver.
@@ -1872,8 +1864,8 @@ namespace Microsoft.Build.Evaluation
                     hash.Add(property.Key);
                     hash.Add(property.Value);
 #else
-                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + property.Key.GetHashCode();
-                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + property.Value.GetHashCode();
+                    propertiesAndItemsHash = (propertiesAndItemsHash * -1521134295) + property.Key.GetHashCode();
+                    propertiesAndItemsHash = (propertiesAndItemsHash * -1521134295) + property.Value.GetHashCode();
 #endif
                 }
             }
@@ -1885,8 +1877,8 @@ namespace Microsoft.Build.Evaluation
                     hash.Add(item.Key);
                     hash.Add(item.Value);
 #else
-                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + item.Key.GetHashCode();
-                    propertiesAndItemsHash = propertiesAndItemsHash * -1521134295 + item.Value.GetHashCode();
+                    propertiesAndItemsHash = (propertiesAndItemsHash * -1521134295) + item.Key.GetHashCode();
+                    propertiesAndItemsHash = (propertiesAndItemsHash * -1521134295) + item.Value.GetHashCode();
 #endif
 
                 }
@@ -1904,7 +1896,7 @@ namespace Microsoft.Build.Evaluation
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.FullPath = projectPath;
 
-                if (sdkResult.PropertiesToAdd != null && sdkResult.PropertiesToAdd.Any())
+                if (sdkResult.PropertiesToAdd?.Any() == true)
                 {
                     var propertyGroup = project.AddPropertyGroup();
                     foreach (var propertyNameAndValue in sdkResult.PropertiesToAdd)
@@ -1913,7 +1905,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                if (sdkResult.ItemsToAdd != null && sdkResult.ItemsToAdd.Any())
+                if (sdkResult.ItemsToAdd?.Any() == true)
                 {
                     var itemGroup = project.AddItemGroup();
                     foreach (var item in sdkResult.ItemsToAdd)
@@ -1948,7 +1940,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Load and parse the specified project import, which may have wildcards,
         /// into one or more ProjectRootElements.
-        /// Caches the parsed import into the provided collection, so future 
+        /// Caches the parsed import into the provided collection, so future
         /// requests can be satisfied without re-parsing it.
         /// </summary>
         private LoadImportsResult ExpandAndLoadImportsFromUnescapedImportExpression(string directoryOfImportingFile, ProjectImportElement importElement, string unescapedExpression,
@@ -2193,7 +2185,6 @@ namespace Microsoft.Build.Evaluation
 
                                     _evaluationLoggingContext.LogBuildEvent(eventArgs);
                                 }
-
 
                                 continue;
                             }
@@ -2500,7 +2491,7 @@ namespace Microsoft.Build.Evaluation
                     sb.Append(", ");
                 }
 
-                sb.Append($"\"{strings[i]}\"");
+                sb.Append('\"').Append(strings[i]).Append('\"');
             }
 
             if (strings.Count > 1)
@@ -2508,7 +2499,7 @@ namespace Microsoft.Build.Evaluation
                 sb.Append(" and ");
             }
 
-            sb.Append($"\"{strings[strings.Count - 1]}\"");
+            sb.Append('\"').Append(strings[strings.Count - 1]).Append('\"');
 
             return sb.ToString();
         }

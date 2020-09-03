@@ -11,9 +11,9 @@ namespace Microsoft.Build.Collections
     /// A simple string interner designed for IPC.
     /// </summary>
     /// <remarks>
-    /// This interner works by providing a way to convert strings to integer IDs.  When used as a form of compression, 
+    /// This interner works by providing a way to convert strings to integer IDs.  When used as a form of compression,
     /// clients will intern their strings and record the set of IDs returned, then transmit those IDs instead of the
-    /// original strings.  The interner itself is also transmitted ahead of time, with the IDs, allowing 
+    /// original strings.  The interner itself is also transmitted ahead of time, with the IDs, allowing
     /// reconstruction of the original strings.  This ensures each string is transmitted exactly once.
     /// </remarks>
     internal class LookasideStringInterner : ITranslatable
@@ -52,7 +52,7 @@ namespace Microsoft.Build.Collections
         /// Constructor to be used during deserialization.
         /// </summary>
         /// <remarks>
-        /// Intern cannot be used on this interner if it came from serialization, since we do 
+        /// Intern cannot be used on this interner if it came from serialization, since we do
         /// not reconstruct the interning dictionary.
         /// </remarks>
         public LookasideStringInterner(ITranslator translator)
@@ -98,17 +98,12 @@ namespace Microsoft.Build.Collections
         /// <returns>The corresponding string.</returns>
         public string GetString(int index)
         {
-            switch (index)
+            return index switch
             {
-                case NullStringIndex:
-                    return null;
-
-                case EmptyStringIndex:
-                    return String.Empty;
-
-                default:
-                    return _strings[index];
-            }
+                NullStringIndex => null,
+                EmptyStringIndex => String.Empty,
+                _ => _strings[index],
+            };
         }
 
         /// <summary>

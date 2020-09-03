@@ -55,7 +55,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (conditionAttribute != null ? conditionAttribute.Value : String.Empty);
+                return conditionAttribute != null ? conditionAttribute.Value : String.Empty;
             }
 
             set
@@ -68,7 +68,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                if (element != null && element.ParentNode is XmlElement)
+                if (element?.ParentNode is XmlElement)
                 {
                     return (XmlElement)element.ParentNode;
                 }

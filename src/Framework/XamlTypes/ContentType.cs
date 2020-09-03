@@ -96,7 +96,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         {
             if (String.IsNullOrEmpty(metadataName))
             {
-                throw new ArgumentNullException("metadataName");
+                throw new ArgumentNullException(nameof(metadataName));
             }
 
             string value;

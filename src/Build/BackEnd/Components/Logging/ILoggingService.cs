@@ -202,14 +202,14 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Adds a set of warning codes to treat as low importance messages for the specified project instance ID.
         /// </summary>
-        /// <param name="projectInstanceId">A <see cref="BuildEventContext.ProjectInstanceId"/> to associate with the list of warning codes.</param>
+        /// <param name="buildEventContext">A <see cref="BuildEventContext"/> to associate with the list of warning codes.</param>
         /// <param name="codes">The list of warning codes to treat as low importance messsages.</param>
         void AddWarningsAsMessages(BuildEventContext buildEventContext, ISet<string> codes);
 
         /// <summary>
         /// Adds a set of warning codes to treat as errors for the specified project instance ID.
         /// </summary>
-        /// <param name="projectInstanceId">A <see cref="BuildEventContext.ProjectInstanceId"/> to associate with the list of warning codes.</param>
+        /// <param name="buildEventContext">A <see cref="BuildEventContext"/> to associate with the list of warning codes.</param>
         /// <param name="codes">The list of warning codes to treat as errors.</param>
         void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes);
 

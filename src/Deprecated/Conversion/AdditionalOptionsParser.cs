@@ -31,7 +31,7 @@ namespace Microsoft.Build.Conversion
     internal enum SwitchValueType
     {
         /// <summary>
-        /// Boolean value 
+        /// Boolean value
         /// </summary>
         SVT_Boolean,
 
@@ -41,7 +41,7 @@ namespace Microsoft.Build.Conversion
         SVT_String,
 
         /// <summary>
-        /// This switch can occur multiple times and the 
+        /// This switch can occur multiple times and the
         /// final value is the ';' delimeted concat of all the
         /// individual occurrences
         /// </summary>
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Conversion
 
     /// <summary>
     /// This class contains the migration info for a switch
-    /// that we want to migrate 
+    /// that we want to migrate
     /// </summary>
     internal sealed class CompSwitchInfo
     {
@@ -85,7 +85,7 @@ namespace Microsoft.Build.Conversion
         internal object SwitchValue;
 
         /// <summary>
-        /// This is the the name of property in the project file in which the
+        /// This is the name of property in the project file in which the
         /// value of this switch is stored
         /// </summary>
         internal string SwitchProjectPropertyName;
@@ -110,32 +110,32 @@ namespace Microsoft.Build.Conversion
     }
 
     /// <summary>
-    /// 
+    ///
     /// Class:       AdditionalOptionsParser
     /// Owner:       ParthaD
-    /// 
-    /// This class contains the logic to parse the AdditionalOptions project 
+    ///
+    /// This class contains the logic to parse the AdditionalOptions project
     /// property of v7.x J# projects and add the individual options as project
     /// properties of the upgraded projects.
-    /// 
+    ///
     /// AdditionalOptions project property in v7.x was basically a string that
     /// was passed ditto to the compiler.
     /// It was used to hold J# compiler options that didnt have an 1-1 equivalent
     /// project property.
     /// For v8.0 and beyond, each J# compiler option has a corresponding project
     /// property.
-    /// 
+    ///
     /// AdditionalOptions property string is broken down into list of options.
     /// White space (only ' ' and '\t') are considered as delimiters if not wrapped
-    /// inside double quotes ("). 
+    /// inside double quotes (").
     /// NOTE:
     ///  1. Other unicode spaces or double quotes sequences not considered
-    ///  2. Backslash (\) not considered as possible escape char for ". 
-    /// 
+    ///  2. Backslash (\) not considered as possible escape char for ".
+    ///
     /// Once broken down into individual options, only a few compiler options are
     /// seached for (viz. the options for which v8.0 has new project properties)
     /// Everything else is ignored.
-    /// 
+    ///
     /// Refer to SwitchesToMigrade enum for the switches that are migrated.
     /// </summary>
     internal sealed class AdditionalOptionsParser
@@ -151,7 +151,7 @@ namespace Microsoft.Build.Conversion
                 null,
                 "CodePage"
             ),
-            
+
             // /x:[all | net]
             new CompSwitchInfo(
                 SwitchesToMigrate.STM_DisableLangExtensions,
@@ -187,7 +187,7 @@ namespace Microsoft.Build.Conversion
                 null,
                 "SecureScoping"
             ),
-            
+
             // /win32res:<file>
             new CompSwitchInfo(
                 SwitchesToMigrate.STM_Win32Resource,
@@ -208,15 +208,14 @@ namespace Microsoft.Build.Conversion
         )
         {
             // Trivial case
-            if (null == additionalOptionsValue)
+            if (additionalOptionsValue == null)
             {
                 return;
             }
 
             // Tokenize the additional options first
-            string[] compSwitchList;
-            compSwitchList = TokenizeAdditionalOptionsValue(additionalOptionsValue);
-            
+            string[] compSwitchList = TokenizeAdditionalOptionsValue(additionalOptionsValue);
+
             // Extract the switch arguments
             foreach (string compSwitch in compSwitchList)
             {
@@ -228,11 +227,11 @@ namespace Microsoft.Build.Conversion
                     }
                 }
             }
-            
+
             // Finally populate the project file and we'r done!
             PopulatePropertyGroup(configPropertyGroup);
         }
-        
+
         /// <summary>
         /// This will tokenize the given string using ' ' and '\t' as delimiters
         /// The delimiters are escaped inside a pair of quotes
@@ -241,7 +240,7 @@ namespace Microsoft.Build.Conversion
         private string[] TokenizeAdditionalOptionsValue(string additionalOptionsValue)
         {
             ArrayList tokens = new ArrayList();
-            
+
             bool inQuotes = false;
             StringBuilder option = new StringBuilder();
             foreach (char c in additionalOptionsValue)
@@ -301,7 +300,7 @@ namespace Microsoft.Build.Conversion
                 }
             }
             // No no... we arent dealing with the correct switchInfo
-            if (null == matchedID)
+            if (matchedID == null)
             {
                 return false;
             }
@@ -326,7 +325,7 @@ namespace Microsoft.Build.Conversion
                             switchVal = false;
                         }
                     }
-                    if (null != switchVal)
+                    if (switchVal != null)
                     {
                         compSwitchInfo.SwitchValue = switchVal;
                     }
@@ -341,7 +340,7 @@ namespace Microsoft.Build.Conversion
                     {
                         switchVal = compSwitch.Substring(matchedID.Length);
                     }
-                    if (null != switchVal)
+                    if (switchVal != null)
                     {
                         compSwitchInfo.SwitchValue = switchVal;
                     }
@@ -353,7 +352,7 @@ namespace Microsoft.Build.Conversion
 
                 case SwitchValueType.SVT_MultiString:
                     Debug.Assert(
-                        null != compSwitchInfo.SwitchValue, 
+                        compSwitchInfo.SwitchValue != null,
                         "Non null switch value expected for a multistring switch: " + matchedID
                     );
 
@@ -361,7 +360,7 @@ namespace Microsoft.Build.Conversion
                     {
                         switchVal = compSwitch.Substring(matchedID.Length);
                     }
-                    if (null != switchVal)
+                    if (switchVal != null)
                     {
                         ((StringBuilder)(compSwitchInfo.SwitchValue)).Append(switchVal);
                         ((StringBuilder)(compSwitchInfo.SwitchValue)).Append(";");
@@ -399,17 +398,17 @@ namespace Microsoft.Build.Conversion
                 switch (compSwitchInfo.SwitchValueType)
                 {
                     case SwitchValueType.SVT_Boolean:
-                        if (null != compSwitchInfo.SwitchValue)
+                        if (compSwitchInfo.SwitchValue != null)
                         {
                             configPropertyGroup.AddProperty(
-                                propertyName, 
+                                propertyName,
                                 compSwitchInfo.SwitchValue.ToString().ToLower(CultureInfo.InvariantCulture)
                             );
                         }
                     break;
 
                     case SwitchValueType.SVT_String:
-                        if (null != compSwitchInfo.SwitchValue)
+                        if (compSwitchInfo.SwitchValue != null)
                         {
                             configPropertyGroup.AddProperty(
                                 propertyName,
@@ -419,7 +418,7 @@ namespace Microsoft.Build.Conversion
                     break;
 
                     case SwitchValueType.SVT_MultiString:
-                        Debug.Assert(null != compSwitchInfo.SwitchValue, "Expected non null value for multistring switch");
+                        Debug.Assert(compSwitchInfo.SwitchValue != null, "Expected non null value for multistring switch");
                         if (0 != ((StringBuilder)(compSwitchInfo.SwitchValue)).Length)
                         {
                             configPropertyGroup.AddProperty(

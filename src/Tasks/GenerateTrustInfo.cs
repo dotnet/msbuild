@@ -65,7 +65,7 @@ namespace Microsoft.Build.Tasks
             {
                 // If it's a known zone and the user add additional permission to it.
                 if (!String.IsNullOrEmpty(TargetZone)
-                    && trustInfo.PermissionSet != null && trustInfo.PermissionSet.Count > 0
+                    && trustInfo.PermissionSet?.Count > 0
                     && !String.Equals(TargetZone, Custom, StringComparison.OrdinalIgnoreCase))
                 {
                     Log.LogErrorFromResources("GenerateManifest.KnownTargetZoneCannotHaveAdditionalPermissionType");

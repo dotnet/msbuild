@@ -16,6 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using Xunit;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -109,6 +110,22 @@ namespace Microsoft.Build.UnitTests
             Assert.True(testNodes?.Count == 1, $"There should be 1 <class /> element with one child Test element {Environment.NewLine}{xmlDocument.OuterXml}");
 
             Assert.Equal("Testing", testNodes?.First().InnerText);
+        }
+
+        [Fact]
+        public void PokeAttributeWithCondition()
+        {
+            const string original = "b";
+            const string value = "x";
+            const string queryTemplate = "/class/variable[@Name='{0}']/@Name";
+
+            XmlDocument xmlDocument = ExecuteXmlPoke(query: string.Format(queryTemplate, original), value: value);
+
+            List<XmlAttribute> nodes = xmlDocument.SelectNodes(string.Format(queryTemplate, value))?.Cast<XmlAttribute>().ToList();
+
+            nodes?.Count.ShouldBe(1, $"There should be 1 <class /> element with an AccessModifier attribute {Environment.NewLine}{xmlDocument.OuterXml}");
+
+            nodes?[0].Value.ShouldBe(value);
         }
 
         [Fact]

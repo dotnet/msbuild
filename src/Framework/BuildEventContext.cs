@@ -219,12 +219,12 @@ namespace Microsoft.Build.Framework
             var hash = 17;
             // submission ID does not contribute to equality
             //hash = hash * 31 + _submissionId;
-            hash = hash * 31 + _nodeId;
-            hash = hash * 31 + _evaluationId;
-            hash = hash * 31 + _targetId;
-            hash = hash * 31 + _projectContextId;
-            hash = hash * 31 + _taskId;
-            hash = hash * 31 + _projectInstanceId;
+            hash = (hash * 31) + _nodeId;
+            hash = (hash * 31) + _evaluationId;
+            hash = (hash * 31) + _targetId;
+            hash = (hash * 31) + _projectContextId;
+            hash = (hash * 31) + _taskId;
+            hash = (hash * 31) + _projectInstanceId;
 
             return hash;
         }
@@ -246,7 +246,7 @@ namespace Microsoft.Build.Framework
                 return true;
             }
 
-            if (ReferenceEquals(obj, null))
+            if (obj is null)
             {
                 return false;
             }
@@ -273,7 +273,7 @@ namespace Microsoft.Build.Framework
                 return true;
             }
 
-            if (ReferenceEquals(left, null))
+            if (left is null)
             {
                 return false;
             }

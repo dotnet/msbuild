@@ -16,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Xunit;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
@@ -125,6 +126,8 @@ namespace Microsoft.Build.UnitTests.Construction
 
             string locations = project.Xml.Location.LocationString + "\r\n";
 
+            List<string> attributeLocations = new List<string>(2);
+
             foreach (var element in project.Xml.AllChildren)
             {
                 foreach (var property in element.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
@@ -133,9 +136,9 @@ namespace Microsoft.Build.UnitTests.Construction
                     {
                         if (property.Name == "ParameterLocations")
                         {
-                            var values = new List<KeyValuePair<string, ElementLocation>>(((ICollection<KeyValuePair<string, ElementLocation>>)property.GetValue(element, null)));
+                            var values = new List<KeyValuePair<string, ElementLocation>>((ICollection<KeyValuePair<string, ElementLocation>>)property.GetValue(element, null));
 
-                            values.ForEach((value) => locations += value.Key + ":" + value.Value.LocationString + "\r\n");
+                            values.ForEach(value => attributeLocations.Add(value.Key + ":" + value.Value.LocationString));
                         }
                         else
                         {
@@ -194,8 +197,6 @@ c:\foo\bar.csproj (21,29)
 c:\foo\bar.csproj (23,25)
 c:\foo\bar.csproj (24,32)
 c:\foo\bar.csproj (24,29)
-Text: (26,32)
-Importance: (26,66)
 c:\foo\bar.csproj (26,43)
 c:\foo\bar.csproj (26,25)
 c:\foo\bar.csproj (28,29)
@@ -204,6 +205,9 @@ c:\foo\bar.csproj (28,21)
 ";
 
             Helpers.VerifyAssertLineByLine(expected, locations);
+
+            // attribute order depends on dictionary internals
+            attributeLocations.ShouldBe(new[] { "Text: (26,32)", "Importance: (26,66)" }, ignoreOrder: true);
         }
     }
 }

@@ -150,7 +150,7 @@ namespace Microsoft.Build.Collections
             get
             {
                 // Trigger KeyNotFoundException
-                return (new Dictionary<K, V>()[key]);
+                return new Dictionary<K, V>()[key];
             }
 
             set

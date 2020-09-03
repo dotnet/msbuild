@@ -413,7 +413,6 @@ namespace Microsoft.Build.UnitTests
             {
                 if (File.Exists(file)) File.Delete(file);
             }
-
         }
 
         /// <summary>
@@ -426,8 +425,7 @@ namespace Microsoft.Build.UnitTests
         public void EvaluateAVarietyOfTrueExpressions(string expression)
         {
             Parser p = new Parser();
-            GenericExpressionNode tree;
-            tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
+            GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
             ConditionEvaluator.IConditionEvaluationState state =
                 new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
                     (
@@ -453,8 +451,7 @@ namespace Microsoft.Build.UnitTests
         public void EvaluateAVarietyOfFalseExpressions(string expression)
         {
             Parser p = new Parser();
-            GenericExpressionNode tree;
-            tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
+            GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
             ConditionEvaluator.IConditionEvaluationState state =
                 new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
                     (

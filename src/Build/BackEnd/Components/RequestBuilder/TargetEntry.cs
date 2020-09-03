@@ -32,7 +32,7 @@ namespace Microsoft.Build.BackEnd
     {
         /// <summary>
         /// The target's dependencies need to be evaluated and pushed onto the target stack.
-        /// 
+        ///
         /// Transitions:
         /// Execution, ErrorExecution
         /// </summary>
@@ -40,7 +40,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// The target is ready to execute its tasks, batched as needed.
-        /// 
+        ///
         /// Transitions:
         /// ErrorExecution, Completed
         /// </summary>
@@ -48,7 +48,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// The target is ready to provide error tasks.
-        /// 
+        ///
         /// Transitions:
         /// None
         /// </summary>
@@ -56,7 +56,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// The target has finished building.  All of the results are in the Lookup.
-        /// 
+        ///
         /// Transitions:
         /// None
         /// </summary>
@@ -163,11 +163,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="stopProcessingOnCompletion">True if the target builder should stop processing the current target stack when this target is complete.</param>
         internal TargetEntry(BuildRequestEntry requestEntry, ITargetBuilderCallback targetBuilderCallback, TargetSpecification targetSpecification, Lookup baseLookup, TargetEntry parentTarget, TargetBuiltReason buildReason, IBuildComponentHost host, bool stopProcessingOnCompletion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, "requestEntry");
-            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback, "targetBuilderCallback");
+            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, nameof(requestEntry));
+            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback, nameof(targetBuilderCallback));
             ErrorUtilities.VerifyThrowArgumentNull(targetSpecification, "targetName");
             ErrorUtilities.VerifyThrowArgumentNull(baseLookup, "lookup");
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
 
             _requestEntry = requestEntry;
             _targetBuilderCallback = targetBuilderCallback;
@@ -243,7 +243,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Retrieves the Lookup this target was initialized with, including any modifications which have 
+        /// Retrieves the Lookup this target was initialized with, including any modifications which have
         /// been made to it while running.
         /// </summary>
         internal Lookup Lookup
@@ -362,7 +362,7 @@ namespace Microsoft.Build.BackEnd
                 if (!projectLoggingContext.LoggingService.OnlyLogCriticalEvents)
                 {
                     // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
-                    string expanded = _expander.ExpandIntoStringAndUnescape(_target.Condition, ExpanderOptions.ExpandPropertiesAndItems | ExpanderOptions.LeavePropertiesUnexpandedOnError, _target.ConditionLocation);
+                    string expanded = _expander.ExpandIntoStringAndUnescape(_target.Condition, ExpanderOptions.ExpandPropertiesAndItems | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _target.ConditionLocation);
 
                     // By design: Not building dependencies. This is what NAnt does too.
                     // NOTE: In the original code, this was logged from the target logging context.  However, the target
@@ -432,7 +432,7 @@ namespace Microsoft.Build.BackEnd
                 string projectFullPath = requestEntry.RequestConfiguration.ProjectFullPath;
 
                 string parentTargetName = null;
-                if (ParentEntry != null && ParentEntry.Target != null)
+                if (ParentEntry?.Target != null)
                 {
                     parentTargetName = ParentEntry.Target.Name;
                 }
@@ -531,7 +531,7 @@ namespace Microsoft.Build.BackEnd
                                 entryForInference = null;
                                 entryForExecution.LeaveScope();
                                 entryForExecution = null;
-                                targetSuccess = (bucketResult != null) && (bucketResult.ResultCode == WorkUnitResultCode.Success);
+                                targetSuccess = (bucketResult?.ResultCode == WorkUnitResultCode.Success);
                                 break;
 
                             case DependencyAnalysisResult.SkipNoInputs:
@@ -546,17 +546,8 @@ namespace Microsoft.Build.BackEnd
                         // Make sure the Invalid Project error gets logged *before* TargetFinished.  Otherwise,
                         // the log is confusing.
                         targetLoggingContext.LogInvalidProjectFileError(e);
-
-                        if (null != entryForInference)
-                        {
-                            entryForInference.LeaveScope();
-                        }
-
-                        if (null != entryForExecution)
-                        {
-                            entryForExecution.LeaveScope();
-                        }
-
+                        entryForInference?.LeaveScope();
+                        entryForExecution?.LeaveScope();
                         aggregateResult = aggregateResult.AggregateResult(new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
                     }
                     finally
@@ -653,11 +644,11 @@ namespace Microsoft.Build.BackEnd
                 }
                 finally
                 {
-                    if (targetLoggingContext != null)
-                    {
+                       
+                    
                         // log the last target finished since we now have the target outputs. 
-                        targetLoggingContext.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems != null && targetOutputItems.Count > 0 ? targetOutputItems : null);
-                    }
+                        targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems?.Count > 0 ? targetOutputItems : null);
+                    
                 }
 
                 _targetResult = new TargetResult(targetOutputItems.ToArray(), aggregateResult);
@@ -724,7 +715,7 @@ namespace Microsoft.Build.BackEnd
 
             // If this target never executed (for instance, because one of its dependencies errored) then we need to
             // create a result for this target to report when it gets to the Completed state.
-            if (null == _targetResult)
+            if (_targetResult == null)
             {
                 _targetResult = new TargetResult(Array.Empty<TaskItem>(), new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
             }
@@ -753,7 +744,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="lookup">The lookup to enter with.</param>
         internal void EnterLegacyCallTargetScope(Lookup lookup)
         {
-            if (null == _legacyCallTargetScopes)
+            if (_legacyCallTargetScopes == null)
             {
                 _legacyCallTargetScopes = new Stack<Lookup.Scope>();
             }
@@ -789,7 +780,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void LeaveLegacyCallTargetScopes()
         {
-            if (null != _legacyCallTargetScopes)
+            if (_legacyCallTargetScopes != null)
             {
                 while (_legacyCallTargetScopes.Count != 0)
                 {
@@ -859,7 +850,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Gets the task execution mode based 
+        /// Gets the task execution mode based
         /// </summary>
         /// <param name="analysis">The result of the up-to-date check.</param>
         /// <returns>The mode to be used to execute tasks.</returns>
@@ -880,7 +871,7 @@ namespace Microsoft.Build.BackEnd
             if ((analysis == DependencyAnalysisResult.FullBuild) ||
                 (analysis == DependencyAnalysisResult.IncrementalBuild))
             {
-                executionMode = executionMode | TaskExecutionMode.ExecuteTaskAndGatherOutputs;
+                executionMode |= TaskExecutionMode.ExecuteTaskAndGatherOutputs;
             }
 
             return executionMode;
@@ -898,7 +889,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Gets the list of parameters which are batchable for a target
-        /// PERF: (Refactor) This used to be a method on the target, and it would 
+        /// PERF: (Refactor) This used to be a method on the target, and it would
         /// cache its values so this would only be computed once for each
         /// target.  We should consider doing something similar for perf reasons.
         /// </summary>
@@ -917,7 +908,7 @@ namespace Microsoft.Build.BackEnd
                 batchableTargetParameters.Add(_target.Outputs);
             }
 
-            if (_target.Returns != null && _target.Returns.Length > 0)
+            if (!string.IsNullOrEmpty(_target.Returns))
             {
                 batchableTargetParameters.Add(_target.Returns);
             }

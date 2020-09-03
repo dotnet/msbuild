@@ -12,8 +12,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Xunit;
 
-
-
 #pragma warning disable 0219
 
 #if FEATURE_FILE_TRACKER
@@ -1212,7 +1210,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             compactOutputs.SaveTlog(delegate (string fullTrackedPath)
             {
                 // We need to answer the question "should fullTrackedPath be included in the TLog?"
-                return (string.Compare(fullTrackedPath, missing, StringComparison.OrdinalIgnoreCase) != 0);
+                return !string.Equals(fullTrackedPath, missing, StringComparison.OrdinalIgnoreCase);
             });
 
             // Read the Tlogs back in..
@@ -1234,7 +1232,6 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofDate = compactInputs.ComputeSourcesNeedingCompilation();
             Assert.Empty(outofDate);
         }
-
 
         [Fact]
         public void MultipleCanonicalCLMissingInputDependencyRemoved()
@@ -1282,7 +1279,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             d.SaveTlog(delegate (string fullTrackedPath)
             {
                 // We need to answer the question "should fullTrackedPath be included in the TLog?"
-                return (string.Compare(fullTrackedPath, missing, StringComparison.OrdinalIgnoreCase) != 0);
+                return !string.Equals(fullTrackedPath, missing, StringComparison.OrdinalIgnoreCase);
             });
 
             // read the tlog back in again
@@ -1301,7 +1298,6 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             outofdate = d.ComputeSourcesNeedingCompilation();
             Assert.Empty(outofdate);
         }
-
 
         [Fact]
         public void MultiplePrimaryCanonicalCL()
@@ -1959,7 +1955,6 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-
         [Fact]
         public void OutputSingleCanonicalCL()
         {
@@ -2412,7 +2407,6 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                 Path.GetFullPath(Path.Combine("TestFiles", "three.obj")),
             });
 
-
             // Represent our tracked and computed outputs
             CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
@@ -2506,7 +2500,6 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                 Path.GetFullPath(Path.Combine("TestFiles", "two.obj")),
                 Path.GetFullPath(Path.Combine("TestFiles", "three.obj")),
             });
-
 
             // Represent our tracked and computed outputs
             CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
@@ -3528,7 +3521,6 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Assert.True(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
             // We should be out of date inputs & outputs vs tracking (since we wrote the files after the tracking logs)
             Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
-
 
             // Touch the tracking logs so that are more recent that any of the inputs
             Thread.Sleep(_sleepTimeMilliseconds);

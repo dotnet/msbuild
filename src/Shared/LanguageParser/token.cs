@@ -59,7 +59,7 @@ namespace Microsoft.Build.Shared.LanguageParser
          */
         internal bool EqualsIgnoreCase(string compareTo)
         {
-            return (String.Compare(_innerText, compareTo, StringComparison.OrdinalIgnoreCase) == 0);
+            return String.Equals(_innerText, compareTo, StringComparison.OrdinalIgnoreCase);
         }
     }
 

@@ -317,6 +317,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="item">The item to attempt to find a match for based on matching metadata</param>
         /// <param name="metadata">Names of metadata to look for matches for</param>
+        /// <param name="options">metadata option matching</param>
         /// <returns></returns>
         public bool MatchesItemOnMetadata(IItem item, IEnumerable<string> metadata, MatchOnMetadataOptions options)
         {
@@ -418,19 +419,17 @@ namespace Microsoft.Build.Evaluation
         protected string ProjectDirectory { get; }
 
         // not a Lazy to reduce memory
-        private FileSpecMatcherTester FileMatcher
+        private ref FileSpecMatcherTester FileMatcher
         {
             get
             {
-                if (_fileMatcherInitialized)
+                if (!_fileMatcherInitialized)
                 {
-                    return _fileMatcher;
+                    _fileMatcher = CreateFileSpecMatcher();
+                    _fileMatcherInitialized = true;
                 }
 
-                _fileMatcher = CreateFileSpecMatcher();
-                _fileMatcherInitialized = true;
-
-                return _fileMatcher;
+                return ref _fileMatcher;
             }
         }
 
@@ -497,5 +496,14 @@ namespace Microsoft.Build.Evaluation
             : base(textFragment, projectDirectory)
         {
         }
+
+        /// <summary>
+        /// True if TextFragment starts with /**/ or a variation thereof with backslashes.
+        /// </summary>
+        public bool IsFullFileSystemScan => TextFragment.Length >= 4
+            && FileUtilities.IsAnySlash(TextFragment[0])
+            && TextFragment[1] == '*'
+            && TextFragment[2] == '*'
+            && FileUtilities.IsAnySlash(TextFragment[3]);
     }
 }

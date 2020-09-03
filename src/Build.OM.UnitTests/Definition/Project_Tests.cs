@@ -2866,7 +2866,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var sb = new StringBuilder();
             for (int i = 0; i < itemElements; i++)
             {
-                sb.AppendLine($"<i_{i} Include=\"a\"/>");
+                sb.Append("<i_").Append(i).AppendLine(" Include=\"a\"/>");
                 expected.Add(($"i_{i}", Operation.Include, Provenance.StringLiteral, 1));
             }
 

@@ -43,9 +43,7 @@ namespace Microsoft.Build.Logging
         {
             if (this.Parameters != null)
             {
-                string[] parameterComponents;
-
-                parameterComponents = this.Parameters.Split(s_fileLoggerParameterDelimiters);
+                string[] parameterComponents = this.Parameters.Split(s_fileLoggerParameterDelimiters);
                 for (int param = 0; param < parameterComponents.Length; param++)
                 {
                     if (parameterComponents[param].Length > 0)
@@ -70,7 +68,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void ApplyFileLoggerParameter(string parameterName, string parameterValue)
         {
-            if (String.Compare("LOGFILE", parameterName, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals("LOGFILE", parameterName, StringComparison.OrdinalIgnoreCase))
             {
                 if (string.IsNullOrEmpty(parameterValue))
                 {
@@ -96,7 +94,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventSource, "eventSource");
+            ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
             ParseFileLoggerParameters();
             string fileName = _logFile;
             try
@@ -118,10 +116,7 @@ namespace Microsoft.Build.Logging
             }
             catch (ArgumentException e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
-                if (_nodeFileLogger != null)
-                {
-                    _nodeFileLogger.Shutdown();
-                }
+                _nodeFileLogger?.Shutdown();
 
                 string errorCode;
                 string helpKeyword;
@@ -138,10 +133,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Shutdown()
         {
-            if (_nodeFileLogger != null)
-            {
-                _nodeFileLogger.Shutdown();
-            }
+            _nodeFileLogger?.Shutdown();
         }
         #endregion
 

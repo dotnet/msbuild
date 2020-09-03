@@ -187,6 +187,7 @@ namespace Microsoft.Build.Tasks
         /// Resolve a reference to a specific file name.
         /// </summary>
         /// <param name="assemblyName">The assemblyname of the reference.</param>
+        /// <param name="sdkName">The sdkname of the reference.</param>
         /// <param name="rawFileNameCandidate">The reference's 'include' treated as a raw file name.</param>
         /// <param name="isPrimaryProjectReference">Whether or not this reference was directly from the project file (and therefore not a dependency)</param>
         /// <param name="wantSpecificVersion">Whether an exact version match is requested.</param>
@@ -307,11 +308,11 @@ namespace Microsoft.Build.Tasks
             {
                 var lockobject = new Object();
 
-                Parallel.ForEach(assemblyFoldersEx, assemblyFolder =>
+                Parallel.ForEach(assemblyFoldersEx.UniqueDirectoryPaths, assemblyFolder =>
                 {
-                    if (FileUtilities.DirectoryExistsNoThrow(assemblyFolder.DirectoryPath))
+                    if (FileUtilities.DirectoryExistsNoThrow(assemblyFolder))
                     {
-                        string[] files = Directory.GetFiles(assemblyFolder.DirectoryPath, "*.*", SearchOption.TopDirectoryOnly);
+                        string[] files = Directory.GetFiles(assemblyFolder, "*.*", SearchOption.TopDirectoryOnly);
 
                         lock (lockobject)
                         {

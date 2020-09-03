@@ -60,7 +60,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get 
             { 
-                return (this.projectPathAttribute != null) ? this.projectPathAttribute.Value : null; 
+                return this.projectPathAttribute?.Value; 
             }
             set
             {
@@ -99,7 +99,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get 
             { 
-                return (this.conditionAttribute != null) ? this.conditionAttribute.Value : null; 
+                return this.conditionAttribute?.Value; 
             }
             set
             {

@@ -329,7 +329,7 @@ namespace Microsoft.Build
         /// </summary>
         /// <param name="other">The string to compare with the target substring.</param>
         /// <returns>True if target substring starts with <paramref name="other"/>, false otherwise.</returns>
-        public bool StartsWithStringByOrdinalComparison(string other) => (String.CompareOrdinal(_target, _startIndex, other, 0, other.Length) == 0);
+        public bool StartsWithStringByOrdinalComparison(string other) => String.CompareOrdinal(_target, _startIndex, other, 0, other.Length) == 0;
 
         /// <summary>
         /// Never reference equals to string.

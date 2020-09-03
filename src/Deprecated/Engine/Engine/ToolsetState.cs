@@ -55,7 +55,7 @@ namespace Microsoft.Build.BuildEngine
             this.parentEngine = engine;
             this.loggingServices = engine.LoggingServices;
 
-            ErrorUtilities.VerifyThrowArgumentNull(toolset, "toolset");
+            ErrorUtilities.VerifyThrowArgumentNull(toolset, nameof(toolset));
             this.toolset = toolset;
 
             this.getFiles = getFiles;
@@ -109,7 +109,6 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-
         #endregion
 
         #region Methods
@@ -146,7 +145,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="taskRegistry"></param>
         internal void SetTaskRegistry(ITaskRegistry taskRegistry)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskRegistry, "taskRegistry");
+            ErrorUtilities.VerifyThrowArgumentNull(taskRegistry, nameof(taskRegistry));
             defaultTasksRegistrationAttempted = true;
             defaultTaskRegistry = taskRegistry;
         }
@@ -231,7 +230,7 @@ namespace Microsoft.Build.BuildEngine
                                     ProjectErrorUtilities.VerifyThrowInvalidProject(topLevelNode.LocalName == XMakeElements.project,
                                         topLevelNode, "UnrecognizedElement", topLevelNode.Name);
 
-                                    ProjectErrorUtilities.VerifyThrowInvalidProject((topLevelNode.Prefix.Length == 0) && (String.Compare(topLevelNode.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase) == 0),
+                                    ProjectErrorUtilities.VerifyThrowInvalidProject((topLevelNode.Prefix.Length == 0) && (String.Equals(topLevelNode.NamespaceURI, XMakeAttributes.defaultXmlNamespace, StringComparison.OrdinalIgnoreCase)),
                                         topLevelNode, "ProjectMustBeInMSBuildXmlNamespace", XMakeAttributes.defaultXmlNamespace);
 
                                     // the <Project> tag can only the XML namespace -- no other attributes

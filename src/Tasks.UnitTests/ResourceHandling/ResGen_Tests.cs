@@ -317,7 +317,7 @@ namespace Microsoft.Build.UnitTests
             t.References = references.ToArray();
 
             commandLineLength = CommandLine.GetCommandLine(t, false).Length;
-            Assert.Equal(commandLineLength, (maxCommandLineLength + 1));
+            Assert.Equal(commandLineLength, maxCommandLineLength + 1);
 
             ExecuteTaskAndVerifyLogContainsErrorFromResource
             (

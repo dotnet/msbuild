@@ -100,6 +100,11 @@
         <target state="new">Version string was not in a correct format.</target>
         <note />
       </trans-unit>
+      <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
+        <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
+        <target state="new">"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="new">Logging verbosity is set to: {0}.</target>
@@ -171,6 +176,11 @@
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="new">Property initial value: $({0})="{1}" Source: {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RarControllerReflectionError">
+        <source>Couldn't create an instance of IRarController for '{0}' type</source>
+        <target state="new">Couldn't create an instance of IRarController for '{0}' type</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">

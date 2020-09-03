@@ -111,8 +111,7 @@ namespace Microsoft.Build.UnitTests
 
             if (path == myreadonly_txt)
             {
-                a = System.IO.FileAttributes.ReadOnly;
-                return a;
+                return System.IO.FileAttributes.ReadOnly;
             }
 
             Assert.True(false, "Unexpected file attributes: " + path);

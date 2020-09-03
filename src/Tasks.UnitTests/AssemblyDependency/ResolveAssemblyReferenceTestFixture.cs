@@ -322,7 +322,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
             }
 
-
             uniqueFileExists = null;
             uniqueGetAssemblyName = null;
         }
@@ -343,7 +342,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     Assert.True(false, message);
                 }
             }
-
 
             // Check for zero IO in GetAssemblyName.
             foreach (var entry in uniqueGetAssemblyName)
@@ -644,11 +642,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 string baseDir = Path.GetDirectoryName(file);
 
-                if (0 == String.Compare(baseDir, path, StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(baseDir, path, StringComparison.OrdinalIgnoreCase))
                 {
                     string fileExtension = Path.GetExtension(file);
 
-                    if (0 == String.Compare(fileExtension, extension, StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals(fileExtension, extension, StringComparison.OrdinalIgnoreCase))
                     {
                         matches.Add(file);
                     }
@@ -711,36 +709,36 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             imageRuntimeVersion = getAssemblyRuntimeVersion(fullPath);
             isManagedWinMD = false;
 
-            if (String.Compare(fullPath, @"C:\WinMD\SampleWindowsRuntimeOnly.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(fullPath, @"C:\WinMD\SampleWindowsRuntimeOnly.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
-            else if (String.Compare(fullPath, @"C:\WinMD\SampleWindowsRuntimeAndCLR.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(fullPath, @"C:\WinMD\SampleWindowsRuntimeAndCLR.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 isManagedWinMD = true;
                 return true;
             }
-            else if (String.Compare(fullPath, @"C:\WinMD\WinMDWithVersion255.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(fullPath, @"C:\WinMD\WinMDWithVersion255.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
-            else if (String.Compare(fullPath, @"C:\WinMD\SampleWindowsRuntimeOnly2.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(fullPath, @"C:\WinMD\SampleWindowsRuntimeOnly2.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
-            else if (String.Compare(fullPath, @"C:\WinMD\SampleWindowsRuntimeOnly3.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(fullPath, @"C:\WinMD\SampleWindowsRuntimeOnly3.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
-            else if (String.Compare(fullPath, @"C:\WinMD\SampleWindowsRuntimeOnly4.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(fullPath, @"C:\WinMD\SampleWindowsRuntimeOnly4.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
-            else if (String.Compare(fullPath, @"C:\WinMD\SampleWindowsRuntimeReferencingSystem.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(fullPath, @"C:\WinMD\SampleWindowsRuntimeReferencingSystem.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
-            else if (String.Compare(fullPath, @"C:\WinMD\SampleWindowsRuntimeReferencingSystemDNE.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(fullPath, @"C:\WinMD\SampleWindowsRuntimeReferencingSystemDNE.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -748,7 +746,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 return true;
             }
-            else if (String.Compare(fullPath, @"C:\FakeSDK\WindowsMetadata\SDKWinMD2.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(fullPath, @"C:\FakeSDK\WindowsMetadata\SDKWinMD2.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -760,11 +758,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 return true;
             }
-            else if (String.Compare(fullPath, @"C:\FakeSDK\WindowsMetadata\SDKWinMD.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(fullPath, @"C:\FakeSDK\WindowsMetadata\SDKWinMD.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
-            else if (String.Compare(fullPath, @"C:\WinMDLib\LibWithWinmdAndNoDll.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(fullPath, @"C:\WinMDLib\LibWithWinmdAndNoDll.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -838,10 +836,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 {
                     uniqueFileExists[lowerPath] = 0;
                 }
-                
-                uniqueFileExists[lowerPath] = uniqueFileExists[lowerPath] + 1;
-            }
 
+                uniqueFileExists[lowerPath]++;
+            }
 
             // First, MyMissingAssembly doesn't exist anywhere.
             if (path.IndexOf("MyMissingAssembly") != -1)
@@ -854,15 +851,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 path = Path.GetFullPath(path);
             }
 
-
             foreach (string file in s_existentFiles)
             {
-                if (0 == String.Compare(path, file, StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(path, file, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
             }
-
 
             // Everything else doesn't exist.
             return false;
@@ -885,7 +880,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             foreach (string dir in existentDirs)
             {
-                if (0 == String.Compare(path, dir, StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(path, dir, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
@@ -911,7 +906,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 return paths;
             }
-            else if (String.Compare(path, @".", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @".", StringComparison.OrdinalIgnoreCase))
             {
                 // Pretend the current directory has a few subfolders.
                 return new string[] {
@@ -929,75 +924,74 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <returns>Image runtime version</returns>
         internal static string GetRuntimeVersion(string path)
         {
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeAndCLR.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeAndCLR.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return "WindowsRuntime 1.0, CLR V2.0.50727";
             }
-            else if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeOnly.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeOnly.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return "WindowsRuntime 1.0";
             }
-            else if (String.Compare(path, @"C:\WinMD\WinMDWithVersion255.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\WinMD\WinMDWithVersion255.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return "WindowsRuntime 1.0";
             }
-            else if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeOnly2.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeOnly2.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return "WindowsRuntime 1.0";
             }
-            else if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeOnly3.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeOnly3.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return "WindowsRuntime 1.0";
             }
-            else if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeOnly4.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeOnly4.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return "WindowsRuntime 1.0";
             }
-            else if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeReferencingSystem.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeReferencingSystem.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return "WindowsRuntime 1.0";
             }
-            else if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeReferencingSystemDNE.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeReferencingSystemDNE.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return "WindowsRuntime 1.0";
             }
-            else if (String.Compare(path, @"C:\WinMD\SampleClrOnly.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\WinMD\SampleClrOnly.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return "CLR V2.0.50727";
             }
-            else if (String.Compare(path, @"C:\WinMD\SampleBadWindowsRuntime.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\WinMD\SampleBadWindowsRuntime.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return "Windows Runtime";
             }
-            else if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeAndOther.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeAndOther.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return "WindowsRuntime 1.0, Other V2.0.50727";
             }
-
-            else if (String.Compare(path, @"C:\DirectoryContainsOnlyDll\a.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\DirectoryContainsOnlyDll\a.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return "V2.0.50727";
             }
-            else if (String.Compare(path, @"C:\DirectoryContainsdllAndWinmd\b.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\DirectoryContainsdllAndWinmd\b.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return "V2.0.50727";
             }
-            else if (String.Compare(path, @"C:\DirectoryContainsdllAndWinmd\c.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\DirectoryContainsdllAndWinmd\c.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return "WindowsRuntime 1.0";
             }
-            else if (String.Compare(path, @"C:\DirectoryContainstwoWinmd\a.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\DirectoryContainstwoWinmd\a.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return "WindowsRuntime 1.0";
             }
-            else if (String.Compare(path, @"C:\DirectoryContainstwoWinmd\c.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            else if (String.Equals(path, @"C:\DirectoryContainstwoWinmd\c.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return "WindowsRuntime 1.0";
             }
@@ -1053,7 +1047,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Compare(path, @"c:\OldClrBug\MyFileLoadExceptionAssembly.dll", StringComparison.OrdinalIgnoreCase) == 0
+                String.Equals(path, @"c:\OldClrBug\MyFileLoadExceptionAssembly.dll", StringComparison.OrdinalIgnoreCase)
             )
             {
                 // An older LKG of the CLR could throw a FileLoadException if it doesn't recognize
@@ -1063,7 +1057,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Compare(path, @"c:\Regress313086\mscorlib.dll", StringComparison.OrdinalIgnoreCase) == 0
+                String.Equals(path, @"c:\Regress313086\mscorlib.dll", StringComparison.OrdinalIgnoreCase)
             )
             {
                 // This is an mscorlib that returns null for its assembly name.
@@ -1072,7 +1066,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Compare(path, Path.Combine(s_myVersion20Path, "BadImage.dll"), StringComparison.OrdinalIgnoreCase) == 0
+                String.Equals(path, Path.Combine(s_myVersion20Path, "BadImage.dll"), StringComparison.OrdinalIgnoreCase)
             )
             {
                 throw new System.BadImageFormatException(@"The format of the file '" + Path.Combine(s_myVersion20Path, "BadImage.dll") + "' is invalid");
@@ -1080,9 +1074,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Compare(path, Path.Combine(s_myProjectPath, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase) == 0
-                || String.Compare(path, Path.Combine(s_myVersion20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase) == 0
-                || String.Compare(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase) == 0
+                String.Equals(path, Path.Combine(s_myProjectPath, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
+                || String.Equals(path, Path.Combine(s_myVersion20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
+                || String.Equals(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
             )
             {
                 // This is an mscorlib.dll with no metadata.
@@ -1091,8 +1085,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Compare(path, Path.Combine(s_myVersion20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase) == 0
-                || String.Compare(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase) == 0
+                String.Equals(path, Path.Combine(s_myVersion20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
+                || String.Equals(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
             )
             {
                 // This is an mscorlib.dll with no metadata.
@@ -1104,129 +1098,129 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 throw new FileNotFoundException(path);
             }
 
-            if (String.Compare(path, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOnFoo45Framework, Version=4.5.0.0, PublicKeyToken=null, Culture=Neutral");
             }
 
-            if (String.Compare(path, Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOnFoo4Framework, Version=4.0.0.0, PublicKeyToken=null, Culture=Neutral");
             }
 
-            if (String.Compare(path, Path.Combine(s_frameworksPath, "DependsOnFoo35Framework.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_frameworksPath, "DependsOnFoo35Framework.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOnFoo35Framework, Version=3.5.0.0, PublicKeyToken=null, Culture=Neutral");
             }
 
-            if (String.Compare(path, @"c:\Regress315619\A\MyAssembly.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\Regress315619\A\MyAssembly.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("MyAssembly, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"c:\Regress315619\B\MyAssembly.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\Regress315619\B\MyAssembly.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("MyAssembly, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, s_regress442570_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_regress442570_ADllPath, StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
             }
-            if (String.Compare(path, @"c:\Regress387218\v1\D.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\Regress387218\v1\D.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("D, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"c:\Regress387218\v2\D.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\Regress387218\v2\D.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("D, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"c:\Regress390219\v1\D.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\Regress390219\v1\D.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("D, Version=1.0.0.0, Culture=fr, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"c:\Regress390219\v2\D.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\Regress390219\v2\D.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("D, Version=2.0.0.0, Culture=en, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"c:\MyStronglyNamed\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\MyStronglyNamed\A.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=neUtral, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"c:\MyNameMismatch\Foo.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\MyNameMismatch\Foo.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Notice the metadata assembly name does not match the base file name.
                 return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=neUtral, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"c:\MyEscapedName\=A=.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\MyEscapedName\=A=.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Notice the metadata assembly name does not match the base file name.
                 return new AssemblyNameExtension("\\=A\\=, Version=2.0.0.0, Culture=neUtral, PublicKeyToken=b77a5c561934e089", true);
             }
 
-            if (String.Compare(path, @"c:\MyEscapedName\__'ASP'dw0024ry.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\MyEscapedName\__'ASP'dw0024ry.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Notice the metadata assembly name does not match the base file name.
                 return new AssemblyNameExtension("__\\'ASP\\'dw0024ry", true);
             }
 
-            if (String.Compare(path, @"c:\MyInaccessible\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\MyInaccessible\A.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate an assembly that throws an UnauthorizedAccessException upon access.
                 throw new UnauthorizedAccessException();
             }
 
-            if (String.Compare(path, Path.Combine(Path.GetTempPath(), @"RawFileNameRelative\System.Xml.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(Path.GetTempPath(), @"RawFileNameRelative\System.Xml.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension(AssemblyRef.SystemXml);
             }
 
-            if (String.Compare(path, Path.Combine(Path.GetTempPath(), @"RelativeAssemblyFiles\System.Xml.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(Path.GetTempPath(), @"RelativeAssemblyFiles\System.Xml.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension(AssemblyRef.SystemXml);
             }
 
-            if (String.Compare(path, Path.Combine(s_myVersion20Path, "System.XML.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myVersion20Path, "System.XML.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension(AssemblyRef.SystemXml);
             }
 
             // This is an assembly with an earlier version.
-            if (String.Compare(path, Path.Combine(s_myProjectPath, "System.Xml.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myProjectPath, "System.Xml.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension(AssemblyRef.SystemXml);
             }
 
             // This is an assembly with an incorrect PKT.
-            if (String.Compare(path, Path.Combine(s_myProjectPath, "System.Data.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myProjectPath, "System.Data.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=A77a5c561934e089");
@@ -1238,19 +1232,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("MyGacAssembly, Version=9.2.3401.1, Culture=neutral, PublicKeyToken=a6694b450823df78");
             }
 
-            if (String.Compare(path, Path.Combine(s_myVersion20Path, "System.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myVersion20Path, "System.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("System, VeRSion=2.0.0.0, Culture=neutRAl, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, Path.Combine(s_myVersion40Path, "System.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myVersion40Path, "System.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("System, VeRSion=4.0.0.0, Culture=neutRAl, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, Path.Combine(s_myVersion90Path, "System.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myVersion90Path, "System.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("System, VeRSion=9.0.0.0, Culture=neutRAl, PublicKeyToken=b77a5c561934e089");
@@ -1258,7 +1252,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Compare(path, Path.Combine(s_myVersion20Path, "System.Data.dll"), StringComparison.OrdinalIgnoreCase) == 0
+                String.Equals(path, Path.Combine(s_myVersion20Path, "System.Data.dll"), StringComparison.OrdinalIgnoreCase)
             )
             {
                 // Simulate a strongly named assembly.
@@ -1281,70 +1275,66 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 return new AssemblyNameExtension("E, Version=0.0.0.0, Culture=neutral, PUBlicKeyToken=null");
             }
-
-
-            if (String.Compare(path, s_unifyMeDll_V05Path, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_unifyMeDll_V05Path, StringComparison.OrdinalIgnoreCase))
             {
                 throw new FileNotFoundException();
             }
 
-            if (String.Compare(path, s_unifyMeDll_V10Path, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_unifyMeDll_V10Path, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("UnifyMe, Version=1.0.0.0, Culture=nEUtral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL");
             }
 
-            if (String.Compare(path, @"C:\Framework\Everett\System.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Framework\Everett\System.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("System, Version=1.0.5000.0, Culture=neutral, PublICKeyToken=" + AssemblyRef.EcmaPublicKey);
             }
 
-            if (String.Compare(path, @"C:\Framework\Whidbey\System.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Framework\Whidbey\System.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=" + AssemblyRef.EcmaPublicKey);
             }
-
-
-            if (String.Compare(path, Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOnEverettSystem, VersION=1.0.5000.0, Culture=neutral, PublicKeyToken=feedbeadbadcadbe");
             }
 
-            if (String.Compare(path, Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOnUnified, Version=0.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"C:\Regress339786\FolderA\C.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress339786\FolderA\C.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("C, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\Regress339786\FolderB\C.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress339786\FolderB\C.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("C, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOnUnified, VERSion=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOnUnified, VeRSIon=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, Path.Combine(s_myApp_V30Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myApp_V30Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOnUnified, Version=3.0.0.0, Culture=neutral, PublicKEYToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, s_unifyMeDll_V20Path, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_unifyMeDll_V20Path, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyTOKEn=b77a5c561934e089");
             }
 
-            if (String.Compare(path, s_unifyMeDll_V30Path, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_unifyMeDll_V30Path, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("UnifyMe, Version=3.0.0.0, Culture=neutral, PublICkeyToken=b77a5c561934e089");
             }
@@ -1364,417 +1354,417 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("G, Version=2.0.0.0, Culture=neutral, PublicKEyToken=aaaaaaaaaaaaaaaa");
             }
 
-            if (String.Compare(path, @"C:\Regress317975\a.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress317975\a.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("A, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
-            if (String.Compare(path, @"C:\Regress317975\b.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress317975\b.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("B, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
-            if (String.Compare(path, @"C:\Regress317975\v2\b.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress317975\v2\b.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
 
             // Set up assembly names for testing target framework version checks
             // Is version 4 and will only depends on 4.0 assemblies
-            if (String.Compare(path, s_40ComponentDependsOnOnlyv4AssembliesDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_40ComponentDependsOnOnlyv4AssembliesDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOnOnlyv4Assemblies, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
             // Is version 9 and will not have any dependencies, will be in the redist list
-            if (String.Compare(path, Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("ReferenceVersion9, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
             // Is a third party assembly which depends on a version 9 assembly
-            if (String.Compare(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOn9, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
             //A second assembly which depends on version 9 framework assemblies.
-            if (String.Compare(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOn9Also, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponents10Path, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponents10Path, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOn9, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponents20Path, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponents20Path, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOn9, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
-            if (String.Compare(path, s_regress444809_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_regress444809_ADllPath, StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("A, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, s_regress444809_V2_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_regress444809_V2_ADllPath, StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, s_regress444809_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_regress444809_BDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("B, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, s_regress444809_CDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_regress444809_CDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("C, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, s_regress444809_DDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_regress444809_DDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("D, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\Regress714052\X86\a.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress714052\X86\a.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=X86");
             }
-            if (String.Compare(path, @"C:\Regress714052\Mix\a.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress714052\Mix\a.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=X86");
             }
-            if (String.Compare(path, @"C:\Regress714052\Mix\a.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress714052\Mix\a.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=MSIL");
             }
 
-            if (String.Compare(path, @"C:\Regress714052\MSIL\a.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress714052\MSIL\a.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=MSIL");
             }
 
-            if (String.Compare(path, @"C:\Regress714052\None\b.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress714052\None\b.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
-            if (String.Compare(path, @"C:\Regress714052\X86\b.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress714052\X86\b.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=X86");
             }
-            if (String.Compare(path, @"C:\Regress714052\Mix\b.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress714052\Mix\b.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=X86");
             }
-            if (String.Compare(path, @"C:\Regress714052\Mix\b.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress714052\Mix\b.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=MSIL");
             }
-            if (String.Compare(path, @"C:\Regress714052\MSIL\b.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress714052\MSIL\b.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=MSIL");
             }
-            if (String.Compare(path, @"C:\Regress714052\None\b.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress714052\None\b.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("B, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
-            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "V.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "V.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("V, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
-            if (String.Compare(path, Path.Combine(s_myComponents2RootPath, "W.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponents2RootPath, "W.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("W, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
-            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "X.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "X.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("X, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "Z.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Z.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("Z, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "Y.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Y.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("Y, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "Microsoft.Build.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Microsoft.Build.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "DependsOnMSBuild12.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "DependsOnMSBuild12.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOnMSBuild12, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\WinMD\v4\MsCorlib.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\v4\MsCorlib.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("mscorlib, Version=4.0.0.0, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"C:\WinMD\v255\MsCorlib.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\v255\MsCorlib.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("mscorlib, Version=255.255.255.255, Culture=Neutral, PublicKeyToken=b77a5c561934e089");
             }
 
-            if (String.Compare(path, @"C:\WinMD\DotNetAssemblyDependsOnWinMD.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\DotNetAssemblyDependsOnWinMD.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("DotNetAssemblyDependsOnWinMD, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\WinMD\DotNetAssemblyDependsOn255WinMD.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\DotNetAssemblyDependsOn255WinMD.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("DotNetAssemblyDependsOn255WinMD, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeOnly.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeOnly.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("SampleWindowsRuntimeOnly, Version=1.0.0.0");
             }
 
-            if (String.Compare(path, @"C:\WinMDArchVerification\DependsOnInvalidPeHeader.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMDArchVerification\DependsOnInvalidPeHeader.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("DependsOnInvalidPeHeader, Version=1.0.0.0");
             }
-            if (String.Compare(path, @"C:\WinMDArchVerification\DependsOnAmd64.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMDArchVerification\DependsOnAmd64.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("DependsOnAmd64, Version=1.0.0.0");
             }
-            if (String.Compare(path, @"C:\WinMDArchVerification\DependsOnArm.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMDArchVerification\DependsOnArm.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("DependsOnArm, Version=1.0.0.0");
             }
-            if (String.Compare(path, @"C:\WinMDArchVerification\DependsOnIA64.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMDArchVerification\DependsOnIA64.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("DependsOnIA64, Version=1.0.0.0");
             }
-            if (String.Compare(path, @"C:\WinMDArchVerification\DependsOnArmv7.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMDArchVerification\DependsOnArmv7.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("DependsOnArmv7, Version=1.0.0.0");
             }
-            if (String.Compare(path, @"C:\WinMDArchVerification\DependsOnX86.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMDArchVerification\DependsOnX86.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("DependsOnX86, Version=1.0.0.0");
             }
-            if (String.Compare(path, @"C:\WinMDArchVerification\DependsOnUnknown.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMDArchVerification\DependsOnUnknown.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("DependsOnUnknown, Version=1.0.0.0");
             }
-            if (String.Compare(path, @"C:\WinMDArchVerification\DependsOnAnyCPUUnknown.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMDArchVerification\DependsOnAnyCPUUnknown.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("DependsOnAnyCPUUnknown, Version=1.0.0.0");
             }
-            if (String.Compare(path, @"C:\WinMD\WinMDWithVersion255.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\WinMDWithVersion255.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("WinMDWithVersion255, Version=255.255.255.255");
             }
 
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeOnly2.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeOnly2.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("SampleWindowsRuntimeOnly2, Version=1.0.0.0");
             }
 
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeOnly3.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeOnly3.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("SampleWindowsRuntimeOnly3, Version=1.0.0.0");
             }
 
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeOnly4.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeOnly4.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("SampleWindowsRuntimeOnly4, Version=1.0.0.0");
             }
 
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeReferencingSystem.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeReferencingSystem.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("SampleWindowsRuntimeReferencingSystem, Version=1.0.0.0");
             }
 
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeReferencingSystemDNE.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeReferencingSystemDNE.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("SampleWindowsRuntimeReferencingSystemDNE, Version=1.0.0.0");
             }
 
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeAndCLR.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeAndCLR.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("SampleWindowsRuntimeAndCLR, Version=1.0.0.0");
             }
 
-            if (String.Compare(path, @"C:\MyWinMDComponents\MyGridWinMD.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\MyWinMDComponents\MyGridWinMD.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("MyGridWinMD, Version=1.0.0.0");
             }
 
-            if (String.Compare(path, @"C:\MyWinMDComponents2\MyGridWinMD.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\MyWinMDComponents2\MyGridWinMD.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("MyGridWinMD, Version=2.0.0.0");
             }
 
-            if (String.Compare(path, @"C:\MyWinMDComponent7s\MyGridWinMD.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\MyWinMDComponent7s\MyGridWinMD.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("MyGridWinMD, Version=1.0.0.0");
             }
 
-            if (String.Compare(path, @"C:\MyWinMDComponents9\MyGridWinMD.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\MyWinMDComponents9\MyGridWinMD.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("MyGridWinMD, Version=1.0.0.0");
             }
 
-            if (String.Compare(path, @"C:\MyWinMDComponentsVv1\MyGridWinMD2.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\MyWinMDComponentsVv1\MyGridWinMD2.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("MyGridWinMD2, Version=1.0.0.0");
             }
 
-            if (String.Compare(path, @"C:\MyWinMDComponentsV1\MyGridWinMD3.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\MyWinMDComponentsV1\MyGridWinMD3.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("MyGridWinMD3, Version=1.0.0.0");
             }
 
-            if (String.Compare(path, @"C:\FakeSDK\References\Debug\X86\DebugX86SDKWinMD.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\FakeSDK\References\Debug\X86\DebugX86SDKWinMD.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("DebugX86SDKWinMD, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\FakeSDK\References\Debug\Neutral\DebugNeutralSDKWinMD.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\FakeSDK\References\Debug\Neutral\DebugNeutralSDKWinMD.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("DebugNeutralSDKWinMD, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\FakeSDK\References\CommonConfiguration\x86\x86SDKWinMD.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\FakeSDK\References\CommonConfiguration\x86\x86SDKWinMD.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("X86SDKWinMD, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\FakeSDK\References\CommonConfiguration\Neutral\NeutralSDKWinMD.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\FakeSDK\References\CommonConfiguration\Neutral\NeutralSDKWinMD.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("NeutralSDKWINMD, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\FakeSDK\References\Debug\X86\DebugX86SDKRA.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\FakeSDK\References\Debug\X86\DebugX86SDKRA.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("Debugx86SDKRA, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\FakeSDK\References\Debug\Neutral\DebugNeutralSDKRA.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\FakeSDK\References\Debug\Neutral\DebugNeutralSDKRA.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("DebugNeutralSDKRA, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\FakeSDK\References\CommonConfiguration\x86\x86SDKRA.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\FakeSDK\References\CommonConfiguration\x86\x86SDKRA.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("X86SDKRA, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\FakeSDK\References\CommonConfiguration\Neutral\NeutralSDKRA.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\FakeSDK\References\CommonConfiguration\Neutral\NeutralSDKRA.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("NeutralSDKRA, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\FakeSDK\References\Debug\X86\SDKReference.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\FakeSDK\References\Debug\X86\SDKReference.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("SDKReference, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\DirectoryContainsOnlyDll\a.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\DirectoryContainsOnlyDll\a.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("A, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\DirectoryContainsdllAndWinmd\b.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\DirectoryContainsdllAndWinmd\b.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("b, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\DirectoryContainsdllAndWinmd\c.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\DirectoryContainsdllAndWinmd\c.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("C, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\DirectoryContainstwoWinmd\a.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\DirectoryContainstwoWinmd\a.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("A, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (String.Compare(path, @"C:\DirectoryContainstwoWinmd\c.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\DirectoryContainstwoWinmd\c.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("C, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
             }
 
-            if (string.Compare(path, @"c:\assemblyfromconfig\folder_x64\assemblyfromconfig_common.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(path, @"c:\assemblyfromconfig\folder_x64\assemblyfromconfig_common.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("assemblyfromconfig_common, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=AMD64");
             }
 
-            if (string.Compare(path, @"c:\assemblyfromconfig\folder_x86\assemblyfromconfig_common.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(path, @"c:\assemblyfromconfig\folder_x86\assemblyfromconfig_common.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("assemblyfromconfig_common, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=X86");
             }
 
-            if (string.Compare(path, @"c:\assemblyfromconfig\folder5010x64\v5assembly.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(path, @"c:\assemblyfromconfig\folder5010x64\v5assembly.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("v5assembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=AMD64");
             }
 
-            if (string.Compare(path, @"c:\assemblyfromconfig\folder501000x86\v5assembly.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(path, @"c:\assemblyfromconfig\folder501000x86\v5assembly.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("v5assembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null, ProcessorArchitecture=X86");
             }
 
-            if (string.Compare(path, s_dependsOnNuGet_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(path, s_dependsOnNuGet_ADllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("A, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
 
-            if (string.Compare(path, s_nugetCache_N_Lib_NDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(path, s_nugetCache_N_Lib_NDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("N, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null");
             }
@@ -1782,7 +1772,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string defaultName = String.Format("{0}, Version=0.0.0.0, PublicKeyToken=null, Culture=Neutral", Path.GetFileNameWithoutExtension(path));
             return new AssemblyNameExtension(defaultName);
         }
-
 
         /// <summary>
         /// Cached implementation. Given an assembly name, crack it open and retrieve the list of dependent
@@ -1861,7 +1850,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <returns>The array of dependent assembly names.</returns>
         internal static AssemblyNameExtension[] GetDependencies(string path)
         {
-            if (String.Compare(path, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo4Framework.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo4Framework.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1869,7 +1858,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo45Framework.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo45Framework.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1877,7 +1866,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo35Framework.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo35Framework.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1885,7 +1874,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, s_regress454863_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_regress454863_ADllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1893,7 +1882,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1901,7 +1890,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\Regress313747\Microsoft.Office.Interop.Excel.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress313747\Microsoft.Office.Interop.Excel.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1909,7 +1898,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\Regress313747\MS.Internal.Test.Automation.Office.Excel.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress313747\MS.Internal.Test.Automation.Office.Excel.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1917,7 +1906,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\Regress387218\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\Regress387218\A.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1925,7 +1914,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\Regress387218\B.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\Regress387218\B.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1933,7 +1922,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\Regress390219\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\Regress390219\A.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1941,7 +1930,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\Regress390219\B.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\Regress390219\B.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1949,7 +1938,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_regress442570_BDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1957,7 +1946,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\Regress313747\Microsoft.Office.Interop.Excel.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress313747\Microsoft.Office.Interop.Excel.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1965,7 +1954,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\Regress313747\MS.Internal.Test.Automation.Office.Excel.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress313747\MS.Internal.Test.Automation.Office.Excel.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1973,7 +1962,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\OldClrBug\DependsMyFileLoadExceptionAssembly.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\OldClrBug\DependsMyFileLoadExceptionAssembly.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1981,7 +1970,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\Regress563286\DependsOnBadImage.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\Regress563286\DependsOnBadImage.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -1989,17 +1978,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"c:\MyInaccessible\A.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\MyInaccessible\A.dll", StringComparison.OrdinalIgnoreCase))
             {
                 throw new UnauthorizedAccessException();
             }
 
-            if (String.Compare(path, @"c:\Regress313086\mscorlib.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"c:\Regress313086\mscorlib.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[] { };
             }
 
-            if (String.Compare(path, Path.Combine(s_myVersion20Path, "System.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myVersion20Path, "System.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2007,7 +1996,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\WinMD\DotNetAssemblyDependsOnWinMD.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\DotNetAssemblyDependsOnWinMD.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2015,7 +2004,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\WinMD\DotNetAssemblyDependsOn255WinMD.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\DotNetAssemblyDependsOn255WinMD.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2023,7 +2012,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeAndClr.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeAndClr.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                  {
@@ -2031,7 +2020,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                  };
             }
 
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeOnly.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeOnly.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                  {
@@ -2039,7 +2028,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                  };
             }
 
-            if (String.Compare(path, @"C:\WinMD\WinMDWithVersion255.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\WinMDWithVersion255.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2047,7 +2036,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeOnly2.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeOnly2.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2055,7 +2044,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeOnly3.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeOnly3.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2066,7 +2055,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeOnly4.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeOnly4.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2075,7 +2064,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeReferencingSystem.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeReferencingSystem.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2084,7 +2073,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\WinMD\SampleWindowsRuntimeReferencingSystemDNE.Winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\WinMD\SampleWindowsRuntimeReferencingSystemDNE.Winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2095,8 +2084,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Compare(path, Path.Combine(s_myVersion20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase) == 0
-                || String.Compare(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase) == 0
+                String.Equals(path, Path.Combine(s_myVersion20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
+                || String.Equals(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
             )
             {
                 return new AssemblyNameExtension[]
@@ -2104,14 +2093,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"MyRelativeAssembly.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"MyRelativeAssembly.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myAppRootPath, "DependsOnSimpleA.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myAppRootPath, "DependsOnSimpleA.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2119,7 +2108,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\Regress312873\b.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress312873\b.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2127,7 +2116,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\Regress339786\FolderA\a.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress339786\FolderA\a.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2135,7 +2124,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\Regress339786\FolderB\b.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress339786\FolderB\b.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2143,7 +2132,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\Regress317975\a.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\Regress317975\a.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2151,7 +2140,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\myassemblies\My.Assembly.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\myassemblies\My.Assembly.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2159,7 +2148,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "MyGrid.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "MyGrid.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2167,16 +2156,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\MyRawDropControls\MyRawDropControl.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\MyRawDropControls\MyRawDropControl.dll", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
                     new AssemblyNameExtension("mscorlib, VeRsIon=2.0.0.0, Culture=neuTRal, PublicKeyToken=b77a5c561934e089")
                 };
             }
-
-
-            if (String.Compare(path, s_myLibraries_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_myLibraries_ADllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2184,7 +2171,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, s_myLibraries_TDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_myLibraries_TDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2192,7 +2179,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, s_myLibraries_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_myLibraries_BDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2201,7 +2188,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, s_myLibraries_V1_DDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_myLibraries_V1_DDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2209,7 +2196,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, s_myLibraries_V2_DDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_myLibraries_V2_DDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2217,14 +2204,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, s_myLibraries_V1_E_EDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_myLibraries_V1_E_EDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myApp_V05Path, "DependsOnWeaklyNamedUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myApp_V05Path, "DependsOnWeaklyNamedUnified.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2232,7 +2219,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2240,7 +2227,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2248,7 +2235,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2256,7 +2243,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2264,7 +2251,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myApp_V30Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myApp_V30Path, "DependsOnUnified.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2272,14 +2259,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, s_myMissingAssemblyAbsPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_myMissingAssemblyAbsPath, StringComparison.OrdinalIgnoreCase))
             {
                 throw new FileNotFoundException(path);
             }
 
             // Set up assembly names for testing target framework version checks
             // Is version 4 and will only depends on 4.0 assemblies
-            if (String.Compare(path, s_40ComponentDependsOnOnlyv4AssembliesDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_40ComponentDependsOnOnlyv4AssembliesDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2288,7 +2275,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
             // Is version 9 and will not have any dependencies, will be in the redist list
-            if (String.Compare(path, Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2298,7 +2285,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
             // Is a third party assembly which depends on a version 9 assembly
-            if (String.Compare(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2308,7 +2295,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
             //A second assembly which depends on version 9 framework assemblies.
-            if (String.Compare(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2316,7 +2303,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponents10Path, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponents10Path, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2324,7 +2311,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponents20Path, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponents20Path, "DependsOn9.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2332,7 +2319,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, s_regress444809_CDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_regress444809_CDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2341,7 +2328,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, s_regress444809_BDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_regress444809_BDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2349,7 +2336,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, s_regress444809_DDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_regress444809_DDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2357,7 +2344,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "V.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "V.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2365,12 +2352,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponents2RootPath, "W.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponents2RootPath, "W.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[] { };
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "X.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "X.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2378,12 +2365,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "Z.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Z.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[] { };
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "Y.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Y.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2391,12 +2378,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "Microsoft.Build.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Microsoft.Build.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[] { };
             }
 
-            if (String.Compare(path, Path.Combine(s_myComponentsRootPath, "DependsOnMSBuild12.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "DependsOnMSBuild12.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2404,7 +2391,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myVersion20Path, "System.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myVersion20Path, "System.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension[]
@@ -2413,7 +2400,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myVersion40Path, "System.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myVersion40Path, "System.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension[]
@@ -2422,7 +2409,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, Path.Combine(s_myVersion90Path, "System.dll"), StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, Path.Combine(s_myVersion90Path, "System.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension[]
@@ -2431,7 +2418,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\DirectoryContainsOnlyDll\a.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\DirectoryContainsOnlyDll\a.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension[]
@@ -2440,7 +2427,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\DirectoryContainsdllAndWinmd\b.dll", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\DirectoryContainsdllAndWinmd\b.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension[]
@@ -2449,13 +2436,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\DirectoryContainsdllAndWinmd\c.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\DirectoryContainsdllAndWinmd\c.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension[0];
             }
 
-            if (String.Compare(path, @"C:\DirectoryContainstwoWinmd\a.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\DirectoryContainstwoWinmd\a.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension[]
@@ -2464,7 +2451,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, @"C:\DirectoryContainstwoWinmd\c.winmd", StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, @"C:\DirectoryContainstwoWinmd\c.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[0];
             }
@@ -2474,7 +2461,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension[0];
             }
 
-            if (String.Compare(path, s_portableDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_portableDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a portable assembly with a reference to System.Runtime
                 return new AssemblyNameExtension[]
@@ -2483,7 +2470,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, s_netstandardLibraryDllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_netstandardLibraryDllPath, StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a .NET Standard assembly
                 return new AssemblyNameExtension[]
@@ -2492,7 +2479,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            if (String.Compare(path, s_dependsOnNuGet_ADllPath, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Equals(path, s_dependsOnNuGet_ADllPath, StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
                 {
@@ -2536,89 +2523,89 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             if (baseKey == Registry.CurrentUser)
             {
-                if (String.Compare(subKey, @"Software\Regress714052", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\X86", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\MSIL", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\Mix", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\Mix", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\Mix\Mix", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\Mix\Mix", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\None", StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    return new string[] { };
-                }
-
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\X86\X86", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\None", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86\X86", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\None\None", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\None\None", StringComparison.OrdinalIgnoreCase))
+                {
+                    return new string[] { };
+                }
+
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "", "vBogusVersion", "v1.a.2.3", "v1.0", "v3.0", "v2.0.50727", "v2.0.x86chk", "RandomJunk" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "ZControlA", "ZControlB", "Infragistics.GridControl.1.0", "Infragistics.MyHKLMControl.1.0", "Infragistics.MyControlWithFutureTargetNDPVersion.1.0", "Infragistics.MyControlWithPastTargetNDPVersion.1.0", "Infragistics.MyControlWithServicePack.1.0" };
                 }
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.x86chk\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.x86chk\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "RawDropControls" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v3.0\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v3.0\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "Infragistics.MyControlWithFutureTargetNDPVersion.1.0" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "Infragistics.MyNDP1Control.1.0", "Infragistics.MyControlWithPastTargetNDPVersion.1.0" };
                 }
 
                 if
                 (
-                    String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.GridControl.1.0", StringComparison.OrdinalIgnoreCase) == 0
-                    || String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithFutureTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase) == 0
-                    || String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyHKLMControl.1.0", StringComparison.OrdinalIgnoreCase) == 0
-                    || String.Compare(subKey, @"Software\Microsoft\.NetFramework\v3.0\AssemblyFoldersEx\Infragistics.MyControlWithFutureTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase) == 0
-                    || String.Compare(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx\Infragistics.MyNDP1Control.1.0", StringComparison.OrdinalIgnoreCase) == 0
-                    || String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithPastTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase) == 0
-                    || String.Compare(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx\Infragistics.MyControlWithPastTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase) == 0
-                    || String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.x86chk\AssemblyFoldersEx\RawDropControls", StringComparison.OrdinalIgnoreCase) == 0
-                    || String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\ZControlA", StringComparison.OrdinalIgnoreCase) == 0
-                    || String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\ZControlB", StringComparison.OrdinalIgnoreCase) == 0
+                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.GridControl.1.0", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithFutureTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyHKLMControl.1.0", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v3.0\AssemblyFoldersEx\Infragistics.MyControlWithFutureTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx\Infragistics.MyNDP1Control.1.0", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithPastTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx\Infragistics.MyControlWithPastTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.x86chk\AssemblyFoldersEx\RawDropControls", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\ZControlA", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\ZControlB", StringComparison.OrdinalIgnoreCase)
                 )
                 {
                     return new string[] { };
@@ -2626,39 +2613,39 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if
                 (
-                    String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0", StringComparison.OrdinalIgnoreCase) == 0
+                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0", StringComparison.OrdinalIgnoreCase)
                 )
                 {
                     // This control has a service pack
                     return new string[] { "sp1", "sp2" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NETCompactFramework", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "v2.0.3600" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "PocketPC" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "AFETestDeviceControl" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx\AFETestDeviceControl", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx\AFETestDeviceControl", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "1234" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\Microsoft SDKs", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\Microsoft SDKs", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "Windows" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\Microsoft SDKs\Windows", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\Microsoft SDKs\Windows", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "7.0", "8.0", "v8.0", "9.0" };
                 }
@@ -2666,105 +2653,105 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (baseKey == Registry.LocalMachine)
             {
-                if (String.Compare(subKey, @"Software\Regress714052", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "v2.0.0" };
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "A", "B" };
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx\A", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx\A", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx\B", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx\B", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\X86", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "X86" };
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\MSIL", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "MSIL" };
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\None", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\None", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "None" };
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\Mix", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\Mix", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "Mix" };
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\Mix\Mix", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\Mix\Mix", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\X86\X86", StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    return new string[] { };
-                }
-
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86\X86", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\None\None", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\None\None", StringComparison.OrdinalIgnoreCase))
+                {
+                    return new string[] { };
+                }
+
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "vBogusVersion", "v2.0.50727" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "Infragistics.FancyControl.1.0", "Infragistics.MyHKLMControl.1.0" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.FancyControl.1.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.FancyControl.1.0", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyHKLMControl.1.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyHKLMControl.1.0", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NETCompactFramework", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "v2.0.3600" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "PocketPC" };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx\AFETestDeviceControl", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx\AFETestDeviceControl", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { };
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\Microsoft SDKs\Windows", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\Microsoft SDKs\Windows", StringComparison.OrdinalIgnoreCase))
                 {
                     return new string[] { "8.0" };
                 }
@@ -2785,41 +2772,41 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             if (baseKey == Registry.CurrentUser)
             {
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\ZControlA", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\ZControlA", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\MyComponentsA";
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\ZControlB", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\ZControlB", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\MyComponentsB";
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.GridControl.1.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.GridControl.1.0", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\MyComponents";
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.x86chk\AssemblyFoldersEx\RawDropControls", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.x86chk\AssemblyFoldersEx\RawDropControls", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\MyRawDropControls";
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyHKLMControl.1.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyHKLMControl.1.0", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\MyComponents\HKCU Components";
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v3.0\AssemblyFoldersEx\Infragistics.MyControlWithFutureTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v3.0\AssemblyFoldersEx\Infragistics.MyControlWithFutureTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase))
                 {
                     return s_myComponentsV30Path;
                 }
 
                 if
                 (
-                    String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithFutureTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase) == 0
-                    || String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithPastTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase) == 0
-                    || String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0", StringComparison.OrdinalIgnoreCase) == 0
+                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithFutureTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithPastTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0", StringComparison.OrdinalIgnoreCase)
                 )
                 {
                     return s_myComponentsV20Path;
@@ -2827,7 +2814,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if
                 (
-                    String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0", StringComparison.OrdinalIgnoreCase) == 0
+                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0", StringComparison.OrdinalIgnoreCase)
                 )
                 {
                     return @"C:\MyComponentBase";
@@ -2835,7 +2822,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if
                 (
-                    String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0\sp1", StringComparison.OrdinalIgnoreCase) == 0
+                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0\sp1", StringComparison.OrdinalIgnoreCase)
                 )
                 {
                     return @"C:\MyComponentServicePack1";
@@ -2843,7 +2830,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if
                 (
-                    String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0\sp2", StringComparison.OrdinalIgnoreCase) == 0
+                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0\sp2", StringComparison.OrdinalIgnoreCase)
                 )
                 {
                     return @"C:\MyComponentServicePack2";
@@ -2851,18 +2838,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if
                 (
-                    String.Compare(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx\Infragistics.MyNDP1Control.1.0", StringComparison.OrdinalIgnoreCase) == 0
-                    || String.Compare(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx\Infragistics.MyControlWithPastTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase) == 0
+                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx\Infragistics.MyNDP1Control.1.0", StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx\Infragistics.MyControlWithPastTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase)
                 )
                 {
                     return s_myComponentsV10Path;
                 }
 
-                if (String.Compare(subKey, @"SOFTWARE\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx\AFETestDeviceControl", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"SOFTWARE\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx\AFETestDeviceControl", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\V1Control";
                 }
-                if (String.Compare(subKey, @"SOFTWARE\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx\AFETestDeviceControl\1234", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"SOFTWARE\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx\AFETestDeviceControl\1234", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\V1ControlSP1";
                 }
@@ -2870,44 +2857,44 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (baseKey == Registry.LocalMachine)
             {
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.FancyControl.1.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.FancyControl.1.0", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\MyComponents\HKLM Components";
                 }
 
-                if (String.Compare(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyHKLMControl.1.0", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyHKLMControl.1.0", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\MyComponents\HKLM Components";
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx\B", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx\B", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\Regress714052\X86";
                 }
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx\A", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx\A", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\Regress714052\MSIL";
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\X86\X86", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86\X86", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\Regress714052\X86";
                 }
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\Mix\Mix", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\Mix\Mix", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\Regress714052\Mix";
                 }
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\Regress714052\MSIL";
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\Regress714052\MSIL";
                 }
 
-                if (String.Compare(subKey, @"Software\Regress714052\v2.0.0\None\None", StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\None\None", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\Regress714052\None";
                 }
@@ -2957,7 +2944,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             foreach (ITaskItem item in items)
             {
-                if (0 == String.Compare(item.ItemSpec, spec, StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(item.ItemSpec, spec, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }

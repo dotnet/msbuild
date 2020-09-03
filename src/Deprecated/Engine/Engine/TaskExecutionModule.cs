@@ -30,7 +30,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal TaskExecutionModule
         (
-            EngineCallback engineCallback, 
+            EngineCallback engineCallback,
             TaskExecutionModuleMode moduleMode,
             bool profileExecution
         )
@@ -128,19 +128,19 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Returns true if the TEM doesn't have a thread in user code and there are no pending 
+        /// Returns true if the TEM doesn't have a thread in user code and there are no pending
         /// workitems
         /// </summary>
         internal bool IsIdle
         {
             get
             {
-                return (activeThreadCount == 0 && workerThread.WorkItemCount == 0);
+                return activeThreadCount == 0 && workerThread.WorkItemCount == 0;
             }
         }
 
         /// <summary>
-        /// Return total time spent executing the tasks by this TEM. This value is only valid if the TEM is created with 
+        /// Return total time spent executing the tasks by this TEM. This value is only valid if the TEM is created with
         /// profileExecution set to true, otherwise this value will be 0
         /// </summary>
         internal long TaskExecutionTime
@@ -155,7 +155,7 @@ namespace Microsoft.Build.BuildEngine
         #region Method used internally inside the TEM boundary (i.e. not called from the engine)
 
         /// <summary>
-        /// This method passes the task outputs to the engine, it is virtual for testing purposes to 
+        /// This method passes the task outputs to the engine, it is virtual for testing purposes to
         /// create a mock TEM
         /// </summary>
         virtual internal void PostTaskOutputs
@@ -176,15 +176,15 @@ namespace Microsoft.Build.BuildEngine
         /// <returns>result of call to engine</returns>
         virtual internal bool BuildProjectFile
         (
-            int handleId, 
-            string[] projectFileNames, 
-            string[] targetNames, 
+            int handleId,
+            string[] projectFileNames,
+            string[] targetNames,
             IDictionary[] globalPropertiesPerProject,
             IDictionary[] targetOutputsPerProject,
             EngineLoggingServices loggingServices,
             string [] toolsVersions,
             bool useResultsCache,
-            bool unloadProjectsOnCompletion, 
+            bool unloadProjectsOnCompletion,
             BuildEventContext taskContext
         )
         {
@@ -203,8 +203,7 @@ namespace Microsoft.Build.BuildEngine
                 bool remoteNode = false;
                 for (int r = 0; r < projectFileNames.Length; r++)
                 {
-                    string fullProjectName = projectFileNames[r] != null ?
-                       projectFileNames[r] : "null";
+                    string fullProjectName = projectFileNames[r] ?? "null";
                     Console.WriteLine("RemoteNode: " + remoteNode + " Project " + fullProjectName + " T:" + targetName + " NodeProdyId# " + handleId + " Time " + DateTime.Now.ToLongTimeString());
                     if (globalPropertiesPerProject[r] != null)
                     {
@@ -226,7 +225,7 @@ namespace Microsoft.Build.BuildEngine
 
                 buildRequests[i] = new BuildRequest(handleId, fullProjectName, targetNames, globalPropertiesPerProject[i],
                                                     toolsVersions[i], i, useResultsCache, unloadProjectsOnCompletion);
-                ErrorUtilities.VerifyThrow(buildRequests[i].IsGeneratedRequest == true, "Should not be sending non generated requests from TEM to engine");
+                ErrorUtilities.VerifyThrow(buildRequests[i].IsGeneratedRequest, "Should not be sending non generated requests from TEM to engine");
                 buildRequests[i].ParentBuildEventContext = taskContext;
             }
 
@@ -290,16 +289,16 @@ namespace Microsoft.Build.BuildEngine
 
             return overallResult;
         }
-       
+
        /// <summary>
        /// Once the buildRequests from the EngineCallback have been created they are sent to this method which will
        /// post the build requests to the parent engine and then wait on the results to come back.
        /// This method uses either a breadthFirst or depthFirst traversal strategy when sending buildRequests to the parent engine.
        /// This method will start in breadthFirst traversal. It will continue to use this strategy until one of two events occur:
-       ///     1. The parent node sents a message indicating the TEM should switch to depthFirst traversal. 
+       ///     1. The parent node sents a message indicating the TEM should switch to depthFirst traversal.
        ///     2. The number of buildRequests is larger than the batchRequestSize.
        /// In both of these cases the system will go from a breadthFirstTraversal to a depthFirst Traversal. In the second case
-       /// a message will be sent to the parent engine to switch the system to depthFirst traversal as the system is starting to 
+       /// a message will be sent to the parent engine to switch the system to depthFirst traversal as the system is starting to
        /// be overloaded with work.
        /// In a depth first strategy the buildRequests will be sent to the parent engine one at a time and waiting for results for
        /// each buildRequest sent. In a breadthFirst traversal strategy some number of the buildrequests will be sent to the parent engine
@@ -310,7 +309,7 @@ namespace Microsoft.Build.BuildEngine
         {
             // If the traversal strategy is breadth first and the number of requests is less than the batchRequestSize
             // or if there is only 1 build request then send ALL build requests to the parent engine and wait on the results.
-            if ((breadthFirstTraversal == true && buildRequests.Length < batchRequestSize) || buildRequests.Length == 1)
+            if ((breadthFirstTraversal && buildRequests.Length < batchRequestSize) || buildRequests.Length == 1)
             {
                 engineCallback.PostBuildRequestsToHost(buildRequests);
                 workerThread.WaitForResults(handleId, buildResultsLocal, buildRequests);
@@ -318,8 +317,7 @@ namespace Microsoft.Build.BuildEngine
             else
             {
                 int currentRequestIndex = 0; // Which build request is being processed
-                int numberOfRequestsToSend = 0; // How many buildRequests are going to be sent based on the number of buildRequests remaining and the build request batch size.
-                
+
                 // Arrays that will be used to partion the buildRequests array when sending batches of builds requests at a time.
                 BuildRequest[] wrapperArrayBreadthFirst = new BuildRequest[batchRequestSize];
                 BuildResult[] resultsArrayBreadthFirst = new BuildResult[batchRequestSize];
@@ -332,10 +330,10 @@ namespace Microsoft.Build.BuildEngine
                 while (currentRequestIndex < buildRequests.Length)
                 {
                     // If there is a breadth first traversal and there are more than batchRequestSize build requests, send the first batchRequestSize, then do the rest depth first
-                    if (breadthFirstTraversal == true)
+                    if (breadthFirstTraversal)
                     {
                         // Figure out how many requests to send, either the full batch size or only part of a batch
-                        numberOfRequestsToSend = (buildRequests.Length - currentRequestIndex) <batchRequestSize ? (buildRequests.Length - currentRequestIndex) : batchRequestSize;
+                        int numberOfRequestsToSend = (buildRequests.Length - currentRequestIndex) < batchRequestSize ? (buildRequests.Length - currentRequestIndex) : batchRequestSize;
 
                         // Initialize the wrapper array to how many requests are going to be sent
                         if (numberOfRequestsToSend != wrapperArrayBreadthFirst.Length)
@@ -343,7 +341,7 @@ namespace Microsoft.Build.BuildEngine
                             wrapperArrayBreadthFirst = new BuildRequest[numberOfRequestsToSend];
                             resultsArrayBreadthFirst = new BuildResult[numberOfRequestsToSend];
                         }
-                        
+
                         // Fill the wrapper array with one batch of build requests
                         for (int i = 0; i < numberOfRequestsToSend; i++)
                         {
@@ -353,14 +351,14 @@ namespace Microsoft.Build.BuildEngine
                         }
 
                         engineCallback.PostBuildRequestsToHost(wrapperArrayBreadthFirst);
-                        
+
                         // Only switch from breadth to depth if there are more thanbatchRequestSize items
                         if ((buildRequests.Length - currentRequestIndex) > batchRequestSize)
                         {
                             engineCallback.PostStatus(nodeId, new NodeStatus(false /* use depth first traversal*/), false /* don't block waiting on the send */);
                             breadthFirstTraversal = false;
                         }
-                        
+
                         workerThread.WaitForResults(handleId, resultsArrayBreadthFirst, wrapperArrayBreadthFirst);
                         Array.Copy(resultsArrayBreadthFirst, 0, buildResultsLocal, currentRequestIndex, numberOfRequestsToSend);
                         currentRequestIndex += numberOfRequestsToSend;
@@ -427,15 +425,15 @@ namespace Microsoft.Build.BuildEngine
 
         internal bool RethrowTaskExceptions()
         {
-            return (moduleMode == TaskExecutionModuleMode.SingleProcMode);
+            return moduleMode == TaskExecutionModuleMode.SingleProcMode;
         }
 
         #endregion
 
         #region Methods called from the engine
         /// <summary>
-        /// Called to execute a task within a target. This method instantiates the task, sets its parameters, 
-        /// and executes it. 
+        /// Called to execute a task within a target. This method instantiates the task, sets its parameters,
+        /// and executes it.
         /// </summary>
         /// <param name="taskState"></param>
         public void ExecuteTask(TaskExecutionState taskState)
@@ -648,12 +646,12 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// In a multiproc build this is the maximum number of build requests which will be sent at a time to the parent engine
-        /// A default of 10 was an arbitrary number but turned out to be a good balance between being too small 
+        /// A default of 10 was an arbitrary number but turned out to be a good balance between being too small
         /// causing the system to run out of work too quickly and being too big and flooding the system with requests.
         /// </summary>
         private const int defaultBatchRequestSize = 10;
         private int batchRequestSize = defaultBatchRequestSize;
-        
+
         /// <summary>
         /// The nodeId of the node the TaskExecutionModule is running on
         /// </summary>

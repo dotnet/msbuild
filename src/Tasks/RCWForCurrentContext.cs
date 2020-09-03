@@ -74,13 +74,12 @@ namespace Microsoft.Build.Tasks.InteropUtilities
         /// Call this helper if your managed object is really an RCW to a COM object
         /// and that COM object was created in a different apartment from where it is being accessed
         /// </summary>
-        /// <param name="rcw">An RCW object created in the original apartment context.</param>
         /// <returns>A new RCW created in the current apartment context</returns>
         public T RCW
         {
             get
             {
-                if (null == _rcwForCurrentCtx)
+                if (_rcwForCurrentCtx == null)
                 {
                     throw new ObjectDisposedException("RCWForCurrentCtx");
                 }
@@ -109,7 +108,7 @@ namespace Microsoft.Build.Tasks.InteropUtilities
         {
             try
             {
-                if (null != _rcwForCurrentCtx &&
+                if (_rcwForCurrentCtx != null &&
                     _shouldReleaseRCW &&
                     Marshal.IsComObject(_rcwForCurrentCtx))
                 {

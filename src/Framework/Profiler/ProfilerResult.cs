@@ -86,10 +86,9 @@ namespace Microsoft.Build.Framework.Profiler
         public override int GetHashCode()
         {
             var hashCode = -2131368567;
-            hashCode = hashCode * -1521134295 + base.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<TimeSpan>.Default.GetHashCode(InclusiveTime);
-            hashCode = hashCode * -1521134295 + EqualityComparer<TimeSpan>.Default.GetHashCode(ExclusiveTime);
-            hashCode = hashCode * -1521134295 + NumberOfHits.GetHashCode();
+            hashCode = (hashCode * -1521134295) + EqualityComparer<TimeSpan>.Default.GetHashCode(InclusiveTime);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<TimeSpan>.Default.GetHashCode(ExclusiveTime);
+            hashCode = (hashCode * -1521134295) + NumberOfHits.GetHashCode();
             return hashCode;
         }
 

@@ -167,9 +167,9 @@ namespace Microsoft.Build.Shared
             // next, if we're caching, check to see if it's already there.
             if (cache)
             {
-                string cachedEscapedString = null;
                 lock (s_unescapedToEscapedStrings)
                 {
+                    string cachedEscapedString;
                     if (s_unescapedToEscapedStrings.TryGetValue(unescapedString, out cachedEscapedString))
                     {
                         return cachedEscapedString;
@@ -210,7 +210,7 @@ namespace Microsoft.Build.Shared
             string unescapedString
             )
         {
-            return (-1 != unescapedString.IndexOfAny(s_charsToEscape));
+            return -1 != unescapedString.IndexOfAny(s_charsToEscape);
         }
 
         /// <summary>
@@ -233,12 +233,12 @@ namespace Microsoft.Build.Shared
                 {
                     // It has either a '%2' or a '%3'.  This is looking very promising.
                     return
-                        (
+
                             (-1 != escapedString.IndexOf("%2a", StringComparison.Ordinal)) ||
                             (-1 != escapedString.IndexOf("%2A", StringComparison.Ordinal)) ||
                             (-1 != escapedString.IndexOf("%3f", StringComparison.Ordinal)) ||
                             (-1 != escapedString.IndexOf("%3F", StringComparison.Ordinal))
-                        );
+                        ;
                 }
             }
             return false;

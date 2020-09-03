@@ -17,7 +17,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// This task resolves items in the build process (built, dependencies, satellites,
     /// content, debug symbols, documentation, etc.) to files for manifest generation.
-    /// </Summary>
+    /// </summary>
     /// <comment>
     /// This task executes following steps:
     ///   (1) Filter out Framework assemblies
@@ -630,7 +630,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            if (identity != null && identity.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion))
+            if (identity?.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion) == true)
             {
                 return true;
             }

@@ -101,5 +101,4 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public override void RemoveChild(ProjectElement child) => CImpl.RemoveChild(child);
         #endregion
     }
-
 }

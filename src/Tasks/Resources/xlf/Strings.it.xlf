@@ -1417,6 +1417,11 @@
         <target state="translated">StopOnFirstFailure non avrà alcun effetto in presenza di tutte le condizioni seguenti: 1) il sistema è in esecuzione in modalità a più processi 2) la proprietà BuildInParallel è true. 3) la proprietà RunEachTargetSeparately è false.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
+      <trans-unit id="RarCouldntConnect">
+        <source>Couldn't connect to the RAR node, starting a new one.</source>
+        <target state="new">Couldn't connect to the RAR node, starting a new one.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
         <target state="translated">MSB3501: non è stato possibile leggere le righe dal file "{0}". {1}</target>
@@ -2300,7 +2305,7 @@
       </trans-unit>
       <trans-unit id="SGen.TaskNotSupported">
         <source>MSB3474: The task "{0}" is not supported on the .NET Core version of MSBuild. Use the Microsoft XML Serializer Generator package instead. See https://go.microsoft.com/fwlink/?linkid=858594 for more information.</source>
-        <target state="translated">MSB3474: l'attività "{0}" non è supportata nella versione .NET Core di MSBuild. Usare il pacchetto dello strumento Microsoft per la generazione di serializzatori XML. Per altre informazioni, vedere https://go.microsoft.com/fwlink/?linkid=858594.</target>
+        <target state="translated">MSB3474: l'attività "{0}" non è supportata nella versione .NET Core di MSBuild. Usare il pacchetto dello strumento del generatore di serializzatori XML Microsoft. Per altre informazioni, vedere https://go.microsoft.com/fwlink/?linkid=858594.</target>
         <note>{StrBegin="MSB3474: "}</note>
       </trans-unit>
       <trans-unit id="SignFile.CertNotInStore">

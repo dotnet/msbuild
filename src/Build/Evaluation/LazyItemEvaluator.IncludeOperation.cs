@@ -5,6 +5,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -81,8 +82,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         string value = valueFragment.TextFragment;
 
-                        if (excludeTester == null ||
-                            !excludeTester.Value(EscapingUtilities.UnescapeAll(value)))
+                        if (excludeTester?.Value(EscapingUtilities.UnescapeAll(value)) != true)
                         {
                             var item = _itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath);
                             itemsToAdd.Add(item);
@@ -90,34 +90,40 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (fragment is GlobFragment globFragment)
                     {
-                        string glob = globFragment.TextFragment;
+                        // If this item is behind a false condition and represents a full drive/filesystem scan, expanding it is
+                        // almost certainly undesired. It should be skipped to avoid evaluation taking an excessive amount of time.
+                        bool skipGlob = !_conditionResult && globFragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs;
+                        if (!skipGlob)
+                        {
+                            string glob = globFragment.TextFragment;
 
-                        if (excludePatternsForGlobs == null)
-                        {
-                            excludePatternsForGlobs = BuildExcludePatternsForGlobs(globsToIgnore, excludePatterns);
-                        }
+                            if (excludePatternsForGlobs == null)
+                            {
+                                excludePatternsForGlobs = BuildExcludePatternsForGlobs(globsToIgnore, excludePatterns);
+                            }
 
-                        string[] includeSplitFilesEscaped;
-                        if (MSBuildEventSource.Log.IsEnabled())
-                        {
-                            MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
-                        }
-                        using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
-                        {
-                            includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
-                                _rootDirectory,
-                                glob,
-                                excludePatternsForGlobs
-                            );
-                        }
-                        if (MSBuildEventSource.Log.IsEnabled())
-                        {
-                            MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
-                        }
+                            string[] includeSplitFilesEscaped;
+                            if (MSBuildEventSource.Log.IsEnabled())
+                            {
+                                MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
+                            }
+                            using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
+                            {
+                                includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
+                                    _rootDirectory,
+                                    glob,
+                                    excludePatternsForGlobs
+                                );
+                            }
+                            if (MSBuildEventSource.Log.IsEnabled())
+                            {
+                                MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
+                            }
 
-                        foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
-                        {
-                            itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
+                            foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
+                            {
+                                itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
+                            }
                         }
                     }
                     else

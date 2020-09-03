@@ -263,7 +263,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// When reset caches is false we need to only keep around the configurations which are being asked for during the design time build.
-        /// Other configurations need to be cleared. If this configuration is marked as ExplicitlyLoadedConfiguration then it should not be cleared when 
+        /// Other configurations need to be cleared. If this configuration is marked as ExplicitlyLoadedConfiguration then it should not be cleared when
         /// Reset Caches is false.
         /// </summary>
         public bool ExplicitlyLoaded { get; set; }
@@ -276,7 +276,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag indicating whether or not the configuration has been loaded before.
         /// </summary>
-        public bool IsLoaded => _project != null && _project.IsLoaded;
+        public bool IsLoaded => _project?.IsLoaded == true;
 
         /// <summary>
         /// Flag indicating if the configuration is cached or not.
@@ -555,9 +555,9 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the objects are equivalent, false otherwise.</returns>
         public static bool operator ==(BuildRequestConfiguration left, BuildRequestConfiguration right)
         {
-            if (ReferenceEquals(left, null))
+            if (left is null)
             {
-                if (ReferenceEquals(right, null))
+                if (right is null)
                 {
                     return true;
                 }
@@ -568,7 +568,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                if (ReferenceEquals(right, null))
+                if (right is null)
                 {
                     return false;
                 }
@@ -748,7 +748,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if they contain the same data, false otherwise</returns>
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(obj, null))
+            if (obj is null)
             {
                 return false;
             }
@@ -770,7 +770,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if equal, false otherwise.</returns>
         public bool Equals(BuildRequestConfiguration other)
         {
-            if (ReferenceEquals(other, null))
+            if (other is null)
             {
                 return false;
             }

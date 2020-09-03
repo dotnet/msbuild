@@ -264,7 +264,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName),
                 "Shared.CannotChangeItemSpecModifiers", metadataName);
 
-            _metadata = _metadata ?? new CopyOnWriteDictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+            _metadata ??= new CopyOnWriteDictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
 
             _metadata[metadataName] = metadataValue ?? string.Empty;
         }

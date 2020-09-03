@@ -54,7 +54,7 @@ namespace Microsoft.Build.Construction
         private static readonly HashSet<string> ValidAttributesOnTarget = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.name, XMakeAttributes.inputs, XMakeAttributes.outputs, XMakeAttributes.keepDuplicateOutputs, XMakeAttributes.dependsOnTargets, XMakeAttributes.beforeTargets, XMakeAttributes.afterTargets, XMakeAttributes.returns };
 
         /// <summary>
-        /// Valid attributes on on error element
+        /// Valid attributes on error element
         /// </summary>
         private static readonly HashSet<string> ValidAttributesOnOnError = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.executeTargets };
 
@@ -94,8 +94,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectParser(XmlDocumentWithLocation document, ProjectRootElement project)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project, "project");
-            ErrorUtilities.VerifyThrowInternalNull(document, "document");
+            ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
+            ErrorUtilities.VerifyThrowInternalNull(document, nameof(document));
 
             _document = document;
             _project = project;
@@ -228,7 +228,6 @@ namespace Microsoft.Build.Construction
 
             return propertyGroup;
         }
-
 
         /// <summary>
         /// Parse a ProjectItemGroupElement
@@ -688,7 +687,7 @@ namespace Microsoft.Build.Construction
 
             ProjectErrorUtilities.VerifyThrowInvalidProject
             (
-                String.IsNullOrWhiteSpace(itemNameAttribute?.Value) && !String.IsNullOrWhiteSpace(propertyNameAttribute?.Value) || !String.IsNullOrWhiteSpace(itemNameAttribute?.Value) && String.IsNullOrWhiteSpace(propertyNameAttribute?.Value),
+                (String.IsNullOrWhiteSpace(itemNameAttribute?.Value) && !String.IsNullOrWhiteSpace(propertyNameAttribute?.Value)) || (!String.IsNullOrWhiteSpace(itemNameAttribute?.Value) && String.IsNullOrWhiteSpace(propertyNameAttribute?.Value)),
                 element.Location,
                 "InvalidTaskOutputSpecification",
                 parent.Name

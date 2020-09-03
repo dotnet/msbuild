@@ -80,15 +80,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override void ResetState()
         {
-            if (LeftChild != null)
-            {
-                LeftChild.ResetState();
-            }
+            LeftChild?.ResetState();
 
-            if (RightChild != null)
-            {
-                RightChild.ResetState();
-            }
+            RightChild?.ResetState();
         }
 
         /// <summary>

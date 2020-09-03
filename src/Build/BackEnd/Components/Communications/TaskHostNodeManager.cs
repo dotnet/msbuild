@@ -73,11 +73,7 @@ namespace Microsoft.Build.BackEnd
         public void ShutdownConnectedNodes(bool enableReuse)
         {
             ErrorUtilities.VerifyThrow(!_componentShutdown, "We should never be calling ShutdownNodes after ShutdownComponent has been called");
-
-            if (null != _outOfProcTaskHostNodeProvider)
-            {
-                _outOfProcTaskHostNodeProvider.ShutdownConnectedNodes(enableReuse);
-            }
+            _outOfProcTaskHostNodeProvider?.ShutdownConnectedNodes(enableReuse);
         }
 
         /// <summary>
@@ -85,10 +81,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
-            if (null != _outOfProcTaskHostNodeProvider)
-            {
-                _outOfProcTaskHostNodeProvider.ShutdownAllNodes();
-            }
+            _outOfProcTaskHostNodeProvider?.ShutdownAllNodes();
         }
         #endregion
 

@@ -36,13 +36,13 @@ namespace Microsoft.Build.Logging
         public int GetHashCode(EvaluationLocation obj)
         {
             var hashCode = 1198539463;
-            hashCode = hashCode * -1521134295 + obj.EvaluationPass.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(obj.EvaluationPassDescription);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(obj.File);
-            hashCode = hashCode * -1521134295 + EqualityComparer<int?>.Default.GetHashCode(obj.Line);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(obj.ElementName);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(obj.ElementDescription);
-            hashCode = hashCode * -1521134295 + obj.Kind.GetHashCode();
+            hashCode = (hashCode * -1521134295) + EqualityComparer<EvaluationPass>.Default.GetHashCode(obj.EvaluationPass);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(obj.EvaluationPassDescription);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(obj.File);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<int?>.Default.GetHashCode(obj.Line);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(obj.ElementName);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(obj.ElementDescription);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<EvaluationLocationKind>.Default.GetHashCode(obj.Kind);
             return hashCode;
         }
     }

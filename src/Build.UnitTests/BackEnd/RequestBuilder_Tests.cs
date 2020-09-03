@@ -261,8 +261,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string projectFile = GetTestProjectFile(configId);
             File.WriteAllText(projectFile, projectFileContents.Replace('`', '"'));
 
-            string defaultToolsVersion = null;
-            defaultToolsVersion = FrameworkLocationHelper.PathToDotNetFrameworkV20 == null
+            string defaultToolsVersion = FrameworkLocationHelper.PathToDotNetFrameworkV20 == null
                                       ? ObjectModelHelpers.MSBuildDefaultToolsVersion
                                       : "2.0";
 
@@ -374,7 +373,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 return Task<BuildResult>.FromResult(result);
             }
 
-            if (null != _newRequests)
+            if (_newRequests != null)
             {
                 string[] projectFiles = new string[_newRequests.Length];
                 PropertyDictionary<ProjectPropertyInstance>[] properties = new PropertyDictionary<ProjectPropertyInstance>[_newRequests.Length];

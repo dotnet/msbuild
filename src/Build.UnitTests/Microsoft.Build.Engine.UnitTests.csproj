@@ -28,8 +28,7 @@
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
     <ProjectReference Include="..\MSBuildTaskHost\MSBuildTaskHost.csproj"
                       Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MonoBuild)' != 'true'"
-                      ReferenceOutputAssembly="false"
-                      OutputItemType="Content" />
+                      Aliases="MSBuildTaskHost" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
@@ -116,6 +115,9 @@
     <Compile Include="..\Shared\UnitTests\CopyOnWriteDictionary_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\TestData\GlobbingTestData.cs">
       <Link>TestData\GlobbingTestData.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\ImmutableDictionary_Tests.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' == 'Full' and '$(MonoBuild)' != 'true'">
+      <Link>ImmutableDictionary_Tests.cs</Link>
     </Compile>
 
     <None Include="..\Shared\UnitTests\App.config">

@@ -55,8 +55,8 @@ namespace Microsoft.Build.Evaluation
                 "ComparisonOnNonNumericExpression",
                  state.Condition,
                  /* helpfully display unexpanded token and expanded result in error message */
-                 (LeftChild.CanNumericEvaluate(state) ? RightChild.GetUnexpandedValue(state) : LeftChild.GetUnexpandedValue(state)),
-                 (LeftChild.CanNumericEvaluate(state) ? RightChild.GetExpandedValue(state) : LeftChild.GetExpandedValue(state)));
+                 LeftChild.CanNumericEvaluate(state) ? RightChild.GetUnexpandedValue(state) : LeftChild.GetUnexpandedValue(state),
+                 LeftChild.CanNumericEvaluate(state) ? RightChild.GetExpandedValue(state) : LeftChild.GetExpandedValue(state));
 
             // If the values identify as numeric, make that comparison instead of the Version comparison since numeric has a stricter definition
             if (isNumeric)

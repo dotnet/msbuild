@@ -89,8 +89,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal Lookup(ItemDictionary<ProjectItemInstance> projectItems, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectItems, "projectItems");
-            ErrorUtilities.VerifyThrowInternalNull(properties, "properties");
+            ErrorUtilities.VerifyThrowInternalNull(projectItems, nameof(projectItems));
+            ErrorUtilities.VerifyThrowInternalNull(properties, nameof(properties));
 
             Lookup.Scope scope = new Lookup.Scope(this, "Lookup()", projectItems, properties);
             _lookupScopes.AddFirst(scope);
@@ -378,13 +378,13 @@ namespace Microsoft.Build.BackEnd
             // adds to the world
             if (PrimaryAddTable != null)
             {
-                SecondaryTable = SecondaryTable ?? new ItemDictionary<ProjectItemInstance>();
+                SecondaryTable ??= new ItemDictionary<ProjectItemInstance>();
                 SecondaryTable.ImportItems(PrimaryAddTable);
             }
 
             if (PrimaryRemoveTable != null)
             {
-                SecondaryTable = SecondaryTable ?? new ItemDictionary<ProjectItemInstance>();
+                SecondaryTable ??= new ItemDictionary<ProjectItemInstance>();
                 SecondaryTable.RemoveItems(PrimaryRemoveTable);
             }
 
@@ -392,14 +392,14 @@ namespace Microsoft.Build.BackEnd
             {
                 foreach (KeyValuePair<string, Dictionary<ProjectItemInstance, MetadataModifications>> entry in PrimaryModifyTable)
                 {
-                    SecondaryTable = SecondaryTable ?? new ItemDictionary<ProjectItemInstance>();
+                    SecondaryTable ??= new ItemDictionary<ProjectItemInstance>();
                     ApplyModificationsToTable(SecondaryTable, entry.Key, entry.Value);
                 }
             }
 
             if (PrimaryPropertySets != null)
             {
-                SecondaryProperties = SecondaryProperties ?? new PropertyDictionary<ProjectPropertyInstance>(PrimaryPropertySets.Count);
+                SecondaryProperties ??= new PropertyDictionary<ProjectPropertyInstance>(PrimaryPropertySets.Count);
                 SecondaryProperties.ImportProperties(PrimaryPropertySets);
             }
         }
@@ -450,7 +450,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ProjectPropertyInstance GetProperty(string name)
         {
-            ErrorUtilities.VerifyThrowInternalLength(name, "name");
+            ErrorUtilities.VerifyThrowInternalLength(name, nameof(name));
 
             return GetProperty(name, 0, name.Length - 1);
         }
@@ -479,7 +479,7 @@ namespace Microsoft.Build.BackEnd
                     ICollection<ProjectItemInstance> adds = scope.Adds[itemType];
                     if (adds.Count != 0)
                     {
-                        allAdds = allAdds ?? new List<ProjectItemInstance>(adds.Count);
+                        allAdds ??= new List<ProjectItemInstance>(adds.Count);
                         allAdds.AddRange(adds);
                     }
                 }
@@ -490,7 +490,7 @@ namespace Microsoft.Build.BackEnd
                     ICollection<ProjectItemInstance> removes = scope.Removes[itemType];
                     if (removes.Count != 0)
                     {
-                        allRemoves = allRemoves ?? new List<ProjectItemInstance>(removes.Count);
+                        allRemoves ??= new List<ProjectItemInstance>(removes.Count);
                         allRemoves.AddRange(removes);
                     }
                 }
@@ -503,7 +503,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (modifies.Count != 0)
                         {
-                            allModifies = allModifies ?? new Dictionary<ProjectItemInstance, MetadataModifications>(modifies.Count);
+                            allModifies ??= new Dictionary<ProjectItemInstance, MetadataModifications>(modifies.Count);
 
                             // We already have some modifies for this type
                             foreach (KeyValuePair<ProjectItemInstance, MetadataModifications> modify in modifies)
@@ -538,7 +538,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // We can just hand out this group verbatim -
                 // that avoids any importing
-                groupFound = groupFound ?? Array.Empty<ProjectItemInstance>();
+                groupFound ??= Array.Empty<ProjectItemInstance>();
 
                 return groupFound;
             }
@@ -593,7 +593,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void PopulateWithItems(string itemType, ICollection<ProjectItemInstance> group)
         {
-            PrimaryTable = PrimaryTable ?? new ItemDictionary<ProjectItemInstance>();
+            PrimaryTable ??= new ItemDictionary<ProjectItemInstance>();
             ICollection<ProjectItemInstance> existing = PrimaryTable[itemType];
             ErrorUtilities.VerifyThrow(existing.Count == 0, "Cannot add an itemgroup of this type.");
 
@@ -613,7 +613,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void PopulateWithItem(ProjectItemInstance item)
         {
-            PrimaryTable = PrimaryTable ?? new ItemDictionary<ProjectItemInstance>();
+            PrimaryTable ??= new ItemDictionary<ProjectItemInstance>();
             PrimaryTable.Add(item);
         }
 
@@ -626,7 +626,7 @@ namespace Microsoft.Build.BackEnd
             MustNotBeOuterScope();
 
             // Put in the set table
-            PrimaryPropertySets = PrimaryPropertySets ?? new PropertyDictionary<ProjectPropertyInstance>();
+            PrimaryPropertySets ??= new PropertyDictionary<ProjectPropertyInstance>();
             PrimaryPropertySets.Set(property);
         }
 
@@ -651,7 +651,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Put them in the add table
-            PrimaryAddTable = PrimaryAddTable ?? new ItemDictionary<ProjectItemInstance>();
+            PrimaryAddTable ??= new ItemDictionary<ProjectItemInstance>();
             IEnumerable<ProjectItemInstance> itemsToAdd = group;
             if (doNotAddDuplicates)
             {
@@ -662,7 +662,7 @@ namespace Microsoft.Build.BackEnd
                 var existingItems = GetItems(itemType);
                 if (existingItems.Count > 0)
                 {
-                    itemsToAdd = itemsToAdd.Where(item => !(existingItems.Contains(item, ProjectItemInstance.EqualityComparer)));
+                    itemsToAdd = itemsToAdd.Where(item => !existingItems.Contains(item, ProjectItemInstance.EqualityComparer));
                 }
             }
 
@@ -684,7 +684,7 @@ namespace Microsoft.Build.BackEnd
 #endif
 
             // Put in the add table
-            PrimaryAddTable = PrimaryAddTable ?? new ItemDictionary<ProjectItemInstance>();
+            PrimaryAddTable ??= new ItemDictionary<ProjectItemInstance>();
             PrimaryAddTable.Add(item);
         }
 
@@ -710,7 +710,7 @@ namespace Microsoft.Build.BackEnd
             item = RetrieveOriginalFromCloneTable(item);
 
             // Put in the remove table
-            PrimaryRemoveTable = PrimaryRemoveTable ?? new ItemDictionary<ProjectItemInstance>();
+            PrimaryRemoveTable ??= new ItemDictionary<ProjectItemInstance>();
             PrimaryRemoveTable.Add(item);
 
             // No need to remove this item from the primary add table if it's 
@@ -753,7 +753,7 @@ namespace Microsoft.Build.BackEnd
 
             // We don't need to check whether the item is in the add table vs. the main table; either
             // way the modification will be applied.
-            PrimaryModifyTable = PrimaryModifyTable ?? new ItemTypeToItemsMetadataUpdateDictionary(MSBuildNameIgnoreCaseComparer.Default);
+            PrimaryModifyTable ??= new ItemTypeToItemsMetadataUpdateDictionary(MSBuildNameIgnoreCaseComparer.Default);
             Dictionary<ProjectItemInstance, MetadataModifications> modifiesOfType;
             if (!PrimaryModifyTable.TryGetValue(itemType, out modifiesOfType))
             {
@@ -790,7 +790,7 @@ namespace Microsoft.Build.BackEnd
             // FUTURE - don't need to clone here for non intrinsic tasks, but at present, they don't do modifies
 
             // Store the clone, in case we're asked to modify or remove it later (we will record it against the real item)
-            _cloneTable = _cloneTable ?? new Dictionary<ProjectItemInstance, ProjectItemInstance>();
+            _cloneTable ??= new Dictionary<ProjectItemInstance, ProjectItemInstance>();
 
             foreach (var modify in allModifies)
             {
@@ -930,7 +930,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void MustNotBeInTable(ItemDictionary<ProjectItemInstance> table, ProjectItemInstance item)
         {
-            if (table != null && table.ItemTypes.Contains(item.ItemType))
+            if (table?.ItemTypes.Contains(item.ItemType) == true)
             {
                 ICollection<ProjectItemInstance> tableOfItemsOfSameType = table[item.ItemType];
                 if (tableOfItemsOfSameType != null)
@@ -945,7 +945,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void MustNotBeInTable(ItemTypeToItemsMetadataUpdateDictionary table, ProjectItemInstance item)
         {
-            if (table != null && table.ContainsKey(item.ItemType))
+            if (table?.ContainsKey(item.ItemType) == true)
             {
                 ItemsMetadataUpdateDictionary tableOfItemsOfSameType = table[item.ItemType];
                 if (tableOfItemsOfSameType != null)
@@ -1140,7 +1140,7 @@ namespace Microsoft.Build.BackEnd
             {
                 get
                 {
-                    MetadataModification modification = null;
+                    MetadataModification modification;
                     if (!_modifications.TryGetValue(metadataName, out modification))
                     {
                         if (_keepOnlySpecified)
@@ -1271,7 +1271,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public bool KeepValue
             {
-                get { return (_remove == false && _newValue == null); }
+                get { return !_remove && _newValue == null; }
             }
 
             /// <summary>

@@ -28,7 +28,7 @@ namespace Microsoft.Build.Execution
         private string _name;
 
         /// <summary>
-        /// Condition on the target. 
+        /// Condition on the target.
         /// Evaluated during the build.
         /// </summary>
         private string _condition;
@@ -44,7 +44,7 @@ namespace Microsoft.Build.Execution
         private string _outputs;
 
         /// <summary>
-        /// Return values on the target. 
+        /// Return values on the target.
         /// </summary>
         private string _returns;
 
@@ -76,8 +76,8 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Whether the project file that this target lives in has at least one target
         /// with a Returns attribute on it.  If so, the default behaviour for all targets
-        /// in the file without Returns attributes changes from returning the Outputs, to 
-        /// returning nothing. 
+        /// in the file without Returns attributes changes from returning the Outputs, to
+        /// returning nothing.
         /// </summary>
         private bool _parentProjectSupportsReturnsAttribute;
 
@@ -162,17 +162,17 @@ namespace Microsoft.Build.Execution
             bool parentProjectSupportsReturnsAttribute
             )
         {
-            ErrorUtilities.VerifyThrowInternalLength(name, "name");
-            ErrorUtilities.VerifyThrowInternalNull(condition, "condition");
-            ErrorUtilities.VerifyThrowInternalNull(inputs, "inputs");
-            ErrorUtilities.VerifyThrowInternalNull(outputs, "outputs");
-            ErrorUtilities.VerifyThrowInternalNull(keepDuplicateOutputs, "keepDuplicateOutputs");
-            ErrorUtilities.VerifyThrowInternalNull(dependsOnTargets, "dependsOnTargets");
-            ErrorUtilities.VerifyThrowInternalNull(beforeTargets, "beforeTargets");
-            ErrorUtilities.VerifyThrowInternalNull(afterTargets, "afterTargets");
-            ErrorUtilities.VerifyThrowInternalNull(location, "location");
-            ErrorUtilities.VerifyThrowInternalNull(children, "children");
-            ErrorUtilities.VerifyThrowInternalNull(onErrorChildren, "onErrorChildren");
+            ErrorUtilities.VerifyThrowInternalLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));
+            ErrorUtilities.VerifyThrowInternalNull(inputs, nameof(inputs));
+            ErrorUtilities.VerifyThrowInternalNull(outputs, nameof(outputs));
+            ErrorUtilities.VerifyThrowInternalNull(keepDuplicateOutputs, nameof(keepDuplicateOutputs));
+            ErrorUtilities.VerifyThrowInternalNull(dependsOnTargets, nameof(dependsOnTargets));
+            ErrorUtilities.VerifyThrowInternalNull(beforeTargets, nameof(beforeTargets));
+            ErrorUtilities.VerifyThrowInternalNull(afterTargets, nameof(afterTargets));
+            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
+            ErrorUtilities.VerifyThrowInternalNull(children, nameof(children));
+            ErrorUtilities.VerifyThrowInternalNull(onErrorChildren, nameof(onErrorChildren));
 
             _name = name;
             _condition = condition;
@@ -338,7 +338,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Full path to the file from which this target originated.
-        /// If it originated in a project that was not loaded and has never been 
+        /// If it originated in a project that was not loaded and has never been
         /// given a path, returns an empty string.
         /// </summary>
         public string FullPath
@@ -450,8 +450,8 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Whether the project file that this target lives in has at least one target
         /// with a Returns attribute on it.  If so, the default behaviour for all targets
-        /// in the file without Returns attributes changes from returning the Outputs, to 
-        /// returning nothing. 
+        /// in the file without Returns attributes changes from returning the Outputs, to
+        /// returning nothing.
         /// </summary>
         internal bool ParentProjectSupportsReturnsAttribute
         {
@@ -543,7 +543,7 @@ namespace Microsoft.Build.Execution
         /// <returns>The new task instance.</returns>
         internal ProjectTaskInstance AddTask(string taskName, string condition, string continueOnError, string msbuildRuntime, string msbuildArchitecture)
         {
-            ErrorUtilities.VerifyThrowInternalLength(taskName, "taskName");
+            ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
             ProjectTaskInstance task = new ProjectTaskInstance(taskName, _location, condition ?? String.Empty, continueOnError ?? String.Empty, msbuildRuntime ?? String.Empty, msbuildArchitecture ?? String.Empty);
             this.AddProjectTargetInstanceChild(task);
             return task;

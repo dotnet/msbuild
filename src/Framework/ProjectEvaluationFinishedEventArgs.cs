@@ -17,7 +17,6 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public ProjectEvaluationFinishedEventArgs()
         {
-            
         }
 
         /// <summary>

@@ -218,5 +218,7 @@ Samples/MultiprocessBuild/PortableTask.dll
 
 #Stage1 build folder for when doing bootstrap builds
 stage1/
-
 .tools
+
+# ETL traces    
+*.etl.zip

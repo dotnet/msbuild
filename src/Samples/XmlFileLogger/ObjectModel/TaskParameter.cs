@@ -65,21 +65,15 @@ namespace Microsoft.Build.Logging.StructuredLogger
         /// <returns>Concrete task parameter node.</returns>
         public static TaskParameter Create(string message, string prefix)
         {
-            switch (prefix)
+            return prefix switch
             {
-                case XmlFileLogger.OutputItemsMessagePrefix:
-                    return new OutputItem(message, prefix);
-                case XmlFileLogger.TaskParameterMessagePrefix:
-                    return new InputParameter(message, prefix);
-                case XmlFileLogger.OutputPropertyMessagePrefix:
-                    return new OutputProperty(message, prefix);
-                case XmlFileLogger.ItemGroupIncludeMessagePrefix:
-                    return new ItemGroup(message, prefix, "Include");
-                case XmlFileLogger.ItemGroupRemoveMessagePrefix:
-                    return new ItemGroup(message, prefix, "Remove");
-                default:
-                    throw new UnknownTaskParameterPrefixException(prefix);
-            }
+                XmlFileLogger.OutputItemsMessagePrefix => new OutputItem(message, prefix),
+                XmlFileLogger.TaskParameterMessagePrefix => new InputParameter(message, prefix),
+                XmlFileLogger.OutputPropertyMessagePrefix => new OutputProperty(message, prefix),
+                XmlFileLogger.ItemGroupIncludeMessagePrefix => new ItemGroup(message, prefix, "Include"),
+                XmlFileLogger.ItemGroupRemoveMessagePrefix => new ItemGroup(message, prefix, "Remove"),
+                _ => throw new UnknownTaskParameterPrefixException(prefix),
+            };
         }
     }
 }

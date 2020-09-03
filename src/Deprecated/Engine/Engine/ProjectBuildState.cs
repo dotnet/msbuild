@@ -89,8 +89,8 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (requiredTargets != null && requiredTargets.Count > 0 ?
-                        this.requiredTargets.Peek() : null);
+                return requiredTargets?.Count > 0 ?
+                        this.requiredTargets.Peek() : null;
             }
         }
 
@@ -138,7 +138,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if ((indexOfTargetInProgress + 1) < targetNamesToBuild.Count)
             {
-                indexOfTargetInProgress = indexOfTargetInProgress + 1;
+                indexOfTargetInProgress++;
                 return (string)targetNamesToBuild[indexOfTargetInProgress];
             }
             else
@@ -199,17 +199,17 @@ namespace Microsoft.Build.BuildEngine
         internal bool ContainsCycle(string name)
         {
             bool containsCycle = false;
-            if (requiredTargets != null && requiredTargets.Count > 1)
+            if (requiredTargets?.Count > 1)
             {
                 string topTarget = requiredTargets.Pop();
                 ErrorUtilities.VerifyThrow(topTarget == name, "Requesting target should be on the top of stack");
                 containsCycle = requiredTargets.Contains(name);
                 requiredTargets.Push(topTarget);
             }
-            if (!containsCycle && requiredTargets != null && requiredTargets.Count > 0)
+            if (!containsCycle && requiredTargets?.Count > 0)
             {
                 containsCycle = 
-                    (String.Compare(name, (string)targetNamesToBuild[indexOfTargetInProgress], StringComparison.OrdinalIgnoreCase) == 0);
+                    (String.Equals(name, (string)targetNamesToBuild[indexOfTargetInProgress], StringComparison.OrdinalIgnoreCase));
             }
             return containsCycle;
         }
@@ -221,7 +221,7 @@ namespace Microsoft.Build.BuildEngine
         internal bool ContainsBlockingTarget(string name)
         {
             bool containsName = false;
-            if (requiredTargets != null && requiredTargets.Count > 0)
+            if (requiredTargets?.Count > 0)
             {
                 containsName = requiredTargets.Contains(name);
             }
@@ -237,7 +237,7 @@ namespace Microsoft.Build.BuildEngine
         internal string GetParentTarget(string name)
         {
             string parentName = null;
-            if (requiredTargets != null && requiredTargets.Count > 0)
+            if (requiredTargets?.Count > 0)
             {
                 parentName = (string)targetNamesToBuild[indexOfTargetInProgress];
 

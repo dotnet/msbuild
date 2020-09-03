@@ -62,6 +62,11 @@ namespace Microsoft.Build.Framework
         private int endColumnNumber;
 
         /// <summary>
+        /// A link pointing to more information about the error
+        /// </summary>
+        private string helpLink;
+
+        /// <summary>
         /// This constructor allows all event data to be initialized
         /// </summary>
         /// <param name="subcategory">event sub-category</param>
@@ -119,10 +124,11 @@ namespace Microsoft.Build.Framework
             string senderName,
             DateTime eventTimestamp
             )
-            : this(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, eventTimestamp, null)
+            : this(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, null, eventTimestamp, null)
         {
             // do nothing
         }
+
 
         /// <summary>
         /// This constructor which allows a timestamp to be set
@@ -154,6 +160,43 @@ namespace Microsoft.Build.Framework
             DateTime eventTimestamp,
             params object[] messageArgs
             )
+            : this(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, null, eventTimestamp, messageArgs)
+        {
+            // do nothing
+        }
+
+        /// <summary>
+        /// This constructor which allows a timestamp to be set
+        /// </summary>
+        /// <param name="subcategory">event sub-category</param>
+        /// <param name="code">event code</param>
+        /// <param name="file">file associated with the event</param>
+        /// <param name="lineNumber">line number (0 if not applicable)</param>
+        /// <param name="columnNumber">column number (0 if not applicable)</param>
+        /// <param name="endLineNumber">end line number (0 if not applicable)</param>
+        /// <param name="endColumnNumber">end column number (0 if not applicable)</param>
+        /// <param name="message">text message</param>
+        /// <param name="helpKeyword">help keyword </param>
+        /// <param name="helpLink">A link pointing to more information about the error </param>
+        /// <param name="senderName">name of event sender</param>
+        /// <param name="eventTimestamp">Timestamp when event was created</param>
+        /// <param name="messageArgs">message arguments</param>
+        public BuildErrorEventArgs
+            (
+            string subcategory,
+            string code,
+            string file,
+            int lineNumber,
+            int columnNumber,
+            int endLineNumber,
+            int endColumnNumber,
+            string message,
+            string helpKeyword,
+            string senderName,
+            string helpLink,
+            DateTime eventTimestamp,
+            params object[] messageArgs
+            )
             : base(message, helpKeyword, senderName, eventTimestamp, messageArgs)
         {
             this.subcategory = subcategory;
@@ -163,6 +206,7 @@ namespace Microsoft.Build.Framework
             this.columnNumber = columnNumber;
             this.endLineNumber = endLineNumber;
             this.endColumnNumber = endColumnNumber;
+            this.helpLink = helpLink;
         }
 
         /// <summary>
@@ -175,18 +219,18 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// The custom sub-type of the event.         
+        /// The custom sub-type of the event.
         /// </summary>
         public string Subcategory => subcategory;
 
         /// <summary>
-        /// Code associated with event. 
+        /// Code associated with event.
         /// </summary>
         public string Code => code;
 
         /// <summary>
-        /// File associated with event.   
-        /// </summary>  
+        /// File associated with event.
+        /// </summary>
         public string File => file;
 
         /// <summary>
@@ -199,24 +243,29 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Line number of interest in associated file. 
+        /// Line number of interest in associated file.
         /// </summary>
         public int LineNumber => lineNumber;
 
         /// <summary>
-        /// Column number of interest in associated file. 
+        /// Column number of interest in associated file.
         /// </summary>
         public int ColumnNumber => columnNumber;
 
         /// <summary>
-        /// Ending line number of interest in associated file. 
+        /// Ending line number of interest in associated file.
         /// </summary>
         public int EndLineNumber => endLineNumber;
 
         /// <summary>
-        /// Ending column number of interest in associated file. 
+        /// Ending column number of interest in associated file.
         /// </summary>
         public int EndColumnNumber => endColumnNumber;
+
+        /// <summary>
+        /// A link pointing to more information about the error.
+        /// </summary>
+        public string HelpLink => helpLink;
 
         #region CustomSerializationToStream
         /// <summary>
@@ -236,6 +285,8 @@ namespace Microsoft.Build.Framework
             writer.Write((Int32)columnNumber);
             writer.Write((Int32)endLineNumber);
             writer.Write((Int32)endColumnNumber);
+
+            writer.WriteOptionalString(helpLink);
         }
 
         /// <summary>
@@ -264,6 +315,15 @@ namespace Microsoft.Build.Framework
             columnNumber = reader.ReadInt32();
             endLineNumber = reader.ReadInt32();
             endColumnNumber = reader.ReadInt32();
+
+            if (version >= 40)
+            {
+                helpLink = reader.ReadByte() == 0 ? null : reader.ReadString();
+            }
+            else
+            {
+                helpLink = null;
+            }
         }
         #endregion
     }

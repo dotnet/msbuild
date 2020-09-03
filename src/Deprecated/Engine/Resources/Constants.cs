@@ -43,20 +43,20 @@ namespace Microsoft.Build.BuildEngine
         /// <returns>true, if specified property is reserved</returns>
         internal static bool IsReservedProperty(string property)
         {
-            return 
-                (
-                    (String.Compare(property, projectDirectory, StringComparison.OrdinalIgnoreCase) == 0) ||
-                    (String.Compare(property, projectFile, StringComparison.OrdinalIgnoreCase) == 0) ||
-                    (String.Compare(property, projectExtension, StringComparison.OrdinalIgnoreCase) == 0) ||
-                    (String.Compare(property, projectFullPath, StringComparison.OrdinalIgnoreCase) == 0) ||
-                    (String.Compare(property, projectName, StringComparison.OrdinalIgnoreCase) == 0) ||
-                    (String.Compare(property, binPath, StringComparison.OrdinalIgnoreCase) == 0) ||
-                    (String.Compare(property, toolsPath, StringComparison.OrdinalIgnoreCase) == 0) ||
-                    (String.Compare(property, projectDefaultTargets, StringComparison.OrdinalIgnoreCase) == 0) ||
-                    (String.Compare(property, programFiles32, StringComparison.OrdinalIgnoreCase) == 0) ||
-                    (String.Compare(property, assemblyVersion, StringComparison.OrdinalIgnoreCase) == 0)
-                    // Intentionally do not include MSBuildExtensionsPath or MSBuildExtensionsPath32 in this list.  We need tasks to be able to override those.
-                );
+            return
+
+                    (String.Equals(property, projectDirectory, StringComparison.OrdinalIgnoreCase)) ||
+                    (String.Equals(property, projectFile, StringComparison.OrdinalIgnoreCase)) ||
+                    (String.Equals(property, projectExtension, StringComparison.OrdinalIgnoreCase)) ||
+                    (String.Equals(property, projectFullPath, StringComparison.OrdinalIgnoreCase)) ||
+                    (String.Equals(property, projectName, StringComparison.OrdinalIgnoreCase)) ||
+                    (String.Equals(property, binPath, StringComparison.OrdinalIgnoreCase)) ||
+                    (String.Equals(property, toolsPath, StringComparison.OrdinalIgnoreCase)) ||
+                    (String.Equals(property, projectDefaultTargets, StringComparison.OrdinalIgnoreCase)) ||
+                    (String.Equals(property, programFiles32, StringComparison.OrdinalIgnoreCase)) ||
+                    (String.Equals(property, assemblyVersion, StringComparison.OrdinalIgnoreCase))
+                // Intentionally do not include MSBuildExtensionsPath or MSBuildExtensionsPath32 in this list.  We need tasks to be able to override those.
+                ;
         }
     }
 

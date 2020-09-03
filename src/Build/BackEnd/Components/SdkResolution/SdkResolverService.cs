@@ -87,7 +87,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
-        public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive)
+        public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
             // Lazy initialize the SDK resolvers
             if (_resolvers == null)
@@ -104,7 +104,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             foreach (SdkResolver sdkResolver in _resolvers)
             {
-                SdkResolverContext context = new SdkResolverContext(buildEngineLogger, projectPath, solutionPath, ProjectCollection.Version, interactive)
+                SdkResolverContext context = new SdkResolverContext(buildEngineLogger, projectPath, solutionPath, ProjectCollection.Version, interactive, isRunningInVisualStudio)
                 {
                     State = GetResolverState(submissionId, sdkResolver)
                 };
@@ -117,7 +117,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     result = (SdkResult)sdkResolver.Resolve(sdk, context, resultFactory);
                 }
-                catch (Exception e) when (e is FileNotFoundException || e is FileLoadException && sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal))
+                catch (Exception e) when (e is FileNotFoundException || (e is FileLoadException && sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal)))
                 {
                     // Since we explicitly add the NuGetSdkResolver, we special case this.  The NuGetSdkResolver has special logic
                     // to load NuGet assemblies at runtime which could fail if the user is not running installed MSBuild.  Rather

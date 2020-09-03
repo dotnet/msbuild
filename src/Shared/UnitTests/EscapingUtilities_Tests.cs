@@ -46,9 +46,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void UnescapeEscape()
         {
-            string text;
-
-            text = "*";
+            string text = "*";
             Assert.Equal(text, EscapingUtilities.UnescapeAll(EscapingUtilities.Escape(text)));
 
             text = "?";
@@ -63,9 +61,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EscapeUnescape()
         {
-            string text;
-
-            text = "%2a";
+            string text = "%2a";
             Assert.Equal(text, EscapingUtilities.Escape(EscapingUtilities.UnescapeAll(text)));
 
             text = "%3f";

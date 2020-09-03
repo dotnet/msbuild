@@ -131,6 +131,7 @@ namespace Microsoft.Build.Tasks
         /// Attempts to download the file.
         /// </summary>
         /// <param name="uri">The parsed <see cref="Uri"/> of the request.</param>
+        /// <param name="cancellationToken">The cancellation token for the task.</param>
         private async Task DownloadAsync(Uri uri, CancellationToken cancellationToken)
         {
             // The main reason to use HttpClient vs WebClient is because we can pass a message handler for unit tests to mock

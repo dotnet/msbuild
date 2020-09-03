@@ -327,8 +327,8 @@ namespace Microsoft.Build.Tasks.Xaml
         }
 
         /// <summary>
-        /// Returns true if the property exists (regardless of whether it is 
-        /// set or not) and false otherwise. 
+        /// Returns true if the property exists (regardless of whether it is
+        /// set or not) and false otherwise.
         /// </summary>
         internal bool PropertyExists(string propertyName)
         {
@@ -526,10 +526,10 @@ namespace Microsoft.Build.Tasks.Xaml
                     {
                         if (!String.IsNullOrEmpty(retVal))
                         {
-                            retVal = retVal + separator;
+                            retVal += separator;
                         }
 
-                        retVal = retVal + argSwitch.Value;
+                        retVal += argSwitch.Value;
                     }
                     else
                     {
