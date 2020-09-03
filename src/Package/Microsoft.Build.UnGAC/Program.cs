@@ -46,6 +46,10 @@ namespace Microsoft.Build.UnGAC
                     {
                         Console.WriteLine($"Could not remove {assembly} from the GAC. HResult: {hresult}");
                     }
+                    else
+                    {
+                        Console.WriteLine($"Removed {assembly} from the GAC. HResult: {hresult}");
+                    }
                 }
             }
             catch (Exception e)
