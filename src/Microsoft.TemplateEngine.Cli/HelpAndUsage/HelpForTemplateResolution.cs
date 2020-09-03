@@ -22,6 +22,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 ShowUsageHelp(commandInput, telemetryLogger);
             }
 
+            //in case only --help option is specified we don't need to show templates list
+            if (commandInput.IsHelpFlagSpecified && string.IsNullOrEmpty(commandInput.TemplateName))
+            {
+                return CreationResultStatus.Success; 
+            }
+
             // in case list is specified we always need to list templates 
             if (commandInput.IsListFlagSpecified)
             {
