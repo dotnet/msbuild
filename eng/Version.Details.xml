@@ -81,9 +81,9 @@
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
       <Sha>3501ddedc274ac10d4b135856b7593a6bb8a72f1</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.8.0-preview-20200903-02">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.8.0-preview-20200903-03">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>60d87bb06891aff6ae7c282524288985c93cac99</Sha>
+      <Sha>1777adc20f044456e5cf0493f0cf6c967a5a315e</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="6.0.0-alpha.1.20451.1">
       <Uri>https://github.com/mono/linker</Uri>
