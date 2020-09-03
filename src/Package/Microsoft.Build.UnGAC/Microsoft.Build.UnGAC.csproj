@@ -16,12 +16,13 @@
     <_SwixArgs Include="TargetExt=.json"/>
   </ItemGroup>
 
-  <!-- SwrProperty is an arcade concept here. -->
+  <!-- SwrProperty is an arcade concept. -->
   <ItemGroup>
-    <!-- BinDir is set via SwrProperty so arcade can see it. OutDir is the path to the exe. See exe.swr to see how this is used. -->
+    <!-- BinDir is set via SwrProperty to be passed to the swr compiler. OutDir is the path to the bin folder. See exe.swr to see how this is used. -->
     <SwrProperty Include="BinDir=$(OutDir)" />
     <!-- Version must constantly update in order for our exe package to run on install and update. -->
     <SwrProperty Include="Version=$(VsixVersion)" />
+
     <!-- our swr file must be picked up, this is how we set that. -->
     <SwrFile Include="exe.swr" Condition=" '$(MSBuildRuntimeType)' == 'Full' " />
   </ItemGroup>

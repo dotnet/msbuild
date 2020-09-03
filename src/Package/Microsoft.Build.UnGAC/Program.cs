@@ -5,6 +5,12 @@ using System;
 
 namespace Microsoft.Build.UnGAC
 {
+    /// <summary>
+    /// Original Issue: https://github.com/dotnet/msbuild/issues/5183
+    /// This tool was created to help prevent customers from putting MSBuild assemblies in the Global Assembly Cache.
+    /// It runs at VS install-time as well as repair-time.
+    /// It is intended to run as best effort. Meaning that if it fails, we avoid throwing and instead log it.
+    /// </summary>
     class Program
     {
         static void Main(string[] args)
@@ -31,14 +37,14 @@ namespace Microsoft.Build.UnGAC
                     return;
                 }
 
-                for (int i = 0; i < assembliesToUnGAC.Length; i++)
+                foreach (string assembly in assembliesToUnGAC)
                 {
-                    hresult = assemblyCache.UninstallAssembly(dwFlags: 0, pszAssemblyName: assembliesToUnGAC[i], refData: IntPtr.Zero, pulDisposition: 0);
+                    hresult = assemblyCache.UninstallAssembly(dwFlags: 0, pszAssemblyName: assembly, pRefData: IntPtr.Zero, pulDisposition: 0);
 
                     // If we hit an error with an assembly, keep trying the others.
                     if ((hresult >> 31) == 1)
                     {
-                        Console.WriteLine($"Could not remove {assembliesToUnGAC[i]} from the GAC. HResult: {hresult}");
+                        Console.WriteLine($"Could not remove {assembly} from the GAC. HResult: {hresult}");
                     }
                 }
             }

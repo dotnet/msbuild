@@ -6,11 +6,13 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.UnGAC
 {
+    // See: https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/fusion/iassemblycache-interface
+
     [ComImport, Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IAssemblyCache
     {
         [PreserveSig]
-        uint UninstallAssembly(uint dwFlags, [MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName, IntPtr refData, int pulDisposition);
+        uint UninstallAssembly(uint dwFlags, [MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName, IntPtr pRefData, ref ulong pulDisposition);
     }
 
     public static class NativeMethods
