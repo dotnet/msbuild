@@ -65,10 +65,10 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
         // If any indexes are out of range or non-numeric, thsi method returns false and projectFiles is set to null.
         internal static bool TryGetProjectFilesToAdd(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath, out IReadOnlyList<string> projectFiles)
         {
+            List<string> filesToAdd = new List<string>();
+
             if ((actionConfig.Args != null) && actionConfig.Args.TryGetValue("primaryOutputIndexes", out string projectIndexes))
             {
-                List<string> filesToAdd = new List<string>();
-
                 foreach (string indexString in projectIndexes.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
                 {
                     if (int.TryParse(indexString.Trim(), out int index))
@@ -93,7 +93,12 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             }
             else
             {
-                projectFiles = templateCreationResult.PrimaryOutputs.Select(x => x.Path).ToList();
+                foreach (string pathString in templateCreationResult.PrimaryOutputs.Select(x => x.Path))
+                {
+                    filesToAdd.Add(!string.IsNullOrEmpty(outputBasePath) ? Path.Combine(outputBasePath, pathString) : pathString);
+                }
+
+                projectFiles = filesToAdd;
                 return true;
             }
         }
