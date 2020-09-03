@@ -4,7 +4,7 @@
     <TargetFramework>net45</TargetFramework>
     <!-- Set as an exe because this project publishes its own output. -->
     <OutputType>Exe</OutputType>
-    <!-- Forcing the 'vsix' output to be json output. -->
+    <!-- Forcing the 'vsix' output to be json output. Workaround for https://github.com/dotnet/arcade/issues/6120 -->
     <TargetVsixContainerName>Microsoft.Build.UnGAC.exe</TargetVsixContainerName>
     <!-- VS Insertion -->
     <VisualStudioInsertionComponent>Microsoft.Build.UnGAC</VisualStudioInsertionComponent>
