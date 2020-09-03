@@ -65,6 +65,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             // show a help example
             Reporter.Output.WriteLine($"    dotnet {commandName} --help");
+
+            // show a help example for template
+            string preferredTemplateName = bestMatchedTemplates.First().Info.ShortName;
+            Reporter.Output.WriteLine($"    dotnet {commandName} {preferredTemplateName} --help");
         }
 
         private static bool GenerateUsageForTemplate(ITemplateInfo templateInfo, IHostSpecificDataLoader hostDataLoader, string commandName)
