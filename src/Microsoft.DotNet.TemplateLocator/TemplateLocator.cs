@@ -4,10 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+
 using Microsoft.DotNet.DotNetSdkResolver;
 using Microsoft.Net.Sdk.WorkloadManifestReader;
-using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.TemplateLocator
 {
@@ -59,7 +58,7 @@ namespace Microsoft.DotNet.TemplateLocator
 
             _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersionBand);
 
-            var workloadResolver = WorkloadResolver.Create(_workloadManifestProvider);
+            var workloadResolver = new WorkloadResolver(_workloadManifestProvider, dotnetRootPath);
             var templates = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template);
 
             var dotnetSdkTemplatePackages = new List<IOptionalSdkTemplatePackageInfo>();

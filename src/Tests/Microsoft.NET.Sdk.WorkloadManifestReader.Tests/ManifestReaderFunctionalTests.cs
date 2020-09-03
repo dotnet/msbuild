@@ -13,7 +13,7 @@ namespace ManifestReaderTests
         {
             using FileStream fsSource =
                 new FileStream(Path.Combine("Manifests", "Sample.json"), FileMode.Open, FileAccess.Read);
-            var workloadResolver = WorkloadResolver.Create(new FakeManifestProvider(new[] {fsSource}));
+            var workloadResolver = new WorkloadResolver(new FakeManifestProvider(new[] { fsSource }), "fakepath");
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template);
             result.Should().HaveCount(1);
         }
