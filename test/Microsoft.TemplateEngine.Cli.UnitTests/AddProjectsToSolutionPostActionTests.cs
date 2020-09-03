@@ -101,5 +101,68 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.False(AddProjectsToSolutionPostAction.TryGetProjectFilesToAdd(EngineEnvironmentSettings, postAction, creationResult, string.Empty, out IReadOnlyList<string> foundProjectFiles));
             Assert.Null(foundProjectFiles);
         }
+
+        [Fact(DisplayName = nameof(AddProjectToSolutionPostActionFindsMultipleProjectsToAddWithOutputBasePath))]
+        public void AddProjectToSolutionPostActionFindsMultipleProjectsToAddWithOutputBasePath()
+        {
+            string outputBasePath = FileSystemHelpers.GetNewVirtualizedPath(EngineEnvironmentSettings);
+
+            IPostAction postAction = new MockPostAction()
+            {
+                ActionId = AddProjectsToSolutionPostAction.ActionProcessorId,
+                Args = new Dictionary<string, string>()
+                {
+                    { "primaryOutputIndexes", "0; 2" }
+                }
+            };
+
+            ICreationResult creationResult = new MockCreationResult()
+            {
+                PrimaryOutputs = new List<ICreationPath>()
+                {
+                    new MockCreationPath() { Path = "outputProj1.csproj" },
+                    new MockCreationPath() { Path = "dontFindMe.csproj" },
+                    new MockCreationPath() { Path = "outputProj2.csproj" },
+                }
+            };
+            string outputFileFullPath0 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[0].Path);
+            string dontFindMeFullPath1 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[1].Path);
+            string outputFileFullPath2 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[2].Path);
+
+            Assert.True(AddProjectsToSolutionPostAction.TryGetProjectFilesToAdd(EngineEnvironmentSettings, postAction, creationResult, outputBasePath, out IReadOnlyList<string> foundProjectFiles));
+            Assert.Equal(2, foundProjectFiles.Count);
+            Assert.Contains(outputFileFullPath0, foundProjectFiles.ToList());
+            Assert.Contains(outputFileFullPath2, foundProjectFiles.ToList());
+
+            Assert.DoesNotContain(dontFindMeFullPath1, foundProjectFiles.ToList());
+        }
+
+        [Fact(DisplayName = nameof(AddProjectToSolutionPostActionWithoutPrimaryOutputIndexesWithOutputBasePath))]
+        public void AddProjectToSolutionPostActionWithoutPrimaryOutputIndexesWithOutputBasePath()
+        {
+            string outputBasePath = FileSystemHelpers.GetNewVirtualizedPath(EngineEnvironmentSettings);
+
+            IPostAction postAction = new MockPostAction()
+            {
+                ActionId = AddProjectsToSolutionPostAction.ActionProcessorId,
+                Args = new Dictionary<string, string>()
+            };
+
+            ICreationResult creationResult = new MockCreationResult()
+            {
+                PrimaryOutputs = new List<ICreationPath>()
+                {
+                    new MockCreationPath() { Path = "outputProj1.csproj" },
+                    new MockCreationPath() { Path = "outputProj2.csproj" },
+                }
+            };
+            string outputFileFullPath0 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[0].Path);
+            string outputFileFullPath1 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[1].Path);
+
+            Assert.True(AddProjectsToSolutionPostAction.TryGetProjectFilesToAdd(EngineEnvironmentSettings, postAction, creationResult, outputBasePath, out IReadOnlyList<string> foundProjectFiles));
+            Assert.Equal(2, foundProjectFiles.Count);
+            Assert.Contains(outputFileFullPath0, foundProjectFiles.ToList());
+            Assert.Contains(outputFileFullPath1, foundProjectFiles.ToList());
+        }
     }
 }
