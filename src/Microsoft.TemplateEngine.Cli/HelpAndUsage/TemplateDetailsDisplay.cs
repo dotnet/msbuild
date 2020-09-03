@@ -9,12 +9,13 @@ using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Utils;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.TemplateResolution;
 
 namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     public static class TemplateDetailsDisplay
     {
-        public static void ShowTemplateGroupHelp(IReadOnlyList<ITemplateMatchInfo> templateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, bool showImplicitlyHiddenParams = false)
+        public static void ShowTemplateGroupHelp(IReadOnlyCollection<ITemplateMatchInfo> templateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, bool showImplicitlyHiddenParams = false)
         {
             if (templateGroup.Count == 0 || !TemplateListResolver.AreAllTemplatesSameGroupIdentity(templateGroup))
             {
@@ -252,7 +253,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
         // Returns a composite of the input parameters and values which are valid for any template in the group.
-        private static IReadOnlyDictionary<string, string> CoalesceInputParameterValuesFromTemplateGroup(IReadOnlyList<ITemplateMatchInfo> templateGroup)
+        private static IReadOnlyDictionary<string, string> CoalesceInputParameterValuesFromTemplateGroup(IReadOnlyCollection<ITemplateMatchInfo> templateGroup)
         {
             Dictionary<string, string> inputValues = new Dictionary<string, string>();
 

@@ -6,20 +6,17 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TemplateEngine.Edge.Template;
 
-namespace Microsoft.TemplateEngine.Cli
+namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 {
     public class TemplateListResolutionResult
     {
-        public TemplateListResolutionResult(string templateName, string userInputLanguage, IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates, IReadOnlyCollection<ITemplateMatchInfo> allTemplatesInContext)
+        public TemplateListResolutionResult(string templateName, string userInputLanguage, IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates, IReadOnlyCollection<ITemplateMatchInfo> allTemplatesInContext, bool useForListing = false)
         {
             _templateName = templateName;
             _hasUserInputLanguage = !string.IsNullOrEmpty(userInputLanguage);
             _coreMatchedTemplates = coreMatchedTemplates;
             _allTemplatesInContext = allTemplatesInContext;
             _bestTemplateMatchList = null;
-            _usingContextMatches = false;
-            _usingPartialMatches = false;
-            ComputeContextBasedAndOtherPartialMatches();
         }
 
         private readonly string _templateName;
@@ -27,10 +24,6 @@ namespace Microsoft.TemplateEngine.Cli
 
         private readonly IReadOnlyCollection<ITemplateMatchInfo> _coreMatchedTemplates;
         private readonly IReadOnlyCollection<ITemplateMatchInfo> _allTemplatesInContext;
-
-        private bool _usingContextMatches;
-
-        private bool _usingPartialMatches;
 
         public bool TryGetCoreMatchedTemplatesWithDisposition(Func<ITemplateMatchInfo, bool> filter, out IReadOnlyList<ITemplateMatchInfo> matchingTemplates)
         {
@@ -220,11 +213,6 @@ namespace Microsoft.TemplateEngine.Cli
             IReadOnlyList<ITemplateMatchInfo> templateList;
             if (TryGetUnambiguousTemplateGroupToUse(out templateList, ignoreDefaultLanguageFiltering))
             {
-                // Unambiguous template group could be a partial match
-                if (!templateList.Any(x => x.IsMatch || x.IsMatchExceptContext()))
-                {
-                    _usingPartialMatches = true;
-                }
                 return templateList;
             }
             else if (!string.IsNullOrEmpty(_templateName) && TryGetAllInvokableTemplates(out templateList))
@@ -241,86 +229,18 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else if (TryGetCoreMatchedTemplatesWithDisposition(x => x.IsPartialMatch, out templateList))
             {
-                _usingPartialMatches = true;
                 return templateList;
             }
             else if (TryGetCoreMatchedTemplatesWithDisposition(x => x.IsPartialMatchExceptContext(), out templateList))
             {
-                _usingPartialMatches = true;
                 return templateList;
             }
             else
             {
                 templateList = _allTemplatesInContext.ToList();
-                _usingContextMatches = true;
                 return templateList;
             }
         }
 
-        // If BaseGetBestTemplateMatchList returned a list from _allTemplatesInContext, this is true.
-        // false otherwise.
-        public bool UsingContextMatches
-        {
-            get
-            {
-                return _usingContextMatches;
-            }
-        }
-
-        /// <summary>
-        ///  The property gets whether or not <c>BaseGetBestTemplateMatchList</c> returned only partial matches with template name/lang.
-        /// </summary>
-        public bool UsingPartialMatches => _usingPartialMatches;
-
-        public bool IsTemplateAmbiguous { get; private set; }
-
-        public bool IsNoTemplatesMatchedState { get; private set; }
-
-        public List<IReadOnlyList<ITemplateMatchInfo>> ContextProblemMatchGroups { get; private set; }
-
-        public List<IReadOnlyList<ITemplateMatchInfo>> RemainingPartialMatchGroups { get; private set; }
-
-        private void ComputeContextBasedAndOtherPartialMatches()
-        {
-            Dictionary<string, List<ITemplateMatchInfo>> contextProblemMatches = new Dictionary<string, List<ITemplateMatchInfo>>();
-            Dictionary<string, List<ITemplateMatchInfo>> remainingPartialMatches = new Dictionary<string, List<ITemplateMatchInfo>>();
-
-            // this filtering / grouping ignores language differences.
-            foreach (ITemplateMatchInfo template in GetBestTemplateMatchList(true))
-            {
-                string groupIdentity = template.Info.GroupIdentity ?? Guid.NewGuid().ToString();
-                if (template.MatchDisposition.Any(x => x.Location == MatchLocation.Context && x.Kind != MatchKind.Exact))
-                {
-                    if (!contextProblemMatches.TryGetValue(groupIdentity, out List<ITemplateMatchInfo> templateGroup))
-                    {
-                        templateGroup = new List<ITemplateMatchInfo>();
-                        contextProblemMatches[groupIdentity] = templateGroup;
-                    }
-
-                    templateGroup.Add(template);
-                }
-                else if (!UsingContextMatches
-                    && template.MatchDisposition.Any(t => t.Location != MatchLocation.Context && t.Kind != MatchKind.Mismatch && t.Kind != MatchKind.Unspecified))
-                {
-                    if (!remainingPartialMatches.TryGetValue(groupIdentity, out List<ITemplateMatchInfo> templateGroup))
-                    {
-                        templateGroup = new List<ITemplateMatchInfo>();
-                        remainingPartialMatches[groupIdentity] = templateGroup;
-                    }
-
-                    templateGroup.Add(template);
-                }
-            }
-
-            // context mismatches from the "matched" templates
-            ContextProblemMatchGroups = contextProblemMatches.Values.ToList<IReadOnlyList<ITemplateMatchInfo>>();
-
-            // other templates with anything matching
-            RemainingPartialMatchGroups = remainingPartialMatches.Values.ToList<IReadOnlyList<ITemplateMatchInfo>>();
-
-            //Set flags
-            IsTemplateAmbiguous = ContextProblemMatchGroups.Count + RemainingPartialMatchGroups.Count > 1;
-            IsNoTemplatesMatchedState = ContextProblemMatchGroups.Count + RemainingPartialMatchGroups.Count == 0;
-        }
     }
 }

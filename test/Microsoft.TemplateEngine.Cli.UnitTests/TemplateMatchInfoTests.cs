@@ -1,4 +1,5 @@
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
 using Xunit;

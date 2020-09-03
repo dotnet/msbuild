@@ -6,12 +6,13 @@ using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
+using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.TemplateSearch;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateSearch.Common;
 using Microsoft.TemplateSearch.Common.TemplateUpdate;
-using static Microsoft.TemplateEngine.Cli.TemplateListResolutionResult;
+using static Microsoft.TemplateEngine.Cli.TemplateResolution.TemplateListResolutionResult;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -67,7 +68,8 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (!anySearchMatches)
                 {
-                    return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(_templateResolutionResult, _environment, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
+                    ListOrHelpTemplateListResolutionResult listingTemplateListResolutionResult = TemplateListResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
+                    return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(listingTemplateListResolutionResult, _environment, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
                 }
                 else
                 {
