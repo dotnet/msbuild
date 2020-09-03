@@ -1482,7 +1482,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     string directory = Path.GetDirectoryName(elementLocation.File);
                     int rootLength = Path.GetPathRoot(directory).Length;
-                    value = FileUtilities.EnsureNoLeadingOrTrailingSlash(directory, rootLength);
+                    value = FileUtilities.EnsureTrailingNoLeadingSlash(directory, rootLength);
                 }
 
                 return value;

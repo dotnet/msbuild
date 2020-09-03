@@ -214,6 +214,22 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Ensures the path does not have a leading slash after removing the first 'start' characters but does end in a slash.
+        /// </summary>
+        internal static string EnsureTrailingNoLeadingSlash(string path, int start)
+        {
+            int stop = path.Length;
+            while (start < stop && IsSlash(path[start]))
+            {
+                start++;
+            }
+
+            return FixFilePath(start < stop && IsSlash(path[stop - 1]) ?
+                path.Substring(start) :
+                path.Substring(start) + Path.DirectorySeparatorChar);
+        }
+
+        /// <summary>
         /// Ensures the path does not have a trailing slash.
         /// </summary>
         internal static string EnsureNoTrailingSlash(string path)
