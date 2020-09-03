@@ -193,5 +193,33 @@ namespace Microsoft.NET.Publish.Tests
 
             publishCommand.Execute().Should().Pass();
         }
+
+        [Fact]
+        public void It_does_not_exclude_packages_depended_on_by_non_privateassets_references()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "PrivateAssetsTransitive",
+                IsSdkProject = true,
+                IsExe = true,
+                TargetFrameworks = "net5.0"
+            };
+
+            //  Both these packages depend on NewtonSoft.Json.  Since only one of the package references specifies PrivateAssets=All,
+            //  NewtonSoft.Json should be included in the publish output
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json.Schema", "3.0.13"));
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Extensions.DependencyModel", "3.1.6", privateAssets: "all"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute().Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory(testProject.TargetFrameworks);
+
+            publishDirectory.Should().HaveFile("Newtonsoft.Json.dll");
+            publishDirectory.Should().HaveFile("Newtonsoft.Json.Schema.dll");
+            publishDirectory.Should().NotHaveFile("Microsoft.Extensions.DependencyModel");
+        }
     }
 }

@@ -29,14 +29,14 @@ namespace Microsoft.NET.Build.Tests
         {
             BuildAppWithTransitiveDependenciesAndTransitiveCompileReference(new []{"/p:DisableTransitiveProjectReferences=true"});
         }
-        
-        [Fact]
+
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/13081")]
         public void It_builds_the_project_successfully_with_static_graph_and_isolation()
         {
             BuildAppWithTransitiveDependenciesAndTransitiveCompileReference(new []{"/graph"});
         }
         
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/13081")]
         public void It_cleans_the_project_successfully_with_static_graph_and_isolation()
         {
             var (testAsset, outputDirectories) = BuildAppWithTransitiveDependenciesAndTransitiveCompileReference(new []{"/graph"});

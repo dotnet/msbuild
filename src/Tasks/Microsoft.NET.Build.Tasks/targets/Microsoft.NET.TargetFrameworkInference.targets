@@ -52,20 +52,17 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(TargetFramework)' != '' and ('$(TargetFrameworkIdentifier)' == '' or '$(TargetFrameworkVersion)' == '')">
 
     <TargetFrameworkIdentifier>$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)'))</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>v$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)', 3))</TargetFrameworkVersion>
-    <_TargetFrameworkVersionLength Condition="$(TargetFrameworkVersion.EndsWith('.0'))" >$([MSBuild]::Subtract($(TargetFrameworkVersion.Length), 2))</_TargetFrameworkVersionLength>
-    <TargetFrameworkVersion Condition="$(TargetFrameworkVersion.EndsWith('.0'))" >$(TargetFrameworkVersion.Substring(0, $(_TargetFrameworkVersionLength)))</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)', 2))</TargetFrameworkVersion>
   </PropertyGroup>
     
   <!--
     Parse TargetPlatform properties.
   -->
-  <PropertyGroup Condition="'$(TargetFramework)' != '' and ('$(TargetPlatformIdentifier)' == '' and '$(TargetPlatformVersion)' == '')">
-    <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
-    <TargetPlatformVersion>$([MSBuild]::GetTargetPlatformVersion('$(TargetFramework)', 3))</TargetPlatformVersion>
-    <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == '0.0.0'" ></TargetPlatformVersion>
-    <_TargetPlatformVersionLength Condition="$(TargetPlatformVersion.EndsWith('.0'))" >$([MSBuild]::Subtract($(TargetPlatformVersion.Length), 2))</_TargetPlatformVersionLength>
-    <TargetPlatformVersion Condition="$(TargetPlatformVersion.EndsWith('.0'))" >$(TargetPlatformVersion.Substring(0, $(_TargetPlatformVersionLength)))</TargetPlatformVersion>
+  <PropertyGroup Condition="'$(TargetFramework)' != '' and ('$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformVersion)' == '')">
+    <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)' == ''">$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
+    <TargetPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'Windows'" >$([MSBuild]::GetTargetPlatformVersion('$(TargetFramework)', 4))</TargetPlatformVersion>
+    <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == '' or ('$(TargetPlatformIdentifier)' == 'Windows' and !$([MSBuild]::VersionGreaterThanOrEquals($(TargetPlatformVersion), 10.0)))" >$([MSBuild]::GetTargetPlatformVersion('$(TargetFramework)', 2))</TargetPlatformVersion>
+    <TargetPlatformVersion Condition="$([MSBuild]::VersionEquals($(TargetPlatformVersion), 0.0))" ></TargetPlatformVersion> 
     <!-- Normalize casing of windows to Windows -->
     <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)' == 'Windows'">Windows</TargetPlatformIdentifier>
   </PropertyGroup>
@@ -161,7 +158,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       />
   </Target>
 
-  <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
+  <!--C++/CLI has its own logic of determine TargetPlatformIdentifier and TargetPlatformVersion-->
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and '$(Language)' != 'C++'">
     <_EnableDefaultWindowsPlatform>false</_EnableDefaultWindowsPlatform>
     <UseOSWinMdReferences>false</UseOSWinMdReferences>
   </PropertyGroup>
@@ -198,9 +196,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                  FormatArguments="$(SupportedOSPlatform);$(TargetPlatformVersion)"/>
   </Target>
 
+  <!--C++/CLI targets rely on the patch version of the Windows SDK version as TargetPlatformVersion. Skip the normalization.-->
   <Target Name="_NormalizeTargetPlatformVersion"
     BeforeTargets="ProcessFrameworkReferences"
-    Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
+    Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and '$(Language)' != 'C++'">
     <ItemGroup>
       <_ValidTargetPlatformVersion Include="@(SdkSupportedTargetPlatform)" Condition="'@(SdkSupportedTargetPlatform)' != '' and $([MSBuild]::VersionEquals(%(Identity), $(TargetPlatformVersion)))" />
     </ItemGroup>
@@ -213,7 +212,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_CheckForInvalidTargetPlatformVersion"
       BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
       DependsOnTargets="_NormalizeTargetPlatformVersion"
-      Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
+      Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and '$(Language)' != 'C++'">
     <PropertyGroup>
       <TargetPlatformVersionSupported Condition="'$(TargetPlatformVersionSupported)' == '' and '@(_ValidTargetPlatformVersion)' != ''" >true</TargetPlatformVersionSupported>
       <_ValidTargetPlatformVersions Condition="'@(SdkSupportedTargetPlatform)' != ''" >@(SdkSupportedTargetPlatform, '%0a')</_ValidTargetPlatformVersions>

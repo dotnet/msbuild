@@ -609,8 +609,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- For future: Delete ResolveCopyLocalAssets task.  Need to figure out how to get correct DestinationSubPath for
            PreserveStoreLayout without this task, and how to handle RuntimeStorePackages. -->
       <ResolveCopyLocalAssets AssetsFilePath="$(ProjectAssetsFile)"
-                              TargetFramework="$(TargetFrameworkMoniker)"
-                              TargetPlatformMoniker="$(TargetPlatformMoniker)"
+                              TargetFramework="$(TargetFramework)"
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
                               RuntimeFrameworks="@(RuntimeFramework)"
@@ -1071,8 +1070,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
                       AssetsFilePath="$(ProjectAssetsFile)"
                       DepsFilePath="$(IntermediateDepsFilePath)"
-                      TargetFramework="$(TargetFrameworkMoniker)"
-                      TargetPlatformMoniker="$(TargetPlatformMoniker)"
+                      TargetFramework="$(TargetFramework)"
                       AssemblyName="$(AssemblyName)"
                       AssemblyExtension="$(TargetExt)"
                       AssemblyVersion="$(Version)"

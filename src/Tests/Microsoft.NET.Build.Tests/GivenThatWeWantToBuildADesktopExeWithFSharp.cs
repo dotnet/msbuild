@@ -57,5 +57,21 @@ namespace Microsoft.NET.Build.Tests
                 "System.ValueTuple.dll",
             });
         }
+
+        // https://github.com/dotnet/sdk/issues/12560
+        [CoreMSBuildAndWindowsOnlyFact]
+        public void It_builds_a_simple_net50_app()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorldFS")
+                .WithSource()
+                .WithTargetFramework("net5.0");
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
     }
 }
