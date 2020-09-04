@@ -270,7 +270,7 @@
     request a target to build itself (perhaps via a chain of other targets).</comment>
   </data>
   <data name="CircularDependencyInTargetGraphWithVerbosity" xml:space="preserve">
-    <value>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}". Target {1} has a {2} dependency on it, but it is depended upon by {3}.</value>
+    <value>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}". Target "{1}" has a "{2}" dependency on it, but it is depended upon by {3}.</value>
     <comment>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</comment>
   </data>
