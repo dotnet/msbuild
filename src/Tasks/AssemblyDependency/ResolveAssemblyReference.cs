@@ -1863,7 +1863,7 @@ namespace Microsoft.Build.Tasks
 
             if (_cache == null)
             {
-                _cache = SystemState.DeserializePrecomputedCaches(CacheInputPaths ?? new string[0], Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo);
+                _cache = SystemState.DeserializePrecomputedCaches(CacheInputPaths ?? Array.Empty<string>(), Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo);
             }
             else
             {

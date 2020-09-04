@@ -118,7 +118,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// The last modified time for this file.
             /// </summary>
-            internal DateTime lastModified;
+            private DateTime lastModified;
 
             /// <summary>
             /// The fusion name of this file.
@@ -203,7 +203,7 @@ namespace Microsoft.Build.Tasks
             /// Gets the last modified date.
             /// </summary>
             /// <value></value>
-            public DateTime LastModified
+            internal DateTime LastModified
             {
                 get { return lastModified; }
                 set { lastModified = value; }
@@ -213,7 +213,7 @@ namespace Microsoft.Build.Tasks
             /// Get or set the assemblyName.
             /// </summary>
             /// <value></value>
-            public AssemblyNameExtension Assembly
+            internal AssemblyNameExtension Assembly
             {
                 get { return assemblyName; }
                 set { assemblyName = value; }
@@ -223,7 +223,7 @@ namespace Microsoft.Build.Tasks
             /// Get or set the runtimeVersion
             /// </summary>
             /// <value></value>
-            public string RuntimeVersion
+            internal string RuntimeVersion
             {
                 get { return runtimeVersion; }
                 set { runtimeVersion = value; }
@@ -233,7 +233,7 @@ namespace Microsoft.Build.Tasks
             /// Get or set the framework name the file was built against
             /// </summary>
             [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Could be used in other assemblies")]
-            public FrameworkName FrameworkNameAttribute
+            internal FrameworkName FrameworkNameAttribute
             {
                 get { return frameworkName; }
                 set { frameworkName = value; }
@@ -242,13 +242,13 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Get or set the ID of this assembly. Used to verify it is the same version.
             /// </summary>
-            public Guid ModuleVersionID { get; set; }
+            internal Guid ModuleVersionID { get; set; }
         }
 
         /// <summary>
         /// Construct.
         /// </summary>
-        public SystemState()
+        internal SystemState()
         {
         }
 
@@ -572,12 +572,17 @@ namespace Microsoft.Build.Tasks
             foreach (string stateFile in stateFiles)
             {
                 // Verify that it's a real stateFile; log message but do not error if not
-                SystemState sfBase = (SystemState)DeserializeCache(stateFile, log, requiredReturnType, false);
-                foreach (string relativePath in sfBase.instanceLocalFileStateCache.Keys)
+                SystemState sysState = (SystemState)DeserializeCache(stateFile, log, requiredReturnType, false);
+                if (sysState == null)
                 {
+                    continue;
+                }
+                foreach (DictionaryEntry kvp in sysState.instanceLocalFileStateCache)
+                {
+                    string relativePath = (string)kvp.Key;
                     if (!assembliesFound.Contains(relativePath))
                     {
-                        FileState fileState = (FileState)sfBase.instanceLocalFileStateCache[relativePath];
+                        FileState fileState = (FileState)kvp.Value;
                         // Verify that the assembly is correct
                         Guid mvid;
                         string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stateFile), relativePath));
@@ -608,18 +613,19 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log)
         {
-            Hashtable newInstanceLocalFileStateCache = new Hashtable();
-            foreach (string path in instanceLocalFileStateCache.Keys)
+            Hashtable newInstanceLocalFileStateCache = new Hashtable(instanceLocalFileStateCache.Count);
+            foreach (DictionaryEntry kvp in instanceLocalFileStateCache)
             {
                 // Add MVID to allow us to verify that we are using the same assembly later
-                FileState fileState = (FileState)instanceLocalFileStateCache[path];
-                using (var reader = new PEReader(File.OpenRead(path)))
+                string absolutePath = (string)kvp.Key;
+                FileState fileState = (FileState)kvp.Value;
+                using (var reader = new PEReader(File.OpenRead(absolutePath)))
                 {
                     var metadataReader = reader.GetMetadataReader();
                     fileState.ModuleVersionID = metadataReader.GetGuid(metadataReader.GetModuleDefinition().Mvid);
                 }
 
-                string relativePath = FileUtilities.MakeRelative(Path.GetDirectoryName(stateFile), path);
+                string relativePath = FileUtilities.MakeRelative(Path.GetDirectoryName(stateFile), absolutePath);
                 newInstanceLocalFileStateCache[relativePath] = fileState;
             }
             instanceLocalFileStateCache = newInstanceLocalFileStateCache;
