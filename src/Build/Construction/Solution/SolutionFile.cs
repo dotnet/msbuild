@@ -86,6 +86,7 @@ namespace Microsoft.Build.Construction
         private const string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
         private const string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
 
+        private const char CommentStartChar = '#';
         #endregion
         #region Member data
         private string _solutionFile;                 // Could be absolute or relative path to the .SLN file.
@@ -1328,7 +1329,8 @@ namespace Microsoft.Build.Construction
                     break;
                 }
 
-                if (String.IsNullOrWhiteSpace(str))
+                // Ignore empty line or comment
+                if (String.IsNullOrWhiteSpace(str) || str[0] == CommentStartChar)
                 {
                     continue;
                 }
@@ -1375,7 +1377,8 @@ namespace Microsoft.Build.Construction
                     break;
                 }
 
-                if (String.IsNullOrWhiteSpace(str))
+                // Ignore empty line or comment
+                if (String.IsNullOrWhiteSpace(str) || str[0] == CommentStartChar)
                 {
                     continue;
                 }
@@ -1440,7 +1443,8 @@ namespace Microsoft.Build.Construction
                     break;
                 }
 
-                if (String.IsNullOrWhiteSpace(str))
+                // Ignore empty line or comment
+                if (String.IsNullOrWhiteSpace(str) || str[0] == CommentStartChar)
                 {
                     continue;
                 }
