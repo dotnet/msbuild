@@ -14,14 +14,14 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
     {
         readonly Dictionary<string, WorkloadDefinition> workloads = new Dictionary<string, WorkloadDefinition>(StringComparer.OrdinalIgnoreCase);
         readonly Dictionary<string, WorkloadPack> packs = new Dictionary<string, WorkloadPack>(StringComparer.OrdinalIgnoreCase);
-        readonly string[] platformIds;
+        string[] platformIds;
         readonly string dotNetRootPath;
 
         public WorkloadResolver(IWorkloadManifestProvider manifestProvider, string dotNetRootPath)
         {
             this.dotNetRootPath = dotNetRootPath;
 
-            // eventually we may want a series of falbacks here, as rids have in general
+            // eventually we may want a series of fallbacks here, as rids have in general
             // but for now, keep it simple
             var platformId = GetHostPlatformId();
             if (platformId != null)
@@ -120,6 +120,11 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
         {
             fileExistOverride = fileExists;
             directoryExistOverride = directoryExists;
+        }
+
+        internal void ReplacePlatformIdsForTest(string[] platformIds)
+        {
+            this.platformIds = platformIds;
         }
 
         bool PackExists (string packPath, WorkloadPackKind kind)

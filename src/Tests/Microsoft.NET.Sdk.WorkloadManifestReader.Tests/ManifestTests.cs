@@ -1,12 +1,17 @@
 using FluentAssertions;
+
 using Microsoft.Net.Sdk.WorkloadManifestReader;
+
 using System.IO;
+using System.Linq;
+
 using Xunit;
 
 namespace ManifestReaderTests
 {
     public class ManifestTests
     {
+        const string fakeRootPath = "fakeRootPath";
 
         [Fact]
         public void ItCanDeserialize()
@@ -21,6 +26,23 @@ namespace ManifestReaderTests
                 result.Packs["Xamarin.Android.Sdk"].Kind.Should().Be(WorkloadPackKind.Sdk);
                 result.Packs["Xamarin.Android.Sdk"].Version.Should().Be("8.4.7");
             }
+        }
+
+        [Fact]
+        public void AliasedPackPath()
+        {
+            var manifestProvider = new FakeManifestProvider(Path.Combine("Manifests", "Sample.json"));
+            var resolver = new WorkloadResolver(manifestProvider, fakeRootPath);
+
+            resolver.ReplaceFilesystemChecksForTest(_ => true, _ => true);
+            resolver.ReplacePlatformIdsForTest(new[] { "win-x64", "*" });
+
+            var buildToolsPack = resolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk).FirstOrDefault(pack => pack.Id == "Xamarin.Android.BuildTools");
+
+            buildToolsPack.Should().NotBeNull();
+            buildToolsPack.Id.Should().Be("Xamarin.Android.BuildTools");
+            buildToolsPack.Version.Should().Be("8.4.7");
+            buildToolsPack.Path.Should().Be(Path.Combine(fakeRootPath, "packs", "Xamarin.Android.BuildTools.Win64Host", "8.4.7"));
         }
     }
 }
