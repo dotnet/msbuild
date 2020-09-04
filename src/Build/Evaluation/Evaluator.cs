@@ -1248,13 +1248,16 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private int AddGlobalProperties()
         {
-            if (_data.GlobalPropertiesDictionary != null)
+            if (_data.GlobalPropertiesDictionary == null)
             {
-                foreach (ProjectPropertyInstance globalProperty in _data.GlobalPropertiesDictionary)
-                {
-                    _data.SetProperty(globalProperty.Name, ((IProperty)globalProperty).EvaluatedValueEscaped, true /* IS global property */, false /* may NOT be a reserved name */);
-                }
+                return 0;
             }
+
+            foreach (ProjectPropertyInstance globalProperty in _data.GlobalPropertiesDictionary)
+            {
+                _data.SetProperty(globalProperty.Name, ((IProperty)globalProperty).EvaluatedValueEscaped, true /* IS global property */, false /* may NOT be a reserved name */);
+            }
+
             return _data.GlobalPropertiesDictionary.Count;
         }
 
