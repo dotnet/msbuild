@@ -677,7 +677,7 @@ namespace Microsoft.Build.BackEnd
                         // continue so we could throw the exception.
                         if (_requestEntry.RequestConfiguration.ActivelyBuildingTargets.ContainsKey(targetSpecification.TargetName))
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(targetLocation, "CircularDependency", targetSpecification.TargetName);
+                            ProjectErrorUtilities.ThrowInvalidProject(targetLocation, "CircularDependencyInTargetGraph", targetSpecification.TargetName);
                         }
                     }
                     else
@@ -689,7 +689,7 @@ namespace Microsoft.Build.BackEnd
                         }
 
                         // We are already building this target on this request. That's a circular dependency.
-                        ProjectErrorUtilities.ThrowInvalidProject(targetLocation, "CircularDependency", targetSpecification.TargetName);
+                        ProjectErrorUtilities.ThrowInvalidProject(targetLocation, "CircularDependencyInTargetGraph", targetSpecification.TargetName);
                     }
                 }
                 else
@@ -698,12 +698,14 @@ namespace Microsoft.Build.BackEnd
                     if (buildReason == TargetBuiltReason.BeforeTargets || buildReason == TargetBuiltReason.DependsOn || buildReason == TargetBuiltReason.None)
                     {
                         TargetEntry currentParent = parentTargetEntry;
+                        List<string> parentChain = new List<string>();
                         while (currentParent != null)
                         {
+                            parentChain.Add(currentParent.Name);
                             if (String.Equals(currentParent.Name, targetSpecification.TargetName, StringComparison.OrdinalIgnoreCase))
                             {
                                 // We are already building this target on this request. That's a circular dependency.
-                                ProjectErrorUtilities.ThrowInvalidProject(targetLocation, "CircularDependency", targetSpecification.TargetName);
+                                ProjectErrorUtilities.ThrowInvalidProject(targetLocation, "CircularDependencyInTargetGraphWithVerbosity", targetSpecification.TargetName, parentTargetEntry.Name, buildReason, string.Join("<-", parentChain));
                             }
 
                             currentParent = currentParent.ParentEntry;
