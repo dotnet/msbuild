@@ -6,6 +6,7 @@ using Microsoft.Build.Utilities;
 using System.Threading;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -31,11 +32,27 @@ namespace Microsoft.Build.Engine.UnitTests
         [InlineData("16.8", "16-7")]
         [InlineData("16.8", "16x7")]
         [InlineData("16.8", "16=7")]
-        public void InvalidFormatDoesNotDisableChangeWaves(string enabledWave, string waveToCheck)
+        public void InvalidCallerFormatThrows(string enabledWave, string waveToCheck)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MSBUILDCHANGEWAVE", enabledWave);
+                env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", enabledWave);
+                Shouldly.Should.Throw(() => ChangeWaves.IsChangeWaveEnabled(waveToCheck), typeof(InternalErrorException));
+            }
+        }
+
+        [Theory]
+        [InlineData("test", "16.8")]
+        [InlineData("16-8", "16.8")]
+        [InlineData("16x8", "16.8")]
+        [InlineData("garbage", "18.20")]
+        [InlineData("", "15.6")]
+        public void InvalidUserValueThrowsWarningAndLeavesWavesEnabled(string enabledWave, string waveToCheck)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", enabledWave);
+                // TODO: check for warning
                 ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBeTrue();
             }
         }
@@ -43,12 +60,47 @@ namespace Microsoft.Build.Engine.UnitTests
         [Theory]
         [InlineData ("16.8", "16.6")]
         [InlineData("16.8", "16.7")]
+        [InlineData("16.11", "16.10")]
         public void DetermineEnabledChangeWaves(string enabledWave, string waveToCheck)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MSBUILDCHANGEWAVE", enabledWave);
+                env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", enabledWave);
                 ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBeTrue();
+            }
+        }
+
+        [Theory]
+        [InlineData("16.8", "16.6")]
+        [InlineData("16.8", "16.7")]
+        [InlineData("16.11", "16.10")]
+        public void DetermineEnabledChangeWaves_InProjectFile(string enabledWave, string waveToCheck)
+        {
+            string project = @"
+            <Project>
+                <Target Name='HelloWorld' Condition=""$([MSBuild]::VersionGreaterThan('$(MSBUILDCHANGEWAVEVERSION)', '" + waveToCheck + @"'))"">
+                    <Message Text='Hello World!'/>
+                </Target>
+                <PropertyGroup>
+                        <msbuildchangewaveversion>" + enabledWave + @"</msbuildchangewaveversion>
+                </PropertyGroup>
+            </Project>";
+
+            MockLogger log = Helpers.BuildProjectWithNewOMExpectSuccess(project);
+            log.AssertLogContains("Hello World");
+        }
+
+        [Theory]
+        [InlineData("16.8", "16.8")]
+        [InlineData("16.8", "16.10")]
+        [InlineData("16.8", "17.0")]
+        [InlineData("16.11", "16.12")]
+        public void DetermineDisabledChangeWaves(string enabledWave, string waveToCheck)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", enabledWave);
+                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBeFalse();
             }
         }
 
@@ -56,13 +108,25 @@ namespace Microsoft.Build.Engine.UnitTests
         [InlineData("16.8", "16.8")]
         [InlineData("16.8", "16.10")]
         [InlineData("16.8", "17.0")]
-        public void DetermineDisabledChangeWaves(string enabledWave, string waveToCheck)
+        [InlineData("16.11", "16.12")]
+        public void DetermineDisabledChangeWaves_InProjectFile(string enabledWave, string waveToCheck)
         {
-            using (TestEnvironment env = TestEnvironment.Create())
-            {
-                env.SetEnvironmentVariable("MSBUILDCHANGEWAVE", enabledWave);
-                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBeFalse();
-            }
+            string project = @"
+            <Project>
+                <Target Name='HelloWorld' Condition=""$([MSBuild]::VersionGreaterThan('$(MSBUILDCHANGEWAVEVERSION)', '" + waveToCheck + @"'))"">
+                    <Message Text='Hello World!'/>
+                </Target>
+                <PropertyGroup>
+                        <msbuildchangewaveversion>" + enabledWave + @"</msbuildchangewaveversion>
+                </PropertyGroup>
+            </Project>";
+
+            MockLogger log = Helpers.BuildProjectWithNewOMExpectSuccess(project);
+            log.AssertLogDoesntContain("Hello World");
         }
+
+
     }
+
+
 }

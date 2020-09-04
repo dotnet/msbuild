@@ -11,7 +11,7 @@ namespace Microsoft.Build.Utilities
 
         /// <summary>
         /// Compares version against the MSBuildChangeWave environment variable.
-        /// Version MUST be of the format: "xx.yy.zz", else Version.TryParse will fail.
+        /// Version MUST be of the format: "xx.yy".
         /// </summary>
         /// <param name="wave">The version to compare.</param>
         /// <returns>A bool indicating whether the version is enabled.</returns>
@@ -28,20 +28,17 @@ namespace Microsoft.Build.Utilities
 
             if (!Version.TryParse(Traits.Instance.MSBuildChangeWave, out currentDisabledWave))
             {
-                // throw a warning or error stating the user set the environment variable
-                // to an incorrectly formatted change wave
-
+                // how do I throw a warning here?
                 return true;
             }
 
             Version waveToCheck;
-            
-            if (!Version.TryParse(wave.ToString(), out waveToCheck))
-            {
-                // throw a warning or error stating the caller input an incorrectly formatted change wave
-                return true;
-            }
-            
+
+            // When a caller passes an invalid waveToCheck, fail the build.
+            ErrorUtilities.VerifyThrow(Version.TryParse(wave.ToString(), out waveToCheck),
+                                       $"Argument 'wave' passed with invalid format." +
+                                       $"Please use the const strings or define one with format 'xx.yy");
+
             return waveToCheck < currentDisabledWave;
         }
     }

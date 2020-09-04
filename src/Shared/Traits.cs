@@ -32,7 +32,7 @@ namespace Microsoft.Build.Utilities
 
         public EscapeHatches EscapeHatches { get; }
 
-        public readonly string MSBuildChangeWave = Environment.GetEnvironmentVariable("MSBUILDCHANGEWAVE");
+        public readonly string MSBuildChangeWave = Environment.GetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION");
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern
