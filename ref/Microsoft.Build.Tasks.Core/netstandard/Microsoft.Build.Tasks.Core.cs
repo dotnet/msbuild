@@ -622,6 +622,8 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] Assemblies { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] AssemblyFiles { get { throw null; } set { } }
         public bool AutoUnify { get { throw null; } set { } }
+        public string[] CacheInputPaths { get { throw null; } set { } }
+        public string CacheOutputPath { get { throw null; } set { } }
         public string[] CandidateAssemblyFiles { get { throw null; } set { } }
         public bool CopyLocalDependenciesWhenParentReferenceInGac { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
