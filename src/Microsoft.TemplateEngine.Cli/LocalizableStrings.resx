@@ -244,7 +244,7 @@
     <value>Filters templates based on language and specifies the language of the template to create.</value>
   </data>
   <data name="ListsTemplates" xml:space="preserve">
-    <value>Lists templates containing the specified name. If no name is specified, lists all templates.</value>
+    <value>Lists templates containing the specified template name. If no name is specified, lists all templates.</value>
   </data>
   <data name="LocaleHelp" xml:space="preserve">
     <value>The locale to use.</value>
@@ -265,7 +265,7 @@
     <value>Multiple values specified for single value parameter: {0}.</value>
   </data>
   <data name="NameOfOutput" xml:space="preserve">
-    <value>The name for the output being created. If no name is specified, the name of the current directory is used.</value>
+    <value>The name for the output being created. If no name is specified, the name of the output directory is used.</value>
   </data>
   <data name="NoItems" xml:space="preserve">
     <value>(No Items)</value>

@@ -937,7 +937,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Lists templates containing the specified name. If no name is specified, lists all templates..
+        ///   Looks up a localized string similar to Lists templates containing the specified template name. If no name is specified, lists all templates..
         /// </summary>
         public static string ListsTemplates {
             get {
@@ -1009,7 +1009,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The name for the output being created. If no name is specified, the name of the current directory is used..
+        ///   Looks up a localized string similar to The name for the output being created. If no name is specified, the name of the output directory is used..
         /// </summary>
         public static string NameOfOutput {
             get {
