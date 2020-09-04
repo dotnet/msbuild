@@ -52,7 +52,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         private static CreationResultStatus DisplayHelpForUnambiguousTemplateGroup(ListOrHelpTemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, ITelemetryLogger telemetryLogger, string defaultLanguage)
         {
             // sanity check: should never happen; as condition for unambiguous template group is checked above
-            if (templateResolutionResult.UnambiguousTemplateGroup == null)
+            if (!templateResolutionResult.UnambiguousTemplateGroup.Any())
             {
                 return DisplayListOrHelpForAmbiguousTemplateGroup(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, telemetryLogger, defaultLanguage);
             }
@@ -78,6 +78,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
         private static CreationResultStatus TemplateDetailedHelpForSingularTemplateGroup(IReadOnlyCollection<ITemplateMatchInfo> unambiguousTemplateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
         {
+            // sanity check: should never happen; as condition for unambiguous template group is checked above
+            if (!unambiguousTemplateGroup.Any())
+            {
+                return CreationResultStatus.NotFound;
+            }
             // (scp 2017-09-06): parse errors probably can't happen in this context.
             foreach (string parseErrorMessage in unambiguousTemplateGroup.Where(x => x.HasParseError()).Select(x => x.GetParseError()).ToList())
             {
@@ -92,8 +97,16 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 DisplayParametersInvalidForSomeTemplates(invalidForSomeTemplates, LocalizableStrings.SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches);
             }
 
-            bool showImplicitlyHiddenParams = unambiguousTemplateGroup.Count > 1;
-            TemplateDetailsDisplay.ShowTemplateGroupHelp(unambiguousTemplateGroup, environmentSettings, commandInput, hostDataLoader, templateCreator, showImplicitlyHiddenParams);
+            if (invalidForAllTemplates.Count == 0)
+            {
+                bool showImplicitlyHiddenParams = unambiguousTemplateGroup.Count > 1;
+                TemplateDetailsDisplay.ShowTemplateGroupHelp(unambiguousTemplateGroup, environmentSettings, commandInput, hostDataLoader, templateCreator, showImplicitlyHiddenParams);
+            }
+            else
+            {
+                Reporter.Error.WriteLine(
+                    string.Format(LocalizableStrings.InvalidParameterTemplateHint,  GetTemplateHelpCommand(commandInput.CommandName, unambiguousTemplateGroup.First().Info)).Bold().Red());
+            }
 
             return invalidForAllTemplates.Count > 0 || invalidForSomeTemplates.Count > 0
                 ? CreationResultStatus.InvalidParamValues
@@ -403,6 +416,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
 
             return CreationResultStatus.InvalidParamValues;
+        }
+
+        internal static string GetTemplateHelpCommand(string commandName, ITemplateInfo template)
+        {
+            return $"dotnet {commandName} {template.ShortName} --help";
         }
 
         private static string GetInputParametersString(string templateName, string templateLanguage, string context, string baselineName)

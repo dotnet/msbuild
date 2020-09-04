@@ -69,7 +69,7 @@ namespace Microsoft.TemplateEngine.Cli
                 if (!anySearchMatches)
                 {
                     ListOrHelpTemplateListResolutionResult listingTemplateListResolutionResult = TemplateListResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
-                    return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(listingTemplateListResolutionResult, _environment, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage);
+                    return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(listingTemplateListResolutionResult, _environment, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, false);
                 }
                 else
                 {
