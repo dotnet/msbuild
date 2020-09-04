@@ -150,21 +150,16 @@ namespace Microsoft.Build.Shared
         {
             public LOGICAL_PROCESSOR_RELATIONSHIP Relationship;
             public uint Size;
-            public GROUP_RELATIONSHIP Group;
+            public PROCESSOR_RELATIONSHIP Processor;
         }
-        internal unsafe struct GROUP_RELATIONSHIP
+        [StructLayout(LayoutKind.Sequential)]
+        internal unsafe struct PROCESSOR_RELATIONSHIP
         {
-            private ushort MaximumGroupCount;
-            public ushort ActiveGroupCount;
+            public byte Flags;
+            private byte EfficiencyClass;
             private fixed byte Reserved[20];
-            public PROCESSOR_GROUP_INFO GroupInfo;
-        }
-        internal unsafe struct PROCESSOR_GROUP_INFO
-        {
-            public byte MaximumProcessorCount;
-            public byte ActiveProcessorCount;
-            public fixed byte Reserved[38];
-            public IntPtr ActiveProcessorMask;
+            public ushort GroupCount;
+            public IntPtr GroupInfo;
         }
 #pragma warning restore 0169, 0149
 
@@ -512,7 +507,7 @@ namespace Microsoft.Build.Shared
             uint len = 0;
             const int ERROR_INSUFFICIENT_BUFFER = 122;
 
-            if (!GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP.RelationGroup, IntPtr.Zero, ref len) &&
+            if (!GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP.RelationProcessorCore, IntPtr.Zero, ref len) &&
                 Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER)
             {
                 // Allocate that much space
@@ -520,7 +515,7 @@ namespace Microsoft.Build.Shared
                 fixed (byte* bufferPtr = buffer)
                 {
                     // Call GetLogicalProcessorInformationEx with the allocated buffer
-                    if (GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP.RelationGroup, (IntPtr)bufferPtr, ref len))
+                    if (GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP.RelationProcessorCore, (IntPtr)bufferPtr, ref len))
                     {
                         // Walk each SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX in the buffer, where the Size of each dictates how
                         // much space it's consuming.  For each group relation, count the number of active processors in each of its group infos.
@@ -530,14 +525,11 @@ namespace Microsoft.Build.Shared
                         while (ptr < endPtr)
                         {
                             var current = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)ptr;
-                            if (current->Relationship == LOGICAL_PROCESSOR_RELATIONSHIP.RelationGroup)
+                            if (current->Relationship == LOGICAL_PROCESSOR_RELATIONSHIP.RelationProcessorCore)
                             {
-                                PROCESSOR_GROUP_INFO* groupInfo = &current->Group.GroupInfo;
-                                int groupCount = current->Group.ActiveGroupCount;
-                                for (int i = 0; i < groupCount; i++)
-                                {
-                                    processorCount += (groupInfo + i)->ActiveProcessorCount;
-                                }
+                                // Flags is 0 if the core has a single logical proc, LTP_PC_SMT if more than one
+                                // for now, assume "more than 1" == 2, as it has historically been for hyperthreading
+                                processorCount += (current->Processor.Flags == 0) ? 1 : 2;
                             }
                             ptr += current->Size;
                         }
