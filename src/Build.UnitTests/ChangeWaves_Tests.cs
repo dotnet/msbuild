@@ -21,7 +21,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 // intentionally avoid setting MSBUILDCHANGEWAVE environment variable
-                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBeTrue();
+                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBe(ChangeWaveReturnType.FeatureEnabled);
             }
         }
 
@@ -53,7 +53,7 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", enabledWave);
                 // TODO: check for warning
-                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBeTrue();
+                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBe(ChangeWaveReturnType.FeatureEnabled);
             }
         }
 
@@ -66,7 +66,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", enabledWave);
-                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBeTrue();
+                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBe(ChangeWaveReturnType.FeatureEnabled);
             }
         }
 
@@ -100,7 +100,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", enabledWave);
-                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBeFalse();
+                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBe(ChangeWaveReturnType.FeatureDisabled);
             }
         }
 
