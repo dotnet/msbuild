@@ -105,15 +105,15 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>7e97ec5e7dab92cd00ecfcc5f617dd51879bf1ed</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="5.0.0-rc.2.20453.4">
+    <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="5.0.0-rc.2.20454.1">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
       <Sha>e6684114271e4e63cc700e319fc1f418edaa5c5e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.0-rc.2.20453.4">
+    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.0-rc.2.20454.1">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
       <Sha>e6684114271e4e63cc700e319fc1f418edaa5c5e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="5.0.0-rc.2.20453.4">
+    <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="5.0.0-rc.2.20454.1">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
       <Sha>e6684114271e4e63cc700e319fc1f418edaa5c5e</Sha>
     </Dependency>
