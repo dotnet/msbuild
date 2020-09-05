@@ -53,10 +53,6 @@ MSBuild can be run on Unix systems that support .NET Core. Set-up instructions c
 
 You can turn on localized builds via the `/p:LocalizedBuild=true` command line argument. For more information on localized builds and how to make contributions to MSBuild's translations, see our [localization documentation](documentation/wiki/Localization.md)
 
-## How to Engage, Contribute and Provide Feedback
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
 #### Getting Started
 
 Before you contribute, please read through the contributing and developer guides to get an idea of what kinds of pull requests we accept.
