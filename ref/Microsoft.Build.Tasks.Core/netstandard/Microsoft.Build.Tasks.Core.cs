@@ -303,6 +303,14 @@ namespace Microsoft.Build.Tasks
         public bool UpdateToAbsolutePaths { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    public sealed partial class FormatUrl : Microsoft.Build.Tasks.TaskExtension
+    {
+        public FormatUrl() { }
+        public string InputUrl { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public string OutputUrl { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
     public sealed partial class FormatVersion : Microsoft.Build.Tasks.TaskExtension
     {
         public FormatVersion() { }

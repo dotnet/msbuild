@@ -416,6 +416,9 @@
     <Compile Include="FindInList.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="FormatUrl.cs" Condition="'$(MonoBuild)' != 'true'">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="FormatVersion.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -612,9 +615,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="FindInvalidProjectReferences.cs" />
-    <Compile Include="FormatUrl.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="GenerateBootstrapper.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
