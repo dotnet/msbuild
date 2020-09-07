@@ -207,7 +207,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     .For(
                         environmentSettings,
                         groupsForDisplay,
-                        columnPadding: 6,
+                        columnPadding: 2,
                         headerSeparator: '-',
                         blankLineBetweenRows: false)
                     .DefineColumn(t => t.Name, LocalizableStrings.Templates, shrinkIfNeeded: true)
@@ -279,7 +279,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 {
                     Name = highestPrecedenceTemplate.Info.Name,
                     ShortName = shortName,
-                    Languages = string.Join(", ", languageForDisplay),
+                    Languages = string.Join(",", languageForDisplay),
                     Classifications = highestPrecedenceTemplate.Info.Classifications != null ? string.Join("/", highestPrecedenceTemplate.Info.Classifications) : null
                 };
                 templateGroupsForDisplay.Add(groupDisplayInfo);
