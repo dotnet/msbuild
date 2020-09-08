@@ -133,26 +133,6 @@ stages:
               _PublishType: none
               _SignType: test
 
-    - template: /eng/build.yml
-      parameters:
-        agentOs: Darwin
-        pool:
-          name: Hosted macOS
-        ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: OSX.1014.Amd64.Open
-        ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: OSX.1014.Amd64
-        strategy:
-          matrix:
-            Build_Debug:
-              _BuildConfig: Debug
-              _PublishType: none
-              _SignType: test
-            Build_Release:
-              _BuildConfig: Release
-              _PublishType: none
-              _SignType: test
-
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/common/templates/job/publish-build-assets.yml
       parameters:
