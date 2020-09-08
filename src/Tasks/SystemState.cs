@@ -572,7 +572,7 @@ namespace Microsoft.Build.Tasks
             foreach (string stateFile in stateFiles)
             {
                 // Verify that it's a real stateFile; log message but do not error if not
-                SystemState sysState = (SystemState)DeserializeCache(stateFile, log, requiredReturnType, false);
+                SystemState sysState = DeserializeCache<SystemState>(stateFile, log, false);
                 if (sysState == null)
                 {
                     continue;

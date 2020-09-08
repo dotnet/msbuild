@@ -1859,7 +1859,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
         {
-            _cache = (SystemState)StateFileBase.DeserializeCache(_stateFile, Log, typeof(SystemState));
+            _cache = StateFileBase.DeserializeCache<SystemState>(_stateFile, Log);
 
             if (_cache == null)
             {
