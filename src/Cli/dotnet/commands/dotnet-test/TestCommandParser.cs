@@ -32,6 +32,11 @@ namespace Microsoft.DotNet.Cli
                         Accept.NoArguments()
                               .ForwardAsSingle(o => "-property:VSTestListTests=true")),
                   Create.Option(
+                        "-e|--environment",
+                        LocalizableStrings.CmdEnvironmentVariableDescription,
+                        Accept.OneOrMoreArguments()
+                              .With(name: LocalizableStrings.CmdEnvironmentVariableExpression)),
+                  Create.Option(
                         "--filter",
                         LocalizableStrings.CmdTestCaseFilterDescription,
                         Accept.ExactlyOneArgument()
