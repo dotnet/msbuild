@@ -35,7 +35,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache at the SystemState instance level. It is serialized and reused between instances.
         /// </summary>
-        private Hashtable instanceLocalFileStateCache = new Hashtable(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, FileState> instanceLocalFileStateCache = new Dictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
 
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace Microsoft.Build.Tasks
         {
             ErrorUtilities.VerifyThrowArgumentNull(info, "info");
 
-            instanceLocalFileStateCache = (Hashtable)info.GetValue("fileState", typeof(Hashtable));
+            instanceLocalFileStateCache = (Dictionary<string, FileState>)info.GetValue("fileState", typeof(Dictionary<string, FileState>));
             isDirty = false;
         }
 
@@ -578,12 +578,12 @@ namespace Microsoft.Build.Tasks
                 {
                     continue;
                 }
-                foreach (DictionaryEntry kvp in sysState.instanceLocalFileStateCache)
+                foreach (KeyValuePair<string, FileState> kvp in sysState.instanceLocalFileStateCache)
                 {
-                    string relativePath = (string)kvp.Key;
+                    string relativePath = kvp.Key;
                     if (!assembliesFound.Contains(relativePath))
                     {
-                        FileState fileState = (FileState)kvp.Value;
+                        FileState fileState = kvp.Value;
                         // Verify that the assembly is correct
                         Guid mvid;
                         string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stateFile), relativePath));
