@@ -1721,9 +1721,11 @@ namespace Microsoft.Build.CommandLine
                                 String.Equals(switchName, "maxcpucount", StringComparison.OrdinalIgnoreCase))
                             {
                                 int numberOfCpus = Environment.ProcessorCount;
-#if NETFRAMEWORK && !MONO
-                                // .NET framework calls Windows APIs that have a core count limit (32/64 depending on process bitness), 
-                                // so check with GetLogicalProcessorInformationEx in that case.
+#if !MONO
+                                // .NET framework calls Windows APIs that have a core count limit (32/64 depending on process bitness).
+                                // .NET Core on Windows returns a core count limited to the current NUMA node
+                                //     https://github.com/dotnet/runtime/issues/41902
+                                // So if we get a high core count on Windows, double-check it.
                                 if (numberOfCpus >= 32 && NativeMethodsShared.IsWindows)
                                 {
                                     var result = NativeMethodsShared.GetPhysicalCoreCount();
