@@ -14,6 +14,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Versioning;
 using System.Security.Permissions;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 
@@ -586,7 +587,7 @@ namespace Microsoft.Build.Tasks
                         // Verify that the assembly is correct
                         Guid mvid;
                         string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stateFile), relativePath));
-                        if (File.Exists(fullPath))
+                        if (FileSystems.Default.FileExists(fullPath))
                         {
                             using (var reader = new PEReader(File.OpenRead(fullPath)))
                             {
