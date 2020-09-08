@@ -1728,7 +1728,7 @@ namespace Microsoft.Build.CommandLine
                                 // So if we get a high core count on Windows, double-check it.
                                 if (numberOfCpus >= 32 && NativeMethodsShared.IsWindows)
                                 {
-                                    var result = NativeMethodsShared.GetPhysicalCoreCount();
+                                    var result = NativeMethodsShared.GetLogicalCoreCount();
                                     if(result != -1)
                                         numberOfCpus = result;
                                 }
