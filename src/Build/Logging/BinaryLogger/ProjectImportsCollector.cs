@@ -20,7 +20,7 @@ namespace Microsoft.Build.Logging
         {
             if (_stream == null)
             {
-                return new byte[0];
+                return Array.Empty<byte>;
             }
             else if (ArchiveFilePath == null)
             {
