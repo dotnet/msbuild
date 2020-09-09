@@ -1098,6 +1098,22 @@ namespace Microsoft.Build.Evaluation
             SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion);
             SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild);
 
+            // Would this be out of sync with traits.instance.msbuildchangewave?
+            string changeWave = Traits.Instance.MSBuildChangeWave;
+            ChangeWaveReturnType rt = ChangeWaves.IsChangeWaveEnabled(changeWave);
+
+            if (rt == ChangeWaveReturnType.Invalid)
+            {
+                _evaluationLoggingContext.LogWarning("ChangeWave_InvalidFormat", new BuildEventFileInfo("", 0, 0, 0, 0), "asd");
+                changeWave = ChangeWaves.EnableAllFeaturesBehindChangeWaves;
+            }
+            else if (rt == ChangeWaveReturnType.VersionOutOfRotation)
+            {
+                _evaluationLoggingContext.LogWarning("ChangeWave_OutOfRotation", new BuildEventFileInfo("", 0, 0, 0, 0), "asd");
+                changeWave = ChangeWaves.LowestWave;
+            }
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.msbuilddisablechangewaveversion, changeWave));
+
             // Fake OS env variables when not on Windows
             if (!NativeMethodsShared.IsWindows)
             {

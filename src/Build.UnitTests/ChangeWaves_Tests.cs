@@ -12,6 +12,21 @@ namespace Microsoft.Build.Engine.UnitTests
 {
     sealed public class ChangeWaves_Tests
     {
+
+        [Theory]
+        [InlineData("16.8")]
+        [InlineData("16.10")]
+        [InlineData("17.0")]
+        [InlineData("25.87")]
+        [InlineData("102.87")]
+        public void EnableAllFeaturesBehindChangeWavesEnablesAllFeaturesBehindChangeWaves(string waveToCheck)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", ChangeWaves.EnableAllFeaturesBehindChangeWaves);
+                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBe(ChangeWaveReturnType.FeatureEnabled);
+            }
+        }
         [Theory]
         [InlineData("16.8")]
         [InlineData("16.10")]

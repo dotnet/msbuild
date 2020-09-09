@@ -11,11 +11,20 @@ namespace Microsoft.Build.Utilities
         FeatureEnabled,
         FeatureDisabled
     }
+    /// <summary>
+    /// There may be some confusion between "enabling waves" and "enabling features".
+    /// Enabling a wave DISABLES all features behind that wave.
+    /// </summary>
     public class ChangeWaves
     {
         public const string LowestWave = Wave16_8, Wave16_8 = "16.8";
         public const string Wave16_10 = "16.10";
         public const string Wave17_0 = "17.0";
+
+        /// <summary>
+        /// Special value indicating that all features behind change-waves should be enabled.
+        /// </summary>
+        public const string EnableAllFeaturesBehindChangeWaves = "999.999";
 
         /// <summary>
         /// Compares version against the MSBuildChangeWave environment variable.
@@ -36,8 +45,9 @@ namespace Microsoft.Build.Utilities
 
             if (!Version.TryParse(Traits.Instance.MSBuildChangeWave, out currentDisabledWave))
             {
-                // how do I throw a warning here?
-                return ChangeWaveReturnType.FeatureEnabled;
+                // should still enable the features behind this wave.
+                // not sure I like that a dev would have to hide their feature behind if(returntype == invalid || returntype == featureenabled)
+                return ChangeWaveReturnType.Invalid;
             }
 
             // User-set change wave is valid. let's verify it's in rotation
