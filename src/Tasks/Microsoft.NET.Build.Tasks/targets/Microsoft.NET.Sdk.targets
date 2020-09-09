@@ -983,7 +983,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup Condition=" '$(ImportWindowsDesktopTargets)' == ''
                  and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
-                 and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))
+                 and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '3.0'))
                  and '$(TargetPlatformIdentifier)' == 'Windows'
                  and ('$(UseWpf)' == 'true' Or '$(UseWindowsForms)' == 'true')">
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
