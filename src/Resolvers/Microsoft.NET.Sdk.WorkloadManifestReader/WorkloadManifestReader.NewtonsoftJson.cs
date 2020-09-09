@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 using JsonTokenType = Newtonsoft.Json.JsonToken;
 
-namespace Microsoft.Net.Sdk.WorkloadManifestReader
+namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     partial class WorkloadManifestReader
     {

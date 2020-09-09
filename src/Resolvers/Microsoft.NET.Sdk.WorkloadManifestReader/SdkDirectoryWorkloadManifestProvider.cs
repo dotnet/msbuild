@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace Microsoft.Net.Sdk.WorkloadManifestReader
+namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public class SdkDirectoryWorkloadManifestProvider : IWorkloadManifestProvider
     {

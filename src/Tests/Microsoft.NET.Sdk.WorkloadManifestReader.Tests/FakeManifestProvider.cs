@@ -1,4 +1,4 @@
-﻿using Microsoft.Net.Sdk.WorkloadManifestReader;
+﻿using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 using System.Collections.Generic;
 using System.IO;

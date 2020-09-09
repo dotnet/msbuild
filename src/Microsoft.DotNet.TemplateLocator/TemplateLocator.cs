@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 
 using Microsoft.DotNet.DotNetSdkResolver;
-using Microsoft.Net.Sdk.WorkloadManifestReader;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.TemplateLocator
 {

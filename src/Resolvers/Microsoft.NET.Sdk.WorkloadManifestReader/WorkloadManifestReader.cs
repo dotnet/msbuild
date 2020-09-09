@@ -2,14 +2,13 @@
 
 using System.Collections.Generic;
 
-using Microsoft.NET.Sdk.WorkloadManifestReader;
 #if USE_SYSTEM_TEXT_JSON
 using System.Text.Json;
 #else
 using JsonTokenType = Newtonsoft.Json.JsonToken;
 #endif
 
-namespace Microsoft.Net.Sdk.WorkloadManifestReader
+namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     partial class WorkloadManifestReader
     {

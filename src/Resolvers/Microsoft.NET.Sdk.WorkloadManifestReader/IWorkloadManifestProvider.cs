@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Microsoft.Net.Sdk.WorkloadManifestReader
+namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     /// <summary>
     /// This abstracts out the process of locating and loading a set of manifests to be loaded into a

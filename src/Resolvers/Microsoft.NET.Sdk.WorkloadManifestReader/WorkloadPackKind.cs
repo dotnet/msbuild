@@ -1,4 +1,4 @@
-﻿namespace Microsoft.Net.Sdk.WorkloadManifestReader
+﻿namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public enum WorkloadPackKind
     {

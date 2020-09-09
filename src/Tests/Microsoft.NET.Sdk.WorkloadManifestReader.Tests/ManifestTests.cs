@@ -1,6 +1,6 @@
 using FluentAssertions;
 
-using Microsoft.Net.Sdk.WorkloadManifestReader;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 using System.IO;
 using System.Linq;

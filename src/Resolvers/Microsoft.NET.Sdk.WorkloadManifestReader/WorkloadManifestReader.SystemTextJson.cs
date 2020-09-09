@@ -5,7 +5,7 @@ using System.Buffers;
 using System.IO;
 using System.Text.Json;
 
-namespace Microsoft.Net.Sdk.WorkloadManifestReader
+namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     partial class WorkloadManifestReader
     {

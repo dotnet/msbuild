@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Microsoft.Net.Sdk.WorkloadManifestReader
+namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     [Serializable]
     class WorkloadManifestFormatException: Exception
