@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Utils;
 
@@ -27,6 +28,9 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             }
 
             settings.Host.LogMessage(string.Format(LocalizableStrings.RunningCommand, actionConfig.Args["executable"] + " " + args));
+
+            string resolvedExecutablePath = ResolveExecutableFilePath(actionConfig.Args["executable"], outputBasePath);
+
             System.Diagnostics.Process commandResult = System.Diagnostics.Process.Start(new ProcessStartInfo
             {
                 RedirectStandardError = true,
@@ -34,7 +38,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 UseShellExecute = false,
                 CreateNoWindow = false,
                 WorkingDirectory = outputBasePath,
-                FileName = actionConfig.Args["executable"],
+                FileName = resolvedExecutablePath,
                 Arguments = args
             });
 
@@ -54,6 +58,22 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             }
 
             return allSucceeded;
+        }
+
+        private static string ResolveExecutableFilePath(string executableFileName, string outputBasePath)
+        {
+            if (!string.IsNullOrEmpty(outputBasePath) && Directory.Exists(outputBasePath))
+            {
+                string executableCombinedFileName = Path.Combine(Path.GetFullPath(outputBasePath), executableFileName);
+                if (File.Exists(executableCombinedFileName))
+                {
+                    return executableCombinedFileName;
+                }
+            }
+
+            // The executable has not been found in the template folder, thus do not use the full path to the file.
+            // The executable will be further searched in the directories from the PATH environment variable.
+            return executableFileName;
         }
     }
 }
