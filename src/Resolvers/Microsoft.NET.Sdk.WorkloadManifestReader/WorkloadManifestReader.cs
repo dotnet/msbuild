@@ -1,28 +1,18 @@
 ﻿using System;
+
 using System.Collections.Generic;
-using System.IO;
-using System.Text.Json;
 
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+#if USE_SYSTEM_TEXT_JSON
+using System.Text.Json;
+#else
+using JsonTokenType = Newtonsoft.Json.JsonToken;
+#endif
 
 namespace Microsoft.Net.Sdk.WorkloadManifestReader
 {
     partial class WorkloadManifestReader
     {
-        static ReadOnlySpan<byte> utf8Bom => new byte[] { 0xEF, 0xBB, 0xBF };
-
-        public static WorkloadManifest ReadWorkloadManifest (Stream manifestStream)
-        {
-            var readerOptions = new JsonReaderOptions {
-                AllowTrailingCommas = true,
-                CommentHandling = JsonCommentHandling.Skip
-            };
-
-            var reader = new Utf8JsonStreamReader(manifestStream, readerOptions);
-
-            return ReadWorkloadManifest(ref reader);
-        }
-
         static void ConsumeToken(ref Utf8JsonStreamReader reader, JsonTokenType expected)
         {
             if (reader.Read() && expected == reader.TokenType)
@@ -44,9 +34,9 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
 
         static bool ReadBool(ref Utf8JsonStreamReader reader)
         {
-            if (reader.Read() && (reader.TokenType == JsonTokenType.True || reader.TokenType == JsonTokenType.False))
+            if (reader.Read() && reader.TokenType.IsBool())
             {
-                return reader.TokenType == JsonTokenType.True;
+                return reader.GetBool();
             }
 
             throw new WorkloadManifestFormatException(Strings.ExpectedBoolAtOffset, reader.TokenStartIndex);
@@ -74,8 +64,8 @@ namespace Microsoft.Net.Sdk.WorkloadManifestReader
                         if (string.Equals("version", propName, StringComparison.OrdinalIgnoreCase))
                         {
                             if (version != null) ThrowDuplicateKeyException(ref reader, propName);
-                            if (!reader.Read() || reader.TokenType != JsonTokenType.Number) throw new WorkloadManifestFormatException(Strings.MissingOrInvalidManifestVersion);
-                            version = reader.GetInt64();
+                            if (!reader.Read() || !reader.TryGetInt64(out var v)) throw new WorkloadManifestFormatException(Strings.MissingOrInvalidManifestVersion);
+                            version = v;
                             continue;
                         }
 
