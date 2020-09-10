@@ -3202,10 +3202,10 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Execute task. This metod is intended to use from RAR as a Service node
+        /// Execute task. This method is intended to be used from a RAR as a Service node.
         /// </summary>
         /// <param name="input">Required input to the task</param>
-        /// <returns>If tasks was executed successfully</returns>
+        /// <returns>If task was executed successfully</returns>
         internal ResolveAssemblyReferenceResult Execute(ResolveAssemblyReferenceTaskInput input)
         {
             ErrorUtilities.VerifyThrowArgumentNull(input, nameof(input));
