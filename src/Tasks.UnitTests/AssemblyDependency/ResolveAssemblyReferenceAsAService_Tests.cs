@@ -36,7 +36,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
         public void EnsureInputPropertiesMatch()
         {
             string[] rarInputProperties = typeof(ResolveAssemblyReference).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                .Where(p => !p.GetCustomAttributes(typeof(OutputAttribute), true).Any()).Select(p => $"{p.PropertyType.FullName}.{p.Name}").ToArray();
+                .Where(p => !p.GetCustomAttributes(typeof(OutputAttribute), inherit: true).Any()).Select(p => $"{p.PropertyType.FullName}.{p.Name}").ToArray();
             string[] inputProperties = typeof(ResolveAssemblyReferenceTaskInput).GetProperties().Select(p => $"{p.PropertyType.FullName}.{p.Name}").ToArray();
 
             foreach (var item in rarInputProperties)

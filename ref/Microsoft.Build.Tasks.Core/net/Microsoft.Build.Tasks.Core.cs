@@ -2544,18 +2544,6 @@ namespace Microsoft.Build.Tasks.Hosting
         bool Compile();
     }
 }
-namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
-{
-    public sealed partial class ReadOnlyTaskItem
-    {
-        public ReadOnlyTaskItem(string itemSpec) { }
-        public ReadOnlyTaskItem(string itemSpec, System.Collections.IDictionary metadata) { }
-        public string ItemSpec { get { throw null; } set { } }
-        public System.Collections.Generic.Dictionary<string, string> MetadataNameToValue { get { throw null; } set { } }
-        public static explicit operator string (Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract.ReadOnlyTaskItem taskItemToCast) { throw null; }
-        public override string ToString() { throw null; }
-    }
-}
 namespace Microsoft.Build.Tasks.Xaml
 {
     public partial class CommandLineArgumentRelation : Microsoft.Build.Tasks.Xaml.PropertyRelation

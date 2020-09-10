@@ -26,6 +26,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     public class ResolveAssemblyReferenceTestFixture : IDisposable
     {
+        /// <summary>
+        /// Determines if <see cref="Execute(ResolveAssemblyReference, bool, RARSimulationMode)"/> should use RARaaS
+        /// </summary>
+        private const bool UseRARaaS = false;
+
         // Create the mocks.
         internal static Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
         internal static Microsoft.Build.Shared.DirectoryExists directoryExists = new Microsoft.Build.Shared.DirectoryExists(DirectoryExists);
@@ -2962,9 +2967,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <remarks>
         /// NOTE! This test is not in fact completely isolated from its environment: it is reading the real redist lists.
         /// </remarks>
-        protected static bool Execute(ResolveAssemblyReference t, RARSimulationMode RARSimulationMode = RARSimulationMode.LoadAndBuildProject, bool useRarService = true)
+        protected static bool Execute(ResolveAssemblyReference t, RARSimulationMode RARSimulationMode = RARSimulationMode.LoadAndBuildProject)
         {
-            return Execute(t, true, RARSimulationMode, useRarService);
+            return Execute(t, true, RARSimulationMode);
         }
 
         [Flags]
@@ -2991,7 +2996,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 ResolveAssemblyReferenceTaskInput taskInput = new ResolveAssemblyReferenceTaskInput(input);
                 ResolveAssemblyReferenceBuildEngine buildEngine = new ResolveAssemblyReferenceBuildEngine();
-                //ResolveAssemblyReference task = GetResolveAssemblyReferenceTask(buildEngine);
                 ResolveAssemblyReference task = new ResolveAssemblyReference
                 {
                     BuildEngine = buildEngine
@@ -3009,8 +3013,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     EventCount = buildEngine.EventCount
                 };
 
-                //System.Console.WriteLine("RAR task: {0}. Logged {1} events", result.TaskResult ? "Succeded" : "Failed", result.EventCount);
-
                 return result;
             }
         }
@@ -3019,7 +3021,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Execute the task. Without confirming that the number of files resolved with and without find dependencies is identical.
         /// This is because profiles could cause the number of primary references to be different.
         /// </summary>
-        protected static bool Execute(ResolveAssemblyReference t, bool buildConsistencyCheck, RARSimulationMode rarSimulationMode = RARSimulationMode.LoadAndBuildProject, bool useRarService = true)
+        protected static bool Execute(ResolveAssemblyReference t, bool buildConsistencyCheck, RARSimulationMode rarSimulationMode = RARSimulationMode.LoadAndBuildProject)
         {
             string tempPath = Path.GetTempPath();
             string redistListPath = Path.Combine(tempPath, Guid.NewGuid() + ".xml");
@@ -3028,11 +3030,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             bool succeeded = false;
 
-            bool usingRarService = false;
+            bool usingRarService = UseRARaaS;
             System.Threading.Tasks.Task serverTask = null;
             Stream clientStream = null, serverStream = null;
-            if (useRarService)
+            if (usingRarService)
             {
+                // Reset the value, so we know that we could initialize RARaaS
+                usingRarService = false;
                 if (t.BuildEngine is MockEngine e)
                 {
                     (serverStream, clientStream) = FullDuplexStream.CreatePair();

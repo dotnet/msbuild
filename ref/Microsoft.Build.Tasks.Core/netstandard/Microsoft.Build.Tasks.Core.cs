@@ -2166,18 +2166,6 @@ namespace Microsoft.Build.Tasks.Hosting
         bool Compile();
     }
 }
-namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
-{
-    public sealed partial class ReadOnlyTaskItem
-    {
-        public ReadOnlyTaskItem(string itemSpec) { }
-        public ReadOnlyTaskItem(string itemSpec, System.Collections.IDictionary metadata) { }
-        public string ItemSpec { get { throw null; } set { } }
-        public System.Collections.Generic.Dictionary<string, string> MetadataNameToValue { get { throw null; } set { } }
-        public static explicit operator string (Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract.ReadOnlyTaskItem taskItemToCast) { throw null; }
-        public override string ToString() { throw null; }
-    }
-}
 namespace System.Deployment.Internal.CodeSigning
 {
     public sealed partial class RSAPKCS1SHA256SignatureDescription : System.Security.Cryptography.SignatureDescription

@@ -8,7 +8,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 {
-    public sealed class ReadOnlyTaskItem
+    internal sealed class ReadOnlyTaskItem
     {
         public string ItemSpec { get; set; }
 

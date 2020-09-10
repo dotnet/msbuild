@@ -47,7 +47,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Default constructor
         /// </summary>
-        internal BuildMessageEventArgs()
+        protected BuildMessageEventArgs()
             : base()
         {
             // do nothing

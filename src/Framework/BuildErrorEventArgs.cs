@@ -212,7 +212,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Default constructor
         /// </summary>
-        internal BuildErrorEventArgs()
+        protected BuildErrorEventArgs()
             : base()
         {
             // do nothing
