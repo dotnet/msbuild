@@ -9,7 +9,7 @@ using JsonTokenType = Newtonsoft.Json.JsonToken;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    partial class WorkloadManifestReader
+    internal partial class WorkloadManifestReader
     {
 
         public static WorkloadManifest ReadWorkloadManifest(Stream manifestStream)
@@ -22,7 +22,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return ReadWorkloadManifest(ref reader);
         }
         // this is a compat wrapper so the source matches the system.text.json impl
-        ref struct Utf8JsonStreamReader
+        private ref struct Utf8JsonStreamReader
         {
             public Utf8JsonStreamReader(JsonTextReader reader)
             {
@@ -68,7 +68,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         }
     }
 
-    static class JsonTokenTypeExtensions
+    internal static class JsonTokenTypeExtensions
     {
         public static bool IsBool(this JsonTokenType tokenType) => tokenType == JsonTokenType.Boolean;
     }

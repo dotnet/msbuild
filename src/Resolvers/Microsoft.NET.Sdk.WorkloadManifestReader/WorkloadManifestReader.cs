@@ -10,9 +10,9 @@ using JsonTokenType = Newtonsoft.Json.JsonToken;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    partial class WorkloadManifestReader
+    internal partial class WorkloadManifestReader
     {
-        static void ConsumeToken(ref Utf8JsonStreamReader reader, JsonTokenType expected)
+        private static void ConsumeToken(ref Utf8JsonStreamReader reader, JsonTokenType expected)
         {
             if (reader.Read() && expected == reader.TokenType)
             {
@@ -21,7 +21,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.ExpectedTokenAtOffset, expected, reader.TokenStartIndex);
         }
 
-        static string ReadString(ref Utf8JsonStreamReader reader)
+        private static string ReadString(ref Utf8JsonStreamReader reader)
         {
             if (reader.Read() && reader.TokenType == JsonTokenType.String)
             {
@@ -31,7 +31,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.ExpectedStringAtOffset, reader.TokenStartIndex);
         }
 
-        static bool ReadBool(ref Utf8JsonStreamReader reader)
+        private static bool ReadBool(ref Utf8JsonStreamReader reader)
         {
             if (reader.Read() && reader.TokenType.IsBool())
             {
@@ -41,10 +41,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.ExpectedBoolAtOffset, reader.TokenStartIndex);
         }
 
-        static void ThrowDuplicateKeyException (ref Utf8JsonStreamReader reader, string key)
+        private static void ThrowDuplicateKeyException (ref Utf8JsonStreamReader reader, string key)
             => throw new WorkloadManifestFormatException(Strings.DuplicateKeyAtOffset, key, reader.TokenStartIndex);
 
-        static WorkloadManifest ReadWorkloadManifest(ref Utf8JsonStreamReader reader)
+        private static WorkloadManifest ReadWorkloadManifest(ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
@@ -125,7 +125,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <summary>
         /// this expects the reader to be before the value token, and leaves it on the last token of the value
         /// </summary>
-        static bool ConsumeValue (ref Utf8JsonStreamReader reader)
+        private static bool ConsumeValue (ref Utf8JsonStreamReader reader)
         {
             if (!reader.Read())
             {
@@ -150,7 +150,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return true;
         }
 
-        static Dictionary<string, WorkloadDefinition> ReadWorkloadDefinitions(ref Utf8JsonStreamReader reader)
+        private static Dictionary<string, WorkloadDefinition> ReadWorkloadDefinitions(ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
@@ -176,7 +176,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
-        static Dictionary<string, WorkloadPack> ReadWorkloadPacks(ref Utf8JsonStreamReader reader)
+        private static Dictionary<string, WorkloadPack> ReadWorkloadPacks(ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
@@ -202,7 +202,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
-        static List<string> ReadStringArray(ref Utf8JsonStreamReader reader)
+        private static List<string> ReadStringArray(ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartArray);
 
@@ -225,7 +225,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
-        static Dictionary<string,string> ReadStringDictionary(ref Utf8JsonStreamReader reader)
+        private static Dictionary<string,string> ReadStringDictionary(ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
@@ -251,7 +251,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
-        static WorkloadDefinition ReadWorkloadDefinition(string id, ref Utf8JsonStreamReader reader)
+        private static WorkloadDefinition ReadWorkloadDefinition(string id, ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
@@ -336,7 +336,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
-        static WorkloadPack ReadWorkloadPack(string id, ref Utf8JsonStreamReader reader)
+        private static WorkloadPack ReadWorkloadPack(string id, ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 

@@ -12,25 +12,28 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// </remarks>
     public class WorkloadResolver : IWorkloadResolver
     {
-        readonly Dictionary<string, WorkloadDefinition> workloads = new Dictionary<string, WorkloadDefinition>(StringComparer.OrdinalIgnoreCase);
-        readonly Dictionary<string, WorkloadPack> packs = new Dictionary<string, WorkloadPack>(StringComparer.OrdinalIgnoreCase);
-        string[] platformIds;
-        readonly string dotNetRootPath;
+        private readonly Dictionary<string, WorkloadDefinition> _workloads = new Dictionary<string, WorkloadDefinition>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, WorkloadPack> _packs = new Dictionary<string, WorkloadPack>(StringComparer.OrdinalIgnoreCase);
+        private string[] _platformIds;
+        private readonly string _dotNetRootPath;
+
+        private Func<string, bool>? _fileExistOverride;
+        private Func<string, bool>? _directoryExistOverride;
 
         public WorkloadResolver(IWorkloadManifestProvider manifestProvider, string dotNetRootPath)
         {
-            this.dotNetRootPath = dotNetRootPath;
+            this._dotNetRootPath = dotNetRootPath;
 
             // eventually we may want a series of fallbacks here, as rids have in general
             // but for now, keep it simple
             var platformId = GetHostPlatformId();
             if (platformId != null)
             {
-                platformIds = new[] { platformId, "*" };
+                _platformIds = new[] { platformId, "*" };
             }
             else
             {
-                platformIds = new[] { "*" };
+                _platformIds = new[] { "*" };
             }
 
             var manifests = new List<WorkloadManifest>();
@@ -48,11 +51,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             {
                 foreach (var workload in manifest.Workloads)
                 {
-                    workloads.Add(workload.Key, workload.Value);
+                    _workloads.Add(workload.Key, workload.Value);
                 }
                 foreach (var pack in manifest.Packs)
                 {
-                    packs.Add(pack.Key, pack.Value);
+                    _packs.Add(pack.Key, pack.Value);
                 }
             }
         }
@@ -60,7 +63,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         // rather that forcing all consumers to depend on and parse the RID catalog, or doing that here, for now just bake in a small
         // subset of dev host platform rids for now for the workloads that are likely to need this functionality soonest
-        string? GetHostPlatformId()
+        private string? GetHostPlatformId()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
@@ -92,15 +95,15 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// </remarks>
         public IEnumerable<PackInfo> GetInstalledWorkloadPacksOfKind(WorkloadPackKind kind)
         {
-            foreach (var pack in packs)
+            foreach (var pack in _packs)
             {
                 if (pack.Value.Kind != kind)
                 {
                     continue;
                 }
 
-                var aliasedId = pack.Value.TryGetAliasForPlatformIds(platformIds) ?? pack.Value.Id;
-                var packPath = GetPackPath(dotNetRootPath, aliasedId, pack.Value.Version, pack.Value.Kind);
+                var aliasedId = pack.Value.TryGetAliasForPlatformIds(_platformIds) ?? pack.Value.Id;
+                var packPath = GetPackPath(_dotNetRootPath, aliasedId, pack.Value.Version, pack.Value.Kind);
 
                 if (PackExists(packPath, kind))
                 {
@@ -114,20 +117,18 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
         }
 
-        Func<string, bool>? fileExistOverride;
-        Func<string, bool>? directoryExistOverride;
-        internal void ReplaceFilesystemChecksForTest (Func<string,bool> fileExists, Func<string, bool> directoryExists)
+        internal void ReplaceFilesystemChecksForTest(Func<string, bool> fileExists, Func<string, bool> directoryExists)
         {
-            fileExistOverride = fileExists;
-            directoryExistOverride = directoryExists;
+            _fileExistOverride = fileExists;
+            _directoryExistOverride = directoryExists;
         }
 
         internal void ReplacePlatformIdsForTest(string[] platformIds)
         {
-            this.platformIds = platformIds;
+            this._platformIds = platformIds;
         }
 
-        bool PackExists (string packPath, WorkloadPackKind kind)
+        private bool PackExists (string packPath, WorkloadPackKind kind)
         {
             switch (kind)
             {
@@ -135,16 +136,16 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 case WorkloadPackKind.Sdk:
                 case WorkloadPackKind.Tool:
                     //can we do a more robust check than directory.exists?
-                    return directoryExistOverride?.Invoke(packPath) ?? Directory.Exists(packPath);
+                    return _directoryExistOverride?.Invoke(packPath) ?? Directory.Exists(packPath);
                 case WorkloadPackKind.Library:
                 case WorkloadPackKind.Template:
-                    return fileExistOverride?.Invoke(packPath) ?? File.Exists(packPath);
+                    return _fileExistOverride?.Invoke(packPath) ?? File.Exists(packPath);
                 default:
                     throw new ArgumentException($"The package kind '{kind}' is not known", nameof(kind));
             }
         }
 
-        static string GetPackPath (string dotNetRootPath, string packageId, string packageVersion, WorkloadPackKind kind)
+        private static string GetPackPath (string dotNetRootPath, string packageId, string packageVersion, WorkloadPackKind kind)
         {
             switch (kind)
             {
@@ -164,7 +165,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public IEnumerable<string> GetPacksInWorkload(string workloadId)
         {
-            if (!workloads.TryGetValue(workloadId, out var workload))
+            if (!_workloads.TryGetValue(workloadId, out var workload))
             {
                 throw new Exception("Workload not found");
             }
@@ -177,13 +178,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return workload.Packs ?? Enumerable.Empty<string>();
         }
 
-        IEnumerable<string> ExpandWorkload (WorkloadDefinition workload)
+        private IEnumerable<string> ExpandWorkload (WorkloadDefinition workload)
         {
             var dedup = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             IEnumerable<string> ExpandPacks (string workloadId)
             {
-                if (!workloads.TryGetValue (workloadId, out var workloadInfo))
+                if (!_workloads.TryGetValue (workloadId, out var workloadInfo))
                 {
                     // inconsistent manifest
                     throw new Exception("Workload not found");
@@ -223,7 +224,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// </remarks>
         public string? TryGetPackVersion(string packId)
         {
-            if (packs.TryGetValue(packId, out var packInfo))
+            if (_packs.TryGetValue(packId, out var packInfo))
             {
                 return packInfo.Version;
             }

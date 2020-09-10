@@ -5,18 +5,18 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public class SdkDirectoryWorkloadManifestProvider : IWorkloadManifestProvider
     {
-        readonly string sdkRootPath;
-        readonly string sdkVersionBand;
+        private readonly string _sdkRootPath;
+        private readonly string _sdkVersionBand;
 
         public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersionBand)
         {
-            this.sdkRootPath = sdkRootPath;
-            this.sdkVersionBand = sdkVersionBand;
+            _sdkRootPath = sdkRootPath;
+            _sdkVersionBand = sdkVersionBand;
         }
 
         public IEnumerable<Stream> GetManifests()
         {
-            var manifestDirectory = Path.Combine(sdkRootPath, "sdk-manifests", sdkVersionBand);
+            var manifestDirectory = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
 
             if (Directory.Exists(manifestDirectory))
             {

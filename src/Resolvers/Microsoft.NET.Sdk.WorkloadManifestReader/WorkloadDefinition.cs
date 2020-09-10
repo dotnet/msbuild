@@ -2,7 +2,7 @@
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    class WorkloadDefinition
+    internal class WorkloadDefinition
     {
         public WorkloadDefinition(
             string id, bool isAbstract, string? description, WorkloadDefinitionKind kind, List<string>? extends,
@@ -26,7 +26,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         public List<string>? Platforms { get; }
     }
 
-    enum WorkloadDefinitionKind
+    internal enum WorkloadDefinitionKind
     {
         Dev,
         Build

@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    partial class WorkloadManifestReader
+    internal partial class WorkloadManifestReader
     {
         public static WorkloadManifest ReadWorkloadManifest(Stream manifestStream)
         {
@@ -22,7 +22,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return ReadWorkloadManifest(ref reader);
         }
 
-        ref struct Utf8JsonStreamReader
+        private ref struct Utf8JsonStreamReader
         {
             static ReadOnlySpan<byte> utf8Bom => new byte[] { 0xEF, 0xBB, 0xBF };
 
@@ -101,7 +101,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         }
     }
 
-    static class JsonTokenTypeExtensions
+    internal static class JsonTokenTypeExtensions
     {
         public static bool IsBool(this JsonTokenType tokenType) => tokenType == JsonTokenType.True || tokenType == JsonTokenType.False;
     }

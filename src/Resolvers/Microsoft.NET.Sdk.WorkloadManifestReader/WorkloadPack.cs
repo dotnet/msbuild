@@ -2,7 +2,7 @@
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    class WorkloadPack
+    internal class WorkloadPack
     {
         public WorkloadPack(string id, string version, WorkloadPackKind kind, Dictionary<string, string>? aliasTo)
         {
