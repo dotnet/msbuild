@@ -96,7 +96,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining(Strings.WindowsDesktopFrameworkRequiresWindows);
         }
 
-        [RequiresMSBuildVersionTheory("16.8.0")]
+        [WindowsOnlyTheory]
         [InlineData("net5.0", "TargetPlatformIdentifier", "Windows", "Exe")]
         [InlineData("netcoreapp3.1", "UseWindowsForms", "true", "WinExe")]
         [InlineData("netcoreapp3.1", "UseWPF", "true", "WinExe")]
@@ -130,7 +130,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "WindowsDesktopSdkTest_50";
 
-            const string tfm = "net5.0";
+            const string tfm = "net5.0-windows";
 
             var testProject = new TestProject()
             {

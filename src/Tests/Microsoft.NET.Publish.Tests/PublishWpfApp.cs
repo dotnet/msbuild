@@ -26,7 +26,7 @@ namespace Microsoft.NET.Publish.Tests
             var newCommand = new DotnetCommand(Log);
             newCommand.WorkingDirectory = testDir.Path;
 
-            newCommand.Execute("new", "wpf").Should().Pass();
+            newCommand.Execute("new", "wpf", "--debug:ephemeral-hive").Should().Pass();
 
             var project = XDocument.Load(Path.Combine(testDir.Path, Path.GetFileName(testDir.Path) + ".csproj"));
             var ns = project.Root.Name.Namespace;

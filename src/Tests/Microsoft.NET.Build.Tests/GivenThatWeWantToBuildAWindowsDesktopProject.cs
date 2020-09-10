@@ -84,7 +84,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
         public void It_warns_when_specifying_windows_desktop_sdk()
         {
-            var targetFramework = "net5.0";
+            var targetFramework = "net5.0-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "windowsDesktopSdk",
@@ -102,8 +102,57 @@ namespace Microsoft.NET.Build.Tests
                 .And
                 .HaveStdOutContaining("NETSDK1137");
         }
-		
-		[WindowsOnlyFact]
+
+        [WindowsOnlyFact]
+        public void It_does_not_warn_when_multitargeting()
+        {
+            var targetFramework = "net5.0;net472;netcoreapp3.1";
+            TestProject testProject = new TestProject()
+            {
+                Name = "windowsDesktopSdk",
+                IsSdkProject = true,
+                ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
+                TargetFrameworks = targetFramework
+            };
+            testProject.AdditionalProperties["UseWPF"] = "true";
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "Windows";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("NETSDK1137");
+        }
+
+        [WindowsOnlyFact]
+        public void It_imports_when_targeting_dotnet_3()
+        {
+            var targetFramework = "netcoreapp3.1";
+            TestProject testProject = new TestProject()
+            {
+                Name = "windowsDesktopSdk",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework
+            };
+            testProject.AdditionalProperties["UseWPF"] = "true";
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "Windows";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            var getValuesCommand = new GetValuesCommand(testAsset, "ImportWindowsDesktopTargets");
+            getValuesCommand.Execute()
+                .Should()
+                .Pass();
+            getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "true" });
+        }
+
+        [WindowsOnlyFact]
         public void It_fails_if_windows_target_platform_version_is_invalid()
         {
             var testProject = new TestProject()
@@ -122,17 +171,22 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1140");
         }
 
-        [WindowsOnlyFact]
-        public void It_succeeds_if_windows_target_platform_version_has_trailing_zeros()
+        [WindowsOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_succeeds_if_windows_target_platform_version_does_not_have_trailing_zeros(bool setInTargetframework)
         {
             var testProject = new TestProject()
             {
                 Name = "ValidWindowsVersion",
                 IsSdkProject = true,
-                TargetFrameworks = "net5.0"
+                TargetFrameworks = setInTargetframework ? "net5.0-windows10.0.18362" : "net5.0"
             };
-            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "Windows"; 
-            testProject.AdditionalProperties["TargetPlatformVersion"] = "10.0.18362.0"; // We must set this manually because if we set it in the TFM we remove the trailing zeroes. 
+            if (!setInTargetframework)
+            {
+                testProject.AdditionalProperties["TargetPlatformIdentifier"] = "Windows";
+                testProject.AdditionalProperties["TargetPlatformVersion"] = "10.0.18362";
+            }
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testAsset);
@@ -144,7 +198,7 @@ namespace Microsoft.NET.Build.Tests
             getValuesCommand.Execute()
                 .Should()
                 .Pass();
-            getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "10.0.18362" });
+            getValuesCommand.GetValues().Should().BeEquivalentTo(new[] { "10.0.18362.0" });
         }
 
         [Fact]

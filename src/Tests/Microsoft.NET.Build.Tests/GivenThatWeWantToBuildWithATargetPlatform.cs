@@ -25,7 +25,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("net5.0-Windows7.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
         [InlineData("net5.0-WINDOWS7.0", ".NETCoreApp", "v5.0", "Windows", "7.0")]
         [InlineData("net5.0-windows", ".NETCoreApp", "v5.0", "Windows", "7.0")]
-        [InlineData("net5.0-windows10.0.19041", ".NETCoreApp", "v5.0", "Windows", "10.0.19041")]
+        [InlineData("net5.0-windows10.0.19041.0", ".NETCoreApp", "v5.0", "Windows", "10.0.19041.0")]
         public void It_defines_target_platform_from_target_framework(string targetFramework, string expectedTargetFrameworkIdentifier, string expectedTargetFrameworkVersion, string expectedTargetPlatformIdentifier, string expectedTargetPlatformVersion)
         {
             var testProj = new TestProject()
@@ -61,6 +61,28 @@ namespace Microsoft.NET.Build.Tests
             assertValue("TargetPlatformMoniker", expectedTargetPlatformIdentifier.Equals(string.Empty) && expectedTargetPlatformVersion.Equals(string.Empty) ?
                 string.Empty : $"{expectedTargetPlatformIdentifier},Version={expectedTargetPlatformVersion}");
             assertValue("TargetPlatformDisplayName", $"{expectedTargetPlatformIdentifier} {expectedTargetPlatformVersion}");
+        }
+
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0.41402")]
+        public void It_defines_target_platform_from_target_framework_with_explicit_version()
+        {
+            var targetPlatformVersion = "10.0.19041.0";
+            var targetFramework = "net5.0-windows";
+            var testProj = new TestProject()
+            {
+                Name = "TargetPlatformTests",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework
+            };
+            testProj.AdditionalProperties["TargetPlatformVersion"] = targetPlatformVersion;
+            var testAsset = _testAssetsManager.CreateTestProject(testProj);
+
+            var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.Path, testProj.Name), targetFramework, "TargetPlatformIdentifier");
+            getValuesCommand
+                .Execute()
+                .Should()
+                .Pass();
+            getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "Windows" });
         }
 
         [Fact]

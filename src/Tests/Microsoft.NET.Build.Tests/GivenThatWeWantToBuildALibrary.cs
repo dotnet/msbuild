@@ -454,8 +454,8 @@ namespace Microsoft.NET.Build.Tests
         [Theory]
         [InlineData(new[] { "1.0", "1.1" }, "ios", "1.1", new[] { "IOS", "IOS1_1", "IOS1_0" })]
         [InlineData(new[] { "11.11", "12.12", "13.13" }, "android", "12.12", new[] { "ANDROID", "ANDROID11_11", "ANDROID12_12" })]
-        [InlineData(new string[] { /* Use the built in SupportedTargetPlatform items */}, "windows", "10.0.19041", new[] { "WINDOWS", "WINDOWS7_0", "WINDOWS8_0", "WINDOWS10_0_17763", "WINDOWS10_0_18362", "WINDOWS10_0_19041" })]
-        public void It_implicitly_defines_compilation_constants_for_the_target_platform_with_backwards_compatibility(string[] supportedTargetPlatform, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
+        [InlineData(new string[] { /* Use the built in SdkSupportedTargetPlatform items */}, "windows", "10.0.19041.0", new[] { "WINDOWS", "WINDOWS7_0", "WINDOWS8_0", "WINDOWS10_0_17763_0", "WINDOWS10_0_18362_0", "WINDOWS10_0_19041_0" })]
+        public void It_implicitly_defines_compilation_constants_for_the_target_platform_with_backwards_compatibility(string[] sdkSupportedTargetPlatform, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
         {
             var targetFramework = "net5.0";
             var testAsset = _testAssetsManager
@@ -480,9 +480,9 @@ namespace Microsoft.NET.Build.Tests
 
                     var itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
-                    foreach (var targetPlatform in supportedTargetPlatform)
+                    foreach (var targetPlatform in sdkSupportedTargetPlatform)
                     {
-                        itemGroup.Add(new XElement(ns + "SupportedTargetPlatform", new XAttribute("Include", targetPlatform)));
+                        itemGroup.Add(new XElement(ns + "SdkSupportedTargetPlatform", new XAttribute("Include", targetPlatform)));
                     }
                 });
 

@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias sdkResolver;
 using FluentAssertions;
 using Microsoft.Build.Framework;
 using Microsoft.DotNet.MSBuildSdkResolver;
@@ -496,7 +497,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
 
             var resolver = new TemplateLocator.TemplateLocator(environment.GetEnvironmentVariable,
-                new VSSettings(environment.VSSettingsFile?.FullName, environment.DisallowPrereleaseByDefault), null, null);
+                new sdkResolver::Microsoft.DotNet.DotNetSdkResolver.VSSettings(environment.VSSettingsFile?.FullName, environment.DisallowPrereleaseByDefault), , null, null);
             resolver.TryGetDotnetSdkVersionUsedInVs("15.8", out var version).Should().BeTrue();
 
             version.Should().Be(sdkVersion);
