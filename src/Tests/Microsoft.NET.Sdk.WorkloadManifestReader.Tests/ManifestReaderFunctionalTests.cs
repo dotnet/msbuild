@@ -1,36 +1,34 @@
-using System.Collections.Generic;
 using FluentAssertions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.IO;
 using Xunit;
+using System.Linq;
 
 namespace ManifestReaderTests
 {
     public class ManifestReaderFunctionalTests
     {
-        [Fact(Skip = "GetInstalledWorkloadPacksOfKind is not implemented")]
-        public void ItCanGetAllTemplatesPacks()
+        [Fact]
+        public void ItShouldGetAllTemplatesPacks()
         {
-            using FileStream fsSource =
-                new FileStream(Path.Combine("Manifests", "Sample.json"), FileMode.Open, FileAccess.Read);
-            var workloadResolver = new WorkloadResolver(new FakeManifestProvider(new[] { fsSource }), "fakepath");
+            var workloadResolver = new WorkloadResolver(new FakeManifestProvider(new[] { Path.Combine("Manifests", "Sample.json") }), "fakepath");
+            workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => true);
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template);
             result.Should().HaveCount(1);
+            var templateItem = result.First();
+            templateItem.Id.Should().Be("xamarin.android.templates");
+            templateItem.IsStillPacked.Should().BeFalse();
+            templateItem.Kind.Should().Be(WorkloadPackKind.Template);
+            templateItem.Path.Should().Be(Path.Combine("fakepath", "template-packs", "xamarin.android.templates.1.0.3.nupkg"));
         }
 
-        private class FakeManifestProvider : IWorkloadManifestProvider
+        [Fact]
+        public void GivienTemplateNupkgDoesNotExistOnDiskItShouldReturnEmpty()
         {
-            private readonly IEnumerable<Stream> _streams;
-
-            public FakeManifestProvider(IEnumerable<Stream> streams)
-            {
-                _streams = streams;
-            }
-
-            public IEnumerable<Stream> GetManifests()
-            {
-                return _streams;
-            }
+            var workloadResolver = new WorkloadResolver(new FakeManifestProvider(new[] { Path.Combine("Manifests", "Sample.json") }), "fakepath");
+            workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => false, directoryExists: (_) => true);
+            var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template);
+            result.Should().HaveCount(0);
         }
     }
 }

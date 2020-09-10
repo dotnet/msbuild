@@ -1,17 +1,14 @@
 using FluentAssertions;
-
 using Microsoft.NET.Sdk.WorkloadManifestReader;
-
 using System.IO;
 using System.Linq;
-
 using Xunit;
 
 namespace ManifestReaderTests
 {
     public class ManifestTests
     {
-        const string fakeRootPath = "fakeRootPath";
+        private const string fakeRootPath = "fakeRootPath";
 
         [Fact]
         public void ItCanDeserialize()

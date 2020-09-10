@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.TemplateLocator.Tests
             var result = _resolver.GetDotnetSdkTemplatePackages("5.0.102", _fakeDotnetRootDirectory);
 
             result.First().Path.Should().Be(templateNupkgPath);
-            result.First().TemplatePackageId.Should().Be("Xamarin.Android.Templates");
+            result.First().TemplatePackageId.Should().Be("xamarin.android.templates");
             result.First().TemplateVersion.Should().Be("1.0.3");
 
             result.Should().HaveCount(1);

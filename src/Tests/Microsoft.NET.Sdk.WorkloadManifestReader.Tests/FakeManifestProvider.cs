@@ -1,22 +1,21 @@
 ﻿using Microsoft.NET.Sdk.WorkloadManifestReader;
-
 using System.Collections.Generic;
 using System.IO;
 
 namespace ManifestReaderTests
 {
-    class FakeManifestProvider : IWorkloadManifestProvider
+    internal class FakeManifestProvider : IWorkloadManifestProvider
         {
-            readonly string[] filePaths;
+            readonly string[] _filePaths;
 
             public FakeManifestProvider(params string[] filePaths)
             {
-                this.filePaths = filePaths;
+                _filePaths = filePaths;
             }
 
             public IEnumerable<Stream> GetManifests()
             {
-                foreach (var filePath in filePaths)
+                foreach (var filePath in _filePaths)
                 {
                     yield return new FileStream(filePath, FileMode.Open, FileAccess.Read);
                 }
