@@ -53,9 +53,11 @@ namespace Microsoft.DotNet.Restore.Test
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void ItRestoresLibToSpecificDirectory(bool useStaticGraphEvaluation)
+        [InlineData(true, ".csproj")]
+        [InlineData(false, ".csproj")]
+        [InlineData(true, ".fsproj")]
+        [InlineData(false, ".fsproj")]
+        public void ItRestoresLibToSpecificDirectory(bool useStaticGraphEvaluation, string extension)
         {
             var testProject = new TestProject()
             {
@@ -66,7 +68,7 @@ namespace Microsoft.DotNet.Restore.Test
 
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.3"));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: useStaticGraphEvaluation.ToString());
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: useStaticGraphEvaluation.ToString(), targetExtension: extension);
 
             var rootPath = Path.Combine(testAsset.TestRoot, testProject.Name);
 
