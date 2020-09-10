@@ -3,38 +3,35 @@
 
 using System;
 using System.IO;
+using System.IO.Pipes;
+using System.Threading.Tasks;
 using MessagePack;
 using MessagePack.Formatters;
 using MessagePack.Resolvers;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 using Nerdbank.Streams;
 using StreamJsonRpc;
 
-#nullable enable
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
 {
     internal static class RpcUtils
     {
+        private readonly static IFormatterResolver _resolver;
+        private readonly static MessagePackSerializerOptions _options;
+
+        static RpcUtils()
+        {
+            _resolver = ResolveAssemlyReferneceResolver.Instance;
+            _options = MessagePackSerializerOptions.Standard.WithResolver(_resolver);
+        }
+
         internal static IJsonRpcMessageHandler GetRarMessageHandler(Stream stream)
         {
             MessagePackFormatter formatter = new MessagePackFormatter();
 
-            IFormatterResolver resolver = CompositeResolver.Create(
-                new IMessagePackFormatter[]
-                {
-                    BuildEventArgsFormatter.CustomFormatter,
-                    BuildEventArgsFormatter.ErrorFormatter,
-                    BuildEventArgsFormatter.WarningFormatter,
-                    BuildEventArgsFormatter.MessageFormatter
-                },
-                new[]
-                {
-                    StandardResolver.Instance
-                }
-            );
-            MessagePackSerializerOptions options = MessagePackSerializerOptions.Standard.WithResolver(resolver);
+            formatter.SetMessagePackSerializerOptions(_options);
 
-            formatter.SetMessagePackSerializerOptions(options);
             return new LengthHeaderMessageHandler(stream.UsePipe(), formatter);
         }
     }
