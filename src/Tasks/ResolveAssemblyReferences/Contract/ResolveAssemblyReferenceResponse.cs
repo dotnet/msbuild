@@ -1,12 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using MessagePack;
-
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 {
-    [MessagePackObject]
-    public sealed class ResolveAssemblyReferenceResponse
+    internal sealed class ResolveAssemblyReferenceResponse
     {
         public ResolveAssemblyReferenceResponse()
         {
@@ -25,47 +22,28 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
             ScatterFiles = ReadOnlyTaskItem.CreateArray(output.ScatterFiles);
             SerializationAssemblyFiles = ReadOnlyTaskItem.CreateArray(output.SerializationAssemblyFiles);
             SuggestedRedirects = ReadOnlyTaskItem.CreateArray(output.SuggestedRedirects);
-            //Assemblies = ReadOnlyTaskItem.CreateArray(output.Assemblies);
-            //AssemblyFiles = ReadOnlyTaskItem.CreateArray(output.AssemblyFiles);
         }
 
-        [Key(0)]
         public ReadOnlyTaskItem[] CopyLocalFiles { get; set; }
 
-        [Key(1)]
         public string DependsOnNETStandard { get; set; }
 
-        [Key(2)]
         public string DependsOnSystemRuntime { get; set; }
 
-        [Key(3)]
         public ReadOnlyTaskItem[] FilesWritten { get; set; }
 
-        [Key(4)]
         public ReadOnlyTaskItem[] RelatedFiles { get; set; }
 
-        [Key(5)]
         public ReadOnlyTaskItem[] ResolvedDependencyFiles { get; set; }
 
-        [Key(6)]
         public ReadOnlyTaskItem[] ResolvedFiles { get; set; }
 
-        [Key(7)]
         public ReadOnlyTaskItem[] SatelliteFiles { get; set; }
 
-        [Key(8)]
         public ReadOnlyTaskItem[] ScatterFiles { get; set; }
 
-        [Key(9)]
         public ReadOnlyTaskItem[] SerializationAssemblyFiles { get; set; }
 
-        [Key(10)]
         public ReadOnlyTaskItem[] SuggestedRedirects { get; set; }
-
-        //[Key(11)]
-        //public ReadOnlyTaskItem[] Assemblies { get; set; }
-
-        //[Key(12)]
-        //public ReadOnlyTaskItem[] AssemblyFiles { get; set; }
     }
 }

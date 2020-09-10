@@ -1,6 +1,8 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
@@ -64,12 +66,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
             }
 
             return result;
-        }
-
-        private static void PrintDiagnostic(int requestId, Stopwatch stopwatch, bool cache)
-        {
-            stopwatch.Stop();
-            Console.WriteLine("{0}; Cached used: {1}; Elapsed: {2} ms", requestId, cache, stopwatch.ElapsedMilliseconds);
         }
 
         public void Dispose()

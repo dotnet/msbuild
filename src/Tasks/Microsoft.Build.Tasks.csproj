@@ -221,9 +221,6 @@
     <Compile Include="..\Shared\XMakeAttributes.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs">
-      <Link>RegisteredTaskObjectCacheBase.cs</Link>
-    </Compile>
     <Compile Include="AppConfig\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -369,7 +366,6 @@
     <Compile Include="ResolveAssemblyReferences\Server\RarController.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceBuildEngine.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceComparer.cs" />
-    <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceSerializedHandler.cs" />
     <Compile Include="ResolveAssemblyReferences\Server\ServerMutex.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceHandler.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemlyReferenceCacheHandler.cs" />

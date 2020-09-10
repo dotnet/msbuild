@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.IO.Pipes;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -66,7 +65,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
             {
                 throw new InternalErrorException("Request failed", e);
             }
-            //return client.ExecuteAsync(request).GetAwaiter().GetResult();
         }
 
         private JsonRpc GetRpcClient()

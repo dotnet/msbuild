@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -31,7 +32,7 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      * 
      **************************************************************************/
-    internal sealed class MockEngine : IBuildEngine7
+    internal sealed class MockEngine : IBuildEngine7, IRarBuildEngine
     {
         private readonly object _lockObj = new object();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
@@ -212,6 +213,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         public bool IsRunningMultipleNodes { get; set; }
+        public Stream ClientStream { get; set; }
 
         public bool BuildProjectFile
             (
@@ -485,6 +487,23 @@ namespace Microsoft.Build.UnitTests
         {
             _objectCache.TryRemove(key, out object obj);
             return obj;
+        }
+
+
+
+        bool IRarBuildEngine.CreateRarNode()
+        {
+            throw new NotSupportedException("RAR node should be created before executing test");
+        }
+
+        string IRarBuildEngine.GetRarPipeName()
+        {
+            return "RARNode.Test";
+        }
+
+        Stream IRarBuildEngine.GetRarClientStream(string pipeName, int timeout)
+        {
+            return ClientStream;
         }
     }
 }

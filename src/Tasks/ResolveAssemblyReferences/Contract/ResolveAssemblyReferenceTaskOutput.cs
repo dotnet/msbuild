@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using MessagePack;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
@@ -25,8 +24,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
             ScatterFiles = ReadOnlyTaskItem.ToTaskItem(response.ScatterFiles);
             SerializationAssemblyFiles = ReadOnlyTaskItem.ToTaskItem(response.SerializationAssemblyFiles);
             SuggestedRedirects = ReadOnlyTaskItem.ToTaskItem(response.SuggestedRedirects);
-            //Assemblies = ReadOnlyTaskItem.ToTaskItem(response.Assemblies);
-            //AssemblyFiles = ReadOnlyTaskItem.ToTaskItem(response.AssemblyFiles);
         }
 
         public ITaskItem[] CopyLocalFiles { get; set; }
@@ -50,9 +47,5 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
         public ITaskItem[] SerializationAssemblyFiles { get; set; }
 
         public ITaskItem[] SuggestedRedirects { get; set; }
-
-        //public ITaskItem[] Assemblies { get; set; }
-
-        //public ITaskItem[] AssemblyFiles { get; set; }
     }
 }

@@ -2,14 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Services;
@@ -76,9 +74,9 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
                   streamFactory,
                   validateHandshakeCallback,
                   timeout: timeout,
-                  resolveAssemblyReferenceTaskHandler: //new ResolveAssemblyReferenceSerializedHandler(
+                  resolveAssemblyReferenceTaskHandler:
                       new ResolveAssemlyReferenceCacheHandler(
-                      new ResolveAssemblyReferenceHandler()))//)
+                      new ResolveAssemblyReferenceHandler()))
         {
         }
 
@@ -167,25 +165,10 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
             }
         }
 
-        private class ConsoleLogger : TraceListener
-        {
-            public override void Write(string message)
-            {
-                Console.Write(message);
-            }
-
-            public override void WriteLine(string message)
-            {
-                Console.WriteLine(message);
-            }
-        }
-
         private JsonRpc GetRpcServer(Stream stream, IResolveAssemblyReferenceTaskHandler handler)
         {
             IJsonRpcMessageHandler serverHandler = RpcUtils.GetRarMessageHandler(stream);
             JsonRpc rpc = new JsonRpc(serverHandler, handler);
-            rpc.TraceSource = new TraceSource("Server", SourceLevels.Warning);
-            rpc.TraceSource.Listeners.Add(new ConsoleLogger()); 
             return rpc;
         }
 

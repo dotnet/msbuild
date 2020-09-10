@@ -17,54 +17,66 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
 
         private BuildEventArgsFormatter() { }
 
-        private bool DeserializeBase(ref MessagePackReader reader, out string message, out string helpKeyword, out string senderName)
-        {
-            message = null;
-            helpKeyword = null;
-            senderName = null;
-
-            if (reader.TryReadNil())
-            {
-                return true;
-            }
-
-            message = reader.ReadString();
-            helpKeyword = reader.ReadString();
-            senderName = reader.ReadString();
-
-            return false;
-        }
-
-        private bool SerializeBase(ref MessagePackWriter wrtier, BuildEventArgs buildEvent)
-        {
-            if (buildEvent == null)
-            {
-                wrtier.WriteNil();
-                return true;
-            }
-
-            wrtier.Write(buildEvent.Message);
-            wrtier.Write(buildEvent.HelpKeyword);
-            wrtier.Write(buildEvent.SenderName);
-
-            return false;
-        }
-
-
         BuildWarningEventArgs IMessagePackFormatter<BuildWarningEventArgs>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
         {
-            if (DeserializeBase(ref reader, out string message, out string helpKeyword, out string senderName))
+            if (reader.TryReadNil())
             {
                 return null;
             }
 
-            string code = reader.ReadString();
-            int columnNumber = reader.ReadInt32();
-            int endColumnNumber = reader.ReadInt32();
-            int endLineNumber = reader.ReadInt32();
-            string file = reader.ReadString();
-            int lineNumber = reader.ReadInt32();
-            string subCategory = reader.ReadString();
+            options.Security.DepthStep(ref reader);
+            int length = reader.ReadArrayHeader();
+            string message = null;
+            string helpKeyword = null;
+            string senderName = null;
+            int columnNumber = default;
+            int endColumnNumber = default;
+            int endLineNumber = default;
+            int lineNumber = default;
+            string code = default;
+            string file = default;
+            string subCategory = default;
+
+            for (int key = 0; key < length; key++)
+            {
+                switch (key)
+                {
+                    case 0:
+                        message = reader.ReadString();
+                        break;
+                    case 1:
+                        helpKeyword = reader.ReadString();
+                        break;
+                    case 2:
+                        senderName = reader.ReadString();
+                        break;
+                    case 3:
+                        columnNumber = reader.ReadInt32();
+                        break;
+                    case 4:
+                        endColumnNumber = reader.ReadInt32();
+                        break;
+                    case 5:
+                        endLineNumber = reader.ReadInt32();
+                        break;
+                    case 6:
+                        lineNumber = reader.ReadInt32();
+                        break;
+                    case 7:
+                        code = reader.ReadString();
+                        break;
+                    case 8:
+                        file = reader.ReadString();
+                        break;
+                    case 9:
+                        subCategory = reader.ReadString();
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
+            }
+
 
             BuildWarningEventArgs buildEvent =
                 new BuildWarningEventArgs(
@@ -79,39 +91,91 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
                         helpKeyword,
                         senderName);
 
+            reader.Depth--;
+
             return buildEvent;
         }
 
         void IMessagePackFormatter<BuildWarningEventArgs>.Serialize(ref MessagePackWriter writer, BuildWarningEventArgs value, MessagePackSerializerOptions options)
         {
-            if (SerializeBase(ref writer, value))
+            if (value == null)
             {
+                writer.WriteNil();
                 return;
             }
 
+            writer.WriteArrayHeader(10);
+            writer.Write(value.Message);
+            writer.Write(value.HelpKeyword);
+            writer.Write(value.SenderName);
+            writer.Write(value.ColumnNumber);
+            writer.Write(value.EndColumnNumber);
+            writer.Write(value.EndLineNumber);
+            writer.Write(value.LineNumber);
             writer.Write(value.Code);
-            writer.WriteInt32(value.ColumnNumber);
-            writer.WriteInt32(value.EndColumnNumber);
-            writer.WriteInt32(value.EndLineNumber);
             writer.Write(value.File);
-            writer.WriteInt32(value.LineNumber);
             writer.Write(value.Subcategory);
         }
 
         BuildErrorEventArgs IMessagePackFormatter<BuildErrorEventArgs>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
         {
-            if (DeserializeBase(ref reader, out string message, out string helpKeyword, out string senderName))
+            if (reader.TryReadNil())
             {
                 return null;
             }
 
-            string code = reader.ReadString();
-            int columnNumber = reader.ReadInt32();
-            int endColumnNumber = reader.ReadInt32();
-            int endLineNumber = reader.ReadInt32();
-            string file = reader.ReadString();
-            int lineNumber = reader.ReadInt32();
-            string subCategory = reader.ReadString();
+            options.Security.DepthStep(ref reader);
+            int length = reader.ReadArrayHeader();
+            string message = null;
+            string helpKeyword = null;
+            string senderName = null;
+            int columnNumber = default;
+            int endColumnNumber = default;
+            int endLineNumber = default;
+            int lineNumber = default;
+            string code = default;
+            string file = default;
+            string subCategory = default;
+
+            for (int key = 0; key < length; key++)
+            {
+                switch (key)
+                {
+                    case 0:
+                        message = reader.ReadString();
+                        break;
+                    case 1:
+                        helpKeyword = reader.ReadString();
+                        break;
+                    case 2:
+                        senderName = reader.ReadString();
+                        break;
+                    case 3:
+                        columnNumber = reader.ReadInt32();
+                        break;
+                    case 4:
+                        endColumnNumber = reader.ReadInt32();
+                        break;
+                    case 5:
+                        endLineNumber = reader.ReadInt32();
+                        break;
+                    case 6:
+                        lineNumber = reader.ReadInt32();
+                        break;
+                    case 7:
+                        code = reader.ReadString();
+                        break;
+                    case 8:
+                        file = reader.ReadString();
+                        break;
+                    case 9:
+                        subCategory = reader.ReadString();
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
+            }
 
             BuildErrorEventArgs buildEvent =
                 new BuildErrorEventArgs(
@@ -125,6 +189,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
                         message,
                         helpKeyword,
                         senderName);
+            reader.Depth--;
 
             return buildEvent;
         }
@@ -132,42 +197,129 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
 
         void IMessagePackFormatter<BuildErrorEventArgs>.Serialize(ref MessagePackWriter writer, BuildErrorEventArgs value, MessagePackSerializerOptions options)
         {
-            if (SerializeBase(ref writer, value))
+            if (value == null)
             {
+                writer.WriteNil();
                 return;
             }
 
+            writer.WriteArrayHeader(10);
+            writer.Write(value.Message);
+            writer.Write(value.HelpKeyword);
+            writer.Write(value.SenderName);
+            writer.Write(value.ColumnNumber);
+            writer.Write(value.EndColumnNumber);
+            writer.Write(value.EndLineNumber);
+            writer.Write(value.LineNumber);
             writer.Write(value.Code);
-            writer.WriteInt32(value.ColumnNumber);
-            writer.WriteInt32(value.EndColumnNumber);
-            writer.WriteInt32(value.EndLineNumber);
             writer.Write(value.File);
-            writer.WriteInt32(value.LineNumber);
             writer.Write(value.Subcategory);
         }
 
         BuildMessageEventArgs IMessagePackFormatter<BuildMessageEventArgs>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
         {
-            if (DeserializeBase(ref reader, out string message, out string helpKeyword, out string senderName))
+            if (reader.TryReadNil())
             {
                 return null;
             }
 
-            int importance = reader.ReadInt32();
+            options.Security.DepthStep(ref reader);
+            int length = reader.ReadArrayHeader();
+            string message = null;
+            string helpKeyword = null;
+            string senderName = null;
+            int columnNumber = default;
+            int endColumnNumber = default;
+            int endLineNumber = default;
+            int lineNumber = default;
+            string code = default;
+            string file = default;
+            string subCategory = default;
+            int importance = default;
 
-            return new BuildMessageEventArgs(message, helpKeyword, senderName, (MessageImportance)importance);
+            for (int key = 0; key < length; key++)
+            {
+                switch (key)
+                {
+                    case 0:
+                        message = reader.ReadString();
+                        break;
+                    case 1:
+                        helpKeyword = reader.ReadString();
+                        break;
+                    case 2:
+                        senderName = reader.ReadString();
+                        break;
+                    case 3:
+                        columnNumber = reader.ReadInt32();
+                        break;
+                    case 4:
+                        endColumnNumber = reader.ReadInt32();
+                        break;
+                    case 5:
+                        endLineNumber = reader.ReadInt32();
+                        break;
+                    case 6:
+                        lineNumber = reader.ReadInt32();
+                        break;
+                    case 7:
+                        code = reader.ReadString();
+                        break;
+                    case 8:
+                        file = reader.ReadString();
+                        break;
+                    case 9:
+                        subCategory = reader.ReadString();
+                        break;
+                    case 10:
+                        importance = reader.ReadInt32();
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
+            }
+
+            BuildMessageEventArgs buildEvent =
+               new BuildMessageEventArgs(
+                       subCategory,
+                       code,
+                       file,
+                       lineNumber,
+                       columnNumber,
+                       endLineNumber,
+                       endColumnNumber,
+                       message,
+                       helpKeyword,
+                       senderName,
+                       (MessageImportance)importance);
+            reader.Depth--;
+
+            return buildEvent;
         }
 
         void IMessagePackFormatter<BuildMessageEventArgs>.Serialize(ref MessagePackWriter writer, BuildMessageEventArgs value, MessagePackSerializerOptions options)
         {
-            if (SerializeBase(ref writer, value))
+            if (value == null)
             {
+                writer.WriteNil();
                 return;
             }
 
             int importance = (int)value.Importance;
 
-            writer.WriteInt32(importance);
+            writer.WriteArrayHeader(11);
+            writer.Write(value.Message);
+            writer.Write(value.HelpKeyword);
+            writer.Write(value.SenderName);
+            writer.Write(value.ColumnNumber);
+            writer.Write(value.EndColumnNumber);
+            writer.Write(value.EndLineNumber);
+            writer.Write(value.LineNumber);
+            writer.Write(value.Code);
+            writer.Write(value.File);
+            writer.Write(value.Subcategory);
+            writer.Write(importance);
         }
 
         CustomBuildEventArgs IMessagePackFormatter<CustomBuildEventArgs>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
@@ -193,7 +345,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
 
         void IMessagePackFormatter<CustomBuildEventArgs>.Serialize(ref MessagePackWriter writer, CustomBuildEventArgs value, MessagePackSerializerOptions options)
         {
-            if(value == null)
+            if (value == null)
             {
                 writer.WriteNil();
                 return;
@@ -224,58 +376,136 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
 
         ExternalProjectStartedEventArgs IMessagePackFormatter<ExternalProjectStartedEventArgs>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
         {
-            if (DeserializeBase(ref reader, out string message, out string helpKeyword, out string senderName))
+            if (reader.TryReadNil())
             {
                 return null;
             }
 
-            string projectFile = reader.ReadString();
-            string targetNames = reader.ReadString();
+            options.Security.DepthStep(ref reader);
+            int length = reader.ReadArrayHeader();
+            string message = null;
+            string helpKeyword = null;
+            string senderName = null;
+            string projectFile = default;
+            string targetNames = default;
 
-            return new ExternalProjectStartedEventArgs(
-                   message,
-                   helpKeyword,
-                   senderName,
-                   projectFile,
-                   targetNames);
+            for (int key = 0; key < length; key++)
+            {
+                switch (key)
+                {
+                    case 0:
+                        message = reader.ReadString();
+                        break;
+                    case 1:
+                        helpKeyword = reader.ReadString();
+                        break;
+                    case 2:
+                        senderName = reader.ReadString();
+                        break;
+                    case 3:
+                        projectFile = reader.ReadString();
+                        break;
+                    case 4:
+                        targetNames = reader.ReadString();
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
+            }
+
+            ExternalProjectStartedEventArgs buildEvent =
+               new ExternalProjectStartedEventArgs(
+                       message,
+                       helpKeyword,
+                       senderName,
+                       projectFile,
+                       targetNames);
+            reader.Depth--;
+
+            return buildEvent;
         }
 
         void IMessagePackFormatter<ExternalProjectStartedEventArgs>.Serialize(ref MessagePackWriter writer, ExternalProjectStartedEventArgs value, MessagePackSerializerOptions options)
         {
-            if (SerializeBase(ref writer, value))
+            if (value == null)
             {
+                writer.WriteNil();
                 return;
             }
 
+            writer.WriteArrayHeader(5);
+            writer.Write(value.Message);
+            writer.Write(value.HelpKeyword);
+            writer.Write(value.SenderName);
             writer.Write(value.ProjectFile);
             writer.Write(value.TargetNames);
         }
 
         ExternalProjectFinishedEventArgs IMessagePackFormatter<ExternalProjectFinishedEventArgs>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
         {
-            if (DeserializeBase(ref reader, out string message, out string helpKeyword, out string senderName))
+            if (reader.TryReadNil())
             {
                 return null;
             }
 
-            string projectFile = reader.ReadString();
-            bool succeeded = reader.ReadBoolean();
+            options.Security.DepthStep(ref reader);
+            int length = reader.ReadArrayHeader();
+            string message = null;
+            string helpKeyword = null;
+            string senderName = null;
+            string projectFile = default;
+            bool succeeded = default;
 
-            return new ExternalProjectFinishedEventArgs(
-                    message,
-                    helpKeyword,
-                    senderName,
-                    projectFile,
-                    succeeded);
+            for (int key = 0; key < length; key++)
+            {
+                switch (key)
+                {
+                    case 0:
+                        message = reader.ReadString();
+                        break;
+                    case 1:
+                        helpKeyword = reader.ReadString();
+                        break;
+                    case 2:
+                        senderName = reader.ReadString();
+                        break;
+                    case 3:
+                        projectFile = reader.ReadString();
+                        break;
+                    case 4:
+                        succeeded = reader.ReadBoolean();
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
+            }
+
+            ExternalProjectFinishedEventArgs buildEvent =
+               new ExternalProjectFinishedEventArgs(
+                       message,
+                       helpKeyword,
+                       senderName,
+                       projectFile,
+                       succeeded);
+            reader.Depth--;
+
+            return buildEvent;
         }
 
         void IMessagePackFormatter<ExternalProjectFinishedEventArgs>.Serialize(ref MessagePackWriter writer, ExternalProjectFinishedEventArgs value, MessagePackSerializerOptions options)
         {
-            if (SerializeBase(ref writer, value))
+            if (value == null)
             {
+                writer.WriteNil();
                 return;
             }
 
+            writer.WriteArrayHeader(5);
+            writer.Write(value.Message);
+            writer.Write(value.HelpKeyword);
+            writer.Write(value.SenderName);
             writer.Write(value.ProjectFile);
             writer.Write(value.Succeeded);
         }

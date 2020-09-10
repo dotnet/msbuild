@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Tracing;
+﻿using System;
+using System.Diagnostics.Tracing;
 
 namespace Microsoft.Build.Eventing
 {
@@ -422,6 +423,18 @@ namespace Microsoft.Build.Eventing
         public void ResolveAssemblyReferenceNodeConnectStop()
         {
             WriteEvent(57);
+        }
+
+        [Event(58)]
+        internal void RARaaSStart()
+        {
+            WriteEvent(58);
+        }
+
+        [Event(59)]
+        internal void RARaaSStop()
+        {
+            WriteEvent(59);
         }
         #endregion
     }

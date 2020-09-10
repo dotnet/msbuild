@@ -1,12 +1,10 @@
-﻿using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 {
@@ -17,8 +15,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
         internal List<BuildMessageEventArgs> MessageBuildEvent { get; } = new List<BuildMessageEventArgs>();
         internal List<BuildWarningEventArgs> WarningBuildEvent { get; } = new List<BuildWarningEventArgs>();
         internal List<BuildErrorEventArgs> ErrorBuildEvent { get; } = new List<BuildErrorEventArgs>();
-
-        private readonly RegisteredTaskObjectCache _objectCache = new RegisteredTaskObjectCache(); 
 
         public bool AllowFailureWithoutError { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
@@ -61,10 +57,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
         public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs)
         {
             throw new NotImplementedException();
-        }
-
-        private class RegisteredTaskObjectCache : RegisteredTaskObjectCacheBase
-        {
         }
     }
 }
