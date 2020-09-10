@@ -1158,6 +1158,18 @@ elementFormDefault="qualified">
     <xs:element name="MinimumVisualStudioVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AdditionalFileItemNames" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AllowUnsafeBlocks" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="AnalysisMode" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AnalysisMode" _locComment="" -->Customizes the set of rules that are enabled by default.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="Default" />
+          <xs:enumeration value="AllEnabledByDefault" />
+          <xs:enumeration value="AllDisabledByDefault" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:element>
     <xs:element name="AppConfigForCompiler" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ApplicationIcon" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ApplicationRevision" type="msb:StringPropertyType" substitutionGroup="msb:Property">
@@ -1501,6 +1513,11 @@ elementFormDefault="qualified">
     <xs:element name="EnableSQLServerDebugging" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="EnableSecurityDebugging" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="EnableUnmanagedDebugging" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="EnforceCodeStyleInBuild" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnforceCodeStyleInBuild" _locComment="" -->Controls whether code style analysis rules configured as warnings or errors should execute on build and report violations. The default is false.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="ErrorLog" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ErrorReport" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="EmbedManifest" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
