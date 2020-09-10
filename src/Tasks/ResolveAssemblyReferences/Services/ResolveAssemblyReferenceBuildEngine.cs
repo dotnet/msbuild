@@ -1,6 +1,8 @@
 ﻿using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,13 +10,15 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 {
-    internal sealed class ResolveAssemblyReferenceBuildEngine : IBuildEngine7
+    internal sealed class ResolveAssemblyReferenceBuildEngine : IBuildEngine
     {
         internal int EventCount => CustomBuildEvent.Count + MessageBuildEvent.Count + WarningBuildEvent.Count + ErrorBuildEvent.Count;
         internal List<CustomBuildEventArgs> CustomBuildEvent { get; } = new List<CustomBuildEventArgs>();
         internal List<BuildMessageEventArgs> MessageBuildEvent { get; } = new List<BuildMessageEventArgs>();
         internal List<BuildWarningEventArgs> WarningBuildEvent { get; } = new List<BuildWarningEventArgs>();
         internal List<BuildErrorEventArgs> ErrorBuildEvent { get; } = new List<BuildErrorEventArgs>();
+
+        private readonly RegisteredTaskObjectCache _objectCache = new RegisteredTaskObjectCache(); 
 
         public bool AllowFailureWithoutError { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
@@ -28,36 +32,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 
         public string ProjectFileOfTaskNode => string.Empty;
 
-        public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs, string toolsVersion)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs)
-        {
-            throw new NotImplementedException();
-        }
-
-        public BuildEngineResult BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<string>[] removeGlobalProperties, string[] toolsVersion, bool returnTargetOutputs)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IDictionary[] targetOutputsPerProject, string[] toolsVersion, bool useResultsCache, bool unloadProjectsOnCompletion)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IReadOnlyDictionary<string, string> GetGlobalProperties()
-        {
-            throw new NotImplementedException();
-        }
-
-        public object GetRegisteredTaskObject(object key, RegisteredTaskObjectLifetime lifetime)
-        {
-            throw new NotImplementedException();
-        }
-
+       
         public void LogCustomEvent(CustomBuildEventArgs e)
         {
             CustomBuildEvent.Add(e);
@@ -83,24 +58,13 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
             WarningBuildEvent.Add(e);
         }
 
-        public void Reacquire()
+        public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs)
         {
             throw new NotImplementedException();
         }
 
-        public void RegisterTaskObject(object key, object obj, RegisteredTaskObjectLifetime lifetime, bool allowEarlyCollection)
+        private class RegisteredTaskObjectCache : RegisteredTaskObjectCacheBase
         {
-            throw new NotImplementedException();
-        }
-
-        public object UnregisterTaskObject(object key, RegisteredTaskObjectLifetime lifetime)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Yield()
-        {
-            throw new NotImplementedException();
         }
     }
 }

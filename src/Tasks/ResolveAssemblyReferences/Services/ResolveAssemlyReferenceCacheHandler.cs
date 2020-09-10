@@ -3,60 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
-using Microsoft.Build.Tasks.ResolveAssemblyReferences.Server;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 {
-    internal sealed class ResolveAssemblyReferenceTaskHandler : IResolveAssemblyReferenceTaskHandler
-    {
-        private ResolveAssemblyReferenceTaskOutput EmptyOutput => new ResolveAssemblyReference().ResolveAssemblyReferenceOutput;
-
-        private readonly ResolveAssemblyReference _task = new ResolveAssemblyReference();
-
-        private ResolveAssemblyReference GetResolveAssemblyReferenceTask(IBuildEngine buildEngine)
-        {
-            _task.BuildEngine = buildEngine;
-            _task.ResolveAssemblyReferenceOutput = EmptyOutput;
-
-            return _task;
-        }
-
-        public Task<ResolveAssemblyReferenceResult> ExecuteAsync(ResolveAssemblyReferenceRequest input, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult(Execute(input));
-
-        }
-
-        internal ResolveAssemblyReferenceResult Execute(ResolveAssemblyReferenceRequest input)
-        {
-            ResolveAssemblyReferenceTaskInput taskInput = new ResolveAssemblyReferenceTaskInput(input);
-            ResolveAssemblyReferenceBuildEngine buildEngine = new ResolveAssemblyReferenceBuildEngine();
-            //ResolveAssemblyReference task = GetResolveAssemblyReferenceTask(buildEngine);
-            ResolveAssemblyReference task = new ResolveAssemblyReference
-            {
-                BuildEngine = buildEngine
-            };
-
-            ResolveAssemblyReferenceResult result = task.Execute(taskInput);
-            //result.CustomBuildEvents = buildEngine.CustomBuildEvent;
-            //result.BuildMessageEvents = buildEngine.MessageBuildEvent;
-            //result.BuildWarningEvents = buildEngine.WarningBuildEvent;
-            //result.BuildErrorEvents = buildEngine.ErrorBuildEvent;
-
-            //result.EventCount = buildEngine.EventCount;
-
-            //System.Console.WriteLine("RAR task: {0}. Logged {1} events", result.TaskResult ? "Succeded" : "Failed", result.EventCount);
-
-            return result;
-        }
-
-        public void Dispose()
-        {
-        }
-    }
-
     internal sealed class ResolveAssemlyReferenceCacheHandler : IResolveAssemblyReferenceTaskHandler
     {
         private readonly struct CacheEntry
@@ -77,8 +27,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 
         private readonly IResolveAssemblyReferenceTaskHandler _handler;
 
-        private static int RequestNum = 0;
-
         public ResolveAssemlyReferenceCacheHandler(IResolveAssemblyReferenceTaskHandler handler)
         {
             _handler = handler;
@@ -87,22 +35,17 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 
         public async Task<ResolveAssemblyReferenceResult> ExecuteAsync(ResolveAssemblyReferenceRequest input, CancellationToken cancellationToken = default)
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
             string projectId = input.StateFile;
-
-            int requestId = Interlocked.Increment(ref RequestNum);
 
             lock (_lock)
             {
-                if (_cache.ContainsKey(projectId))
+                if (projectId != null && _cache.ContainsKey(projectId))
                 {
                     Console.WriteLine($"Found entry for project: '{projectId}'");
                     CacheEntry entry = _cache[projectId];
 
                     if (ResolveAssemblyReferenceComparer.CompareInput(input, entry.Request))
                     {
-                        PrintDiagnostic(requestId, stopwatch, true);
                         return entry.Result;
                     }
 
@@ -116,10 +59,10 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
             lock (_lock)
             {
                 Console.WriteLine("Adding new entry to cache");
-                _cache[projectId] = new CacheEntry(input, result);
+                if (projectId != null)
+                    _cache[projectId] = new CacheEntry(input, result);
             }
 
-            PrintDiagnostic(requestId, stopwatch, false);
             return result;
         }
 

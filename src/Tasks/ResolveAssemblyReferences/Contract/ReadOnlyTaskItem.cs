@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
         [Key(1)]
         public Dictionary<string, string> MetadataNameToValue { get; set; }
 
-      
+
         [IgnoreMember]
         public string EvaluatedIncludeEscaped
         {
@@ -36,7 +36,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
             set => throw new NotImplementedException();
         }
 
-       
+
 
         public ReadOnlyTaskItem(string itemSpec)
         {
@@ -44,15 +44,20 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
             MetadataNameToValue = new Dictionary<string, string>();
         }
 
+        public ReadOnlyTaskItem(string itemSpec, IDictionary metadata)
+        {
+            ItemSpec = itemSpec;
+            MetadataNameToValue = new Dictionary<string, string>((IDictionary<string, string>)metadata);
+        }
+
         public string GetMetadata(string metadataName)
         {
-            string metadataValue = GetMetadataValueEscaped(metadataName);
-            return EscapingUtilities.UnescapeAll(metadataValue);
+            throw new NotImplementedException();
         }
 
         public void SetMetadata(string metadataName, string metadataValue)
         {
-            MetadataNameToValue[metadataName] = metadataValue;
+            throw new NotImplementedException();
         }
 
         public void RemoveMetadata(string metadataName)
@@ -62,10 +67,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 
         public void CopyMetadataTo(ITaskItem destinationItem)
         {
-            foreach (KeyValuePair<string, string> metadataNameWithValue in MetadataNameToValue)
-            {
-                destinationItem.SetMetadata(metadataNameWithValue.Key, metadataNameWithValue.Value);
-            }
+            throw new NotImplementedException();
         }
 
         public IDictionary CloneCustomMetadata()
@@ -75,8 +77,8 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 
         public string GetMetadataValueEscaped(string metadataName)
         {
-            bool isFound = MetadataNameToValue.TryGetValue(metadataName, out string metadataValue);
-            return isFound ? metadataValue : string.Empty;
+            throw new NotImplementedException();
+
         }
 
         public void SetMetadataValueLiteral(string metadataName, string metadataValue)
@@ -100,8 +102,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
                 if (items[i] == null)
                     continue;
 
-                ReadOnlyTaskItem readOnlyTaskItem = new ReadOnlyTaskItem(items[i].ItemSpec);
-                items[i].CopyMetadataTo(readOnlyTaskItem);
+                ReadOnlyTaskItem readOnlyTaskItem = new ReadOnlyTaskItem(items[i].ItemSpec, items[i].CloneCustomMetadata());
                 readOnlyTaskItems[i] = readOnlyTaskItem;
             }
 
@@ -119,12 +120,29 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
                 if (readOnlyTaskItems[i] == null)
                     continue;
 
-                TaskItem item = new TaskItem(readOnlyTaskItems[i].ItemSpec);
-                readOnlyTaskItems[i].CopyMetadataTo(item);
+                TaskItem item = new TaskItem(readOnlyTaskItems[i].ItemSpec, readOnlyTaskItems[i].MetadataNameToValue);
                 items[i] = item;
             }
 
             return items;
         }
+
+        /// <summary>
+        /// This allows an explicit typecast from a "TaskItem" to a "string", returning the escaped ItemSpec for this item.
+        /// </summary>
+        /// <param name="taskItemToCast">The item to operate on.</param>
+        /// <returns>The item-spec of the item.</returns>
+        public static explicit operator string(ReadOnlyTaskItem taskItemToCast)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(taskItemToCast, nameof(taskItemToCast));
+            return taskItemToCast.ItemSpec;
+        }
+
+
+        /// <summary>
+        /// Gets the item-spec.
+        /// </summary>
+        /// <returns>The item-spec string.</returns>
+        public override string ToString() => ItemSpec;
     }
 }

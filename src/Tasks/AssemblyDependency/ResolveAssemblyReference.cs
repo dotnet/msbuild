@@ -952,7 +952,8 @@ namespace Microsoft.Build.Tasks
                 TargetProcessorArchitecture = TargetProcessorArchitecture,
                 UnresolveFrameworkAssembliesFromHigherFrameworks = UnresolveFrameworkAssembliesFromHigherFrameworks,
                 UseResolveAssemblyReferenceService = UseResolveAssemblyReferenceService,
-                WarnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatch
+                WarnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatch,
+                CurrentPath = Directory.GetCurrentDirectory()
             };
             set
             {
@@ -1020,7 +1021,7 @@ namespace Microsoft.Build.Tasks
                 _copyLocalFiles = value.CopyLocalFiles;
                 DependsOnNETStandard = value.DependsOnNETStandard;
                 DependsOnSystemRuntime = value.DependsOnSystemRuntime;
-                FilesWritten = value.FilesWritten;
+                _filesWritten = new List<ITaskItem>(value.FilesWritten);
                 _relatedFiles = value.RelatedFiles;
                 _resolvedDependencyFiles = value.ResolvedDependencyFiles;
                 _resolvedFiles = value.ResolvedFiles;
@@ -2028,6 +2029,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyPathInGac">Delegate to get assembly path in the GAC.</param>
         /// <param name="isWinMDFile">Delegate used for checking whether it is a WinMD file.</param>
         /// <param name="readMachineTypeFromPEHeader">Delegate use to read machine type from PE Header</param>
+        /// <param name="getRootedPath">Delegate which converts relative path to absolute one</param>
         /// <returns>True if there was success.</returns>
 #else
         /// <summary>
@@ -2043,6 +2045,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyPathInGac">Delegate to get assembly path in the GAC.</param>
         /// <param name="isWinMDFile">Delegate used for checking whether it is a WinMD file.</param>
         /// <param name="readMachineTypeFromPEHeader">Delegate use to read machine type from PE Header</param>
+        /// <param name="getRootedPath"></param>
         /// <returns>True if there was success.</returns>
 #endif
         internal bool Execute
@@ -2063,9 +2066,13 @@ namespace Microsoft.Build.Tasks
 #endif
             GetAssemblyPathInGac getAssemblyPathInGac,
             IsWinMDFile isWinMDFile,
-            ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader
+            ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader,
+            GetRootedPath getRootedPath = null
         )
         {
+            // Make this default option
+            getRootedPath ??= FileUtilities.NormalizePath;
+
             bool success = true;
             MSBuildEventSource.Log.RarOverallStart();
             {
@@ -2282,6 +2289,7 @@ namespace Microsoft.Build.Tasks
                         openBaseKey,
 #endif
                         getRuntimeVersion,
+                        getRootedPath,
                         targetedRuntimeVersion,
                         _projectTargetFramework,
                         frameworkMoniker,
@@ -3129,7 +3137,9 @@ namespace Microsoft.Build.Tasks
                 if (connected)
                 {
                     // Client is connected to the RAR node, we can execute RAR task remotely
+                    MSBuildEventSource.Log.RARaaSStart();
                     ResolveAssemblyReferenceResult result = client.Execute(ResolveAssemblyReferenceInput);
+                    MSBuildEventSource.Log.RARaaSStop();
                     ResolveAssemblyReferenceOutput = result.Output;
                     LogEvents(result.BuildWarningEvents);
                     LogEvents(result.BuildMessageEvents);
@@ -3205,9 +3215,37 @@ namespace Microsoft.Build.Tasks
             // Since this method should be run from RAR node, we prevent it from creating loop.
             UseResolveAssemblyReferenceService = false;
 
-            bool result = Execute();
+            bool result = Execute
+            (
+                new FileExists(p => FileUtilities.FileExistsNoThrow(p)),
+                new DirectoryExists(p => FileUtilities.DirectoryExistsNoThrow(p)),
+                new GetDirectories(Directory.GetDirectories),
+                new GetAssemblyName(AssemblyNameExtension.GetAssemblyNameEx),
+                new GetAssemblyMetadata(AssemblyInformation.GetAssemblyMetadata),
+#if FEATURE_WIN32_REGISTRY
+                new GetRegistrySubKeyNames(RegistryHelper.GetSubKeyNames),
+                new GetRegistrySubKeyDefaultValue(RegistryHelper.GetDefaultValue),
+#endif
+                new GetLastWriteTime(NativeMethodsShared.GetLastWriteFileUtcTime),
+                new GetAssemblyRuntimeVersion(AssemblyInformation.GetRuntimeVersion),
+#if FEATURE_WIN32_REGISTRY
+                new OpenBaseKey(RegistryHelper.OpenBaseKey),
+#endif
+                new GetAssemblyPathInGac(GetAssemblyPathInGac),
+                new IsWinMDFile(AssemblyInformation.IsWinMDFile),
+                new ReadMachineTypeFromPEHeader(ReferenceTable.ReadMachineTypeFromPEHeader),
+                (path) =>
+                {
+                    if(Path.IsPathRooted(path))
+                    {
+                        return FileUtilities.NormalizePath(path);
+                    }
 
-            return new ResolveAssemblyReferenceResult(result, ResolveAssemblyReferenceOutput);
+                    return FileUtilities.NormalizePath(input.CurrentPath, path);
+                }
+            );
+
+            return new ResolveAssemblyReferenceResult(result, ResolveAssemblyReferenceOutput, ResolveAssemblyReferenceInput);
         }
         #endregion
     }

@@ -46,7 +46,8 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
                    x.TargetProcessorArchitecture == y.TargetProcessorArchitecture &&
                    x.UnresolveFrameworkAssembliesFromHigherFrameworks == y.UnresolveFrameworkAssembliesFromHigherFrameworks &&
                    x.UseResolveAssemblyReferenceService == y.UseResolveAssemblyReferenceService &&
-                   x.WarnOrErrorOnTargetArchitectureMismatch == y.WarnOrErrorOnTargetArchitectureMismatch;
+                   x.WarnOrErrorOnTargetArchitectureMismatch == y.WarnOrErrorOnTargetArchitectureMismatch &&
+                   x.CurrentPath == y.CurrentPath;
 
             return fieldsEqual &&
                    AreStringListsEqual(x.AllowedAssemblyExtensions, y.AllowedAssemblyExtensions) &&
@@ -88,7 +89,10 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
                    AreTaskItemListsEqual(x.SatelliteFiles, y.SatelliteFiles) &&
                    AreTaskItemListsEqual(x.ScatterFiles, y.ScatterFiles) &&
                    AreTaskItemListsEqual(x.SerializationAssemblyFiles, y.SerializationAssemblyFiles) &&
-                   AreTaskItemListsEqual(x.SuggestedRedirects, y.SuggestedRedirects);
+                   AreTaskItemListsEqual(x.SuggestedRedirects, y.SuggestedRedirects); 
+            //&&
+            //       AreTaskItemListsEqual(x.Assemblies, y.Assemblies) &&
+            //       AreTaskItemListsEqual(x.AssemblyFiles, y.AssemblyFiles);
         }
 
         private static bool AreStringListsEqual(string[] x, string[] y)

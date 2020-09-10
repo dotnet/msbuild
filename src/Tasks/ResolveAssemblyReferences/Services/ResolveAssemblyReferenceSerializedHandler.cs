@@ -3,25 +3,26 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 using Microsoft.VisualStudio.Threading;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 {
-    internal sealed class ResolveAssemblyReferenceSerializedTaskHandler : IResolveAssemblyReferenceTaskHandler
+    internal sealed class ResolveAssemblyReferenceSerializedHandler : IResolveAssemblyReferenceTaskHandler
     {
         private const int MaxNumberOfConcurentClients = 1;
 
         private readonly IResolveAssemblyReferenceTaskHandler _taskHandler;
         private readonly AsyncSemaphore _semaphore;
 
-        public ResolveAssemblyReferenceSerializedTaskHandler(IResolveAssemblyReferenceTaskHandler taskHandler)
+        public ResolveAssemblyReferenceSerializedHandler(IResolveAssemblyReferenceTaskHandler taskHandler)
         {
             _taskHandler = taskHandler;
             _semaphore = new AsyncSemaphore(MaxNumberOfConcurentClients);
         }
 
-        public ResolveAssemblyReferenceSerializedTaskHandler() : this(new ResolveAssemblyReferenceTaskHandler())
+        public ResolveAssemblyReferenceSerializedHandler() : this(new ResolveAssemblyReferenceHandler())
         {
         }
 
@@ -29,7 +30,9 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
         {
             using (await _semaphore.EnterAsync(cancellationToken))
             {
-                return await _taskHandler.ExecuteAsync(input, cancellationToken);
+                NativeMethodsShared.SetCurrentDirectory(input.CurrentPath);
+                ResolveAssemblyReferenceResult result = await _taskHandler.ExecuteAsync(input, cancellationToken);
+                return result;
             }
         }
 

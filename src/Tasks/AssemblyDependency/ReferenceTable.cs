@@ -85,6 +85,8 @@ namespace Microsoft.Build.Tasks
         private readonly GetAssemblyMetadata _getAssemblyMetadata;
         /// <summary>Delegate used to get the image runtime version of a file</summary>
         private readonly GetAssemblyRuntimeVersion _getRuntimeVersion;
+        /// <summary>Delegate used to get absolute path form relative one</summary>
+        private readonly GetRootedPath _getRootedPath;
 #if FEATURE_WIN32_REGISTRY
         /// <summary> Delegate to get the base registry key for AssemblyFoldersEx</summary>
         private OpenBaseKey _openBaseKey;
@@ -186,6 +188,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
         /// <param name="allowedAssemblyExtensions"></param>
         /// <param name="getRuntimeVersion"></param>
+        /// <param name="getRootedPath"></param>
         /// <param name="targetedRuntimeVersion"></param>
         /// <param name="projectTargetFramework"></param>
         /// <param name="targetFrameworkMoniker"></param>
@@ -224,6 +227,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
         /// <param name="allowedAssemblyExtensions"></param>
         /// <param name="getRuntimeVersion"></param>
+        /// <param name="getRootedPath"></param>
         /// <param name="targetedRuntimeVersion"></param>
         /// <param name="projectTargetFramework"></param>
         /// <param name="targetFrameworkMoniker"></param>
@@ -264,6 +268,7 @@ namespace Microsoft.Build.Tasks
             OpenBaseKey openBaseKey,
 #endif
             GetAssemblyRuntimeVersion getRuntimeVersion,
+            GetRootedPath getRootedPath,
             Version targetedRuntimeVersion,
             Version projectTargetFramework,
             FrameworkNameVersioning targetFrameworkMoniker,
@@ -296,6 +301,7 @@ namespace Microsoft.Build.Tasks
             _getAssemblyName = getAssemblyName;
             _getAssemblyMetadata = getAssemblyMetadata;
             _getRuntimeVersion = getRuntimeVersion;
+            _getRootedPath = getRootedPath;
             _projectTargetFramework = projectTargetFramework;
             _targetedRuntimeVersion = targetedRuntimeVersion;
 #if FEATURE_WIN32_REGISTRY
@@ -358,6 +364,7 @@ namespace Microsoft.Build.Tasks
                     getRuntimeVersion,
                     targetedRuntimeVersion,
                     getAssemblyPathInGac,
+                    getRootedPath,
                     log
                 );
         }
@@ -446,7 +453,7 @@ namespace Microsoft.Build.Tasks
 
             if (!Path.IsPathRooted(assemblyFileName))
             {
-                reference.FullPath = Path.GetFullPath(assemblyFileName);
+                reference.FullPath = _getRootedPath(assemblyFileName);
             }
             else
             {
@@ -1302,14 +1309,14 @@ namespace Microsoft.Build.Tasks
             // If a reference has the SDKName metadata on it then we will only search using a single resolver, that is the InstalledSDKResolver.
             if (reference.SDKName.Length > 0)
             {
-                jaggedResolvers.Add(new Resolver[] { new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion) });
+                jaggedResolvers.Add(new Resolver[] { new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _getRootedPath, _targetedRuntimeVersion) });
             }
             else
             {
                 // Do not probe near dependees if the reference is primary and resolved externally. If resolved externally, the search paths should have been specified in such a way to point to the assembly file.
                 if (assemblyName == null || !_externallyResolvedPrimaryReferences.Contains(assemblyName.Name))
                 {
-                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion));
+                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _getRootedPath, _targetedRuntimeVersion));
                 }
 
                 jaggedResolvers.Add(Resolvers);
@@ -1347,7 +1354,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (!Path.IsPathRooted(resolvedPath))
                 {
-                    resolvedPath = Path.GetFullPath(resolvedPath);
+                    resolvedPath = _getRootedPath(resolvedPath);
                 }
 
                 reference.FullPath = resolvedPath;

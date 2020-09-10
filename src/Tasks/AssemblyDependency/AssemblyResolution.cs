@@ -117,6 +117,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getRuntimeVersion"></param>
         /// <param name="targetedRuntimeVersion"></param>
         /// <param name="getAssemblyPathInGac"></param>
+        /// <param name="getRootedPath"></param>
         /// <param name="log"></param>
         /// <returns></returns>
 #else
@@ -134,6 +135,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getRuntimeVersion"></param>
         /// <param name="targetedRuntimeVersion"></param>
         /// <param name="getAssemblyPathInGac"></param>
+        /// <param name="getRootedPath"></param>
         /// <param name="log"></param>
         /// <returns></returns>
 #endif
@@ -155,6 +157,7 @@ namespace Microsoft.Build.Tasks
             GetAssemblyRuntimeVersion getRuntimeVersion,
             Version targetedRuntimeVersion,
             GetAssemblyPathInGac getAssemblyPathInGac,
+            GetRootedPath getRootedPath,
             TaskLoggingHelper log
         )
         {
@@ -168,44 +171,44 @@ namespace Microsoft.Build.Tasks
                 // HintPath property.
                 if (String.Equals(basePath, AssemblyResolutionConstants.hintPathSentinel, StringComparison.OrdinalIgnoreCase))
                 {
-                    resolvers[p] = new HintPathResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
+                    resolvers[p] = new HintPathResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, getRootedPath, targetedRuntimeVersion);
                 }
                 else if (String.Equals(basePath, AssemblyResolutionConstants.frameworkPathSentinel, StringComparison.OrdinalIgnoreCase))
                 {
-                    resolvers[p] = new FrameworkPathResolver(frameworkPaths, installedAssemblies, searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
+                    resolvers[p] = new FrameworkPathResolver(frameworkPaths, installedAssemblies, searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, getRootedPath, targetedRuntimeVersion);
                 }
                 else if (String.Equals(basePath, AssemblyResolutionConstants.rawFileNameSentinel, StringComparison.OrdinalIgnoreCase))
                 {
-                    resolvers[p] = new RawFilenameResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
+                    resolvers[p] = new RawFilenameResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, getRootedPath, targetedRuntimeVersion);
                 }
                 else if (String.Equals(basePath, AssemblyResolutionConstants.candidateAssemblyFilesSentinel, StringComparison.OrdinalIgnoreCase))
                 {
-                    resolvers[p] = new CandidateAssemblyFilesResolver(candidateAssemblyFiles, searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
+                    resolvers[p] = new CandidateAssemblyFilesResolver(candidateAssemblyFiles, searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, getRootedPath, targetedRuntimeVersion);
                 }
 #if FEATURE_GAC
                 else if (String.Equals(basePath, AssemblyResolutionConstants.gacSentinel, StringComparison.OrdinalIgnoreCase))
                 {
-                    resolvers[p] = new GacResolver(targetProcessorArchitecture, searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, getAssemblyPathInGac);
+                    resolvers[p] = new GacResolver(targetProcessorArchitecture, searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, getRootedPath, targetedRuntimeVersion, getAssemblyPathInGac);
                 }
 #endif
                 else if (String.Equals(basePath, AssemblyResolutionConstants.assemblyFoldersSentinel, StringComparison.OrdinalIgnoreCase))
                 {
-                    resolvers[p] = new AssemblyFoldersResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
+                    resolvers[p] = new AssemblyFoldersResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, getRootedPath, targetedRuntimeVersion);
                 }
 #if FEATURE_WIN32_REGISTRY
                 // Check for AssemblyFoldersEx sentinel.
                 else if (0 == String.Compare(basePath, 0, AssemblyResolutionConstants.assemblyFoldersExSentinel, 0, AssemblyResolutionConstants.assemblyFoldersExSentinel.Length, StringComparison.OrdinalIgnoreCase))
                 {
-                    resolvers[p] = new AssemblyFoldersExResolver(searchPaths[p], getAssemblyName, fileExists, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getRuntimeVersion, openBaseKey, targetedRuntimeVersion, targetProcessorArchitecture, true, buildEngine);
+                    resolvers[p] = new AssemblyFoldersExResolver(searchPaths[p], getAssemblyName, fileExists, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, getRuntimeVersion, openBaseKey, getRootedPath, targetedRuntimeVersion, targetProcessorArchitecture, true, buildEngine);
                 }
 #endif
                 else if (0 == String.Compare(basePath, 0, AssemblyResolutionConstants.assemblyFoldersFromConfigSentinel, 0, AssemblyResolutionConstants.assemblyFoldersFromConfigSentinel.Length, StringComparison.OrdinalIgnoreCase))
                 {
-                    resolvers[p] = new AssemblyFoldersFromConfigResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, targetProcessorArchitecture, true, buildEngine, log);
+                    resolvers[p] = new AssemblyFoldersFromConfigResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, getRootedPath, targetedRuntimeVersion, targetProcessorArchitecture, true, buildEngine, log);
                 }
                 else
                 {
-                    resolvers[p] = new DirectoryResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
+                    resolvers[p] = new DirectoryResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, getRootedPath, targetedRuntimeVersion);
                 }
             }
             return resolvers;
@@ -220,13 +223,14 @@ namespace Microsoft.Build.Tasks
             FileExists fileExists,
             GetAssemblyName getAssemblyName,
             GetAssemblyRuntimeVersion getRuntimeVersion,
+            GetRootedPath getRootedPath,
             Version targetedRuntimeVersion
         )
         {
             var resolvers = new Resolver[directories.Count];
             for (int i = 0; i < directories.Count; i++)
             {
-                resolvers[i] = new DirectoryResolver(directories[i], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
+                resolvers[i] = new DirectoryResolver(directories[i], getAssemblyName, fileExists, getRuntimeVersion, getRootedPath, targetedRuntimeVersion);
             }
 
             return resolvers;

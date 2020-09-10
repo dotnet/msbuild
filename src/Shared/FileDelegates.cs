@@ -56,4 +56,11 @@ namespace Microsoft.Build.Shared
     /// </summary>
     /// <param name="path">The path to create.</param>
     internal delegate FileStream FileCreate(string path);
+
+    /// <summary>
+    /// Rooted path delegate. If necessary, converts relative path to absolute one.
+    /// </summary>
+    /// <param name="path">The path to convert.</param>
+    /// <returns>Absolute path.</returns>
+    internal delegate string GetRootedPath(string path);
 }

@@ -16,8 +16,8 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
             AllowedAssemblyExtensions = request.AllowedAssemblyExtensions;
             AllowedRelatedFileExtensions = request.AllowedRelatedFileExtensions;
             AppConfigFile = request.AppConfigFile;
-            Assemblies = request.Assemblies;
-            AssemblyFiles = request.AssemblyFiles;
+            Assemblies = ReadOnlyTaskItem.ToTaskItem(request.Assemblies);
+            AssemblyFiles = ReadOnlyTaskItem.ToTaskItem(request.AssemblyFiles);
             AutoUnify = request.AutoUnify;
             CandidateAssemblyFiles = request.CandidateAssemblyFiles;
             CopyLocalDependenciesWhenParentReferenceInGac = request.CopyLocalDependenciesWhenParentReferenceInGac;
@@ -27,18 +27,18 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
             FindRelatedFiles = request.FindRelatedFiles;
             FindSatellites = request.FindSatellites;
             FindSerializationAssemblies = request.FindSerializationAssemblies;
-            FullFrameworkAssemblyTables = request.FullFrameworkAssemblyTables;
+            FullFrameworkAssemblyTables = ReadOnlyTaskItem.ToTaskItem(request.FullFrameworkAssemblyTables);
             FullFrameworkFolders = request.FullFrameworkFolders;
             FullTargetFrameworkSubsetNames = request.FullTargetFrameworkSubsetNames;
             IgnoreDefaultInstalledAssemblySubsetTables = request.IgnoreDefaultInstalledAssemblySubsetTables;
             IgnoreDefaultInstalledAssemblyTables = request.IgnoreDefaultInstalledAssemblyTables;
             IgnoreTargetFrameworkAttributeVersionMismatch = request.IgnoreTargetFrameworkAttributeVersionMismatch;
             IgnoreVersionForFrameworkReferences = request.IgnoreVersionForFrameworkReferences;
-            InstalledAssemblySubsetTables = request.InstalledAssemblySubsetTables;
-            InstalledAssemblyTables = request.InstalledAssemblyTables;
+            InstalledAssemblySubsetTables = ReadOnlyTaskItem.ToTaskItem(request.InstalledAssemblySubsetTables);
+            InstalledAssemblyTables = ReadOnlyTaskItem.ToTaskItem(request.InstalledAssemblyTables);
             LatestTargetFrameworkDirectories = request.LatestTargetFrameworkDirectories;
             ProfileName = request.ProfileName;
-            ResolvedSDKReferences = request.ResolvedSDKReferences;
+            ResolvedSDKReferences = ReadOnlyTaskItem.ToTaskItem(request.ResolvedSDKReferences);
             SearchPaths = request.SearchPaths;
             Silent = request.Silent;
             StateFile = request.StateFile;
@@ -53,6 +53,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
             UnresolveFrameworkAssembliesFromHigherFrameworks = request.UnresolveFrameworkAssembliesFromHigherFrameworks;
             UseResolveAssemblyReferenceService = request.UseResolveAssemblyReferenceService;
             WarnOrErrorOnTargetArchitectureMismatch = request.WarnOrErrorOnTargetArchitectureMismatch;
+            CurrentPath = request.CurrentPath;
         }
 
         public string[] AllowedAssemblyExtensions { get; set; }
@@ -134,5 +135,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
         public bool UseResolveAssemblyReferenceService { get; set; }
 
         public string WarnOrErrorOnTargetArchitectureMismatch { get; set; }
+        public string CurrentPath { get; set; }
     }
 }

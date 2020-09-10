@@ -53,6 +53,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
             UnresolveFrameworkAssembliesFromHigherFrameworks = input.UnresolveFrameworkAssembliesFromHigherFrameworks;
             UseResolveAssemblyReferenceService = input.UseResolveAssemblyReferenceService;
             WarnOrErrorOnTargetArchitectureMismatch = input.WarnOrErrorOnTargetArchitectureMismatch;
+            CurrentPath = input.CurrentPath;
         }
 
         [Key(0)]
@@ -174,5 +175,8 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 
         [Key(39)]
         public string WarnOrErrorOnTargetArchitectureMismatch { get; set; }
+
+        [Key(40)]
+        public string CurrentPath { get; set; }
     }
 }

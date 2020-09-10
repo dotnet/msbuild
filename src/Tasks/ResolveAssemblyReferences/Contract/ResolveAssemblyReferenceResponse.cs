@@ -25,6 +25,8 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
             ScatterFiles = ReadOnlyTaskItem.CreateArray(output.ScatterFiles);
             SerializationAssemblyFiles = ReadOnlyTaskItem.CreateArray(output.SerializationAssemblyFiles);
             SuggestedRedirects = ReadOnlyTaskItem.CreateArray(output.SuggestedRedirects);
+            //Assemblies = ReadOnlyTaskItem.CreateArray(output.Assemblies);
+            //AssemblyFiles = ReadOnlyTaskItem.CreateArray(output.AssemblyFiles);
         }
 
         [Key(0)]
@@ -59,5 +61,11 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 
         [Key(10)]
         public ReadOnlyTaskItem[] SuggestedRedirects { get; set; }
+
+        //[Key(11)]
+        //public ReadOnlyTaskItem[] Assemblies { get; set; }
+
+        //[Key(12)]
+        //public ReadOnlyTaskItem[] AssemblyFiles { get; set; }
     }
 }

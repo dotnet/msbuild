@@ -27,9 +27,10 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyName"></param>
         /// <param name="fileExists"></param>
         /// <param name="getRuntimeVersion"></param>
+        /// <param name="getRootedPath"></param>
         /// <param name="targetedRuntimeVesion"></param>
-        public CandidateAssemblyFilesResolver(string[] candidateAssemblyFiles, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false)
+        public CandidateAssemblyFilesResolver(string[] candidateAssemblyFiles, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, GetRootedPath getRootedPath, Version targetedRuntimeVesion)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, getRootedPath, targetedRuntimeVesion, ProcessorArchitecture.None, false)
         {
             _candidateAssemblyFiles = candidateAssemblyFiles;
         }

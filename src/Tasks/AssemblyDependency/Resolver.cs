@@ -35,6 +35,11 @@ namespace Microsoft.Build.Tasks
         protected GetAssemblyRuntimeVersion getRuntimeVersion;
 
         /// <summary>
+        /// Delegate
+        /// </summary>
+        protected GetRootedPath getRootedPath;
+
+        /// <summary>
         /// Runtime we are targeting
         /// </summary>
         protected Version targetedRuntimeVersion;
@@ -52,12 +57,13 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
+        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, GetRootedPath getRootedPath, Version targetedRuntimeVesion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
         {
             this.searchPathElement = searchPathElement;
             this.getAssemblyName = getAssemblyName;
             this.fileExists = fileExists;
             this.getRuntimeVersion = getRuntimeVersion;
+            this.getRootedPath = getRootedPath;
             this.targetedRuntimeVersion = targetedRuntimeVesion;
             this.targetProcessorArchitecture = targetedProcessorArchitecture;
             this.compareProcessorArchitecture = compareProcessorArchitecture;

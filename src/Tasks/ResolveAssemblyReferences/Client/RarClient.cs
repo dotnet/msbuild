@@ -55,18 +55,26 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
         {
             ResolveAssemblyReferenceRequest request = new ResolveAssemblyReferenceRequest(input);
 
-            IResolveAssemblyReferenceTaskHandler client = GetRpcClient();
-
+            var client = GetRpcClient();
+            client.StartListening();
             // TODO: Find out if there is any possibility of awaiting it.
-            return client.ExecuteAsync(request).GetAwaiter().GetResult();
+            try
+            {
+                return client.InvokeAsync<ResolveAssemblyReferenceResult>(nameof(IResolveAssemblyReferenceTaskHandler.ExecuteAsync), request).GetAwaiter().GetResult();
+            }
+            catch (ConnectionLostException e)
+            {
+                throw new InternalErrorException("Request failed", e);
+            }
+            //return client.ExecuteAsync(request).GetAwaiter().GetResult();
         }
 
-        private IResolveAssemblyReferenceTaskHandler GetRpcClient()
+        private JsonRpc GetRpcClient()
         {
             ErrorUtilities.VerifyThrowInternalErrorUnreachable(_clientStream != null);
 
             IJsonRpcMessageHandler handler = RpcUtils.GetRarMessageHandler(_clientStream);
-            return JsonRpc.Attach<IResolveAssemblyReferenceTaskHandler>(handler);
+            return new JsonRpc(handler);
         }
 
         public void Dispose()

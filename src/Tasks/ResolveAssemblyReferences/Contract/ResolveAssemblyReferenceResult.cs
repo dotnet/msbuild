@@ -15,10 +15,11 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
         {
         }
 
-        internal ResolveAssemblyReferenceResult(bool taskResult, ResolveAssemblyReferenceTaskOutput output)
+        internal ResolveAssemblyReferenceResult(bool taskResult, ResolveAssemblyReferenceTaskOutput output, ResolveAssemblyReferenceTaskInput input)
         {
             TaskResult = taskResult;
             Response = new ResolveAssemblyReferenceResponse(output);
+            Request = new ResolveAssemblyReferenceRequest(input);
         }
 
         [Key(0)]
@@ -33,15 +34,22 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
         public List<CustomBuildEventArgs> CustomBuildEvents { get; set; }
 
         [Key(4)]
-        public List<BuildErrorEventArgs> BuildErrorEvents {get;set;}
+        public List<BuildErrorEventArgs> BuildErrorEvents { get; set; }
 
         [Key(5)]
-        public List<BuildMessageEventArgs> BuildMessageEvents {get;set;}
+        public List<BuildMessageEventArgs> BuildMessageEvents { get; set; }
 
         [Key(6)]
-        public List<BuildWarningEventArgs> BuildWarningEvents {get;set;}
+        public List<BuildWarningEventArgs> BuildWarningEvents { get; set; }
+
+
+        [Key(7)]
+        public ResolveAssemblyReferenceRequest Request { get; set; }
 
         [IgnoreMember]
         internal ResolveAssemblyReferenceTaskOutput Output => new ResolveAssemblyReferenceTaskOutput(Response);
+
+        [IgnoreMember]
+        internal ResolveAssemblyReferenceTaskInput InputOutput => new ResolveAssemblyReferenceTaskInput(Request);
     }
 }

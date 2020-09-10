@@ -76,7 +76,9 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
                   streamFactory,
                   validateHandshakeCallback,
                   timeout: timeout,
-                  resolveAssemblyReferenceTaskHandler: new ResolveAssemlyReferenceCacheHandler(new ResolveAssemblyReferenceTaskHandler()))
+                  resolveAssemblyReferenceTaskHandler: //new ResolveAssemblyReferenceSerializedHandler(
+                      new ResolveAssemlyReferenceCacheHandler(
+                      new ResolveAssemblyReferenceHandler()))//)
         {
         }
 
@@ -182,8 +184,8 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
         {
             IJsonRpcMessageHandler serverHandler = RpcUtils.GetRarMessageHandler(stream);
             JsonRpc rpc = new JsonRpc(serverHandler, handler);
-            //rpc.TraceSource = new TraceSource("Server", SourceLevels.Verbose);
-            //rpc.TraceSource.Listeners.Add(new ConsoleLogger());
+            rpc.TraceSource = new TraceSource("Server", SourceLevels.Warning);
+            rpc.TraceSource.Listeners.Add(new ConsoleLogger()); 
             return rpc;
         }
 
