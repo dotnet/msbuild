@@ -102,8 +102,57 @@ namespace Microsoft.NET.Build.Tests
                 .And
                 .HaveStdOutContaining("NETSDK1137");
         }
-		
-		[WindowsOnlyFact]
+
+        [WindowsOnlyFact]
+        public void It_does_not_warn_when_multitargeting()
+        {
+            var targetFramework = "net5.0;net472;netcoreapp3.1";
+            TestProject testProject = new TestProject()
+            {
+                Name = "windowsDesktopSdk",
+                IsSdkProject = true,
+                ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
+                TargetFrameworks = targetFramework
+            };
+            testProject.AdditionalProperties["UseWPF"] = "true";
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "Windows";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("NETSDK1137");
+        }
+
+        [WindowsOnlyFact]
+        public void It_imports_when_targeting_dotnet_3()
+        {
+            var targetFramework = "netcoreapp3.1";
+            TestProject testProject = new TestProject()
+            {
+                Name = "windowsDesktopSdk",
+                IsSdkProject = true,
+                TargetFrameworks = targetFramework
+            };
+            testProject.AdditionalProperties["UseWPF"] = "true";
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "Windows";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            var getValuesCommand = new GetValuesCommand(testAsset, "ImportWindowsDesktopTargets");
+            getValuesCommand.Execute()
+                .Should()
+                .Pass();
+            getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "true" });
+        }
+
+        [WindowsOnlyFact]
         public void It_fails_if_windows_target_platform_version_is_invalid()
         {
             var testProject = new TestProject()

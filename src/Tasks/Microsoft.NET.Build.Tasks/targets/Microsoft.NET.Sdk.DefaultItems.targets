@@ -372,7 +372,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="_CheckForUnnecessaryWindowsDesktopSDK"
         BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
-        Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and '$(_MicrosoftWindowsDesktopSdkImported)' == 'true'">
+        Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0')) and '$(_MicrosoftWindowsDesktopSdkImported)' == 'true' and '$(TargetFrameworks)' == ''">
     <NETSdkWarning ResourceName="UnnecessaryWindowsDesktopSDK" />
   </Target>
 </Project>
