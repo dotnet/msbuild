@@ -1,6 +1,7 @@
 ﻿using MessagePack;
 using MessagePack.Resolvers;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Client;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Server;
@@ -70,9 +71,13 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             {
                 Assemblies = assemblyNames
             };
+
+            MessagePackSerializerOptions options = MessagePackSerializerOptions.Standard.WithResolver(ResolveAssemlyReferneceResolver.Instance);
+
             ResolveAssemblyReferenceRequest request = new ResolveAssemblyReferenceRequest(rar.ResolveAssemblyReferenceInput);
-            byte[] data = MessagePackSerializer.Serialize(request);
-            ResolveAssemblyReferenceRequest requestDes = MessagePackSerializer.Deserialize<ResolveAssemblyReferenceRequest>(data);
+            byte[] data = MessagePackSerializer.Serialize(request, options);
+
+            ResolveAssemblyReferenceRequest requestDes = MessagePackSerializer.Deserialize<ResolveAssemblyReferenceRequest>(data, options);
 
             ResolveAssemblyReferenceComparer.CompareInput(request, requestDes).ShouldBeTrue();
         }
