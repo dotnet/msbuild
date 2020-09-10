@@ -15,6 +15,12 @@ using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Xunit;
 using Xunit.Abstractions;
 using Shouldly;
+using Nerdbank.Streams;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences.Server;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
+using System.Threading.Tasks;
+using System.Threading;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences.Services;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -171,8 +177,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public ResolveAssemblyReferenceTestFixture(ITestOutputHelper output)
         {
             Environment.SetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE", "1");
-
-            _output = output;
         }
 
         public void Dispose()
@@ -2958,9 +2962,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <remarks>
         /// NOTE! This test is not in fact completely isolated from its environment: it is reading the real redist lists.
         /// </remarks>
-        protected static bool Execute(ResolveAssemblyReference t, RARSimulationMode RARSimulationMode = RARSimulationMode.LoadAndBuildProject)
+        protected static bool Execute(ResolveAssemblyReference t, RARSimulationMode RARSimulationMode = RARSimulationMode.LoadAndBuildProject, bool useRarService = true)
         {
-            return Execute(t, true, RARSimulationMode);
+            return Execute(t, true, RARSimulationMode, useRarService);
         }
 
         [Flags]
@@ -2971,11 +2975,51 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             LoadAndBuildProject = LoadProject | BuildProject
         }
 
+        private class RarHandler : IResolveAssemblyReferenceTaskHandler
+        {
+            public void Dispose()
+            {
+            }
+
+            public Task<ResolveAssemblyReferenceResult> ExecuteAsync(ResolveAssemblyReferenceRequest input, CancellationToken cancellationToken = default)
+            {
+                return System.Threading.Tasks.Task.FromResult(Execute(input));
+
+            }
+
+            internal ResolveAssemblyReferenceResult Execute(ResolveAssemblyReferenceRequest input)
+            {
+                ResolveAssemblyReferenceTaskInput taskInput = new ResolveAssemblyReferenceTaskInput(input);
+                ResolveAssemblyReferenceBuildEngine buildEngine = new ResolveAssemblyReferenceBuildEngine();
+                //ResolveAssemblyReference task = GetResolveAssemblyReferenceTask(buildEngine);
+                ResolveAssemblyReference task = new ResolveAssemblyReference
+                {
+                    BuildEngine = buildEngine
+                };
+
+                task.ResolveAssemblyReferenceInput = taskInput;
+                bool taskResult = ExecuteRarTask(task);
+                ResolveAssemblyReferenceResult result = new ResolveAssemblyReferenceResult(taskResult, task.ResolveAssemblyReferenceOutput, task.ResolveAssemblyReferenceInput)
+                {
+                    CustomBuildEvents = buildEngine.CustomBuildEvent,
+                    BuildMessageEvents = buildEngine.MessageBuildEvent,
+                    BuildWarningEvents = buildEngine.WarningBuildEvent,
+                    BuildErrorEvents = buildEngine.ErrorBuildEvent,
+
+                    EventCount = buildEngine.EventCount
+                };
+
+                //System.Console.WriteLine("RAR task: {0}. Logged {1} events", result.TaskResult ? "Succeded" : "Failed", result.EventCount);
+
+                return result;
+            }
+        }
+
         /// <summary>
         /// Execute the task. Without confirming that the number of files resolved with and without find dependencies is identical.
         /// This is because profiles could cause the number of primary references to be different.
         /// </summary>
-        protected static bool Execute(ResolveAssemblyReference t, bool buildConsistencyCheck, RARSimulationMode rarSimulationMode = RARSimulationMode.LoadAndBuildProject)
+        protected static bool Execute(ResolveAssemblyReference t, bool buildConsistencyCheck, RARSimulationMode rarSimulationMode = RARSimulationMode.LoadAndBuildProject, bool useRarService = true)
         {
             string tempPath = Path.GetTempPath();
             string redistListPath = Path.Combine(tempPath, Guid.NewGuid() + ".xml");
@@ -2983,6 +3027,22 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             s_existentFiles.Add(rarCacheFile);
 
             bool succeeded = false;
+
+            bool usingRarService = false;
+            System.Threading.Tasks.Task serverTask = null;
+            Stream clientStream = null, serverStream = null;
+            if (useRarService)
+            {
+                if (t.BuildEngine is MockEngine e)
+                {
+                    (serverStream, clientStream) = FullDuplexStream.CreatePair();
+                    e.ClientStream = clientStream;
+                    RarController rarController = new RarController(string.Empty, null, null, new RarHandler());
+                    serverTask = rarController.HandleClientAsync(serverStream);
+                    usingRarService = true;
+                    t.UseResolveAssemblyReferenceService = true;
+                }
+            }
 
             try
             {
@@ -3003,27 +3063,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     t.FindSerializationAssemblies = false;
                     t.FindRelatedFiles = false;
                     t.StateFile = null;
-	                t.Execute
-	                (
-	                    fileExists,
-	                    directoryExists,
-	                    getDirectories,
-	                    getAssemblyName,
-	                    getAssemblyMetadata,
-	#if FEATURE_WIN32_REGISTRY
-	                    getRegistrySubKeyNames,
-	                    getRegistrySubKeyDefaultValue,
-	#endif
-	                    getLastWriteTime,
-	                    getRuntimeVersion,
-	#if FEATURE_WIN32_REGISTRY
-	                    openBaseKey,
-	#endif
-	                    checkIfAssemblyIsInGac,
-	                    isWinMDFile,
-	                    readMachineTypeFromPEHeader
-	                );
 
+                    if (usingRarService)
+                    {
+                        t.Execute();
+                    }
+                    else
+                    {
+                        ExecuteRarTask(t);
+                    }
                     // A few checks. These should always be true or it may be a perf issue for project load.
                     ITaskItem[] loadModeResolvedFiles = new TaskItem[0];
                     if (t.ResolvedFiles != null)
@@ -3064,27 +3112,22 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     string cache = rarCacheFile;
                     t.StateFile = cache;
                     File.Delete(t.StateFile);
-	                succeeded =
-	                    t.Execute
-	                    (
-	                        fileExists,
-	                        directoryExists,
-	                        getDirectories,
-	                        getAssemblyName,
-	                        getAssemblyMetadata,
-	#if FEATURE_WIN32_REGISTRY
-	                        getRegistrySubKeyNames,
-	                        getRegistrySubKeyDefaultValue,
-	#endif
-	                        getLastWriteTime,
-	                        getRuntimeVersion,
-	#if FEATURE_WIN32_REGISTRY
-	                        openBaseKey,
-	#endif
-	                        checkIfAssemblyIsInGac,
-	                        isWinMDFile,
-	                        readMachineTypeFromPEHeader
-	                    );
+
+                    if (usingRarService)
+                    {
+                        serverStream?.Dispose();
+                        clientStream?.Dispose();
+                        (serverStream, clientStream) = FullDuplexStream.CreatePair();
+                        e.ClientStream = clientStream;
+                        RarController rarController = new RarController(string.Empty, null, null, new RarHandler());
+                        serverTask = rarController.HandleClientAsync(serverStream);
+
+                        succeeded = t.Execute();
+                    }
+                    else
+                    {
+                        succeeded = ExecuteRarTask(t);
+                    }
                     if (FileUtilities.FileExistsNoThrow(t.StateFile))
                     {
                         Assert.Single(t.FilesWritten);
@@ -3115,8 +3158,35 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 {
                     FileUtilities.DeleteNoThrow(rarCacheFile);
                 }
+
+                serverStream?.Dispose();
+                clientStream?.Dispose();
             }
             return succeeded;
+        }
+
+        private static bool ExecuteRarTask(ResolveAssemblyReference t)
+        {
+            return t.Execute
+                (
+                    fileExists,
+                    directoryExists,
+                    getDirectories,
+                    getAssemblyName,
+                    getAssemblyMetadata,
+#if FEATURE_WIN32_REGISTRY
+                            getRegistrySubKeyNames,
+                    getRegistrySubKeyDefaultValue,
+#endif
+                            getLastWriteTime,
+                    getRuntimeVersion,
+#if FEATURE_WIN32_REGISTRY
+                            openBaseKey,
+#endif
+                            checkIfAssemblyIsInGac,
+                    isWinMDFile,
+                    readMachineTypeFromPEHeader
+                );
         }
 
         /// <summary>
