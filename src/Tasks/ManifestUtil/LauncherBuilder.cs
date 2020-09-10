@@ -93,18 +93,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 File.Copy(LauncherPath, strOutputExe, true);
                 ClearReadOnlyAttribute(strOutputExe);
             }
-            catch (Exception ex)
-            {
-                if (ex is IOException ||
+            catch (Exception ex) when (ex is IOException ||
                     ex is UnauthorizedAccessException ||
                     ex is ArgumentException ||
                     ex is NotSupportedException)
-                {
-                    _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.CopyError", LauncherPath, strOutputExe, ex.Message));
-                    return false;
-                }
-
-                throw;
+            {
+                _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.CopyError", LauncherPath, strOutputExe, ex.Message));
+                return false;
             }
 
             return true;

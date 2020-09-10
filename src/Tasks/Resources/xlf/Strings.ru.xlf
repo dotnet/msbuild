@@ -779,6 +779,11 @@
         <target state="new">MSB3961: An error occurred trying to copy '{0}' to '{1}': {2}</target>
         <note>{StrBegin="MSB3961: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateLauncher.EmptyEntryPoint">
+        <source>MSB3966: EntryPoint input parameter cannot be empty in the GenerateLauncher task.</source>
+        <target state="new">MSB3966: EntryPoint input parameter cannot be empty in the GenerateLauncher task.</target>
+        <note>{StrBegin="MSB3965: "}</note>
+      </trans-unit>
       <trans-unit id="GenerateLauncher.General">
         <source>MSB3962: An error occurred generating a launcher: {0}</source>
         <target state="new">MSB3962: An error occurred generating a launcher: {0}</target>

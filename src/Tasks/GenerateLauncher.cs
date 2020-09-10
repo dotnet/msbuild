@@ -56,6 +56,7 @@ namespace Microsoft.Build.Tasks
 
             if (EntryPoint == null)
             {
+                Log.LogErrorWithCodeFromResources("GenerateLauncher.EmptyEntryPoint");
                 return false;
             }
 
@@ -78,13 +79,17 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (BuildMessage message in messages)
                 {
-                    if (message.Severity == BuildMessageSeverity.Error)
+                    switch (message.Severity)
                     {
-                        Log.LogError(null, message.HelpCode, message.HelpKeyword, null, 0, 0, 0, 0, message.Message);
-                    }
-                    else if (message.Severity == BuildMessageSeverity.Warning)
-                    {
-                        Log.LogWarning(null, message.HelpCode, message.HelpKeyword, null, 0, 0, 0, 0, message.Message);
+                        case BuildMessageSeverity.Error:
+                            Log.LogError(null, message.HelpCode, message.HelpKeyword, null, 0, 0, 0, 0, message.Message);
+                            break;
+                        case BuildMessageSeverity.Warning:
+                            Log.LogWarning(null, message.HelpCode, message.HelpKeyword, null, 0, 0, 0, 0, message.Message);
+                            break;
+                        case BuildMessageSeverity.Info:
+                            Log.LogMessage(null, message.HelpCode, message.HelpKeyword, null, 0, 0, 0, 0, message.Message);
+                            continue;
                     }
                 }
             }
@@ -92,7 +97,7 @@ namespace Microsoft.Build.Tasks
             OutputEntryPoint = new TaskItem(Path.Combine(Path.GetDirectoryName(EntryPoint.ItemSpec), results.KeyFile));
             OutputEntryPoint.SetMetadata(ItemMetadataNames.targetPath, results.KeyFile);
 
-            return results.Succeeded;
+            return !Log.HasLoggedErrors;
         }
     }
 }
