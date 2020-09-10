@@ -30,6 +30,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_DotNetCLIToolTargetsDir Condition=" '$(_DotNetCLIToolTargetsDir)'=='' ">$(MSBuildThisFileDirectory)DotNetCLIToolTargets\</_DotNetCLIToolTargetsDir>
     <_PublishProfilesDir Condition=" '$(_PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</_PublishProfilesDir>
 
+    <PublishIISAssets Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' 
+             And '$(_TargetFrameworkVersionWithoutV)' != '' 
+             AND $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))
+             And '$(RuntimeIdentifier)' != ''
+             And !$(RuntimeIdentifier.StartsWith('win'))
+             And '$(PublishIISAssets)' == ''">false</PublishIISAssets>
   </PropertyGroup>
 
   <!-- Extension points for BeforePublish and AfterPublish-->
@@ -89,6 +95,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(_ComputeTargetsDir)Microsoft.NET.Sdk.Publish.ComputeFiles.targets" Condition="Exists('$(_ComputeTargetsDir)Microsoft.NET.Sdk.Publish.ComputeFiles.targets')" />
 
+  <!--
+  ***********************************************************************************************
+  Import the Filter target
+  ***********************************************************************************************
+ -->
+
+  <Import Project="$(_CopyTargetsDir)Microsoft.NET.Sdk.Publish.FilterFiles.targets" Condition="Exists('$(_CopyTargetsDir)Microsoft.NET.Sdk.Publish.FilterFiles.targets')"/>
+
+ 
   <!--
   ***********************************************************************************************
   Import the Copy target

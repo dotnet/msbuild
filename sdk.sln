@@ -199,6 +199,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CopyTargets", "CopyTargets", "{683F3DA5-3713-4F8C-8AA2-586D3F6B4E30}"
 	ProjectSection(SolutionItems) = preProject
 		src\WebSdk\Publish\Targets\CopyTargets\Microsoft.NET.Sdk.Publish.CopyFiles.targets = src\WebSdk\Publish\Targets\CopyTargets\Microsoft.NET.Sdk.Publish.CopyFiles.targets
+		src\WebSdk\Publish\Targets\CopyTargets\Microsoft.NET.Sdk.Publish.FilterFiles.targets = src\WebSdk\Publish\Targets\CopyTargets\Microsoft.NET.Sdk.Publish.FilterFiles.targets
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DotNetCLIToolTargets", "DotNetCLIToolTargets", "{6186F09D-9FFA-4C83-860F-93BA74368A5B}"
