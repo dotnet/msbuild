@@ -555,7 +555,7 @@ namespace Microsoft.Build.Construction
                         ProjectFileErrorUtilities.ThrowInvalidProjectFile
                         (
                             "SubCategoryForSolutionParsingErrors",
-                            new BuildEventFileInfo(project),
+                            new BuildEventFileInfo(FileUtilities.GetFullPath(project, Path.GetDirectoryName(_solutionFile))),
                             "SolutionFilterFilterContainsProjectNotInSolution",
                             _solutionFilterFile,
                             project,
