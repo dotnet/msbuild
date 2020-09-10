@@ -73,6 +73,21 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
+        public void WhenUsingDefaultTargetPlatformVersionItCanGenerateSupportedOSPlatformAttribute()
+        {
+            TestProject testProject = SetUpProject();
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "windows";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var runCommand = new DotnetCommand(Log, "run");
+            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            runCommand.Execute()
+                .Should()
+                .Pass().And.HaveStdOutContaining("PlatformName:Windows7.0");
+        }
+
+        [Fact]
         public void WhenSupportedOSPlatformIsHigherThanTargetPlatformVersionItShouldError()
         {
             TestProject testProject = SetUpProject();

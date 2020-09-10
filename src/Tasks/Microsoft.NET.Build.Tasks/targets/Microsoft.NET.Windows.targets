@@ -27,6 +27,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'windows' and '$(TargetPlatformVersion)' == ''" >
     <TargetPlatformVersion>7.0</TargetPlatformVersion>
     <!-- Automatic generation of TargetPlatformMoniker and TargetPlatformDisplayName have already been evaluated so we need to hardcode these values. -->
+    <SupportedOSPlatform>7.0</SupportedOSPlatform>
     <TargetPlatformMoniker>Windows,Version=7.0</TargetPlatformMoniker>
     <TargetPlatformDisplayName>Windows 7.0</TargetPlatformDisplayName>
   </PropertyGroup>
