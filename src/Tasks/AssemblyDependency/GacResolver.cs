@@ -25,11 +25,10 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyName">Delegate to get the assembly name object.</param>
         /// <param name="fileExists">Delegate to check if the file exists.</param>
         /// <param name="getRuntimeVersion">Delegate to get the runtime version.</param>
-        /// <param name="getRootedPath">Delegate to convert relative path to absolute</param>
         /// <param name="targetedRuntimeVesion">The targeted runtime version.</param>
         /// <param name="getAssemblyPathInGac">Delegate to get assembly path in the GAC.</param>
-        public GacResolver(System.Reflection.ProcessorArchitecture targetProcessorArchitecture, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, GetRootedPath getRootedPath, Version targetedRuntimeVesion, GetAssemblyPathInGac getAssemblyPathInGac)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, getRootedPath, targetedRuntimeVesion, targetProcessorArchitecture, true)
+        public GacResolver(System.Reflection.ProcessorArchitecture targetProcessorArchitecture, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, GetAssemblyPathInGac getAssemblyPathInGac)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, targetProcessorArchitecture, true)
         {
             _getAssemblyPathInGac = getAssemblyPathInGac;
         }

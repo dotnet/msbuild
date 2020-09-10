@@ -13,12 +13,15 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal class HintPathResolver : Resolver
     {
+        private readonly GetRootedPath _getRootedPath;
+
         /// <summary>
         /// Construct.
         /// </summary>
         public HintPathResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, GetRootedPath getRootedPath, Version targetedRuntimeVesion)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, getRootedPath, targetedRuntimeVesion, ProcessorArchitecture.None, false)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false)
         {
+            _getRootedPath = getRootedPath;
         }
 
         /// <summary>
@@ -57,7 +60,7 @@ namespace Microsoft.Build.Tasks
             // However, we should consider Trim() the hintpath https://github.com/microsoft/msbuild/issues/4603
             if (!string.IsNullOrEmpty(hintPath) && !FileUtilities.PathIsInvalid(hintPath))
             {
-                if (ResolveAsFile(getRootedPath(hintPath), assemblyName, isPrimaryProjectReference, wantSpecificVersion, true, assembliesConsideredAndRejected))
+                if (ResolveAsFile(_getRootedPath(hintPath), assemblyName, isPrimaryProjectReference, wantSpecificVersion, true, assembliesConsideredAndRejected))
                 {
                     userRequestedSpecificFile = true;
                     foundPath = hintPath;

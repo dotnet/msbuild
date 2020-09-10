@@ -16,8 +16,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        public RawFilenameResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, GetRootedPath getRootedPath, Version targetedRuntimeVesion)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, getRootedPath, targetedRuntimeVesion, ProcessorArchitecture.None, false)
+        public RawFilenameResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false)
         {
         }
 

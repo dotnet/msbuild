@@ -23,14 +23,13 @@ namespace Microsoft.Build.Tasks
         /// Construct.
         /// </summary>
         /// <param name="candidateAssemblyFiles">List of literal assembly file names to be considered when SearchPaths has {CandidateAssemblyFiles}.</param>
-        /// <param name="searchPathElement"></param>
-        /// <param name="getAssemblyName"></param>
-        /// <param name="fileExists"></param>
-        /// <param name="getRuntimeVersion"></param>
-        /// <param name="getRootedPath"></param>
-        /// <param name="targetedRuntimeVesion"></param>
-        public CandidateAssemblyFilesResolver(string[] candidateAssemblyFiles, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, GetRootedPath getRootedPath, Version targetedRuntimeVesion)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, getRootedPath, targetedRuntimeVesion, ProcessorArchitecture.None, false)
+        /// <param name="searchPathElement">The search path element.</param>
+        /// <param name="getAssemblyName">Delegate to get the assembly name object.</param>
+        /// <param name="fileExists">Delegate to check if the file exists.</param>
+        /// <param name="getRuntimeVersion">Delegate to get the runtime version.</param>
+        /// <param name="targetedRuntimeVesion">The targeted runtime version.</param>
+        public CandidateAssemblyFilesResolver(string[] candidateAssemblyFiles, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false)
         {
             _candidateAssemblyFiles = candidateAssemblyFiles;
         }
