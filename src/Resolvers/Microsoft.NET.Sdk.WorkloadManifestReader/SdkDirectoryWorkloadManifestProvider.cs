@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
@@ -8,8 +9,32 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private readonly string _sdkRootPath;
         private readonly string _sdkVersionBand;
 
-        public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersionBand)
+        public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion)
         {
+            if (string.IsNullOrWhiteSpace(sdkVersion))
+            {
+                throw new ArgumentException($"'{nameof(sdkVersion)}' cannot be null or whitespace", nameof(sdkVersion));
+            }
+
+            if (string.IsNullOrWhiteSpace(sdkRootPath))
+            {
+                throw new ArgumentException($"'{nameof(sdkRootPath)}' cannot be null or whitespace",
+                    nameof(sdkRootPath));
+            }
+
+            if (!Version.TryParse(sdkVersion.Split('-')[0], out var sdkVersionParsed))
+            {
+                throw new ArgumentException($"'{nameof(sdkVersion)}' should be a version, but get {sdkVersion}");
+            }
+
+            static int Last2DigitsTo0(int versionBuild)
+            {
+                return (versionBuild / 100) * 100;
+            }
+
+            var sdkVersionBand =
+                $"{sdkVersionParsed.Major}.{sdkVersionParsed.Minor}.{Last2DigitsTo0(sdkVersionParsed.Build)}";
+
             _sdkRootPath = sdkRootPath;
             _sdkVersionBand = sdkVersionBand;
         }

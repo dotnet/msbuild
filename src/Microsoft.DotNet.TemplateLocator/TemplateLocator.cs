@@ -49,20 +49,7 @@ namespace Microsoft.DotNet.TemplateLocator
                     nameof(dotnetRootPath));
             }
 
-            if (!Version.TryParse(sdkVersion.Split('-')[0], out var sdkVersionParsed))
-            {
-                throw new ArgumentException($"'{nameof(sdkVersion)}' should be a version, but get {sdkVersion}");
-            }
-
-            static int Last2DigitsTo0(int versionBuild)
-            {
-                return (versionBuild / 100) * 100;
-            }
-
-            var sdkVersionBand =
-                $"{sdkVersionParsed.Major}.{sdkVersionParsed.Minor}.{Last2DigitsTo0(sdkVersionParsed.Build)}";
-
-            _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersionBand);
+            _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion);
             _workloadResolver ??= new WorkloadResolver(_workloadManifestProvider, dotnetRootPath);
 
             return _workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template)

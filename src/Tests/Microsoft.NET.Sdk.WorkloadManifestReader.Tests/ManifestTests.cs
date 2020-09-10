@@ -18,10 +18,10 @@ namespace ManifestReaderTests
                 var result = WorkloadManifestReader.ReadWorkloadManifest(fsSource);
                 result.Version.Should().Be(5);
 
-                result.Packs["Xamarin.Android.Sdk"].Id.Should().Be("Xamarin.Android.Sdk");
-                result.Packs["Xamarin.Android.Sdk"].IsAlias.Should().Be(false);
-                result.Packs["Xamarin.Android.Sdk"].Kind.Should().Be(WorkloadPackKind.Sdk);
-                result.Packs["Xamarin.Android.Sdk"].Version.Should().Be("8.4.7");
+                result.Packs["xamarin.android.sdk"].Id.Should().Be("xamarin.android.sdk");
+                result.Packs["xamarin.android.sdk"].IsAlias.Should().Be(false);
+                result.Packs["xamarin.android.sdk"].Kind.Should().Be(WorkloadPackKind.Sdk);
+                result.Packs["xamarin.android.sdk"].Version.Should().Be("8.4.7");
             }
         }
 
@@ -34,12 +34,12 @@ namespace ManifestReaderTests
             resolver.ReplaceFilesystemChecksForTest(_ => true, _ => true);
             resolver.ReplacePlatformIdsForTest(new[] { "win-x64", "*" });
 
-            var buildToolsPack = resolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk).FirstOrDefault(pack => pack.Id == "Xamarin.Android.BuildTools");
+            var buildToolsPack = resolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk).FirstOrDefault(pack => pack.Id == "xamarin.android.buildtools");
 
             buildToolsPack.Should().NotBeNull();
-            buildToolsPack.Id.Should().Be("Xamarin.Android.BuildTools");
+            buildToolsPack.Id.Should().Be("xamarin.android.buildtools");
             buildToolsPack.Version.Should().Be("8.4.7");
-            buildToolsPack.Path.Should().Be(Path.Combine(fakeRootPath, "packs", "Xamarin.Android.BuildTools.Win64Host", "8.4.7"));
+            buildToolsPack.Path.Should().Be(Path.Combine(fakeRootPath, "packs", "xamarin.android.buildtools.win64host", "8.4.7"));
         }
     }
 }

@@ -38,7 +38,7 @@
         "xamarin-android-build-armv7a": {
             "kind": "build",
             "packs": [
-                "mono.android.runtime.armv7a",
+                "mono.android.runtime.armv7a"
             ],
             // the dependency is likely redundant in practice as any
             // workload restore that resolves xamarin-android-build-armv7a
@@ -52,7 +52,7 @@
             "packs": [
                 "mono.android.runtime.x86"
             ],
-            "extends": [ "xamarin-android-build" ],
+            "extends": [ "xamarin-android-build" ]
         },
         // this is an optional workload component that is only
         // expected to be installed for projects that use AOT
