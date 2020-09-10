@@ -293,6 +293,16 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 }
             }
 
+            // in case parameter is specified as --aaa=bbb, Tokens collection contains --aaa=bbb as single token
+            // in this case we need to check if token starts with variant=
+            foreach (string variant in VariantsForCanonical(canonical))
+            {
+                if (_parseResult.Tokens.Any(s => s.StartsWith($"{variant}=")))
+                {
+                    return variant;
+                }
+            }
+
             // this is really an error. But returning the canonical is "safe"
             return canonical;
         }

@@ -23,15 +23,19 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
 
             IReadOnlyList<ITemplateInfo> templateInfoList = templateGroup.Select(x => x.Info).ToList();
-            ShowTemplateDetailHeaders(templateInfoList);
-
             TemplateGroupParameterDetails? groupParameterDetails = DetermineParameterDispositionsForTemplateGroup(templateInfoList, environmentSettings, commandInput, hostDataLoader, templateCreator);
 
             if (groupParameterDetails != null)
             {
-                // get the input params valid for any param in the group
+                if (!string.IsNullOrEmpty(groupParameterDetails.Value.AdditionalInfo))
+                {
+                    Reporter.Error.WriteLine(groupParameterDetails.Value.AdditionalInfo.Bold().Red());
+                    Reporter.Error.WriteLine();
+                    return;
+                }
+                // get the input params valid for any param in the group              
                 IReadOnlyDictionary<string, string> inputTemplateParams = CoalesceInputParameterValuesFromTemplateGroup(templateGroup);
-
+                ShowTemplateDetailHeaders(templateInfoList);
                 ShowParameterHelp(inputTemplateParams, showImplicitlyHiddenParams, groupParameterDetails.Value, environmentSettings);
             }
             else
@@ -82,11 +86,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
         private static void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, bool showImplicitlyHiddenParams, TemplateGroupParameterDetails parameterDetails, IEngineEnvironmentSettings environmentSettings)
         {
-            if (!string.IsNullOrEmpty(parameterDetails.AdditionalInfo))
-            {
-                Reporter.Error.WriteLine(parameterDetails.AdditionalInfo.Bold().Red());
-                Reporter.Output.WriteLine();
-            }
 
             IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(parameterDetails.AllParams.ParameterDefinitions, parameterDetails.ExplicitlyHiddenParams,
                                                                                     showImplicitlyHiddenParams, parameterDetails.HasPostActionScriptRunner, parameterDetails.ParametersToAlwaysShow);
