@@ -104,7 +104,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private readonly IsWinMDFile _isWinMDFile;
 
-        /// <summary>version of the framework targeted by this project</summary>
+        /// <summary>Version of the framework targeted by this project.</summary>
         private readonly Version _projectTargetFramework;
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Tasks
         private readonly FrameworkNameVersioning _targetFrameworkMoniker;
 
         /// <summary>
-        /// Logging helper to allow the logging of meessages from the Reference Table
+        /// Logging helper to allow the logging of meessages from the Reference Table.
         /// </summary>
         private readonly TaskLoggingHelper _log;
 
@@ -188,11 +188,11 @@ namespace Microsoft.Build.Tasks
         /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
         /// <param name="allowedAssemblyExtensions"></param>
         /// <param name="getRuntimeVersion"></param>
-        /// <param name="getRootedPath"></param>
-        /// <param name="targetedRuntimeVersion"></param>
-        /// <param name="projectTargetFramework"></param>
-        /// <param name="targetFrameworkMoniker"></param>
-        /// <param name="log"></param>
+        /// /// <param name="getRootedPath">Get absolute path from relative one.</param>
+        /// <param name="targetedRuntimeVersion">Version of the runtime to target.</param>
+        /// <param name="projectTargetFramework">Version of the framework targeted by the project.</param>
+        /// <param name="targetFrameworkMoniker">Target framework moniker we are targeting.</param>
+        /// <param name="log">Logging helper to allow the logging of meessages from the Reference Table.</param>
         /// <param name="latestTargetFrameworkDirectories"></param>
         /// <param name="copyLocalDependenciesWhenParentReferenceInGac"></param>
         /// <param name="doNotCopyLocalIfInGac"></param>
@@ -227,11 +227,11 @@ namespace Microsoft.Build.Tasks
         /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
         /// <param name="allowedAssemblyExtensions"></param>
         /// <param name="getRuntimeVersion"></param>
-        /// <param name="getRootedPath"></param>
-        /// <param name="targetedRuntimeVersion"></param>
-        /// <param name="projectTargetFramework"></param>
-        /// <param name="targetFrameworkMoniker"></param>
-        /// <param name="log"></param>
+        /// <param name="getRootedPath">Get absolute path from relative one.</param>
+        /// <param name="targetedRuntimeVersion">Version of the runtime to target.</param>
+        /// <param name="projectTargetFramework">Version of the framework targeted by the project.</param>
+        /// <param name="targetFrameworkMoniker">Target framework moniker we are targeting.</param>
+        /// <param name="log">Logging helper to allow the logging of meessages from the Reference Table.</param>
         /// <param name="latestTargetFrameworkDirectories"></param>
         /// <param name="copyLocalDependenciesWhenParentReferenceInGac"></param>
         /// <param name="doNotCopyLocalIfInGac"></param>
