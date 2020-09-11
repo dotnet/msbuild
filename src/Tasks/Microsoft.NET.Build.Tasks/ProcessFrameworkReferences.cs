@@ -371,6 +371,11 @@ namespace Microsoft.NET.Build.Tasks
             if (!string.IsNullOrEmpty(kfr.TargetFramework.Platform)
                 && kfr.TargetFramework.PlatformVersion != null)
             {
+                if (!kfr.TargetFramework.Platform.Equals(TargetPlatformIdentifier, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
                 if (!Version.TryParse(TargetPlatformVersion, out var targetPlatformVersionParsed))
                 {
                     return false;
