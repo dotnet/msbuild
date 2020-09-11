@@ -98,7 +98,7 @@ namespace Microsoft.NET.Build.Tasks
             var knownFrameworkReferencesForTargetFramework =
                 KnownFrameworkReferences
                     .Select(item => new KnownFrameworkReference(item))
-                    .Where(KnownFrameworkReferenceAppliesToTargetFramework)
+                    .Where(kfr => KnownFrameworkReferenceAppliesToTargetFramework(kfr.TargetFramework))
                     .ToList();
 
             //  Get known runtime packs from known framework references.
@@ -113,8 +113,7 @@ namespace Microsoft.NET.Build.Tasks
             //  Add additional known runtime packs
             knownRuntimePacksForTargetFramework.AddRange(
                 KnownRuntimePacks.Select(item => new KnownRuntimePack(item))
-                                 .Where(krp => krp.TargetFramework.Framework.Equals(TargetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase) &&
-                                               NormalizeVersion(krp.TargetFramework.Version) == _normalizedTargetFrameworkVersion));
+                                 .Where(krp => KnownFrameworkReferenceAppliesToTargetFramework(krp.TargetFramework)));
 
             var frameworkReferenceMap = FrameworkReferences.ToDictionary(fr => fr.ItemSpec, StringComparer.OrdinalIgnoreCase);
 
@@ -360,18 +359,18 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private bool KnownFrameworkReferenceAppliesToTargetFramework(KnownFrameworkReference kfr)
+        private bool KnownFrameworkReferenceAppliesToTargetFramework(NuGetFramework knownFrameworkReferenceTargetFramework)
         {
-            if (!kfr.TargetFramework.Framework.Equals(TargetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase)
-                || NormalizeVersion(kfr.TargetFramework.Version) != _normalizedTargetFrameworkVersion)
+            if (!knownFrameworkReferenceTargetFramework.Framework.Equals(TargetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase)
+                || NormalizeVersion(knownFrameworkReferenceTargetFramework.Version) != _normalizedTargetFrameworkVersion)
             {
                 return false;
             }
 
-            if (!string.IsNullOrEmpty(kfr.TargetFramework.Platform)
-                && kfr.TargetFramework.PlatformVersion != null)
+            if (!string.IsNullOrEmpty(knownFrameworkReferenceTargetFramework.Platform)
+                && knownFrameworkReferenceTargetFramework.PlatformVersion != null)
             {
-                if (!kfr.TargetFramework.Platform.Equals(TargetPlatformIdentifier, StringComparison.OrdinalIgnoreCase))
+                if (!knownFrameworkReferenceTargetFramework.Platform.Equals(TargetPlatformIdentifier, StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
@@ -381,8 +380,8 @@ namespace Microsoft.NET.Build.Tasks
                     return false;
                 }
 
-                if (NormalizeVersion(targetPlatformVersionParsed) != NormalizeVersion(kfr.TargetFramework.PlatformVersion)
-                    || NormalizeVersion(kfr.TargetFramework.Version) != _normalizedTargetFrameworkVersion)
+                if (NormalizeVersion(targetPlatformVersionParsed) != NormalizeVersion(knownFrameworkReferenceTargetFramework.PlatformVersion)
+                    || NormalizeVersion(knownFrameworkReferenceTargetFramework.Version) != _normalizedTargetFrameworkVersion)
                 {
                     return false;
                 }
