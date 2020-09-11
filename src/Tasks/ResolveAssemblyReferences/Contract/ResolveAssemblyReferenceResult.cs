@@ -13,31 +13,18 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
         {
         }
 
-        internal ResolveAssemblyReferenceResult(bool taskResult, ResolveAssemblyReferenceTaskOutput output, ResolveAssemblyReferenceTaskInput input)
+        internal ResolveAssemblyReferenceResult(bool taskResult, ResolveAssemblyReferenceTaskOutput output)
         {
             TaskResult = taskResult;
             Response = new ResolveAssemblyReferenceResponse(output);
-            Request = new ResolveAssemblyReferenceRequest(input);
         }
 
         public bool TaskResult { get; set; }
 
         public ResolveAssemblyReferenceResponse Response { get; set; }
 
-        public int EventCount { get; set; }
-
-        public List<CustomBuildEventArgs> CustomBuildEvents { get; set; }
-
-        public List<BuildErrorEventArgs> BuildErrorEvents { get; set; }
-
-        public List<BuildMessageEventArgs> BuildMessageEvents { get; set; }
-
-        public List<BuildWarningEventArgs> BuildWarningEvents { get; set; }
-
-        public ResolveAssemblyReferenceRequest Request { get; set; }
+        public List<BuildEventArgs> BuildEvents { get; set; }
 
         internal ResolveAssemblyReferenceTaskOutput Output => new ResolveAssemblyReferenceTaskOutput(Response);
-
-        internal ResolveAssemblyReferenceTaskInput InputOutput => new ResolveAssemblyReferenceTaskInput(Request);
     }
 }

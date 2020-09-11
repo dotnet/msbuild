@@ -188,7 +188,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="assemblyMetadataCache">Cache of metadata already read from paths.</param>
         /// <param name="allowedAssemblyExtensions"></param>
         /// <param name="getRuntimeVersion"></param>
-        /// /// <param name="getRootedPath">Get absolute path from relative one.</param>
+        /// <param name="getRootedPath">Get absolute path from relative one.</param>
         /// <param name="targetedRuntimeVersion">Version of the runtime to target.</param>
         /// <param name="projectTargetFramework">Version of the framework targeted by the project.</param>
         /// <param name="targetFrameworkMoniker">Target framework moniker we are targeting.</param>

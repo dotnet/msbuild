@@ -2020,10 +2020,10 @@ namespace Microsoft.Build.Execution
 
         internal bool CreateRarNode()
         {
-            //// If the _buildParametrs is not set, we are in OutOfProc mode, so continue
-            //// Else check if users specified that he want to use multiple nodes, if so use RARaaS
-            //if (_buildParameters?.MaxNodeCount == 1)
-            //    return false;
+            // If the _buildParametrs is not set, we are in OutOfProc mode, so continue
+            // Else check if users specified that he want to use multiple nodes, if so use RARaaS
+            if (_buildParameters?.MaxNodeCount == 1)
+                return false;
 
 
             string nodeLocation = _buildParameters?.NodeExeLocation ?? BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;

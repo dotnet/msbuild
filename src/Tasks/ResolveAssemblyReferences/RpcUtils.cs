@@ -22,7 +22,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
 
         static RpcUtils()
         {
-            _resolver = ResolveAssemlyReferneceResolver.Instance;
+            _resolver = ResolveAssemblyReferneceResolver.Instance;
             _options = MessagePackSerializerOptions.Standard.WithResolver(_resolver);
         }
 

@@ -9,7 +9,7 @@ using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 {
-    internal sealed class ResolveAssemlyReferenceCacheHandler : IResolveAssemblyReferenceTaskHandler
+    internal sealed class ResolveAssemblyReferenceCacheHandler : IResolveAssemblyReferenceTaskHandler
     {
         private readonly struct CacheEntry
         {
@@ -29,7 +29,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 
         private readonly IResolveAssemblyReferenceTaskHandler _handler;
 
-        public ResolveAssemlyReferenceCacheHandler(IResolveAssemblyReferenceTaskHandler handler)
+        public ResolveAssemblyReferenceCacheHandler(IResolveAssemblyReferenceTaskHandler handler)
         {
             _handler = handler;
             _cache = new Dictionary<string, CacheEntry>(StringComparer.OrdinalIgnoreCase);

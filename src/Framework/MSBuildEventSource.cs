@@ -425,13 +425,13 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(58)]
-        internal void RARaaSStart()
+        internal void ResolveAssemblyReferenceServiceRequestStart()
         {
             WriteEvent(58);
         }
 
         [Event(59)]
-        internal void RARaaSStop()
+        internal void ResolveAssemblyReferenceServiceRequestStop()
         {
             WriteEvent(59);
         }

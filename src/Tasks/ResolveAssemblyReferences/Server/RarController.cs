@@ -75,7 +75,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
                   validateHandshakeCallback,
                   timeout: timeout,
                   resolveAssemblyReferenceTaskHandler:
-                      new ResolveAssemlyReferenceCacheHandler(
+                      new ResolveAssemblyReferenceCacheHandler(
                       new ResolveAssemblyReferenceHandler()))
         {
         }

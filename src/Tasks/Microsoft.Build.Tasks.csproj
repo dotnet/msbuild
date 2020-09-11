@@ -361,14 +361,14 @@
     <Compile Include="ResolveAssemblyReferences\Formatters\ResolveAssemblyReferenceRequestFormatter.cs" />
     <Compile Include="ResolveAssemblyReferences\Formatters\ResolveAssemblyReferenceResponseFormatter.cs" />
     <Compile Include="ResolveAssemblyReferences\Formatters\ResolveAssemblyReferenceResultFormatter.cs" />
-    <Compile Include="ResolveAssemblyReferences\ResolveAssemlyReferneceResolver.cs" />
+    <Compile Include="ResolveAssemblyReferences\ResolveAssemblyReferneceResolver.cs" />
     <Compile Include="ResolveAssemblyReferences\RpcUtils.cs" />
     <Compile Include="ResolveAssemblyReferences\Server\RarController.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceBuildEngine.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceComparer.cs" />
     <Compile Include="ResolveAssemblyReferences\Server\ServerMutex.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceHandler.cs" />
-    <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemlyReferenceCacheHandler.cs" />
+    <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceCacheHandler.cs" />
     <Compile Include="ResolveComReference.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />

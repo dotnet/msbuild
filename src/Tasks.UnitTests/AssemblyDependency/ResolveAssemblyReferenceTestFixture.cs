@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Determines if <see cref="Execute(ResolveAssemblyReference, bool, RARSimulationMode)"/> should use RARaaS
         /// </summary>
-        private const bool UseRARaaS = false;
+        private const bool UseRARaaS = true;
 
         // Create the mocks.
         internal static Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
@@ -2989,7 +2989,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             public Task<ResolveAssemblyReferenceResult> ExecuteAsync(ResolveAssemblyReferenceRequest input, CancellationToken cancellationToken = default)
             {
                 return System.Threading.Tasks.Task.FromResult(Execute(input));
-
             }
 
             internal ResolveAssemblyReferenceResult Execute(ResolveAssemblyReferenceRequest input)
@@ -3003,14 +3002,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 task.ResolveAssemblyReferenceInput = taskInput;
                 bool taskResult = ExecuteRarTask(task);
-                ResolveAssemblyReferenceResult result = new ResolveAssemblyReferenceResult(taskResult, task.ResolveAssemblyReferenceOutput, task.ResolveAssemblyReferenceInput)
+                ResolveAssemblyReferenceResult result = new ResolveAssemblyReferenceResult(taskResult, task.ResolveAssemblyReferenceOutput)
                 {
-                    CustomBuildEvents = buildEngine.CustomBuildEvent,
-                    BuildMessageEvents = buildEngine.MessageBuildEvent,
-                    BuildWarningEvents = buildEngine.WarningBuildEvent,
-                    BuildErrorEvents = buildEngine.ErrorBuildEvent,
-
-                    EventCount = buildEngine.EventCount
+                    BuildEvents = buildEngine.BuildEvents
                 };
 
                 return result;

@@ -3137,14 +3137,11 @@ namespace Microsoft.Build.Tasks
                 if (connected)
                 {
                     // Client is connected to the RAR node, we can execute RAR task remotely
-                    MSBuildEventSource.Log.RARaaSStart();
+                    MSBuildEventSource.Log.ResolveAssemblyReferenceServiceRequestStart();
                     ResolveAssemblyReferenceResult result = client.Execute(ResolveAssemblyReferenceInput);
-                    MSBuildEventSource.Log.RARaaSStop();
+                    MSBuildEventSource.Log.ResolveAssemblyReferenceServiceRequestStop();
                     ResolveAssemblyReferenceOutput = result.Output;
-                    LogEvents(result.BuildWarningEvents);
-                    LogEvents(result.BuildMessageEvents);
-                    LogEvents(result.BuildErrorEvents);
-                    LogEvents(result.CustomBuildEvents);
+                    LogEvents(result.BuildEvents);
                     return result.TaskResult;
                 }
             }
@@ -3171,7 +3168,7 @@ namespace Microsoft.Build.Tasks
             );
         }
 
-        private void LogEvents(IEnumerable<LazyFormattedBuildEventArgs> buildEventArgs)
+        private void LogEvents(IEnumerable<BuildEventArgs> buildEventArgs)
         {
             if (buildEventArgs == null)
             {
@@ -3236,7 +3233,7 @@ namespace Microsoft.Build.Tasks
                 new ReadMachineTypeFromPEHeader(ReferenceTable.ReadMachineTypeFromPEHeader),
                 (path) =>
                 {
-                    if(Path.IsPathRooted(path))
+                    if (Path.IsPathRooted(path))
                     {
                         return FileUtilities.NormalizePath(path);
                     }
@@ -3245,7 +3242,7 @@ namespace Microsoft.Build.Tasks
                 }
             );
 
-            return new ResolveAssemblyReferenceResult(result, ResolveAssemblyReferenceOutput, ResolveAssemblyReferenceInput);
+            return new ResolveAssemblyReferenceResult(result, ResolveAssemblyReferenceOutput);
         }
         #endregion
     }

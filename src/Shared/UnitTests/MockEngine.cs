@@ -489,8 +489,6 @@ namespace Microsoft.Build.UnitTests
             return obj;
         }
 
-
-
         bool IRarBuildEngine.CreateRarNode()
         {
             throw new NotSupportedException("RAR node should be created before executing test");

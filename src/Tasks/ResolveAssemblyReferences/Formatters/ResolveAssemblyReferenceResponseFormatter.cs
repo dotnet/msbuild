@@ -29,8 +29,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters
             formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Serialize(ref writer, value.ScatterFiles, options);
             formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Serialize(ref writer, value.SerializationAssemblyFiles, options);
             formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Serialize(ref writer, value.SuggestedRedirects, options);
-            //formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Serialize(ref writer, value.Assemblies, options);
-            //formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Serialize(ref writer, value.AssemblyFiles, options);
         }
 
         public ResolveAssemblyReferenceResponse Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
@@ -54,8 +52,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters
             ReadOnlyTaskItem[] scatterFiles = default;
             ReadOnlyTaskItem[] serializationAssemblyFiles = default;
             ReadOnlyTaskItem[] suggestedRedirects = default;
-            //ReadOnlyTaskItem[] assemblies = default;
-            //ReadOnlyTaskItem[] assemblyFiles = default;
 
             for (int i = 0; i < length; i++)
             {
@@ -96,12 +92,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters
                     case 10:
                         suggestedRedirects = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
                         break;
-                    //case 11:
-                    //    assemblies = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
-                    //    break;
-                    //case 12:
-                    //    assemblyFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
-                    //    break;
                     default:
                         reader.Skip();
                         break;
@@ -121,8 +111,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters
                 ScatterFiles = scatterFiles,
                 SerializationAssemblyFiles = serializationAssemblyFiles,
                 SuggestedRedirects = suggestedRedirects,
-                //Assemblies = assemblies,
-                //AssemblyFiles = assemblyFiles
             };
             reader.Depth--;
             return result;

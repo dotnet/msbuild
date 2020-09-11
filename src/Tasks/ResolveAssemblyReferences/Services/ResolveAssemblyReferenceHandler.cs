@@ -24,13 +24,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
             };
 
             ResolveAssemblyReferenceResult result = task.Execute(taskInput);
-
-            result.CustomBuildEvents = buildEngine.CustomBuildEvent;
-            result.BuildMessageEvents = buildEngine.MessageBuildEvent;
-            result.BuildWarningEvents = buildEngine.WarningBuildEvent;
-            result.BuildErrorEvents = buildEngine.ErrorBuildEvent;
-            result.EventCount = buildEngine.EventCount;
-
+            result.BuildEvents = buildEngine.BuildEvents;
 
             return result;
         }

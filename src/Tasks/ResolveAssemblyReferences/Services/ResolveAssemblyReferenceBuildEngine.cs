@@ -10,11 +10,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 {
     internal sealed class ResolveAssemblyReferenceBuildEngine : IBuildEngine
     {
-        internal int EventCount => CustomBuildEvent.Count + MessageBuildEvent.Count + WarningBuildEvent.Count + ErrorBuildEvent.Count;
-        internal List<CustomBuildEventArgs> CustomBuildEvent { get; } = new List<CustomBuildEventArgs>();
-        internal List<BuildMessageEventArgs> MessageBuildEvent { get; } = new List<BuildMessageEventArgs>();
-        internal List<BuildWarningEventArgs> WarningBuildEvent { get; } = new List<BuildWarningEventArgs>();
-        internal List<BuildErrorEventArgs> ErrorBuildEvent { get; } = new List<BuildErrorEventArgs>();
+        internal List<BuildEventArgs> BuildEvents { get; } = new List<BuildEventArgs>();
 
         public bool AllowFailureWithoutError { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
@@ -31,17 +27,17 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
        
         public void LogCustomEvent(CustomBuildEventArgs e)
         {
-            CustomBuildEvent.Add(e);
+            BuildEvents.Add(e);
         }
 
         public void LogErrorEvent(BuildErrorEventArgs e)
         {
-            ErrorBuildEvent.Add(e);
+            BuildEvents.Add(e);
         }
 
         public void LogMessageEvent(BuildMessageEventArgs e)
         {
-            MessageBuildEvent.Add(e);
+            BuildEvents.Add(e);
         }
 
         public void LogTelemetry(string eventName, IDictionary<string, string> properties)
@@ -51,7 +47,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 
         public void LogWarningEvent(BuildWarningEventArgs e)
         {
-            WarningBuildEvent.Add(e);
+            BuildEvents.Add(e);
         }
 
         public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs)

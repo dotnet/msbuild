@@ -9,7 +9,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
 {
     internal sealed class BuildEventArgsFormatter
-        : IMessagePackFormatter<BuildErrorEventArgs>, IMessagePackFormatter<BuildWarningEventArgs>, IMessagePackFormatter<BuildMessageEventArgs>,
+        : IMessagePackFormatter<BuildEventArgs>, IMessagePackFormatter<BuildErrorEventArgs>, IMessagePackFormatter<BuildWarningEventArgs>, IMessagePackFormatter<BuildMessageEventArgs>,
          IMessagePackFormatter<CustomBuildEventArgs>, IMessagePackFormatter<ExternalProjectStartedEventArgs>, IMessagePackFormatter<ExternalProjectFinishedEventArgs>
     {
 
@@ -17,6 +17,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
 
         private BuildEventArgsFormatter() { }
 
+        #region BuildWarningEventArgs
         BuildWarningEventArgs IMessagePackFormatter<BuildWarningEventArgs>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
@@ -116,7 +117,9 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
             writer.Write(value.File);
             writer.Write(value.Subcategory);
         }
+        #endregion
 
+        #region BuildErrorEventArgs
         BuildErrorEventArgs IMessagePackFormatter<BuildErrorEventArgs>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
@@ -194,7 +197,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
             return buildEvent;
         }
 
-
         void IMessagePackFormatter<BuildErrorEventArgs>.Serialize(ref MessagePackWriter writer, BuildErrorEventArgs value, MessagePackSerializerOptions options)
         {
             if (value == null)
@@ -215,7 +217,9 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
             writer.Write(value.File);
             writer.Write(value.Subcategory);
         }
+        #endregion
 
+        #region BuildMessageEventArgs
         BuildMessageEventArgs IMessagePackFormatter<BuildMessageEventArgs>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
@@ -321,7 +325,9 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
             writer.Write(value.Subcategory);
             writer.Write(importance);
         }
+        #endregion
 
+        #region CustomBuildEventArgs
         CustomBuildEventArgs IMessagePackFormatter<CustomBuildEventArgs>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
@@ -509,126 +515,70 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
             writer.Write(value.ProjectFile);
             writer.Write(value.Succeeded);
         }
+        #endregion
 
+        BuildEventArgs IMessagePackFormatter<BuildEventArgs>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+        {
+            if (reader.TryReadNil())
+            {
+                return null;
+            }
 
-        //private abstract class Formatter<TArg> : IMessagePackFormatter<TArg> where TArg : BuildEventArgs
-        //{
-        //    public TArg Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
-        //    {
-        //        ReadOnlySequence<byte>? buffer = reader.ReadBytes();
+            options.Security.DepthStep(ref reader);
+            int _ = reader.ReadArrayHeader();
+            int customType = reader.ReadInt32();
+            BuildEventArgs buildEvent = customType switch
+            {
+                1 => (this as IMessagePackFormatter<BuildErrorEventArgs>).Deserialize(ref reader, options),
+                2 => (this as IMessagePackFormatter<BuildWarningEventArgs>).Deserialize(ref reader, options),
+                3 => (this as IMessagePackFormatter<BuildMessageEventArgs>).Deserialize(ref reader, options),
+                4 => (this as IMessagePackFormatter<CustomBuildEventArgs>).Deserialize(ref reader, options),
+                _ => null
+            };
+            reader.Depth--;
 
-        //        if (!buffer.HasValue)
-        //        {
-        //            return null;
-        //        }
+            ErrorUtilities.VerifyThrowInternalNull(buildEvent, nameof(buildEvent));
 
-        //        try
-        //        {
-        //            BinaryReader binaryReader = new BinaryReader(buffer.Value.AsStream());
-        //            TArg arg = GetEventArgInstance();
-        //            // We are communicating with current MSBuild RAR node, if not something is really wrong
-        //            arg.CreateFromStream(binaryReader, int.MaxValue);
-        //            return arg;
-        //        }
-        //        catch (Exception)
-        //        {
-        //            return null;
-        //        }
-        //    }
+            return buildEvent;
+        }
 
-        //    public void Serialize(ref MessagePackWriter writer, TArg value, MessagePackSerializerOptions options)
-        //    {
-        //        if (value is null)
-        //        {
-        //            writer.Write((byte[])null);
-        //            return;
-        //        }
+        void IMessagePackFormatter<BuildEventArgs>.Serialize(ref MessagePackWriter writer, BuildEventArgs value, MessagePackSerializerOptions options)
+        {
+            if (value == null)
+            {
+                writer.WriteNil();
+                return;
+            }
 
-        //        using MemoryStream stream = new MemoryStream();
-        //        using BinaryWriter binaryWriter = new BinaryWriter(stream);
+            int customType = value switch
+            {
+                BuildErrorEventArgs _ => 1,
+                BuildWarningEventArgs _ => 2,
+                BuildMessageEventArgs _ => 3,
+                CustomBuildEventArgs _ => 4,
+                _ => 0
+            };
 
-        //        value.WriteToStream(binaryWriter);
-        //        writer.Write(stream.ToArray());
-        //    }
-
-        //    protected abstract TArg GetEventArgInstance();
-        //}
-
-        //private sealed class BuildError : Formatter<BuildErrorEventArgs>, IMessagePackFormatter<BuildErrorEventArgs>
-        //{
-        //    protected override BuildErrorEventArgs GetEventArgInstance() => new BuildErrorEventArgs();
-        //}
-
-        //private sealed class BuildMessage : Formatter<BuildMessageEventArgs>, IMessagePackFormatter<BuildMessageEventArgs>
-        //{
-        //    protected override BuildMessageEventArgs GetEventArgInstance() => new BuildMessageEventArgs();
-        //}
-
-        //private sealed class BuildWarning : Formatter<BuildWarningEventArgs>, IMessagePackFormatter<BuildWarningEventArgs>
-        //{
-        //    protected override BuildWarningEventArgs GetEventArgInstance() => new BuildWarningEventArgs();
-        //}
-
-        //private sealed class Custom : IMessagePackFormatter<CustomBuildEventArgs>
-        //{
-        //    private static IMessagePackFormatter<ExternalProjectFinishedEventArgs> ExternalProjectFinishedFormatter = new ExternalProjectFinished();
-        //    private static IMessagePackFormatter<ExternalProjectStartedEventArgs> ExternalProjectStartedFormatter = new ExternalProjectStarted();
-
-        //    public CustomBuildEventArgs Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
-        //    {
-        //        ushort formatter = reader.ReadUInt16();
-
-        //        switch (formatter)
-        //        {
-        //            case 1:
-        //                return ExternalProjectStartedFormatter.Deserialize(ref reader, options);
-        //            case 2:
-        //                return ExternalProjectFinishedFormatter.Deserialize(ref reader, options);
-        //            default:
-        //                ErrorUtilities.ThrowInternalError("Unexpected formatter id");
-        //                return null; // Never hits...
-        //        }
-        //    }
-
-        //    public void Serialize(ref MessagePackWriter writer, CustomBuildEventArgs value, MessagePackSerializerOptions options)
-        //    {
-        //        ushort formatterId = value switch
-        //        {
-        //            ExternalProjectStartedEventArgs _ => 1,
-        //            ExternalProjectFinishedEventArgs _ => 2,
-        //            _ => 0
-        //        };
-
-        //        if (formatterId == 0)
-        //        {
-        //            ErrorUtilities.ThrowArgumentOutOfRange(nameof(value));
-        //        }
-
-        //        writer.WriteUInt16(formatterId);
-
-        //        switch (formatterId)
-        //        {
-        //            case 1:
-        //                ExternalProjectStartedFormatter.Serialize(ref writer, value as ExternalProjectStartedEventArgs, options);
-        //                break;
-        //            case 2:
-        //                ExternalProjectFinishedFormatter.Serialize(ref writer, value as ExternalProjectFinishedEventArgs, options);
-        //                break;
-        //            default:
-        //                ErrorUtilities.ThrowInternalErrorUnreachable();
-        //                break;
-        //        }
-        //    }
-
-        //    private class ExternalProjectFinished : Formatter<ExternalProjectFinishedEventArgs>, IMessagePackFormatter<ExternalProjectFinishedEventArgs>
-        //    {
-        //        protected override ExternalProjectFinishedEventArgs GetEventArgInstance() => new ExternalProjectFinishedEventArgs();
-        //    }
-
-        //    private class ExternalProjectStarted : Formatter<ExternalProjectStartedEventArgs>, IMessagePackFormatter<ExternalProjectStartedEventArgs>
-        //    {
-        //        protected override ExternalProjectStartedEventArgs GetEventArgInstance() => new ExternalProjectStartedEventArgs();
-        //    }
-        //}
+            writer.WriteArrayHeader(2);
+            writer.WriteInt32(customType);
+            switch (customType)
+            {
+                case 1:
+                    (this as IMessagePackFormatter<BuildErrorEventArgs>).Serialize(ref writer, value as BuildErrorEventArgs, options);
+                    break;
+                case 2:
+                    (this as IMessagePackFormatter<BuildWarningEventArgs>).Serialize(ref writer, value as BuildWarningEventArgs, options);
+                    break;
+                case 3:
+                    (this as IMessagePackFormatter<BuildMessageEventArgs>).Serialize(ref writer, value as BuildMessageEventArgs, options);
+                    break;
+                case 4:
+                    (this as IMessagePackFormatter<CustomBuildEventArgs>).Serialize(ref writer, value as CustomBuildEventArgs, options);
+                    break;
+                default:
+                    ErrorUtilities.ThrowInternalError("Unexpected formatter id");
+                    break;
+            }
+        }
     }
 }

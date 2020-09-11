@@ -58,9 +58,8 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 inputProperties.ShouldContain(item);
             }
         }
-
         [Fact]
-        public void TransferedRequestEquals()
+        public void TransferredRequestEquals()
         {
             ITaskItem[] assemblyNames = new TaskItem[]
             {
@@ -72,7 +71,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 Assemblies = assemblyNames
             };
 
-            MessagePackSerializerOptions options = MessagePackSerializerOptions.Standard.WithResolver(ResolveAssemlyReferneceResolver.Instance);
+            MessagePackSerializerOptions options = MessagePackSerializerOptions.Standard.WithResolver(ResolveAssemblyReferneceResolver.Instance);
 
             ResolveAssemblyReferenceRequest request = new ResolveAssemblyReferenceRequest(rar.ResolveAssemblyReferenceInput);
             byte[] data = MessagePackSerializer.Serialize(request, options);
