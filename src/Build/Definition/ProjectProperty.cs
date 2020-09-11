@@ -49,7 +49,7 @@ namespace Microsoft.Build.Evaluation
             _evaluatedValueEscaped = evaluatedValueEscaped;
         }
 
-        internal virtual string EvaluatedValueEscapedIntenral => _evaluatedValueEscaped;
+        internal virtual string EvaluatedValueEscapedInternal => _evaluatedValueEscaped;
 
         /// <summary>
         /// Name of the property.
@@ -79,7 +79,7 @@ namespace Microsoft.Build.Evaluation
         {
             [DebuggerStepThrough]
             get
-            { return EscapingUtilities.UnescapeAll(EvaluatedValueEscapedIntenral); }
+            { return EscapingUtilities.UnescapeAll(EvaluatedValueEscapedInternal); }
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace Microsoft.Build.Evaluation
         string IProperty.EvaluatedValueEscaped
         {
             [DebuggerStepThrough]
-            get => EvaluatedValueEscapedIntenral;
+            get => EvaluatedValueEscapedInternal;
         }
 
         /// <summary>
@@ -201,7 +201,7 @@ namespace Microsoft.Build.Evaluation
         string IValued.EscapedValue
         {
             [DebuggerStepThrough]
-            get => EvaluatedValueEscapedIntenral;
+            get => EvaluatedValueEscapedInternal;
         }
 
         #region IEquatable<ProjectProperty> Members
@@ -225,7 +225,7 @@ namespace Microsoft.Build.Evaluation
 
             return _project == other._project &&
                    Xml == other.Xml &&
-                   EvaluatedValueEscapedIntenral == other.EvaluatedValueEscapedIntenral &&
+                   EvaluatedValueEscapedInternal == other.EvaluatedValueEscapedInternal &&
                    Name == other.Name;
         }
 

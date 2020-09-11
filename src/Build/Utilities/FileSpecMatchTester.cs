@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.EscapingStringExtensions;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -27,7 +26,7 @@ namespace Microsoft.Build.Internal
 
         public static FileSpecMatcherTester Parse(string currentDirectory, string fileSpec)
         {
-            string unescapedFileSpec = fileSpec.Unescape();
+            string unescapedFileSpec = EscapingUtilities.UnescapeAll(fileSpec);
             Regex regex = EngineFileUtilities.FilespecHasWildcards(fileSpec) ? CreateRegex(unescapedFileSpec, currentDirectory) : null;
 
             return new FileSpecMatcherTester(currentDirectory, unescapedFileSpec, regex);
