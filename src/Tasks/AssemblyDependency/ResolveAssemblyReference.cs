@@ -448,16 +448,16 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// If not null, serializes a cache to this location. This overrides the usual cache, so only use this if you will
-        /// not have access to the usual cache at the next build.
+        /// If not null, serializes information about <see cref="AssemblyFiles" /> inputs to the named file.
+        /// This overrides the usual outputs, so do not use this unless you are building an SDK with many references.
         /// </summary>
-        public string CacheOutputPath { get; set; }
+        public string AssemblyInformationCacheOutputPath { get; set; }
 
         /// <summary>
         /// If not null, uses this set of caches as inputs if RAR cannot find the usual cache in the obj folder. Typically
         /// used for demos and first-run scenarios.
         /// </summary>
-        public string[] CacheInputPaths { get; set; }
+        public ITaskItem[] AssemblyInformationCachePaths { get; set; }
 
         /// <summary>
         /// List of locations to search for assemblyFiles when resolving dependencies.
