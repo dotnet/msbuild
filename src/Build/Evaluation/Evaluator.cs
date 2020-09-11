@@ -1081,6 +1081,43 @@ namespace Microsoft.Build.Evaluation
                 }
             }
         }
+        /// <summary>
+        /// Ensure the built in property MSBuildDisableChangeWaveVersion is set properly while raising appropriate warnings.
+        /// </summary>
+        /// <returns>String representation of the set change wave, or 999.999 if unset.</returns>
+        private string SanitizeChangeWave()
+        {
+            Version changeWave;
+            // order of operations:
+            // 1. If unset, default to enabling all change waves.
+            // 2. If it had an invalid format, enable all and log it.
+            // 3. If it's a version out of rotation, clamp and log it.
+            // 4. Set as built in property
+
+            // If unset, enable all features.
+            if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableChangeWaveVersion))
+            {
+                Traits.Instance.MSBuildDisableChangeWaveVersion = ChangeWaves.EnableAllFeaturesBehindChangeWaves;
+                return ChangeWaves.EnableAllFeaturesBehindChangeWaves;
+            }
+
+            // If the user-set change wave is of invalid format, log a warning and don't opt out.
+            if (!Version.TryParse(Traits.Instance.MSBuildDisableChangeWaveVersion, out changeWave))
+            {
+                _evaluationLoggingContext.LogWarning("ChangeWave_InvalidFormat", new BuildEventFileInfo("", 0, 0, 0, 0), Traits.Instance.MSBuildDisableChangeWaveVersion);
+                Traits.Instance.MSBuildDisableChangeWaveVersion = ChangeWaves.EnableAllFeaturesBehindChangeWaves;
+                changeWave = ChangeWaves.EnableAllFeaturesVersion;
+            }
+            // If the change wave is out of rotation, log a warning and opt out of all waves.
+            else if (ChangeWaves.IsChangeWaveOutOfRotation(changeWave))
+            {
+                _evaluationLoggingContext.LogWarning("ChangeWave_OutOfRotation", new BuildEventFileInfo("", 0, 0, 0, 0), changeWave.ToString());
+                Traits.Instance.MSBuildDisableChangeWaveVersion = ChangeWaves.LowestWave;
+                changeWave = ChangeWaves.LowestWaveVersion;
+            }
+
+            return changeWave.ToString();
+        }
 
         /// <summary>
         /// Set the built-in properties, most of which are read-only
@@ -1089,30 +1126,17 @@ namespace Microsoft.Build.Evaluation
         {
             string startupDirectory = BuildParameters.StartupDirectory;
 
-            SetBuiltInProperty(ReservedPropertyNames.toolsVersion, _data.Toolset.ToolsVersion);
-            SetBuiltInProperty(ReservedPropertyNames.toolsPath, _data.Toolset.ToolsPath);
-            SetBuiltInProperty(ReservedPropertyNames.binPath, _data.Toolset.ToolsPath);
-            SetBuiltInProperty(ReservedPropertyNames.startupDirectory, startupDirectory);
-            SetBuiltInProperty(ReservedPropertyNames.buildNodeCount, _maxNodeCount.ToString(CultureInfo.CurrentCulture));
-            SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32);
-            SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion);
-            SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild);
+            List<P> builtInProperties = new List<P>(20);
 
-            // Would this be out of sync with traits.instance.msbuildchangewave?
-            string changeWave = Traits.Instance.MSBuildChangeWave;
-            ChangeWaveReturnType rt = ChangeWaves.IsChangeWaveEnabled(changeWave);
-
-            if (rt == ChangeWaveReturnType.Invalid)
-            {
-                _evaluationLoggingContext.LogWarning("ChangeWave_InvalidFormat", new BuildEventFileInfo("", 0, 0, 0, 0), "asd");
-                changeWave = ChangeWaves.EnableAllFeaturesBehindChangeWaves;
-            }
-            else if (rt == ChangeWaveReturnType.VersionOutOfRotation)
-            {
-                _evaluationLoggingContext.LogWarning("ChangeWave_OutOfRotation", new BuildEventFileInfo("", 0, 0, 0, 0), "asd");
-                changeWave = ChangeWaves.LowestWave;
-            }
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.msbuilddisablechangewaveversion, changeWave));
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.toolsVersion, _data.Toolset.ToolsVersion));
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.toolsPath, _data.Toolset.ToolsPath));
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.binPath, _data.Toolset.ToolsPath));
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.startupDirectory, startupDirectory));
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.buildNodeCount, _maxNodeCount.ToString(CultureInfo.CurrentCulture)));
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32));
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion));
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild));
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.msbuilddisablechangewaveversion, SanitizeChangeWave()));
 
             // Fake OS env variables when not on Windows
             if (!NativeMethodsShared.IsWindows)

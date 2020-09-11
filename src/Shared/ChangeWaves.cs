@@ -17,14 +17,21 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     public class ChangeWaves
     {
-        public const string LowestWave = Wave16_8, Wave16_8 = "16.8";
+        public const string Wave16_8 = "16.8";
         public const string Wave16_10 = "16.10";
         public const string Wave17_0 = "17.0";
+
+        public const string LowestWave = Wave16_8;
+        public const string HighestWave = Wave17_0;
 
         /// <summary>
         /// Special value indicating that all features behind change-waves should be enabled.
         /// </summary>
         public const string EnableAllFeaturesBehindChangeWaves = "999.999";
+
+        internal static readonly Version LowestWaveVersion = new Version(LowestWave);
+        internal static readonly Version HighestWaveVersion = new Version(HighestWave);
+        internal static readonly Version EnableAllFeaturesVersion = new Version(EnableAllFeaturesBehindChangeWaves);
 
         /// <summary>
         /// Compares version against the MSBuildChangeWave environment variable.
@@ -36,24 +43,19 @@ namespace Microsoft.Build.Utilities
         {
             // This is opt out behavior, all waves are enabled by default.
             // If version is invalid, 
-            if (string.IsNullOrEmpty(Traits.Instance.MSBuildChangeWave))
+            if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableChangeWaveVersion))
             {
                 return ChangeWaveReturnType.FeatureEnabled;
             }
 
             Version currentDisabledWave;
 
-            if (!Version.TryParse(Traits.Instance.MSBuildChangeWave, out currentDisabledWave))
+            if (!Version.TryParse(Traits.Instance.MSBuildDisableChangeWaveVersion, out currentDisabledWave))
             {
                 // should still enable the features behind this wave.
                 // not sure I like that a dev would have to hide their feature behind if(returntype == invalid || returntype == featureenabled)
                 return ChangeWaveReturnType.Invalid;
             }
-
-            // User-set change wave is valid. let's verify it's in rotation
-            HandleOutOfRotationWaves(currentDisabledWave);
-
-
 
             Version waveToCheck;
 
@@ -65,9 +67,9 @@ namespace Microsoft.Build.Utilities
             return waveToCheck < currentDisabledWave ? ChangeWaveReturnType.FeatureEnabled : ChangeWaveReturnType.FeatureDisabled;
         }
 
-        public static void HandleOutOfRotationWaves(Version wave)
+        public static bool IsChangeWaveOutOfRotation(Version v)
         {
-            //Ideas: how do we check reliably what our current lowest wave it?
+            return v < LowestWaveVersion || v > HighestWaveVersion;
         }
     }
 }
