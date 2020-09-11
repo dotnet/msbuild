@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.Deployment.Bootstrapper;
 
@@ -93,10 +94,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 File.Copy(LauncherPath, strOutputExe, true);
                 ClearReadOnlyAttribute(strOutputExe);
             }
-            catch (Exception ex) when (ex is IOException ||
-                    ex is UnauthorizedAccessException ||
-                    ex is ArgumentException ||
-                    ex is NotSupportedException)
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
                 _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.CopyError", LauncherPath, strOutputExe, ex.Message));
                 return false;
