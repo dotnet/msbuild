@@ -6,6 +6,8 @@
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <DisableImplicitNETCorePlatformsReference>true</DisableImplicitNETCorePlatformsReference>
+    <!-- do not import analyzer assemblies from the sdk as they will be double loaded -->
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
   </PropertyGroup>
 
   <Import Project="targets\BuildToolsetTasks.targets" />
