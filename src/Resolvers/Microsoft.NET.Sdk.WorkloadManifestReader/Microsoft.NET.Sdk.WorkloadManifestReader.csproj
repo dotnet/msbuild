@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
+    <EmbeddedResource Update="**\*.resx" GenerateSource="true" Namespace="Microsoft.NET.Sdk.Localization" />
   </ItemGroup>
 
   <ItemGroup>

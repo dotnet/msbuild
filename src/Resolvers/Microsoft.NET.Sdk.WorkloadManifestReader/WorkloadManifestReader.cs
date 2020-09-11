@@ -4,6 +4,7 @@
 using System;
 
 using System.Collections.Generic;
+using Microsoft.NET.Sdk.Localization;
 
 #if USE_SYSTEM_TEXT_JSON
 using System.Text.Json;

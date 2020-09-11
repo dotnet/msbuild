@@ -12,8 +12,8 @@ namespace Microsoft.DotNet.TemplateLocator
 {
     public sealed class TemplateLocator
     {
-        private IWorkloadManifestProvider _workloadManifestProvider;
-        private IWorkloadResolver _workloadResolver;
+        private IWorkloadManifestProvider? _workloadManifestProvider;
+        private IWorkloadResolver? _workloadResolver;
         private readonly Lazy<NETCoreSdkResolver> _netCoreSdkResolver;
 
         public TemplateLocator()
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.TemplateLocator
         /// Test constructor
         /// </summary>
         public TemplateLocator(Func<string, string> getEnvironmentVariable, VSSettings vsSettings,
-            IWorkloadManifestProvider workloadManifestProvider, IWorkloadResolver workloadResolver)
+            IWorkloadManifestProvider? workloadManifestProvider, IWorkloadResolver? workloadResolver)
         {
             _netCoreSdkResolver =
                 new Lazy<NETCoreSdkResolver>(() => new NETCoreSdkResolver(getEnvironmentVariable, vsSettings));
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.TemplateLocator
                 .Select(pack => new OptionalSdkTemplatePackageInfo(pack.Id, pack.Version, pack.Path)).ToList();
         }
 
-        public bool TryGetDotnetSdkVersionUsedInVs(string vsVersion, out string sdkVersion)
+        public bool TryGetDotnetSdkVersionUsedInVs(string vsVersion, out string? sdkVersion)
         {
             string dotnetExeDir = _netCoreSdkResolver.Value.GetDotnetExeDirectory();
 

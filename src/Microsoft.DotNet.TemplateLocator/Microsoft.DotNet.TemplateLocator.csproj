@@ -10,8 +10,12 @@
     <IsPackable>true</IsPackable>
     <!-- Create FileDefinitions items for ResolveHostfxrCopyLocalContent target -->
     <EmitLegacyAssetsFileItems>true</EmitLegacyAssetsFileItems>
-
     <PackageId>microsoft.dotnet.templateLocator</PackageId>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>Enable</Nullable>
+
+    <UseSystemTextJson Condition="'$(TargetFramework)'!='netstandard2.0' And '$(TargetFramework)'!='net472'">True</UseSystemTextJson>
+    <DefineConstants Condition="'$(UseSystemTextJson)'=='True'">$(DefineConstants);USE_SYSTEM_TEXT_JSON</DefineConstants>
 
     <!--https://github.com/NuGet/Home/issues/3891#issuecomment-377319939-->
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
@@ -33,6 +37,24 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Resolvers\Microsoft.DotNet.SdkResolver\Microsoft.DotNet.SdkResolver.csproj" PrivateAssets="All" />
-    <ProjectReference Include="..\Resolvers\Microsoft.NET.Sdk.WorkloadManifestReader\Microsoft.NET.Sdk.WorkloadManifestReader.csproj" PrivateAssets="All" />
+  </ItemGroup>
+
+  <!-- Directly compile files from Microsoft.NET.Sdk.WorkloadManifestReader.
+       In theory it is not necessary for template locator to do source level
+       dependency. However, keep it in sync with msbuild resolver to avoid
+       2 different ways of doing things
+  -->
+  <ItemGroup>
+    <Compile Include="..\Resolvers\Microsoft.NET.Sdk.WorkloadManifestReader\**\*.cs" LinkBase="Microsoft.DotNet.SdkResolver" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="4.7.2" Condition="'$(UseSystemTextJson)'=='True'" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" Condition="'$(UseSystemTextJson)'!='True'" />
+  </ItemGroup>
+
+  <!--strings are duplicated from manifest reader so that we don't have another set of satellite assembly-->
+  <ItemGroup>
+    <EmbeddedResource Update="**\*.resx" GenerateSource="true" Namespace="Microsoft.NET.Sdk.Localization" />
   </ItemGroup>
 </Project>
