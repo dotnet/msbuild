@@ -1728,6 +1728,21 @@ elementFormDefault="qualified">
       </xs:annotation>
     </xs:element>
     <xs:element name="ResponseFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="RunAnalyzers" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="RunAnalyzers" _locComment="" -->Disables analyzers at both build and design time. This property takes precedence over RunAnalyzersDuringBuild and RunAnalyzersDuringLiveAnalysis. Default is true.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="RunAnalyzersDuringBuild" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="RunAnalyzersDuringBuild" _locComment="" -->Controls whether analyzers run at build time. Default is true.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="RunAnalyzersDuringLiveAnalysis" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="RunAnalyzersDuringLiveAnalysis" _locComment="" -->Controls whether analyzers analyze code live at design time. Default is true.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="RootNamespace" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="RuntimeIdentifier" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
