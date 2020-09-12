@@ -237,7 +237,7 @@ namespace Microsoft.Build.Construction
 
         internal bool ProjectShouldBuild(string projectFile)
         {
-            return _solutionFilter?.Contains(projectFile) != false;
+            return _solutionFilter?.Contains(FileUtilities.FixFilePath(projectFile)) != false;
         }
 
         /// <summary>
@@ -382,7 +382,7 @@ namespace Microsoft.Build.Construction
                 _solutionFilter = new HashSet<string>(NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
                 foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
                 {
-                    _solutionFilter.Add(project.GetString());
+                    _solutionFilter.Add(FileUtilities.FixFilePath(project.GetString()));
                 }
             }
             catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
@@ -545,7 +545,7 @@ namespace Microsoft.Build.Construction
                 HashSet<string> projectPaths = new HashSet<string>(_projectsInOrder.Count, NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
                 foreach (ProjectInSolution project in _projectsInOrder)
                 {
-                    projectPaths.Add(project.RelativePath);
+                    projectPaths.Add(FileUtilities.FixFilePath(project.RelativePath));
                 }
                 foreach (string project in _solutionFilter)
                 {
