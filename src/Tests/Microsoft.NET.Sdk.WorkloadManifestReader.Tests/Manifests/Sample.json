@@ -1,8 +1,12 @@
 ﻿{
     "version": 5,
-    "data" : {
+    "data": {
         "foo": {
-            "bar": [ 1,2,3]
+            "bar": [
+                1,
+                2,
+                3
+            ]
         }
     },
     "workloads": {
@@ -13,7 +17,7 @@
             "description": "Create, build and run Android apps",
             "kind": "dev",
             "packs": [
-                "Xamarin.Android.Templates",
+                "Xamarin.Android.Templates"
             ],
             // on dev machines we expect to pre-install support
             // for common device architectures
@@ -21,7 +25,7 @@
                 "xamarin-android-build",
                 "xamarin-android-build-armv7a",
                 "xamarin-android-build-x86"
-            ],
+            ]
         },
         "xamarin-android-build": {
             "description": "Build and run Android apps",
@@ -43,7 +47,9 @@
             // the dependency is likely redundant in practice as any
             // workload restore that resolves xamarin-android-build-armv7a
             // will also resolve xamarin-android-build, but let's be explicit
-            "extends": [ "xamarin-android-build" ],
+            "extends": [
+                "xamarin-android-build"
+            ]
         },
         // on CI machines, this will only be installed if
         // the app actually targets the x86 architecture
@@ -52,14 +58,20 @@
             "packs": [
                 "Mono.Android.Runtime.x86"
             ],
-            "extends": [ "xamarin-android-build" ],
+            "extends": [
+                "xamarin-android-build"
+            ]
         },
         // this is an optional workload component that is only
         // expected to be installed for projects that use AOT
         "xamarin-android-aot": {
             "description": "Ahead of Time compilation for Xamarin.Android using LLVM",
-            "packs": [ "Xamarin.Android.LLVM.Aot.armv7a" ],
-            "extends": [ "xamarin-android" ]
+            "packs": [
+                "Xamarin.Android.LLVM.Aot.armv7a"
+            ],
+            "extends": [
+                "xamarin-android"
+            ]
         },
         // this is a convenience for devs who want to pre-install everything
         //
@@ -67,7 +79,10 @@
         // and the runtime packs to support various device architectures
         "xamarin-android-complete": {
             "description": "All Xamarin.Android-related components",
-            "extends": [ "xamarin-android", "xamarin-android-aot" ]
+            "extends": [
+                "xamarin-android",
+                "xamarin-android-aot"
+            ]
         }
     },
     "packs": {
@@ -77,17 +92,17 @@
             "version": "8.4.7"
         },
         "Xamarin.Android.Templates": {
-            "kind" : "template",
+            "kind": "template",
             "version": "1.0.3"
         },
         // reference assemblies for net5-android bindings
         "Xamarin.Android.Framework": {
-            "kind" : "framework",
+            "kind": "framework",
             "version": "8.4"
         },
         // implementation assemblies net5-android bindings
         "Xamarin.Android.Runtime": {
-            "kind" : "framework",
+            "kind": "framework",
             "version": "8.4.7.4"
         },
         // targets and tools for taking IL assemblies and producing a set of
@@ -95,23 +110,23 @@
         // and its tasks are invoked by the Xamarin.Android.Sdk targets that
         // handle packing and bindings-related tasks
         "Mono.Android.Sdk": {
-            "kind" : "sdk",
+            "kind": "sdk",
             "version": "7.0.1"
         },
         // runtime binaries for x86 devices
         "Mono.Android.Runtime.x86": {
-            "kind" : "framework",
+            "kind": "framework",
             "version": "7.0.1"
         },
         // runtime binaries for x86 devices
         "Mono.Android.Runtime.Armv7a": {
-            "kind" : "framework",
+            "kind": "framework",
             "version": "7.0.1"
         },
         // build tools for Android that include native binaries that
         // are specific to the host platform.
         "Xamarin.Android.BuildTools": {
-            "version" : "8.4.7",
+            "version": "8.4.7",
             "kind": "sdk",
             "alias-to": {
                 "osx-x64": "Xamarin.Android.BuildTools.MacHost",
@@ -123,7 +138,7 @@
         // set properties with the compiler location to be used by
         // the targets in Mono.Android.Sdk
         "Mono.Android.LLVM.Aot.armv7a": {
-            "version" : "8.4.7",
+            "version": "8.4.7",
             "kind": "sdk",
             "alias-to": {
                 "osx-x64": "Mono.Android.LLVM.Aot.armv7a.MacHost",

@@ -19,7 +19,7 @@ namespace ManifestReaderTests
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template);
             result.Should().HaveCount(1);
             var templateItem = result.First();
-            templateItem.Id.Should().Be("xamarin.android.templates");
+            templateItem.Id.Should().Be("Xamarin.Android.Templates");
             templateItem.IsStillPacked.Should().BeFalse();
             templateItem.Kind.Should().Be(WorkloadPackKind.Template);
             templateItem.Path.Should().Be(Path.Combine("fakepath", "template-packs", "xamarin.android.templates.1.0.3.nupkg"));
