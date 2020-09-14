@@ -114,6 +114,8 @@ namespace Microsoft.Build.UnitTests.Construction
                   </Target>
                   </Project>
                     ");
+
+                // Slashes here (and in the .slnf) are hardcoded as backslashes intentionally to support the common case.
                 TransientTestFile solutionFile = testEnvironment.CreateFile(simpleProjectFolder, "SimpleProject.sln",
                     @"
                     Microsoft Visual Studio Solution File, Format Version 12.00
