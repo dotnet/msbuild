@@ -200,14 +200,62 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             return hasOtherThanMismatch && hasContextMismatch;
         }
 
-        public static bool HasNameMatchOrPartialMatch(this ITemplateMatchInfo templateMatchInfo)
+        public static bool HasNameOrClassificationMatchOrPartialMatch(this ITemplateMatchInfo templateMatchInfo)
         {
-            return templateMatchInfo.MatchDisposition.Any((x => (x.Location == MatchLocation.Name || x.Location == MatchLocation.ShortName) && (x.Kind == MatchKind.Exact || x.Kind == MatchKind.Partial)));
+            return templateMatchInfo.MatchDisposition.Any((x => (x.Location == MatchLocation.Name || x.Location == MatchLocation.ShortName || x.Location == MatchLocation.Classification) && (x.Kind == MatchKind.Exact || x.Kind == MatchKind.Partial)));
         }
 
         public static bool HasAnyMismatch(this ITemplateMatchInfo templateMatchInfo)
         {
             return templateMatchInfo.MatchDisposition.Any(m => m.Kind == MatchKind.Mismatch);
+        }
+
+        public static bool HasClassificationMatchAndNameMismatch(this ITemplateMatchInfo templateMatchInfo)
+        {
+            if (templateMatchInfo.MatchDisposition.Count == 0)
+            {
+                return false;
+            }
+
+            bool hasNameMismatch = false;
+            bool hasClassificationMatch = false;
+
+            foreach (MatchInfo disposition in templateMatchInfo.MatchDisposition)
+            {
+                if (disposition.Location == MatchLocation.Name && disposition.Kind != MatchKind.Mismatch)
+                {
+                    return false;
+                }
+                else if (disposition.Location == MatchLocation.Name && disposition.Kind == MatchKind.Mismatch)
+                {
+                    hasNameMismatch = true;
+                }
+                else if (disposition.Location == MatchLocation.ShortName && disposition.Kind != MatchKind.Mismatch)
+                {
+                    return false;
+                }
+                else if (disposition.Location == MatchLocation.ShortName && disposition.Kind == MatchKind.Mismatch)
+                {
+                    hasNameMismatch = true;
+                }
+                else if (disposition.Location == MatchLocation.Classification)
+                {
+                    if (disposition.Kind == MatchKind.Exact || disposition.Kind == MatchKind.Partial)
+                    {
+                        hasClassificationMatch = true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else if (disposition.Kind == MatchKind.Mismatch)
+                {
+                    return false;
+                }
+            }
+
+            return hasNameMismatch && hasClassificationMatch;
         }
     }
 }

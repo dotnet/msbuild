@@ -170,13 +170,14 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         {
             IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
 
+            // for list we also try to get match on template name in classification (tags). These matches only will be used if short name and name has a mismatch.
+            // filter below only sets the exact or partial match if name matches the tag. If name doesn't match the tag, no match disposition is added to collection.
             IReadOnlyList<ITemplateMatchInfo> coreMatchedTemplates = TemplateListFilter.GetTemplateMatchInfo
             (
                 filterableTemplateInfo,
                 TemplateListFilter.PartialMatchFilter,
                 WellKnownSearchFilters.NameFilter(commandInput.TemplateName),
-                //TODO: check if search for Classification is needed
-                //         WellKnownSearchFilters.ClassificationsFilter(commandInput.TemplateName),
+                WellKnownSearchFilters.ClassificationsFilter(commandInput.TemplateName),
                 WellKnownSearchFilters.LanguageFilter(commandInput.Language),
                 WellKnownSearchFilters.ContextFilter(commandInput.TypeFilter),
                 WellKnownSearchFilters.BaselineFilter(commandInput.BaselineName)
@@ -195,8 +196,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                 filterableTemplateInfo,
                 TemplateListFilter.PartialMatchFilter,
                 WellKnownSearchFilters.NameFilter(commandInput.TemplateName),
-                //TODO: check if search for Classification is needed
-                //         WellKnownSearchFilters.ClassificationsFilter(commandInput.TemplateName),
                 WellKnownSearchFilters.LanguageFilter(commandInput.Language),
                 WellKnownSearchFilters.ContextFilter(commandInput.TypeFilter),
                 WellKnownSearchFilters.BaselineFilter(commandInput.BaselineName)

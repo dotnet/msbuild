@@ -40,9 +40,17 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                     {
                         _exactMatchedTemplates = _coreMatchedTemplates.Where(t => t.IsInvokableMatch()).ToList();
                     }
-                    else
+                    else if (_coreMatchedTemplates.Where(t => t.IsMatch).Any())
                     {
                         _exactMatchedTemplates = _coreMatchedTemplates.Where(t => t.IsMatch).ToList();
+                    }
+                    // if there is no match try to match by classification (tag) and other filters ignoring name mismatch.
+                    // in case classification matches given template name in command these templates still to be shown in the list.
+                    // classfication matching is only done in case --list is specified in column, otherwise collection of match disposition doesn't have matchs on classification
+                    // TODO: when matching on tags is implemented via special parameter (--tags) keep IsMatch condition only
+                    else
+                    {
+                        _exactMatchedTemplates = _coreMatchedTemplates.Where(t => t.HasClassificationMatchAndNameMismatch()).ToList();
                     }
                 }
                 return _exactMatchedTemplates;
@@ -64,7 +72,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             {
                 if (_partiallyMatchedTemplates == null)
                 {
-                    _partiallyMatchedTemplates = _coreMatchedTemplates.Where(t => t.HasNameMatchOrPartialMatch() && t.HasAnyMismatch()).ToList();
+                    // TODO: clarify if collection should include matching by classification only.
+                    // At the moment defintion of partial match:
+                    // - has exact or partial match by name or short name or classification
+                    // - has mismatch in language, type or baseline
+                    _partiallyMatchedTemplates = _coreMatchedTemplates.Where(t => t.HasNameOrClassificationMatchOrPartialMatch() && t.HasAnyMismatch()).ToList();
                 }
                 return _partiallyMatchedTemplates;
             }
