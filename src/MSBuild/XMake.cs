@@ -1726,11 +1726,16 @@ namespace Microsoft.Build.CommandLine
                             {
                                 int numberOfCpus = Environment.ProcessorCount;
 #if !MONO
-                                // .NET framework calls Windows APIs that have a core count limit (32/64 depending on process bitness).
                                 // .NET Core on Windows returns a core count limited to the current NUMA node
-                                //     https://github.com/dotnet/runtime/issues/41902
-                                // So if we get a high core count on Windows, double-check it.
-                                if (numberOfCpus >= 32 && NativeMethodsShared.IsWindows)
+                                //     https://github.com/dotnet/runtime/issues/29686
+                                // so always double-check it.
+                                if (NativeMethodsShared.IsWindows
+#if NETFRAMEWORK
+                                     // .NET Framework calls Windows APIs that have a core count limit (32/64 depending on process bitness).
+                                     // So if we get a high core count on full framework, double-check it.
+                                     && (numberOfCpus >= 32)
+#endif
+                                    )
                                 {
                                     var result = NativeMethodsShared.GetLogicalCoreCount();
                                     if(result != -1)
