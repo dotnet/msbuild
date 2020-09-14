@@ -19,6 +19,11 @@ It's a 4 step process:
 ```c#
     public const string Wave17_4 = "17.4"`
 ```
+3. As you rotate in/out change waves, be sure to update the lowest and highest waves.
+```c#
+    public const string LowestWave = Wave16_8;
+    public const string HighestWave = Wave17_0;
+```
 
 ### Checking If A Change Wave is Enabled
 Surround your feature with the following:
@@ -45,12 +50,7 @@ Create tests as you normally would, but include tests with `MSBuildChangeWaveVer
 ### Change Wave 'End of Lifespan' Procedure
 Your feature will eventually become standard functionality. When a change wave rotates out, do the following:
 1. Start by deleting the constant `Wave17_4` that was created in step one.
-1. Remove **all** if-statements surrounding features that were assigned that change wave.
+1. Remove **all** conditions surrounding features that were assigned that change wave.
+1. Delete tests associated with checking that the wave to be deleted is disabled.
 
 # Questions!
-1. How do we correctly check for $(MSBUILDCHANGEWAVEVERSION) <= 16.7 when MSBUILDCHANGEWAVEVERSION is 16.10?
- - Done, we use the instrinsic function `MSBuild::VersionGreaterThan` (thanks Nick!)
-
-IDEA: What if we didn't throw a warning in the static `IsChangeWaveEnabled` class? How could we?
-
-Dev calls IsChangeWaveEnabled incorrectly? Fail the build. Explicitly let them know they messed up and should be using the constants.

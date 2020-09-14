@@ -3,14 +3,6 @@ using System;
 
 namespace Microsoft.Build.Utilities
 {
-
-    public enum ChangeWaveReturnType
-    {
-        Invalid = 0,
-        VersionOutOfRotation,
-        FeatureEnabled,
-        FeatureDisabled
-    }
     /// <summary>
     /// There may be some confusion between "enabling waves" and "enabling features".
     /// Enabling a wave DISABLES all features behind that wave.
@@ -39,22 +31,20 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="wave">The version to compare.</param>
         /// <returns>A bool indicating whether the version is enabled.</returns>
-        public static ChangeWaveReturnType IsChangeWaveEnabled(string wave)
+        public static bool IsFeatureEnabled(string wave)
         {
             // This is opt out behavior, all waves are enabled by default.
             // If version is invalid, 
             if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableChangeWaveVersion))
             {
-                return ChangeWaveReturnType.FeatureEnabled;
+                return true;
             }
 
             Version currentDisabledWave;
 
             if (!Version.TryParse(Traits.Instance.MSBuildDisableChangeWaveVersion, out currentDisabledWave))
             {
-                // should still enable the features behind this wave.
-                // not sure I like that a dev would have to hide their feature behind if(returntype == invalid || returntype == featureenabled)
-                return ChangeWaveReturnType.Invalid;
+                return true;
             }
 
             Version waveToCheck;
@@ -64,7 +54,7 @@ namespace Microsoft.Build.Utilities
                                        $"Argument 'wave' passed with invalid format." +
                                        $"Please use the const strings or define one with format 'xx.yy");
 
-            return waveToCheck < currentDisabledWave ? ChangeWaveReturnType.FeatureEnabled : ChangeWaveReturnType.FeatureDisabled;
+            return waveToCheck < currentDisabledWave ? true : false;
         }
 
         public static bool IsChangeWaveOutOfRotation(Version v)

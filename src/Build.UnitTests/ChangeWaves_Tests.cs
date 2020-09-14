@@ -24,7 +24,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", ChangeWaves.EnableAllFeaturesBehindChangeWaves);
-                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBe(ChangeWaveReturnType.FeatureEnabled);
+                ChangeWaves.IsFeatureEnabled(waveToCheck).ShouldBe(true);
             }
         }
         [Theory]
@@ -36,7 +36,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 // intentionally avoid setting MSBUILDCHANGEWAVE environment variable
-                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBe(ChangeWaveReturnType.FeatureEnabled);
+                ChangeWaves.IsFeatureEnabled(waveToCheck).ShouldBe(true);
             }
         }
 
@@ -52,7 +52,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", enabledWave);
-                Shouldly.Should.Throw(() => ChangeWaves.IsChangeWaveEnabled(waveToCheck), typeof(InternalErrorException));
+                Shouldly.Should.Throw(() => ChangeWaves.IsFeatureEnabled(waveToCheck), typeof(InternalErrorException));
             }
         }
 
@@ -67,8 +67,21 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", enabledWave);
-                // TODO: check for warning
-                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBe(ChangeWaveReturnType.FeatureEnabled);
+
+                string project = @"
+            <Project>
+                <Target Name='HelloWorld' Condition=""$([MSBuild]::VersionGreaterThan('$(MSBUILDCHANGEWAVEVERSION)', '" + waveToCheck + @"'))"">
+                    <Message Text='Hello World!'/>
+                </Target>
+                <PropertyGroup>
+                        <msbuildchangewaveversion>" + enabledWave + @"</msbuildchangewaveversion>
+                </PropertyGroup>
+            </Project>";
+
+                MockLogger log = Helpers.BuildProjectWithNewOMExpectSuccess(project);
+
+                ChangeWaves.IsFeatureEnabled(waveToCheck).ShouldBe(true);
+                log.AssertLogContains("Warning");
             }
         }
 
@@ -81,7 +94,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", enabledWave);
-                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBe(ChangeWaveReturnType.FeatureEnabled);
+                ChangeWaves.IsFeatureEnabled(waveToCheck).ShouldBe(true);
             }
         }
 
@@ -115,7 +128,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", enabledWave);
-                ChangeWaves.IsChangeWaveEnabled(waveToCheck).ShouldBe(ChangeWaveReturnType.FeatureDisabled);
+                ChangeWaves.IsFeatureEnabled(waveToCheck).ShouldBe(true);
             }
         }
 

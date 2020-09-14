@@ -1088,11 +1088,6 @@ namespace Microsoft.Build.Evaluation
         private string SanitizeChangeWave()
         {
             Version changeWave;
-            // order of operations:
-            // 1. If unset, default to enabling all change waves.
-            // 2. If it had an invalid format, enable all and log it.
-            // 3. If it's a version out of rotation, clamp and log it.
-            // 4. Set as built in property
 
             // If unset, enable all features.
             if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableChangeWaveVersion))
@@ -1104,14 +1099,14 @@ namespace Microsoft.Build.Evaluation
             // If the user-set change wave is of invalid format, log a warning and don't opt out.
             if (!Version.TryParse(Traits.Instance.MSBuildDisableChangeWaveVersion, out changeWave))
             {
-                _evaluationLoggingContext.LogWarning("ChangeWave_InvalidFormat", new BuildEventFileInfo("", 0, 0, 0, 0), Traits.Instance.MSBuildDisableChangeWaveVersion);
+                _evaluationLoggingContext.LogWarning("ChangeWave_InvalidFormat", new BuildEventFileInfo("WhatDoIPutHere.cs", 0, 0, 0, 0), Traits.Instance.MSBuildDisableChangeWaveVersion);
                 Traits.Instance.MSBuildDisableChangeWaveVersion = ChangeWaves.EnableAllFeaturesBehindChangeWaves;
                 changeWave = ChangeWaves.EnableAllFeaturesVersion;
             }
             // If the change wave is out of rotation, log a warning and opt out of all waves.
             else if (ChangeWaves.IsChangeWaveOutOfRotation(changeWave))
             {
-                _evaluationLoggingContext.LogWarning("ChangeWave_OutOfRotation", new BuildEventFileInfo("", 0, 0, 0, 0), changeWave.ToString());
+                _evaluationLoggingContext.LogWarning("ChangeWave_OutOfRotation", new BuildEventFileInfo("WhatDoIPutHere.cs", 0, 0, 0, 0), changeWave.ToString());
                 Traits.Instance.MSBuildDisableChangeWaveVersion = ChangeWaves.LowestWave;
                 changeWave = ChangeWaves.LowestWaveVersion;
             }
