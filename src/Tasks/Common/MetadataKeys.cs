@@ -21,6 +21,7 @@ namespace Microsoft.NET.Build.Tasks
         // Target Metadata
         public const string RuntimeIdentifier = "RuntimeIdentifier";
         public const string TargetFrameworkMoniker = "TargetFrameworkMoniker";
+        public const string TargetFramework = "TargetFramework";
         public const string FrameworkName = "FrameworkName";
         public const string FrameworkVersion = "FrameworkVersion";
         public const string IsTrimmable = "IsTrimmable"; 

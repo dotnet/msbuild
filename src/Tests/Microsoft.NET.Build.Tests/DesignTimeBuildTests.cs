@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml.Linq;
@@ -111,6 +112,50 @@ namespace Microsoft.NET.Build.Tests
                 .BeEquivalentTo("Newtonsoft.Json/12.0.2", "Humanizer/2.6.2");
         }
 
+        [Theory]
+        [InlineData("netcoreapp3.0")]
+        [InlineData("net5.0")]
+        [InlineData("net5.0-windows")]
+        [InlineData("net5.0-windows7.0")]
+        public void PackageErrorsAreSet(string targetFramework)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesignTimePackageDependencies",
+                TargetFrameworks = targetFramework,
+                IsSdkProject = true
+            };
+
+            //  Downgrade will cause an error
+            testProject.AdditionalProperties["ContinueOnError"] = "ErrorAndContinue";
+
+            testProject.PackageReferences.Add(new TestPackageReference("NuGet.Commands", "4.0.0"));
+            testProject.PackageReferences.Add(new TestPackageReference("NuGet.Packaging", "3.5.0"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+
+            new RestoreCommand(testAsset)
+                .Execute()
+                .Should()
+                .Fail();
+
+            var getValuesCommand = new GetValuesCommand(testAsset, "_PackageDependenciesDesignTime", GetValuesCommand.ValueType.Item);
+            getValuesCommand.ShouldRestore = false;
+            getValuesCommand.DependsOnTargets = "ResolvePackageDependenciesDesignTime";
+            getValuesCommand.MetadataNames = new List<string>() { "DiagnosticLevel" };
+
+            getValuesCommand
+                .WithWorkingDirectory(testAsset.TestRoot)
+                .Execute(GetDesignTimeMSBuildArgs())
+                .Should()
+                .Fail();
+
+            var valuesWithMetadata = getValuesCommand.GetValuesWithMetadata();
+            var nugetPackagingMetadata = valuesWithMetadata.Single(kvp => kvp.value.Equals("NuGet.Packaging/3.5.0")).metadata;
+            nugetPackagingMetadata["DiagnosticLevel"].Should().Be("Error");
+
+        }
+
         private void TestDesignTimeBuildAfterChange(Action<XDocument> projectChange, [CallerMemberName] string callingMethod = "")
         {
             var designTimeArgs = GetDesignTimeMSBuildArgs();
@@ -210,6 +255,7 @@ namespace Microsoft.NET.Build.Tests
                 "/t:CollectResolvedCompilationReferencesDesignTime;ResolveFrameworkReferences",
                 //  Set targeting pack folder to nonexistant folder so the project won't use installed targeting packs
                 "/p:NetCoreTargetingPackRoot=" + Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()),
+                "/bl"
             };
 
             return args;

@@ -850,7 +850,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 ProjectPath = _projectPath,
                 ProjectLanguage = null,
                 EmitLegacyAssetsFileItems = emitLegacyAssetsFileItems,
-                TargetFrameworkMoniker = target
+                TargetFramework = target
             };
 
             task.Execute().Should().BeTrue();

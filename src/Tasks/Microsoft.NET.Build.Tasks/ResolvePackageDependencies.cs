@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using NuGet.Frameworks;
 using NuGet.ProjectModel;
 using System;
 using System.Collections.Generic;
@@ -119,7 +120,7 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         public bool EmitLegacyAssetsFileItems { get; set; } = false;
 
-        public string TargetFrameworkMoniker { get; set; }
+        public string TargetFramework { get; set; }
 
         #endregion
 
@@ -253,9 +254,15 @@ namespace Microsoft.NET.Build.Tasks
 
             string GetPackageDiagnosticLevel(LockFileLibrary package)
             {
-                string target = TargetFrameworkMoniker ?? "";
+                string target = TargetFramework ?? "";
 
-                var messages = LockFile.LogMessages.Where(log => log.LibraryId == package.Name && log.TargetGraphs.Contains(target));
+                var messages = LockFile.LogMessages.Where(log => log.LibraryId == package.Name && log.TargetGraphs
+                                .Select(tg =>
+                                {
+                                    var parsedTargetGraph = NuGetFramework.Parse(tg);
+                                    var alias = _lockFile.PackageSpec.TargetFrameworks.FirstOrDefault(tf => tf.FrameworkName == parsedTargetGraph)?.TargetAlias;
+                                    return alias ?? tg;
+                                }).Contains(target));
 
                 if (!messages.Any())
                 {
@@ -275,6 +282,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     TaskItem item = new TaskItem(target.Name);
                     item.SetMetadata(MetadataKeys.RuntimeIdentifier, target.RuntimeIdentifier ?? string.Empty);
+                    item.SetMetadata(MetadataKeys.TargetFramework, TargetFramework);
                     item.SetMetadata(MetadataKeys.TargetFrameworkMoniker, target.TargetFramework.DotNetFrameworkName);
                     item.SetMetadata(MetadataKeys.FrameworkName, target.TargetFramework.Framework);
                     item.SetMetadata(MetadataKeys.FrameworkVersion, target.TargetFramework.Version.ToString());
