@@ -119,6 +119,13 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("net5.0-windows7.0")]
         public void PackageErrorsAreSet(string targetFramework)
         {
+            var designTimeArgs = GetDesignTimeMSBuildArgs();
+            if (designTimeArgs == null)
+            {
+                //  Design-time targets couldn't be found
+                return;
+            }
+
             var testProject = new TestProject()
             {
                 Name = "DesignTimePackageDependencies",
@@ -146,7 +153,7 @@ namespace Microsoft.NET.Build.Tests
 
             getValuesCommand
                 .WithWorkingDirectory(testAsset.TestRoot)
-                .Execute(GetDesignTimeMSBuildArgs())
+                .Execute(designTimeArgs)
                 .Should()
                 .Fail();
 
