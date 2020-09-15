@@ -49,7 +49,7 @@ namespace Microsoft.NET.Build.Tests
             runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
             runCommand.Execute()
                 .Should()
-                .Pass().And.HaveStdOutContaining("PlatformName:iOS13.2");
+                .Pass().And.HaveStdOutContaining("PlatformName:'iOS13.2'");
         }
 
         [Fact]
@@ -69,7 +69,7 @@ namespace Microsoft.NET.Build.Tests
             runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
             runCommand.Execute()
                 .Should()
-                .Pass().And.HaveStdOutContaining("PlatformName:iOS13.2");
+                .Pass().And.HaveStdOutContaining("PlatformName:'iOS13.2'");
         }
 
         [Fact]
@@ -84,7 +84,25 @@ namespace Microsoft.NET.Build.Tests
             runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
             runCommand.Execute()
                 .Should()
-                .Pass().And.HaveStdOutContaining("PlatformName:Windows7.0");
+                .Pass().And.HaveStdOutContaining("PlatformName:'Windows7.0'");
+        }
+
+        [Fact]
+        public void WhenUsingZeroedSupportedOSPlatformItCanGenerateSupportedOSPlatformAttribute()
+        {
+            TestProject testProject = SetUpProject();
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "windows";
+            testProject.AdditionalProperties["SupportedOSPlatform"] = "0.0";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var runCommand = new DotnetCommand(Log, "run");
+            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            runCommand.Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("PlatformName:'Windows'");
         }
 
         [Fact]
@@ -136,7 +154,7 @@ namespace CustomAttributesTestApp
             if (attributes.Length > 0)
             {
                 var attribute = attributes[0] as System.Runtime.Versioning.SupportedOSPlatformAttribute;
-                Console.WriteLine($""PlatformName:{attribute.PlatformName}"");
+                Console.WriteLine($""PlatformName:'{attribute.PlatformName}'"");
             }
             else
             {
