@@ -42,6 +42,8 @@ namespace Microsoft.Build.Tasks
 
         public ITaskItem InputManifest { get; set; }
 
+        public bool LauncherBasedDeployment { get; set; }
+
         public int MaxTargetPath { get; set; }
 
         [Output]
@@ -460,6 +462,8 @@ namespace Microsoft.Build.Tasks
                 {
                     applicationManifest.TargetFrameworkVersion = TargetFrameworkVersion;
                 }
+
+                applicationManifest.LauncherBasedDeployment = LauncherBasedDeployment;
             }
 
             if (!String.IsNullOrEmpty(EntryPoint?.ItemSpec))

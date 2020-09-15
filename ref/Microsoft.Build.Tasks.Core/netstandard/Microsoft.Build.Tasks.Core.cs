@@ -303,6 +303,14 @@ namespace Microsoft.Build.Tasks
         public bool UpdateToAbsolutePaths { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    public sealed partial class FormatUrl : Microsoft.Build.Tasks.TaskExtension
+    {
+        public FormatUrl() { }
+        public string InputUrl { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public string OutputUrl { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
     public sealed partial class FormatVersion : Microsoft.Build.Tasks.TaskExtension
     {
         public FormatVersion() { }
@@ -375,6 +383,17 @@ namespace Microsoft.Build.Tasks
         protected override bool OnManifestResolved(Microsoft.Build.Tasks.Deployment.ManifestUtilities.Manifest manifest) { throw null; }
         protected internal override bool ValidateInputs() { throw null; }
     }
+    public sealed partial class GenerateLauncher : Microsoft.Build.Tasks.TaskExtension
+    {
+        public GenerateLauncher() { }
+        public Microsoft.Build.Framework.ITaskItem EntryPoint { get { throw null; } set { } }
+        public string LauncherPath { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem OutputEntryPoint { get { throw null; } set { } }
+        public string OutputPath { get { throw null; } set { } }
+        public string VisualStudioVersion { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
     public abstract partial class GenerateManifestBase : Microsoft.Build.Utilities.Task
     {
         protected GenerateManifestBase() { }
@@ -383,6 +402,7 @@ namespace Microsoft.Build.Tasks
         public string Description { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem EntryPoint { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem InputManifest { get { throw null; } set { } }
+        public bool LauncherBasedDeployment { get { throw null; } set { } }
         public int MaxTargetPath { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem OutputManifest { get { throw null; } set { } }
@@ -757,6 +777,7 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] SatelliteAssemblies { get { throw null; } set { } }
         public bool SigningManifests { get { throw null; } set { } }
         public string TargetCulture { get { throw null; } set { } }
+        public string TargetFrameworkIdentifier { get { throw null; } set { } }
         public string TargetFrameworkVersion { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
@@ -1223,6 +1244,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public string IconFile { get { throw null; } set { } }
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public bool IsClickOnceManifest { get { throw null; } set { } }
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public bool LauncherBasedDeployment { get { throw null; } set { } }
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public int MaxTargetPath { get { throw null; } set { } }
         [System.Xml.Serialization.XmlIgnoreAttribute]
@@ -1767,6 +1790,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public Microsoft.Build.Tasks.Deployment.ManifestUtilities.FileReference FindTargetPath(string targetPath) { throw null; }
         public System.Collections.IEnumerator GetEnumerator() { throw null; }
         public void Remove(Microsoft.Build.Tasks.Deployment.ManifestUtilities.FileReference file) { }
+    }
+    public partial class LauncherBuilder
+    {
+        public LauncherBuilder(string launcherPath) { }
+        public string LauncherPath { get { throw null; } set { } }
+        public Microsoft.Build.Tasks.Deployment.Bootstrapper.BuildResults Build(string filename, string outputPath) { throw null; }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(false)]
     public abstract partial class Manifest
