@@ -7,7 +7,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     internal class WorkloadPack
     {
-        public WorkloadPack(string id, string version, WorkloadPackKind kind, Dictionary<string, string>? aliasTo)
+        public WorkloadPack(WorkloadPackId id, string version, WorkloadPackKind kind, Dictionary<string, WorkloadPackId>? aliasTo)
         {
             Id = id;
             Version = version;
@@ -15,13 +15,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             AliasTo = aliasTo;
         }
 
-        public string Id { get; }
+        public WorkloadPackId Id { get; }
         public string Version { get; }
         public WorkloadPackKind Kind { get; }
         public bool IsAlias => AliasTo != null && AliasTo.Count > 0;
-        public Dictionary<string, string>? AliasTo { get; }
+        public Dictionary<string, WorkloadPackId>? AliasTo { get; }
 
-        public string? TryGetAliasForPlatformIds (IEnumerable<string> platformIds)
+        public WorkloadPackId? TryGetAliasForPlatformIds (IEnumerable<string> platformIds)
         {
             if (AliasTo == null || AliasTo.Count == 0)
             {
@@ -30,7 +30,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             foreach (var platformId in platformIds)
             {
-                if (AliasTo.TryGetValue(platformId, out string? alias))
+                if (AliasTo.TryGetValue(platformId, out WorkloadPackId alias))
                 {
                     return alias;
                 }

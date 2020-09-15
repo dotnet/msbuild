@@ -15,8 +15,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// </remarks>
     public class WorkloadResolver : IWorkloadResolver
     {
-        private readonly Dictionary<string, WorkloadDefinition> _workloads = new Dictionary<string, WorkloadDefinition>(StringComparer.OrdinalIgnoreCase);
-        private readonly Dictionary<string, WorkloadPack> _packs = new Dictionary<string, WorkloadPack>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<WorkloadDefinitionkId, WorkloadDefinition> _workloads = new Dictionary<WorkloadDefinitionkId, WorkloadDefinition>();
+        private readonly Dictionary<WorkloadPackId, WorkloadPack> _packs = new Dictionary<WorkloadPackId, WorkloadPack>();
         private string[] _platformIds;
         private readonly string _dotNetRootPath;
 
@@ -111,7 +111,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 if (PackExists(packPath, kind))
                 {
                     yield return new PackInfo(
-                        pack.Value.Id,
+                        pack.Value.Id.ToString(),
                         pack.Value.Version,
                         pack.Value.Kind,
                         packPath
@@ -148,19 +148,19 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
         }
 
-        private static string GetPackPath (string dotNetRootPath, string packageId, string packageVersion, WorkloadPackKind kind)
+        private static string GetPackPath (string dotNetRootPath, WorkloadPackId packageId, string packageVersion, WorkloadPackKind kind)
         {
             switch (kind)
             {
                 case WorkloadPackKind.Framework:
                 case WorkloadPackKind.Sdk:
-                    return Path.Combine(dotNetRootPath, "packs", packageId, packageVersion);
+                    return Path.Combine(dotNetRootPath, "packs", packageId.ToString(), packageVersion);
                 case WorkloadPackKind.Template:
-                    return Path.Combine(dotNetRootPath, "template-packs", packageId.ToLowerInvariant() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
+                    return Path.Combine(dotNetRootPath, "template-packs", packageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
                 case WorkloadPackKind.Library:
-                    return Path.Combine(dotNetRootPath, "library-packs", packageId.ToLowerInvariant() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
+                    return Path.Combine(dotNetRootPath, "library-packs", packageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
                 case WorkloadPackKind.Tool:
-                    return Path.Combine(dotNetRootPath, "tool-packs", packageId, packageVersion);
+                    return Path.Combine(dotNetRootPath, "tool-packs", packageId.ToString(), packageVersion);
                 default:
                     throw new ArgumentException($"The package kind '{kind}' is not known", nameof(kind));
             }
@@ -168,24 +168,31 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public IEnumerable<string> GetPacksInWorkload(string workloadId)
         {
-            if (!_workloads.TryGetValue(workloadId, out var workload))
+            if (string.IsNullOrWhiteSpace(workloadId))
+            {
+                throw new ArgumentException($"'{nameof(workloadId)}' cannot be null or whitespace", nameof(workloadId));
+            }
+
+            var id = new WorkloadDefinitionkId(workloadId);
+
+            if (!_workloads.TryGetValue(id, out var workload))
             {
                 throw new Exception("Workload not found");
             }
 
             if (workload.Extends?.Count > 0)
             {
-                return ExpandWorkload(workload);
+                return ExpandWorkload(workload).Select (p => p.ToString());
             }
 
-            return workload.Packs ?? Enumerable.Empty<string>();
+            return workload.Packs.Select(p => p.ToString()) ?? Enumerable.Empty<string>();
         }
 
-        private IEnumerable<string> ExpandWorkload (WorkloadDefinition workload)
+        private IEnumerable<WorkloadPackId> ExpandWorkload (WorkloadDefinition workload)
         {
-            var dedup = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var dedup = new HashSet<WorkloadDefinitionkId>();
 
-            IEnumerable<string> ExpandPacks (string workloadId)
+            IEnumerable<WorkloadPackId> ExpandPacks (WorkloadDefinitionkId workloadId)
             {
                 if (!_workloads.TryGetValue (workloadId, out var workloadInfo))
                 {
@@ -227,7 +234,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// </remarks>
         public string? TryGetPackVersion(string packId)
         {
-            if (_packs.TryGetValue(packId, out var packInfo))
+            if (string.IsNullOrWhiteSpace(packId))
+            {
+                throw new ArgumentException($"'{nameof(packId)}' cannot be null or whitespace", nameof(packId));
+            }
+
+            if (_packs.TryGetValue(new WorkloadPackId (packId), out var packInfo))
             {
                 return packInfo.Version;
             }

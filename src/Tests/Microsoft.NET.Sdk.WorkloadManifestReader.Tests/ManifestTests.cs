@@ -20,11 +20,12 @@ namespace ManifestReaderTests
             {
                 var result = WorkloadManifestReader.ReadWorkloadManifest(fsSource);
                 result.Version.Should().Be(5);
+                var xamAndroidId = new WorkloadPackId("Xamarin.Android.Sdk");
 
-                result.Packs["Xamarin.Android.Sdk"].Id.Should().Be("Xamarin.Android.Sdk");
-                result.Packs["Xamarin.Android.Sdk"].IsAlias.Should().Be(false);
-                result.Packs["Xamarin.Android.Sdk"].Kind.Should().Be(WorkloadPackKind.Sdk);
-                result.Packs["Xamarin.Android.Sdk"].Version.Should().Be("8.4.7");
+                result.Packs[xamAndroidId].Id.Should().Be(xamAndroidId);
+                result.Packs[xamAndroidId].IsAlias.Should().Be(false);
+                result.Packs[xamAndroidId].Kind.Should().Be(WorkloadPackKind.Sdk);
+                result.Packs[xamAndroidId].Version.Should().Be("8.4.7");
             }
         }
 
