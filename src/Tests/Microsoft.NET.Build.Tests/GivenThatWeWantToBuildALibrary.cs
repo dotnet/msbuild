@@ -389,12 +389,9 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData(new string[] { }, "ios", "1.1", new[] { "IOS", "IOS1_1" })]
-        [InlineData(new string[] { }, "android", "2.2", new[] { "ANDROID", "ANDROID2_2" })]
-        [InlineData(new string[] { }, "windows", "7.0", new[] { "WINDOWS", "WINDOWS7_0" })]
-        [InlineData(new string[] { }, "windows", "10.0.19041.0", new[] { "WINDOWS", "WINDOWS10_0_19041_0" })]
-        [InlineData(new[] { "1.0", "1.1" }, "ios", "1.1", new[] { "IOS", "IOS1_1" })]
-        [InlineData(new[] { "11.11", "12.12", "13.13" }, "android", "12.12", new[] { "ANDROID", "ANDROID12_12" })]
+        [InlineData(new string[] { }, "windows", "10.0.19041.0", new[] { "WINDOWS" })]
+        [InlineData(new[] { "1.0", "1.1" }, "ios", "1.1", new[] { "IOS" })]
+        [InlineData(new[] { "11.11", "12.12", "13.13" }, "android", "12.12", new[] { "ANDROID" })]
         public void It_implicitly_defines_compilation_constants_for_the_target_platform(string[] sdkSupportedTargetPlatform, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
         {
             var targetFramework = "net5.0";
@@ -452,7 +449,7 @@ namespace Microsoft.NET.Build.Tests
 
         [WindowsOnlyTheory]
         [InlineData("netcoreapp3.1", new[] { "NETCOREAPP", "NETCOREAPP3_1" })]
-        [InlineData("net5.0", new[] { "NETCOREAPP", "NET", "NET5_0", "WINDOWS", "WINDOWS7_0" }, "windows", "7.0")]
+        [InlineData("net5.0", new[] { "NETCOREAPP", "NET", "NET5_0", "WINDOWS" }, "windows", "7.0")]
         public void It_can_use_implicitly_defined_compilation_constants(string targetFramework, string[] expectedOutput, string targetPlatformIdentifier = null, string targetPlatformVersion = null)
         {
             var testProj = new TestProject()
@@ -492,14 +489,8 @@ class Program
         #if WINDOWS
             Console.WriteLine(""WINDOWS"");
         #endif
-        #if WINDOWS7_0
-            Console.WriteLine(""WINDOWS7_0"");
-        #endif
         #if IOS
             Console.WriteLine(""IOS"");
-        #endif
-        #if IOS7_0
-            Console.WriteLine(""IOS7_0"");
         #endif
     }
 }");
