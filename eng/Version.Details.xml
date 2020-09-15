@@ -9,41 +9,41 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>7efaf6afab961484e729658ebcf038ef7f4194c8</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App.Ref" Version="6.0.0-alpha.1.20463.3">
+    <Dependency Name="Microsoft.NETCore.App.Ref" Version="6.0.0-alpha.1.20464.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>dcbac854ca05fc0226cfd6ba3e0337e9d429d98e</Sha>
+      <Sha>e13f72bfe26ef243fa96e67ec3ee5aa29c294c54</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App.Internal" Version="6.0.0-alpha.1.20463.3">
+    <Dependency Name="Microsoft.NETCore.App.Internal" Version="6.0.0-alpha.1.20464.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>dcbac854ca05fc0226cfd6ba3e0337e9d429d98e</Sha>
+      <Sha>e13f72bfe26ef243fa96e67ec3ee5aa29c294c54</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="6.0.0-alpha.1.20463.3">
+    <Dependency Name="Microsoft.NETCore.App.Runtime.win-x64" Version="6.0.0-alpha.1.20464.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>dcbac854ca05fc0226cfd6ba3e0337e9d429d98e</Sha>
+      <Sha>e13f72bfe26ef243fa96e67ec3ee5aa29c294c54</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.App.Host.win-x64" Version="6.0.0-alpha.1.20463.3">
+    <Dependency Name="Microsoft.NETCore.App.Host.win-x64" Version="6.0.0-alpha.1.20464.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>dcbac854ca05fc0226cfd6ba3e0337e9d429d98e</Sha>
+      <Sha>e13f72bfe26ef243fa96e67ec3ee5aa29c294c54</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Platforms" Version="6.0.0-alpha.1.20463.3">
+    <Dependency Name="Microsoft.NETCore.Platforms" Version="6.0.0-alpha.1.20464.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>dcbac854ca05fc0226cfd6ba3e0337e9d429d98e</Sha>
+      <Sha>e13f72bfe26ef243fa96e67ec3ee5aa29c294c54</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="5.0.0-beta.20461.7">
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>a81e6e87cf21837abfde2da6eb9b057bea9f49fc</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.HostModel" Version="6.0.0-alpha.1.20463.3">
+    <Dependency Name="Microsoft.NET.HostModel" Version="6.0.0-alpha.1.20464.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>dcbac854ca05fc0226cfd6ba3e0337e9d429d98e</Sha>
+      <Sha>e13f72bfe26ef243fa96e67ec3ee5aa29c294c54</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="6.0.0-alpha.1.20463.3">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="6.0.0-alpha.1.20464.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>dcbac854ca05fc0226cfd6ba3e0337e9d429d98e</Sha>
+      <Sha>e13f72bfe26ef243fa96e67ec3ee5aa29c294c54</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="6.0.0-alpha.1.20463.3">
+    <Dependency Name="Microsoft.NETCore.DotNetHostResolver" Version="6.0.0-alpha.1.20464.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>dcbac854ca05fc0226cfd6ba3e0337e9d429d98e</Sha>
+      <Sha>e13f72bfe26ef243fa96e67ec3ee5aa29c294c54</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Cli.CommandLine" Version="1.0.0-preview.19208.1">
       <Uri>https://github.com/dotnet/CliCommandLineParser</Uri>
@@ -89,21 +89,21 @@
       <Uri>https://github.com/mono/linker</Uri>
       <Sha>395e24a5ccaf6c976feb4891756ee1f73a4672c9</Sha>
     </Dependency>
-    <Dependency Name="System.CodeDom" Version="6.0.0-alpha.1.20463.3">
+    <Dependency Name="System.CodeDom" Version="6.0.0-alpha.1.20464.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>dcbac854ca05fc0226cfd6ba3e0337e9d429d98e</Sha>
+      <Sha>e13f72bfe26ef243fa96e67ec3ee5aa29c294c54</Sha>
     </Dependency>
-    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="6.0.0-alpha.1.20463.3">
+    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="6.0.0-alpha.1.20464.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>dcbac854ca05fc0226cfd6ba3e0337e9d429d98e</Sha>
+      <Sha>e13f72bfe26ef243fa96e67ec3ee5aa29c294c54</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Encoding.CodePages" Version="6.0.0-alpha.1.20463.3">
+    <Dependency Name="System.Text.Encoding.CodePages" Version="6.0.0-alpha.1.20464.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>dcbac854ca05fc0226cfd6ba3e0337e9d429d98e</Sha>
+      <Sha>e13f72bfe26ef243fa96e67ec3ee5aa29c294c54</Sha>
     </Dependency>
-    <Dependency Name="System.Resources.Extensions" Version="6.0.0-alpha.1.20463.3">
+    <Dependency Name="System.Resources.Extensions" Version="6.0.0-alpha.1.20464.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>dcbac854ca05fc0226cfd6ba3e0337e9d429d98e</Sha>
+      <Sha>e13f72bfe26ef243fa96e67ec3ee5aa29c294c54</Sha>
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="5.0.0-rc.1.20417.4">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
