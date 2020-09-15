@@ -261,8 +261,7 @@ namespace Microsoft.NET.Build.Tests
                 "/t:CollectUpToDateCheckOutputDesignTime;ResolvePackageDependenciesDesignTime;CompileDesignTime",
                 "/t:CollectResolvedCompilationReferencesDesignTime;ResolveFrameworkReferences",
                 //  Set targeting pack folder to nonexistant folder so the project won't use installed targeting packs
-                "/p:NetCoreTargetingPackRoot=" + Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()),
-                "/bl"
+                "/p:NetCoreTargetingPackRoot=" + Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString())
             };
 
             return args;
