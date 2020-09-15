@@ -90,6 +90,7 @@ namespace Microsoft.Build.Construction
         #endregion
         #region Member data
         private string _solutionFile;                 // Could be absolute or relative path to the .SLN file.
+        private string _solutionFilterFile;          // Could be absolute or relative path to the .SLNF file.
         private HashSet<string> _solutionFilter;     // The project files to include in loading the solution.
         private bool _parsingForConversionOnly;      // Are we parsing this solution to get project reference data during
                                                      // conversion, or in preparation for actually building the solution?
@@ -365,6 +366,7 @@ namespace Microsoft.Build.Construction
 
         private void ParseSolutionFilter(string solutionFilterFile)
         {
+            _solutionFilterFile = solutionFilterFile;
             try
             {
                 _solutionFile = ParseSolutionFromSolutionFilter(solutionFilterFile, out JsonElement solution);
@@ -554,9 +556,9 @@ namespace Microsoft.Build.Construction
                         ProjectFileErrorUtilities.ThrowInvalidProjectFile
                         (
                             "SubCategoryForSolutionParsingErrors",
-                            new BuildEventFileInfo(project),
+                            new BuildEventFileInfo(FileUtilities.GetFullPath(project, Path.GetDirectoryName(_solutionFile))),
                             "SolutionFilterFilterContainsProjectNotInSolution",
-                            _solutionFilter,
+                            _solutionFilterFile,
                             project,
                             _solutionFile
                         );
