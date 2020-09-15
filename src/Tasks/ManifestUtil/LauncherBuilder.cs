@@ -15,7 +15,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     /// <summary>
     /// Adds Launcher and updates its resource
     /// </summary>
-    [ComVisible(true)]
     public class LauncherBuilder
     {
         private const string LAUNCHER_RESOURCENAME = "FILENAME";

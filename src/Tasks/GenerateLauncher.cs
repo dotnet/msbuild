@@ -34,12 +34,6 @@ namespace Microsoft.Build.Tasks
 
         [Output]
         public ITaskItem OutputEntryPoint { get; set; }
-
-        [Output]
-        public string FrameworkName { get; set; }
-
-        [Output]
-        public string FrameworkVersion { get; set; }
         #endregion
 
         public override bool Execute()
@@ -58,17 +52,6 @@ namespace Microsoft.Build.Tasks
             {
                 Log.LogErrorWithCodeFromResources("GenerateLauncher.EmptyEntryPoint");
                 return false;
-            }
-
-            // Get Framework name and version.
-            // Launcher-based manifest generation has to use Framework elements that match Launcher identity.
-            Assembly a = Assembly.UnsafeLoadFrom(LauncherPath);
-            var targetFrameworkAttribute = a.GetCustomAttribute<TargetFrameworkAttribute>();
-            if (targetFrameworkAttribute != null)
-            {
-                FrameworkName = targetFrameworkAttribute.FrameworkName;
-                string[] split = FrameworkName.Split(new string[] { "Version=" }, StringSplitOptions.None);
-                FrameworkVersion = split.Length > 1 ? split[split.Length - 1] : string.Empty;
             }
 
             var launcherBuilder = new LauncherBuilder(LauncherPath);

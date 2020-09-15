@@ -3989,10 +3989,22 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         VisualStudioVersion="$(VisualStudioVersion)">
 
       <Output TaskParameter="OutputEntryPoint" ItemName="_DeploymentManifestLauncherEntryPoint"/>
-      <Output TaskParameter="FrameworkName" PropertyName="_DeploymentManifestTargetFrameworkMoniker"/>
-      <Output TaskParameter="FrameworkVersion" PropertyName="_DeploymentManifestTargetFrameworkVersion"/>
-
     </GenerateLauncher>
+
+    <!--
+      .NET Core ClickOnce deployments use Launcher, which targets .NET FX 4.5 as the minimum
+      supported ClickOnce runtime version on target user's machine.
+
+      TargetFramework Verion and Moniker properties are used in Deployment manifest generation
+      task to set compatibleFrameworks element, which needs to match Launcher's target version.
+
+      Version can be overriden with DeploymentManifestTargetFrameworkVersionOverride property.
+    -->
+    <PropertyGroup>
+      <_DeploymentManifestTargetFrameworkVersion Condition="'$(DeploymentManifestTargetFrameworkVersionOverride)' == ''">v4.5</_DeploymentManifestTargetFrameworkVersion>
+      <_DeploymentManifestTargetFrameworkVersion Condition="'$(DeploymentManifestTargetFrameworkVersionOverride)' != ''">$(DeploymentManifestTargetFrameworkVersionOverride)</_DeploymentManifestTargetFrameworkVersion>
+      <_DeploymentManifestTargetFrameworkMoniker>.NETFramework,Version=$(_DeploymentManifestTargetFrameworkVersion)</_DeploymentManifestTargetFrameworkMoniker>
+    </PropertyGroup>
 
     <!-- Sign Launcher EXE -->
     <SignFile

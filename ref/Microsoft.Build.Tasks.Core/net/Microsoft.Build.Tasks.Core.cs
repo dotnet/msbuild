@@ -493,10 +493,6 @@ namespace Microsoft.Build.Tasks
     {
         public GenerateLauncher() { }
         public Microsoft.Build.Framework.ITaskItem EntryPoint { get { throw null; } set { } }
-        [Microsoft.Build.Framework.OutputAttribute]
-        public string FrameworkName { get { throw null; } set { } }
-        [Microsoft.Build.Framework.OutputAttribute]
-        public string FrameworkVersion { get { throw null; } set { } }
         public string LauncherPath { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem OutputEntryPoint { get { throw null; } set { } }
@@ -2158,7 +2154,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public System.Collections.IEnumerator GetEnumerator() { throw null; }
         public void Remove(Microsoft.Build.Tasks.Deployment.ManifestUtilities.FileReference file) { }
     }
-    [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public partial class LauncherBuilder
     {
         public LauncherBuilder(string launcherPath) { }
