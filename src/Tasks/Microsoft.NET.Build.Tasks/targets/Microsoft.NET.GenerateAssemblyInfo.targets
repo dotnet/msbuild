@@ -120,8 +120,13 @@ Copyright (c) .NET Foundation. All rights reserved.
                          and '$(SupportedOSPlatform)' != ''
                          and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                          and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">
-      <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">
+      <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute"
+                         Condition="!$([MSBuild]::VersionEquals($(SupportedOSPlatform), '0.0'))" >
         <_Parameter1>$(TargetPlatformIdentifier)$(SupportedOSPlatform)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute"
+                         Condition="$([MSBuild]::VersionEquals($(SupportedOSPlatform), '0.0'))" >
+        <_Parameter1>$(TargetPlatformIdentifier)</_Parameter1>
       </AssemblyAttribute>
     </ItemGroup>
   </Target>

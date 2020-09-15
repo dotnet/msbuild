@@ -49,7 +49,7 @@ namespace Microsoft.NET.Build.Tests
             runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
             runCommand.Execute()
                 .Should()
-                .Pass().And.HaveStdOutContaining("PlatformName:iOS13.2");
+                .Pass().And.HaveStdOutContaining("PlatformName:'iOS13.2'");
         }
 
         [Fact]
@@ -69,7 +69,55 @@ namespace Microsoft.NET.Build.Tests
             runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
             runCommand.Execute()
                 .Should()
-                .Pass().And.HaveStdOutContaining("PlatformName:iOS13.2");
+                .Pass().And.HaveStdOutContaining("PlatformName:'iOS13.2'");
+        }
+
+        [Fact]
+        public void WhenUsingDefaultTargetPlatformVersionItCanGenerateSupportedOSPlatformAttribute()
+        {
+            TestProject testProject = SetUpProject();
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = "windows";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var runCommand = new DotnetCommand(Log, "run");
+            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            runCommand.Execute()
+                .Should()
+                .Pass().And.HaveStdOutContaining("PlatformName:'Windows7.0'");
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("net5.0-windows", "Windows7.0")]
+        [InlineData("net5.0-windows10.0.19041.0", "Windows10.0.19041.0")]
+        public void WhenUsingTargetPlatformInTargetFrameworkItCanGenerateSupportedOSPlatformAttribute(string targetFramework, string expectedAttribute)
+        {
+            TestProject testProject = SetUpProject(targetFramework);
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var runCommand = new DotnetCommand(Log, "run");
+            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            runCommand.Execute()
+                .Should()
+                .Pass().And.HaveStdOutContaining($"PlatformName:'{ expectedAttribute }'");
+        }
+
+        [Fact]
+        public void WhenUsingZeroedSupportedOSPlatformItCanGenerateSupportedOSPlatformAttribute()
+        {
+            TestProject testProject = SetUpProject("net5.0-windows");
+            testProject.AdditionalProperties["SupportedOSPlatform"] = "0.0";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var runCommand = new DotnetCommand(Log, "run");
+            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            runCommand.Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("PlatformName:'Windows'");
         }
 
         [Fact]
@@ -92,14 +140,14 @@ namespace Microsoft.NET.Build.Tests
                 .Fail().And.HaveStdOutContaining("NETSDK1135");
         }
 
-        private static TestProject SetUpProject()
+        private static TestProject SetUpProject(string targetFramework = "net5.0")
         {
             TestProject testProject = new TestProject()
             {
                 Name = "Project",
                 IsSdkProject = true,
                 IsExe = true,
-                TargetFrameworks = "net5.0",
+                TargetFrameworks = targetFramework,
             };
 
             testProject.SourceFiles["PrintAttribute.cs"] = _printAttribute;
@@ -121,7 +169,7 @@ namespace CustomAttributesTestApp
             if (attributes.Length > 0)
             {
                 var attribute = attributes[0] as System.Runtime.Versioning.SupportedOSPlatformAttribute;
-                Console.WriteLine($""PlatformName:{attribute.PlatformName}"");
+                Console.WriteLine($""PlatformName:'{attribute.PlatformName}'"");
             }
             else
             {
