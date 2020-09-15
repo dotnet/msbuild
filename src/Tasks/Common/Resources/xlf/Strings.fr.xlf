@@ -620,6 +620,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1046: La valeur TargetFramework '{0}' est non valide. Pour effectuer un multiciblage, utilisez la propriété 'TargetFrameworks' à la place.</target>
         <note>{StrBegin="NETSDK1046: "}</note>
       </trans-unit>
+      <trans-unit id="TargetingApphostPackMissingCannotRestore">
+        <source>NETSDK1145: The {0} pack is not installed and NuGet package restore is not supported. Upgrade Visual Studio, remove global.json if it specifies a certain SDK version, and uninstall the newer SDK. For more options visit   https://aka.ms/targeting-apphost-pack-missing  Pack Type:{0}, Pack directory: {1}, targetframework: {2}, Pack PackageId: {3}, Pack Package Version: {4}</source>
+        <target state="new">NETSDK1145: The {0} pack is not installed and NuGet package restore is not supported. Upgrade Visual Studio, remove global.json if it specifies a certain SDK version, and uninstall the newer SDK. For more options visit   https://aka.ms/targeting-apphost-pack-missing  Pack Type:{0}, Pack directory: {1}, targetframework: {2}, Pack PackageId: {3}, Pack Package Version: {4}</target>
+        <note>{StrBegin="NETSDK1145: "}</note>
+      </trans-unit>
       <trans-unit id="TargetingPackNeedsRestore">
         <source>NETSDK1127: The targeting pack {0} is not installed. Please restore and try again.</source>
         <target state="new">NETSDK1127: The targeting pack {0} is not installed. Please restore and try again.</target>

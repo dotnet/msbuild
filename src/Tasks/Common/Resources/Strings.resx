@@ -682,4 +682,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1144: Optimizing assemblies for size failed. Optimization can be disabled by setting the PublishTrimmed property to false.</value>
     <comment>{StrBegin="NETSDK1144: "}</comment>
   </data>
+  <data name="TargetingApphostPackMissingCannotRestore" xml:space="preserve">
+    <value>NETSDK1145: The {0} pack is not installed and NuGet package restore is not supported. Upgrade Visual Studio, remove global.json if it specifies a certain SDK version, and uninstall the newer SDK. For more options visit   https://aka.ms/targeting-apphost-pack-missing  Pack Type:{0}, Pack directory: {1}, targetframework: {2}, Pack PackageId: {3}, Pack Package Version: {4}</value>
+    <comment>{StrBegin="NETSDK1145: "}</comment>
+  </data>
 </root>

@@ -52,6 +52,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <EnableTargetingPackDownload>true</EnableTargetingPackDownload>
     </PropertyGroup>
 
+    <PropertyGroup>
+      <_NuGetRestoreSupported Condition="'$(Language)' == 'C++'">false</_NuGetRestoreSupported>
+    </PropertyGroup>
+
     <ItemGroup>
       <_PackAsToolShimRuntimeIdentifiers Condition="@(_PackAsToolShimRuntimeIdentifiers) ==''" Include="$(PackAsToolShimRuntimeIdentifiers)"/>
     </ItemGroup>
@@ -104,7 +108,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                      DotNetComHostLibraryNameWithoutExtension="$(_DotNetComHostLibraryNameWithoutExtension)"
                      DotNetIjwHostLibraryNameWithoutExtension="$(_DotNetIjwHostLibraryNameWithoutExtension)"
                      RuntimeGraphPath="$(BundledRuntimeIdentifierGraphFile)"
-                     KnownAppHostPacks="@(KnownAppHostPack)">
+                     KnownAppHostPacks="@(KnownAppHostPack)"
+                     NuGetRestoreSupported="$(_NuGetRestoreSupported)"
+                     NetCoreTargetingPackRoot="$(NetCoreTargetingPackRoot)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
       <Output TaskParameter="AppHost" ItemName="AppHostPack" />
@@ -318,7 +324,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ResolveTargetingPackAssets FrameworkReferences="@(FrameworkReference)"
                                 ResolvedTargetingPacks="@(ResolvedTargetingPack)"
                                 RuntimeFrameworks="@(RuntimeFramework)"
-                                GenerateErrorForMissingTargetingPacks="$(GenerateErrorForMissingTargetingPacks)">
+                                GenerateErrorForMissingTargetingPacks="$(GenerateErrorForMissingTargetingPacks)"
+                                NuGetRestoreSupported="$(_NuGetRestoreSupported)"
+                                NetCoreTargetingPackRoot="$(NetCoreTargetingPackRoot)">
       <Output TaskParameter="ReferencesToAdd" ItemName="Reference" />
       <Output TaskParameter="PlatformManifests" ItemName="PlatformManifestsFromTargetingPacks" />
       <Output TaskParameter="PackageConflictPreferredPackages" PropertyName="PackageConflictPreferredPackages" />
