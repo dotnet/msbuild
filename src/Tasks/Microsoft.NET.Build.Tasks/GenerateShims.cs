@@ -124,7 +124,7 @@ namespace Microsoft.NET.Build.Tasks
                     }
                     else
                     {
-                        // by passing null to assemblyToCopyResorcesFrom, it will skip coping resorces,
+                        // by passing null to assemblyToCopyResorcesFrom, it will skip copying resources,
                         // which is only supported on Windows
                         if (windowsGraphicalUserInterface)
                         {

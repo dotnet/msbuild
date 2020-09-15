@@ -651,8 +651,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1073: "}</note>
       </trans-unit>
       <trans-unit id="UnnecessaryWindowsDesktopSDK">
-        <source>NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Microsoft.NET.Sdk can be used instead.</source>
-        <target state="new">NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Microsoft.NET.Sdk can be used instead.</target>
+        <source>NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Consider changing the Sdk attribute of the root Project element to 'Microsoft.NET.Sdk'.</source>
+        <target state="new">NETSDK1137: It is no longer necessary to use the Microsoft.NET.Sdk.WindowsDesktop SDK. Consider changing the Sdk attribute of the root Project element to 'Microsoft.NET.Sdk'.</target>
         <note>{StrBegin="NETSDK1137: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">

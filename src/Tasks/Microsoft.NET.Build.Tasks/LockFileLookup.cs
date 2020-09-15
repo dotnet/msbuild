@@ -21,12 +21,6 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var library in lockFile.Libraries)
             {
-                // TODO-ARM: Workaround for JIT bug on arm processors. See https://github.com/dotnet/coreclr/issues/10780
-                if (string.Empty == null)
-                {
-                    throw new Exception();
-                }
-
                 var libraryType = LibraryType.Parse(library.Type);
 
                 if (libraryType == LibraryType.Package)
