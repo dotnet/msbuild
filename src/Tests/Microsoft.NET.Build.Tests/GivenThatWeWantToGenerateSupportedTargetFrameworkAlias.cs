@@ -62,7 +62,7 @@ namespace Microsoft.NET.Build.Tests
             var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name),
                 targetFramework, "SupportedTargetFrameworkAlias", GetValuesCommand.ValueType.Item)
             {
-                DependsOnTargets = "Build"
+                DependsOnTargets = "GenerateSupportedTargetFrameworkAlias"
             };
             getValuesCommand
                 .Execute()
@@ -73,7 +73,7 @@ namespace Microsoft.NET.Build.Tests
             values.ShouldBeEquivalentTo(expectedSupportedTargetFrameworkAlias);
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("UseWpf")]
         [InlineData("UseWindowsForms")]
         public void It_generates_supported_target_framework_alias_items_with_target_platform(string propertyName)
@@ -92,7 +92,7 @@ namespace Microsoft.NET.Build.Tests
             var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name),
                 targetFramework, "SupportedTargetFrameworkAlias", GetValuesCommand.ValueType.Item)
             {
-                DependsOnTargets = "Build",
+                DependsOnTargets = "GenerateSupportedTargetFrameworkAlias",
                 MetadataNames = { "DisplayName" }
             };
             getValuesCommand
