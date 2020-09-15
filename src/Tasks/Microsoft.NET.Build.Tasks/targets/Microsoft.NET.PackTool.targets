@@ -42,7 +42,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       AppHostIntermediatePath="$(AppHostIntermediatePath)"
       ResolvedFileToPublish="@(ResolvedFileToPublish)"
       PublishDir="$(PublishDir)"
-      TargetFramework="$(TargetFramework)">
+      TargetFrameworkMoniker="$(TargetFrameworkMoniker)">
 
       <Output TaskParameter="ResolvedFileToPublishWithPackagePath" ItemName="_ResolvedFileToPublishWithPackagePath" />
     </ResolveToolPackagePaths>
