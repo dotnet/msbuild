@@ -32,6 +32,15 @@ namespace Microsoft.Build.Collections
     [Serializable]
     internal class CopyOnWriteDictionary<K, V> : IDictionary<K, V>, IDictionary, ISerializable
     {
+#if !NET35 // MSBuildNameIgnoreCaseComparer not compiled into MSBuildTaskHost but also allocations not interesting there.
+        /// <summary>
+        /// Empty dictionary with a <see cref="MSBuildNameIgnoreCaseComparer" />,
+        /// used as the basis of new dictionaries with that comparer to avoid
+        /// allocating new comparers objects.
+        /// </summary>
+        private static ImmutableDictionary<K, V> NameComparerDictionaryPrototype = ImmutableDictionary.Create<K, V>((IEqualityComparer<K>)MSBuildNameIgnoreCaseComparer.Default);
+#endif
+
         /// <summary>
         /// The backing dictionary.
         /// Lazily created.
@@ -67,7 +76,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal CopyOnWriteDictionary(int capacity, IEqualityComparer<K>? keyComparer)
         {
-            _backing = ImmutableDictionary.Create<K, V>(keyComparer);
+            _backing = GetInitialDictionary(keyComparer);
         }
 
         /// <summary>
@@ -80,9 +89,20 @@ namespace Microsoft.Build.Collections
 
             object comparer = info.GetValue(nameof(Comparer), typeof(IEqualityComparer<K>));
 
-            var b = ImmutableDictionary.Create<K, V>((IEqualityComparer<K>)comparer);
+            var b = GetInitialDictionary((IEqualityComparer<K>)comparer);
 
             _backing = b.AddRange((KeyValuePair<K, V>[])v);
+        }
+
+        private static ImmutableDictionary<K, V> GetInitialDictionary(IEqualityComparer<K>? keyComparer)
+        {
+#if NET35
+            return ImmutableDictionary.Create<K, V>(keyComparer);
+#else
+            return typeof(K) == typeof(string) && keyComparer is MSBuildNameIgnoreCaseComparer
+                            ? NameComparerDictionaryPrototype
+                            : ImmutableDictionary.Create<K, V>(keyComparer);
+#endif
         }
 
         /// <summary>
