@@ -187,7 +187,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_CheckForSupportedOSPlatformHigherThanTargetPlatformVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform" >
 
     <NETSdkError Condition="'$(SupportedOSPlatform)' != '' and $(TargetPlatformVersion) != '' and $([MSBuild]::VersionGreaterThan($(SupportedOSPlatform), $(TargetPlatformVersion)))"
-                 ResourceName="CannotHaveSupportedOSPlatformHigherThanTargetPlatformVersion"
+                 ResourceName="CannotHaveSupportedOSPlatformVersionHigherThanTargetPlatformVersion"
                  FormatArguments="$(SupportedOSPlatform);$(TargetPlatformVersion)"/>
   </Target>
 
