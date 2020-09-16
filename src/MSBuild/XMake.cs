@@ -2786,6 +2786,8 @@ namespace Microsoft.Build.CommandLine
                 string[] potentialProjectFiles = getFiles(projectDirectory ?? ".", "*.*proj");
                 // Get all files in the current directory that have a sln extension
                 string[] potentialSolutionFiles = getFiles(projectDirectory ?? ".", "*.sln");
+                // List of solutionFilterFiles. Unitialized because it often will not need to be.
+                List<string> solutionFilterFiles = null;
 
                 List<string> extensionsToIgnore = new List<string>();
                 if (projectsExtensionsToIgnore != null)
@@ -2812,6 +2814,12 @@ namespace Microsoft.Build.CommandLine
                         {
                             extensionsToIgnore.Add(Path.GetExtension(s));
                         }
+                        else if (FileUtilities.IsSolutionFilterFilename(s))
+                        {
+                            solutionFilterFiles ??= new List<string>();
+                            solutionFilterFiles.Add(s);
+                            extensionsToIgnore.Add(Path.GetExtension(s));
+                        }
                     }
                 }
 
@@ -2834,10 +2842,10 @@ namespace Microsoft.Build.CommandLine
                     }
                 }
                 // If there is exactly 1 project file and exactly 1 solution file
-                if ((potentialProjectFiles.Length == 1) && (potentialSolutionFiles.Length == 1))
+                if (potentialProjectFiles.Length == 1 && (potentialSolutionFiles.Length == 1 || solutionFilterFiles.Count == 1))
                 {
                     // Grab the name of both project and solution without extensions
-                    string solutionName = Path.GetFileNameWithoutExtension(potentialSolutionFiles[0]);
+                    string solutionName = Path.GetFileNameWithoutExtension(potentialSolutionFiles.Length == 1 ? potentialSolutionFiles[0] : solutionFilterFiles[0]);
                     string projectName = Path.GetFileNameWithoutExtension(potentialProjectFiles[0]);
                     // Compare the names and error if they are not identical
                     InitializationException.VerifyThrow(String.Equals(solutionName, projectName, StringComparison.OrdinalIgnoreCase), projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
@@ -2881,8 +2889,9 @@ namespace Microsoft.Build.CommandLine
                     InitializationException.VerifyThrow(!isAmbiguousProject, projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
                 }
                 // if there are no project or solution files in the directory, we can't build
-                else if ((potentialProjectFiles.Length == 0) &&
-                         (potentialSolutionFiles.Length == 0))
+                else if (potentialProjectFiles.Length == 0 &&
+                         potentialSolutionFiles.Length == 0 &&
+                         solutionFilterFiles.Count == 0)
                 {
                     InitializationException.VerifyThrow(false, "MissingProjectError");
                 }
@@ -2890,7 +2899,7 @@ namespace Microsoft.Build.CommandLine
                 // We are down to only one project or solution.
                 // If only 1 solution build the solution.  If only 1 project build the project
                 // If 1 solution and 1 project and they are of the same name build the solution
-                projectFile = (potentialSolutionFiles.Length == 1) ? potentialSolutionFiles[0] : potentialProjectFiles[0];
+                projectFile = (potentialSolutionFiles.Length == 1) ? potentialSolutionFiles[0] : solutionFilterFiles.Count == 1 ? solutionFilterFiles[0] : potentialProjectFiles[0];
             }
 
             return projectFile;
