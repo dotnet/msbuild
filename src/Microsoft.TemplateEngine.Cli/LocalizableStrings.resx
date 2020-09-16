@@ -322,8 +322,7 @@
     <value>Rerun the command and pass --force to accept and create.</value>
   </data>
   <data name="RunHelpForInformationAboutAcceptedParameters" xml:space="preserve">
-    <value>Run dotnet {0} --help for usage information.
-See https://aka.ms/dotnet-install-templates to learn how to install additional template packs.</value>
+    <value>Run dotnet {0} --help for usage information.</value>
   </data>
   <data name="ShortName" xml:space="preserve">
     <value>Short Name</value>

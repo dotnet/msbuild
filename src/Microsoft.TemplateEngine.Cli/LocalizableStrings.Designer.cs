@@ -1306,8 +1306,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Run dotnet {0} --help for usage information.
-        ///See https://aka.ms/dotnet-install-templates to learn how to install additional template packs..
+        ///   Looks up a localized string similar to Run dotnet {0} --help for usage information..
         /// </summary>
         public static string RunHelpForInformationAboutAcceptedParameters {
             get {
