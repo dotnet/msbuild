@@ -4,9 +4,21 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(MicrosoftFSharpCompilerPackageVersion)" />
+    <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(MicrosoftFSharpCompilerPackageVersion)" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.Build.Framework" Version="$(FSharpBuildVersion)" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(FSharpBuildVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(FSharpBuildVersion)" />
   </ItemGroup>
+
+   <Target Name="_ResolvePublishNuGetPackagePdbsAndXml"
+        AfterTargets="_ResolveCopyLocalAssetsForPublish">
+    <ItemGroup>
+        <ResolvedFileToPublish
+          Include="$(PkgMicrosoft_FSharp_Compiler)/lib/netcoreapp3.1/FSharp.Core.xml"
+          CopyToPublishDirectory="PreserveNewest"
+          DestinationSubPath="FSharp.Core.xml"
+          RelativePath="FSharp.Core.xml"
+          TargetPath="FSharpCore.xml" />
+    </ItemGroup>
+  </Target>
 </Project>
