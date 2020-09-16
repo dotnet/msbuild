@@ -604,6 +604,9 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="DefaultValuePlusSwitchWithoutValueDefault" xml:space="preserve">
     <value>Default: {0} / (*) {1}</value>
   </data>
+  <data name="DefaultIfOptionWithoutValue" xml:space="preserve">
+    <value>Default if option is provided without a value: {0}</value>
+  </data>
   <data name="SwitchWithoutValueDefaultFootnote" xml:space="preserve">
     <value>* Indicates the value used if the switch is provided without a value.</value>
   </data>

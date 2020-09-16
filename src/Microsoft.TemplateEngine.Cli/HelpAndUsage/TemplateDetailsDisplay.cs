@@ -89,7 +89,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(parameterDetails.AllParams.ParameterDefinitions, parameterDetails.ExplicitlyHiddenParams,
                                                                                     showImplicitlyHiddenParams, parameterDetails.HasPostActionScriptRunner, parameterDetails.ParametersToAlwaysShow);
-            bool anyParamsShowingDefaultForSwitchWithNoValue = false;
 
             if (filteredParams.Any())
             {
@@ -218,20 +217,30 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     }
 
                     // display the default value if there is one
-                    if (!string.IsNullOrEmpty(param.DefaultValue))
+                    if (!string.IsNullOrWhiteSpace(param.DefaultValue))
                     {
-                        if (param is IAllowDefaultIfOptionWithoutValue paramWithNoValueDefault
-                            && !string.IsNullOrEmpty(paramWithNoValueDefault.DefaultIfOptionWithoutValue)
-                            && !string.Equals(paramWithNoValueDefault.DefaultIfOptionWithoutValue, param.DefaultValue, StringComparison.Ordinal))
+                        displayValue.AppendLine(string.Format(LocalizableStrings.DefaultValue, param.DefaultValue));
+                    }
+
+                    if (param is IAllowDefaultIfOptionWithoutValue paramWithNoValueDefault
+                        && !string.IsNullOrWhiteSpace(paramWithNoValueDefault.DefaultIfOptionWithoutValue))
+                    {
+                        // default if option is provided without a value should not be displayed if:
+                        // - it is bool parameter with "DefaultIfOptionWithoutValue": "true"
+                        // - it is not bool parameter (int, string, etc) and default value coincides with "DefaultIfOptionWithoutValue"
+                        if (string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase))
                         {
-                            // the regular default, and the default if the switch is provided without a value
-                            displayValue.AppendLine(string.Format(LocalizableStrings.DefaultValuePlusSwitchWithoutValueDefault, param.DefaultValue, paramWithNoValueDefault.DefaultIfOptionWithoutValue));
-                            anyParamsShowingDefaultForSwitchWithNoValue = true;
+                            if (!string.Equals(paramWithNoValueDefault.DefaultIfOptionWithoutValue, "true", StringComparison.OrdinalIgnoreCase))
+                            {
+                                displayValue.AppendLine(string.Format(LocalizableStrings.DefaultIfOptionWithoutValue, paramWithNoValueDefault.DefaultIfOptionWithoutValue));
+                            }
                         }
                         else
                         {
-                            // only the regular default
-                            displayValue.AppendLine(string.Format(LocalizableStrings.DefaultValue, param.DefaultValue));
+                            if (!string.Equals(paramWithNoValueDefault.DefaultIfOptionWithoutValue, param.DefaultValue, StringComparison.Ordinal))
+                            {
+                                displayValue.AppendLine(string.Format(LocalizableStrings.DefaultIfOptionWithoutValue, paramWithNoValueDefault.DefaultIfOptionWithoutValue));
+                            }
                         }
                     }
 
@@ -239,11 +248,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 }, string.Empty);
 
                 Reporter.Output.WriteLine(formatter.Layout());
-
-                if (anyParamsShowingDefaultForSwitchWithNoValue)
-                {
-                    Reporter.Output.WriteLine(LocalizableStrings.SwitchWithoutValueDefaultFootnote);
-                }
             }
             else
             {
