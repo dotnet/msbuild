@@ -19,12 +19,13 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Utilities;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {
-    public class GivenDotnettestBuildsAndRunsTestfromCsproj : SdkTest
+    public class GivenDotnetTestBuildsAndRunsTestFromCsproj : SdkTest
     {
-        public GivenDotnettestBuildsAndRunsTestfromCsproj(ITestOutputHelper log) : base(log)
+        public GivenDotnetTestBuildsAndRunsTestFromCsproj(ITestOutputHelper log) : base(log)
         {
         }
 
@@ -555,6 +556,29 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             result.ExitCode.Should().Be(1);
         }
+
+        [Fact]
+        public void ItSetsDotnetRootToTheLocationOfDotnetExecutableWhenRunningDotnetTestWithProject()
+        {
+            string testAppName = "VSTestCore";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource()
+                            .WithVersionVariables();
+
+            var testProjectDirectory = testInstance.Path;
+
+            CommandResult result = new DotnetTestCommand(Log)
+                                        .WithWorkingDirectory(testProjectDirectory)
+                                        .Execute(ConsoleLoggerOutputNormal);
+
+            result.ExitCode.Should().Be(1);
+            var dotnet = result.StartInfo.FileName;
+            Path.GetFileNameWithoutExtension(dotnet).Should().Be("dotnet");
+            string dotnetRoot = Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)";
+            result.StartInfo.EnvironmentVariables.ContainsKey(dotnetRoot).Should().BeTrue($"because {dotnetRoot} should be set");
+            result.StartInfo.EnvironmentVariables[dotnetRoot].Should().Be(Path.GetDirectoryName(dotnet));
+        }
+
 
         private string CopyAndRestoreVSTestDotNetCoreTestApp([CallerMemberName] string callingMethod = "")
         {
