@@ -31,6 +31,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefineConstants>$(DefineConstants);$(ImplicitConfigurationDefine)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
-    <DefineConstants>$(DefineConstants);$(VersionlessImplicitFrameworkDefine);$(ImplicitFrameworkDefine)</DefineConstants>
+    <DefineConstants>$(DefineConstants);$(VersionlessImplicitFrameworkDefine);$(ImplicitFrameworkDefine);$(BackwardsCompatFrameworkDefine)</DefineConstants>
   </PropertyGroup>
 </Project>

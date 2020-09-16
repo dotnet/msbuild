@@ -15,10 +15,6 @@ using System.Collections.Generic;
 using System;
 using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using NuGet.ProjectModel;
-using NuGet.Common;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -195,7 +191,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("net45", new[] { "NETFRAMEWORK=-1", "NET45=-1" }, true)]
         [InlineData("net461", new[] { "NETFRAMEWORK=-1", "NET461=-1" }, true)]
         [InlineData("netcoreapp1.0", new[] { "NETCOREAPP=-1", "NETCOREAPP1_0=-1", "_MyType=\"Empty\"" }, false)]
-        [InlineData("net5.0", new[] { "NET=-1", "NET5_0=-1", "NETCOREAPP=-1", "NETCOREAPP3_1=-1", "_MyType=\"Empty\"" }, false)]
+        [InlineData("net5.0", new[] { "NET=-1", "NET5_0=-1", "NETCOREAPP=-1", "_MyType=\"Empty\"" }, false)]
         [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { "_MyType=\"Empty\"" }, false)]
         [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NETFRAMEWORK=-1", "NET40=-1" }, false)]
         [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS=-1", "XAMARINIOS1_0=-1", "_MyType=\"Empty\"" }, false)]
