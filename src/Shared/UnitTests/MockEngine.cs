@@ -495,8 +495,11 @@ namespace Microsoft.Build.UnitTests
             cpuCount ??= Semaphore.OpenExisting("cpuCount");
 
             int coresAcquiredBeforeMoreCoresGetAcquired = runningTotal;
+
+            cpuCount.WaitOne();
+
             // Keep requesting cores until we can't anymore, or we've gotten the number of cores we wanted.
-            for (int i = 0; i < requestedCores; i++)
+            for (int i = 1; i < requestedCores; i++)
             {
                 if (cpuCount.WaitOne(0))
                 {
