@@ -33,8 +33,8 @@ namespace Microsoft.Build.BuildEngine
             if (taskExecutionModule == null)
             {
                 taskExecutionModule = new TaskExecutionModule(parentEngine.EngineCallback,
-                    (cpuCount == 1 && !childMode ? TaskExecutionModule.TaskExecutionModuleMode.SingleProcMode :
-                                                   TaskExecutionModule.TaskExecutionModuleMode.MultiProcFullNodeMode), parentEngine.ProfileBuild);
+                    cpuCount == 1 && !childMode ? TaskExecutionModule.TaskExecutionModuleMode.SingleProcMode :
+                                                   TaskExecutionModule.TaskExecutionModuleMode.MultiProcFullNodeMode, parentEngine.ProfileBuild);
             }
         }
         #endregion
@@ -50,7 +50,7 @@ namespace Microsoft.Build.BuildEngine
         /// <returns></returns>
         internal bool RegisterNodeProvider(INodeProvider nodeProviderToRegister)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(nodeProviderToRegister,"nodeProviderToRegister");
+            ErrorUtilities.VerifyThrowArgumentNull(nodeProviderToRegister, nameof(nodeProviderToRegister));
 
             INodeDescription[] nodeDescriptions = nodeProviderToRegister.QueryNodeDescriptions();
 
@@ -135,7 +135,7 @@ namespace Microsoft.Build.BuildEngine
                     // Calculate the time remaining and only continue if there is time left
                     TimeSpan timeSpent = new TimeSpan(DateTime.Now.Ticks - startTime);
                     startTime = DateTime.Now.Ticks;
-                    responseTimeout = responseTimeout - (int)timeSpent.TotalMilliseconds;
+                    responseTimeout -= (int)timeSpent.TotalMilliseconds;
                     if (responseTimeout <= 0)
                     {
                         Console.WriteLine("Response time out out exceeded :" + DateTime.Now.Ticks);
@@ -152,7 +152,6 @@ namespace Microsoft.Build.BuildEngine
 
             return statusForNodes;
         }
-
 
         internal void PostNodeStatus(int nodeId, NodeStatus nodeStatus)
         {
@@ -173,7 +172,6 @@ namespace Microsoft.Build.BuildEngine
             statusReplyCount++;
             statusMessageReceived.Set();
         }
-
 
         internal void PostCycleNotification
         (

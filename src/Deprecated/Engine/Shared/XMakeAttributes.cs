@@ -75,12 +75,11 @@ namespace Microsoft.Build.BuildEngine.Shared
             //  Condition, ContinueOnError
             //
             // We want to match case-sensitively on all of them
-            return ((attribute == condition) ||
+            return (attribute == condition) ||
                     (attribute == continueOnError) ||
                     (attribute == msbuildRuntime) ||
                     (attribute == msbuildArchitecture) ||
-                    (attribute == xmlns));
-
+                    (attribute == xmlns);
         }
 
         /// <summary>
@@ -91,11 +90,11 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>true, if the given attribute is reserved and badly cased</returns>
         internal static bool IsBadlyCasedSpecialTaskAttribute(string attribute)
         {
-            return (!IsSpecialTaskAttribute(attribute) &&
-                ((String.Compare(attribute, condition, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(attribute, continueOnError, StringComparison.OrdinalIgnoreCase) == 0) || 
-                (String.Compare(attribute, msbuildRuntime, StringComparison.OrdinalIgnoreCase) == 0) || 
-                (String.Compare(attribute, msbuildArchitecture, StringComparison.OrdinalIgnoreCase) == 0)));
+            return !IsSpecialTaskAttribute(attribute) &&
+                ((String.Equals(attribute, condition, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(attribute, continueOnError, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(attribute, msbuildRuntime, StringComparison.OrdinalIgnoreCase)) ||
+                (String.Equals(attribute, msbuildArchitecture, StringComparison.OrdinalIgnoreCase)));
         }
 
         /// <summary>
@@ -106,9 +105,9 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>true, if a target cannot batch on the given attribute</returns>
         internal static bool IsNonBatchingTargetAttribute(string attribute)
         {
-            return ((attribute == name) ||
+            return (attribute == name) ||
                     (attribute == condition) ||
-                    (attribute == dependsOnTargets));
+                    (attribute == dependsOnTargets);
         }
     }
 }

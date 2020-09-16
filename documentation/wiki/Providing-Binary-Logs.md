@@ -9,3 +9,6 @@ However, you should be aware what type of information is captured in the binary 
 You can create a binary log by passing the `-bl` parameter to MSBuild.  You can explore the contents of the generated .binlog file using [MSBuild Structured Log Viewer](http://msbuildlog.com/).
 
 [More details about binary logs](Binary-Log.md)
+
+## Capturing Binary Logs Through Visual Studio
+See [this guide](https://github.com/dotnet/project-system-tools) in the Project System Tools repo for capturing binlogs through Visual Studio.

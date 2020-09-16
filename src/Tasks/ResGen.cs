@@ -457,7 +457,7 @@ namespace Microsoft.Build.Tasks
             /// <returns>True if the array is null or has length zero</returns>
             private static bool IsNullOrEmpty(ITaskItem[] value)
             {
-                return (value == null || value.Length == 0);
+                return value == null || value.Length == 0;
             }
 
             /// <summary>
@@ -538,7 +538,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             private void GenerateResGenCommands(CommandLineBuilderExtension resGenArguments, bool useForResponseFile)
             {
-                resGenArguments = resGenArguments ?? new CommandLineBuilderExtension();
+                resGenArguments ??= new CommandLineBuilderExtension();
 
                 if (IsNullOrEmpty(OutputFiles))
                 {
@@ -577,7 +577,7 @@ namespace Microsoft.Build.Tasks
                     resGenArguments.AppendSwitch("/compile" + (useForResponseFile ? "\n" : String.Empty));
 
                     // append the resources to compile
-                    if (InputFiles != null && InputFiles.Length > 0)
+                    if (InputFiles?.Length > 0)
                     {
                         ITaskItem[] inputFiles = InputFiles;
                         ITaskItem[] outputFiles = OutputFiles;

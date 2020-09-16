@@ -327,7 +327,7 @@ namespace Microsoft.Build.Tasks
 
             _timestampCache = (ResolveComReferenceCache)StateFileBase.DeserializeCache(StateFile, Log, typeof(ResolveComReferenceCache));
 
-            if (_timestampCache == null || (_timestampCache != null && !_timestampCache.ToolPathsMatchCachePaths(_tlbimpPath, _aximpPath)))
+            if (_timestampCache?.ToolPathsMatchCachePaths(_tlbimpPath, _aximpPath) != true)
             {
                 if (!Silent)
                 {
@@ -442,7 +442,7 @@ namespace Microsoft.Build.Tasks
             }
             finally
             {
-                if ((_timestampCache != null) && _timestampCache.Dirty)
+                if ((_timestampCache?.Dirty == true))
                 {
                     _timestampCache.SerializeCache(StateFile, Log);
                 }
@@ -490,7 +490,7 @@ namespace Microsoft.Build.Tasks
             {
                 _tlbimpPath = GetPathToSDKFileWithCurrentlyTargetedArchitecture("TlbImp.exe", TargetDotNetFrameworkVersion.Version35, VisualStudioVersion.VersionLatest);
 
-                if (null == _tlbimpPath && ExecuteAsTool)
+                if (_tlbimpPath == null && ExecuteAsTool)
                 {
                     Log.LogErrorWithCodeFromResources("General.PlatformSDKFileNotFound", "TlbImp.exe",
                         ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version35, VisualStudioVersion.VersionLatest),
@@ -502,7 +502,7 @@ namespace Microsoft.Build.Tasks
                 _tlbimpPath = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, TargetProcessorArchitecture, SdkToolsPath, "TlbImp.exe", Log, ExecuteAsTool);
             }
 
-            if (null == _tlbimpPath && !ExecuteAsTool)
+            if (_tlbimpPath == null && !ExecuteAsTool)
             {
                 // if TlbImp.exe is not installed, just use the filename
                 _tlbimpPath = "TlbImp.exe";
@@ -539,7 +539,7 @@ namespace Microsoft.Build.Tasks
                 // We want to use the copy of AxImp corresponding to our targeted architecture if possible.  
                 _aximpPath = GetPathToSDKFileWithCurrentlyTargetedArchitecture("AxImp.exe", targetAxImpVersion, VisualStudioVersion.VersionLatest);
 
-                if (null == _aximpPath)
+                if (_aximpPath == null)
                 {
                     Log.LogErrorWithCodeFromResources("General.PlatformSDKFileNotFound", "AxImp.exe",
                         ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(targetAxImpVersion, VisualStudioVersion.VersionLatest),
@@ -1165,7 +1165,7 @@ namespace Microsoft.Build.Tasks
 
             for (int i = 0; i < ResolvedAssemblyReferences.GetLength(0); i++)
             {
-                if (String.Compare(Path.GetFileName(ResolvedAssemblyReferences[i].ItemSpec), assemblyName, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals(Path.GetFileName(ResolvedAssemblyReferences[i].ItemSpec), assemblyName, StringComparison.OrdinalIgnoreCase))
                 {
                     assemblyPath = ResolvedAssemblyReferences[i].ItemSpec;
                     return true;
@@ -1308,6 +1308,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="outputDirectory">Directory the interop DLL should be written to</param>
         /// <param name="refName">Name of reference</param>
         /// <param name="topLevelRef">True if this is a top-level reference</param>
+        /// <param name="dependencyPaths">List of dependency paths for that reference</param>
         /// <param name="wrapperInfo">Information about wrapper locations</param>
         /// <returns>True if the reference was already found or successfully generated, false otherwise.</returns>
         internal bool ResolveComReferenceTlb(ComReferenceInfo referenceInfo, string outputDirectory, string refName, bool topLevelRef, List<string> dependencyPaths, out ComReferenceWrapperInfo wrapperInfo)
@@ -1333,7 +1334,7 @@ namespace Microsoft.Build.Tasks
                     {
                         // conflicting typelib names for different typelibs? generate a temporary wrapper
                         if (!ComReference.AreTypeLibAttrEqual(referenceInfo.attr, projectRefInfo.attr) &&
-                            String.Compare(referenceInfo.typeLibName, projectRefInfo.typeLibName, StringComparison.OrdinalIgnoreCase) == 0)
+                            String.Equals(referenceInfo.typeLibName, projectRefInfo.typeLibName, StringComparison.OrdinalIgnoreCase))
                         {
                             isTemporary = true;
                         }
@@ -1619,7 +1620,7 @@ namespace Microsoft.Build.Tasks
                 if (_projectTargetFramework != null && (_projectTargetFramework >= s_targetFrameworkVersion_40))
                 {
                     if ((embedInteropTypesMetadata != null) &&
-                        (String.Compare(embedInteropTypesMetadata, "true", StringComparison.OrdinalIgnoreCase) == 0))
+                        (String.Equals(embedInteropTypesMetadata, "true", StringComparison.OrdinalIgnoreCase)))
                     {
                         // Embed Interop Types forces CopyLocal to false
                         taskItem.SetMetadata(ItemMetadataNames.copyLocal, "false");
@@ -1631,7 +1632,7 @@ namespace Microsoft.Build.Tasks
 
                 // if Private is not set on the original item, we set CopyLocal to false for GAC items 
                 // and true for non-GAC items
-                if ((privateMetadata == null) || (privateMetadata.Length == 0))
+                if (string.IsNullOrEmpty(privateMetadata))
                 {
                     if (String.Compare(taskItem.ItemSpec, 0, gacPath, 0, gacPath.Length, StringComparison.OrdinalIgnoreCase) == 0)
                     {

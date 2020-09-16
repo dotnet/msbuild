@@ -15,6 +15,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Compare numerically
         /// </summary>
+        /// <param name="left">left input</param>
+        /// <param name="right">right input</param>
+        /// <returns>true if right is higher than left, false otherwise</returns>
         protected override bool Compare(double left, double right)
         {
             return left < right;
@@ -23,7 +26,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Compare Versions. This is only intended to compare version formats like "A.B.C.D" which can otherwise not be compared numerically
         /// </summary>
-        /// <returns></returns>
+        /// <param name="left">left version</param>
+        /// <param name="right">right version</param>
+        /// <returns>true if right version is higher than left, false otherwise</returns>
         protected override bool Compare(Version left, Version right)
         {
             return left < right;
@@ -32,6 +37,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Compare mixed numbers and Versions
         /// </summary>
+        /// <param name="left">left version</param>
+        /// <param name="right">right number</param>
+        /// <returns>true if right is higher than major version of left, false otherwise</returns>
         protected override bool Compare(Version left, double right)
         {
             if (left.Major != right)
@@ -47,6 +55,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Compare mixed numbers and Versions
         /// </summary>
+        /// <param name="left">left number</param>
+        /// <param name="right">right version</param>
+        /// <returns>true if the major version of right is higher than left, false otherwise</returns>
         protected override bool Compare(double left, Version right)
         {
             if (right.Major != left)

@@ -464,8 +464,6 @@ namespace Microsoft.Build.BuildEngine
             // any more.
             while (propertyStartIndex != -1)
             {
-                bool tryExtractPropertyFunction = false;
-                bool tryExtractRegistryFunction = false;
 
                 // Append the targetString with the portion of the sourceString up to
                 // (but not including) the "$(", and advance the sourceIndex pointer.
@@ -473,8 +471,9 @@ namespace Microsoft.Build.BuildEngine
                 {
                     results.Add(expression.Substring(sourceIndex, propertyStartIndex - sourceIndex));
                 }
-                sourceIndex = propertyStartIndex;
 
+                bool tryExtractPropertyFunction;
+                bool tryExtractRegistryFunction;
                 // Following the "$(" we need to locate the matching ')'
                 // Scan for the matching closing bracket, skipping any nested ones
                 // This is a very complete, fast validation of parenthesis matching including for nested
@@ -655,8 +654,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private static int ScanForClosingParenthesis(string expression, int index)
         {
-            bool potentialPropertyFunction = false;
-            bool potentialRegistryFunction = false;
+            bool potentialPropertyFunction;
+            bool potentialRegistryFunction;
             return ScanForClosingParenthesis(expression, index, out potentialPropertyFunction, out potentialRegistryFunction);
         }
 
@@ -907,7 +906,7 @@ namespace Microsoft.Build.BuildEngine
                     object valueFromRegistry = Registry.GetValue(registryKeyName,
                                                                  valueName,
                                                                  null /* default if key or value name is not found */);
-                    if (null != valueFromRegistry)
+                    if (valueFromRegistry != null)
                     {
                         // Convert the result to a string that is reasonable for MSBuild
                         result = ConvertToString(valueFromRegistry);
@@ -1042,7 +1041,7 @@ namespace Microsoft.Build.BuildEngine
                 // First we'll see if there is a static function being called
                 // A static method is the content that follows the last "::", the rest being
                 // the type
-                int methodStartIndex = -1;
+                int methodStartIndex;
 
                 // This is a static method call
                 if (expressionRoot[0] == '[')
@@ -1129,8 +1128,6 @@ namespace Microsoft.Build.BuildEngine
             /// </summary>
             public object Execute(Expander expander, object objectInstance, BuildPropertyGroup properties, ExpanderOptions options)
             {
-                object functionResult = String.Empty;
-
                 object[] args = null;
 
                 try
@@ -1190,7 +1187,8 @@ namespace Microsoft.Build.BuildEngine
                         // change the type of the final unescaped string into the destination
                         args[0] = Convert.ChangeType(args[0], objectInstance.GetType(), CultureInfo.InvariantCulture);
                     }
-                    
+
+                    object functionResult;
                     // If we've been asked for and instance to be constructed, then we
                     // need to locate an appropriate constructor and invoke it
                     if (String.Equals("new", this.name, StringComparison.OrdinalIgnoreCase))
@@ -1429,20 +1427,15 @@ namespace Microsoft.Build.BuildEngine
             {
                 string baseName = typeName;
                 int assemblyNameEnd = baseName.LastIndexOf('.');
-                Type foundType = null;
-
                 ErrorUtilities.VerifyThrow(assemblyNameEnd > 0, "Invalid typename: {0}", typeName);
 
                 // We will work our way up the namespace looking for an assembly that matches
                 while (assemblyNameEnd > 0)
                 {
-                    string candidateAssemblyName = null;
-
-                    candidateAssemblyName = baseName.Substring(0, assemblyNameEnd);
+                    string candidateAssemblyName = baseName.Substring(0, assemblyNameEnd);
 
                     // Try to load the assembly with the computed name
-                    foundType = GetTypeFromAssembly(typeName, candidateAssemblyName);
-
+                    Type foundType = GetTypeFromAssembly(typeName, candidateAssemblyName);
                     if (foundType != null)
                     {
                         // We have a match, so get the type from that assembly
@@ -1459,7 +1452,6 @@ namespace Microsoft.Build.BuildEngine
                 // We didn't find it, so we need to give up
                 return null;
             }
-
 
             /// <summary>
             /// Get the specified type from the assembly partial name supplied
@@ -1526,7 +1518,6 @@ namespace Microsoft.Build.BuildEngine
                     // It may be that there are '()' but no actual arguments content
                     if (argumentStartIndex == expressionFunction.Length - 1)
                     {
-                        argumentsContent = String.Empty;
                         functionArguments = new string[0];
                     }
                     else
@@ -1594,7 +1585,7 @@ namespace Microsoft.Build.BuildEngine
             private static string[] ExtractFunctionArguments(string expressionFunction, string argumentsContent)
             {
                 List<string> arguments = new List<string>();
-                StringBuilder argumentBuilder = new StringBuilder(argumentsContent.Length); ;
+                StringBuilder argumentBuilder = new StringBuilder(argumentsContent.Length); 
 
                 // Iterate over the contents of the arguments extracting the
                 // the individual arguments as we go
@@ -1611,18 +1602,18 @@ namespace Microsoft.Build.BuildEngine
 
                         ProjectErrorUtilities.VerifyThrowInvalidProject(n != 0, null, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
-                        argumentBuilder.Append(argumentsContent.Substring(nestedPropertyStart, (n - nestedPropertyStart) + 1));
+                        argumentBuilder.Append(argumentsContent, nestedPropertyStart, (n - nestedPropertyStart) + 1);
                     }
                     else if (argumentsContent[n] == '`' || argumentsContent[n] == '"' || argumentsContent[n] == '\'')
                     {
                         int quoteStart = n;
-                        n += 1; // skip over the opening quote
+                        n++; // skip over the opening quote
 
                         n = ScanForClosingQuote(argumentsContent[quoteStart], argumentsContent, n);
 
                         ProjectErrorUtilities.VerifyThrowInvalidProject(n != 0, null, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
-                        argumentBuilder.Append(argumentsContent.Substring(quoteStart, (n - quoteStart) + 1));
+                        argumentBuilder.Append(argumentsContent, quoteStart, (n - quoteStart) + 1);
                     }
                     else if (argumentsContent[n] == ',')
                     {
@@ -1672,12 +1663,12 @@ namespace Microsoft.Build.BuildEngine
                 // If we don't have something that can be treated as an argument
                 // then we should treat it as a null so that passing nulls
                 // becomes possible through an empty argument between commas.
-                ErrorUtilities.VerifyThrowArgumentNull(argumentBuilder, "argumentBuilder");
+                ErrorUtilities.VerifyThrowArgumentNull(argumentBuilder, nameof(argumentBuilder));
                 // we reached the end of an argument, add the builder's final result
                 // to our arguments. 
                 string argValue = argumentBuilder.ToString().Trim();
                 // We support passing of null through the argument constant value null
-                if (String.Compare("null", argValue, StringComparison.OrdinalIgnoreCase) == 0)
+                if (String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
                 {
                     arguments.Add(null);
                 }
@@ -1784,9 +1775,6 @@ namespace Microsoft.Build.BuildEngine
             /// </summary>
             private object LateBindExecute(Exception ex, BindingFlags bindingFlags, object objectInstance /* null unless instance method */, object[] args, bool isConstructor)
             {
-                ParameterInfo[] parameters = null;
-                MethodBase[] members = null;
-                MethodBase memberInfo = null;
 
                 // First let's try for a method where all arguments are strings..
                 Type[] types = new Type[arguments.Length];
@@ -1795,6 +1783,7 @@ namespace Microsoft.Build.BuildEngine
                     types[n] = typeof(string);
                 }
 
+                MethodBase memberInfo;
                 if (isConstructor)
                 {
                     memberInfo = objectType.GetConstructor(bindingFlags, null, types, null);
@@ -1808,6 +1797,7 @@ namespace Microsoft.Build.BuildEngine
                 // search for a method with the right number of arguments
                 if (memberInfo == null)
                 {
+                    MethodBase[] members;
                     // Gather all methods that may match
                     if (isConstructor)
                     {
@@ -1818,22 +1808,21 @@ namespace Microsoft.Build.BuildEngine
                         members = objectType.GetMethods(bindingFlags);
                     }
 
-                    // Try to find a method with the right name, number of arguments and
-                    // compatible argument types
-                    object[] coercedArguments = null;
                     foreach (MethodBase member in members)
                     {
-                        parameters = member.GetParameters();
+                        ParameterInfo[] parameters = member.GetParameters();
 
                         // Simple match on name and number of params, we will be case insensitive
                         if (parameters.Length == this.arguments.Length)
                         {
                             if (isConstructor || String.Equals(member.Name, this.name, StringComparison.OrdinalIgnoreCase))
                             {
+                                // Try to find a method with the right name, number of arguments and
+                                // compatible argument types
                                 // we have a match on the name and argument number
                                 // now let's try to coerce the arguments we have
                                 // into the arguments on the matching method
-                                coercedArguments = CoerceArguments(args, parameters);
+                                object[] coercedArguments = CoerceArguments(args, parameters);
 
                                 if (coercedArguments != null)
                                 {

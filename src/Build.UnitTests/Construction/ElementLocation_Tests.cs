@@ -493,9 +493,7 @@ namespace Microsoft.Build.UnitTests.Construction
                     }
                 }
 
-                locations = locations.Replace(file, "c:\\foo\\bar.csproj");
-
-                return locations;
+                return locations.Replace(file, "c:\\foo\\bar.csproj");
             }
             finally
             {

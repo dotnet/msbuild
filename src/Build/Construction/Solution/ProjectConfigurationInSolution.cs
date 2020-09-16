@@ -10,7 +10,6 @@ namespace Microsoft.Build.Construction
     /// </summary>
     public sealed class ProjectConfigurationInSolution
     {
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -52,7 +51,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static string RemoveSpaceFromAnyCpuPlatform(string platformName)
         {
-            if (string.Compare(platformName, "Any CPU", StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(platformName, "Any CPU", StringComparison.OrdinalIgnoreCase))
             {
                 return "AnyCPU";
             }

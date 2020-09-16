@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO.Pipes;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
@@ -24,6 +25,7 @@ using Microsoft.Build.BackEnd.Components.Caching;
 using System.Reflection;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.BackEnd.Components.ResourceManager;
+using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -35,7 +37,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine7
+        IBuildEngine7, IRarBuildEngine
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set.
@@ -115,9 +117,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="targetBuilderCallback">An <see cref="ITargetBuilderCallback"/> to use to invoke targets and build projects.</param>
         public TaskHost(IBuildComponentHost host, BuildRequestEntry requestEntry, ElementLocation taskLocation, ITargetBuilderCallback targetBuilderCallback)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
-            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, "requestEntry");
-            ErrorUtilities.VerifyThrowInternalNull(taskLocation, "taskLocation");
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, nameof(requestEntry));
+            ErrorUtilities.VerifyThrowInternalNull(taskLocation, nameof(taskLocation));
 
             _host = host;
             _requestEntry = requestEntry;
@@ -394,7 +396,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+                ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
                 if (!_activeProxy)
                 {
@@ -465,7 +467,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+                ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
                 if (!_activeProxy)
                 {
@@ -506,7 +508,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+                ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
                 if (!_activeProxy)
                 {
@@ -547,7 +549,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+                ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
                 if (!_activeProxy)
                 {
@@ -638,7 +640,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(eventName, "eventName");
+                ErrorUtilities.VerifyThrowArgumentNull(eventName, nameof(eventName));
 
                 if (!_activeProxy)
                 {
@@ -742,8 +744,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public async Task<BuildEngineResult> InternalBuildProjects(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, "projectFileNames");
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, "globalProperties");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, nameof(projectFileNames));
+            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
             VerifyActiveProxy();
 
             BuildEngineResult result;
@@ -874,10 +876,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     ILease lease = (ILease)RemotingServices.GetLifetimeService(this);
 
-                    if (lease != null)
-                    {
-                        lease.Unregister(_sponsor);
-                    }
+                    lease?.Unregister(_sponsor);
 
                     _sponsor.Close();
                     _sponsor = null;
@@ -914,8 +913,8 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A Task returning a structure containing the result of the build, success or failure and the list of target outputs per project</returns>
         private async Task<BuildEngineResult> BuildProjectFilesInParallelAsync(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, "projectFileNames");
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, "globalProperties");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, nameof(projectFileNames));
+            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
             VerifyActiveProxy();
 
             List<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = null;
@@ -999,10 +998,7 @@ namespace Microsoft.Build.BackEnd
                     // Now walk through the results, and report that subset which was asked for.
                     for (int i = 0; i < results.Length; i++)
                     {
-                        if (targetOutputsPerProject != null)
-                        {
-                            targetOutputsPerProject.Add(new Dictionary<string, ITaskItem[]>(StringComparer.OrdinalIgnoreCase));
-                        }
+                        targetOutputsPerProject?.Add(new Dictionary<string, ITaskItem[]>(StringComparer.OrdinalIgnoreCase));
 
                         foreach (KeyValuePair<string, TargetResult> resultEntry in results[i].ResultsByTarget)
                         {
@@ -1037,7 +1033,7 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
 
-                    ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length || overallSuccess == false, "The number of results returned {0} cannot be less than the number of project files {1} unless one of the results indicated failure.", results.Length, projectFileNames.Length);
+                    ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length || !overallSuccess, "The number of results returned {0} cannot be less than the number of project files {1} unless one of the results indicated failure.", results.Length, projectFileNames.Length);
                 }
 
                 BuildRequestsSucceeded = overallSuccess;
@@ -1052,7 +1048,36 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void VerifyActiveProxy()
         {
-            ErrorUtilities.VerifyThrow(_activeProxy == true, "Attempted to use an inactive task host.");
+            ErrorUtilities.VerifyThrow(_activeProxy, "Attempted to use an inactive task host.");
+        }
+
+        /// <summary>
+        /// Initialize new RAR node
+        /// </summary>
+        bool IRarBuildEngine.CreateRarNode()
+        {
+            return BuildManager.DefaultBuildManager.CreateRarNode();
+        }
+
+        /// <summary>
+        /// Provides RAR node name for current configuration
+        /// </summary>
+        string IRarBuildEngine.GetRarPipeName()
+        {
+            BuildParameters parameters = _host.BuildParameters;
+            return CommunicationsUtilities.GetRarPipeName(parameters.EnableNodeReuse, parameters.LowPriority);
+        }
+
+        /// <summary>
+        /// Constructs <seealso cref="NamedPipeClientStream"/>
+        /// </summary>
+        NamedPipeClientStream IRarBuildEngine.GetRarClientStream(string pipeName, int timeout)
+        {
+            BuildParameters parameters = _host.BuildParameters;
+            Handshake handshake = NodeProviderOutOfProc.GetHandshake(enableNodeReuse: parameters.EnableNodeReuse,
+                                                         enableLowPriority: parameters.LowPriority, specialNode: true);
+
+            return NamedPipeUtil.TryConnectToProcess(pipeName, timeout, handshake);
         }
     }
 }

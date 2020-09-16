@@ -128,7 +128,7 @@ namespace Microsoft.Build.Construction
         {
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(key, "key");
+                ErrorUtilities.VerifyThrowArgumentNull(key, nameof(key));
 
                 if (key.Length == 0)
                 {
@@ -155,7 +155,7 @@ namespace Microsoft.Build.Construction
         {
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(document, "document");
+                ErrorUtilities.VerifyThrowArgumentNull(document, nameof(document));
 
                 VerifyState();
 
@@ -215,7 +215,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         private void OnStrongCacheEntryRemoved(object sender, ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, "projectRootElement");
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
             Clear(projectRootElement.XmlDocument);
         }
 

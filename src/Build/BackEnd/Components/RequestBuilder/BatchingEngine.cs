@@ -127,12 +127,12 @@ namespace Microsoft.Build.BackEnd
             Dictionary<string, MetadataReference> consumedMetadataReferences = pair.Metadata;
 
             List<ItemBucket> buckets = null;
-            if (consumedMetadataReferences != null && consumedMetadataReferences.Count > 0)
+            if (consumedMetadataReferences?.Count > 0)
             {
                 // Add any item types that we were explicitly told to assume.
                 if (implicitBatchableItemType != null)
                 {
-                    consumedItemReferences = consumedItemReferences ?? new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
+                    consumedItemReferences ??= new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
                     consumedItemReferences.Add(implicitBatchableItemType);
                 }
 
@@ -232,7 +232,7 @@ namespace Microsoft.Build.BackEnd
                     // in the tag anywhere.  Adding it to this list allows us (down below in this
                     // method) to check that every item in this list has a value for each 
                     // unqualified metadata reference.
-                    consumedItemReferenceNames = consumedItemReferenceNames ?? new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
+                    consumedItemReferenceNames ??= new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
                     consumedItemReferenceNames.Add(consumedMetadataReference.ItemName);
                 }
             }
@@ -335,7 +335,7 @@ namespace Microsoft.Build.BackEnd
 
                         // If we didn't find a bucket that matches this item, create a new one, adding
                         // this item to the bucket.
-                        if (null == matchingBucket)
+                        if (matchingBucket == null)
                         {
                             matchingBucket = new ItemBucket(itemListsToBeBatched.Keys, itemMetadataValues, lookup, buckets.Count);
 
@@ -395,7 +395,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (
                         (metadataItemName != null) &&
-                        (0 != String.Compare(item.ItemType, metadataItemName, StringComparison.OrdinalIgnoreCase))
+                        (!String.Equals(item.ItemType, metadataItemName, StringComparison.OrdinalIgnoreCase))
                     )
                 {
                     itemMetadataValues[metadataQualifiedName] = String.Empty;

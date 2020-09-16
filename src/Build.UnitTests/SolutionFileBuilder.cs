@@ -112,7 +112,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     Guid.NewGuid()
                         .ToString("B")));
 
-            if (SolutionDependencies != null && SolutionDependencies.Length > 0)
+            if (SolutionDependencies?.Length > 0)
             {
                 foreach (var (parent, dependency) in SolutionDependencies)
                 {
@@ -123,7 +123,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 }
             }
 
-            if (SolutionDependenciesProjectNameToGuids!= null && SolutionDependenciesProjectNameToGuids.Length > 0)
+            if (SolutionDependenciesProjectNameToGuids?.Length > 0)
             {
                 foreach (var (parent, dependencyGuids) in SolutionDependenciesProjectNameToGuids)
                 {
@@ -132,7 +132,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 }
             }
 
-            ProjectConfigurations = ProjectConfigurations ?? projectInfos.ToDictionary(
+            ProjectConfigurations ??= projectInfos.ToDictionary(
                 p => p.Key,
                 p => SolutionConfigurationPlatforms.ToDictionary(
                     sc => sc,
@@ -153,27 +153,27 @@ MinimumVisualStudioVersion = 10.0.40219.1");
 
             foreach (var project in projectInfos.Values)
             {
-                sb.AppendLine($@"
-Project(""{project.ProjectTypeGuid}"") = ""{project.Name}"", ""{project.Path}"", ""{project.Guid}""");
+                sb.Append(@"
+Project(""").Append(project.ProjectTypeGuid).Append(@""") = """).Append(project.Name).Append(@""", """).Append(project.Path).Append(@""", """).Append(project.Guid).AppendLine(@"""");
 
                 if (project.Dependencies.Count > 0 || project.DependencyGuids.Count > 0)
                 {
-                    sb.AppendLine($"\tProjectSection(ProjectDependencies) = postProject");
+                    sb.AppendLine("\tProjectSection(ProjectDependencies) = postProject");
 
                     foreach (var dependency in project.Dependencies)
                     {
-                        sb.AppendLine($"\t\t{dependency.Guid} = {dependency.Guid}");
+                        sb.Append("\t\t").Append(dependency.Guid).Append(" = ").AppendLine(dependency.Guid);
                     }
 
                     foreach (var dependencyGuid in project.DependencyGuids)
                     {
-                        sb.AppendLine($"\t\t{dependencyGuid} = {dependencyGuid}");
+                        sb.Append("\t\t").Append(dependencyGuid).Append(" = ").AppendLine(dependencyGuid);
                     }
 
-                    sb.AppendLine($"\tEndProjectSection");
+                    sb.AppendLine("\tEndProjectSection");
                 }
 
-                sb.AppendLine($@"
+                sb.AppendLine(@"
 EndProject");
             }
 
@@ -183,7 +183,7 @@ EndProject");
 
             foreach (var solutionConfigurationPlatform in SolutionConfigurationPlatforms)
             {
-                sb.AppendLine($"\t\t{solutionConfigurationPlatform.FullName} = {solutionConfigurationPlatform.FullName}");
+                sb.Append("\t\t").Append(solutionConfigurationPlatform.FullName).Append(" = ").AppendLine(solutionConfigurationPlatform.FullName);
             }
 
             sb.AppendLine("\tEndGlobalSection");
@@ -196,8 +196,8 @@ EndProject");
                 {
                     var solutionConfiguration = configurationMapping.Key;
                     var projectConfiguration = configurationMapping.Value;
-                    sb.AppendLine($"\t\t{project.Value.Guid}.{solutionConfiguration.FullName}.ActiveCfg = {projectConfiguration.FullName}");
-                    sb.AppendLine($"\t\t{project.Value.Guid}.{solutionConfiguration.FullName}.Build.0 = {projectConfiguration.FullName}");
+                    sb.Append("\t\t").Append(project.Value.Guid).Append('.').Append(solutionConfiguration.FullName).Append(".ActiveCfg = ").AppendLine(projectConfiguration.FullName);
+                    sb.Append("\t\t").Append(project.Value.Guid).Append('.').Append(solutionConfiguration.FullName).Append(".Build.0 = ").AppendLine(projectConfiguration.FullName);
                 }
             }
 

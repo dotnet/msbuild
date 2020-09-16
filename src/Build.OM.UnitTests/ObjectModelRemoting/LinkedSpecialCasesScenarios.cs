@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
-
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -80,14 +79,13 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public MyTestCollectionGroup StdGroup { get; }
         public LinkedSpecialCasesScenarios(MyTestCollectionGroup group)
         {
-
             this.StdGroup = group;
             group.ResetBeforeTests();
         }
 
         private ProjectPair GetNewInMemoryProject(string path, string content = null)
         {
-            content = content ?? TestCollectionGroup.SampleProjectFile;
+            content ??= TestCollectionGroup.SampleProjectFile;
             var tempPath = this.StdGroup.Disk.GetAbsolutePath(path);
             var newReal = this.StdGroup.Target.LoadInMemoryWithSettings(content, ProjectLoadSettings.IgnoreMissingImports);
             newReal.Xml.FullPath = tempPath;
@@ -110,11 +108,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             xmlPair.View.Save();
             Assert.False(xmlPair.View.HasUnsavedChanges);
 
-            sourceProject = sourceProject ?? xmlPair.View;
+            sourceProject ??= xmlPair.View;
 
 
             // var existingItemGroup1 = sourceProject.QuerySingleChildrenWithValidation<ProjectItemGroupElement>((ig) => ig.Label == "Group1");
-            var existingItemGroupList = sourceProject.AllChildren.OfType<ProjectItemGroupElement>().Where(((ig) => ig.Label == "Group1")).ToList();
+            var existingItemGroupList = sourceProject.AllChildren.OfType<ProjectItemGroupElement>().Where((ig) => ig.Label == "Group1").ToList();
             Assert.Single(existingItemGroupList);
             var existingItemGroup = existingItemGroupList[0];
 
@@ -164,9 +162,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             xmlPair.View.Save();
             Assert.False(xmlPair.View.HasUnsavedChanges);
 
-            sourceProject = sourceProject ?? xmlPair.View;
+            sourceProject ??= xmlPair.View;
 
-            var existingItemGroupList = sourceProject.AllChildren.OfType<ProjectItemGroupElement>().Where(((ig) => ig.Label == "Group1")).ToList();
+            var existingItemGroupList = sourceProject.AllChildren.OfType<ProjectItemGroupElement>().Where((ig) => ig.Label == "Group1").ToList();
             Assert.Single(existingItemGroupList);
             var existingItemGroup = existingItemGroupList[0];
             Assert.NotNull(existingItemGroup);

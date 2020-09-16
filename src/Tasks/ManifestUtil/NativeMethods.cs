@@ -12,6 +12,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static readonly IntPtr RT_MANIFEST = new IntPtr(24);
         [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern IntPtr LoadLibraryExW(string strFileName, IntPtr hFile, UInt32 ulFlags);
+        [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern int SetDllDirectoryW(string strPathName);
         [DllImport("Kernel32.dll", SetLastError = true)]
         public static extern bool FreeLibrary(IntPtr hModule);
         [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]

@@ -100,7 +100,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         private NodeEndpointInProc(EndpointMode commMode, IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
 
             _status = LinkStatus.Inactive;
             _mode = commMode;
@@ -161,7 +161,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">Unused</param>
         public void Listen(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrowInternalNull(factory, "factory");
+            ErrorUtilities.VerifyThrowInternalNull(factory, nameof(factory));
             _packetFactory = factory;
 
             // Initialize our thread in async mode so we are ready when the Node-side endpoint "connects".
@@ -179,7 +179,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">Unused</param>
         public void Connect(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrowInternalNull(factory, "factory");
+            ErrorUtilities.VerifyThrowInternalNull(factory, nameof(factory));
             _packetFactory = factory;
 
             // Set up asynchronous packet pump, if necessary.
@@ -252,7 +252,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newStatus">The new status of the endpoint link.</param>
         private void RaiseLinkStatusChanged(LinkStatus newStatus)
         {
-            if (null != OnLinkStatusChanged)
+            if (OnLinkStatusChanged != null)
             {
                 LinkStatusChangedDelegate linkStatusDelegate = OnLinkStatusChanged;
                 linkStatusDelegate(this, newStatus);
@@ -324,10 +324,10 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to be transmitted.</param>
         private void EnqueuePacket(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, "packet");
+            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
             ErrorUtilities.VerifyThrow(_mode == EndpointMode.Asynchronous, "EndPoint mode is synchronous, should be asynchronous");
-            ErrorUtilities.VerifyThrow(null != _packetQueue, "packetQueue is null");
-            ErrorUtilities.VerifyThrow(null != _packetAvailable, "packetAvailable is null");
+            ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue is null");
+            ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable is null");
 
             _packetQueue.Enqueue(packet);
             _packetAvailable.Set();
@@ -340,10 +340,10 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_asyncDataMonitor)
             {
-                ErrorUtilities.VerifyThrow(null == _packetPump, "packetPump != null");
-                ErrorUtilities.VerifyThrow(null == _packetAvailable, "packetAvailable != null");
-                ErrorUtilities.VerifyThrow(null == _terminatePacketPump, "terminatePacketPump != null");
-                ErrorUtilities.VerifyThrow(null == _packetQueue, "packetQueue != null");
+                ErrorUtilities.VerifyThrow(_packetPump == null, "packetPump != null");
+                ErrorUtilities.VerifyThrow(_packetAvailable == null, "packetAvailable != null");
+                ErrorUtilities.VerifyThrow(_terminatePacketPump == null, "terminatePacketPump != null");
+                ErrorUtilities.VerifyThrow(_packetQueue == null, "packetQueue != null");
 
 #if FEATURE_THREAD_CULTURE
                 _packetPump = new Thread(PacketPumpProc);
@@ -377,10 +377,10 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_asyncDataMonitor)
             {
-                ErrorUtilities.VerifyThrow(null != _packetPump, "packetPump == null");
-                ErrorUtilities.VerifyThrow(null != _packetAvailable, "packetAvailable == null");
-                ErrorUtilities.VerifyThrow(null != _terminatePacketPump, "terminatePacketPump == null");
-                ErrorUtilities.VerifyThrow(null != _packetQueue, "packetQueue == null");
+                ErrorUtilities.VerifyThrow(_packetPump != null, "packetPump == null");
+                ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable == null");
+                ErrorUtilities.VerifyThrow(_terminatePacketPump != null, "terminatePacketPump == null");
+                ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue == null");
 
                 _terminatePacketPump.Set();
                 if (!_packetPump.Join((int)new TimeSpan(0, 0, BuildParameters.EndpointShutdownTimeout).TotalMilliseconds))

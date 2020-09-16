@@ -203,9 +203,8 @@ namespace Microsoft.Build.UnitTests.Construction
             Project project = new Project(projectXml);
 
             project.Build(logger);
-
-            string code = null;
-            string keyword = null;
+            string code;
+            string keyword;
             string text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionParseUnknownProjectType", "proj1.csproj");
 
             // check the error event
@@ -215,9 +214,6 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal(text, warning.Message);
             Assert.Equal(code, warning.Code);
             Assert.Equal(keyword, warning.HelpKeyword);
-
-            code = null;
-            keyword = null;
             text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionInvalidSolutionConfiguration");
 
             // check the warning event
@@ -227,9 +223,6 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal(text, error.Message);
             Assert.Equal(code, error.Code);
             Assert.Equal(keyword, error.HelpKeyword);
-
-            code = null;
-            keyword = null;
             text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionVenusProjectNoClean");
 
             // check the message event
@@ -417,7 +410,6 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal("ABC", instances[0].GetPropertyValue("VisualStudioVersion"));
         }
 
-
         /// <summary>
         /// Test to make sure that even if the solution version corresponds to an existing sub-toolset version
         /// </summary>
@@ -500,7 +492,6 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndGlobalSection
                     EndGlobal
                 ";
-
 
             string solutionFileContentsDev11 = solutionFilePreambleV11 + solutionBodySingleProjectContents;
             string solutionFileContentsDev12 = solutionFilePreambleV12 + solutionBodySingleProjectContents;
@@ -620,7 +611,6 @@ namespace Microsoft.Build.UnitTests.Construction
                 List<ILogger> loggers = new List<ILogger>(1);
                 loggers.Add(logger);
 
-
                 instances[0].Build(loggers);
                 logger.AssertLogContains(String.Format(".[{0}].", ObjectModelHelpers.MSBuildDefaultToolsVersion));
             }
@@ -629,7 +619,6 @@ namespace Microsoft.Build.UnitTests.Construction
                 ObjectModelHelpers.DeleteTempProjectDirectory();
             }
         }
-
 
         /// <summary>
         /// Verify that we throw the appropriate error if the solution declares a dependency 
@@ -1156,8 +1145,6 @@ EndGlobal
             }
         }
 
-
-
         /// <summary>
         /// Test that the in memory project created from a solution file exposes an MSBuild property which,
         /// if set when building a solution, will be specified as the ToolsVersion on the MSBuild task when
@@ -1206,7 +1193,7 @@ EndGlobal
                 {
                     foreach (ProjectTaskInstance childNode in target.Tasks)
                     {
-                        if (0 == String.Compare(childNode.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                        if (String.Equals(childNode.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
                         {
                             string projectsParameter = childNode.GetParameter("Projects");
                             if (projectsParameter != "@(ProjectReference)")
@@ -1323,8 +1310,6 @@ EndGlobal
                     EndGlobalSection
                 EndGlobal
                 ";
-
-            ProjectInstance[] instances = null;
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
             bool caughtException = false;
 
@@ -1332,7 +1317,7 @@ EndGlobal
             {
                 // SolutionProjectGenerator.Generate() is used at build-time, and creates evaluation- and 
                 // execution-model projects; as such it will throw if fed an explicitly invalid toolsversion
-                instances = SolutionProjectGenerator.Generate(solution, null, "invalid", _buildEventContext, CreateMockLoggingService());
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "invalid", _buildEventContext, CreateMockLoggingService());
             }
             catch (InvalidProjectFileException)
             {
@@ -1375,56 +1360,56 @@ EndGlobal
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase)));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase)));
 
-            ProjectTargetInstance buildTarget = instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase) == 0).First().Value;
-            ProjectTargetInstance cleanTarget = instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase) == 0).First().Value;
-            ProjectTargetInstance rebuildTarget = instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase) == 0).First().Value;
-            ProjectTargetInstance publishTarget = instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase) == 0).First().Value;
+            ProjectTargetInstance buildTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)).First().Value;
+            ProjectTargetInstance cleanTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase)).First().Value;
+            ProjectTargetInstance rebuildTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)).First().Value;
+            ProjectTargetInstance publishTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase)).First().Value;
 
             // Check that the appropriate target is being passed to the child projects
             Assert.Null(buildTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Targets"));
 
             Assert.Equal("Clean", cleanTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Targets"));
 
             Assert.Equal("Rebuild", rebuildTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Targets"));
 
             Assert.Equal("Publish", publishTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Targets"));
 
             // Check that the child projects in question are the members of the "ProjectReference" item group
             Assert.Equal("@(ProjectReference)", buildTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Projects"));
 
             Assert.Equal("@(ProjectReference->Reverse())", cleanTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Projects"));
 
             Assert.Equal("@(ProjectReference)", rebuildTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Projects"));
 
             Assert.Equal("@(ProjectReference)", publishTarget.Tasks.Where
                 (
-                task => String.Compare(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase) == 0
+                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)
                 ).First().GetParameter("Projects"));
 
             // We should have only the four standard targets plus the two validation targets (ValidateSolutionConfiguration and ValidateToolsVersions).
@@ -1707,7 +1692,6 @@ EndGlobal
             Assert.Null(SolutionProjectGenerator.PredictActiveSolutionConfigurationName(solution, globalProperties));
         }
 
-
         /// <summary>
         /// Verifies that the SolutionProjectGenerator will correctly escape project file paths
         /// </summary>
@@ -1737,9 +1721,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = null;
-
-            solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
             // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
             Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
@@ -1958,10 +1940,7 @@ EndGlobal
                 // Since we're creating our own BuildManager, we need to make sure that the default 
                 // one has properly relinquished the inproc node
                 NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
-                if (nodeProviderInProc != null)
-                {
-                    nodeProviderInProc.Dispose();
-                }
+                nodeProviderInProc?.Dispose();
 
                 File.WriteAllText(projectFilePath, solutionFileContents.Replace('\'', '"'));
                 MockLogger logger = new MockLogger(output);
@@ -1971,7 +1950,6 @@ EndGlobal
                 parameters.EnableNodeReuse = false;
                 parameters.ShutdownInProcNodeOnBuildFinish = true;
                 buildManager = new BuildManager();
-
 
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties["Configuration"] = "Release";
@@ -2050,10 +2028,7 @@ EndGlobal
                 // Since we're creating our own BuildManager, we need to make sure that the default 
                 // one has properly relinquished the inproc node
                 NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
-                if (nodeProviderInProc != null)
-                {
-                    nodeProviderInProc.Dispose();
-                }
+                nodeProviderInProc?.Dispose();
 
                 File.WriteAllText(projectFilePath, solutionFileContents.Replace('\'', '"'));
                 MockLogger logger = new MockLogger(output);
@@ -2063,7 +2038,6 @@ EndGlobal
                 parameters.EnableNodeReuse = false;
                 parameters.ShutdownInProcNodeOnBuildFinish = true;
                 buildManager = new BuildManager();
-
 
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties["Configuration"] = "Release";
@@ -2194,26 +2168,26 @@ EndGlobal
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "One" });
 
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "One", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "One", StringComparison.OrdinalIgnoreCase)));
 
             instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Two", "Three", "Four" });
 
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Two", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Three", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Four", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Two", StringComparison.OrdinalIgnoreCase)));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Three", StringComparison.OrdinalIgnoreCase)));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Four", StringComparison.OrdinalIgnoreCase)));
 
             instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Build" });
 
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)));
 
             instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Five", "Rebuild" });
 
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Five", StringComparison.OrdinalIgnoreCase) == 0));
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Five", StringComparison.OrdinalIgnoreCase)));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)));
 
             instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "My_Project:Six" });
 
-            Assert.Single(instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase) == 0));
+            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase)));
         }
 
         /// <summary>
@@ -2281,7 +2255,6 @@ EndGlobal
 
                 Assert.Equal(12, instances[0].TargetsCount);
             }
-
 
             instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), new[] { "Foo" });
 

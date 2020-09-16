@@ -555,7 +555,6 @@ namespace Microsoft.Build.Utilities
                 ErrorUtilities.ThrowInvalidOperation("LoggingBeforeTaskInitialization", e.Message);
             }
 
-
             BuildEngine.LogMessageEvent(e);
         }
 
@@ -572,7 +571,7 @@ namespace Microsoft.Build.Utilities
         /// <exception cref="ArgumentNullException">Thrown when <c>message</c> is null.</exception>
         public void LogError(string message, params object[] messageArgs)
         {
-            LogError(null, null, null, null, 0, 0, 0, 0, message, messageArgs);
+            LogError(null, null, null, null, null, 0, 0, 0, 0, message, messageArgs);
         }
 
         /// <summary>
@@ -595,6 +594,40 @@ namespace Microsoft.Build.Utilities
             string subcategory,
             string errorCode,
             string helpKeyword,
+            string file,
+            int lineNumber,
+            int columnNumber,
+            int endLineNumber,
+            int endColumnNumber,
+            string message,
+            params object[] messageArgs
+        )
+        {
+            LogError(subcategory, errorCode, helpKeyword, null, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, messageArgs);
+        }
+
+        /// <summary>
+        /// Logs an error using the specified string and other error details.
+        /// Thread safe.
+        /// </summary>
+        /// <param name="subcategory">Description of the error type (can be null).</param>
+        /// <param name="errorCode">The error code (can be null).</param>
+        /// <param name="helpKeyword">The help keyword for the host IDE (can be null).</param>
+        /// <param name="file">The path to the file containing the error (can be null).</param>
+        /// <param name="lineNumber">The line in the file where the error occurs (set to zero if not available).</param>
+        /// <param name="columnNumber">The column in the file where the error occurs (set to zero if not available).</param>
+        /// <param name="endLineNumber">The last line of a range of lines in the file where the error occurs (set to zero if not available).</param>
+        /// <param name="endColumnNumber">The last column of a range of columns in the file where the error occurs (set to zero if not available).</param>
+        /// <param name="message">The message string.</param>
+        /// <param name="helpLink">A link pointing to more information about the error.</param>
+        /// <param name="messageArgs">Optional arguments for formatting the message string.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <c>message</c> is null.</exception>
+        public void LogError
+        (
+            string subcategory,
+            string errorCode,
+            string helpKeyword,
+            string helpLink,
             string file,
             int lineNumber,
             int columnNumber,
@@ -634,6 +667,7 @@ namespace Microsoft.Build.Utilities
                     message,
                     helpKeyword,
                     TaskName,
+                    helpLink,
                     DateTime.UtcNow,
                     messageArgs
                 );
@@ -702,7 +736,7 @@ namespace Microsoft.Build.Utilities
             string messageCode;
             string throwAwayMessageBody = ResourceUtilities.ExtractMessageCode(true /* only msbuild codes */, FormatResourceString(messageResourceName, messageArgs), out messageCode);
 
-            ErrorUtilities.VerifyThrow(messageCode == null || messageCode.Length == 0, "Called LogErrorFromResources instead of LogErrorWithCodeFromResources, but message '" + throwAwayMessageBody + "' does have an error code '" + messageCode + "'");
+            ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(messageCode), "Called LogErrorFromResources instead of LogErrorWithCodeFromResources, but message '" + throwAwayMessageBody + "' does have an error code '" + messageCode + "'");
 #endif
 
             LogError
@@ -727,7 +761,7 @@ namespace Microsoft.Build.Utilities
         /// 
         /// A task can provide a help keyword prefix either via the Task (or TaskMarshalByRef) base class constructor, or the
         /// Task.HelpKeywordPrefix (or AppDomainIsolatedTask.HelpKeywordPrefix) property.
-        ///    
+        /// 
         /// Thread safe.
         /// </summary>
         /// <param name="messageResourceName">The name of the string resource to load.</param>
@@ -746,7 +780,7 @@ namespace Microsoft.Build.Utilities
         /// 
         /// A task can provide a help keyword prefix either via the Task (or TaskMarshalByRef) base class constructor, or the
         /// Task.HelpKeywordPrefix (or AppDomainIsolatedTask.HelpKeywordPrefix) property.
-        ///    
+        /// 
         /// Thread safe.
         /// </summary>
         /// <param name="subcategoryResourceName">The name of the string resource that describes the error type (can be null).</param>
@@ -923,6 +957,40 @@ namespace Microsoft.Build.Utilities
             params object[] messageArgs
         )
         {
+            LogWarning(subcategory, warningCode, helpKeyword, null, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, messageArgs);
+        }
+
+        /// <summary>
+        /// Logs a warning using the specified string and other warning details.
+        /// Thread safe.
+        /// </summary>
+        /// <param name="subcategory">Description of the warning type (can be null).</param>
+        /// <param name="warningCode">The warning code (can be null).</param>
+        /// <param name="helpKeyword">The help keyword for the host IDE (can be null).</param>
+        /// <param name="helpLink">A link pointing to more information about the warning (can be null).</param>
+        /// <param name="file">The path to the file causing the warning (can be null).</param>
+        /// <param name="lineNumber">The line in the file causing the warning (set to zero if not available).</param>
+        /// <param name="columnNumber">The column in the file causing the warning (set to zero if not available).</param>
+        /// <param name="endLineNumber">The last line of a range of lines in the file causing the warning (set to zero if not available).</param>
+        /// <param name="endColumnNumber">The last column of a range of columns in the file causing the warning (set to zero if not available).</param>
+        /// <param name="message">The message string.</param>
+        /// <param name="messageArgs">Optional arguments for formatting the message string.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <c>message</c> is null.</exception>
+        public void LogWarning
+        (
+            string subcategory,
+            string warningCode,
+            string helpKeyword,
+            string helpLink,
+            string file,
+            int lineNumber,
+            int columnNumber,
+            int endLineNumber,
+            int endColumnNumber,
+            string message,
+            params object[] messageArgs
+        )
+        {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
             ErrorUtilities.VerifyThrowArgumentNull(message, nameof(message));
 
@@ -953,6 +1021,7 @@ namespace Microsoft.Build.Utilities
                     message,
                     helpKeyword,
                     TaskName,
+                    helpLink,
                     DateTime.UtcNow,
                     messageArgs
                 );
@@ -1036,14 +1105,14 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Logs a warning using the specified resource string. 
+        /// Logs a warning using the specified resource string.
         /// If the message has a warning code prefixed to it, the code is extracted and logged with the message. If a help keyword
         /// prefix has been provided, a help keyword for the host IDE is also logged with the message. The help keyword is
         /// composed by appending the string resource name to the prefix.
-        /// 
+        ///
         /// A task can provide a help keyword prefix either via the Task (or TaskMarshalByRef) base class constructor, or the
         /// Task.HelpKeywordPrefix (or AppDomainIsolatedTask.HelpKeywordPrefix) property.
-        /// 
+        ///
         /// Thread safe.
         /// </summary>
         /// <param name="messageResourceName">The name of the string resource to load.</param>
@@ -1055,14 +1124,14 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Logs a warning using the specified resource string and other warning details. 
+        /// Logs a warning using the specified resource string and other warning details.
         /// If the message has a warning code, the code is extracted and logged with the message.
         /// If a help keyword prefix has been provided, a help keyword for the host IDE is also logged with the message. The help
         /// keyword is composed by appending the warning message resource string name to the prefix.
-        /// 
+        ///
         /// A task can provide a help keyword prefix either via the Task (or TaskMarshalByRef) base class constructor, or the
         /// Task.HelpKeywordPrefix (or AppDomainIsolatedTask.HelpKeywordPrefix) property.
-        /// 
+        ///
         /// Thread safe.
         /// </summary>
         /// <param name="subcategoryResourceName">The name of the string resource that describes the warning type (can be null).</param>
@@ -1188,8 +1257,8 @@ namespace Microsoft.Build.Utilities
 
             bool errorsFound;
 
-            // Command-line tools are generally going to emit their output using the current 
-            // codepage, so that it displays correctly in the console window.  
+            // Command-line tools are generally going to emit their output using the current
+            // codepage, so that it displays correctly in the console window.
             using (StreamReader fileStream = FileUtilities.OpenRead(fileName, Encoding.GetEncoding(0))) // HIGHCHAR: Use ANSI for logging messages.
             {
                 errorsFound = LogMessagesFromStream(fileStream, messageImportance);
@@ -1244,7 +1313,7 @@ namespace Microsoft.Build.Utilities
             bool isError = false;
             CanonicalError.Parts messageParts = CanonicalError.Parse(lineOfText);
 
-            if (null == messageParts)
+            if (messageParts == null)
             {
                 // Line was not recognized as a canonical error. Log it as a message.
                 LogMessage(messageImportance, lineOfText);
@@ -1255,7 +1324,7 @@ namespace Microsoft.Build.Utilities
                 //  Log it as a warning or error.
                 string origin = messageParts.origin;
 
-                if ((origin == null) || (origin.Length == 0))
+                if (string.IsNullOrEmpty(origin))
                 {
                     // Use the task class name as the origin, if none specified.
                     origin = TaskNameUpperCase;
@@ -1329,7 +1398,7 @@ namespace Microsoft.Build.Utilities
 #region AppDomain Code
 
         /// <summary>
-        /// InitializeLifetimeService is called when the remote object is activated. 
+        /// InitializeLifetimeService is called when the remote object is activated.
         /// This method will determine how long the lifetime for the object will be.
         /// Thread safe. However, InitializeLifetimeService and MarkAsInactive should
         /// only be called in that order, together or not at all, and no more than once.
@@ -1365,7 +1434,7 @@ namespace Microsoft.Build.Utilities
                 // increase the lease time allowing the object to stay in memory
                 _sponsor = new ClientSponsor();
 
-                // When a new lease is requested lets make it last 1 minutes longer. 
+                // When a new lease is requested lets make it last 1 minutes longer.
                 int leaseExtensionTime = 1;
 
                 string leaseExtensionTimeFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDTASKLOGGINGHELPERLEASEEXTENSIONTIME");

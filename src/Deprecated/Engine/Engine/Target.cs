@@ -226,7 +226,7 @@ namespace Microsoft.Build.BuildEngine
             }
 
             // It's considered an error if a target does not have a name.
-            ProjectErrorUtilities.VerifyThrowInvalidProject((targetName != null) && (targetName.Length > 0),
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(targetName),
                 targetElement, "MissingRequiredAttribute", XMakeAttributes.name, XMakeElements.target);
 
             this.taskElementList = new ArrayList();
@@ -492,7 +492,6 @@ namespace Microsoft.Build.BuildEngine
             }
         }
 
-
         internal TargetExecutionWrapper ExecutionState
         {
             get
@@ -590,7 +589,7 @@ namespace Microsoft.Build.BuildEngine
                     // cache the individual target IDs for unloaded projects and it's not really worth the trouble.
                     // Just use the parent event context.
                     parentEngine.LoggingServices.LogComment(buildContext.ProjectBuildEventContext,
-                        ((buildState == BuildState.CompletedSuccessfully) ? "TargetAlreadyCompleteSuccess" : "TargetAlreadyCompleteFailure"),
+                        (buildState == BuildState.CompletedSuccessfully) ? "TargetAlreadyCompleteSuccess" : "TargetAlreadyCompleteFailure",
                         this.targetName);
 
                     // Only contexts which are generated from an MSBuild task could need 
@@ -601,7 +600,7 @@ namespace Microsoft.Build.BuildEngine
                          buildContext.NameOfBlockingTarget == null))
                     {
                         error.VerifyThrow(
-                            String.Compare(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), this.Name, StringComparison.OrdinalIgnoreCase) == 0,
+                            String.Equals(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), this.Name, StringComparison.OrdinalIgnoreCase),
                             "The name of the target in progress is inconsistent with the target being built");
 
                         error.VerifyThrow(targetOutputItems != null,
@@ -699,8 +698,6 @@ namespace Microsoft.Build.BuildEngine
         /// <returns>true, if successful</returns>
         internal bool ExecuteOneTask(XmlElement taskNode, ITaskHost hostObject)
         {
-            bool taskExecutedSuccessfully = false;
-
             string projectFileOfTaskNode = XmlUtilities.GetXmlNodeFile(taskNode, parentProject.FullFileName);
             BuildEventContext targetBuildEventContext = new BuildEventContext
                                 (
@@ -714,14 +711,11 @@ namespace Microsoft.Build.BuildEngine
             TaskExecutionModule taskExecutionModule = parentEngine.NodeManager.TaskExecutionModule;
             TaskEngine taskEngine = new TaskEngine(taskNode, hostObject, parentProject.FullFileName, projectFileOfTaskNode, parentEngine.LoggingServices, handleId, taskExecutionModule, targetBuildEventContext);
 
-            taskExecutedSuccessfully =
-                taskEngine.ExecuteTask
+            return taskEngine.ExecuteTask
                 (
                     TaskExecutionMode.ExecuteTaskAndGatherOutputs,
                     new Lookup(parentProject.evaluatedItemsByName, parentProject.evaluatedProperties, ParentProject.ItemDefinitionLibrary)
                 );
-
-            return taskExecutedSuccessfully;
         }
 
         /// <summary>
@@ -732,11 +726,11 @@ namespace Microsoft.Build.BuildEngine
             (
             )
         {
-            if (this.ParentProject != null)
-            {
+               
+            
                 // This is a change to the contents of the project file.
-                this.ParentProject.MarkProjectAsDirty();
-            }
+                this.ParentProject?.MarkProjectAsDirty();
+            
         }
 
         /// <summary>
@@ -751,7 +745,6 @@ namespace Microsoft.Build.BuildEngine
             string attributeValue
             )
         {
-            XmlAttribute updatedAttribute = null;
             // If this Target object is not actually represented by a 
             // <Target> element in the parentProject.file, then do not allow
             // the caller to set the condition.
@@ -760,7 +753,7 @@ namespace Microsoft.Build.BuildEngine
             // If this item was imported from another parentProject. we don't allow modifying it.
             error.VerifyThrowInvalidOperation(!this.importedFromAnotherProject, "CannotModifyImportedProjects");
 
-            updatedAttribute = ProjectXmlUtilities.SetOrRemoveAttribute(this.targetElement, attributeName, attributeValue);
+            XmlAttribute updatedAttribute = ProjectXmlUtilities.SetOrRemoveAttribute(targetElement, attributeName, attributeValue);
 
             // Mark the project dirty after an attribute has been updated
             this.MarkTargetAsDirty();
@@ -779,7 +772,7 @@ namespace Microsoft.Build.BuildEngine
             )
         {
             error.VerifyThrow(this.taskElementList != null, "Arraylist not initialized!");
-            error.VerifyThrowArgumentLength(taskName, "taskName");
+            error.VerifyThrowArgumentLength(taskName, nameof(taskName));
 
             // Confirm that it's not an imported target.
             error.VerifyThrowInvalidOperation(!this.IsImported, "CannotModifyImportedProjects");
@@ -812,7 +805,7 @@ namespace Microsoft.Build.BuildEngine
             error.VerifyThrowInvalidOperation(!this.IsImported, "CannotModifyImportedProjects");
 
             error.VerifyThrow(this.taskElementList != null, "Arraylist not initialized!");
-            error.VerifyThrowArgumentNull(taskElement, "taskElement");
+            error.VerifyThrowArgumentNull(taskElement, nameof(taskElement));
 
             // Confirm that the BuildTask belongs to this Target.
             error.VerifyThrowInvalidOperation(taskElement.ParentTarget == this,

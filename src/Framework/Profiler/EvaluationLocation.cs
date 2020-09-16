@@ -255,16 +255,15 @@ namespace Microsoft.Build.Framework.Profiler
         public override int GetHashCode()
         {
             var hashCode = 1198539463;
-            hashCode = hashCode * -1521134295 + base.GetHashCode();
-            hashCode = hashCode * -1521134295 + Id.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<long?>.Default.GetHashCode(ParentId);
-            hashCode = hashCode * -1521134295 + EvaluationPass.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(EvaluationPassDescription);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(File);
-            hashCode = hashCode * -1521134295 + EqualityComparer<int?>.Default.GetHashCode(Line);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ElementName);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ElementDescription);
-            hashCode = hashCode * -1521134295 + Kind.GetHashCode();
+            hashCode = (hashCode * -1521134295) + Id.GetHashCode();
+            hashCode = (hashCode * -1521134295) + EqualityComparer<long?>.Default.GetHashCode(ParentId);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<EvaluationPass>.Default.GetHashCode(EvaluationPass);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(EvaluationPassDescription);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(File);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<int?>.Default.GetHashCode(Line);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(ElementName);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(ElementDescription);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<EvaluationLocationKind>.Default.GetHashCode(Kind);
             return hashCode;
         }
 

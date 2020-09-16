@@ -31,7 +31,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             this.platformName = platformName;
 
             // Some configurations don't have the platform part
-            if ((platformName != null) && (platformName.Length > 0))
+            if (!string.IsNullOrEmpty(platformName))
             {
                 this.fullName = string.Format(CultureInfo.InvariantCulture, "{0}{1}{2}", configurationName, configurationPlatformSeparator, platformName);
             }

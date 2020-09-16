@@ -115,7 +115,7 @@ namespace Microsoft.Build.BackEnd
             bool skipStaticGraphIsolationConstraints = false)
         {
             ErrorUtilities.VerifyThrowArgumentNull(escapedTargets, "targets");
-            ErrorUtilities.VerifyThrowArgumentNull(parentBuildEventContext, "parentBuildEventContext");
+            ErrorUtilities.VerifyThrowArgumentNull(parentBuildEventContext, nameof(parentBuildEventContext));
 
             _submissionId = submissionId;
             _configurationId = configurationId;
@@ -292,7 +292,6 @@ namespace Microsoft.Build.BackEnd
             get => _requestedProjectState;
             set => _requestedProjectState = value;
         }
-
 
         /// <summary>
         /// The route for host-aware tasks back to the host

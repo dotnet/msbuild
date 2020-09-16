@@ -100,14 +100,13 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
         [Fact]
         public void GetUnResolvedDependentSDKs()
         {
-            string[] result = null;
             HashSet<SDKReference> resolvedSDKsEmpty = new HashSet<SDKReference>();
             List<string> dependentSDKsEmpty = new List<string>();
 
             HashSet<SDKReference> resolvedSDKs = new HashSet<SDKReference>() { new SDKReference(new TaskItem(), "bar", "1.0"), new SDKReference(new TaskItem(), "foo", "1.0"), new SDKReference(new TaskItem(), "Newt", "1.0") };
             List<string> dependentSDKs = new List<string>() { "bar, Version=1.0", "bar, Version=2.0", "baz, Version=2.0", "CannotParseMeAsSDK", "newt, version=1.0" };
 
-            result = ResolveSDKReference.GetUnresolvedDependentSDKs(resolvedSDKsEmpty, dependentSDKsEmpty);
+            string[] result = ResolveSDKReference.GetUnresolvedDependentSDKs(resolvedSDKsEmpty, dependentSDKsEmpty);
             Assert.Empty(result);
 
             result = ResolveSDKReference.GetUnresolvedDependentSDKs(new HashSet<SDKReference>(), dependentSDKs);

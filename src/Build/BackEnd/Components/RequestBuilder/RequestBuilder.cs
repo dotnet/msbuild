@@ -170,7 +170,7 @@ namespace Microsoft.Build.BackEnd
             {
                 VerifyIsNotZombie();
 
-                return (_requestTask != null && !_requestTask.IsCompleted) || (_componentHost.LegacyThreadingData.MainThreadSubmissionId != -1);
+                return (_requestTask?.IsCompleted == false) || (_componentHost.LegacyThreadingData.MainThreadSubmissionId != -1);
             }
         }
 
@@ -181,9 +181,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="entry">The entry to build.</param>
         public void BuildRequest(NodeLoggingContext loggingContext, BuildRequestEntry entry)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "loggingContext");
-            ErrorUtilities.VerifyThrowArgumentNull(entry, "entry");
-            ErrorUtilities.VerifyThrow(null != _componentHost, "Host not set.");
+            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, nameof(loggingContext));
+            ErrorUtilities.VerifyThrowArgumentNull(entry, nameof(entry));
+            ErrorUtilities.VerifyThrow(_componentHost != null, "Host not set.");
             ErrorUtilities.VerifyThrow(_targetBuilder == null, "targetBuilder not null");
             ErrorUtilities.VerifyThrow(_nodeLoggingContext == null, "nodeLoggingContext not null");
             ErrorUtilities.VerifyThrow(_requestEntry == null, "requestEntry not null");
@@ -213,7 +213,7 @@ namespace Microsoft.Build.BackEnd
             VerifyEntryInReadyState();
 
             _continueResults = _requestEntry.Continue();
-            ErrorUtilities.VerifyThrow((_blockType == BlockType.BlockedOnTargetInProgress || _blockType == BlockType.Yielded) || (_continueResults != null), "Unexpected null results for request {0} (nr {1})", _requestEntry.Request.GlobalRequestId, _requestEntry.Request.NodeRequestId);
+            ErrorUtilities.VerifyThrow(_blockType == BlockType.BlockedOnTargetInProgress || _blockType == BlockType.Yielded || (_continueResults != null), "Unexpected null results for request {0} (nr {1})", _requestEntry.Request.GlobalRequestId, _requestEntry.Request.NodeRequestId);
 
             // Setting the continue event will wake up the build thread, which is suspended in StartNewBuildRequests.
             _continueEvent.Set();
@@ -308,10 +308,10 @@ namespace Microsoft.Build.BackEnd
         public async Task<BuildResult[]> BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets = false)
         {
             VerifyIsNotZombie();
-            ErrorUtilities.VerifyThrowArgumentNull(projectFiles, "projectFiles");
-            ErrorUtilities.VerifyThrowArgumentNull(properties, "properties");
-            ErrorUtilities.VerifyThrowArgumentNull(targets, "targets");
-            ErrorUtilities.VerifyThrowArgumentNull(toolsVersions, "toolsVersions");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFiles, nameof(projectFiles));
+            ErrorUtilities.VerifyThrowArgumentNull(properties, nameof(properties));
+            ErrorUtilities.VerifyThrowArgumentNull(targets, nameof(targets));
+            ErrorUtilities.VerifyThrowArgumentNull(toolsVersions, nameof(toolsVersions));
             ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
             ErrorUtilities.VerifyThrow(projectFiles.Length == properties.Length, "Properties and project counts not the same");
             ErrorUtilities.VerifyThrow(projectFiles.Length == toolsVersions.Length, "Tools versions and project counts not the same");
@@ -469,7 +469,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
             ErrorUtilities.VerifyThrow(_componentHost == null, "RequestBuilder already initialized.");
             _componentHost = host;
         }
@@ -582,7 +582,7 @@ namespace Microsoft.Build.BackEnd
                         // to null between the null check and asking the LegacyThreadingData for the Task.
                         IBuildComponentHost componentHostSnapshot = _componentHost;
 
-                        if (componentHostSnapshot != null && componentHostSnapshot.LegacyThreadingData != null)
+                        if (componentHostSnapshot?.LegacyThreadingData != null)
                         {
                             return componentHostSnapshot.LegacyThreadingData.GetLegacyThreadInactiveTask(_requestEntry.Request.SubmissionId);
                         }
@@ -726,7 +726,7 @@ namespace Microsoft.Build.BackEnd
             }
             catch (InvalidProjectFileException ex)
             {
-                if (null != _projectLoggingContext)
+                if (_projectLoggingContext != null)
                 {
                     _projectLoggingContext.LogInvalidProjectFileError(ex);
                 }
@@ -764,7 +764,7 @@ namespace Microsoft.Build.BackEnd
             {
                 _blockType = BlockType.Unblocked;
 
-                if (null != thrownException)
+                if (thrownException != null)
                 {
                     ErrorUtilities.VerifyThrow(result == null, "Result already set when exception was thrown.");
                     result = new BuildResult(_requestEntry.Request, thrownException);
@@ -781,7 +781,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void ReportResultAndCleanUp(BuildResult result)
         {
-            if (null != _projectLoggingContext)
+            if (_projectLoggingContext != null)
             {
                 try
                 {
@@ -916,8 +916,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BuildResult[] GetResultsForContinuation(FullyQualifiedBuildRequest[] requests, bool isContinue)
         {
-            IDictionary<int, BuildResult> results;
-            results = _continueResults;
+            IDictionary<int, BuildResult> results = _continueResults;
             _continueResults = null;
             if (results == null)
             {
@@ -990,7 +989,7 @@ namespace Microsoft.Build.BackEnd
         /// This method is called to reset the current directory to the one appropriate for this project.  It should be called any time
         /// the project is resumed.
         /// If the directory does not exist, does nothing.
-        /// This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project. 
+        /// This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project.
         /// No errors are masked by doing this: errors loading the project from disk are reported at load time, if necessary.
         /// </summary>
         private void SetProjectCurrentDirectory()
@@ -1293,7 +1292,7 @@ namespace Microsoft.Build.BackEnd
             {
                 return null;
             }
-            
+
             return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
         }
 

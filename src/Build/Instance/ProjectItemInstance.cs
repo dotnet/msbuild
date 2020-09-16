@@ -52,7 +52,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Constructor for items with no metadata.
         /// Include may be empty.
-        /// Called before the build when virtual items are added, 
+        /// Called before the build when virtual items are added,
         /// and during the build when tasks emit items.
         /// Mutability follows the project.
         /// </summary>
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Constructor for items with no metadata.
         /// Include may be empty.
-        /// Called before the build when virtual items are added, 
+        /// Called before the build when virtual items are added,
         /// and during the build when tasks emit items.
         /// Mutability follows the project.
         /// </summary>
@@ -75,7 +75,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Constructor for items with metadata.
-        /// Called before the build when virtual items are added, 
+        /// Called before the build when virtual items are added,
         /// and during the build when tasks emit items.
         /// Include may be empty.
         /// Direct metadata may be null, indicating no metadata. It will be cloned.
@@ -106,7 +106,7 @@ namespace Microsoft.Build.Execution
         {
             CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = null;
 
-            if (directMetadata != null && directMetadata.GetEnumerator().MoveNext())
+            if (directMetadata?.GetEnumerator().MoveNext() == true)
             {
                 metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(directMetadata.FastCountOrZero());
                 foreach (KeyValuePair<string, string> metadatum in directMetadata)
@@ -159,7 +159,7 @@ namespace Microsoft.Build.Execution
         /// Item type, for example "Compile"
         /// </summary>
         /// <remarks>
-        /// This cannot be set, as it is used as the key into 
+        /// This cannot be set, as it is used as the key into
         /// the project's items table.
         /// </remarks>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -339,7 +339,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Get any metadata in the item that has the specified name,
-        /// otherwise returns null. 
+        /// otherwise returns null.
         /// Includes any metadata inherited from item definitions.
         /// Includes any built-in metadata.
         /// </summary>
@@ -349,7 +349,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Get the value of a metadata on this item, or 
+        /// Get the value of a metadata on this item, or
         /// String.Empty if it does not exist or has no value.
         /// Includes any metadata inherited from item definitions and any built-in metadata.
         /// To determine whether a piece of metadata is actually present
@@ -416,7 +416,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Get the value of a metadata on this item, or 
+        /// Get the value of a metadata on this item, or
         /// String.Empty if it does not exist or has no value.
         /// Includes any metadata inherited from item definitions and any built-in metadata.
         /// To determine whether a piece of metadata is actually present
@@ -466,7 +466,7 @@ namespace Microsoft.Build.Execution
         /// ITaskItem implementation
         /// </summary>
         /// <comments>
-        /// MetadataValue is assumed to be in its escaped form. 
+        /// MetadataValue is assumed to be in its escaped form.
         /// </comments>
         void ITaskItem.SetMetadata(string metadataName, string metadataValue)
         {
@@ -477,7 +477,7 @@ namespace Microsoft.Build.Execution
         /// ITaskItem2 implementation
         /// </summary>
         /// <comments>
-        /// Assumes metadataValue is unescaped. 
+        /// Assumes metadataValue is unescaped.
         /// </comments>
         void ITaskItem2.SetMetadataValueLiteral(string metadataName, string metadataValue)
         {
@@ -627,7 +627,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Sets metadata where one built-in metadata is allowed to be set: RecursiveDir. 
+        /// Sets metadata where one built-in metadata is allowed to be set: RecursiveDir.
         /// This is not normally legal to set outside of evaluation. However, the CreateItem
         /// needs to be able to set it as a task output, because it supports wildcards. So as a special exception we allow
         /// tasks to set this particular metadata as a task output.
@@ -699,7 +699,7 @@ namespace Microsoft.Build.Execution
             ProjectItemDefinitionInstance itemDefinition;
             if (projectToUse.ItemDefinitions.TryGetValue(itemTypeToUse, out itemDefinition))
             {
-                inheritedItemDefinitions = inheritedItemDefinitions ?? new List<ProjectItemDefinitionInstance>();
+                inheritedItemDefinitions ??= new List<ProjectItemDefinitionInstance>();
                 inheritedItemDefinitions.Add(itemDefinition);
             }
 
@@ -708,7 +708,7 @@ namespace Microsoft.Build.Execution
             _taskItem = new TaskItem(
                                         includeEscaped,
                                         includeBeforeWildcardExpansionEscaped,
-                                        (directMetadata == null) ? null : directMetadata.DeepClone(), // copy on write!
+                                        directMetadata?.DeepClone(), // copy on write!
                                         inheritedItemDefinitions,
                                         _project.Directory,
                                         _project.IsImmutable,
@@ -717,7 +717,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// An item without an item type. Cast to an ITaskItem, this is 
+        /// An item without an item type. Cast to an ITaskItem, this is
         /// what is given to tasks. It is also used for target outputs.
         /// </summary>
         internal sealed class TaskItem :
@@ -802,8 +802,8 @@ namespace Microsoft.Build.Execution
                               string definingFileEscaped // the actual project file (or import) that defines this item.
                               )
             {
-                ErrorUtilities.VerifyThrowArgumentLength(includeEscaped, "includeEscaped");
-                ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped, "includeBeforeWildcardExpansionEscaped");
+                ErrorUtilities.VerifyThrowArgumentLength(includeEscaped, nameof(includeEscaped));
+                ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped, nameof(includeBeforeWildcardExpansionEscaped));
 
                 _includeEscaped = FileUtilities.FixFilePath(includeEscaped);
                 _includeBeforeWildcardExpansionEscaped = FileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped);
@@ -863,9 +863,9 @@ namespace Microsoft.Build.Execution
             /// Gets or sets the unescaped include, or "name", for the item.
             /// </summary>
             /// <comments>
-            /// This one is a bit tricky.  Orcas assumed that the value being set was escaped, but 
+            /// This one is a bit tricky.  Orcas assumed that the value being set was escaped, but
             /// that the value being returned was unescaped.  Maintain that behaviour here.  To get
-            /// the escaped value, use ITaskItem2.EvaluatedIncludeEscaped. 
+            /// the escaped value, use ITaskItem2.EvaluatedIncludeEscaped.
             /// </comments>
             public string ItemSpec
             {
@@ -1114,7 +1114,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// This allows an explicit typecast from a "TaskItem" to a "string", returning the ItemSpec for this item.
             /// </summary>
-            public static explicit operator string (TaskItem that)
+            public static explicit operator string(TaskItem that)
             {
                 return that._includeEscaped;
             }
@@ -1127,11 +1127,11 @@ namespace Microsoft.Build.Execution
             /// <returns>True if the items are equivalent, false otherwise.</returns>
             public static bool operator ==(TaskItem left, TaskItem right)
             {
-                if (!Object.ReferenceEquals(left, null))
+                if (!(left is null))
                 {
                     return left.Equals(right);
                 }
-                else if (!Object.ReferenceEquals(right, null))
+                else if (!(right is null))
                 {
                     return right.Equals(left);
                 }
@@ -1236,14 +1236,12 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public string GetMetadataEscaped(string metadataName)
             {
-                if (metadataName == null || metadataName.Length == 0)
+                if (string.IsNullOrEmpty(metadataName))
                 {
-                    ErrorUtilities.VerifyThrowArgumentLength(metadataName, "metadataName");
+                    ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
                 }
 
-                string value = null;
-                ProjectMetadataInstance metadatum = null;
-
+                ProjectMetadataInstance metadatum;
                 if (_directMetadata != null)
                 {
                     metadatum = _directMetadata[metadataName];
@@ -1255,21 +1253,19 @@ namespace Microsoft.Build.Execution
 
                 metadatum = GetItemDefinitionMetadata(metadataName);
 
-                if (null != metadatum && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
+                if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
                 {
                     Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
 
                     // We don't have a location to use, but this is very unlikely to error
-                    value = expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
-
-                    return value;
+                    return expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
                 }
-                else if (null != metadatum)
+                else if (metadatum != null)
                 {
                     return metadatum.EvaluatedValueEscaped;
                 }
 
-                value = GetBuiltInMetadataEscaped(metadataName);
+                string value = GetBuiltInMetadataEscaped(metadataName);
 
                 return value ?? String.Empty;
             }
@@ -1278,7 +1274,7 @@ namespace Microsoft.Build.Execution
             /// ITaskItem implementation which sets metadata.
             /// </summary>
             /// <comments>
-            /// The value is assumed to be escaped. 
+            /// The value is assumed to be escaped.
             /// </comments>
             public void SetMetadata(string metadataName, string metadataValueEscaped)
             {
@@ -1288,7 +1284,7 @@ namespace Microsoft.Build.Execution
             }
 
             /// <summary>
-            /// ITaskItem2 implementation which sets the literal value of metadata -- it is escaped 
+            /// ITaskItem2 implementation which sets the literal value of metadata -- it is escaped
             /// internally as necessary.
             /// </summary>
             void ITaskItem2.SetMetadataValueLiteral(string metadataName, string metadataValue)
@@ -1325,19 +1321,19 @@ namespace Microsoft.Build.Execution
             /// Copies direct and item definition metadata.
             /// Does not copy built-in metadata, and will not overwrite existing, non-empty metadata.
             /// If the destination implements ITaskItem2, this avoids losing the escaped nature of values.
-            /// 
+            ///
             /// When copying metadata to a task item which can be accessed from a task (Utilities task item)
             /// this method will merge and expand any metadata originating with item definitions.
             /// </summary>
             /// <param name="destinationItem">destination item to copy the metadata from this to</param>
-            /// <param name="addOriginalItemSpec">Whether the OriginalItemSpec should be added as a piece 
-            /// of magic metadata. For copying of items this is useful but for cloning of items this adds 
-            /// additional metadata which is not useful because the OriginalItemSpec will always be identical 
+            /// <param name="addOriginalItemSpec">Whether the OriginalItemSpec should be added as a piece
+            /// of magic metadata. For copying of items this is useful but for cloning of items this adds
+            /// additional metadata which is not useful because the OriginalItemSpec will always be identical
             /// to the ItemSpec, and the addition will and will cause copy-on-write to trigger.
             /// </param>
             public void CopyMetadataTo(ITaskItem destinationItem, bool addOriginalItemSpec)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(destinationItem, "destinationItem");
+                ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
 
                 string originalItemSpec = null;
                 if (addOriginalItemSpec)
@@ -1413,7 +1409,7 @@ namespace Microsoft.Build.Execution
 
             /// <summary>
             /// ITaskItem2 implementation which returns a clone of the metadata on this object.
-            /// Values returned are in their original escaped form. 
+            /// Values returned are in their original escaped form.
             /// </summary>
             /// <returns>The cloned metadata.</returns>
             IDictionary ITaskItem2.CloneCustomMetadataEscaped()
@@ -1495,7 +1491,7 @@ namespace Microsoft.Build.Execution
             /// <returns>True if the items are equivalent, false otherwise.</returns>
             public bool Equals(TaskItem other)
             {
-                if (Object.ReferenceEquals(other, null))
+                if (other is null)
                 {
                     return false;
                 }
@@ -1553,7 +1549,7 @@ namespace Microsoft.Build.Execution
             /// </remarks>
             public bool HasMetadata(string name)
             {
-                if ((_directMetadata != null && _directMetadata.Contains(name)) ||
+                if ((_directMetadata?.Contains(name) == true) ||
                      FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) ||
                     GetItemDefinitionMetadata(name) != null)
                 {
@@ -1596,16 +1592,32 @@ namespace Microsoft.Build.Execution
                 return new TaskItem(translator, interner);
             }
 
+            private void WriteInternString(ITranslator translator, LookasideStringInterner interner, ref string str)
+            {
+                var key = interner.Intern(str);
+                translator.Writer.Write(key);
+            }
+            
+            private void ReadInternString(ITranslator translator, LookasideStringInterner interner, ref string str)
+            {
+                var val = translator.Reader.ReadInt32();
+                str = interner.GetString(val);
+            }
+
             /// <summary>
             /// Reads or writes the task item to the translator using an interner for metadata.
             /// </summary>
             internal void TranslateWithInterning(ITranslator translator, LookasideStringInterner interner)
             {
+                translator.Translate(ref _itemDefinitions, ProjectItemDefinitionInstance.FactoryForDeserialization);
+                translator.Translate(ref _isImmutable);
                 translator.Translate(ref _includeEscaped);
-                translator.Translate(ref _includeBeforeWildcardExpansionEscaped);
 
                 if (translator.Mode == TranslationDirection.WriteToStream)
                 {
+                    WriteInternString(translator, interner, ref _includeBeforeWildcardExpansionEscaped);
+                    WriteInternString(translator, interner, ref _definingFileEscaped);
+
                     CopyOnWritePropertyDictionary<ProjectMetadataInstance> temp = MetadataCollection;
 
                     // Intern the metadata
@@ -1624,6 +1636,8 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
+                    ReadInternString(translator, interner, ref _includeBeforeWildcardExpansionEscaped);
+                    ReadInternString(translator, interner, ref _definingFileEscaped);
                     if (translator.TranslateNullable(_directMetadata))
                     {
                         int count = translator.Reader.ReadInt32();
@@ -1691,7 +1705,7 @@ namespace Microsoft.Build.Execution
             {
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                _directMetadata = _directMetadata ?? new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                _directMetadata ??= new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
                 ProjectMetadataInstance metadatum = new ProjectMetadataInstance(name, metadataValueEscaped, allowItemSpecModifiers /* may not be built-in metadata name */);
                 _directMetadata.Set(metadatum);
 
@@ -1699,7 +1713,7 @@ namespace Microsoft.Build.Execution
             }
 
             /// <summary>
-            /// Sets metadata where one built-in metadata is allowed to be set: RecursiveDir. 
+            /// Sets metadata where one built-in metadata is allowed to be set: RecursiveDir.
             /// This is not normally legal to set outside of evaluation. However, the CreateItem
             /// needs to be able to set it as a task output, because it supports wildcards. So as a special exception we allow
             /// tasks to set this particular metadata as a task output.
@@ -1713,7 +1727,7 @@ namespace Microsoft.Build.Execution
 
                 if (!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(name))
                 {
-                    _directMetadata = _directMetadata ?? new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                    _directMetadata ??= new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
                     ProjectMetadataInstance metadatum = new ProjectMetadataInstance(name, evaluatedValueEscaped, true /* may be built-in metadata name */);
                     _directMetadata.Set(metadatum);
                 }
@@ -1763,7 +1777,6 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private ProjectMetadataInstance GetItemDefinitionMetadata(string metadataName)
             {
-                ProjectMetadataInstance metadataFromDefinition = null;
 
                 // Check any inherited item definition metadata first. It's more like
                 // direct metadata, but we didn't want to copy the tables.
@@ -1771,7 +1784,7 @@ namespace Microsoft.Build.Execution
                 {
                     foreach (ProjectItemDefinitionInstance itemDefinition in _itemDefinitions)
                     {
-                        metadataFromDefinition = itemDefinition.GetMetadata(metadataName);
+                        ProjectMetadataInstance metadataFromDefinition = itemDefinition.GetMetadata(metadataName);
 
                         if (metadataFromDefinition != null)
                         {
@@ -1809,7 +1822,7 @@ namespace Microsoft.Build.Execution
                 internal ProjectItemInstanceFactory(ProjectInstance project, string itemType)
                     : this(project)
                 {
-                    ErrorUtilities.VerifyThrowInternalLength(itemType, "itemType");
+                    ErrorUtilities.VerifyThrowInternalLength(itemType, nameof(itemType));
                     this.ItemType = itemType;
                 }
 
@@ -1901,7 +1914,7 @@ namespace Microsoft.Build.Execution
                 private ProjectItemInstance CreateItem(string includeEscaped, string includeBeforeWildcardExpansionEscaped, ProjectItemInstance source, string definingProject)
                 {
                     ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
-                    ErrorUtilities.VerifyThrowInternalNull(source, "source");
+                    ErrorUtilities.VerifyThrowInternalNull(source, nameof(source));
 
                     // The new item inherits any metadata originating in item definitions, which
                     // takes precedence over its own item definition metadata.
@@ -1915,14 +1928,14 @@ namespace Microsoft.Build.Execution
                     List<ProjectItemDefinitionInstance> itemDefinitionsClone = null;
                     if (source._taskItem._itemDefinitions != null)
                     {
-                        itemDefinitionsClone = itemDefinitionsClone ?? new List<ProjectItemDefinitionInstance>(source._taskItem._itemDefinitions.Count + 1);
+                        itemDefinitionsClone ??= new List<ProjectItemDefinitionInstance>(source._taskItem._itemDefinitions.Count + 1);
                         itemDefinitionsClone.AddRange(source._taskItem._itemDefinitions);
                     }
 
                     ProjectItemDefinitionInstance sourceItemDefinition;
                     if (_project.ItemDefinitions.TryGetValue(source.ItemType, out sourceItemDefinition))
                     {
-                        itemDefinitionsClone = itemDefinitionsClone ?? new List<ProjectItemDefinitionInstance>();
+                        itemDefinitionsClone ??= new List<ProjectItemDefinitionInstance>();
                         itemDefinitionsClone.Add(sourceItemDefinition);
                     }
 
@@ -2026,7 +2039,7 @@ namespace Microsoft.Build.Execution
                 {
                     TaskItem item = new TaskItem(baseItem);
 
-                    if (Path.DirectorySeparatorChar != '\\' && includeEscaped != null && includeEscaped.IndexOf('\\') > -1)
+                    if (Path.DirectorySeparatorChar != '\\' && includeEscaped?.IndexOf('\\') > -1)
                     {
                         includeEscaped = includeEscaped.Replace('\\', '/');
                     }
@@ -2057,7 +2070,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Implementation of IMetadataTable that can be passed to expander to expose only built-in metadata on this item.
             /// Built-in metadata is stored in a separate table so it can be cleared out when the item is renamed, as this invalidates the values.
-            /// Also, more importantly, because typically the same regular metadata values can be shared by many items, 
+            /// Also, more importantly, because typically the same regular metadata values can be shared by many items,
             /// and keeping item-specific metadata out of it could allow it to be implemented as a copy-on-write table.
             /// </summary>
             private class BuiltInMetadataTable : IMetadataTable

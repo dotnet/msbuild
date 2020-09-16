@@ -132,7 +132,7 @@ namespace Microsoft.Build.BackEnd
         public void SendData(int node, INodePacket packet)
         {
             // Look up the node provider for this node in the mapping.
-            INodeProvider provider = null;
+            INodeProvider provider;
             if (!_nodeIdToProvider.TryGetValue(node, out provider))
             {
                 ErrorUtilities.ThrowInternalError("Node {0} does not have a provider.", node);
@@ -156,16 +156,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             _nodesShutdown = true;
-
-            if (null != _inProcNodeProvider)
-            {
-                _inProcNodeProvider.ShutdownConnectedNodes(enableReuse);
-            }
-
-            if (null != _outOfProcNodeProvider)
-            {
-                _outOfProcNodeProvider.ShutdownConnectedNodes(enableReuse);
-            }
+            _inProcNodeProvider?.ShutdownConnectedNodes(enableReuse);
+            _outOfProcNodeProvider?.ShutdownConnectedNodes(enableReuse);
         }
 
         /// <summary>
@@ -174,10 +166,7 @@ namespace Microsoft.Build.BackEnd
         public void ShutdownAllNodes()
         {
             // don't worry about inProc
-            if (null != _outOfProcNodeProvider)
-            {
-                _outOfProcNodeProvider.ShutdownAllNodes();
-            }
+            _outOfProcNodeProvider?.ShutdownAllNodes();
         }
 
         #endregion
@@ -325,7 +314,7 @@ namespace Microsoft.Build.BackEnd
         private int AttemptCreateNode(INodeProvider nodeProvider, NodeConfiguration nodeConfiguration)
         {
             // If no provider was passed in, we obviously can't create a node.
-            if (null == nodeProvider)
+            if (nodeProvider == null)
             {
                 ErrorUtilities.ThrowInternalError("No node provider provided.");
                 return InvalidNodeId;
@@ -338,8 +327,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Assign a global ID to the node we are about to create.
-            int nodeId = InvalidNodeId;
-
+            int nodeId;
             if (nodeProvider is NodeProviderInProc)
             {
                 nodeId = _inprocNodeId;

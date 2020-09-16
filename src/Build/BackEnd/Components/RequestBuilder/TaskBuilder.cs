@@ -48,7 +48,7 @@ namespace Microsoft.Build.BackEnd
 
     /// <summary>
     /// The TaskBuilder is one of two components related to building tasks, the other being the TaskExecutionHost.  The TaskBuilder is
-    /// responsible for all parts dealing with the XML/task declaration.  It determines if the task is intrinsic or extrinsic, 
+    /// responsible for all parts dealing with the XML/task declaration.  It determines if the task is intrinsic or extrinsic,
     /// looks up the task in the task registry, determines the task parameters and requests them to be set, and requests outputs
     /// when task execution has been completed.  It is not responsible for reflection over the task instance or anything which
     /// requires dealing with the task instance directly - those actions are handled by the TaskExecutionHost.
@@ -77,7 +77,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// The task instance for extrinsic tasks
-        /// </summary> 
+        /// </summary>
         private ProjectTaskInstance _taskNode;
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// indicates whether to ignore task execution failures
-        /// </summary> 
+        /// </summary>
         private ContinueOnError _continueOnError;
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> to use when executing the task.</param>
         /// <returns>The result of running the task batch.</returns>
         /// <remarks>
-        /// The ExecuteTask method takes a task as specified by XML and executes it.  This procedure is comprised 
+        /// The ExecuteTask method takes a task as specified by XML and executes it.  This procedure is comprised
         /// of the following steps:
         /// 1. Loading the Task from its containing assembly by looking it up in the task registry
         /// 2. Determining if the task is batched.  If it is, create the batches and execute each as if it were a non-batched task
@@ -205,10 +205,7 @@ namespace Microsoft.Build.BackEnd
                 _componentHost = null;
 
                 IDisposable disposable = _taskExecutionHost as IDisposable;
-                if (disposable != null)
-                {
-                    disposable.Dispose();
-                }
+                disposable?.Dispose();
 
                 _taskExecutionHost = null;
             }
@@ -284,12 +281,12 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it. 
+        /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it.
         /// </summary>
         /// <returns>true, if successful</returns>
         private async Task<WorkUnitResult> ExecuteTask(TaskExecutionMode mode, Lookup lookup)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(lookup, "lookup");
+            ErrorUtilities.VerifyThrowArgumentNull(lookup, nameof(lookup));
 
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
             TaskHost taskHost = null;
@@ -343,7 +340,7 @@ namespace Microsoft.Build.BackEnd
 
                 taskHost?.MarkAsInactive();
 
-                // Now all task batches are done, apply all item adds to the outer 
+                // Now all task batches are done, apply all item adds to the outer
                 // target batch; we do this even if the task wasn't found (in that case,
                 // no items or properties will have been added to the scope)
                 if (buckets != null)
@@ -361,7 +358,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Execute a single bucket
         /// </summary>
-        /// <returns>true if execution succeeded</returns>        
+        /// <returns>true if execution succeeded</returns>
         private async Task<WorkUnitResult> ExecuteBucket(TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask, Dictionary<string, string> lookupHash)
         {
             // On Intrinsic tasks, we do not allow batchable params, therefore metadata is excluded.
@@ -383,9 +380,7 @@ namespace Microsoft.Build.BackEnd
             if (!condition)
             {
                 LogSkippedTask(bucket, howToExecuteTask);
-                taskResult = new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null);
-
-                return taskResult;
+                return new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null);
             }
 
             // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
@@ -407,14 +402,14 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Change to the project root directory.
                     // If that directory does not exist, do nothing. (Do not check first as it is almost always there and it is slow)
-                    // This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project. 
+                    // This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project.
                     // No errors are masked by doing this: errors loading the project from disk are reported at load time, if necessary.
                     NativeMethodsShared.SetCurrentDirectory(_buildRequestEntry.ProjectRootDirectory);
                 }
 
                 if (howToExecuteTask == TaskExecutionMode.ExecuteTaskAndGatherOutputs)
                 {
-                    // We need to find the task before logging the task started event so that the using task statement comes before the task started event 
+                    // We need to find the task before logging the task started event so that the using task statement comes before the task started event
                     IDictionary<string, string> taskIdentityParameters = GatherTaskIdentityParameters(bucket.Expander);
                     TaskRequirements? requirements = _taskExecutionHost.FindTask(taskIdentityParameters);
                     if (requirements != null)
@@ -425,7 +420,7 @@ namespace Microsoft.Build.BackEnd
                         try
                         {
                             if (
-                                ((requirements.Value & TaskRequirements.RequireSTAThread) == TaskRequirements.RequireSTAThread)
+                                (requirements.Value & TaskRequirements.RequireSTAThread) == TaskRequirements.RequireSTAThread
 #if FEATURE_APARTMENT_STATE
                                 && (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
 #endif
@@ -513,19 +508,19 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Returns the set of parameters that can contribute to a task's identity, and their values for this particular task.  
+        /// Returns the set of parameters that can contribute to a task's identity, and their values for this particular task.
         /// </summary>
         private IDictionary<string, string> GatherTaskIdentityParameters(Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
-            ErrorUtilities.VerifyThrowInternalNull(_taskNode, "taskNode"); // taskNode should never be null when we're calling this method. 
+            ErrorUtilities.VerifyThrowInternalNull(_taskNode, "taskNode"); // taskNode should never be null when we're calling this method.
 
             string msbuildArchitecture = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildArchitecture ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildArchitectureLocation ?? ElementLocation.EmptyLocation);
             string msbuildRuntime = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildRuntime ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildRuntimeLocation ?? ElementLocation.EmptyLocation);
 
             IDictionary<string, string> taskIdentityParameters = null;
 
-            // only bother to create a task identity parameter set if we're putting anything in there -- otherwise, 
-            // a null set will be treated as equivalent to all parameters being "don't care". 
+            // only bother to create a task identity parameter set if we're putting anything in there -- otherwise,
+            // a null set will be treated as equivalent to all parameters being "don't care".
             if (msbuildRuntime != String.Empty || msbuildArchitecture != String.Empty)
             {
                 taskIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -540,14 +535,13 @@ namespace Microsoft.Build.BackEnd
             return taskIdentityParameters;
         }
 
-
 #if FEATURE_APARTMENT_STATE
         /// <summary>
         /// Executes the task using an STA thread.
         /// </summary>
         /// <comment>
-        /// STA thread launching also being used in XMakeCommandLine\OutOfProcTaskAppDomainWrapperBase.cs, InstantiateAndExecuteTaskInSTAThread method.  
-        /// Any bug fixes made to this code, please ensure that you also fix that code.  
+        /// STA thread launching also being used in XMakeCommandLine\OutOfProcTaskAppDomainWrapperBase.cs, InstantiateAndExecuteTaskInSTAThread method.
+        /// Any bug fixes made to this code, please ensure that you also fix that code.
         /// </comment>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is caught and rethrown in the correct thread.")]
         private WorkUnitResult ExecuteTaskInSTAThread(ItemBucket bucket, TaskLoggingContext taskLoggingContext, IDictionary<string, string> taskIdentityParameters, TaskHost taskHost, TaskExecutionMode howToExecuteTask)
@@ -592,10 +586,7 @@ namespace Microsoft.Build.BackEnd
                 taskRunnerFinished = null;
             }
 
-            if (exceptionFromExecution != null)
-            {
-                exceptionFromExecution.Throw();
-            }
+            exceptionFromExecution?.Throw();
 
             return taskResult;
         }
@@ -614,7 +605,7 @@ namespace Microsoft.Build.BackEnd
                     if (!_targetLoggingContext.LoggingService.OnlyLogCriticalEvents)
                     {
                         // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
-                        string expanded = bucket.Expander.ExpandIntoStringAndUnescape(_targetChildInstance.Condition, ExpanderOptions.ExpandAll | ExpanderOptions.LeavePropertiesUnexpandedOnError, _targetChildInstance.ConditionLocation);
+                        string expanded = bucket.Expander.ExpandIntoStringAndUnescape(_targetChildInstance.Condition, ExpanderOptions.ExpandAll | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _targetChildInstance.ConditionLocation);
 
                         // Whilst we are within the processing of the task, we haven't actually started executing it, so
                         // our skip task message needs to be in the context of the target. However any errors should be reported
@@ -828,7 +819,7 @@ namespace Microsoft.Build.BackEnd
 
                     // Set the property "MSBuildLastTaskResult" to reflect whether the task succeeded or not.
                     // The main use of this is if ContinueOnError is true -- so that the next task can consult the result.
-                    // So we want it to be "false" even if ContinueOnError is true. 
+                    // So we want it to be "false" even if ContinueOnError is true.
                     // The constants "true" and "false" should NOT be localized. They become property values.
                     bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, taskResult ? "true" : "false", true/* may be reserved */, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
                 }
@@ -868,7 +859,7 @@ namespace Microsoft.Build.BackEnd
                         _continueOnError = ContinueOnError.ErrorAndStop;
 
                         // Rethrow wrapped in order to avoid losing the callstack
-                        throw new BuildAbortedException(taskException.Message, ((BuildAbortedException)taskException));
+                        throw new BuildAbortedException(taskException.Message, (BuildAbortedException)taskException);
                     }
                     else if (type == typeof(CircularDependencyException))
                     {
@@ -895,7 +886,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else if (type == typeof(Exception) || type.GetTypeInfo().IsSubclassOf(typeof(Exception)))
                     {
-                        // Occasionally, when debugging a very uncommon task exception, it is useful to loop the build with 
+                        // Occasionally, when debugging a very uncommon task exception, it is useful to loop the build with
                         // a debugger attached to break on 2nd chance exceptions.
                         // That requires that there needs to be a way to not catch here, by setting an environment variable.
                         if (ExceptionHandling.IsCriticalException(taskException) || (Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") == "1"))
@@ -1186,7 +1177,7 @@ namespace Microsoft.Build.BackEnd
         {
             string taskParameterAttribute = _taskNode.GetParameter(taskParameterName);
 
-            if (null != taskParameterAttribute)
+            if (taskParameterAttribute != null)
             {
                 ProjectTaskOutputItemInstance taskItemInstance = taskOutputSpecification as ProjectTaskOutputItemInstance;
                 if (taskItemInstance != null)

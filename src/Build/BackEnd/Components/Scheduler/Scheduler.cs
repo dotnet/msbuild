@@ -33,9 +33,9 @@ namespace Microsoft.Build.BackEnd
         internal const int InvalidNodeId = -1;
 
         /// <summary>
-        /// ID used to indicate that the results for a particular configuration may at one point 
-        /// have resided on this node, but currently do not and will need to be transferred back 
-        /// in order to be used.  
+        /// ID used to indicate that the results for a particular configuration may at one point
+        /// have resided on this node, but currently do not and will need to be transferred back
+        /// in order to be used.
         /// </summary>
         internal const int ResultsTransferredId = -2;
 
@@ -50,8 +50,8 @@ namespace Microsoft.Build.BackEnd
         internal const int VirtualNode = 0;
 
         /// <summary>
-        /// If MSBUILDCUSTOMSCHEDULER = CustomSchedulerForSQL, the default multiplier for the amount by which 
-        /// the count of configurations on any one node can exceed the average configuration count is 1.1 -- 
+        /// If MSBUILDCUSTOMSCHEDULER = CustomSchedulerForSQL, the default multiplier for the amount by which
+        /// the count of configurations on any one node can exceed the average configuration count is 1.1 --
         /// + 10%.
         /// </summary>
         private const double DefaultCustomSchedulerForSQLConfigurationLimitMultiplier = 1.1;
@@ -81,13 +81,13 @@ namespace Microsoft.Build.BackEnd
         private Dictionary<int, NodeInfo> _availableNodes;
 
         /// <summary>
-        /// The number of inproc nodes that can be created without hitting the 
+        /// The number of inproc nodes that can be created without hitting the
         /// node limit.
         /// </summary>
         private int _currentInProcNodeCount = 0;
 
         /// <summary>
-        /// The number of out-of-proc nodes that can be created without hitting the 
+        /// The number of out-of-proc nodes that can be created without hitting the
         /// node limit.
         /// </summary>
         private int _currentOutOfProcNodeCount = 0;
@@ -135,9 +135,9 @@ namespace Microsoft.Build.BackEnd
         private string _debugDumpPath;
 
         /// <summary>
-        /// If MSBUILDCUSTOMSCHEDULER = CustomSchedulerForSQL, the user may also choose to set 
-        /// MSBUILDCUSTOMSCHEDULERFORSQLCONFIGURATIONLIMITMULTIPLIER to the value by which they want 
-        /// the max configuration count for any one node to exceed the average configuration count.  
+        /// If MSBUILDCUSTOMSCHEDULER = CustomSchedulerForSQL, the user may also choose to set
+        /// MSBUILDCUSTOMSCHEDULERFORSQLCONFIGURATIONLIMITMULTIPLIER to the value by which they want
+        /// the max configuration count for any one node to exceed the average configuration count.
         /// If that env var is not set, or is set to an invalid value (negative, less than 1, non-numeric)
         /// then we use the default value instead.
         /// </summary>
@@ -162,8 +162,6 @@ namespace Microsoft.Build.BackEnd
             _forceAffinityOutOfProc = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
             _debugDumpPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
             _schedulingUnlimitedVariable = Environment.GetEnvironmentVariable("MSBUILDSCHEDULINGUNLIMITED");
-            string strNodeLimitOffset = null;
-
             _nodeLimitOffset = 0;
 
             if (!String.IsNullOrEmpty(_schedulingUnlimitedVariable))
@@ -174,8 +172,7 @@ namespace Microsoft.Build.BackEnd
             {
                 _schedulingUnlimited = false;
 
-                strNodeLimitOffset = Environment.GetEnvironmentVariable("MSBUILDNODELIMITOFFSET");
-
+                string strNodeLimitOffset = Environment.GetEnvironmentVariable("MSBUILDNODELIMITOFFSET");
                 if (!String.IsNullOrEmpty(strNodeLimitOffset))
                 {
                     _nodeLimitOffset = Int16.Parse(strNodeLimitOffset, CultureInfo.InvariantCulture);
@@ -198,8 +195,8 @@ namespace Microsoft.Build.BackEnd
         #region Delegates
 
         /// <summary>
-        /// In the circumstance where we want to specify the scheduling algorithm via the secret environment variable 
-        /// MSBUILDCUSTOMSCHEDULING, the scheduling algorithm used will be assigned to a delegate of this type. 
+        /// In the circumstance where we want to specify the scheduling algorithm via the secret environment variable
+        /// MSBUILDCUSTOMSCHEDULING, the scheduling algorithm used will be assigned to a delegate of this type.
         /// </summary>
         internal delegate void AssignUnscheduledRequestsDelegate(List<ScheduleResponse> responses, HashSet<int> idleNodes);
 
@@ -603,8 +600,6 @@ namespace Microsoft.Build.BackEnd
 
             // Resume any work available which has already been assigned to specific nodes.
             ResumeRequiredWork(responses);
-
-            int nodesFreeToDoWorkPriorToScheduling = 0;
             HashSet<int> idleNodes = new HashSet<int>();
             foreach (int availableNodeId in _availableNodes.Keys)
             {
@@ -614,7 +609,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            nodesFreeToDoWorkPriorToScheduling = idleNodes.Count;
+            int nodesFreeToDoWorkPriorToScheduling = idleNodes.Count;
 
             // Assign requests to any nodes which are currently idle.
             if (idleNodes.Count > 0 && _schedulingData.UnscheduledRequestsCount > 0)
@@ -742,8 +737,8 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Reads in the scheduling plan if one exists and has not previously been read; returns true if the scheduling plan 
-        /// both exists and is valid, or false otherwise. 
+        /// Reads in the scheduling plan if one exists and has not previously been read; returns true if the scheduling plan
+        /// both exists and is valid, or false otherwise.
         /// </summary>
         private bool GetSchedulingPlanAndAlgorithm()
         {
@@ -1164,13 +1159,13 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Custom scheduler for the SQL folks to solve a performance problem with their builds where they end up with a few long-running 
-        /// requests on all but one node, and then a very large number of short-running requests on that one node -- which is by design for 
-        /// our current scheduler, but makes it so that later in the build, when these configurations are re-entered with new requests, the 
-        /// build becomes essentially serial because so many of the configurations are tied to that one node.  
-        /// 
-        /// Fixes that problem by intentionally choosing to refrain from assigning new configurations to idle nodes if those idle nodes already 
-        /// have more than their fair share of the existing configurations assigned to them. 
+        /// Custom scheduler for the SQL folks to solve a performance problem with their builds where they end up with a few long-running
+        /// requests on all but one node, and then a very large number of short-running requests on that one node -- which is by design for
+        /// our current scheduler, but makes it so that later in the build, when these configurations are re-entered with new requests, the
+        /// build becomes essentially serial because so many of the configurations are tied to that one node.
+        ///
+        /// Fixes that problem by intentionally choosing to refrain from assigning new configurations to idle nodes if those idle nodes already
+        /// have more than their fair share of the existing configurations assigned to them.
         /// </summary>
         private void AssignUnscheduledRequestsUsingCustomSchedulerForSQL(List<ScheduleResponse> responses, HashSet<int> idleNodes)
         {
@@ -1247,8 +1242,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void AssignUnscheduledRequestToNode(SchedulableRequest request, int nodeId, List<ScheduleResponse> responses)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(request, "request");
-            ErrorUtilities.VerifyThrowArgumentNull(responses, "responses");
+            ErrorUtilities.VerifyThrowArgumentNull(request, nameof(request));
+            ErrorUtilities.VerifyThrowArgumentNull(responses, nameof(responses));
             ErrorUtilities.VerifyThrow(nodeId != InvalidNodeId, "Invalid node id specified.");
 
             // Currently we cannot move certain kinds of traversals (notably solution metaprojects) to other nodes because 
@@ -1287,21 +1282,12 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            int limit = 0;
-            switch (_componentHost.BuildParameters.MaxNodeCount)
+            int limit = _componentHost.BuildParameters.MaxNodeCount switch
             {
-                case 1:
-                    limit = 1;
-                    break;
-
-                case 2:
-                    limit = _componentHost.BuildParameters.MaxNodeCount + 1 + _nodeLimitOffset;
-                    break;
-
-                default:
-                    limit = _componentHost.BuildParameters.MaxNodeCount + 2 + _nodeLimitOffset;
-                    break;
-            }
+                1 => 1,
+                2 => _componentHost.BuildParameters.MaxNodeCount + 1 + _nodeLimitOffset,
+                _ => _componentHost.BuildParameters.MaxNodeCount + 2 + _nodeLimitOffset,
+            };
 
             // We're at our limit of schedulable requests if: 
             // (1) MaxNodeCount requests are currently executing
@@ -1328,14 +1314,14 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Adds CreateNode responses to satisfy all the affinities in the list of requests, with the following constraints:
-        /// 
+        ///
         /// a) Issue no more than one response to create an inproc node, and aggressively issues as many requests for an out-of-proc node
-        ///    as there are requests to assign to them. 
-        ///    
+        ///    as there are requests to assign to them.
+        ///
         /// b) Don't exceed the max node count, *unless* there isn't even one node of the necessary affinity yet. (That means that even if there's a max
-        ///    node count of e.g., 3, and we have already created 3 out of proc nodes, we will still create an inproc node if affinity requires it; if 
+        ///    node count of e.g., 3, and we have already created 3 out of proc nodes, we will still create an inproc node if affinity requires it; if
         ///    we didn't, the build would jam.)
-        ///    
+        ///
         /// Returns true if there is a pending response to create a new node.
         /// </summary>
         private bool CreateNewNodeIfPossible(List<ScheduleResponse> responses, IEnumerable<SchedulableRequest> requests)
@@ -1486,8 +1472,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleRequestBlockedOnInProgressTarget(SchedulableRequest blockedRequest, BuildRequestBlocker blocker)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blockedRequest, "blockedRequest");
-            ErrorUtilities.VerifyThrowArgumentNull(blocker, "blocker");
+            ErrorUtilities.VerifyThrowArgumentNull(blockedRequest, nameof(blockedRequest));
+            ErrorUtilities.VerifyThrowArgumentNull(blocker, nameof(blocker));
 
             // We are blocked on an in-progress request building a target whose results we need.
             SchedulableRequest blockingRequest = _schedulingData.GetScheduledRequest(blocker.BlockingRequestId);
@@ -1545,8 +1531,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleRequestBlockedByNewRequests(SchedulableRequest parentRequest, BuildRequestBlocker blocker, List<ScheduleResponse> responses)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blocker, "blocker");
-            ErrorUtilities.VerifyThrowArgumentNull(responses, "responses");
+            ErrorUtilities.VerifyThrowArgumentNull(blocker, nameof(blocker));
+            ErrorUtilities.VerifyThrowArgumentNull(responses, nameof(responses));
 
             // The request is waiting on new requests.
             bool abortRequestBatch = false;
@@ -1566,7 +1552,7 @@ namespace Microsoft.Build.BackEnd
                 // directly here.  We COULD simply report these as blocking the parent request and let the scheduler pick them up later when the parent
                 // comes back up as schedulable, but we prefer to send the results back immediately so this request can (potentially) continue uninterrupted.
                 ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
-                if (null != response)
+                if (response != null)
                 {
                     TraceScheduler("Request {0} (node request {1}) satisfied from the cache.", request.GlobalRequestId, request.NodeRequestId);
 
@@ -1659,10 +1645,7 @@ namespace Microsoft.Build.BackEnd
                         BuildRequest requestToAdd = requestsToAdd.Pop();
                         SchedulableRequest blockingRequest = _schedulingData.CreateRequest(requestToAdd, parentRequest);
 
-                        if (parentRequest != null)
-                        {
-                            parentRequest.BlockByRequest(blockingRequest, blocker.TargetsInProgress);
-                        }
+                        parentRequest?.BlockByRequest(blockingRequest, blocker.TargetsInProgress);
                     }
                 }
             }
@@ -1688,7 +1671,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Attempts to get results from the cache for this request.  If results are available, reports them to the 
+        /// Attempts to get results from the cache for this request.  If results are available, reports them to the
         /// correct node.  If that action causes the parent to become ready and its node is idle, the parent is
         /// resumed.
         /// </summary>
@@ -1976,8 +1959,8 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Iterates through the set of available nodes and checks whether any of them is 
-        /// capable of servicing this request or any of the requests that it is blocked 
+        /// Iterates through the set of available nodes and checks whether any of them is
+        /// capable of servicing this request or any of the requests that it is blocked
         /// by (regardless of whether they are currently available to do so).
         /// </summary>
         private bool RequestOrAnyItIsBlockedByCanBeServiced(SchedulableRequest request)
@@ -2016,7 +1999,7 @@ namespace Microsoft.Build.BackEnd
         /// assigns a new request id.
         /// </summary>
         /// <remarks>
-        /// UNDONE: (Performance) This algorithm should be modified so we don't have to iterate over all of the 
+        /// UNDONE: (Performance) This algorithm should be modified so we don't have to iterate over all of the
         /// requests to find a matching one.  A HashSet with proper equality semantics and a good hash code for the BuildRequest
         /// would speed this considerably, especially for large numbers of projects in a build.
         /// </remarks>
@@ -2092,7 +2075,7 @@ namespace Microsoft.Build.BackEnd
                 currentWork[i] = invalidWorkId;
                 previousWork[i] = invalidWorkId;
                 runningRequests[i] = new HashSet<int>();
-                nodeIndices.Append(String.Format(CultureInfo.InvariantCulture, "{0,-5}   ", indexToAvailableNodeId[i]));
+                nodeIndices.AppendFormat(CultureInfo.InvariantCulture, "{0,-5}   ", indexToAvailableNodeId[i]);
             }
 
             loggingService.LogComment(context, MessageImportance.Normal, "NodeUtilizationHeader", nodeIndices.ToString());
@@ -2217,7 +2200,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    stringBuilder.Append(String.Format(CultureInfo.InvariantCulture, "{0,-5}   ", currentWork[i]));
+                    stringBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0,-5}   ", currentWork[i]);
                     haveNonIdleNode = true;
                 }
             }

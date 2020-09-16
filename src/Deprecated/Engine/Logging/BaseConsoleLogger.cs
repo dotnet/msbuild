@@ -113,9 +113,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (loggerParameters != null)
             {
-                string[] parameterComponents;
-
-                parameterComponents = loggerParameters.Split(parameterDelimiters);
+                string[] parameterComponents = loggerParameters.Split(parameterDelimiters);
                 for (int param = 0; param < parameterComponents.Length; param++)
                 {
                     if (parameterComponents[param].Length > 0)
@@ -175,7 +173,7 @@ namespace Microsoft.Build.BuildEngine
         internal string IndentString(string s, int indent)
         {
             // It's possible the event has a null message
-            if (null == s)
+            if (s == null)
             {
                 s = String.Empty;
             }
@@ -347,7 +345,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal bool IsVerbosityAtLeast(LoggerVerbosity checkVerbosity)
         {
-            return (this.verbosity >= checkVerbosity);
+            return this.verbosity >= checkVerbosity;
         }
 
         /// <summary>
@@ -566,7 +564,6 @@ namespace Microsoft.Build.BuildEngine
             return itemTypes;
         }
 
-
         internal virtual void OutputItems(string itemType, ArrayList itemTypeList)
         {
             // Write each item, one per line
@@ -589,7 +586,6 @@ namespace Microsoft.Build.BuildEngine
             }
             resetColor();
         }
-
 
         /// <summary>
         /// Returns a performance counter for a given scope (either task name or target name)
@@ -719,7 +715,6 @@ namespace Microsoft.Build.BuildEngine
                             inScope = false;
 
                             elapsedTime += (System.DateTime.Now - scopeStartTime);
-
                         }
                         else if (!InScope && value)
                         {
@@ -868,31 +863,31 @@ namespace Microsoft.Build.BuildEngine
             if (eventSource != null)
             {
                 eventSource.BuildStarted +=
-                        new BuildStartedEventHandler(BuildStartedHandler);
+                         BuildStartedHandler;
                 eventSource.BuildFinished +=
-                        new BuildFinishedEventHandler(BuildFinishedHandler);
+                         BuildFinishedHandler;
                 eventSource.ProjectStarted +=
-                        new ProjectStartedEventHandler(ProjectStartedHandler);
+                         ProjectStartedHandler;
                 eventSource.ProjectFinished +=
-                        new ProjectFinishedEventHandler(ProjectFinishedHandler);
+                         ProjectFinishedHandler;
                 eventSource.TargetStarted +=
-                        new TargetStartedEventHandler(TargetStartedHandler);
+                         TargetStartedHandler;
                 eventSource.TargetFinished +=
-                        new TargetFinishedEventHandler(TargetFinishedHandler);
+                         TargetFinishedHandler;
                 eventSource.TaskStarted +=
-                        new TaskStartedEventHandler(TaskStartedHandler);
+                         TaskStartedHandler;
                 eventSource.TaskFinished +=
-                        new TaskFinishedEventHandler(TaskFinishedHandler);
+                         TaskFinishedHandler;
 
                 eventSource.ErrorRaised +=
-                        new BuildErrorEventHandler(ErrorHandler);
+                         ErrorHandler;
                 eventSource.WarningRaised +=
-                        new BuildWarningEventHandler(WarningHandler);
+                         WarningHandler;
                 eventSource.MessageRaised +=
-                        new BuildMessageEventHandler(MessageHandler);
+                         MessageHandler;
 
                 eventSource.CustomEventRaised +=
-                        new CustomBuildEventHandler(CustomEventHandler);
+                         CustomEventHandler;
             }
         }
 
@@ -902,7 +897,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal virtual bool ApplyParameter(string parameterName, string parameterValue)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameterName, "parameterName");
+            ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
 
             switch (parameterName.ToUpperInvariant())
             {

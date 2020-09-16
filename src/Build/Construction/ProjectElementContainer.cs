@@ -481,7 +481,7 @@ namespace Microsoft.Build.Construction
                 // Therefore, we need to traverse both directions to find the first sibling of the same type as the one being added.
                 // If none is found, then the node being added is inserted as the only node of its kind
 
-                bool SiblingIsExplicitElement(ProjectElement _) => _.ExpressedAsAttribute == false;
+                bool SiblingIsExplicitElement(ProjectElement _) => !_.ExpressedAsAttribute;
 
                 if (TrySearchLeftSiblings(child.PreviousSibling, SiblingIsExplicitElement, out ProjectElement referenceSibling))
                 {
@@ -491,8 +491,7 @@ namespace Microsoft.Build.Construction
                     {
                         //  Try to match the surrounding formatting by checking the whitespace that precedes the node we inserted
                         //  after, and inserting the same whitespace between the previous node and the one we added
-                        if (referenceSibling.XmlElement.PreviousSibling != null &&
-                            referenceSibling.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
+                        if (referenceSibling.XmlElement.PreviousSibling?.NodeType == XmlNodeType.Whitespace)
                         {
                             var newWhitespaceNode = XmlDocument.CreateWhitespace(referenceSibling.XmlElement.PreviousSibling.Value);
                             XmlElement.InsertAfter(newWhitespaceNode, referenceSibling.XmlElement);
@@ -508,8 +507,7 @@ namespace Microsoft.Build.Construction
                     {
                         //  Try to match the surrounding formatting by checking the whitespace that precedes where we inserted
                         //  the new node, and inserting the same whitespace between the node we added and the one after it.
-                        if (child.XmlElement.PreviousSibling != null &&
-                            child.XmlElement.PreviousSibling.NodeType == XmlNodeType.Whitespace)
+                        if (child.XmlElement.PreviousSibling?.NodeType == XmlNodeType.Whitespace)
                         {
                             var newWhitespaceNode = XmlDocument.CreateWhitespace(child.XmlElement.PreviousSibling.Value);
                             XmlElement.InsertBefore(newWhitespaceNode, referenceSibling.XmlElement);
@@ -579,7 +577,7 @@ namespace Microsoft.Build.Construction
                 {
                     //  If we are trying to preserve formatting of the file, then also remove any whitespace
                     //  that came before the node we removed.
-                    if (previousSibling != null && previousSibling.NodeType == XmlNodeType.Whitespace)
+                    if (previousSibling?.NodeType == XmlNodeType.Whitespace)
                     {
                         XmlElement.RemoveChild(previousSibling);
                     }

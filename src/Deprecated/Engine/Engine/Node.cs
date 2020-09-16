@@ -29,8 +29,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal Node
         (
-            int nodeId, 
-            LoggerDescription[] nodeLoggers, 
+            int nodeId,
+            LoggerDescription[] nodeLoggers,
             IEngineCallback parentCallback,
             BuildPropertyGroup parentGlobalProperties,
             ToolsetDefinitionLocations toolsetSearchLocations,
@@ -127,7 +127,7 @@ namespace Microsoft.Build.BuildEngine
             TaskExecutionContext taskExecutionContext = localEngine.EngineCallback.GetTaskContextFromHandleId(currentRequest.HandleId);
             while (!taskExecutionContext.BuildContext.BuildRequest.IsExternalRequest)
             {
-                ErrorUtilities.VerifyThrow(taskExecutionContext.BuildContext.BuildRequest.IsGeneratedRequest, 
+                ErrorUtilities.VerifyThrow(taskExecutionContext.BuildContext.BuildRequest.IsGeneratedRequest,
                                            "Must be a generated request");
 
                 taskExecutionContext =
@@ -214,7 +214,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// A variation of PostStatus that throws instead of calling ReportUnhandledError
-        /// if there's a problem. This allows ReportUnhandledError itself to post status 
+        /// if there's a problem. This allows ReportUnhandledError itself to post status
         /// without the possibility of a loop.
         /// </summary>
         internal void PostStatusThrow(NodeStatus nodeStatus, bool blockUntilSent)
@@ -251,7 +251,7 @@ namespace Microsoft.Build.BuildEngine
                             launchedEngineLoopThread = true;
                             ThreadStart threadState = new ThreadStart(this.NodeLocalEngineLoop);
                             Thread taskThread = new Thread(threadState);
-                            taskThread.Name = "MSBuild Child Engine";                            
+                            taskThread.Name = "MSBuild Child Engine";
                             taskThread.SetApartmentState(ApartmentState.STA);
                             taskThread.Start();
                         }
@@ -305,7 +305,7 @@ namespace Microsoft.Build.BuildEngine
                 buildResult.HandleId = nodeRequestMapping.HandleId;
                 buildResult.RequestId = nodeRequestMapping.RequestId;
                 nodeRequestMapping.AddResultToCache(buildResult);
-                
+
                 // posts the result to the inproc node
                 localEngine.Router.PostDoneNotice(0, buildResult);
             }
@@ -387,7 +387,6 @@ namespace Microsoft.Build.BuildEngine
                 localEngine.LoggingServices.OnlyLogCriticalEvents = this.logOnlyCriticalEvents;
                 localEngine.PostEngineCommand( new ChangeTraversalTypeCommand( useBreadthFirstTraversal, true ));
             }
-
         }
 
         /// <summary>
@@ -436,7 +435,6 @@ namespace Microsoft.Build.BuildEngine
             {
                 try
                 {
-
                     PostStatusThrow(nodeStatus, true /* wait for the message to be sent before returning */);
                 }
                 catch (Exception ex)
@@ -457,10 +455,7 @@ namespace Microsoft.Build.BuildEngine
                 LocalNode.DumpExceptionToFile(originalException);
             }
 
-            if (localEngine != null)
-            {
-                localEngine.Shutdown();
-            }
+            localEngine?.Shutdown();
         }
 
         /// <summary>
@@ -474,10 +469,7 @@ namespace Microsoft.Build.BuildEngine
         /// <exception cref="Exception">Re-throws exception passed in</exception>
         internal void ReportFatalCommunicationError(Exception originalException, TextWriter loggingStream)
         {
-            if (loggingStream != null)
-            {
-                loggingStream.WriteLine(originalException.ToString());
-            }
+            loggingStream?.WriteLine(originalException.ToString());
 
             string message = ResourceUtilities.FormatResourceString("FatalErrorOnChildNode", nodeId, originalException.Message);
 

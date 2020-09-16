@@ -246,14 +246,14 @@ namespace Microsoft.Build.BuildEngine
                     // If the project file is malformed the build may fail without initializing the initialtargets or
                     // the default targests fields. The retrieval code expects non-null values
                     // so it is necessary to replace null with empty string
-                    ErrorUtilities.VerifyThrow(buildResult.EvaluationResult == false || buildResult.InitialTargets != null 
-                                               && buildResult.DefaultTargets != null , 
+                    ErrorUtilities.VerifyThrow(!buildResult.EvaluationResult || (buildResult.InitialTargets != null 
+                                               && buildResult.DefaultTargets != null), 
                                                "Expect initial targets to be non-null for successful builds");
-                    string defaultTargets = buildResult.DefaultTargets == null ? String.Empty : buildResult.DefaultTargets;
+                    string defaultTargets = buildResult.DefaultTargets ?? String.Empty;
                     PropertyCacheEntry defaultTargetsCacheEntry = new PropertyCacheEntry(Constants.defaultTargetCacheName, defaultTargets);
                     AddCacheEntryInternal(defaultTargetsCacheEntry);
 
-                    string initialTargets = buildResult.InitialTargets == null ? String.Empty : buildResult.InitialTargets;
+                    string initialTargets = buildResult.InitialTargets ?? String.Empty;
                     PropertyCacheEntry initialTargetsCacheEntry = new PropertyCacheEntry(Constants.initialTargetCacheName, initialTargets );
                     AddCacheEntryInternal(initialTargetsCacheEntry);
                 }
@@ -299,7 +299,7 @@ namespace Microsoft.Build.BuildEngine
                         }
 
                         BuildResultCacheEntry cacheEntry = new BuildResultCacheEntry((string)entry.Key, targetOutputs,
-                            (buildState == Target.BuildState.CompletedSuccessfully));
+                            buildState == Target.BuildState.CompletedSuccessfully);
 
                         if (Engine.debugMode)
                         {

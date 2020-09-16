@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -22,52 +23,60 @@ namespace Microsoft.Build.Shared.FileSystem
     }
 
     /// <summary>
-    /// Windows-specific implementation of file system operations using Windows native invocations
+    /// Windows-specific implementation of file system operations using Windows native invocations.
+    /// TODO For potential extra perf gains, provide native implementations for all IFileSystem methods and stop inheriting from ManagedFileSystem
     /// </summary>
-    internal class WindowsFileSystem : IFileSystem
+    internal class WindowsFileSystem : ManagedFileSystem
     {
         private static readonly WindowsFileSystem Instance = new WindowsFileSystem();
 
-        /// <nodoc/>
-        public static WindowsFileSystem Singleton() => WindowsFileSystem.Instance;
+        public new static WindowsFileSystem Singleton() => WindowsFileSystem.Instance;
 
-        private WindowsFileSystem()
-        { }
+        private WindowsFileSystem(){ }
 
-        /// <inheritdoc/>
-        public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
+        public override IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
         {
             return EnumerateFileOrDirectories(path, FileArtifactType.File, searchPattern, searchOption);
         }
 
-        /// <inheritdoc/>
-        public IEnumerable<string> EnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
+        public override IEnumerable<string> EnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
         {
             return EnumerateFileOrDirectories(path, FileArtifactType.Directory, searchPattern, searchOption);
         }
 
-        /// <inheritdoc/>
-        public IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, SearchOption searchOption)
+        public override IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, SearchOption searchOption)
         {
             return EnumerateFileOrDirectories(path, FileArtifactType.FileOrDirectory, searchPattern, searchOption);
         }
 
-        /// <inheritdoc/>
-        public bool DirectoryExists(string path)
+        public override bool DirectoryExists(string path)
         {
             return NativeMethodsShared.DirectoryExistsWindows(path);
         }
 
-        /// <inheritdoc/>
-        public bool FileExists(string path)
+        public override bool FileExists(string path)
         {
             return NativeMethodsShared.FileExistsWindows(path);
         }
 
-        /// <inheritdoc/>
-        public bool DirectoryEntryExists(string path)
+        public override bool DirectoryEntryExists(string path)
         {
             return NativeMethodsShared.FileOrDirectoryExistsWindows(path);
+        }
+
+        public override DateTime GetLastWriteTimeUtc(string path)
+        {
+            var fileLastWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(path);
+
+            if (fileLastWriteTime != DateTime.MinValue)
+            {
+                return fileLastWriteTime;
+            }
+            else
+            {
+                NativeMethodsShared.GetLastWriteDirectoryUtcTime(path, out var directoryLastWriteTime);
+                return directoryLastWriteTime;
+            }
         }
 
         private static IEnumerable<string> EnumerateFileOrDirectories(
@@ -113,27 +122,14 @@ namespace Microsoft.Build.Shared.FileSystem
                 {
                     int hr = Marshal.GetLastWin32Error();
                     Debug.Assert(hr != WindowsNative.ErrorFileNotFound);
-
-                    WindowsNative.EnumerateDirectoryStatus findHandleOpenStatus;
-                    switch (hr)
+                    WindowsNative.EnumerateDirectoryStatus findHandleOpenStatus = hr switch
                     {
-                        case WindowsNative.ErrorFileNotFound:
-                            findHandleOpenStatus = WindowsNative.EnumerateDirectoryStatus.SearchDirectoryNotFound;
-                            break;
-                        case WindowsNative.ErrorPathNotFound:
-                            findHandleOpenStatus = WindowsNative.EnumerateDirectoryStatus.SearchDirectoryNotFound;
-                            break;
-                        case WindowsNative.ErrorDirectory:
-                            findHandleOpenStatus = WindowsNative.EnumerateDirectoryStatus.CannotEnumerateFile;
-                            break;
-                        case WindowsNative.ErrorAccessDenied:
-                            findHandleOpenStatus = WindowsNative.EnumerateDirectoryStatus.AccessDenied;
-                            break;
-                        default:
-                            findHandleOpenStatus = WindowsNative.EnumerateDirectoryStatus.UnknownError;
-                            break;
-                    }
-
+                        WindowsNative.ErrorFileNotFound => WindowsNative.EnumerateDirectoryStatus.SearchDirectoryNotFound,
+                        WindowsNative.ErrorPathNotFound => WindowsNative.EnumerateDirectoryStatus.SearchDirectoryNotFound,
+                        WindowsNative.ErrorDirectory => WindowsNative.EnumerateDirectoryStatus.CannotEnumerateFile,
+                        WindowsNative.ErrorAccessDenied => WindowsNative.EnumerateDirectoryStatus.AccessDenied,
+                        _ => WindowsNative.EnumerateDirectoryStatus.UnknownError,
+                    };
                     return new WindowsNative.EnumerateDirectoryResult(directoryPath, findHandleOpenStatus, hr);
                 }
 

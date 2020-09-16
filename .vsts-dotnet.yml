@@ -147,11 +147,11 @@ stages:
         ArtifactName: logs
       condition: succeededOrFailed()
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: symbols'
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Artifact: bin'
       inputs:
-        PathtoPublish: 'artifacts\bin'
-        ArtifactName: symbols
+        path: 'artifacts\bin'
+        artifactName: bin
       condition: succeededOrFailed()
 
     # Publishes setup VSIXes to a drop.
@@ -179,6 +179,15 @@ stages:
       inputs:
         PathtoPublish: 'artifacts\packages\$(BuildConfiguration)'
         ArtifactName: PackageArtifacts
+      condition: succeeded()
+
+    # Publish "IntelliSense" XSD files to their own artifact
+    # so it can be consumed by the insertion-to-VS job
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Artifact: xsd'
+      inputs:
+        path: 'artifacts\xsd'
+        artifactName: xsd
       condition: succeeded()
 
     # Publish Asset Manifests for Build Asset Registry job

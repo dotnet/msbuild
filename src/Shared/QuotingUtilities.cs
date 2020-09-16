@@ -193,7 +193,7 @@ namespace Microsoft.Build.Shared
                         break;
 
                     case '"':
-                        unquotedString.Append('\\', (precedingBackslashes / 2));
+                        unquotedString.Append('\\', precedingBackslashes / 2);
                         if ((precedingBackslashes % 2) == 0)
                         {
                             if (isQuoted &&

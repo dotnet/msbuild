@@ -12,7 +12,7 @@ namespace Microsoft.Build.Tasks
     {
         /// <summary>
         /// Passed to the "Transform" property on the TlbImp task to indicate
-        /// what transforms, if any, to apply to the type library during 
+        /// what transforms, if any, to apply to the type library during
         /// assembly generation
         /// </summary>
         internal enum TlbImpTransformFlags
@@ -35,7 +35,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Defines the "TlbImp" MSBuild task, which enables using TlbImp.exe 
+        /// Defines the "TlbImp" MSBuild task, which enables using TlbImp.exe
         /// to generate assemblies from type libraries.
         /// </summary>
         internal class TlbImp : AxTlbBaseTask
@@ -237,7 +237,7 @@ namespace Microsoft.Build.Tasks
                 commandLine.AppendFileNameIfNotNull(TypeLibName);
 
                 // options
-                commandLine.AppendSwitchIfNotNull("/asmversion:", (AssemblyVersion != null) ? AssemblyVersion.ToString() : null);
+                commandLine.AppendSwitchIfNotNull("/asmversion:", AssemblyVersion?.ToString());
                 commandLine.AppendSwitchIfNotNull("/namespace:", AssemblyNamespace);
                 commandLine.AppendSwitchIfNotNull("/machine:", Machine);
                 commandLine.AppendWhenTrue("/noclassmembers", Bag, "PreventClassMembers");
@@ -296,46 +296,38 @@ namespace Microsoft.Build.Tasks
             }
 
             /// <summary>
-            /// Verifies that an allowed combination of TlbImpTransformFlags has been 
+            /// Verifies that an allowed combination of TlbImpTransformFlags has been
             /// passed to the Transform property.
             /// </summary>
             /// <returns>True if Transform is valid and false otherwise</returns>
             private bool ValidateTransformFlags()
             {
                 // Any flag on its own is fine ...
-                switch (Transform)
+                return Transform switch
                 {
-                    case TlbImpTransformFlags.None:
-                        return true;
-                    case TlbImpTransformFlags.SerializableValueClasses:
-                        return true;
-                    case TlbImpTransformFlags.TransformDispRetVals:
-                        return true;
-                }
-
-                // ... But any and all other combinations of flags are disallowed.
-                return false;
+                    TlbImpTransformFlags.None => true,
+                    TlbImpTransformFlags.SerializableValueClasses => true,
+                    TlbImpTransformFlags.TransformDispRetVals => true,
+                    // ... But any and all other combinations of flags are disallowed.
+                    _ => false,
+                };
             }
 
             /// <summary>
-            /// Converts a given flag to the equivalent parameter passed to the /transform: 
+            /// Converts a given flag to the equivalent parameter passed to the /transform:
             /// option of tlbimp.exe
             /// </summary>
             /// <param name="flags">The TlbImpTransformFlags being converted</param>
             /// <returns>A string that can be passed to /transform: on the command line</returns>
             private static string ConvertTransformFlagsToCommandLineCommand(TlbImpTransformFlags flags)
             {
-                switch (flags)
+                return flags switch
                 {
-                    case TlbImpTransformFlags.None:
-                        return null;
-                    case TlbImpTransformFlags.SerializableValueClasses:
-                        return "SerializableValueClasses";
-                    case TlbImpTransformFlags.TransformDispRetVals:
-                        return "DispRet";
-                }
-
-                return null;
+                    TlbImpTransformFlags.None => null,
+                    TlbImpTransformFlags.SerializableValueClasses => "SerializableValueClasses",
+                    TlbImpTransformFlags.TransformDispRetVals => "DispRet",
+                    _ => null,
+                };
             }
 
             #endregion // ToolTask Members

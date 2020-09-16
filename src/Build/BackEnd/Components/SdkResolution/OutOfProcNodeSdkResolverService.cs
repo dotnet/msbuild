@@ -61,14 +61,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
-        public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive)
+        public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
             // Get a cached response if possible, otherwise send the request
             var sdkResult = _responseCache.GetOrAdd(
                 sdk.Name,
                 key =>
                 {
-                    var result = RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive);
+                    var result = RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
                     return result;
                 });
 
@@ -103,13 +103,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _responseReceivedEvent.Set();
         }
 
-        private SdkResult RequestSdkPathFromMainNode(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive)
+        private SdkResult RequestSdkPathFromMainNode(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
             // Clear out the last response for good measure
             _lastResponse = null;
 
             // Create the SdkResolverRequest packet to send
-            INodePacket packet = SdkResolverRequest.Create(submissionId, sdk, loggingContext.BuildEventContext, sdkReferenceLocation, solutionPath, projectPath, interactive);
+            INodePacket packet = SdkResolverRequest.Create(submissionId, sdk, loggingContext.BuildEventContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
 
             SendPacket(packet);
 

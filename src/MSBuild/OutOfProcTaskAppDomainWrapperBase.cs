@@ -360,7 +360,7 @@ namespace Microsoft.Build.CommandLine
                 try
                 {
                     PropertyInfo paramInfo = wrappedTask.GetType().GetProperty(param.Key, BindingFlags.Instance | BindingFlags.Public);
-                    paramInfo.SetValue(wrappedTask, (param.Value == null ? null : param.Value.WrappedParameter), null);
+                    paramInfo.SetValue(wrappedTask, param.Value?.WrappedParameter, null);
                 }
                 catch (Exception e)
                 {

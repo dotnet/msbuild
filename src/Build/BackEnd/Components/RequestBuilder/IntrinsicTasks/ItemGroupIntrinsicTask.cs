@@ -159,7 +159,7 @@ namespace Microsoft.Build.BackEnd
         {
             // First, collect up the appropriate metadata collections.  We need the one from the item definition, if any, and
             // the one we are using for this batching bucket.
-            ProjectItemDefinitionInstance itemDefinition = null;
+            ProjectItemDefinitionInstance itemDefinition;
             Project.ItemDefinitions.TryGetValue(child.ItemType, out itemDefinition);
 
             // The NestedMetadataTable will handle the aggregation of the different metadata collections
@@ -215,7 +215,7 @@ namespace Microsoft.Build.BackEnd
                 LoggingContext.BuildEventContext,
                 FileSystems.Default);
 
-            if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd != null && itemsToAdd.Count > 0)
+            if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd?.Count > 0)
             {
                 var itemGroupText = ItemGroupLoggingHelper.GetParameterText(
                     ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix,
@@ -235,6 +235,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="child">The item specification to evaluate and remove.</param>
         /// <param name="bucket">The batching bucket.</param>
+        /// <param name="matchOnMetadata">Metadata matching.</param>
+        /// <param name="matchingOptions">Options matching.</param>
         private void ExecuteRemove(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, HashSet<string> matchOnMetadata, MatchOnMetadataOptions matchingOptions)
         {
             ICollection<ProjectItemInstance> group = bucket.Lookup.GetItems(child.ItemType);
@@ -244,8 +246,7 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            List<ProjectItemInstance> itemsToRemove = null;
-
+            List<ProjectItemInstance> itemsToRemove;
             if (matchOnMetadata == null)
             {
                 itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, bucket.Expander);
@@ -679,7 +680,7 @@ namespace Microsoft.Build.BackEnd
             public string GetEscapedValueIfPresent(string specifiedItemType, string name)
             {
                 string value = null;
-                if (null == specifiedItemType || specifiedItemType == _itemType)
+                if (specifiedItemType == null || specifiedItemType == _itemType)
                 {
                     // Look in the addTable
                     if (_addTable.TryGetValue(name, out value))
@@ -689,17 +690,17 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Look in the bucket table
-                if (null != _bucketTable)
+                if (_bucketTable != null)
                 {
                     value = _bucketTable.GetEscapedValueIfPresent(specifiedItemType, name);
-                    if (null != value)
+                    if (value != null)
                     {
                         return value;
                     }
                 }
 
                 // Look in the item definition table
-                if (null != _itemDefinitionTable)
+                if (_itemDefinitionTable != null)
                 {
                     value = _itemDefinitionTable.GetEscapedValueIfPresent(specifiedItemType, name);
                 }

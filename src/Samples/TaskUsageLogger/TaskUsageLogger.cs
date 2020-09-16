@@ -64,10 +64,10 @@ namespace TaskUsageLogger
         {
             ProcessParameters();
 
-            eventSource.ProjectStarted += new ProjectStartedEventHandler(HandleProjectStarted);
-            eventSource.TargetStarted += new TargetStartedEventHandler(HandleTargetStarted);
-            eventSource.TaskStarted += new TaskStartedEventHandler(HandleTaskStarted);
-            eventSource.BuildFinished += new BuildFinishedEventHandler(HandleBuildFinished);
+            eventSource.ProjectStarted += HandleProjectStarted;
+            eventSource.TargetStarted += HandleTargetStarted;
+            eventSource.TaskStarted += HandleTaskStarted;
+            eventSource.BuildFinished += HandleBuildFinished;
 
             _targetIdsToNames = new Dictionary<int, string>();
             _tasks = new HashSet<TaskData>();
@@ -215,7 +215,7 @@ namespace TaskUsageLogger
         /// </summary>
         private void GatherAndEvaluateTasksForProject(Project p, int projectContextId)
         {
-            HashSet<UsingTaskData> usingTasks = null;
+            HashSet<UsingTaskData> usingTasks;
             if (!_tasksByProjectContextId.TryGetValue(projectContextId, out usingTasks))
             {
                 usingTasks = new HashSet<UsingTaskData>();
@@ -248,7 +248,7 @@ namespace TaskUsageLogger
                 string evaluatedTaskName = EvaluateIfNecessary(usingTask.TaskName, containingProject);
 
                 // A task registration can define either AssemblyName or AssemblyFile, but not both.
-                string evaluatedTaskAssemblyPath = null;
+                string evaluatedTaskAssemblyPath;
                 if (String.IsNullOrEmpty(usingTask.AssemblyName))
                 {
                     evaluatedTaskAssemblyPath = EvaluateIfNecessary(usingTask.AssemblyFile, containingProject);

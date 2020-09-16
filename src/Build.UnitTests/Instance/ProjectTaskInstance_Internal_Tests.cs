@@ -66,7 +66,7 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
             IDictionary<string, (string, MockElementLocation)> parameters,
             List<ProjectTaskInstanceChild> outputs)
         {
-            parameters = parameters ?? new Dictionary<string, (string, MockElementLocation)>();
+            parameters ??= new Dictionary<string, (string, MockElementLocation)>();
 
             var parametersCopy = new Dictionary<string, (string, ElementLocation)>(parameters.Count);
             foreach (var param in parameters)

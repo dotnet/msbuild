@@ -73,7 +73,7 @@ namespace Microsoft.Build.Evaluation
                 key = itemType + "." + name;
             }
 
-            string value = null;
+            string value;
             _metadata.TryGetValue(key, out value);
 
             return value;

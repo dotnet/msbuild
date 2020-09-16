@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Update="jnm2.ReferenceAssemblies.net35" Version="1.0.1" />
     <PackageReference Update="LargeAddressAware" Version="1.0.3" />
     <PackageReference Update="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="Microsoft.CodeAnalysis.Build.Tasks" Version="3.0.0-beta1-61516-01" />
@@ -16,7 +17,7 @@
     <PackageReference Update="Microsoft.Net.Compilers.Toolset" Version="$(MicrosoftNetCompilersToolsetVersion)" />
     <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" />
     <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30" />
-    <PackageReference Update="Microsoft.Win32.Registry" Version="4.3.0" />
+    <PackageReference Update="Microsoft.Win32.Registry" Version="4.6.0" />
     <PackageReference Update="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="PdbGit" Version="3.0.41" />
@@ -35,9 +36,12 @@
     <PackageReference Update="System.Reflection.TypeExtensions" Version="4.1.0" />
     <PackageReference Update="System.Resources.Extensions" Version="4.6.0" />
     <PackageReference Update="System.Resources.Writer" Version="4.0.0" />
+    <PackageReference Update="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Update="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <PackageReference Update="System.Runtime.Loader" Version="4.0.0" />
     <PackageReference Update="System.Runtime.Serialization.Primitives" Version="4.1.1" />
+    <PackageReference Update="System.Security.Cryptography.Pkcs" Version="4.7.0" />
+    <PackageReference Update="System.Security.Cryptography.Xml" Version="4.7.0" />
     <PackageReference Update="System.Security.Permissions" Version="4.7.0" />
     <PackageReference Update="System.Security.Principal.Windows" Version="4.7.0" />
     <PackageReference Update="System.Text.Encoding.CodePages" Version="4.0.1" />
@@ -48,6 +52,8 @@
     <PackageReference Update="xunit.assert" Version="$(XUnitVersion)" />
     <PackageReference Update="xunit.console" Version="$(XUnitVersion)" />
     <PackageReference Update="xunit.core" Version="$(XUnitVersion)" />
+    <PackageReference Update="StreamJsonRpc" Version="2.4.48" />
+    <PackageReference Update="Newtonsoft.Json" Version="12.*" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">

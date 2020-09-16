@@ -48,6 +48,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private FileAssociation[] _fileAssociations;
         private FileAssociationCollection _fileAssociationList;
         private string _targetFrameworkVersion;
+        private bool _launcherBasedDeployment = false;
 
         /// <summary>
         /// Initializes a new instance of the ApplicationManifest class.
@@ -109,6 +110,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             get => _errorReportUrl;
             set => _errorReportUrl = value;
+        }
+
+        /// <summary>
+        /// Indicates if manifest is part of Launcher-based deployment, which requires
+        /// somewhat different manifest generation and validation.
+        /// </summary>
+        [XmlIgnore]
+        public bool LauncherBasedDeployment
+        {
+            get => _launcherBasedDeployment;
+            set => _launcherBasedDeployment = value;
         }
 
         // Make sure we have a CLR dependency, add it if not...
@@ -193,7 +205,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             get => _isClickOnceManifest;
             set => _isClickOnceManifest = value;
         }
-
 
         /// <summary>
         /// Specifies the maximum allowable length of a file path in a ClickOnce application deployment.
@@ -414,7 +425,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 if (assembly.ReferenceType == AssemblyReferenceType.NativeAssembly && !assembly.IsPrerequisite && !String.IsNullOrEmpty(assembly.ResolvedPath))
                 {
-                    ComInfo[] comInfoArray = ManifestReader.GetComInfo(assembly.ResolvedPath); ;
+                    ComInfo[] comInfoArray = ManifestReader.GetComInfo(assembly.ResolvedPath); 
                     if (comInfoArray != null)
                     {
                         foreach (ComInfo comInfo in comInfoArray)
@@ -632,7 +643,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     {
                         targetPathList.Add(key, false);
                     }
-                    else if (targetPathList[key] == false)
+                    else if (!targetPathList[key])
                     {
                         OutputMessages.AddWarningMessage("GenerateManifest.DuplicateTargetPath", assembly.ToString());
                         targetPathList[key] = true; // only warn once per path
@@ -656,7 +667,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             foreach (FileReference file in FileReferences)
             {
                 // Check that file is not an assembly...
-                if (!String.IsNullOrEmpty(file.ResolvedPath) && PathUtil.IsAssembly(file.ResolvedPath))
+                // Unless this is a Launcher-based deployments where all files except launcher
+                // are added as regular file references and not assembly references.
+                if (!_launcherBasedDeployment &&
+                    !String.IsNullOrEmpty(file.ResolvedPath) && PathUtil.IsAssembly(file.ResolvedPath))
                 {
                     OutputMessages.AddWarningMessage("GenerateManifest.AssemblyAsFile", file.ToString());
                 }
@@ -675,7 +689,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     {
                         targetPathList.Add(key, false);
                     }
-                    else if (targetPathList[key] == false)
+                    else if (!targetPathList[key])
                     {
                         OutputMessages.AddWarningMessage("GenerateManifest.DuplicateTargetPath", file.TargetPath);
                         targetPathList[key] = true; // only warn once per path
@@ -705,7 +719,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             else
             {
-                if (assembly.AssemblyIdentity != null && assembly.AssemblyIdentity.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion))
+                if (assembly.AssemblyIdentity?.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion) == true)
                 {
                     // if the binary is targeting v4.0 and it has the transparent attribute then we may allow partially trusted callers.
                     if (assembly.IsPrimary

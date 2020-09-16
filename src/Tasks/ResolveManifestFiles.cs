@@ -17,7 +17,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// This task resolves items in the build process (built, dependencies, satellites,
     /// content, debug symbols, documentation, etc.) to files for manifest generation.
-    /// </Summary>
+    /// </summary>
     /// <comment>
     /// This task executes following steps:
     ///   (1) Filter out Framework assemblies
@@ -46,6 +46,7 @@ namespace Microsoft.Build.Tasks
         private CultureInfo _targetCulture;
         private bool _includeAllSatellites;
 
+        private string _targetFrameworkIdentifier;
         private string _targetFrameworkVersion;
         // if signing manifests is on and not all app files are included, then the project can't be published.
         private bool _canPublish;
@@ -120,6 +121,19 @@ namespace Microsoft.Build.Tasks
                 return _targetFrameworkVersion;
             }
             set => _targetFrameworkVersion = value;
+        }
+
+        public string TargetFrameworkIdentifier
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_targetFrameworkIdentifier))
+                {
+                    return Constants.DotNetFrameworkIdentifier;
+                }
+                return _targetFrameworkIdentifier;
+            }
+            set => _targetFrameworkIdentifier = value;
         }
 
         #endregion
@@ -630,7 +644,14 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            if (identity != null && identity.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion))
+            if (String.Equals(TargetFrameworkIdentifier, Constants.DotNetCoreAppIdentifier, StringComparison.InvariantCultureIgnoreCase))
+            {
+                if (identity?.IsInFramework(Constants.DotNetCoreIdentifier, null) == true)
+                {
+                    return true;
+                }
+            }
+            else if (identity?.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion) == true)
             {
                 return true;
             }

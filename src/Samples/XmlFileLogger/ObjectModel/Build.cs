@@ -171,7 +171,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
             var project = GetOrAddProject(taskStartedEventArgs.BuildEventContext.ProjectContextId);
             var target = project.GetTargetById(taskStartedEventArgs.BuildEventContext.TargetId);
 
-            target.AddChildTask(new Task(taskStartedEventArgs.TaskName, taskStartedEventArgs, GetTaskAssembly((taskStartedEventArgs.TaskName))));
+            target.AddChildTask(new Task(taskStartedEventArgs.TaskName, taskStartedEventArgs, GetTaskAssembly(taskStartedEventArgs.TaskName)));
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
         {
             Project parent = null;
 
-            if (projectStartedEventArgs.ParentProjectBuildEventContext != null && projectStartedEventArgs.ParentProjectBuildEventContext.ProjectContextId >= 0)
+            if (projectStartedEventArgs.ParentProjectBuildEventContext?.ProjectContextId >= 0)
             {
                 parent = GetOrAddProject(projectStartedEventArgs.ParentProjectBuildEventContext.ProjectContextId);
             }

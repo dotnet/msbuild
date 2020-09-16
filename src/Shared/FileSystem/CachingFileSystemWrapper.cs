@@ -12,6 +12,7 @@ namespace Microsoft.Build.Shared.FileSystem
     {
         private readonly IFileSystem _fileSystem;
         private readonly ConcurrentDictionary<string, bool> _existenceCache = new ConcurrentDictionary<string, bool>();
+        private readonly ConcurrentDictionary<string, DateTime> _lastWriteTimeCache = new ConcurrentDictionary<string, DateTime>();
 
         public CachingFileSystemWrapper(IFileSystem fileSystem)
         {
@@ -21,6 +22,16 @@ namespace Microsoft.Build.Shared.FileSystem
         public bool DirectoryEntryExists(string path)
         {
             return CachedExistenceCheck(path, p => _fileSystem.DirectoryEntryExists(p));
+        }
+
+        public FileAttributes GetAttributes(string path)
+        {
+            return _fileSystem.GetAttributes(path);
+        }
+
+        public DateTime GetLastWriteTimeUtc(string path)
+        {
+            return _lastWriteTimeCache.GetOrAdd(path, p =>_fileSystem.GetLastWriteTimeUtc(p));
         }
 
         public bool DirectoryExists(string path)
@@ -36,6 +47,26 @@ namespace Microsoft.Build.Shared.FileSystem
         public IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             return _fileSystem.EnumerateDirectories(path, searchPattern, searchOption);
+        }
+
+        public TextReader ReadFile(string path)
+        {
+            return _fileSystem.ReadFile(path);
+        }
+
+        public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share)
+        {
+            return _fileSystem.GetFileStream(path, mode, access, share);
+        }
+
+        public string ReadFileAllText(string path)
+        {
+            return _fileSystem.ReadFileAllText(path);
+        }
+
+        public byte[] ReadFileAllBytes(string path)
+        {
+            return _fileSystem.ReadFileAllBytes(path);
         }
 
         public IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)

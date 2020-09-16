@@ -33,7 +33,7 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="readApplicationConfiguration"></param>
         internal ToolsetConfigurationReader(ReadApplicationConfiguration readApplicationConfiguration)
         {
-            error.VerifyThrowArgumentNull(readApplicationConfiguration, "readApplicationConfiguration");
+            error.VerifyThrowArgumentNull(readApplicationConfiguration, nameof(readApplicationConfiguration));
             this.readApplicationConfiguration = readApplicationConfiguration;
         }
 
@@ -55,7 +55,7 @@ namespace Microsoft.Build.BuildEngine
                                               toolset.ElementInformation.LineNumber
                                           );
 
-                        if (toolset.toolsVersion != null && toolset.toolsVersion.Length == 0)
+                        if (toolset.toolsVersion?.Length == 0)
                         {
                             InvalidToolsetDefinitionException.Throw("InvalidToolsetValueInConfigFileValue", location);
                         }
@@ -77,7 +77,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (ConfigurationSection == null ? null : ConfigurationSection.Default);
+                return ConfigurationSection?.Default;
             }
         }
 
@@ -104,7 +104,7 @@ namespace Microsoft.Build.BuildEngine
                                       propertyElement.ElementInformation.LineNumber
                                   );
 
-                if (propertyElement.Name != null && propertyElement.Name.Length == 0)
+                if (propertyElement.Name?.Length == 0)
                 {
                     InvalidToolsetDefinitionException.Throw("InvalidToolsetValueInConfigFileValue", location);
                 }
@@ -131,7 +131,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                if (null == configurationSection && !configurationReadAttempted)
+                if (configurationSection == null && !configurationReadAttempted)
                 {
                     try
                     {
@@ -148,7 +148,7 @@ namespace Microsoft.Build.BuildEngine
                         // If section definition is not present and section is also not present, this value is null
                         // If the section definition is not present and section is present, then this value is null
 
-                        if (null != configuration)
+                        if (configuration != null)
                         {
                             configurationSection = configuration.GetSection("msbuildToolsets") as ToolsetConfigurationSection;
                         }
@@ -226,7 +226,7 @@ namespace Microsoft.Build.BuildEngine
                 // Note this means we can't distinguish between the attribute being present but containing
                 // an empty string for its value and the attribute not being present at all.
                 string defaultValue = (string)base["default"];
-                return (String.IsNullOrEmpty(defaultValue) ? null : defaultValue);
+                return String.IsNullOrEmpty(defaultValue) ? null : defaultValue;
             }
             set
             {
@@ -387,7 +387,7 @@ namespace Microsoft.Build.BuildEngine
             }
             set
             {
-                base["toolsVersion"] = value;
+                base[nameof(toolsVersion)] = value;
             }
         }
 

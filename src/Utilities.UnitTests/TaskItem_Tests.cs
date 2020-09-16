@@ -180,7 +180,6 @@ namespace Microsoft.Build.UnitTests
             t.MetadataCount.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length + 1);
         }
 
-
         [Fact]
         public void NonexistentRequestFullPath()
         {
@@ -380,13 +379,22 @@ namespace Microsoft.Build.UnitTests
                     itemsInThisAppDomain[i].ItemSpec.ShouldBe(creator.CreatedTaskItems[i].ItemSpec);
                     itemsInThisAppDomain[i].MetadataCount.ShouldBe(creator.CreatedTaskItems[i].MetadataCount + 1);
 
+                    Dictionary<string, string> creatorMetadata = new Dictionary<string, string>(creator.CreatedTaskItems[i].MetadataCount);
                     foreach (string metadatum in creator.CreatedTaskItems[i].MetadataNames)
+                    {
+                        creatorMetadata[metadatum] = creator.CreatedTaskItems[i].GetMetadata(metadatum);
+                    }
+
+                    Dictionary<string, string> metadataInThisAppDomain = new Dictionary<string, string>(itemsInThisAppDomain[i].MetadataCount);
+                    foreach (string metadatum in itemsInThisAppDomain[i].MetadataNames)
                     {
                         if (!string.Equals("OriginalItemSpec", metadatum))
                         {
-                            itemsInThisAppDomain[i].GetMetadata(metadatum).ShouldBe(creator.CreatedTaskItems[i].GetMetadata(metadatum));
+                            metadataInThisAppDomain[metadatum] = itemsInThisAppDomain[i].GetMetadata(metadatum);
                         }
                     }
+
+                    metadataInThisAppDomain.ShouldBe(creatorMetadata, ignoreOrder: true);
                 }
             }
             finally
@@ -420,7 +428,7 @@ namespace Microsoft.Build.UnitTests
             /// </summary>
             public void Run(string[] includes, IDictionary<string, string> metadataToAdd)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(includes, "includes");
+                ErrorUtilities.VerifyThrowArgumentNull(includes, nameof(includes));
 
                 CreatedTaskItems = new TaskItem[includes.Length];
 

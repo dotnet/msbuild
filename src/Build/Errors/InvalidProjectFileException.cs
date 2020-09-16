@@ -186,8 +186,8 @@ namespace Microsoft.Build.Exceptions
             Exception innerException
         ) : base(message, innerException)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
-            ErrorUtilities.VerifyThrowArgumentLength(message, "message");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
+            ErrorUtilities.VerifyThrowArgumentLength(message, nameof(message));
 
             // Try to helpfully provide a full path if possible, but do so robustly.
             // This exception might be because the path was invalid!
@@ -196,7 +196,7 @@ namespace Microsoft.Build.Exceptions
             {
                 string fullPath = FileUtilities.GetFullPathNoThrow(projectFile);
 
-                projectFile = (fullPath == null) ? projectFile : fullPath;
+                projectFile = fullPath ?? projectFile;
             }
 
             file = projectFile;

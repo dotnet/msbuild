@@ -99,6 +99,7 @@ namespace Microsoft.Build.Tasks
             return null;
         }
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Compile search paths into an array of resolvers.
         /// </summary>
@@ -118,6 +119,24 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyPathInGac"></param>
         /// <param name="log"></param>
         /// <returns></returns>
+#else
+        /// <summary>
+        /// Compile search paths into an array of resolvers.
+        /// </summary>
+        /// <param name="buildEngine"></param>
+        /// <param name="searchPaths"></param>
+        /// <param name="candidateAssemblyFiles">Paths to assembly files mentioned in the project.</param>
+        /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64, the processor architecture being targetted.</param>
+        /// <param name="frameworkPaths">Paths to FX folders.</param>
+        /// <param name="fileExists"></param>
+        /// <param name="getAssemblyName"></param>
+        /// <param name="installedAssemblies"></param>
+        /// <param name="getRuntimeVersion"></param>
+        /// <param name="targetedRuntimeVersion"></param>
+        /// <param name="getAssemblyPathInGac"></param>
+        /// <param name="log"></param>
+        /// <returns></returns>
+#endif
         public static Resolver[] CompileSearchPaths
         (
             IBuildEngine buildEngine,
@@ -147,29 +166,29 @@ namespace Microsoft.Build.Tasks
 
                 // Was {HintPathFromItem} specified? If so, take the Item's
                 // HintPath property.
-                if (0 == String.Compare(basePath, AssemblyResolutionConstants.hintPathSentinel, StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(basePath, AssemblyResolutionConstants.hintPathSentinel, StringComparison.OrdinalIgnoreCase))
                 {
                     resolvers[p] = new HintPathResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
                 }
-                else if (0 == String.Compare(basePath, AssemblyResolutionConstants.frameworkPathSentinel, StringComparison.OrdinalIgnoreCase))
+                else if (String.Equals(basePath, AssemblyResolutionConstants.frameworkPathSentinel, StringComparison.OrdinalIgnoreCase))
                 {
                     resolvers[p] = new FrameworkPathResolver(frameworkPaths, installedAssemblies, searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
                 }
-                else if (0 == String.Compare(basePath, AssemblyResolutionConstants.rawFileNameSentinel, StringComparison.OrdinalIgnoreCase))
+                else if (String.Equals(basePath, AssemblyResolutionConstants.rawFileNameSentinel, StringComparison.OrdinalIgnoreCase))
                 {
                     resolvers[p] = new RawFilenameResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
                 }
-                else if (0 == String.Compare(basePath, AssemblyResolutionConstants.candidateAssemblyFilesSentinel, StringComparison.OrdinalIgnoreCase))
+                else if (String.Equals(basePath, AssemblyResolutionConstants.candidateAssemblyFilesSentinel, StringComparison.OrdinalIgnoreCase))
                 {
                     resolvers[p] = new CandidateAssemblyFilesResolver(candidateAssemblyFiles, searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
                 }
 #if FEATURE_GAC
-                else if (0 == String.Compare(basePath, AssemblyResolutionConstants.gacSentinel, StringComparison.OrdinalIgnoreCase))
+                else if (String.Equals(basePath, AssemblyResolutionConstants.gacSentinel, StringComparison.OrdinalIgnoreCase))
                 {
                     resolvers[p] = new GacResolver(targetProcessorArchitecture, searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, getAssemblyPathInGac);
                 }
 #endif
-                else if (0 == String.Compare(basePath, AssemblyResolutionConstants.assemblyFoldersSentinel, StringComparison.OrdinalIgnoreCase))
+                else if (String.Equals(basePath, AssemblyResolutionConstants.assemblyFoldersSentinel, StringComparison.OrdinalIgnoreCase))
                 {
                     resolvers[p] = new AssemblyFoldersResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
                 }

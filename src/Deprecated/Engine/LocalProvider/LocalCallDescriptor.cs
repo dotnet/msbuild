@@ -475,7 +475,7 @@ namespace Microsoft.Build.BuildEngine
 
             for (int i = 0; i < numberOfNodeEvents; i++)
             {
-                NodeLoggingEvent e = null;
+                NodeLoggingEvent e;
                 if (reader.ReadByte() == 0)
                 {
                     e = new NodeLoggingEvent();
@@ -954,7 +954,6 @@ namespace Microsoft.Build.BuildEngine
         #region Constructors
         internal LocalCallDescriptorForRequestStatus()
         {
-
         }
 
         internal LocalCallDescriptorForRequestStatus(int requestId)

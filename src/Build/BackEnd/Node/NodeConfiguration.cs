@@ -40,6 +40,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private LoggingNodeConfiguration _loggingNodeConfiguration;
 
+#pragma warning disable 1572 // appDomainSetup not always there
         /// <summary>
         /// Constructor
         /// </summary>
@@ -67,6 +68,7 @@ namespace Microsoft.Build.BackEnd
 #endif
             _loggingNodeConfiguration = loggingNodeConfiguration;
         }
+#pragma warning restore
 
         /// <summary>
         /// Private constructor for deserialization

@@ -404,7 +404,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             string fullName = GetFullName(FullNameFlags.Default);
             foreach (RedistList list in redistDictionary.Values)
             {
-                if (list != null && list.IsFrameworkAssembly(fullName))
+                if (list?.IsFrameworkAssembly(fullName) == true)
                 {
                     return true;
                 }
@@ -433,23 +433,23 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             var sb = new StringBuilder(_name);
             if (!String.IsNullOrEmpty(_version))
             {
-                sb.Append(String.Format(CultureInfo.InvariantCulture, ", Version={0}", _version));
+                sb.AppendFormat(CultureInfo.InvariantCulture, ", Version={0}", _version);
             }
             if (!String.IsNullOrEmpty(_culture))
             {
-                sb.Append(String.Format(CultureInfo.InvariantCulture, ", Culture={0}", _culture));
+                sb.AppendFormat(CultureInfo.InvariantCulture, ", Culture={0}", _culture);
             }
             if (!String.IsNullOrEmpty(_publicKeyToken))
             {
-                sb.Append(String.Format(CultureInfo.InvariantCulture, ", PublicKeyToken={0}", _publicKeyToken));
+                sb.AppendFormat(CultureInfo.InvariantCulture, ", PublicKeyToken={0}", _publicKeyToken);
             }
             if (!String.IsNullOrEmpty(_processorArchitecture) && (flags & FullNameFlags.ProcessorArchitecture) != 0)
             {
-                sb.Append(String.Format(CultureInfo.InvariantCulture, ", ProcessorArchitecture={0}", _processorArchitecture));
+                sb.AppendFormat(CultureInfo.InvariantCulture, ", ProcessorArchitecture={0}", _processorArchitecture);
             }
             if (!String.IsNullOrEmpty(_type) && (flags & FullNameFlags.Type) != 0)
             {
-                sb.Append(String.Format(CultureInfo.InvariantCulture, ", Type={0}", _type));
+                sb.AppendFormat(CultureInfo.InvariantCulture, ", Type={0}", _type);
             }
             return sb.ToString();
         }

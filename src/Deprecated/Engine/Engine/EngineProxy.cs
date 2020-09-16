@@ -46,7 +46,7 @@ namespace Microsoft.Build.BuildEngine
         private string projectFileOfTaskNode;
 
         /// <summary>
-        /// The token identifing the context of this evaluation 
+        /// The token identifing the context of this evaluation
         /// </summary>
         private int handleId;
 
@@ -56,7 +56,7 @@ namespace Microsoft.Build.BuildEngine
         private bool continueOnError;
 
         /// <summary>
-        /// The module within which this class has been created. Used for all callbacks to 
+        /// The module within which this class has been created. Used for all callbacks to
         /// engine.
         /// </summary>
         private TaskExecutionModule parentModule;
@@ -102,7 +102,7 @@ namespace Microsoft.Build.BuildEngine
         {
             // do nothing
         }
-     
+
         /// <summary>
         /// Create an instance of this class to represent the IBuildEngine2 interface to the task
         /// including the event location where the log messages are raised
@@ -115,10 +115,10 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="buildEventContext">Event Context where events will be seen to be raised from. Task messages will get this as their event context</param>
         internal EngineProxy
         (
-            TaskExecutionModule parentModule, 
-            int handleId, 
+            TaskExecutionModule parentModule,
+            int handleId,
             string parentProjectFullFileName,
-            string projectFileOfTaskNode, 
+            string projectFileOfTaskNode,
             EngineLoggingServices loggingServices,
             BuildEventContext buildEventContext
         )
@@ -143,8 +143,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public void LogErrorEvent(BuildErrorEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
-            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
+            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
             if (parentModule.IsRunningMultipleNodes && !e.GetType().IsSerializable)
             {
@@ -190,14 +190,14 @@ namespace Microsoft.Build.BuildEngine
                     e = new BuildErrorEventArgs
                         (
                             e.Subcategory,
-                            e.Code, 
-                            e.File, 
-                            e.LineNumber, 
-                            e.ColumnNumber, 
-                            e.EndLineNumber, 
-                            e.EndColumnNumber, 
+                            e.Code,
+                            e.File,
+                            e.LineNumber,
+                            e.ColumnNumber,
+                            e.EndLineNumber,
+                            e.EndColumnNumber,
                             message,  // this is the new message from above
-                            e.HelpKeyword, 
+                            e.HelpKeyword,
                             e.SenderName
                         );
                 }
@@ -212,8 +212,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public void LogWarningEvent(BuildWarningEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
-            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
+            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
             if (parentModule.IsRunningMultipleNodes && !e.GetType().IsSerializable)
             {
@@ -250,7 +250,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="file">File field from the original BuildEventArgs</param>
         /// <param name="message">Message field from the original BuildEventArgs</param>
@@ -289,8 +289,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public void LogMessageEvent(BuildMessageEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
-            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
+            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
             if (parentModule.IsRunningMultipleNodes && !e.GetType().IsSerializable)
             {
@@ -306,8 +306,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         public void LogCustomEvent(CustomBuildEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
-            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
+            ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
             if (parentModule.IsRunningMultipleNodes && !e.GetType().IsSerializable)
             {
@@ -327,7 +327,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
                 return this.continueOnError;
             }
@@ -351,7 +351,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
                 ComputeProjectFileLocationOfTaskNode();
                 return this.lineNumber;
@@ -367,7 +367,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
                 ComputeProjectFileLocationOfTaskNode();
                 return this.columnNumber;
@@ -381,7 +381,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
                 return projectFileOfTaskNode;
             }
@@ -430,16 +430,16 @@ namespace Microsoft.Build.BuildEngine
         /// <returns>result of call to engine</returns>
         public bool BuildProjectFile
             (
-            string projectFileName, 
-            string[] targetNames, 
-            IDictionary globalProperties, 
+            string projectFileName,
+            string[] targetNames,
+            IDictionary globalProperties,
             IDictionary targetOutputs,
             string toolsVersion
             )
         {
             lock (callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
                 // Wrap the project name into an array
                 string[] projectFileNames = new string[1];
@@ -485,7 +485,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Not implemented for the proxy 
+        /// Not implemented for the proxy
         /// </summary>
 	public void Yield()
 	{
@@ -504,12 +504,12 @@ namespace Microsoft.Build.BuildEngine
         /// <remarks>
         /// 1) it is acceptable to pass null for both <c>targetNames</c> and <c>targetOutputs</c>
         /// 2) if no targets are specified, the default targets are built
-        /// 
+        ///
         /// </remarks>
         /// <param name="projectFileNames">The project to build.</param>
         /// <param name="targetNames">The targets in the project to build (can be null).</param>
         /// <param name="globalProperties">An array of hashtables of additional global properties to apply
-        ///     to the child project (array entries can be null). 
+        ///     to the child project (array entries can be null).
         ///     The key and value in the hashtable should both be strings.</param>
         /// <param name="removeGlobalProperties">A list of global properties which should be removed.</param>
         /// <param name="toolsVersions">A tools version recognized by the Engine that will be used during this build (can be null).</param>
@@ -527,11 +527,11 @@ namespace Microsoft.Build.BuildEngine
         {
             lock (callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy == true, "AttemptingToLogFromInactiveTask");
+                ErrorUtilities.VerifyThrowInvalidOperation(activeProxy, "AttemptingToLogFromInactiveTask");
 
-                ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, "projectFileNames");
+                ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, nameof(projectFileNames));
                 ErrorUtilities.VerifyThrowArgumentNull(globalProperties, "globalPropertiesPerProject");
-                
+
                 Dictionary<string, ITaskItem[]>[] targetOutputsPerProject = null;
 
                 if (returnTargetOutputs)
@@ -552,7 +552,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// InitializeLifetimeService is called when the remote object is activated. 
+        /// InitializeLifetimeService is called when the remote object is activated.
         /// This method will determine how long the lifetime for the object will be.
         /// </summary>
         public override object InitializeLifetimeService()
@@ -573,7 +573,7 @@ namespace Microsoft.Build.BuildEngine
                 int leaseTimeFromEnvironment;
                 if (int.TryParse(initialLeaseTimeFromEnvironment , out leaseTimeFromEnvironment) && leaseTimeFromEnvironment > 0)
                 {
-                      initialLeaseTime = leaseTimeFromEnvironment;        
+                      initialLeaseTime = leaseTimeFromEnvironment;
                 }
             }
 
@@ -593,7 +593,7 @@ namespace Microsoft.Build.BuildEngine
                 int leaseExtensionFromEnvironment;
                 if (int.TryParse(leaseExtensionTimeFromEnvironment , out leaseExtensionFromEnvironment) && leaseExtensionFromEnvironment > 0)
                 {
-                      leaseExtensionTime = leaseExtensionFromEnvironment;        
+                      leaseExtensionTime = leaseExtensionFromEnvironment;
                 }
             }
 
@@ -604,7 +604,6 @@ namespace Microsoft.Build.BuildEngine
 
             return lease;
         }
-
 
         /// <summary>
         /// Indicates to the EngineProxy that it is no longer needed.
@@ -619,23 +618,19 @@ namespace Microsoft.Build.BuildEngine
             loggingServices = null;
             parentModule = null;
             buildEventContext = null;
-            
+
             // Clear out the sponsor (who is responsible for keeping the EngineProxy remoting lease alive until the task is done)
             // this will be null if the engineproxy was never sent accross an appdomain boundry.
             if (sponsor != null)
             {
                 ILease lease = (ILease)RemotingServices.GetLifetimeService(this);
-             
-                if (lease != null)
-                {
-                    lease.Unregister(sponsor);
-                }
-                
+                lease?.Unregister(sponsor);
+
                 sponsor.Close();
                 sponsor = null;
             }
         }
-	
+
         #region Properties
         /// <summary>
         /// Provide a way to change the BuildEventContext of the engine proxy. This is important in batching where each batch will need its own buildEventContext.

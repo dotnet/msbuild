@@ -289,7 +289,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 var proj3 = CreateProjectFile(env, 3, new[] { 1 });
                 var projectsInCycle = new List<string> {entryProject.Path, proj3.Path, proj2.Path, entryProject.Path};
                 string expectedErrorMessage = GraphBuilder.FormatCircularDependencyError(projectsInCycle);
-                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(expectedErrorMessage.ToString());
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(expectedErrorMessage);
             }
         }
 
@@ -323,7 +323,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 CreateProjectFile(env, 10);
                 var projectsInCycle = new List<string> {proj2.Path, proj3.Path, proj7.Path, proj6.Path, proj2.Path };
                 var errorMessage = GraphBuilder.FormatCircularDependencyError(projectsInCycle);
-                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(errorMessage.ToString());
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(errorMessage);
             }
         }
 
@@ -1516,7 +1516,7 @@ $@"
             Dictionary<string, string> additionalGlobalProperties = null,
             int expectedInnerBuildCount = 2)
         {
-            additionalGlobalProperties = additionalGlobalProperties ?? new Dictionary<string, string>();
+            additionalGlobalProperties ??= new Dictionary<string, string>();
 
             AssertOuterBuildEvaluation(outerBuild, additionalGlobalProperties);
 
