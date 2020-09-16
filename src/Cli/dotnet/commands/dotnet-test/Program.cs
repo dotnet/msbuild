@@ -74,10 +74,12 @@ namespace Microsoft.DotNet.Tools.Test
                 noRestore,
                 msbuildPath);
 
-            var rootVariableName = Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)";
-            if (Environment.GetEnvironmentVariable(rootVariableName) == null)
+            // Set DOTNET_PATH if it isn't already set in the environment as it is required
+            // by the testhost which uses the apphost feature (Windows only).
+            (bool hasRootVariable, string rootVariableName, string rootValue) = VSTestForwardingApp.GetRootVariable();
+            if (!hasRootVariable)
             {
-                testCommand.EnvironmentVariable(rootVariableName, Path.GetDirectoryName(new Muxer().MuxerPath));
+                testCommand.EnvironmentVariable(rootVariableName, rootValue);
             }
 
             return testCommand;
