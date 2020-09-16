@@ -946,6 +946,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to To list installed templates, run &apos;dotnet new --list&apos;..
+        /// </summary>
+        public static string ListTemplatesCommand {
+            get {
+                return ResourceManager.GetString("ListTemplatesCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The locale to use..
         /// </summary>
         public static string LocaleHelp {

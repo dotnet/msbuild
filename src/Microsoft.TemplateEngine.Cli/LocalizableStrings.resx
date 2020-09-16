@@ -678,4 +678,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="InvalidParameterTemplateHint" xml:space="preserve">
     <value>For a list of valid options, run '{0}'.</value>
   </data>
+  <data name="ListTemplatesCommand" xml:space="preserve">
+    <value>To list installed templates, run 'dotnet new --list'.</value>
+  </data>
 </root>

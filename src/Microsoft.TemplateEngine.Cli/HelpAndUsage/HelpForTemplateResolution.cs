@@ -452,7 +452,9 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         private static void ShowNoTemplatesFoundMessage(string templateName, string templateLanguage, string context, string baselineName)
         {
             // No templates found matching the following input parameter(s): {0}.
+            // To list installed templates: dotnet new --list.
             Reporter.Error.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, GetInputParametersString(templateName, templateLanguage, context, baselineName)).Bold().Red());
+            Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand.Bold().Red());
         }
 
         private static void ShowTemplatesFoundMessage(string templateName, string templateLanguage, string context, string baselineName)
