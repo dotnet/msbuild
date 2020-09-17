@@ -80,6 +80,25 @@ Microsoft has an internal build system, [CloudBuild](https://www.microsoft.com/r
 
 MSBuild static graph features make it easier to implement a system like CloudBuild by building required operations into MSBuild itself.
 
+## What is static graph?
+
+MSBuild's static graph extends the MSBuild engine and APIs with new functionality to improve on these weaknesses:
+
+- The ability to [construct a directed acyclic graph of MSBuild projects](#project-graph) given an entry point (solution or project).
+- The ability to consider that graph when scheduling projects for build.
+- The ability to cache MSBuild's internal build results (metadata about outputs, not the outputs themselves) across build invocations.
+- The ability to [enforce restrictions on builds](#isolated-builds) to ensure that the graph is correct and complete.
+
+Static graph functionality can be used in three ways:
+
+- On the command line with `-graph` (and equivalent API).
+  - This gets the scheduling improvements for well-specified projects, but allows underspecified projects to complete without error.
+- On the command line with `-graph -isolate` (and equivalent API).
+  - This gets the scheduling improvements and also enforces that the graph is correct and complete. In this mode, MSBuild will produce an error if there is an `MSBuild` task invocation that was not known to the graph ahead of time.
+  - As part of a higher-order build system that uses [single project isolated builds](#single-project-isolated-builds) to provide caching and/or distribution on top of the built-in functionality. The only known implementation of this system is Microsoft-internal currently.
+
+## Design documentation
+
 ### Design goals
 
 - Stock projects can build with "project-level build" and if clean onboard to MS internal build engines with cache/distribution
