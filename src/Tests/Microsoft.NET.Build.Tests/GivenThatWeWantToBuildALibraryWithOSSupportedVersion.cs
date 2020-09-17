@@ -212,6 +212,29 @@ namespace Microsoft.NET.Build.Tests
 
         }
 
+        [Theory]
+        [InlineData("netcoreapp3.1")]
+        [InlineData("net48")]
+        public void WhenNotTargetingNet5TargetPlatformMinVersionPropertyCanBeSet(string targetFramework)
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "Project",
+                IsSdkProject = true,
+                IsExe = true,
+                TargetFrameworks = targetFramework,
+            };
+
+            testProject.AdditionalProperties["TargetPlatformMinVersion"] = "10.0.18362.0";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            new BuildCommand(testAsset)
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
         [Fact]
         public void WhenNotTargetingWindowsTargetPlatformMinVersionPropertyIsIgnored()
         {

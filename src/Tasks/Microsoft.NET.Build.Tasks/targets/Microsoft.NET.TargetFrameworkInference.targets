@@ -179,7 +179,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="NETFrameworkWithoutUsingNETSdkDefaults" />
   </Target>
 
-  <Target Name="_CheckForSupportedOSPlatformVersionHigherThanTargetPlatformVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform" >
+  <Target Name="_CheckForSupportedOSPlatformVersionHigherThanTargetPlatformVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+          Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
 
     <NETSdkError Condition="'$(SupportedOSPlatformVersion)' != '' and $(TargetPlatformVersion) != '' and $([MSBuild]::VersionGreaterThan($(SupportedOSPlatformVersion), $(TargetPlatformVersion)))"
                  ResourceName="CannotHaveSupportedOSPlatformVersionHigherThanTargetPlatformVersion"
