@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -236,9 +237,120 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <remarks>
         /// Used by the MSBuild workload resolver to emit actionable errors
         /// </remarks>
-        public IList<WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packId)
+        public IList<WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packIds)
         {
+            var installedPacks = new HashSet<WorkloadPackId>();
+            var requestedPacks = new HashSet<WorkloadPackId>(packIds.Select(p => new WorkloadPackId(p)));
+
+            foreach (var pack in _packs)
+            {
+                var aliasedId = pack.Value.TryGetAliasForPlatformIds(_platformIds) ?? pack.Value.Id;
+                var packPath = GetPackPath(_dotNetRootPath, aliasedId, pack.Value.Version, pack.Value.Kind);
+
+                if (PackExists(packPath, pack.Value.Kind))
+                {
+                    installedPacks.Add(pack.Key);
+                }
+            }
+
+            // find workloads that contain any of the requested packs
+            var incompleteCandidates = new List<WorkloadSuggestionCandidate>();
+            var completeCandidates = new HashSet<WorkloadSuggestionCandidate>();
+
+            foreach (var workload in _workloads)
+            {
+                var expanded = new HashSet<WorkloadPackId>(ExpandWorkload(workload.Value));
+                if (expanded.Any(e => requestedPacks.Contains(e)))
+                {
+                    var stillMissing = new HashSet<WorkloadPackId>(requestedPacks.Where(p => !expanded.Contains(p)));
+                    var satisfied = requestedPacks.Count - stillMissing.Count;
+
+                    var candidate = new WorkloadSuggestionCandidate(new HashSet<WorkloadDefinitionId>() { workload.Key }, expanded, stillMissing);
+
+                    if (candidate.IsComplete)
+                    {
+                        completeCandidates.Add(candidate);
+                    }
+                    else
+                    {
+                        incompleteCandidates.Add(candidate);
+                    }
+                }
+            }
+
+            //find all valid complete permutations by recursively exploring possible branches from a root
+            void FindCandidates (WorkloadSuggestionCandidate root, List<WorkloadSuggestionCandidate> branches)
+            {
+                foreach (var branch in branches)
+                {
+                    //skip branches identical to ones that have already already been taken
+                    //there's probably a more efficient way to do this but this is easy to reason about
+                    if (root.Workloads.IsSupersetOf(branch.Workloads))
+                    {
+                        continue;
+                    }
+
+                    //skip branches that don't reduce the number of missing packs
+                    //the branch may be a more optimal solution, but this will be handled elsewhere in the permuation space where it is treated as a root
+                    if (!root.StillMissingPacks.Overlaps(branch.Packs))
+                    {
+                        continue;
+                    }
+
+                    //construct the new condidate by combining the root and the branch
+                    var combinedIds = new HashSet<WorkloadDefinitionId>(root.Workloads);
+                    combinedIds.UnionWith(branch.Workloads);
+                    var combinedPacks = new HashSet<WorkloadPackId>(root.Packs);
+                    combinedPacks.UnionWith(branch.Packs);
+                    var stillMissing = new HashSet<WorkloadPackId>(root.StillMissingPacks);
+                    stillMissing.ExceptWith(branch.StillMissingPacks);
+                    var candidate = new WorkloadSuggestionCandidate(combinedIds, combinedPacks, stillMissing);
+
+                    //if the candidate contains all the requested packs, it's complete. else, recurse to try adding more branches to it.
+                    if (candidate.IsComplete)
+                    {
+                        completeCandidates.Add(candidate);
+                    }
+                    else
+                    {
+                        FindCandidates(candidate, branches);
+                    }
+                }
+            }
+
+            foreach (var c in incompleteCandidates)
+            {
+                FindCandidates(c, incompleteCandidates);
+            }
+
             throw new NotImplementedException();
+        }
+
+        private class WorkloadSuggestionCandidate : IEquatable<WorkloadSuggestionCandidate>
+        {
+            public WorkloadSuggestionCandidate(HashSet<WorkloadDefinitionId> id, HashSet<WorkloadPackId> packs, HashSet<WorkloadPackId> missingPacks)
+            {
+                Packs = packs;
+                StillMissingPacks = missingPacks;
+                Workloads = id;
+            }
+
+            public HashSet<WorkloadDefinitionId> Workloads { get; }
+            public HashSet<WorkloadPackId> Packs { get; }
+            public HashSet<WorkloadPackId> StillMissingPacks { get; }
+            public bool IsComplete => StillMissingPacks.Count == 0;
+
+            public bool Equals(WorkloadSuggestionCandidate other) => Workloads.SetEquals(other.Workloads);
+
+            public override int GetHashCode()
+            {
+                int hashcode = 0;
+                foreach(var id in Workloads)
+                {
+                    hashcode ^= id.GetHashCode();
+                }
+                return hashcode;
+            }
         }
 
         public class PackInfo
