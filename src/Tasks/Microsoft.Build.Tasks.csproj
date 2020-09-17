@@ -1008,7 +1008,6 @@
     <PackageReference Include="System.Resources.Extensions" />
     <PackageReference Include="StreamJsonRpc" />
     <PackageReference Include="MessagePack" />
-    <!--<PackageReference Include="Newtonsoft.Json" />-->
   </ItemGroup>
 
   <!-- Tasks need to mimic redistributing the compilers, so add references to both full framework and .net core -->
