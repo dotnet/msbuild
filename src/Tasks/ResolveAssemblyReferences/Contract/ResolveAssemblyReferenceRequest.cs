@@ -1,58 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.IO;
-
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 {
     internal sealed class ResolveAssemblyReferenceRequest
     {
         public ResolveAssemblyReferenceRequest() { }
-        internal ResolveAssemblyReferenceRequest(ResolveAssemblyReferenceTaskInput input)
-        {
-            AllowedAssemblyExtensions = input.AllowedAssemblyExtensions;
-            AllowedRelatedFileExtensions = input.AllowedRelatedFileExtensions;
-            AppConfigFile = input.AppConfigFile;
-            Assemblies = ReadOnlyTaskItem.CreateArray(input.Assemblies);
-            AssemblyFiles = ReadOnlyTaskItem.CreateArray(input.AssemblyFiles);
-            AutoUnify = input.AutoUnify;
-            CandidateAssemblyFiles = input.CandidateAssemblyFiles;
-            CopyLocalDependenciesWhenParentReferenceInGac = input.CopyLocalDependenciesWhenParentReferenceInGac;
-            DoNotCopyLocalIfInGac = input.DoNotCopyLocalIfInGac;
-            FindDependencies = input.FindDependencies;
-            FindDependenciesOfExternallyResolvedReferences = input.FindDependenciesOfExternallyResolvedReferences;
-            FindRelatedFiles = input.FindRelatedFiles;
-            FindSatellites = input.FindSatellites;
-            FindSerializationAssemblies = input.FindSerializationAssemblies;
-            FullFrameworkAssemblyTables = ReadOnlyTaskItem.CreateArray(input.FullFrameworkAssemblyTables);
-            FullFrameworkFolders = input.FullFrameworkFolders;
-            FullTargetFrameworkSubsetNames = input.FullTargetFrameworkSubsetNames;
-            IgnoreDefaultInstalledAssemblySubsetTables = input.IgnoreDefaultInstalledAssemblySubsetTables;
-            IgnoreDefaultInstalledAssemblyTables = input.IgnoreDefaultInstalledAssemblyTables;
-            IgnoreTargetFrameworkAttributeVersionMismatch = input.IgnoreTargetFrameworkAttributeVersionMismatch;
-            IgnoreVersionForFrameworkReferences = input.IgnoreVersionForFrameworkReferences;
-            InstalledAssemblySubsetTables = ReadOnlyTaskItem.CreateArray(input.InstalledAssemblySubsetTables);
-            InstalledAssemblyTables = ReadOnlyTaskItem.CreateArray(input.InstalledAssemblyTables);
-            LatestTargetFrameworkDirectories = input.LatestTargetFrameworkDirectories;
-            ProfileName = input.ProfileName;
-            ResolvedSDKReferences = ReadOnlyTaskItem.CreateArray(input.ResolvedSDKReferences);
-            SearchPaths = input.SearchPaths;
-            Silent = input.Silent;
-            StateFile = input.StateFile == null ? input.StateFile : Path.GetFullPath(input.StateFile);
-            SupportsBindingRedirectGeneration = input.SupportsBindingRedirectGeneration;
-            TargetedRuntimeVersion = input.TargetedRuntimeVersion;
-            TargetFrameworkDirectories = input.TargetFrameworkDirectories;
-            TargetFrameworkMoniker = input.TargetFrameworkMoniker;
-            TargetFrameworkMonikerDisplayName = input.TargetFrameworkMonikerDisplayName;
-            TargetFrameworkSubsets = input.TargetFrameworkSubsets;
-            TargetFrameworkVersion = input.TargetFrameworkVersion;
-            TargetProcessorArchitecture = input.TargetProcessorArchitecture;
-            UnresolveFrameworkAssembliesFromHigherFrameworks = input.UnresolveFrameworkAssembliesFromHigherFrameworks;
-            UseResolveAssemblyReferenceService = input.UseResolveAssemblyReferenceService;
-            WarnOrErrorOnTargetArchitectureMismatch = input.WarnOrErrorOnTargetArchitectureMismatch;
-            CurrentPath = input.CurrentPath;
-        }
-
+        
         public string[] AllowedAssemblyExtensions { get; set; }
 
         public string[] AllowedRelatedFileExtensions { get; set; }
@@ -134,5 +88,9 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
         public string WarnOrErrorOnTargetArchitectureMismatch { get; set; }
 
         public string CurrentPath { get; set; }
+
+        public string AssemblyInformationCacheOutputPath { get; set; }
+
+        public ReadOnlyTaskItem[] AssemblyInformationCachePaths { get; set; }
     }
 }

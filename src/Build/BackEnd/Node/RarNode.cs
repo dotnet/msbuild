@@ -42,6 +42,7 @@ namespace Microsoft.Build.Execution
             Handshake handshake = NodeProviderOutOfProc.GetHandshake(enableNodeReuse: nodeReuse,
                                                                      enableLowPriority: lowPriority, specialNode: true);
 
+            Console.WriteLine(pipeName);
             IRarController controller = GetController(pipeName, handshake);
 
             Task<int> rarTask = controller.StartAsync(cts.Token);

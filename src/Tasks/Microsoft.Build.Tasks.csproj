@@ -354,13 +354,11 @@
     <Compile Include="ResolveAssemblyReferences\Contract\ReadOnlyTaskItem.cs" />
     <Compile Include="ResolveAssemblyReferences\Contract\ResolveAssemblyReferenceRequest.cs" />
     <Compile Include="ResolveAssemblyReferences\Contract\ResolveAssemblyReferenceResponse.cs" />
-    <Compile Include="ResolveAssemblyReferences\Contract\ResolveAssemblyReferenceTaskInput.cs" />
-    <Compile Include="ResolveAssemblyReferences\Contract\ResolveAssemblyReferenceTaskOutput.cs" />
     <Compile Include="ResolveAssemblyReferences\Formatters\BuildEventArgsFormatter.cs" />
     <Compile Include="ResolveAssemblyReferences\Formatters\ReadOnlyTaskItemFormatter.cs" />
-    <Compile Include="ResolveAssemblyReferences\Formatters\ResolveAssemblyReferenceRequestFormatter.cs" />
-    <Compile Include="ResolveAssemblyReferences\Formatters\ResolveAssemblyReferenceResponseFormatter.cs" />
-    <Compile Include="ResolveAssemblyReferences\Formatters\ResolveAssemblyReferenceResultFormatter.cs" />
+    <Compile Include="ResolveAssemblyReferences\Formatters\RequestFormatter.cs" />
+    <Compile Include="ResolveAssemblyReferences\Formatters\ResponseFormatter.cs" />
+    <Compile Include="ResolveAssemblyReferences\Formatters\ResultFormatter.cs" />
     <Compile Include="ResolveAssemblyReferences\ResolveAssemblyReferneceResolver.cs" />
     <Compile Include="ResolveAssemblyReferences\RpcUtils.cs" />
     <Compile Include="ResolveAssemblyReferences\Server\RarController.cs" />
@@ -368,7 +366,6 @@
     <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceComparer.cs" />
     <Compile Include="ResolveAssemblyReferences\Server\ServerMutex.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceHandler.cs" />
-    <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceCacheHandler.cs" />
     <Compile Include="ResolveComReference.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />

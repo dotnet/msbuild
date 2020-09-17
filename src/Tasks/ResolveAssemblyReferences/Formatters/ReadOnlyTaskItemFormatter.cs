@@ -57,7 +57,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters
 
             ReadOnlyTaskItem result = new ReadOnlyTaskItem(itemSpec)
             {
-                ItemSpec = itemSpec,
                 MetadataNameToValue = metadataNameToValue
             };
             reader.Depth--;

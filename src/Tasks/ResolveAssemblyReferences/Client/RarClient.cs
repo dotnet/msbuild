@@ -33,7 +33,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
                 return true;
 
             string pipeName = _rarBuildEngine.GetRarPipeName();
-
+              
             MSBuildEventSource.Log.ResolveAssemblyReferenceNodeConnectStart();
             Stream stream = _rarBuildEngine.GetRarClientStream(pipeName, timeout);
             MSBuildEventSource.Log.ResolveAssemblyReferenceNodeConnectStop();
@@ -50,10 +50,8 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Client
             return _rarBuildEngine.CreateRarNode();
         }
 
-        internal ResolveAssemblyReferenceResult Execute(ResolveAssemblyReferenceTaskInput input)
+        internal ResolveAssemblyReferenceResult Execute(ResolveAssemblyReferenceRequest request)
         {
-            ResolveAssemblyReferenceRequest request = new ResolveAssemblyReferenceRequest(input);
-
             var client = GetRpcClient();
             client.StartListening();
             // TODO: Find out if there is any possibility of awaiting it.

@@ -9,7 +9,7 @@ using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters
 {
-    internal sealed class ResolveAssemblyReferenceResultFormatter : IMessagePackFormatter<ResolveAssemblyReferenceResult>
+    internal sealed class ResultFormatter : IMessagePackFormatter<ResolveAssemblyReferenceResult>
     {
         public void Serialize(ref MessagePackWriter writer, ResolveAssemblyReferenceResult value, MessagePackSerializerOptions options)
         {
@@ -36,24 +36,21 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters
             options.Security.DepthStep(ref reader);
             IFormatterResolver formatterResolver = options.Resolver;
             int length = reader.ReadArrayHeader();
-            List<BuildEventArgs> buildEvents = default;
-            ResolveAssemblyReferenceResponse response = default;
-            bool taskResult = default;
+
+            ResolveAssemblyReferenceResult result = new ResolveAssemblyReferenceResult();
 
             for (int i = 0; i < length; i++)
             {
-                int key = i;
-
-                switch (key)
+                switch (i)
                 {
                     case 2:
-                        taskResult = reader.ReadBoolean();
+                        result.TaskResult = reader.ReadBoolean();
                         break;
                     case 1:
-                        response = formatterResolver.GetFormatter<ResolveAssemblyReferenceResponse>().Deserialize(ref reader, options);
+                        result.Response = formatterResolver.GetFormatter<ResolveAssemblyReferenceResponse>().Deserialize(ref reader, options);
                         break;
                     case 0:
-                        buildEvents = formatterResolver.GetFormatter<List<BuildEventArgs>>().Deserialize(ref reader, options);
+                        result.BuildEvents = formatterResolver.GetFormatter<List<BuildEventArgs>>().Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();
@@ -61,12 +58,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters
                 }
             }
 
-            ResolveAssemblyReferenceResult result = new ResolveAssemblyReferenceResult
-            {
-                TaskResult = taskResult,
-                Response = response,
-                BuildEvents = buildEvents
-            };
             reader.Depth--;
             return result;
         }

@@ -1,5 +1,4 @@
 ﻿using MessagePack;
-using MessagePack.Resolvers;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Client;
@@ -12,15 +11,10 @@ using Microsoft.Build.Utilities;
 using Nerdbank.Streams;
 using Shouldly;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.IO.Pipelines;
-using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 using Task = System.Threading.Tasks.Task;
@@ -37,8 +31,8 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
         public void EnsureInputPropertiesMatch()
         {
             string[] rarInputProperties = typeof(ResolveAssemblyReference).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                .Where(p => !p.GetCustomAttributes(typeof(OutputAttribute), inherit: true).Any()).Select(p => $"{p.PropertyType.FullName}.{p.Name}").ToArray();
-            string[] inputProperties = typeof(ResolveAssemblyReferenceTaskInput).GetProperties().Select(p => $"{p.PropertyType.FullName}.{p.Name}").ToArray();
+                .Where(p => !p.GetCustomAttributes(typeof(OutputAttribute), inherit: true).Any()).Select(p => p.Name).ToArray();
+            string[] inputProperties = typeof(ResolveAssemblyReferenceRequest).GetProperties().Select(p => p.Name).ToArray();
 
             foreach (var item in rarInputProperties)
             {
@@ -50,37 +44,38 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
         public void EnsureOutputPropertiesMatch()
         {
             string[] rarInputProperties = typeof(ResolveAssemblyReference).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                .Where(p => p.GetCustomAttributes(typeof(OutputAttribute), true).Any()).Select(p => $"{p.PropertyType.FullName}.{p.Name}").ToArray();
-            string[] inputProperties = typeof(ResolveAssemblyReferenceTaskOutput).GetProperties().Select(p => $"{p.PropertyType.FullName}.{p.Name}").ToArray();
+                .Where(p => p.GetCustomAttributes(typeof(OutputAttribute), true).Any()).Select(p => p.Name).ToArray();
+            string[] inputProperties = typeof(ResolveAssemblyReferenceResponse).GetProperties().Select(p => p.Name).ToArray();
 
             foreach (var item in rarInputProperties)
             {
                 inputProperties.ShouldContain(item);
             }
         }
+
         [Fact]
         public void TransferredRequestEquals()
         {
-            ITaskItem[] assemblyNames = new TaskItem[]
-            {
-                new TaskItem("DependsOnEverettSystem, Version=1.0.5000.0, Culture=neutral, PublicKeyToken=feedbeadbadcadbe")
-            };
-
-            ResolveAssemblyReference rar = new ResolveAssemblyReference
-            {
-                Assemblies = assemblyNames
-            };
-
             MessagePackSerializerOptions options = MessagePackSerializerOptions.Standard.WithResolver(ResolveAssemblyReferneceResolver.Instance);
+            ResolveAssemblyReferenceRequest request = GetPopulatedObject<ResolveAssemblyReferenceRequest>("test", new[] { "testArr" }, true, new[] { new ReadOnlyTaskItem("test") });
 
-            ResolveAssemblyReferenceRequest request = new ResolveAssemblyReferenceRequest(rar.ResolveAssemblyReferenceInput);
             byte[] data = MessagePackSerializer.Serialize(request, options);
-
             ResolveAssemblyReferenceRequest requestDes = MessagePackSerializer.Deserialize<ResolveAssemblyReferenceRequest>(data, options);
 
             ResolveAssemblyReferenceComparer.CompareInput(request, requestDes).ShouldBeTrue();
         }
 
+        [Fact]
+        public void TransferredResponseEquals()
+        {
+            MessagePackSerializerOptions options = MessagePackSerializerOptions.Standard.WithResolver(ResolveAssemblyReferneceResolver.Instance);
+            ResolveAssemblyReferenceResponse response = GetPopulatedObject<ResolveAssemblyReferenceResponse>("test", new[] { "testArr" }, true, new[] { new ReadOnlyTaskItem("test") });
+
+            byte[] data = MessagePackSerializer.Serialize(response, options);
+            ResolveAssemblyReferenceResponse responseDes = MessagePackSerializer.Deserialize<ResolveAssemblyReferenceResponse>(data, options);
+
+            ResolveAssemblyReferenceComparer.CompareOutput(response, responseDes).ShouldBeTrue();
+        }
 
         [Fact]
         public void TransmitDataTest()
@@ -105,9 +100,8 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 Assemblies = assemblyNames
             };
 
-            ResolveAssemblyReferenceRequest request = new ResolveAssemblyReferenceRequest(rar.ResolveAssemblyReferenceInput);
             ResolveAssemblyReferenceHandler handler = new ResolveAssemblyReferenceHandler();
-            ResolveAssemblyReferenceResult expectedResult = handler.Execute(request);
+            ResolveAssemblyReferenceResult expectedResult = handler.Execute(rar.ResolveAssemblyReferenceInput);
 
             client.Connect();
             ResolveAssemblyReferenceResult result = client.Execute(rar.ResolveAssemblyReferenceInput);
@@ -117,6 +111,50 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
             serverStream.Dispose();
             clientStream.Dispose();
+        }
+
+        private T GetPopulatedObject<T>(string str, string[] strArray, bool boolVal, ReadOnlyTaskItem[] taskItems) where T : new()
+        {
+            int count = 0;
+            T request = new T();
+            Type t = typeof(T);
+            t.GetConstructor(Type.EmptyTypes).Invoke(null);
+            foreach (var prop in t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+            {
+                var propType = prop.PropertyType;
+                if (propType == typeof(string))
+                {
+                    prop.SetValue(request, str + count++);
+                }
+                else if (propType == typeof(string[]))
+                {
+                    if (strArray?.Length > 0)
+                    {
+                        strArray[0] += count++;
+                    }
+
+                    prop.SetValue(request, strArray);
+                }
+                else if (propType == typeof(bool))
+                {
+                    prop.SetValue(request, boolVal);
+                }
+                else if (propType == typeof(ReadOnlyTaskItem[]))
+                {
+                    if (taskItems?.Length > 0 && taskItems[0] != null)
+                    {
+                        taskItems[0].ItemSpec += count++;
+                    }
+
+                    prop.SetValue(request, taskItems);
+                }
+                else
+                {
+                    // Fix by adding new if with this type
+                    throw new NotImplementedException($"Invalid type: {propType.FullName}");
+                }
+            }
+            return request;
         }
     }
 }

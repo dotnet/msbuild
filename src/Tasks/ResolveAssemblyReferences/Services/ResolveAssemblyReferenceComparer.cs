@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
@@ -20,8 +21,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
                 return false;
             }
 
-            bool fieldsEqual = y != null &&
-                   x.AppConfigFile == y.AppConfigFile &&
+            bool fieldsEqual = x.AppConfigFile == y.AppConfigFile &&
                    x.AutoUnify == y.AutoUnify &&
                    x.CopyLocalDependenciesWhenParentReferenceInGac == y.CopyLocalDependenciesWhenParentReferenceInGac &&
                    x.DoNotCopyLocalIfInGac == y.DoNotCopyLocalIfInGac &&
@@ -46,6 +46,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
                    x.UnresolveFrameworkAssembliesFromHigherFrameworks == y.UnresolveFrameworkAssembliesFromHigherFrameworks &&
                    x.UseResolveAssemblyReferenceService == y.UseResolveAssemblyReferenceService &&
                    x.WarnOrErrorOnTargetArchitectureMismatch == y.WarnOrErrorOnTargetArchitectureMismatch &&
+                   x.AssemblyInformationCacheOutputPath == y.AssemblyInformationCacheOutputPath &&
                    x.CurrentPath == y.CurrentPath;
 
             return fieldsEqual &&
@@ -63,6 +64,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
                    AreTaskItemListsEqual(x.ResolvedSDKReferences, y.ResolvedSDKReferences) &&
                    AreStringListsEqual(x.SearchPaths, y.SearchPaths) &&
                    AreStringListsEqual(x.TargetFrameworkDirectories, y.TargetFrameworkDirectories) &&
+                   AreTaskItemListsEqual(x.AssemblyInformationCachePaths, y.AssemblyInformationCachePaths) &&
                    AreStringListsEqual(x.TargetFrameworkSubsets, y.TargetFrameworkSubsets);
         }
 
@@ -89,9 +91,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
                    AreTaskItemListsEqual(x.ScatterFiles, y.ScatterFiles) &&
                    AreTaskItemListsEqual(x.SerializationAssemblyFiles, y.SerializationAssemblyFiles) &&
                    AreTaskItemListsEqual(x.SuggestedRedirects, y.SuggestedRedirects); 
-            //&&
-            //       AreTaskItemListsEqual(x.Assemblies, y.Assemblies) &&
-            //       AreTaskItemListsEqual(x.AssemblyFiles, y.AssemblyFiles);
         }
 
         private static bool AreStringListsEqual(string[] x, string[] y)

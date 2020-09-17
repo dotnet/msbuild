@@ -2993,14 +2993,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             internal ResolveAssemblyReferenceResult Execute(ResolveAssemblyReferenceRequest input)
             {
-                ResolveAssemblyReferenceTaskInput taskInput = new ResolveAssemblyReferenceTaskInput(input);
                 ResolveAssemblyReferenceBuildEngine buildEngine = new ResolveAssemblyReferenceBuildEngine();
                 ResolveAssemblyReference task = new ResolveAssemblyReference
                 {
                     BuildEngine = buildEngine
                 };
 
-                task.ResolveAssemblyReferenceInput = taskInput;
+                task.ResolveAssemblyReferenceInput = input;
                 bool taskResult = ExecuteRarTask(task);
                 ResolveAssemblyReferenceResult result = new ResolveAssemblyReferenceResult(taskResult, task.ResolveAssemblyReferenceOutput)
                 {

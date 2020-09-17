@@ -6,7 +6,7 @@ using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters
 {
-    internal sealed class ResolveAssemblyReferenceResponseFormatter : MessagePack.Formatters.IMessagePackFormatter<ResolveAssemblyReferenceResponse>
+    internal sealed class ResponseFormatter : MessagePack.Formatters.IMessagePackFormatter<ResolveAssemblyReferenceResponse>
     {
         public void Serialize(ref MessagePackWriter writer, ResolveAssemblyReferenceResponse value, MessagePackSerializerOptions options)
         {
@@ -41,56 +41,44 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters
             options.Security.DepthStep(ref reader);
             IFormatterResolver formatterResolver = options.Resolver;
             int length = reader.ReadArrayHeader();
-            ReadOnlyTaskItem[] copyLocalFiles = default;
-            string dependsOnNETStandard = default;
-            string dependsOnSystemRuntime = default;
-            ReadOnlyTaskItem[] filesWritten = default;
-            ReadOnlyTaskItem[] relatedFiles = default;
-            ReadOnlyTaskItem[] resolvedDependencyFiles = default;
-            ReadOnlyTaskItem[] resolvedFiles = default;
-            ReadOnlyTaskItem[] satelliteFiles = default;
-            ReadOnlyTaskItem[] scatterFiles = default;
-            ReadOnlyTaskItem[] serializationAssemblyFiles = default;
-            ReadOnlyTaskItem[] suggestedRedirects = default;
+            ResolveAssemblyReferenceResponse result = new ResolveAssemblyReferenceResponse();
 
             for (int i = 0; i < length; i++)
             {
-                int key = i;
-
-                switch (key)
+                switch (i)
                 {
                     case 0:
-                        copyLocalFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
+                        result.CopyLocalFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
                         break;
                     case 1:
-                        dependsOnNETStandard = reader.ReadString();
+                        result.DependsOnNETStandard = reader.ReadString();
                         break;
                     case 2:
-                        dependsOnSystemRuntime = reader.ReadString();
+                        result.DependsOnSystemRuntime = reader.ReadString();
                         break;
                     case 3:
-                        filesWritten = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
+                        result.FilesWritten = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
                         break;
                     case 4:
-                        relatedFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
+                        result.RelatedFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
                         break;
                     case 5:
-                        resolvedDependencyFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
+                        result.ResolvedDependencyFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
                         break;
                     case 6:
-                        resolvedFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
+                        result.ResolvedFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
                         break;
                     case 7:
-                        satelliteFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
+                        result.SatelliteFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
                         break;
                     case 8:
-                        scatterFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
+                        result.ScatterFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
                         break;
                     case 9:
-                        serializationAssemblyFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
+                        result.SerializationAssemblyFiles = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
                         break;
                     case 10:
-                        suggestedRedirects = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
+                        result.SuggestedRedirects = formatterResolver.GetFormatter<ReadOnlyTaskItem[]>().Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();
@@ -98,20 +86,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters
                 }
             }
 
-            ResolveAssemblyReferenceResponse result = new ResolveAssemblyReferenceResponse
-            {
-                CopyLocalFiles = copyLocalFiles,
-                DependsOnNETStandard = dependsOnNETStandard,
-                DependsOnSystemRuntime = dependsOnSystemRuntime,
-                FilesWritten = filesWritten,
-                RelatedFiles = relatedFiles,
-                ResolvedDependencyFiles = resolvedDependencyFiles,
-                ResolvedFiles = resolvedFiles,
-                SatelliteFiles = satelliteFiles,
-                ScatterFiles = scatterFiles,
-                SerializationAssemblyFiles = serializationAssemblyFiles,
-                SuggestedRedirects = suggestedRedirects,
-            };
             reader.Depth--;
             return result;
         }

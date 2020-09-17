@@ -1,15 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.IO;
-using System.IO.Pipes;
-using System.Threading.Tasks;
 using MessagePack;
-using MessagePack.Formatters;
-using MessagePack.Resolvers;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
 using Nerdbank.Streams;
 using StreamJsonRpc;
 

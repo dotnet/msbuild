@@ -921,15 +921,15 @@ namespace Microsoft.Build.Tasks
             private set;
         }
 
-        internal ResolveAssemblyReferenceTaskInput ResolveAssemblyReferenceInput
+        internal ResolveAssemblyReferenceRequest ResolveAssemblyReferenceInput
         {
-            get => new ResolveAssemblyReferenceTaskInput
+            get => new ResolveAssemblyReferenceRequest  
             {
                 AllowedAssemblyExtensions = AllowedAssemblyExtensions,
                 AllowedRelatedFileExtensions = AllowedRelatedFileExtensions,
                 AppConfigFile = AppConfigFile,
-                Assemblies = Assemblies,
-                AssemblyFiles = AssemblyFiles,
+                Assemblies = ReadOnlyTaskItem.ToReadOnlyItems(Assemblies),
+                AssemblyFiles = ReadOnlyTaskItem.ToReadOnlyItems(AssemblyFiles),
                 AutoUnify = AutoUnify,
                 CandidateAssemblyFiles = CandidateAssemblyFiles,
                 CopyLocalDependenciesWhenParentReferenceInGac = CopyLocalDependenciesWhenParentReferenceInGac,
@@ -939,18 +939,18 @@ namespace Microsoft.Build.Tasks
                 FindRelatedFiles = FindRelatedFiles,
                 FindSatellites = FindSatellites,
                 FindSerializationAssemblies = FindSerializationAssemblies,
-                FullFrameworkAssemblyTables = FullFrameworkAssemblyTables,
+                FullFrameworkAssemblyTables = ReadOnlyTaskItem.ToReadOnlyItems(FullFrameworkAssemblyTables),
                 FullFrameworkFolders = FullFrameworkFolders,
                 FullTargetFrameworkSubsetNames = FullTargetFrameworkSubsetNames,
                 IgnoreDefaultInstalledAssemblySubsetTables = IgnoreDefaultInstalledAssemblySubsetTables,
                 IgnoreDefaultInstalledAssemblyTables = IgnoreDefaultInstalledAssemblyTables,
                 IgnoreTargetFrameworkAttributeVersionMismatch = IgnoreTargetFrameworkAttributeVersionMismatch,
                 IgnoreVersionForFrameworkReferences = IgnoreVersionForFrameworkReferences,
-                InstalledAssemblySubsetTables = InstalledAssemblySubsetTables,
-                InstalledAssemblyTables = InstalledAssemblyTables,
+                InstalledAssemblySubsetTables = ReadOnlyTaskItem.ToReadOnlyItems(InstalledAssemblySubsetTables),
+                InstalledAssemblyTables = ReadOnlyTaskItem.ToReadOnlyItems(InstalledAssemblyTables),
                 LatestTargetFrameworkDirectories = LatestTargetFrameworkDirectories,
                 ProfileName = ProfileName,
-                ResolvedSDKReferences = ResolvedSDKReferences,
+                ResolvedSDKReferences = ReadOnlyTaskItem.ToReadOnlyItems(ResolvedSDKReferences),
                 SearchPaths = SearchPaths,
                 Silent = Silent,
                 StateFile = StateFile,
@@ -965,6 +965,8 @@ namespace Microsoft.Build.Tasks
                 UnresolveFrameworkAssembliesFromHigherFrameworks = UnresolveFrameworkAssembliesFromHigherFrameworks,
                 UseResolveAssemblyReferenceService = UseResolveAssemblyReferenceService,
                 WarnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatch,
+                AssemblyInformationCacheOutputPath = AssemblyInformationCacheOutputPath,
+                AssemblyInformationCachePaths = ReadOnlyTaskItem.ToReadOnlyItems(AssemblyInformationCachePaths),
                 CurrentPath = Directory.GetCurrentDirectory()
             };
             set
@@ -972,8 +974,8 @@ namespace Microsoft.Build.Tasks
                 AllowedAssemblyExtensions = value.AllowedAssemblyExtensions;
                 AllowedRelatedFileExtensions = value.AllowedRelatedFileExtensions;
                 AppConfigFile = value.AppConfigFile;
-                Assemblies = value.Assemblies;
-                AssemblyFiles = value.AssemblyFiles;
+                Assemblies = ReadOnlyTaskItem.ToTaskItems(value.Assemblies);
+                AssemblyFiles = ReadOnlyTaskItem.ToTaskItems(value.AssemblyFiles);
                 AutoUnify = value.AutoUnify;
                 CandidateAssemblyFiles = value.CandidateAssemblyFiles;
                 CopyLocalDependenciesWhenParentReferenceInGac = value.CopyLocalDependenciesWhenParentReferenceInGac;
@@ -983,18 +985,18 @@ namespace Microsoft.Build.Tasks
                 FindRelatedFiles = value.FindRelatedFiles;
                 FindSatellites = value.FindSatellites;
                 FindSerializationAssemblies = value.FindSerializationAssemblies;
-                FullFrameworkAssemblyTables = value.FullFrameworkAssemblyTables;
+                FullFrameworkAssemblyTables = ReadOnlyTaskItem.ToTaskItems(value.FullFrameworkAssemblyTables);
                 FullFrameworkFolders = value.FullFrameworkFolders;
                 FullTargetFrameworkSubsetNames = value.FullTargetFrameworkSubsetNames;
                 IgnoreDefaultInstalledAssemblySubsetTables = value.IgnoreDefaultInstalledAssemblySubsetTables;
                 IgnoreDefaultInstalledAssemblyTables = value.IgnoreDefaultInstalledAssemblyTables;
                 IgnoreTargetFrameworkAttributeVersionMismatch = value.IgnoreTargetFrameworkAttributeVersionMismatch;
                 IgnoreVersionForFrameworkReferences = value.IgnoreVersionForFrameworkReferences;
-                InstalledAssemblySubsetTables = value.InstalledAssemblySubsetTables;
-                InstalledAssemblyTables = value.InstalledAssemblyTables;
+                InstalledAssemblySubsetTables = ReadOnlyTaskItem.ToTaskItems(value.InstalledAssemblySubsetTables);
+                InstalledAssemblyTables = ReadOnlyTaskItem.ToTaskItems(value.InstalledAssemblyTables);
                 LatestTargetFrameworkDirectories = value.LatestTargetFrameworkDirectories;
                 ProfileName = value.ProfileName;
-                ResolvedSDKReferences = value.ResolvedSDKReferences;
+                ResolvedSDKReferences = ReadOnlyTaskItem.ToTaskItems(value.ResolvedSDKReferences);
                 SearchPaths = value.SearchPaths;
                 Silent = value.Silent;
                 StateFile = value.StateFile;
@@ -1009,38 +1011,40 @@ namespace Microsoft.Build.Tasks
                 UnresolveFrameworkAssembliesFromHigherFrameworks = value.UnresolveFrameworkAssembliesFromHigherFrameworks;
                 UseResolveAssemblyReferenceService = value.UseResolveAssemblyReferenceService;
                 WarnOrErrorOnTargetArchitectureMismatch = value.WarnOrErrorOnTargetArchitectureMismatch;
+                AssemblyInformationCacheOutputPath = value.AssemblyInformationCacheOutputPath;
+                AssemblyInformationCachePaths = ReadOnlyTaskItem.ToTaskItems(value.AssemblyInformationCachePaths);
             }
         }
 
-        internal ResolveAssemblyReferenceTaskOutput ResolveAssemblyReferenceOutput
+        internal ResolveAssemblyReferenceResponse ResolveAssemblyReferenceOutput
         {
-            get => new ResolveAssemblyReferenceTaskOutput
+            get => new ResolveAssemblyReferenceResponse
             {
-                CopyLocalFiles = CopyLocalFiles,
+                CopyLocalFiles = ReadOnlyTaskItem.ToReadOnlyItems(CopyLocalFiles),
                 DependsOnNETStandard = DependsOnNETStandard,
                 DependsOnSystemRuntime = DependsOnSystemRuntime,
-                FilesWritten = FilesWritten,
-                RelatedFiles = RelatedFiles,
-                ResolvedDependencyFiles = ResolvedDependencyFiles,
-                ResolvedFiles = ResolvedFiles,
-                SatelliteFiles = SatelliteFiles,
-                ScatterFiles = ScatterFiles,
-                SerializationAssemblyFiles = SerializationAssemblyFiles,
-                SuggestedRedirects = SuggestedRedirects,
+                FilesWritten = ReadOnlyTaskItem.ToReadOnlyItems(FilesWritten),
+                RelatedFiles = ReadOnlyTaskItem.ToReadOnlyItems(RelatedFiles),
+                ResolvedDependencyFiles = ReadOnlyTaskItem.ToReadOnlyItems(ResolvedDependencyFiles),
+                ResolvedFiles = ReadOnlyTaskItem.ToReadOnlyItems(ResolvedFiles),
+                SatelliteFiles = ReadOnlyTaskItem.ToReadOnlyItems(SatelliteFiles),
+                ScatterFiles = ReadOnlyTaskItem.ToReadOnlyItems(ScatterFiles),
+                SerializationAssemblyFiles = ReadOnlyTaskItem.ToReadOnlyItems(SerializationAssemblyFiles),
+                SuggestedRedirects = ReadOnlyTaskItem.ToReadOnlyItems(SuggestedRedirects),
             };
             set
             {
-                _copyLocalFiles = value.CopyLocalFiles;
+                _copyLocalFiles = ReadOnlyTaskItem.ToTaskItems(value.CopyLocalFiles);
                 DependsOnNETStandard = value.DependsOnNETStandard;
                 DependsOnSystemRuntime = value.DependsOnSystemRuntime;
-                _filesWritten = new List<ITaskItem>(value.FilesWritten);
-                _relatedFiles = value.RelatedFiles;
-                _resolvedDependencyFiles = value.ResolvedDependencyFiles;
-                _resolvedFiles = value.ResolvedFiles;
-                _satelliteFiles = value.SatelliteFiles;
-                _scatterFiles = value.ScatterFiles;
-                _serializationAssemblyFiles = value.SerializationAssemblyFiles;
-                _suggestedRedirects = value.SuggestedRedirects;
+                _filesWritten = new List<ITaskItem>(ReadOnlyTaskItem.ToTaskItems(value.FilesWritten));
+                _relatedFiles = ReadOnlyTaskItem.ToTaskItems(value.RelatedFiles);
+                _resolvedDependencyFiles =  ReadOnlyTaskItem.ToTaskItems(value.ResolvedDependencyFiles);
+                _resolvedFiles =  ReadOnlyTaskItem.ToTaskItems(value.ResolvedFiles);
+                _satelliteFiles =  ReadOnlyTaskItem.ToTaskItems(value.SatelliteFiles);
+                _scatterFiles =  ReadOnlyTaskItem.ToTaskItems(value.ScatterFiles);
+                _serializationAssemblyFiles =  ReadOnlyTaskItem.ToTaskItems(value.SerializationAssemblyFiles);
+                _suggestedRedirects =  ReadOnlyTaskItem.ToTaskItems(value.SuggestedRedirects);
             }
         }
 
@@ -3152,9 +3156,13 @@ namespace Microsoft.Build.Tasks
                     MSBuildEventSource.Log.ResolveAssemblyReferenceServiceRequestStart();
                     ResolveAssemblyReferenceResult result = client.Execute(ResolveAssemblyReferenceInput);
                     MSBuildEventSource.Log.ResolveAssemblyReferenceServiceRequestStop();
-                    ResolveAssemblyReferenceOutput = result.Output;
+                    ResolveAssemblyReferenceOutput = result.Response;
                     LogEvents(result.BuildEvents);
                     return result.TaskResult;
+                }
+                else
+                {
+                    ErrorUtilities.ThrowInternalError(UseResolveAssemblyReferenceService.ToString());
                 }
             }
 
@@ -3215,7 +3223,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="input">Required input to the task</param>
         /// <returns>If task was executed successfully</returns>
-        internal ResolveAssemblyReferenceResult Execute(ResolveAssemblyReferenceTaskInput input)
+        internal ResolveAssemblyReferenceResult Execute(ResolveAssemblyReferenceRequest input)
         {
             ErrorUtilities.VerifyThrowArgumentNull(input, nameof(input));
 

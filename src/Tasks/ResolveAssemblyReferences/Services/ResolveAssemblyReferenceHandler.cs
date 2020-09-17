@@ -16,14 +16,13 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 
         internal ResolveAssemblyReferenceResult Execute(ResolveAssemblyReferenceRequest input)
         {
-            ResolveAssemblyReferenceTaskInput taskInput = new ResolveAssemblyReferenceTaskInput(input);
             ResolveAssemblyReferenceBuildEngine buildEngine = new ResolveAssemblyReferenceBuildEngine();
             ResolveAssemblyReference task = new ResolveAssemblyReference
             {
                 BuildEngine = buildEngine
             };
 
-            ResolveAssemblyReferenceResult result = task.Execute(taskInput);
+            ResolveAssemblyReferenceResult result = task.Execute(input);
             result.BuildEvents = buildEngine.BuildEvents;
 
             return result;

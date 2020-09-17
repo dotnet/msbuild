@@ -9,21 +9,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
         {
         }
 
-        internal ResolveAssemblyReferenceResponse(ResolveAssemblyReferenceTaskOutput output)
-        {
-            CopyLocalFiles = ReadOnlyTaskItem.CreateArray(output.CopyLocalFiles);
-            DependsOnNETStandard = output.DependsOnNETStandard;
-            DependsOnSystemRuntime = output.DependsOnSystemRuntime;
-            FilesWritten = ReadOnlyTaskItem.CreateArray(output.FilesWritten);
-            RelatedFiles = ReadOnlyTaskItem.CreateArray(output.RelatedFiles);
-            ResolvedDependencyFiles = ReadOnlyTaskItem.CreateArray(output.ResolvedDependencyFiles);
-            ResolvedFiles = ReadOnlyTaskItem.CreateArray(output.ResolvedFiles);
-            SatelliteFiles = ReadOnlyTaskItem.CreateArray(output.SatelliteFiles);
-            ScatterFiles = ReadOnlyTaskItem.CreateArray(output.ScatterFiles);
-            SerializationAssemblyFiles = ReadOnlyTaskItem.CreateArray(output.SerializationAssemblyFiles);
-            SuggestedRedirects = ReadOnlyTaskItem.CreateArray(output.SuggestedRedirects);
-        }
-
         public ReadOnlyTaskItem[] CopyLocalFiles { get; set; }
 
         public string DependsOnNETStandard { get; set; }

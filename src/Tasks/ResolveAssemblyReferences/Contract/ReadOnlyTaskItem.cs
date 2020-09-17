@@ -23,10 +23,34 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
         public ReadOnlyTaskItem(string itemSpec, IDictionary metadata)
         {
             ItemSpec = itemSpec;
-            MetadataNameToValue = new Dictionary<string, string>((IDictionary<string, string>)metadata);
+
+            if (metadata is Dictionary<string, string> metadataNameToValue)
+            {
+                MetadataNameToValue = metadataNameToValue;
+            }
+            else if (metadata is IDictionary<string, string> metadataByInterface)
+            {
+                MetadataNameToValue = new Dictionary<string, string>(metadataByInterface);
+            }
+            else
+            {
+                if (metadata.Count > 0)
+                {
+                    MetadataNameToValue = new Dictionary<string, string>();
+
+                    foreach (DictionaryEntry singleMetadata in metadata)
+                    {
+                        string key = (string)singleMetadata.Key;
+                        if (key != null)
+                        {
+                            MetadataNameToValue[key] = (string)singleMetadata.Value ?? string.Empty;
+                        }
+                    }
+                }
+            }
         }
 
-        internal static ReadOnlyTaskItem[] CreateArray(ITaskItem[] items)
+        internal static ReadOnlyTaskItem[] ToReadOnlyItems(ITaskItem[] items)
         {
             if (items == null)
                 return null;
@@ -44,7 +68,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
             return readOnlyTaskItems;
         }
 
-        internal static ITaskItem[] ToTaskItem(ReadOnlyTaskItem[] readOnlyTaskItems)
+        internal static ITaskItem[] ToTaskItems(ReadOnlyTaskItem[] readOnlyTaskItems)
         {
             if (readOnlyTaskItems == null)
                 return null;
