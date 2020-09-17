@@ -1081,10 +1081,11 @@ namespace Microsoft.Build.Evaluation
                 }
             }
         }
+
         /// <summary>
         /// Ensure the built in property MSBuildDisableChangeWaveVersion is set properly while raising appropriate warnings.
         /// </summary>
-        /// <returns>String representation of the set change wave, or 999.999 if unset.</returns>
+        /// <returns> String representation of the set change wave, or "999.999" if unset. </returns>
         private string SanitizeChangeWave()
         {
             Version changeWave;
@@ -1096,18 +1097,18 @@ namespace Microsoft.Build.Evaluation
                 return ChangeWaves.EnableAllFeaturesBehindChangeWaves;
             }
 
-            // If the user-set change wave is of invalid format, log a warning and don't opt out.
+            // If the user-set change wave is of invalid format, log a warning and enable all features.
             if (!Version.TryParse(Traits.Instance.MSBuildDisableChangeWaveVersion, out changeWave))
             {
-                _evaluationLoggingContext.LogWarning("ChangeWave_InvalidFormat", new BuildEventFileInfo("WhatDoIPutHere.cs", 0, 0, 0, 0), Traits.Instance.MSBuildDisableChangeWaveVersion);
+                _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableChangeWaveVersion);
                 Traits.Instance.MSBuildDisableChangeWaveVersion = ChangeWaves.EnableAllFeaturesBehindChangeWaves;
                 changeWave = ChangeWaves.EnableAllFeaturesVersion;
             }
-            // If the change wave is out of rotation, log a warning and opt out of all waves.
+            // If the change wave is out of rotation, log a warning and disable all features.
             else if (ChangeWaves.IsChangeWaveOutOfRotation(changeWave))
             {
-                _evaluationLoggingContext.LogWarning("ChangeWave_OutOfRotation", new BuildEventFileInfo("WhatDoIPutHere.cs", 0, 0, 0, 0), changeWave.ToString());
-                Traits.Instance.MSBuildDisableChangeWaveVersion = ChangeWaves.LowestWave;
+                _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.AllWaves[0], changeWave.ToString());
+                Traits.Instance.MSBuildDisableChangeWaveVersion = ChangeWaves.AllWaves[0];
                 changeWave = ChangeWaves.LowestWaveVersion;
             }
 

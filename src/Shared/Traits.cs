@@ -32,22 +32,21 @@ namespace Microsoft.Build.Utilities
 
         public EscapeHatches EscapeHatches { get; }
 
-        private string MSBuildChangeWave;
+        private string _msbuildChangeWave;
 
         public string MSBuildDisableChangeWaveVersion
         {
             get
             {
-                if (MSBuildChangeWave == null)
+                if (_msbuildChangeWave == null)
                 {
-                    MSBuildChangeWave = Environment.GetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION");
+                    _msbuildChangeWave = Environment.GetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION");
                 }
-                return MSBuildChangeWave;
+                return _msbuildChangeWave;
             }
             internal set
             {
-                // Potentially sanitize value here.
-                MSBuildChangeWave = value;
+                _msbuildChangeWave = value;
             }
         }
 

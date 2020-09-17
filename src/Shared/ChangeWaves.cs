@@ -13,17 +13,36 @@ namespace Microsoft.Build.Utilities
         public const string Wave16_10 = "16.10";
         public const string Wave17_0 = "17.0";
 
-        public const string LowestWave = Wave16_8;
-        public const string HighestWave = Wave17_0;
-
         /// <summary>
         /// Special value indicating that all features behind change-waves should be enabled.
         /// </summary>
         public const string EnableAllFeaturesBehindChangeWaves = "999.999";
 
-        internal static readonly Version LowestWaveVersion = new Version(LowestWave);
-        internal static readonly Version HighestWaveVersion = new Version(HighestWave);
+        public static readonly string[] AllWaves = { Wave16_8, Wave16_10, Wave17_0 };
+
+        internal static readonly Version LowestWaveVersion = new Version(AllWaves[0]);
+        internal static readonly Version HighestWaveVersion = new Version(AllWaves[AllWaves.Length - 1]);
         internal static readonly Version EnableAllFeaturesVersion = new Version(EnableAllFeaturesBehindChangeWaves);
+
+        public static string LowestWave
+        {
+            get
+            {
+                return AllWaves[0];
+            }
+        }
+
+        public static string HighestWave
+        {
+            get
+            {
+                return AllWaves[AllWaves.Length - 1];
+            }
+        }
+
+
+
+
 
         /// <summary>
         /// Compares version against the MSBuildChangeWave environment variable.
@@ -34,7 +53,6 @@ namespace Microsoft.Build.Utilities
         public static bool IsFeatureEnabled(string wave)
         {
             // This is opt out behavior, all waves are enabled by default.
-            // If version is invalid, 
             if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableChangeWaveVersion))
             {
                 return true;
@@ -42,6 +60,7 @@ namespace Microsoft.Build.Utilities
 
             Version currentDisabledWave;
 
+            // If we can't parse the environment variable, default to enabling features.
             if (!Version.TryParse(Traits.Instance.MSBuildDisableChangeWaveVersion, out currentDisabledWave))
             {
                 return true;
@@ -52,14 +71,14 @@ namespace Microsoft.Build.Utilities
             // When a caller passes an invalid waveToCheck, fail the build.
             ErrorUtilities.VerifyThrow(Version.TryParse(wave.ToString(), out waveToCheck),
                                        $"Argument 'wave' passed with invalid format." +
-                                       $"Please use the const strings or define one with format 'xx.yy");
+                                       $"Please use pre-existing const strings or define one with format 'xx.yy");
 
             return waveToCheck < currentDisabledWave ? true : false;
         }
 
         public static bool IsChangeWaveOutOfRotation(Version v)
         {
-            return v < LowestWaveVersion || v > HighestWaveVersion;
+            return v != EnableAllFeaturesVersion && (v < LowestWaveVersion || v > HighestWaveVersion);
         }
     }
 }

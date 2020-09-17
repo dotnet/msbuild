@@ -36,7 +36,8 @@ Surround your feature with the following:
 ```
 If you need to condition a Task or Target, condition it based on `MSBuildChangeWaveVersion`
 ```xml
-<Target Name="SomeBreakingChange" Condition="$([MSBuild]::VersionGreaterThan('$(MSBuildChangeWaveVersion)', '17.4'))"">
+<Target Name="SomeBreakingChange" Condition="$([MSBuild]::VersionLessThan('17.4', '$(MSBuildChangeWaveVersion)'))"">
+<!-- Where '17.4' is the change wave assigned to your feature. -->
 ```
 **NOTE**: If `MSBuildChangeWaveVersion` is in an invalid format, the build will fail here.
 
@@ -45,7 +46,6 @@ Create tests as you normally would, but include tests with `MSBuildChangeWaveVer
 1. Some version prior (your feature should NOT run)
 1. The same version (your feature should NOT run)
 1. Some version after (your feature SHOULD run)
-**NOTE:** Don't forget
 
 ### Change Wave 'End of Lifespan' Procedure
 Your feature will eventually become standard functionality. When a change wave rotates out, do the following:
