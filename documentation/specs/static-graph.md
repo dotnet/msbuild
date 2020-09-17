@@ -26,6 +26,7 @@
     - [Detours](#detours)
     - [Isolation requirement](#isolation-requirement)
     - [Tool servers](#tool-servers)
+  - [Examples](#examples)
 
 ## What is static graph for?
 
@@ -456,3 +457,72 @@ To support this scenario, a new MSBuild Task API could be introduced which allow
 Similarly for a theoretical server mode for MSBuild, MSBuild would need to report its own I/O rather than the higher-order build engine detouring the process externally. For example, if the higher-order build engine connected to an existing running MSBuild process to make build requests, it could not detour that process and so MSBuild would need to report all I/O done as part of a particular build request.
 
 **OPEN ISSUE:** As described above in an open issue, tool servers are the only scenario which would not be supportable by just externally detouring the MSBuild process. The amount of investment required to enable tool servers is quite high and spans across multiple codebases: MSBuild needs to detour itself, MSBuild need to expose a new Tasks API, the `Csc` task needs to opt into that API, and the higher-order build engine needs to opt-in to MSBuild reporting its own I/O, as well as detecting that the feature is supported in the version of MSBuild it's using. Tool servers may add substantial performance gain, but the investment is also substantial.
+
+## Examples
+
+To illustrate the difference between `-graph` and `-graph -isolate`, consider these two projects, which are minimal except for a new target in the referenced project that is consumed in the referencing project.
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UnusualOutput>Configuration\Unusual.txt</UnusualOutput>
+  </PropertyGroup>
+
+  <Target Name="UnusualThing" Returns="$(UnusualOutput)" />
+</Project>
+```
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Referenced\Referenced.csproj" />
+  </ItemGroup>
+
+  <Target Name="GetUnusualThing" BeforeTargets="BeforeBuild">
+    <MSBuild Projects="..\Referenced\Referenced.csproj"
+             Targets="UnusualThing">
+      <Output TaskParameter="TargetOutputs"
+              ItemName="Content" />
+    </MSBuild>
+  </Target>
+</Project>
+```
+
+This project can successfully build with `-graph`
+
+```sh-session
+$ dotnet msbuild -graph -noautorsp -nologo
+"Static graph loaded in 0.253 seconds: 2 nodes, 1 edges"
+  You are using a preview version of .NET. See: https://aka.ms/dotnet-core-preview
+  Referenced -> S:\Referenced\bin\Debug\netcoreapp3.1\Referenced.dll
+  Referencing -> S:\Referencing\bin\Debug\netcoreapp3.1\Referencing.dll
+```
+
+But fails with `-graph -isolate`
+
+```sh-session
+$ dotnet msbuild -graph -isolate -noautorsp -nologo
+"Static graph loaded in 0.255 seconds: 2 nodes, 1 edges"
+  You are using a preview version of .NET. See: https://aka.ms/dotnet-core-preview
+  Referenced -> S:\Referenced\bin\Debug\netcoreapp3.1\Referenced.dll
+S:\Referencing\Referencing.csproj(12,5): error : MSB4252: Project "S:\Referencing\Referencing.csproj" with global properties
+S:\Referencing\Referencing.csproj(12,5): error :     (IsGraphBuild=true)
+S:\Referencing\Referencing.csproj(12,5): error :     is building project "S:\Referenced\Referenced.csproj" with global properties
+S:\Referencing\Referencing.csproj(12,5): error :     (IsGraphBuild=true)
+S:\Referencing\Referencing.csproj(12,5): error :     with the (UnusualThing) target(s) but the build result for the built project is not in the engine cache. In isolated builds this could mean one of the following:
+S:\Referencing\Referencing.csproj(12,5): error :     - the reference was called with a target which is not specified in the ProjectReferenceTargets item in project "S:\Referencing\Referencing.csproj"
+S:\Referencing\Referencing.csproj(12,5): error :     - the reference was called with global properties that do not match the static graph inferred nodes
+S:\Referencing\Referencing.csproj(12,5): error :     - the reference was not explicitly specified as a ProjectReference item in project "S:\Referencing\Referencing.csproj"
+S:\Referencing\Referencing.csproj(12,5): error :
+```
+
+This part of the error is the problem here:
+
+> the reference was called with a target which is not specified in the ProjectReferenceTargets item in project "S:\Referencing\Referencing.csproj"
