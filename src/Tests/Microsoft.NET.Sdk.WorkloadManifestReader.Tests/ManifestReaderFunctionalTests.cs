@@ -14,23 +14,60 @@ namespace ManifestReaderTests
         [Fact]
         public void ItShouldGetAllTemplatesPacks()
         {
-            var workloadResolver = new WorkloadResolver(new FakeManifestProvider(new[] { Path.Combine("Manifests", "Sample.json") }), "fakepath");
-            workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => true);
+            WorkloadResolver workloadResolver = SetUp();
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template);
             result.Should().HaveCount(1);
             var templateItem = result.First();
             templateItem.Id.Should().Be("Xamarin.Android.Templates");
             templateItem.IsStillPacked.Should().BeFalse();
             templateItem.Kind.Should().Be(WorkloadPackKind.Template);
-            templateItem.Path.Should().Be(Path.Combine("fakepath", "template-packs", "xamarin.android.templates.1.0.3.nupkg"));
+            templateItem.Path.Should()
+                .Be(Path.Combine("fakepath", "template-packs", "xamarin.android.templates.1.0.3.nupkg"));
         }
 
         [Fact]
-        public void GivienTemplateNupkgDoesNotExistOnDiskItShouldReturnEmpty()
+        public void ItShouldGetAllSdkPacks()
         {
-            var workloadResolver = new WorkloadResolver(new FakeManifestProvider(new[] { Path.Combine("Manifests", "Sample.json") }), "fakepath");
+            WorkloadResolver workloadResolver = SetUp();
+            var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk);
+            result.Should().HaveCount(4);
+            var androidWorkloads = result.Single(w => w.Id == "Xamarin.Android.Sdk");
+            androidWorkloads.Id.Should().Be("Xamarin.Android.Sdk");
+            androidWorkloads.IsStillPacked.Should().BeTrue();
+            androidWorkloads.Kind.Should().Be(WorkloadPackKind.Sdk);
+            androidWorkloads.Version.Should().Be("8.4.7");
+            androidWorkloads.Path.Should().Be(Path.Combine("fakepath", "packs", "Xamarin.Android.Sdk", "8.4.7"));
+        }
+
+        private static WorkloadResolver SetUp()
+        {
+            var workloadResolver =
+                new WorkloadResolver(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
+                    "fakepath");
+
+            workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => true);
+            return workloadResolver;
+        }
+
+        [Fact]
+        public void GivenTemplateNupkgDoesNotExistOnDiskItShouldReturnEmpty()
+        {
+            var workloadResolver =
+                new WorkloadResolver(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
+                    "fakepath");
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => false, directoryExists: (_) => true);
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template);
+            result.Should().HaveCount(0);
+        }
+
+        [Fact]
+        public void GivenWorkloadSDKsDirectoryNotExistOnDiskItShouldReturnEmpty()
+        {
+            var workloadResolver =
+                new WorkloadResolver(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
+                    "fakepath");
+            workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => false);
+            var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk);
             result.Should().HaveCount(0);
         }
     }
