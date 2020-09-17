@@ -40,6 +40,8 @@ namespace Microsoft.Build.Collections
         /// </summary>
         private static ImmutableDictionary<K, V> NameComparerDictionaryPrototype = ImmutableDictionary.Create<K, V>((IEqualityComparer<K>)MSBuildNameIgnoreCaseComparer.Default);
 #endif
+        private static ImmutableDictionary<K, V> OrdinalIgnoreCaseComparerDictionaryPrototype = ImmutableDictionary.Create<K, V>((IEqualityComparer<K>)StringComparer.OrdinalIgnoreCase);
+
 
         /// <summary>
         /// The backing dictionary.
@@ -101,7 +103,9 @@ namespace Microsoft.Build.Collections
 #else
             return typeof(K) == typeof(string) && keyComparer is MSBuildNameIgnoreCaseComparer
                             ? NameComparerDictionaryPrototype
-                            : ImmutableDictionary.Create<K, V>(keyComparer);
+                            : keyComparer == StringComparer.OrdinalIgnoreCase
+                              ? OrdinalIgnoreCaseComparerDictionaryPrototype
+                              : ImmutableDictionary.Create<K, V>(keyComparer);
 #endif
         }
 
