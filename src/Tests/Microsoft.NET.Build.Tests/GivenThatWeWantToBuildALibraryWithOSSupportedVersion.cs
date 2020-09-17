@@ -150,7 +150,7 @@ namespace Microsoft.NET.Build.Tests
                 .Fail().And.HaveStdOutContaining("NETSDK1135");
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void WhenTargetPlatformMinVersionIsSetForWindowsItIsUsedForTheSupportedOSPlatformAttribute()
         {
             TestProject testProject = SetUpProject("net5.0-windows10.0.19041");
@@ -167,7 +167,7 @@ namespace Microsoft.NET.Build.Tests
                 .And.HaveStdOutContaining(SupportedOSPlatformAttribute("Windows10.0.18362.0"));
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void WhenTargetingWindowsSupportedOSVersionPropertySetsTargetPlatformMinVersion()
         {
             TestProject testProject = SetUpProject("net5.0-windows10.0.19041");
@@ -193,7 +193,7 @@ namespace Microsoft.NET.Build.Tests
                 .BeEquivalentTo("10.0.18362.0");                
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void WhenTargetingWindowsSupportedOSPlatformVersionPropertyIsPreferredOverTargetPlatformMinVersion()
         {
             TestProject testProject = SetUpProject("net5.0-windows10.0.19041");
