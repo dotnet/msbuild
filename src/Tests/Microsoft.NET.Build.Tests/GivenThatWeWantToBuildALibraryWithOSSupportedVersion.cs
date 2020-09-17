@@ -97,7 +97,7 @@ namespace Microsoft.NET.Build.Tests
 
         [WindowsOnlyTheory]
         [InlineData("net5.0-windows", "Windows7.0")]
-        [InlineData("net5.0-windows10.0.19041.0", "Windows10.0.19041.0")]
+        [InlineData("net5.0-windows10.0.19041", "Windows10.0.19041.0")]
         public void WhenUsingTargetPlatformInTargetFrameworkItCanGenerateSupportedOSPlatformAttribute(string targetFramework, string expectedAttribute)
         {
             TestProject testProject = SetUpProject(targetFramework);
@@ -148,6 +148,92 @@ namespace Microsoft.NET.Build.Tests
             buildCommand.Execute()
                 .Should()
                 .Fail().And.HaveStdOutContaining("NETSDK1135");
+        }
+
+        [Fact]
+        public void WhenTargetPlatformMinVersionIsSetForWindowsItIsUsedForTheSupportedOSPlatformAttribute()
+        {
+            TestProject testProject = SetUpProject("net5.0-windows10.0.19041");
+            testProject.AdditionalProperties["TargetPlatformMinVersion"] = "10.0.18362.0";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var runCommand = new DotnetCommand(Log, "run");
+            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            runCommand.Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining(TargetPlatformAttribute("Windows10.0.19041.0"))
+                .And.HaveStdOutContaining(SupportedOSPlatformAttribute("Windows10.0.18362.0"));
+        }
+
+        [Fact]
+        public void WhenTargetingWindowsSupportedOSVersionPropertySetsTargetPlatformMinVersion()
+        {
+            TestProject testProject = SetUpProject("net5.0-windows10.0.19041");
+            testProject.AdditionalProperties["SupportedOSPlatformVersion"] = "10.0.18362.0";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var runCommand = new DotnetCommand(Log, "run");
+            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            runCommand.Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining(TargetPlatformAttribute("Windows10.0.19041.0"))
+                .And.HaveStdOutContaining(SupportedOSPlatformAttribute("Windows10.0.18362.0"));
+
+            var getValuesCommand = new GetValuesCommand(testAsset, "TargetPlatformMinVersion");
+            getValuesCommand.Execute()
+                .Should()
+                .Pass();
+
+            getValuesCommand.GetValues()
+                .Should()
+                .BeEquivalentTo("10.0.18362.0");                
+        }
+
+        [Fact]
+        public void WhenTargetingWindowsSupportedOSPlatformVersionPropertyIsPreferredOverTargetPlatformMinVersion()
+        {
+            TestProject testProject = SetUpProject("net5.0-windows10.0.19041");
+            testProject.AdditionalProperties["TargetPlatformMinVersion"] = "10.0.18362.0";
+            testProject.AdditionalProperties["SupportedOSPlatformVersion"] = "10.0.17663.0";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var runCommand = new DotnetCommand(Log, "run");
+            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            runCommand.Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining(TargetPlatformAttribute("Windows10.0.19041.0"))
+                .And.HaveStdOutContaining(SupportedOSPlatformAttribute("Windows10.0.17663.0"));
+
+        }
+
+        [Fact]
+        public void WhenNotTargetingWindowsTargetPlatformMinVersionPropertyIsIgnored()
+        {
+            TestProject testProject = SetUpProject();
+
+            var targetPlatformIdentifier = "iOS";
+            testProject.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
+            testProject.AdditionalProperties["TargetPlatformSupported"] = "true";
+            testProject.AdditionalProperties["TargetPlatformVersionSupported"] = "true";
+            testProject.AdditionalProperties["SupportedOSPlatformVersion"] = "13.2";
+            testProject.AdditionalProperties["TargetPlatformVersion"] = "14.0";
+            testProject.AdditionalProperties["TargetPlatformMinVersion"] = "12.0";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var runCommand = new DotnetCommand(Log, "run");
+            runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
+            runCommand.Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining(TargetPlatformAttribute("iOS14.0"))
+                .And.HaveStdOutContaining(SupportedOSPlatformAttribute("iOS13.2"));
         }
 
         private static string TargetPlatformAttribute(string targetPlatform)
