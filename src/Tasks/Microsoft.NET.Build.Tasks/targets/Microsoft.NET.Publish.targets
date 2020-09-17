@@ -700,8 +700,13 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        Condition="'$(PublishReferencesDocumentationFiles)' == 'true' or '%(ReferenceCopyLocalPaths.Extension)' != '.xml'">
         <DestinationSubPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(ReferenceCopyLocalPaths.Filename)%(ReferenceCopyLocalPaths.Extension)</DestinationSubPath>
       </_ResolvedCopyLocalPublishAssets>
-    </ItemGroup>
 
+      <!-- Include RuntimePackAsset where RuntimePackAlwaysCopyLocal is true -->
+      <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)"
+                              Condition="'%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true'">
+        <DestinationSubPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(ReferenceCopyLocalPaths.Filename)%(ReferenceCopyLocalPaths.Extension)</DestinationSubPath>
+      </_ResolvedCopyLocalPublishAssets>
+    </ItemGroup>
   </Target>
 
   <!--

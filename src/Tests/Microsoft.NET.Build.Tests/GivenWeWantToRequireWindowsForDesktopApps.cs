@@ -228,6 +228,33 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
 
             Assert(publishCommand.GetOutputDirectory(tfm, runtimeIdentifier: runtimeIdentifier));
+
+            var command = new GetValuesCommand(
+                Log,
+                Path.Combine(asset.Path, testProject.Name),
+                testProject.TargetFrameworks,
+                "FilesCopiedToPublishDir",
+                GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "ComputeFilesCopiedToPublishDir",
+                MetadataNames = { "RelativePath" },
+            };
+
+            command.Execute().Should().Pass();
+            var items = from item in command.GetValuesWithMetadata()
+                        select new
+                        {
+                            Identity = item.value,
+                            RelativePath = item.metadata["RelativePath"]
+                        };
+
+            items
+                .Should().Contain(i => i.RelativePath == "Microsoft.Windows.SDK.NET.dll" && Path.GetFileName(i.Identity) == "Microsoft.Windows.SDK.NET.dll",
+                                  because: "wapproj should copy cswinrt dlls");
+            items
+                .Should()
+                .Contain(i => i.RelativePath == "WinRT.Runtime.dll" && Path.GetFileName(i.Identity) == "WinRT.Runtime.dll",
+                         because: "wapproj should copy cswinrt dlls");
         }
 
         private TestAsset CreateWindowsDesktopSdkTestAsset(string projectName, string uiFrameworkProperty)
