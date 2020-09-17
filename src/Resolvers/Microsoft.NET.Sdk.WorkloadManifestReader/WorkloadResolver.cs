@@ -15,7 +15,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// </remarks>
     public class WorkloadResolver : IWorkloadResolver
     {
-        private readonly Dictionary<WorkloadDefinitionkId, WorkloadDefinition> _workloads = new Dictionary<WorkloadDefinitionkId, WorkloadDefinition>();
+        private readonly Dictionary<WorkloadDefinitionId, WorkloadDefinition> _workloads = new Dictionary<WorkloadDefinitionId, WorkloadDefinition>();
         private readonly Dictionary<WorkloadPackId, WorkloadPack> _packs = new Dictionary<WorkloadPackId, WorkloadPack>();
         private string[] _platformIds;
         private readonly string _dotNetRootPath;
@@ -173,7 +173,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 throw new ArgumentException($"'{nameof(workloadId)}' cannot be null or whitespace", nameof(workloadId));
             }
 
-            var id = new WorkloadDefinitionkId(workloadId);
+            var id = new WorkloadDefinitionId(workloadId);
 
             if (!_workloads.TryGetValue(id, out var workload))
             {
@@ -190,9 +190,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         private IEnumerable<WorkloadPackId> ExpandWorkload (WorkloadDefinition workload)
         {
-            var dedup = new HashSet<WorkloadDefinitionkId>();
+            var dedup = new HashSet<WorkloadDefinitionId>();
 
-            IEnumerable<WorkloadPackId> ExpandPacks (WorkloadDefinitionkId workloadId)
+            IEnumerable<WorkloadPackId> ExpandPacks (WorkloadDefinitionId workloadId)
             {
                 if (!_workloads.TryGetValue (workloadId, out var workloadInfo))
                 {

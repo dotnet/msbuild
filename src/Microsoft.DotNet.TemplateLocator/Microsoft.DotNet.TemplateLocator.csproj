@@ -11,7 +11,6 @@
     <!-- Create FileDefinitions items for ResolveHostfxrCopyLocalContent target -->
     <EmitLegacyAssetsFileItems>true</EmitLegacyAssetsFileItems>
     <PackageId>microsoft.dotnet.templateLocator</PackageId>
-    <LangVersion>8.0</LangVersion>
     <Nullable>Enable</Nullable>
 
     <UseSystemTextJson Condition="'$(TargetFramework)'!='netstandard2.0' And '$(TargetFramework)'!='net472'">True</UseSystemTextJson>
