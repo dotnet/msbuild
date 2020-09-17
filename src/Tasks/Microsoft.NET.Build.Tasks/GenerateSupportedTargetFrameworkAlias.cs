@@ -30,10 +30,17 @@ namespace Microsoft.NET.Build.Tasks
         protected override void ExecuteCore()
         {
             var targetFramework = NuGetFramework.Parse(TargetFrameworkMoniker);
-            if (!(targetFramework.Framework.Equals(".NETCoreApp") && targetFramework.Version >= new Version(5, 0)) && !UseWpf && !UseWindowsForms)
+            if (!(targetFramework.Framework.Equals(".NETCoreApp") && targetFramework.Version >= new Version(5, 0)))
             {
-                // Target platform properties were defaulted to windows prior to 5.0, ignore these values
-                TargetPlatformMoniker = string.Empty;
+                if (UseWpf || UseWindowsForms)
+                {
+                    // Continue with windows as the target platform
+                }
+                else
+                {
+                    // Target platform properties were defaulted to windows prior to 5.0, ignore these values
+                    TargetPlatformMoniker = string.Empty;
+                }
             }
 
             IList<ITaskItem> convertedTfms = new List<ITaskItem>();

@@ -255,7 +255,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     Generate a list of valid TargetFramework aliases for the project system to consume for the target framework properties page drop down
   -->
-  <Target Name="GenerateSupportedTargetFrameworkAlias">
+  <Target Name="GenerateSupportedTargetFrameworkAlias"
+          Returns="@(SupportedTargetFrameworkAlias)">
     <GenerateSupportedTargetFrameworkAlias SupportedTargetFramework="@(SupportedTargetFramework)"
                                            TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
                                            TargetPlatformMoniker="$(TargetPlatformMoniker)"

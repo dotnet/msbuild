@@ -74,11 +74,12 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("UseWpf")]
-        [InlineData("UseWindowsForms")]
-        public void It_generates_supported_target_framework_alias_items_with_target_platform(string propertyName)
+        [InlineData("netcoreapp3.1", "UseWpf")]
+        [InlineData("netcoreapp3.1", "UseWindowsForms")]
+        [InlineData("net5.0-windows", "UseWpf")]
+        [InlineData("net5.0-windows", "UseWindowsForms")]
+        public void It_generates_supported_target_framework_alias_items_with_target_platform(string targetFramework, string propertyName)
         {
-            var targetFramework = "netcoreapp3.1";
             TestProject testProject = new TestProject()
             {
                 Name = "TargetFrameworkAliasItemGroup",
