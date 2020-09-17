@@ -26,9 +26,16 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Set 7.0 as the TargetPlatformVersion for windows. -->
   <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'windows' and '$(TargetPlatformVersion)' == ''" >
     <TargetPlatformVersion>7.0</TargetPlatformVersion>
-    <!-- Automatic generation of TargetPlatformMoniker and TargetPlatformDisplayName have already been evaluated so we need to hardcode these values. -->
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'Windows'">
+    <!-- When targeting Windows, sync the SupportedOSPlatformVersion and TargetPlatformMinVersion.  If either one isn't set, set it to the
+         other value. -->
+    <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == ''">$(TargetPlatformMinVersion)</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">$(SupportedOSPlatformVersion)</TargetPlatformMinVersion>
+  
+    <!-- If neither were set, then use the TargetPlatformVersion value for both -->
     <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == ''">$(TargetPlatformVersion)</SupportedOSPlatformVersion>
-    <TargetPlatformMoniker>Windows,Version=$(TargetPlatformVersion)</TargetPlatformMoniker>
-    <TargetPlatformDisplayName>Windows $(TargetPlatformVersion)</TargetPlatformDisplayName>
+    <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">$(TargetPlatformVersion)</TargetPlatformMinVersion>    
   </PropertyGroup>
 </Project>
