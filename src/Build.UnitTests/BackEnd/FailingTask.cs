@@ -10,11 +10,14 @@ namespace Microsoft.Build.UnitTests
     {
         public override bool Execute()
         {
-            BuildEngine.GetType().GetProperty("AllowFailureWithoutError").SetValue(BuildEngine, EnableDefaultFailure);
+            if (!AllowFailureWithoutError.Equals("Default"))
+            {
+                BuildEngine.GetType().GetProperty("AllowFailureWithoutError").SetValue(BuildEngine, AllowFailureWithoutError.Equals("True"));
+            }
             return false;
         }
 
         [Required]
-        public bool EnableDefaultFailure { get; set; }
+        public string AllowFailureWithoutError { get; set; }
     }
 }
