@@ -60,7 +60,7 @@ Consider a simple solution with a library and an application that depends on the
 
 The second build will:
 
-1. Build the library project, skipping all well-authored targets.
+1. Build the library project, skipping all targets that define inputs and outputs.
 1. Build the application project.
 
 But using higher-level knowledge, we can see a more-optimal build:
@@ -78,7 +78,7 @@ Ideally, a build could span multiple computers, and each could use results gener
 
 Microsoft has an internal build system, [CloudBuild](https://www.microsoft.com/research/publication/cloudbuild-microsofts-distributed-and-caching-build-service/), that supports this and has proven that it is effective, but is heuristic-based and requires maintenance.
 
-MSBuild static graph features make it easier to implement a system like CloudBuild by building required operations into MSBuild itself.
+MSBuild static graph features make it easier to implement a system like CloudBuild by building operations like graph construction and output caching into MSBuild itself.
 
 ## What is static graph?
 
@@ -462,6 +462,8 @@ Similarly for a theoretical server mode for MSBuild, MSBuild would need to repor
 
 To illustrate the difference between `-graph` and `-graph -isolate`, consider these two projects, which are minimal except for a new target in the referenced project that is consumed in the referencing project.
 
+`Referenced\Referenced.csproj`:
+
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
 
@@ -473,6 +475,8 @@ To illustrate the difference between `-graph` and `-graph -isolate`, consider th
   <Target Name="UnusualThing" Returns="$(UnusualOutput)" />
 </Project>
 ```
+
+`Referencing\Referencing.csproj`:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -498,9 +502,8 @@ To illustrate the difference between `-graph` and `-graph -isolate`, consider th
 This project can successfully build with `-graph`
 
 ```sh-session
-$ dotnet msbuild -graph -noautorsp -nologo
+$ dotnet msbuild Referencing\Referencing.csproj -graph
 "Static graph loaded in 0.253 seconds: 2 nodes, 1 edges"
-  You are using a preview version of .NET. See: https://aka.ms/dotnet-core-preview
   Referenced -> S:\Referenced\bin\Debug\netcoreapp3.1\Referenced.dll
   Referencing -> S:\Referencing\bin\Debug\netcoreapp3.1\Referencing.dll
 ```
@@ -508,9 +511,8 @@ $ dotnet msbuild -graph -noautorsp -nologo
 But fails with `-graph -isolate`
 
 ```sh-session
-$ dotnet msbuild -graph -isolate -noautorsp -nologo
+$ dotnet msbuild Referencing\Referencing.csproj -graph -isolate
 "Static graph loaded in 0.255 seconds: 2 nodes, 1 edges"
-  You are using a preview version of .NET. See: https://aka.ms/dotnet-core-preview
   Referenced -> S:\Referenced\bin\Debug\netcoreapp3.1\Referenced.dll
 S:\Referencing\Referencing.csproj(12,5): error : MSB4252: Project "S:\Referencing\Referencing.csproj" with global properties
 S:\Referencing\Referencing.csproj(12,5): error :     (IsGraphBuild=true)
@@ -526,3 +528,7 @@ S:\Referencing\Referencing.csproj(12,5): error :
 This part of the error is the problem here:
 
 > the reference was called with a target which is not specified in the ProjectReferenceTargets item in project "S:\Referencing\Referencing.csproj"
+
+This is unacceptable in an isolated build because it means that the cached outputs of `Referenced.csproj` will be incomplete: they won't have the results of the `GetUnusualThing` target, because it's nonstandandard (and thus not one of the "well understood to be called on `ProjectReference`s targets that are handled by default).
+
+TODO: write docs for SDK authors/build engineers on how to teach the graph about this sort of thing.
