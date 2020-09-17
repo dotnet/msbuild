@@ -13,10 +13,6 @@ namespace Microsoft.Build.Engine.UnitTests
 {
     sealed public class ChangeWaves_Tests
     {
-        // Every test:
-        // out of rotation-specific tests
-        // 
-
         [Theory]
         [InlineData("16.8")]
         [InlineData("16.10")]
@@ -28,14 +24,14 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", ChangeWaves.EnableAllFeaturesBehindChangeWaves);
-                ChangeWaves.IsFeatureEnabled(featureWave).ShouldBe(true);
+                ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = @"
-            <Project>
-                <Target Name='HelloWorld' Condition=""'$(MSBUILDCHANGEWAVEVERSION)' == '999.999' and $([MSBuild]::VersionLessThan('" + featureWave + @"', '$(MSBUILDCHANGEWAVEVERSION)'))"">
-                    <Message Text='Hello World!'/>
-                </Target>
-            </Project>";
+                    <Project>
+                        <Target Name='HelloWorld' Condition=""'$(MSBUILDCHANGEWAVEVERSION)' == '999.999' and $([MSBuild]::VersionLessThan('" + featureWave + @"', '$(MSBUILDCHANGEWAVEVERSION)'))"">
+                            <Message Text='Hello World!'/>
+                        </Target>
+                    </Project>";
 
                 TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
 
@@ -57,7 +53,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                ChangeWaves.IsFeatureEnabled(featureWave).ShouldBe(true);
+                ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = @"
                     <Project>
@@ -89,7 +85,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", "16.8");
-                Shouldly.Should.Throw(() => ChangeWaves.IsFeatureEnabled(waveToCheck), typeof(InternalErrorException));
+                Shouldly.Should.Throw(() => ChangeWaves.IsChangeWaveEnabled(waveToCheck), typeof(InternalErrorException));
             }
         }
 
@@ -103,7 +99,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", enabledWave);
-                ChangeWaves.IsFeatureEnabled(featureWave).ShouldBe(true);
+                ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = @"
                     <Project>
@@ -156,10 +152,6 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        /// <summary>
-        /// When MSBUILDCHANGEWAVEVERSION is set, any feature in a wave lower than that will be enabled.
-        /// </summary>
-        /// <param name="featureWave"></param>
         [Fact]
         public void CorrectlyDetermineEnabledFeatures()
         {
@@ -169,14 +161,14 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 for (int i = 0; i < ChangeWaves.AllWaves.Length-1; i++)
                 {
-                    ChangeWaves.IsFeatureEnabled(ChangeWaves.AllWaves[i]).ShouldBe(true);
+                    ChangeWaves.IsChangeWaveEnabled(ChangeWaves.AllWaves[i]).ShouldBe(true);
 
                     string projectFile = @"
-                    <Project>
-                        <Target Name='HelloWorld' Condition=""$([MSBuild]::VersionLessThan('" + ChangeWaves.AllWaves[i] + @"', '$(MSBUILDCHANGEWAVEVERSION)'))"">
-                            <Message Text='Hello World!'/>
-                        </Target>
-                    </Project>";
+                        <Project>
+                            <Target Name='HelloWorld' Condition=""$([MSBuild]::VersionLessThan('" + ChangeWaves.AllWaves[i] + @"', '$(MSBUILDCHANGEWAVEVERSION)'))"">
+                                <Message Text='Hello World!'/>
+                            </Target>
+                        </Project>";
 
                     TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
 
@@ -201,14 +193,14 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 foreach (string wave in ChangeWaves.AllWaves)
                 {
-                    ChangeWaves.IsFeatureEnabled(wave).ShouldBeFalse();
+                    ChangeWaves.IsChangeWaveEnabled(wave).ShouldBeFalse();
 
                     string projectFile = @"
-                    <Project>
-                        <Target Name='HelloWorld' Condition=""$([MSBuild]::VersionLessThan('" + wave + @"', '$(MSBUILDCHANGEWAVEVERSION)'))"">
-                            <Message Text='Hello World!'/>
-                        </Target>
-                    </Project>";
+                        <Project>
+                            <Target Name='HelloWorld' Condition=""$([MSBuild]::VersionLessThan('" + wave + @"', '$(MSBUILDCHANGEWAVEVERSION)'))"">
+                                <Message Text='Hello World!'/>
+                            </Target>
+                        </Project>";
 
                     TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
 

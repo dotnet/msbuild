@@ -32,16 +32,10 @@ namespace Microsoft.Build.Utilities
 
         public EscapeHatches EscapeHatches { get; }
 
-        private string _msbuildChangeWave;
-
         public string MSBuildDisableChangeWaveVersion
         {
             get
             {
-                if (_msbuildChangeWave == null)
-                {
-                    _msbuildChangeWave = Environment.GetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION");
-                }
                 return _msbuildChangeWave;
             }
             internal set
@@ -49,6 +43,8 @@ namespace Microsoft.Build.Utilities
                 _msbuildChangeWave = value;
             }
         }
+
+        private string _msbuildChangeWave = Environment.GetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION"); 
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern

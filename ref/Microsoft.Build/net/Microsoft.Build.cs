@@ -2066,7 +2066,8 @@ namespace Microsoft.Build.Utilities
         public ChangeWaves() { }
         public static string HighestWave { get { throw null; } }
         public static string LowestWave { get { throw null; } }
+        public static bool IsChangeWaveEnabled(string wave) { throw null; }
+        public static bool IsChangeWaveEnabled(System.Version wave) { throw null; }
         public static bool IsChangeWaveOutOfRotation(System.Version v) { throw null; }
-        public static bool IsFeatureEnabled(string wave) { throw null; }
     }
 }
