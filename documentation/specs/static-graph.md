@@ -1,6 +1,10 @@
 - [Static Graph](#static-graph)
   - [Overview](#overview)
-    - [Motivations](#motivations)
+    - [What is static graph for?](#what-is-static-graph-for)
+      - [Weakness of the old model: project-level scheduling](#weakness-of-the-old-model-project-level-scheduling)
+      - [Weakness of the old model: incrementality](#weakness-of-the-old-model-incrementality)
+      - [Weakness of the old model: caching and distributability](#weakness-of-the-old-model-caching-and-distributability)
+    - [Design goals](#design-goals)
   - [Project Graph](#project-graph)
     - [Build dimensions](#build-dimensions)
       - [Multitargeting](#multitargeting)
@@ -24,7 +28,60 @@
 
 ## Overview
 
-### Motivations
+### What is static graph for?
+
+As a repo gets bigger and more complex, weaknesses in MSBuild's scheduling and incrementality models become more apparent. MSBuild's static graph features are intended to ameliorate these weaknesses while remaining as compatible as possible with existing projects and SDKs.
+
+MSBuild projects can refer to other projects by using the `MSBuild` task to execute targets in another project and return values. In `Microsoft.Common.targets`, `ProjectReference` items are transformed into `MSBuild` task executions in order to provide a user-friendly interface: "reference the output of these projects".
+
+#### Weakness of the old model: project-level scheduling
+
+Because references to other projects aren't known until a target in the referencing project calls the `MSBuild` task, the MSBuild engine cannot start working on building referenced projects until the referencing project yields. For example, if project `A` depended on `B`, `C`, and `D` and was being built with more-than-3 way parallelism, an ideal build would run `B`, `C`, and `D` in parallel with the parts of `A` that could execute before the references were available.
+
+Today, the order of operations of this build are:
+
+1. `A` completes evaluation and starts building, doing isolated work until it gets to `ResolveProjectReferences`.
+1. In parallel, `B`, `C`, and `D` run the requested targets.
+1. `A` resumes building and completes.
+
+With graph-aware scheduling, this becomes:
+
+1. `A`, `B`, `C`, and `D` evaluate in parallel.
+1. `B`, `C`, and `D` build to completion in parallel.
+1. `A` builds, and instantly gets cached results for the `MSBuild` task calls in `ResolveProjectReferences`
+
+#### Weakness of the old model: incrementality
+
+[incremental build](https://docs.microsoft.com/visualstudio/msbuild/incremental-builds) (that is, "redo only the parts of the build that would produce different outputs compared to the last build") is the most powerful tool to reduce build times and developer inner-loop speed.
+
+MSBuild supports incremental builds by allowing a target to be skipped if the target's outputs are up to date with its inputs. This allows tools like the compiler to be skipped when possible. But since the incrementality is at the target level, MSBuild must fully evaluate the project and walk through all targets, running those that are out of date or that don't specify inputs and outputs.
+
+Consider a simple solution with a library and an application that depends on the library. Suppose you build, then make a change in the application's source code, then build again.
+
+The second build will:
+
+1. Build the library project, skipping all well-authored targets.
+1. Build the application project.
+
+But using higher-level knowledge, we can see a more-optimal build:
+
+1. Skip everything involving the library project, because _none_ of its inputs have changed.
+1. Build only the application project.
+
+Visual Studio offers a ["fast up-to-date check"](https://github.com/dotnet/project-system/blob/cd275918ef9f181f6efab96715a91db7aabec832/docs/up-to-date-check.md) system that gets closer to the latter, but MSBuild itself does not.
+
+#### Weakness of the old model: caching and distributability
+
+For very large builds, including many Microsoft products, the fact that MSBuild can build in parallel only on a single machine is a major impediment, even if incrementality is addressed.
+
+Ideally, a build could span multiple computers, and each could use results generated on another machine as inputs to its own build projects. In addition, if all of a project's inputs remain unchanged, the system would ideally reuse the outputs of the project, even if they were built long ago on another computer.
+
+Microsoft has an internal build system, [CloudBuild](https://www.microsoft.com/research/publication/cloudbuild-microsofts-distributed-and-caching-build-service/), that supports this and has proven that it is effective, but is heuristic-based and requires maintenance.
+
+MSBuild static graph features make it easier to implement a system like CloudBuild by building required operations into MSBuild itself.
+
+### Design goals
+
 - Stock projects can build with "project-level build" and if clean onboard to MS internal build engines with cache/distribution
 - Stock projects will be "project-level build" clean.
 - Add determinism to MSBuild w.r.t. project dependencies. Today MSBuild discovers projects just in time, as it finds MSBuild tasks. This means there’s no guarantee that the same graph is produced two executions in a row, other than hopefully sane project files. With the static graph, you’d know the shape of the build graph before the build starts.
@@ -76,10 +133,10 @@ Multitargeting supporting SDKs MUST implement the following properties and seman
 - Node edges
   - When project A references multitargeting project B, and B is identified as an outer build, the graph node for project A will reference both the outer build of B, and all the inner builds of B. The edges to the inner builds are speculative, as at build time only one inner build gets referenced. However, the graph cannot know at evaluation time which inner build will get chosen.
   - When multitargeting project B is a root, then the outer build node for B will reference the inner builds of B.
-  - For multitargeting projects, the `ProjectReference` item gets applied only to inner builds. An outer build cannot have its own distinct `ProjectReference`s, it is the inner builds that reference other project files, not the outer build. This constraint might get relaxed in the future via additional configuration, to allow outer build specific references. 
+  - For multitargeting projects, the `ProjectReference` item gets applied only to inner builds. An outer build cannot have its own distinct `ProjectReference`s, it is the inner builds that reference other project files, not the outer build. This constraint might get relaxed in the future via additional configuration, to allow outer build specific references.
 
 These specific rules represent the minimal rules required to represent multitargeting in `Microsoft.Net.Sdk`. As we adopt SDKs whose multitargeting complexity that cannot be expressed with the above rules, we'll extend the rules.
-For example, `InnerBuildProperty` could become `InnerBuildProperties` for SDKs where there's multiple multitargeting global properties. 
+For example, `InnerBuildProperty` could become `InnerBuildProperties` for SDKs where there's multiple multitargeting global properties.
 
 For example, here is a trimmed down `Microsoft.Net.Sdk` multitargeting project:
 ```xml
@@ -315,7 +372,7 @@ These incremental builds can even be extended to multiple projects by keeping a 
 <!-- workflow -->
 Single project builds can be achieved by providing MSBuild with input and output cache files.
 
-The input cache files contain the cached results of all of the current project's references. This way, when the current project executes, it will naturally build its references via [MSBuild task](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-task) calls. The engine, instead of executing these tasks, will serve them from the provided input caches. 
+The input cache files contain the cached results of all of the current project's references. This way, when the current project executes, it will naturally build its references via [MSBuild task](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-task) calls. The engine, instead of executing these tasks, will serve them from the provided input caches.
 
 The output cache file tells MSBuild where it should serialize the results of the current project. This output cache would become an input cache for all other projects that depend on the current project.
 The output cache file can be ommited in which case the build would just reuse prior results but not write out any new results. This could be useful when one wants to replay a build from previous caches.
@@ -345,7 +402,7 @@ Output cache file constraints:
 
 #### APIs
 Caches are provided via [BuildParameters](https://github.com/Microsoft/msbuild/blob/2d4dc592a638b809944af10ad1e48e7169e40808/src/Build/BackEnd/BuildManager/BuildParameters.cs#L746-L764). They are applied in `BuildManager.BeginBuild`
-#### Command line 
+#### Command line
 Caches are provided to MSBuild.exe via the multi value `/inputResultsCaches` and the single value `/outputResultsCache`.
 
 ## I/O Tracking
