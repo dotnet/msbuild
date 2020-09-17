@@ -1,9 +1,12 @@
+# Static Graph
+
 - [Static Graph](#static-graph)
-  - [Overview](#overview)
-    - [What is static graph for?](#what-is-static-graph-for)
-      - [Weakness of the old model: project-level scheduling](#weakness-of-the-old-model-project-level-scheduling)
-      - [Weakness of the old model: incrementality](#weakness-of-the-old-model-incrementality)
-      - [Weakness of the old model: caching and distributability](#weakness-of-the-old-model-caching-and-distributability)
+  - [What is static graph for?](#what-is-static-graph-for)
+    - [Weakness of the old model: project-level scheduling](#weakness-of-the-old-model-project-level-scheduling)
+    - [Weakness of the old model: incrementality](#weakness-of-the-old-model-incrementality)
+    - [Weakness of the old model: caching and distributability](#weakness-of-the-old-model-caching-and-distributability)
+  - [What is static graph?](#what-is-static-graph)
+  - [Design documentation](#design-documentation)
     - [Design goals](#design-goals)
   - [Project Graph](#project-graph)
     - [Build dimensions](#build-dimensions)
@@ -24,17 +27,13 @@
     - [Isolation requirement](#isolation-requirement)
     - [Tool servers](#tool-servers)
 
-# Static Graph
-
-## Overview
-
-### What is static graph for?
+## What is static graph for?
 
 As a repo gets bigger and more complex, weaknesses in MSBuild's scheduling and incrementality models become more apparent. MSBuild's static graph features are intended to ameliorate these weaknesses while remaining as compatible as possible with existing projects and SDKs.
 
 MSBuild projects can refer to other projects by using the `MSBuild` task to execute targets in another project and return values. In `Microsoft.Common.targets`, `ProjectReference` items are transformed into `MSBuild` task executions in order to provide a user-friendly interface: "reference the output of these projects".
 
-#### Weakness of the old model: project-level scheduling
+### Weakness of the old model: project-level scheduling
 
 Because references to other projects aren't known until a target in the referencing project calls the `MSBuild` task, the MSBuild engine cannot start working on building referenced projects until the referencing project yields. For example, if project `A` depended on `B`, `C`, and `D` and was being built with more-than-3 way parallelism, an ideal build would run `B`, `C`, and `D` in parallel with the parts of `A` that could execute before the references were available.
 
@@ -50,7 +49,7 @@ With graph-aware scheduling, this becomes:
 1. `B`, `C`, and `D` build to completion in parallel.
 1. `A` builds, and instantly gets cached results for the `MSBuild` task calls in `ResolveProjectReferences`
 
-#### Weakness of the old model: incrementality
+### Weakness of the old model: incrementality
 
 [incremental build](https://docs.microsoft.com/visualstudio/msbuild/incremental-builds) (that is, "redo only the parts of the build that would produce different outputs compared to the last build") is the most powerful tool to reduce build times and developer inner-loop speed.
 
@@ -70,7 +69,7 @@ But using higher-level knowledge, we can see a more-optimal build:
 
 Visual Studio offers a ["fast up-to-date check"](https://github.com/dotnet/project-system/blob/cd275918ef9f181f6efab96715a91db7aabec832/docs/up-to-date-check.md) system that gets closer to the latter, but MSBuild itself does not.
 
-#### Weakness of the old model: caching and distributability
+### Weakness of the old model: caching and distributability
 
 For very large builds, including many Microsoft products, the fact that MSBuild can build in parallel only on a single machine is a major impediment, even if incrementality is addressed.
 
