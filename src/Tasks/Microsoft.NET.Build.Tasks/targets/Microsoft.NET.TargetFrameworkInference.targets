@@ -191,7 +191,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     BeforeTargets="ProcessFrameworkReferences"
     Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and '$(Language)' != 'C++'">
     <ItemGroup>
-      <_ValidTargetPlatformVersion Include="@(SdkSupportedTargetPlatform)" Condition="'@(SdkSupportedTargetPlatform)' != '' and $([MSBuild]::VersionEquals(%(Identity), $(TargetPlatformVersion)))" />
+      <_ValidTargetPlatformVersion Include="@(SdkSupportedTargetPlatformVersion)" Condition="'@(SdkSupportedTargetPlatformVersion)' != '' and $([MSBuild]::VersionEquals(%(Identity), $(TargetPlatformVersion)))" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -205,8 +205,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and '$(Language)' != 'C++'">
     <PropertyGroup>
       <TargetPlatformVersionSupported Condition="'$(TargetPlatformVersionSupported)' == '' and '@(_ValidTargetPlatformVersion)' != ''" >true</TargetPlatformVersionSupported>
-      <_ValidTargetPlatformVersions Condition="'@(SdkSupportedTargetPlatform)' != ''" >@(SdkSupportedTargetPlatform, '%0a')</_ValidTargetPlatformVersions>
-      <_ValidTargetPlatformVersions Condition="'@(SdkSupportedTargetPlatform)' == ''" >None</_ValidTargetPlatformVersions>
+      <_ValidTargetPlatformVersions Condition="'@(SdkSupportedTargetPlatformVersion)' != ''" >@(SdkSupportedTargetPlatformVersion, '%0a')</_ValidTargetPlatformVersions>
+      <_ValidTargetPlatformVersions Condition="'@(SdkSupportedTargetPlatformVersion)' == ''" >None</_ValidTargetPlatformVersions>
     </PropertyGroup>
 
     <NetSdkError Condition="'$(TargetPlatformVersionSupported)' != 'true'"
