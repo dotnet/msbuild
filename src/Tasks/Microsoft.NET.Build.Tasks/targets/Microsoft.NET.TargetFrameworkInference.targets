@@ -77,9 +77,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_UnsupportedTargetFrameworkError>true</_UnsupportedTargetFrameworkError>
   </PropertyGroup>
 
-  <!--Default SupportedOSPlatform to TargetPlatformVersion-->
-  <PropertyGroup Condition="'$(SupportedOSPlatform)' == '' and '$(TargetPlatformVersion)' != ''">
-    <SupportedOSPlatform>$(TargetPlatformVersion)</SupportedOSPlatform>
+  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'Windows'">
+    <!-- When targeting Windows, sync the SupportedOSPlatformVersion and TargetPlatformMinVersion.  If either one isn't set, set it to the
+         other value. -->
+    <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == ''">$(TargetPlatformMinVersion)</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">$(SupportedOSPlatformVersion)</TargetPlatformMinVersion>
+  
+    <!-- If niether were set, then use the TargetPlatformVersion value for both -->
+    <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == ''">$(TargetPlatformVersion)</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">$(TargetPlatformVersion)</TargetPlatformMinVersion>    
+  </PropertyGroup>
+  
+  <!-- Default SupportedOSPlatformVersion to TargetPlatformVersion -->
+  <PropertyGroup Condition="'$(SupportedOSPlatformVersion)' == ''">
+    <SupportedOSPlatformVersion>$(TargetPlatformVersion)</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <!--
@@ -184,11 +195,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="NETFrameworkWithoutUsingNETSdkDefaults" />
   </Target>
 
-  <Target Name="_CheckForSupportedOSPlatformHigherThanTargetPlatformVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform" >
+  <Target Name="_CheckForSupportedOSPlatformVersionHigherThanTargetPlatformVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform" >
 
-    <NETSdkError Condition="'$(SupportedOSPlatform)' != '' and $(TargetPlatformVersion) != '' and $([MSBuild]::VersionGreaterThan($(SupportedOSPlatform), $(TargetPlatformVersion)))"
+    <NETSdkError Condition="'$(SupportedOSPlatformVersion)' != '' and $(TargetPlatformVersion) != '' and $([MSBuild]::VersionGreaterThan($(SupportedOSPlatformVersion), $(TargetPlatformVersion)))"
                  ResourceName="CannotHaveSupportedOSPlatformVersionHigherThanTargetPlatformVersion"
-                 FormatArguments="$(SupportedOSPlatform);$(TargetPlatformVersion)"/>
+                 FormatArguments="$(SupportedOSPlatformVersion);$(TargetPlatformVersion)"/>
   </Target>
 
   <!--C++/CLI targets rely on the patch version of the Windows SDK version as TargetPlatformVersion. Skip the normalization.-->
