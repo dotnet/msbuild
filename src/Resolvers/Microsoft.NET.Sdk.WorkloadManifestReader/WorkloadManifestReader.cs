@@ -54,7 +54,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             long? version = null;
             string? description = null;
-            Dictionary<WorkloadDefinitionkId, WorkloadDefinition>? workloads = null;
+            Dictionary<WorkloadDefinitionId, WorkloadDefinition>? workloads = null;
             Dictionary<WorkloadPackId, WorkloadPack>? packs = null;
 
             while (reader.Read())
@@ -115,7 +115,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         return new WorkloadManifest (
                             version.Value,
                             description,
-                            workloads ?? new Dictionary<WorkloadDefinitionkId, WorkloadDefinition> (),
+                            workloads ?? new Dictionary<WorkloadDefinitionId, WorkloadDefinition> (),
                             packs ?? new Dictionary<WorkloadPackId, WorkloadPack> ()
                         );
                     default:
@@ -154,18 +154,18 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return true;
         }
 
-        private static Dictionary<WorkloadDefinitionkId, WorkloadDefinition> ReadWorkloadDefinitions(ref Utf8JsonStreamReader reader)
+        private static Dictionary<WorkloadDefinitionId, WorkloadDefinition> ReadWorkloadDefinitions(ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
-            var workloads = new Dictionary<WorkloadDefinitionkId, WorkloadDefinition>();
+            var workloads = new Dictionary<WorkloadDefinitionId, WorkloadDefinition>();
 
             while (reader.Read())
             {
                 switch (reader.TokenType)
                 {
                     case JsonTokenType.PropertyName:
-                        var workloadId = new WorkloadDefinitionkId(reader.GetString());
+                        var workloadId = new WorkloadDefinitionId(reader.GetString());
                         var workload = ReadWorkloadDefinition(workloadId, ref reader);
                         if (workloads.ContainsKey(workloadId)) ThrowDuplicateKeyException(ref reader, workloadId);
                         workloads.Add(workloadId, workload);
@@ -304,7 +304,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
-        private static WorkloadDefinition ReadWorkloadDefinition(WorkloadDefinitionkId id, ref Utf8JsonStreamReader reader)
+        private static WorkloadDefinition ReadWorkloadDefinition(WorkloadDefinitionId id, ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
@@ -312,7 +312,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             bool? isAbstractOrNull = null;
             WorkloadDefinitionKind? kind = null;
             List<WorkloadPackId>? packs = null;
-            List<WorkloadDefinitionkId>? extends = null;
+            List<WorkloadDefinitionId>? extends = null;
             List<string>? platforms = null;
 
             while (reader.Read())
@@ -362,7 +362,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         if (string.Equals("extends", propName, StringComparison.OrdinalIgnoreCase))
                         {
                             if (extends != null) ThrowDuplicateKeyException(ref reader, propName);
-                            extends = ReadStringArray<WorkloadDefinitionkId>(ref reader, s => new WorkloadDefinitionkId(s));
+                            extends = ReadStringArray<WorkloadDefinitionId>(ref reader, s => new WorkloadDefinitionId(s));
                             continue;
                         }
 

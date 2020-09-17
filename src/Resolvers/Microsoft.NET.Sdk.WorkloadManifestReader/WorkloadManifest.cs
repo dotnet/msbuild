@@ -10,7 +10,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// </summary>
     internal class WorkloadManifest
     {
-        public WorkloadManifest(long version, string? description, Dictionary<WorkloadDefinitionkId, WorkloadDefinition> workloads, Dictionary<WorkloadPackId, WorkloadPack> packs)
+        public WorkloadManifest(long version, string? description, Dictionary<WorkloadDefinitionId, WorkloadDefinition> workloads, Dictionary<WorkloadPackId, WorkloadPack> packs)
         {
             Version = version;
             Description = description;
@@ -20,7 +20,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public long Version { get; }
         public string? Description { get; }
-        public Dictionary<WorkloadDefinitionkId, WorkloadDefinition> Workloads { get; }
+        public Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads { get; }
         public Dictionary<WorkloadPackId, WorkloadPack> Packs { get; }
     }
 }
