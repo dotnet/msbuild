@@ -41,15 +41,7 @@ namespace Microsoft.Build.UnGAC
                 {
                     hresult = assemblyCache.UninstallAssembly(dwFlags: 0, pszAssemblyName: assembly, pRefData: IntPtr.Zero, pulDisposition: 0);
 
-                    // If we hit an error with an assembly, keep trying the others.
-                    if ((hresult >> 31) == 1)
-                    {
-                        Console.WriteLine($"Could not remove {assembly} from the GAC. HResult: {hresult}");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Removed {assembly} from the GAC. HResult: {hresult}");
-                    }
+                    Console.WriteLine($"Tried to remove {assembly} from the GAC. HResult: 0x{hresult:X8}");
                 }
             }
             catch (Exception e)
