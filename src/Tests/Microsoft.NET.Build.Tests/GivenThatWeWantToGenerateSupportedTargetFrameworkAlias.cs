@@ -12,6 +12,7 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using System.Xml.Linq;
 using System.Linq;
 using System.Collections.Generic;
+using NuGet.Frameworks;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -21,18 +22,90 @@ namespace Microsoft.NET.Build.Tests
         {}
 
         [Theory]
-        [InlineData("", new string[] { ".NETCoreApp,Version=v3.1", ".NETCoreApp,Version=v5.0", ".NETStandard,Version=v2.1", ".NETFramework,Version=v4.7.2" }, new string[] { "netcoreapp3.1", "net5.0", "netstandard2.1", "net472" })] 
-        [InlineData("Windows", new string[] { ".NETCoreApp,Version=v3.1", ".NETCoreApp,Version=v5.0" }, new string[] { "netcoreapp3.1", "net5.0-windows7.0" })]
-        public void It_generates_supported_target_framework_alias_items(string targetPlatform, string[] mockSupportedTargetFramework, string[] expectedSupportedTargetFrameworkAlias)
+        [InlineData("netcoreapp3.1")]
+        [InlineData("net5.0")]
+        [InlineData("net6.0")]
+        [InlineData("netstandard2.1")]
+        [InlineData("net48")]
+        public void It_generates_supported_target_framework_alias_items(string currentTargetFramework)
         {
-            var targetFramework = string.IsNullOrWhiteSpace(targetPlatform)? "net5.0" :  $"net5.0-{ targetPlatform }";
+            TestTargetFrameworkAlias(currentTargetFramework, propertySetToTrue: null, new[]
+                {
+                    "netcoreapp3.0",
+                    "netcoreapp3.1",
+                    "net5.0",
+                    "net6.0",
+                    "netstandard2.0",
+                    "netstandard2.1",
+                    "net471",
+                    "net48"
+                });
+        }
+
+        [Theory]
+        [InlineData("net5.0-windows")]
+        [InlineData("net6.0-windows")]
+        public void It_generates_supported_target_framework_alias_items_when_targeting_windows(string currentTargetFramework)
+        {
+            TestTargetFrameworkAlias(currentTargetFramework, propertySetToTrue: null, new[]
+                {
+                    "netcoreapp3.0",
+                    "netcoreapp3.1",
+                    "net5.0-windows7.0",
+                    "net6.0-windows7.0",
+                    "netstandard2.0",
+                    "netstandard2.1",
+                    "net471",
+                    "net48"
+                });
+        }
+
+        [Theory]
+        [InlineData("netcoreapp3.1", "UseWpf")]
+        [InlineData("netcoreapp3.1", "UseWindowsForms")]
+        public void It_generates_supported_target_framework_alias_items_when_retargeting_to_windows(string currentTargetFramework, string propertyName)
+        {
+            TestTargetFrameworkAlias(currentTargetFramework, propertySetToTrue: propertyName, new[]
+                {
+                    "netcoreapp3.0",
+                    "netcoreapp3.1",
+                    "net5.0-windows7.0",
+                    "net6.0-windows7.0",
+                    "netstandard2.0",
+                    "netstandard2.1",
+                    "net471",
+                    "net48"
+                });
+        }
+
+        private void TestTargetFrameworkAlias(string targetFramework, string propertySetToTrue, string[] expectedSupportedTargetFrameworkAliases)
+        {
             TestProject testProject = new TestProject()
             {
                 Name = "MockTargetFrameworkAliasItemGroup",
-                IsSdkProject = true, 
-                IsExe = true, 
+                IsSdkProject = true,
+                IsExe = true,
                 TargetFrameworks = targetFramework
             };
+            testProject.AdditionalProperties["NETCoreAppMaximumVersion"] = "6.0";
+
+            if (!string.IsNullOrEmpty(propertySetToTrue))
+            {
+                testProject.AdditionalProperties[propertySetToTrue] = "true";
+            }
+
+            var mockSupportedTargetFramework = new List<(string targetFrameworkMoniker, string displayName)>()
+            {
+                ( ".NETCoreApp,Version=v3.0", ".NET Core 3.0"),
+                ( ".NETCoreApp,Version=v3.1", ".NET Core 3.1"),
+                ( ".NETCoreApp,Version=v5.0", ".NET 5"),
+                ( ".NETCoreApp,Version=v6.0", ".NET 6"),
+                ( ".NETStandard,Version=v2.0", ".NET Standard 2.0"),
+                ( ".NETStandard,Version=v2.1", ".NET Standard 2.1"),
+                ( ".NETFramework,Version=v4.7.1", ".NET Framework 4.7.1"),
+                ( ".NETFramework,Version=v4.8", ".NET Framework 4.8"),
+            };
+
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject).WithProjectChanges(project =>
             {
@@ -54,7 +127,8 @@ namespace Microsoft.NET.Build.Tests
                 foreach (var tfm in mockSupportedTargetFramework)
                 {
                     var mockTfm = new XElement(ns + "SupportedTargetFramework",
-                                        new XAttribute("Include", tfm));
+                                        new XAttribute("Include", tfm.targetFrameworkMoniker),
+                                        new XAttribute("DisplayName", tfm.displayName));
                     itemGroup.Add(mockTfm);
                 }
             });
@@ -70,45 +144,9 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
 
             var values = getValuesCommand.GetValues();
-            values.ShouldBeEquivalentTo(expectedSupportedTargetFrameworkAlias);
-        }
-
-        [WindowsOnlyTheory]
-        [InlineData("netcoreapp3.1", "UseWpf")]
-        [InlineData("netcoreapp3.1", "UseWindowsForms")]
-        [InlineData("net5.0-windows", "UseWpf")]
-        [InlineData("net5.0-windows", "UseWindowsForms")]
-        public void It_generates_supported_target_framework_alias_items_with_target_platform(string targetFramework, string propertyName)
-        {
-            TestProject testProject = new TestProject()
-            {
-                Name = "TargetFrameworkAliasItemGroup",
-                IsSdkProject = true,
-                IsExe = true,
-                TargetFrameworks = targetFramework
-            };
-            testProject.AdditionalProperties[propertyName] = "true";
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
-
-            var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name),
-                targetFramework, "SupportedTargetFrameworkAlias", GetValuesCommand.ValueType.Item)
-            {
-                DependsOnTargets = "GenerateSupportedTargetFrameworkAlias",
-                MetadataNames = { "DisplayName" }
-            };
-            getValuesCommand
-                .Execute()
-                .Should()
-                .Pass();
-
-            var values = getValuesCommand.GetValuesWithMetadata();
-            var net5Value = values.Where(value => value.value.Equals("net5.0-windows7.0"));
-            net5Value.Should().NotBeNullOrEmpty();
-            net5Value.FirstOrDefault().metadata.GetValueOrDefault("DisplayName").Should().Be(".NET 5.0");
-
-            var net31Value = values.Where(value => value.value.Equals("netcoreapp3.1"));
-            net31Value.Should().NotBeNullOrEmpty();
-            net31Value.FirstOrDefault().metadata.GetValueOrDefault("DisplayName").Should().Be(".NET Core 3.1");
+            var valuesForTargetFrameworkIdentifier =
+                values.Where(v => NuGetFramework.Parse(v).Framework == NuGetFramework.Parse(targetFramework).Framework).ToList();
+            values.ShouldBeEquivalentTo(expectedSupportedTargetFrameworkAliases);
         }
     }
 }
