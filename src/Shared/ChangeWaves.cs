@@ -16,11 +16,11 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Special value indicating that all features behind change-waves should be enabled.
         /// </summary>
-        public const string EnableAllFeaturesBehindChangeWaves = "999.999";
+        public const string EnableAllFeatures = "999.999";
 
         internal static readonly Version LowestWaveVersion = new Version(AllWaves[0]);
         internal static readonly Version HighestWaveVersion = new Version(AllWaves[AllWaves.Length - 1]);
-        internal static readonly Version EnableAllFeaturesVersion = new Version(EnableAllFeaturesBehindChangeWaves);
+        internal static readonly Version EnableAllFeaturesVersion = new Version(EnableAllFeatures);
 
         public static string LowestWave
         {
@@ -39,7 +39,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Compares the passed wave to the MSBuildChangeWaveVersion environment variable.
+        /// Compares the passed wave to the MSBuildDisableFeaturesFromVersion environment variable.
         /// Version MUST be of the format: "xx.yy".
         /// </summary>
         /// <param name="wave">The version to compare.</param>
@@ -57,14 +57,14 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Compares the passed wave to the MSBuildChangeWaveVersion environment variable.
+        /// Compares the passed wave to the MSBuildDisableFeaturesFromVersion environment variable.
         /// </summary>
         /// <param name="wave">The version to compare.</param>
         /// <returns>A bool indicating whether the version is enabled.</returns>
         public static bool IsChangeWaveEnabled(Version wave)
         {
             // This is opt out behavior, all waves are enabled by default.
-            if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableChangeWaveVersion))
+            if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableFeaturesFromVersion))
             {
                 return true;
             }
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Utilities
             Version currentSetWave;
 
             // If we can't parse the environment variable, default to enabling features.
-            if (!Version.TryParse(Traits.Instance.MSBuildDisableChangeWaveVersion, out currentSetWave))
+            if (!Version.TryParse(Traits.Instance.MSBuildDisableFeaturesFromVersion, out currentSetWave))
             {
                 return true;
             }

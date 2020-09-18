@@ -32,19 +32,19 @@ namespace Microsoft.Build.Utilities
 
         public EscapeHatches EscapeHatches { get; }
 
-        public string MSBuildDisableChangeWaveVersion
+        public string MSBuildDisableFeaturesFromVersion
         {
             get
             {
-                return _msbuildChangeWave;
+                return msbuildDisableFeaturesFromVersion;
             }
             internal set
             {
-                _msbuildChangeWave = value;
+                msbuildDisableFeaturesFromVersion = value;
             }
         }
 
-        private string _msbuildChangeWave = Environment.GetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION"); 
+        private string msbuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION"); 
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern

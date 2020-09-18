@@ -23,12 +23,12 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", ChangeWaves.EnableAllFeaturesBehindChangeWaves);
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.EnableAllFeatures);
                 ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = @"
                     <Project>
-                        <Target Name='HelloWorld' Condition=""'$(MSBUILDCHANGEWAVEVERSION)' == '999.999' and $([MSBuild]::VersionLessThan('" + featureWave + @"', '$(MSBUILDCHANGEWAVEVERSION)'))"">
+                        <Target Name='HelloWorld' Condition=""'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '999.999' and $([MSBuild]::VersionLessThan('" + featureWave + @"', '$(MSBUILDDISABLEFEATURESFROMVERSION)'))"">
                             <Message Text='Hello World!'/>
                         </Target>
                     </Project>";
@@ -57,7 +57,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 string projectFile = @"
                     <Project>
-                        <Target Name='HelloWorld' Condition="" '$(MSBUILDCHANGEWAVEVERSION)' == '999.999' and $([MSBuild]::VersionLessThan('" + featureWave + @"', '$(MSBUILDCHANGEWAVEVERSION)'))"">
+                        <Target Name='HelloWorld' Condition="" '$(MSBUILDDISABLEFEATURESFROMVERSION)' == '999.999' and $([MSBuild]::VersionLessThan('" + featureWave + @"', '$(MSBUILDDISABLEFEATURESFROMVERSION)'))"">
                             <Message Text='Hello World!'/>
                         </Target>
                     </Project>";
@@ -84,7 +84,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", "16.8");
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "16.8");
                 Shouldly.Should.Throw(() => ChangeWaves.IsChangeWaveEnabled(waveToCheck), typeof(InternalErrorException));
             }
         }
@@ -98,12 +98,12 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", enabledWave);
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", enabledWave);
                 ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = @"
                     <Project>
-                        <Target Name='HelloWorld' Condition=""'$(MSBUILDCHANGEWAVEVERSION)' == '" + ChangeWaves.EnableAllFeaturesBehindChangeWaves + @"' and $([MSBuild]::VersionLessThan('" + featureWave + @"', '$(MSBUILDCHANGEWAVEVERSION)'))"">
+                        <Target Name='HelloWorld' Condition=""'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '" + ChangeWaves.EnableAllFeatures + @"' and $([MSBuild]::VersionLessThan('" + featureWave + @"', '$(MSBUILDDISABLEFEATURESFROMVERSION)'))"">
                             <Message Text='Hello World!'/>
                         </Target>
                     </Project>";
@@ -129,11 +129,11 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", enabledWave);
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", enabledWave);
 
                 string projectFile = @"
                     <Project>
-                        <Target Name='HelloWorld' Condition=""'$(MSBUILDCHANGEWAVEVERSION)' == '" + ChangeWaves.LowestWave + @"' and $([MSBuild]::VersionLessThan('" + ChangeWaves.LowestWave + @"', '$(MSBUILDCHANGEWAVEVERSION)'))"">
+                        <Target Name='HelloWorld' Condition=""'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '" + ChangeWaves.LowestWave + @"' and $([MSBuild]::VersionLessThan('" + ChangeWaves.LowestWave + @"', '$(MSBUILDDISABLEFEATURESFROMVERSION)'))"">
                             <Message Text='Hello World!'/>
                         </Target>
                     </Project>";
@@ -157,7 +157,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", ChangeWaves.HighestWave);
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.HighestWave);
 
                 for (int i = 0; i < ChangeWaves.AllWaves.Length-1; i++)
                 {
@@ -165,7 +165,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                     string projectFile = @"
                         <Project>
-                            <Target Name='HelloWorld' Condition=""$([MSBuild]::VersionLessThan('" + ChangeWaves.AllWaves[i] + @"', '$(MSBUILDCHANGEWAVEVERSION)'))"">
+                            <Target Name='HelloWorld' Condition=""$([MSBuild]::VersionLessThan('" + ChangeWaves.AllWaves[i] + @"', '$(MSBUILDDISABLEFEATURESFROMVERSION)'))"">
                                 <Message Text='Hello World!'/>
                             </Target>
                         </Project>";
@@ -189,7 +189,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MSBUILDCHANGEWAVEVERSION", ChangeWaves.LowestWave);
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.LowestWave);
 
                 foreach (string wave in ChangeWaves.AllWaves)
                 {
@@ -197,7 +197,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                     string projectFile = @"
                         <Project>
-                            <Target Name='HelloWorld' Condition=""$([MSBuild]::VersionLessThan('" + wave + @"', '$(MSBUILDCHANGEWAVEVERSION)'))"">
+                            <Target Name='HelloWorld' Condition=""$([MSBuild]::VersionLessThan('" + wave + @"', '$(MSBUILDDISABLEFEATURESFROMVERSION)'))"">
                                 <Message Text='Hello World!'/>
                             </Target>
                         </Project>";
