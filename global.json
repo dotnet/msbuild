@@ -1,6 +1,6 @@
 {
   "tools": {
-    "dotnet": "5.0.100-rc.1.20431.3",
+    "dotnet": "5.0.100-rc.1.20452.10",
     "runtimes": {
       "dotnet": [
         "$(MicrosoftNETCoreAppInternalPackageVersion)"
@@ -12,7 +12,7 @@
     "xcopy-msbuild": "16.8.0-preview3"
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "5.0.0-beta.20465.7",
-    "Microsoft.DotNet.Helix.Sdk": "5.0.0-beta.20465.7"
+    "Microsoft.DotNet.Arcade.Sdk": "5.0.0-beta.20467.6",
+    "Microsoft.DotNet.Helix.Sdk": "5.0.0-beta.20467.6"
   }
 }
