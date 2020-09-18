@@ -392,7 +392,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData(new string[] { }, "windows", "10.0.19041.0", new[] { "WINDOWS" })]
         [InlineData(new[] { "1.0", "1.1" }, "ios", "1.1", new[] { "IOS" })]
         [InlineData(new[] { "11.11", "12.12", "13.13" }, "android", "12.12", new[] { "ANDROID" })]
-        public void It_implicitly_defines_compilation_constants_for_the_target_platform(string[] sdkSupportedTargetPlatform, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
+        public void It_implicitly_defines_compilation_constants_for_the_target_platform(string[] sdkSupportedTargetPlatformVersion, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
         {
             var targetFramework = "net5.0";
             var testAsset = _testAssetsManager
@@ -417,9 +417,9 @@ namespace Microsoft.NET.Build.Tests
 
                     var itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
-                    foreach (var targetPlatform in sdkSupportedTargetPlatform)
+                    foreach (var targetPlatform in sdkSupportedTargetPlatformVersion)
                     {
-                        itemGroup.Add(new XElement(ns + "SdkSupportedTargetPlatform", new XAttribute("Include", targetPlatform)));
+                        itemGroup.Add(new XElement(ns + "SdkSupportedTargetPlatformVersion", new XAttribute("Include", targetPlatform)));
                     }
                 });
 

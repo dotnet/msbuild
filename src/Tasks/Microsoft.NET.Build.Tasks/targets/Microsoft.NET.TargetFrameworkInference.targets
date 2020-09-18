@@ -77,11 +77,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_UnsupportedTargetFrameworkError>true</_UnsupportedTargetFrameworkError>
   </PropertyGroup>
 
-  <!--Default SupportedOSPlatform to TargetPlatformVersion-->
-  <PropertyGroup Condition="'$(SupportedOSPlatform)' == '' and '$(TargetPlatformVersion)' != ''">
-    <SupportedOSPlatform>$(TargetPlatformVersion)</SupportedOSPlatform>
-  </PropertyGroup>
-
   <!--
     NOTE: We must not validate the TFM before restore target runs as it prevents adding additional TFM 
           support from being provided by a nuget package such as MSBuild.Sdk.Extras.
@@ -184,11 +179,12 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="NETFrameworkWithoutUsingNETSdkDefaults" />
   </Target>
 
-  <Target Name="_CheckForSupportedOSPlatformHigherThanTargetPlatformVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform" >
+  <Target Name="_CheckForSupportedOSPlatformVersionHigherThanTargetPlatformVersion" BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+          Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">
 
-    <NETSdkError Condition="'$(SupportedOSPlatform)' != '' and $(TargetPlatformVersion) != '' and $([MSBuild]::VersionGreaterThan($(SupportedOSPlatform), $(TargetPlatformVersion)))"
-                 ResourceName="CannotHaveSupportedOSPlatformHigherThanTargetPlatformVersion"
-                 FormatArguments="$(SupportedOSPlatform);$(TargetPlatformVersion)"/>
+    <NETSdkError Condition="'$(SupportedOSPlatformVersion)' != '' and $(TargetPlatformVersion) != '' and $([MSBuild]::VersionGreaterThan($(SupportedOSPlatformVersion), $(TargetPlatformVersion)))"
+                 ResourceName="CannotHaveSupportedOSPlatformVersionHigherThanTargetPlatformVersion"
+                 FormatArguments="$(SupportedOSPlatformVersion);$(TargetPlatformVersion)"/>
   </Target>
 
   <!--C++/CLI targets rely on the patch version of the Windows SDK version as TargetPlatformVersion. Skip the normalization.-->
@@ -196,7 +192,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     BeforeTargets="ProcessFrameworkReferences"
     Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and '$(Language)' != 'C++'">
     <ItemGroup>
-      <_ValidTargetPlatformVersion Include="@(SdkSupportedTargetPlatform)" Condition="'@(SdkSupportedTargetPlatform)' != '' and $([MSBuild]::VersionEquals(%(Identity), $(TargetPlatformVersion)))" />
+      <_ValidTargetPlatformVersion Include="@(SdkSupportedTargetPlatformVersion)" Condition="'@(SdkSupportedTargetPlatformVersion)' != '' and $([MSBuild]::VersionEquals(%(Identity), $(TargetPlatformVersion)))" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -210,8 +206,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       Condition="'$(TargetPlatformVersion)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) and '$(Language)' != 'C++'">
     <PropertyGroup>
       <TargetPlatformVersionSupported Condition="'$(TargetPlatformVersionSupported)' == '' and '@(_ValidTargetPlatformVersion)' != ''" >true</TargetPlatformVersionSupported>
-      <_ValidTargetPlatformVersions Condition="'@(SdkSupportedTargetPlatform)' != ''" >@(SdkSupportedTargetPlatform, '%0a')</_ValidTargetPlatformVersions>
-      <_ValidTargetPlatformVersions Condition="'@(SdkSupportedTargetPlatform)' == ''" >None</_ValidTargetPlatformVersions>
+      <_ValidTargetPlatformVersions Condition="'@(SdkSupportedTargetPlatformVersion)' != ''" >@(SdkSupportedTargetPlatformVersion, '%0a')</_ValidTargetPlatformVersions>
+      <_ValidTargetPlatformVersions Condition="'@(SdkSupportedTargetPlatformVersion)' == ''" >None</_ValidTargetPlatformVersions>
     </PropertyGroup>
 
     <NetSdkError Condition="'$(TargetPlatformVersionSupported)' != 'true'"
