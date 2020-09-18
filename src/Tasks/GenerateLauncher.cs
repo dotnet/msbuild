@@ -32,6 +32,8 @@ namespace Microsoft.Build.Tasks
 
         public string VisualStudioVersion { get; set; }
 
+        public string AssemblyName { get; set; }
+
         [Output]
         public ITaskItem OutputEntryPoint { get; set; }
         #endregion
@@ -50,12 +52,22 @@ namespace Microsoft.Build.Tasks
 
             if (EntryPoint == null)
             {
-                Log.LogErrorWithCodeFromResources("GenerateLauncher.EmptyEntryPoint");
+                Log.LogErrorWithCodeFromResources("GenerateLauncher.InvalidInput");
                 return false;
             }
 
             var launcherBuilder = new LauncherBuilder(LauncherPath);
-            BuildResults results = launcherBuilder.Build(Path.GetFileName(EntryPoint.ItemSpec), OutputPath);
+            string entryPointFileName = Path.GetFileName(EntryPoint.ItemSpec);
+            //
+            // If the EntryPoint specified is apphost.exe, we need to use the assemblyname instead since
+            // apphost.exe is the source file that will get copied to outdir as {assemblyname}.exe.
+            //
+            if (entryPointFileName.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) &&
+                !String.IsNullOrEmpty(AssemblyName))
+            {
+                entryPointFileName = AssemblyName;
+            }
+            BuildResults results = launcherBuilder.Build(entryPointFileName, OutputPath);
 
             BuildMessage[] messages = results.Messages;
             if (messages != null)
