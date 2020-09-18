@@ -1,7 +1,9 @@
 # MSBuild Change Waves For Devs
 
+⚠ This doc is intended for internal teams.
+
 ## What are Change Waves?
-Sometimes we want to make a breaking change _and_ give customers a heads up as to what's breaking. So we develop the change and provide an opt-out while acknowledging that this feature will become a standard functionality down the line.
+Sometimes we want to make a breaking change _and_ give folks a heads up as to what's breaking. So we develop the change and provide an opt-out while acknowledging that this feature will become standard functionality down the line. This opt out comes in the form of setting the environment variable `MSBuildChangeWaveVersion` to the wave that contains the feature you want **disabled**. See the mapping of features to change waves below.
 
 ## Developing With Change Waves in Mind
 For the purpose of providing an example, the rest of this document assumes we're developing a feature for MSBuild version **17.4**.

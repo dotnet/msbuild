@@ -12,7 +12,7 @@ Simply set `MSBuildChangeWaveVersion` as an environment variable.
 
 ## 16.8
 - [Enable NoWarn](https://github.com/dotnet/msbuild/pull/5671)
-- [Allow expands-to-empty item transforms again](https://github.com/dotnet/msbuild/pull/5703)
+- [Truncate Target/Task skipped log messages to 1024 chars](https://github.com/dotnet/msbuild/pull/5553)
 - [Don't expand full drive globs with false condition](https://github.com/dotnet/msbuild/pull/5669)
 ## 16.10
 
