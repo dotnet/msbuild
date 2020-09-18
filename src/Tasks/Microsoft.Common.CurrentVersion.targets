@@ -1825,7 +1825,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         -->
 
     <PropertyGroup>
-      <MSBuildGlobalPropertiesToRemoveFromProjectReferences Condition="'$(DoNotPassOutputPathToReferencedProjects)'=='true'">;OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
+      <MSBuildGlobalPropertiesToRemoveFromProjectReferences Condition="'$(PassOutputPathToReferencedProjects)'=='false'">;OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
     </PropertyGroup>
 
     <MSBuild
