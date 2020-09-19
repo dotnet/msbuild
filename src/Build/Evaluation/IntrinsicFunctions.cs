@@ -506,6 +506,11 @@ namespace Microsoft.Build.Evaluation
             return NuGetFramework.Value.GetTargetPlatformVersion(tfm, versionPartCount);
         }
 
+        internal static bool IsChangeWaveEnabled(string wave)
+        {
+            return ChangeWaves.IsChangeWaveEnabled(wave);
+        }
+
         public static string GetCurrentToolsDirectory()
         {
             return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
