@@ -19,8 +19,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                              and '$(TargetPlatformIdentifier)' == 'Windows'
                              and '$(TargetPlatformVersion)' != ''
                              and $([MSBuild]::VersionGreaterThanOrEquals($(TargetPlatformVersion), '10.0'))
-                             and '$(Language)' != 'C++'">
-    <_IncludeWindowsSDKRefFrameworkReferences>true</_IncludeWindowsSDKRefFrameworkReferences>
+                             and '$(Language)' != 'C++'
+                             and '$(IncludeWindowsSDKRefFrameworkReferences)' == ''">
+    <IncludeWindowsSDKRefFrameworkReferences>true</IncludeWindowsSDKRefFrameworkReferences>
   </PropertyGroup>
 
   <!-- Set 7.0 as the TargetPlatformVersion for windows. -->
