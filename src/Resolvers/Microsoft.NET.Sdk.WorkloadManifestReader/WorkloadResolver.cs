@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -237,7 +237,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <remarks>
         /// Used by the MSBuild workload resolver to emit actionable errors
         /// </remarks>
-        public IList<WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packIds)
+        public ISet<WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packIds)
         {
             var installedPacks = new HashSet<WorkloadPackId>();
             var requestedPacks = new HashSet<WorkloadPackId>(packIds.Select(p => new WorkloadPackId(p)));
@@ -291,7 +291,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     }
 
                     //skip branches that don't reduce the number of missing packs
-                    //the branch may be a more optimal solution, but this will be handled elsewhere in the permuation space where it is treated as a root
+                    //the branch may be a more optimal solution, but this will be handled elsewhere in the permutation space where it is treated as a root
                     if (!root.StillMissingPacks.Overlaps(branch.Packs))
                     {
                         continue;
@@ -303,7 +303,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     var combinedPacks = new HashSet<WorkloadPackId>(root.Packs);
                     combinedPacks.UnionWith(branch.Packs);
                     var stillMissing = new HashSet<WorkloadPackId>(root.StillMissingPacks);
-                    stillMissing.ExceptWith(branch.StillMissingPacks);
+                    stillMissing.ExceptWith(branch.Packs);
                     var candidate = new WorkloadSuggestionCandidate(combinedIds, combinedPacks, stillMissing);
 
                     //if the candidate contains all the requested packs, it's complete. else, recurse to try adding more branches to it.
@@ -323,7 +323,48 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 FindCandidates(c, incompleteCandidates);
             }
 
-            throw new NotImplementedException();
+            // minimize number of unnecessary packs installed by the suggestion, then minimize number of workloads ids listed in the suggestion
+            // eventually a single pass to find the "best" would be more efficient but this this more readable and easier to tweak
+            var scoredList = completeCandidates.Select(
+                c =>
+                {
+                    var installedCount = c.Packs.Count(p => installedPacks.Contains(p));
+                    var extraPacks = c.Packs.Count - installedCount - requestedPacks.Count;
+                    return (c.Workloads, extraPacks);
+                });
+
+            var result = FindBest(
+                scoredList,
+                (x, y) => y.extraPacks - x.extraPacks,
+                (x, y) => y.Workloads.Count - x.Workloads.Count);
+
+            return new HashSet<WorkloadInfo>
+            (
+                result.Workloads.Select(s => new WorkloadInfo(s.ToString(), _workloads[s].Description))
+            );
+        }
+
+        private T FindBest<T>(IEnumerable<T> values, params Comparison<T>[] comparators)
+        {
+            T best = values.First();
+
+            foreach(T val in values.Skip(1))
+            {
+                foreach(Comparison<T> c in comparators)
+                {
+                    var cmp = c(val, best);
+                    if (cmp > 0)
+                    {
+                        best = val;
+                        break;
+                    }
+                    else if (cmp < 0)
+                    {
+                        break;
+                    }
+                }
+            }
+            return best;
         }
 
         private class WorkloadSuggestionCandidate : IEquatable<WorkloadSuggestionCandidate>
@@ -340,7 +381,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             public HashSet<WorkloadPackId> StillMissingPacks { get; }
             public bool IsComplete => StillMissingPacks.Count == 0;
 
-            public bool Equals(WorkloadSuggestionCandidate other) => Workloads.SetEquals(other.Workloads);
+            public bool Equals(WorkloadSuggestionCandidate? other) => other != null && Workloads.SetEquals(other.Workloads);
 
             public override int GetHashCode()
             {
@@ -388,14 +429,14 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public class WorkloadInfo
         {
-            public WorkloadInfo(string id, string description)
+            public WorkloadInfo(string id, string? description)
             {
                 Id = id;
                 Description = description;
             }
 
             public string Id { get; }
-            public string Description { get; }
+            public string? Description { get; }
         }
     }
 }
