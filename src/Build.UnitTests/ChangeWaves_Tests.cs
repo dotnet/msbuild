@@ -136,7 +136,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 string projectFile = @"
                     <Project>
-                        <Target Name='HelloWorld' Condition=""'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '" + ChangeWaves.LowestWave + @"' and $([MSBuild]::IsChangeWaveEnabled('" + ChangeWaves.LowestWave + @"')) == 'false'"">
+                        <Target Name='HelloWorld' Condition=""'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '" + ChangeWaves.LowestWave + @"' and $([MSBuild]::IsChangeWaveEnabled('" + ChangeWaves.LowestWave + @"')) == false"">
                             <Message Text='Hello World!'/>
                         </Target>
                     </Project>";
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                     string projectFile = @"
                         <Project>
-                            <Target Name='HelloWorld' Condition=""$([MSBuild]::IsChangeWaveEnabled('" + wave + @"')) == 'false'"">
+                            <Target Name='HelloWorld' Condition=""$([MSBuild]::IsChangeWaveEnabled('" + wave + @"')) == false"">
                                 <Message Text='Hello World!'/>
                             </Target>
                         </Project>";
