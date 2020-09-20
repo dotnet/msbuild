@@ -508,7 +508,7 @@ namespace Microsoft.Build.Evaluation
 
         internal static bool IsChangeWaveEnabled(string wave)
         {
-            return ChangeWaves.IsChangeWaveEnabled(wave);
+            return string.IsNullOrEmpty(wave) ? false : ChangeWaves.IsChangeWaveEnabled(wave);
         }
 
         public static string GetCurrentToolsDirectory()
