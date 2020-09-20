@@ -2054,12 +2054,3 @@ namespace Microsoft.Build.ObjectModelRemoting
         public string Value { get { throw null; } }
     }
 }
-namespace Microsoft.Build.Utilities
-{
-    public enum ChangeWaveConversionState
-    {
-        InvalidFormat = 1,
-        OutOfRotation = 2,
-        Valid = 0,
-    }
-}

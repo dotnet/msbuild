@@ -1,20 +1,25 @@
-# MSBuild Change Waves
+# What are Change Waves?
+A Change Wave is a set of potentially-breaking features developed under the same opt-out flag. This flag happens to be the version of MSBuild that the features were developed for. The purpose of this is to warn developers of breaking changes that will become standard functionality down the line. 
 
-## What are Change Waves?
-Sometimes we want to make a breaking change _and_ give folks a heads up as to what's breaking. So we develop the change and provide an opt-out while acknowledging that this feature will become standard functionality down the line. This opt out comes in the form of setting the environment variable `MSBuildChangeWaveVersion` to the wave that contains the feature you want **disabled**. See the mapping of features to change waves below.
+## How do they work?
+The opt out comes in the form of setting the environment variable `MSBuildDisableFeaturesFromVersion` to the wave (or version) that contains the feature you want **disabled**. See the mapping of change waves to features below.
 
-## How To Disable A Change Wave
-Simply set `MSBuildChangeWaveVersion` as an environment variable.
+**Note:** If  `MSBuildDisableFeaturesFromVersion` is set to `16.8`, this will **disable** all features under that `16.8` and **any further versions**.
 
-**Note:** Ensure you correctly follow the format `xx.yy`. eg; 16.8, 17.12, etc.
+## MSBuildDisableFeaturesFromVersion Values
+- If `MSBuildDisableFeaturesFromVersion` is not set, all change waves will **be enabled**
+- If `MSBuildDisableFeaturesFromVersion` is set to some out of bounds version (see current rotation of waves below), you will be defaulted to the lowest wave. This will **disable all waves**.
+- If `MSBuildDisableFeaturesFromVersion` is set to some invalid format (ex: 16x8, 17_0), all change waves will **be enabled**.
 
-# Change Wave & Associated Features
+# Change Waves & Associated Features
 
-## 16.8
+## Current Rotation of Change Waves
+### 16.8
 - [Enable NoWarn](https://github.com/dotnet/msbuild/pull/5671)
 - [Truncate Target/Task skipped log messages to 1024 chars](https://github.com/dotnet/msbuild/pull/5553)
 - [Don't expand full drive globs with false condition](https://github.com/dotnet/msbuild/pull/5669)
-## 16.10
+### 16.10
 
+### 17.0
 
-## 17.0
+## Change Waves No Longer In Rotation
