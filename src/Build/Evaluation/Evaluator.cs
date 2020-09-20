@@ -1108,7 +1108,7 @@ namespace Microsoft.Build.Evaluation
             }
             else if(changeWaveState == ChangeWaveConversionState.OutOfRotation)
             {
-                _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.AllWaves[0], ChangeWaves.DisabledWave);
+                _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.AllWaves[0], Traits.Instance.MSBuildDisableFeaturesFromVersion);
             }
 
             // Fake OS env variables when not on Windows
