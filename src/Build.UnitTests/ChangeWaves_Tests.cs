@@ -28,7 +28,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 string projectFile = @"
                     <Project>
-                        <Target Name='HelloWorld' Condition=""'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '999.999' and $([MSBuild]::VersionLessThan('" + featureWave + @"', '$(MSBUILDDISABLEFEATURESFROMVERSION)'))"">
+                        <Target Name='HelloWorld' Condition=""'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '" + ChangeWaves.EnableAllFeatures + @"' and $([MSBuild]::IsChangeWaveEnabled('" + featureWave + @"'))"">
                             <Message Text='Hello World!'/>
                         </Target>
                     </Project>";
@@ -41,6 +41,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 collection.LoadProject(file.Path).Build().ShouldBeTrue();
                 log.AssertLogContains("Hello World!");
+                ChangeWaves.DisabledWave = null;
             }
         }
 
@@ -57,7 +58,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 string projectFile = @"
                     <Project>
-                        <Target Name='HelloWorld' Condition="" '$(MSBUILDDISABLEFEATURESFROMVERSION)' == '999.999' and $([MSBuild]::VersionLessThan('" + featureWave + @"', '$(MSBUILDDISABLEFEATURESFROMVERSION)'))"">
+                        <Target Name='HelloWorld' Condition="" '$(MSBUILDDISABLEFEATURESFROMVERSION)' == '" + ChangeWaves.EnableAllFeatures + @"' and $([MSBuild]::IsChangeWaveEnabled('" + featureWave + @"'))"">
                             <Message Text='Hello World!'/>
                         </Target>
                     </Project>";
@@ -70,6 +71,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 collection.LoadProject(file.Path).Build().ShouldBeTrue();
                 log.AssertLogContains("Hello World!");
+                ChangeWaves.DisabledWave = null;
             }
         }
 
@@ -94,16 +96,16 @@ namespace Microsoft.Build.Engine.UnitTests
         [InlineData("16_8", "5.7")]
         [InlineData("16x8", "20.4")]
         [InlineData("garbage", "18.20")]
-        public void InvalidFormatThrowsWarningAndLeavesFeaturesEnabled(string enabledWave, string featureWave)
+        public void InvalidFormatThrowsWarningAndLeavesFeaturesEnabled(string disableFromWave, string featureWave)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", enabledWave);
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFromWave);
                 ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = @"
                     <Project>
-                        <Target Name='HelloWorld' Condition=""'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '" + ChangeWaves.EnableAllFeatures + @"' and $([MSBuild]::VersionLessThan('" + featureWave + @"', '$(MSBUILDDISABLEFEATURESFROMVERSION)'))"">
+                        <Target Name='HelloWorld' Condition=""'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '" + ChangeWaves.EnableAllFeatures + @"' and $([MSBuild]::IsChangeWaveEnabled('" + featureWave + @"'))"">
                             <Message Text='Hello World!'/>
                         </Target>
                     </Project>";
@@ -119,21 +121,22 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 log.AssertLogContains("invalid format");
                 log.AssertLogContains("Hello World!");
+                ChangeWaves.DisabledWave = null;
             }
         }
 
         [Theory]
         [InlineData("0.8")]
         [InlineData("203.45")]
-        public void OutOfRotationWavesThrowsWarningAndDisablesFeatures(string enabledWave)
+        public void OutOfRotationWavesThrowsWarningAndDisablesFeatures(string disableFromWave)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", enabledWave);
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFromWave);
 
                 string projectFile = @"
                     <Project>
-                        <Target Name='HelloWorld' Condition=""'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '" + ChangeWaves.LowestWave + @"' and $([MSBuild]::VersionLessThan('" + ChangeWaves.LowestWave + @"', '$(MSBUILDDISABLEFEATURESFROMVERSION)'))"">
+                        <Target Name='HelloWorld' Condition=""'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '" + ChangeWaves.LowestWave + @"' and $([MSBuild]::IsChangeWaveEnabled('" + ChangeWaves.LowestWave + @"')) == 'false'"">
                             <Message Text='Hello World!'/>
                         </Target>
                     </Project>";
@@ -148,7 +151,8 @@ namespace Microsoft.Build.Engine.UnitTests
                 p.Build().ShouldBeTrue();
 
                 log.AssertLogContains("out of rotation");
-                log.AssertLogDoesntContain("Hello World!");
+                log.AssertLogContains("Hello World!");
+                ChangeWaves.DisabledWave = null;
             }
         }
 
@@ -180,6 +184,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     p.Build().ShouldBeTrue();
 
                     log.AssertLogContains("Hello World!");
+                    ChangeWaves.DisabledWave = null;
                 }
             }
         }
@@ -197,7 +202,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                     string projectFile = @"
                         <Project>
-                            <Target Name='HelloWorld' Condition=""$([MSBuild]::VersionLessThan('" + wave + @"', '$(MSBUILDDISABLEFEATURESFROMVERSION)'))"">
+                            <Target Name='HelloWorld' Condition=""$([MSBuild]::IsChangeWaveEnabled('" + wave + @"')) == 'false'"">
                                 <Message Text='Hello World!'/>
                             </Target>
                         </Project>";
@@ -211,7 +216,8 @@ namespace Microsoft.Build.Engine.UnitTests
                     Project p = collection.LoadProject(file.Path);
                     p.Build().ShouldBeTrue();
 
-                    log.AssertLogDoesntContain("Hello World!");
+                    log.AssertLogContains("Hello World!");
+                    ChangeWaves.DisabledWave = null;
                 }
             }
         }

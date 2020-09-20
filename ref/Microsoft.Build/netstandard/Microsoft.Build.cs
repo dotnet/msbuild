@@ -2050,18 +2050,10 @@ namespace Microsoft.Build.ObjectModelRemoting
 }
 namespace Microsoft.Build.Utilities
 {
-    public partial class ChangeWaves
+    public enum ChangeWaveConversionState
     {
-        public static readonly string[] AllWaves;
-        public const string EnableAllFeatures = "999.999";
-        public const string Wave16_10 = "16.10";
-        public const string Wave16_8 = "16.8";
-        public const string Wave17_0 = "17.0";
-        public ChangeWaves() { }
-        public static string HighestWave { get { throw null; } }
-        public static string LowestWave { get { throw null; } }
-        public static bool IsChangeWaveEnabled(string wave) { throw null; }
-        public static bool IsChangeWaveEnabled(System.Version wave) { throw null; }
-        public static bool IsChangeWaveOutOfRotation(System.Version v) { throw null; }
+        InvalidFormat = 1,
+        OutOfRotation = 2,
+        Valid = 0,
     }
 }

@@ -3,10 +3,17 @@ using System;
 
 namespace Microsoft.Build.Utilities
 {
+    internal enum ChangeWaveConversionState
+    {
+        Valid,
+        InvalidFormat,
+        OutOfRotation
+    }
+
     /// <summary>
     /// All waves are enabled by default, meaning all features behind change waves are enabled.
     /// </summary>
-    public class ChangeWaves
+    internal class ChangeWaves
     {
         public static readonly string[] AllWaves = { Wave16_8, Wave16_10, Wave17_0 };
         public const string Wave16_8 = "16.8";
@@ -22,7 +29,7 @@ namespace Microsoft.Build.Utilities
         internal static readonly Version HighestWaveVersion = new Version(AllWaves[AllWaves.Length - 1]);
         internal static readonly Version EnableAllFeaturesVersion = new Version(EnableAllFeatures);
 
-        public static string LowestWave
+        internal static string LowestWave
         {
             get
             {
@@ -30,12 +37,64 @@ namespace Microsoft.Build.Utilities
             }
         }
 
-        public static string HighestWave
+        internal static string HighestWave
         {
             get
             {
                 return AllWaves[AllWaves.Length - 1];
             }
+        }
+
+        private static string cachedWave = null;
+
+        internal static string DisabledWave
+        {
+            get
+            {
+                if (cachedWave == null)
+                {
+                    cachedWave = Traits.Instance.MSBuildDisableFeaturesFromVersion;
+                }
+
+                return cachedWave;
+            }
+            set
+            {
+                cachedWave = value;
+            }
+        }
+
+        /// <summary>
+        /// Ensure the the environment variable MSBuildDisableFeaturesFromWave is set to a proper value.
+        /// </summary>
+        /// <returns> String representation of the set change wave. "999.999" if unset or invalid, and the lowest version in rotation if out of bounds. </returns>
+        internal static string SanitizeChangeWave(out ChangeWaveConversionState result)
+        {
+            Version changeWave;
+
+            // If unset, enable all features.
+            if (string.IsNullOrEmpty(DisabledWave))
+            {
+                result = ChangeWaveConversionState.Valid;
+                return DisabledWave = ChangeWaves.EnableAllFeatures;
+            }
+
+            // If the user-set change wave is of invalid format, log a warning and enable all features.
+            if (!Version.TryParse(DisabledWave, out changeWave))
+            {
+                result = ChangeWaveConversionState.InvalidFormat;
+                return DisabledWave = ChangeWaves.EnableAllFeatures;
+            }
+
+            // If the change wave is out of rotation, log a warning and disable all features.
+            else if (ChangeWaves.IsChangeWaveOutOfRotation(changeWave))
+            {
+                result = ChangeWaveConversionState.OutOfRotation;
+                return DisabledWave = ChangeWaves.AllWaves[0];
+            }
+
+            result = ChangeWaveConversionState.Valid;
+            return DisabledWave = changeWave.ToString();
         }
 
         /// <summary>
@@ -64,7 +123,7 @@ namespace Microsoft.Build.Utilities
         public static bool IsChangeWaveEnabled(Version wave)
         {
             // This is opt out behavior, all waves are enabled by default.
-            if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableFeaturesFromVersion))
+            if (string.IsNullOrEmpty(DisabledWave))
             {
                 return true;
             }
@@ -72,7 +131,7 @@ namespace Microsoft.Build.Utilities
             Version currentSetWave;
 
             // If we can't parse the environment variable, default to enabling features.
-            if (!Version.TryParse(Traits.Instance.MSBuildDisableFeaturesFromVersion, out currentSetWave))
+            if (!Version.TryParse(DisabledWave, out currentSetWave))
             {
                 return true;
             }

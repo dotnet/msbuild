@@ -32,19 +32,7 @@ namespace Microsoft.Build.Utilities
 
         public EscapeHatches EscapeHatches { get; }
 
-        public string MSBuildDisableFeaturesFromVersion
-        {
-            get
-            {
-                return msbuildDisableFeaturesFromVersion;
-            }
-            internal set
-            {
-                msbuildDisableFeaturesFromVersion = value;
-            }
-        }
-
-        private string msbuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION"); 
+        internal readonly string MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION"); 
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern
