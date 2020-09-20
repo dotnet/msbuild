@@ -24,6 +24,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.EnableAllFeatures);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
                 ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = @"
@@ -43,7 +44,6 @@ namespace Microsoft.Build.Engine.UnitTests
                 log.AssertLogContains("Hello World!");
                 ChangeWaves.DisabledWave = null;
             }
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
         }
 
         [Theory]
@@ -91,7 +91,6 @@ namespace Microsoft.Build.Engine.UnitTests
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "16.8");
                 Shouldly.Should.Throw<InternalErrorException>(() => ChangeWaves.IsChangeWaveEnabled(waveToCheck));
             }
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
         }
 
         [Theory]
@@ -104,6 +103,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFromWave);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
                 ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = @"
@@ -126,7 +126,6 @@ namespace Microsoft.Build.Engine.UnitTests
                 log.AssertLogContains("Hello World!");
                 ChangeWaves.DisabledWave = null;
             }
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
         }
 
         [Theory]
@@ -137,6 +136,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFromWave);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 string projectFile = @"
                     <Project>
@@ -158,7 +158,6 @@ namespace Microsoft.Build.Engine.UnitTests
                 log.AssertLogContains("Hello World!");
                 ChangeWaves.DisabledWave = null;
             }
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
         }
 
         [Fact]
@@ -167,6 +166,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.HighestWave);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 for (int i = 0; i < ChangeWaves.AllWaves.Length-1; i++)
                 {
@@ -192,7 +192,6 @@ namespace Microsoft.Build.Engine.UnitTests
                     ChangeWaves.DisabledWave = null;
                 }
             }
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
         }
 
         [Fact]
@@ -201,6 +200,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.LowestWave);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 foreach (string wave in ChangeWaves.AllWaves)
                 {
@@ -226,7 +226,6 @@ namespace Microsoft.Build.Engine.UnitTests
                     ChangeWaves.DisabledWave = null;
                 }
             }
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
         }
     }
 }
