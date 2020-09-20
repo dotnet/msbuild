@@ -153,6 +153,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 log.AssertLogContains("out of rotation");
                 log.AssertLogContains("Hello World!");
                 ChangeWaves.DisabledWave = null;
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
 
