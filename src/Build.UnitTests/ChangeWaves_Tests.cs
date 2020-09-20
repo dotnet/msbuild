@@ -43,6 +43,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 collection.LoadProject(file.Path).Build().ShouldBeTrue();
                 log.AssertLogContains("Hello World!");
                 ChangeWaves.DisabledWave = null;
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
 
@@ -73,8 +74,8 @@ namespace Microsoft.Build.Engine.UnitTests
                 collection.LoadProject(file.Path).Build().ShouldBeTrue();
                 log.AssertLogContains("Hello World!");
                 ChangeWaves.DisabledWave = null;
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
         }
 
         [Theory]
@@ -125,6 +126,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 log.AssertLogContains("invalid format");
                 log.AssertLogContains("Hello World!");
                 ChangeWaves.DisabledWave = null;
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
 
@@ -157,6 +159,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 log.AssertLogContains("out of rotation");
                 log.AssertLogContains("Hello World!");
                 ChangeWaves.DisabledWave = null;
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
 
@@ -191,6 +194,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     log.AssertLogContains("Hello World!");
                     ChangeWaves.DisabledWave = null;
                 }
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
 
@@ -225,6 +229,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     log.AssertLogContains("Hello World!");
                     ChangeWaves.DisabledWave = null;
                 }
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
     }
