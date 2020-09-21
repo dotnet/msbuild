@@ -1,7 +1,7 @@
 ⚠ This doc is intended for internal teams.
 
 # What are Change Waves?
-A Change Wave is a set of potentially-breaking features developed under the same opt-out flag. This flag happens to be the version of MSBuild that the features were developed for. The purpose of this is to warn developers of breaking changes that will become standard functionality down the line. 
+A Change Wave is a set of risky features developed under the same opt-out flag. This flag happens to be the version of MSBuild that the features were developed for. The purpose of this is to warn developers of risky changes that will become standard functionality down the line. 
 
 ## How do they work?
 The opt out comes in the form of setting the environment variable `MSBuildDisableFeaturesFromVersion` to the wave (or version) that contains the feature you want **disabled**. 
@@ -47,7 +47,7 @@ Surround your feature with the following:
 
 If you need to condition a Task or Target, use the built in `IsChangeWaveEnabled` function.
 ```xml
-<Target Name="SomeBreakingChange" Condition="$([MSBuild]::IsChangeWaveEnabled('17.4'))"">
+<Target Name="SomeRiskyChange" Condition="$([MSBuild]::IsChangeWaveEnabled('17.4'))"">
 <!-- Where '17.4' is the change wave assigned to your feature. -->
 ```
 
@@ -61,7 +61,7 @@ Example:
 using (TestEnvironment env = TestEnvironment.Create())
 {
     // Important: use the constant here
-    env.SetEnvironmentVariable("MSBuildDisableFeaturesFromVersion", ChangeWaves.Wave17_4);
+    env.SetChangeWave(ChangeWaves.Wave17_4);
 
     string projectFile = @"
         <Project>

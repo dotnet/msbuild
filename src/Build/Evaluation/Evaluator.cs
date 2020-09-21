@@ -1100,7 +1100,7 @@ namespace Microsoft.Build.Evaluation
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32));
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion));
             builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.msbuilddisablefeaturesfromversion, ChangeWaves.SanitizeChangeWave(out changeWaveState)));
+            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.msbuilddisablefeaturesfromversion, ChangeWaves.ApplyChangeWave(out changeWaveState)));
 
             if (changeWaveState == ChangeWaveConversionState.InvalidFormat)
             {

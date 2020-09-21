@@ -88,7 +88,7 @@ namespace Microsoft.Build.Internal
             assemblyVersion,
             version,
             interactive,
-            msbuilddisablefeaturesfromversion
+            msbuilddisablefeaturesfromversion,
         };
 
         /// <summary>

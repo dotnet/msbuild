@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using Xunit;
 using Shouldly;
@@ -31,7 +34,7 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 env.SetChangeWave(ChangeWaves.EnableAllFeatures);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-                ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
+                ChangeWaves.IsFeatureEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = @"
                     <Project>
@@ -62,7 +65,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetChangeWave("");
-                ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
+                ChangeWaves.IsFeatureEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = @"
                     <Project>
@@ -95,7 +98,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetChangeWave("16.8");
-                Shouldly.Should.Throw<InternalErrorException>(() => ChangeWaves.IsChangeWaveEnabled(waveToCheck));
+                Shouldly.Should.Throw<InternalErrorException>(() => ChangeWaves.IsFeatureEnabled(waveToCheck));
             }
         }
 
@@ -110,7 +113,7 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 env.SetChangeWave(disableFromWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-                ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
+                ChangeWaves.IsFeatureEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = @"
                     <Project>
@@ -177,7 +180,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 for (int i = 0; i < ChangeWaves.AllWaves.Length-1; i++)
                 {
-                    ChangeWaves.IsChangeWaveEnabled(ChangeWaves.AllWaves[i]).ShouldBe(true);
+                    ChangeWaves.IsFeatureEnabled(ChangeWaves.AllWaves[i]).ShouldBe(true);
 
                     string projectFile = @"
                         <Project>
@@ -212,7 +215,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 foreach (string wave in ChangeWaves.AllWaves)
                 {
-                    ChangeWaves.IsChangeWaveEnabled(wave).ShouldBeFalse();
+                    ChangeWaves.IsFeatureEnabled(wave).ShouldBeFalse();
 
                     string projectFile = @"
                         <Project>

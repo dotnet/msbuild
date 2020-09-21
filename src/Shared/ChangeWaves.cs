@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Microsoft.Build.Shared;
 using System;
 
@@ -68,7 +71,7 @@ namespace Microsoft.Build.Utilities
         /// Ensure the the environment variable MSBuildDisableFeaturesFromWave is set to a proper value.
         /// </summary>
         /// <returns> String representation of the set change wave. "999.999" if unset or invalid, and the lowest version in rotation if out of bounds. </returns>
-        internal static string SanitizeChangeWave(out ChangeWaveConversionState result)
+        internal static string ApplyChangeWave(out ChangeWaveConversionState result)
         {
             Version changeWave;
 
@@ -103,16 +106,16 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="wave">The version to compare.</param>
         /// <returns>A bool indicating whether the feature behind a change wave is enabled.</returns>
-        public static bool IsChangeWaveEnabled(string wave)
+        public static bool IsFeatureEnabled(string wave)
         {
             Version waveToCheck;
 
-            // When a caller passes an invalid waveToCheck, fail the build.
+            // When a caller passes an invalid wave, fail the build.
             ErrorUtilities.VerifyThrow(Version.TryParse(wave.ToString(), out waveToCheck),
                                        $"Argument 'wave' passed with invalid format." +
                                        $"Please use pre-existing const strings or define one with format 'xx.yy");
 
-            return IsChangeWaveEnabled(waveToCheck);
+            return IsFeatureEnabled(waveToCheck);
         }
 
         /// <summary>
@@ -120,7 +123,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="wave">The version to compare.</param>
         /// <returns>A bool indicating whether the version is enabled.</returns>
-        public static bool IsChangeWaveEnabled(Version wave)
+        public static bool IsFeatureEnabled(Version wave)
         {
             // This is opt out behavior, all waves are enabled by default.
             if (string.IsNullOrEmpty(DisabledWave))
