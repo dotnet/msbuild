@@ -30,7 +30,7 @@ namespace Microsoft.NET.Build.Tasks
         protected override void ExecuteCore()
         {
             var targetFramework = NuGetFramework.Parse(TargetFrameworkMoniker);
-            if (!(targetFramework.Framework.Equals(".NETCoreApp") && targetFramework.Version >= new Version(5, 0)))
+            if (!(targetFramework.Framework.Equals(".NETCoreApp") && targetFramework.Version >= new Version(5, 0)) || UseWpf || UseWindowsForms)
             {
                 // Target platform properties were defaulted to windows prior to 5.0, ignore these values
                 TargetPlatformMoniker = string.Empty;

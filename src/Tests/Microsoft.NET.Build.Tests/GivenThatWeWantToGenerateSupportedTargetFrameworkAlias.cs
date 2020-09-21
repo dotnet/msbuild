@@ -63,6 +63,8 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyTheory]
         [InlineData("net5.0", "UseWpf")]
         [InlineData("net5.0", "UseWindowsForms")]
+        [InlineData("net5.0-windows", "UseWpf")]
+        [InlineData("net5.0-windows", "UseWindowsForms")]
         [InlineData("netcoreapp3.1", "UseWpf")]
         [InlineData("netcoreapp3.1", "UseWindowsForms")]
         public void It_generates_supported_target_framework_alias_items_when_using_wpf_or_winforms(string currentTargetFramework, string propertyName)
