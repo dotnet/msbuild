@@ -97,6 +97,8 @@ Static graph functionality can be used in three ways:
   - This gets the scheduling improvements and also enforces that the graph is correct and complete. In this mode, MSBuild will produce an error if there is an `MSBuild` task invocation that was not known to the graph ahead of time.
 - As part of a higher-order build system that uses [single project isolated builds](#single-project-isolated-builds) to provide caching and/or distribution on top of the built-in functionality. The only known implementation of this system is Microsoft-internal currently.
 
+"Correct and complete" here means that the static graph can be used to accurately predict all targets that need to be built for all projects in the graph, and all of the references between projects. This is required for the higher-order build system scenario, because an unknown reference couldn't be satisfied at runtime (as it is in regular MSBuild and `-graph` with no `-isolate` scenarios).
+
 ## Design documentation
 
 ### Design goals
