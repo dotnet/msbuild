@@ -52,7 +52,7 @@ With graph-aware scheduling, this becomes:
 
 ### Weakness of the old model: incrementality
 
-[incremental build](https://docs.microsoft.com/visualstudio/msbuild/incremental-builds) (that is, "redo only the parts of the build that would produce different outputs compared to the last build") is the most powerful tool to reduce build times and developer inner-loop speed.
+[Incremental build](https://docs.microsoft.com/visualstudio/msbuild/incremental-builds) (that is, "redo only the parts of the build that would produce different outputs compared to the last build") is the most powerful tool to reduce build times and increase developer inner-loop speed.
 
 MSBuild supports incremental builds by allowing a target to be skipped if the target's outputs are up to date with its inputs. This allows tools like the compiler to be skipped when possible. But since the incrementality is at the target level, MSBuild must fully evaluate the project and walk through all targets, running those that are out of date or that don't specify inputs and outputs.
 
@@ -95,7 +95,7 @@ Static graph functionality can be used in three ways:
   - This gets the scheduling improvements for well-specified projects, but allows underspecified projects to complete without error.
 - On the command line with `-graph -isolate` (and equivalent API).
   - This gets the scheduling improvements and also enforces that the graph is correct and complete. In this mode, MSBuild will produce an error if there is an `MSBuild` task invocation that was not known to the graph ahead of time.
-  - As part of a higher-order build system that uses [single project isolated builds](#single-project-isolated-builds) to provide caching and/or distribution on top of the built-in functionality. The only known implementation of this system is Microsoft-internal currently.
+- As part of a higher-order build system that uses [single project isolated builds](#single-project-isolated-builds) to provide caching and/or distribution on top of the built-in functionality. The only known implementation of this system is Microsoft-internal currently.
 
 ## Design documentation
 
