@@ -1,0 +1,19 @@
+use vs
+
+package name=Microsoft.Build.UnGAC
+        version=$(Version)
+        vs.package.type=exe
+        vs.package.chip=neutral
+        vs.package.language=neutral
+
+vs.installCommand fileName=[Payload]
+
+vs.repairCommand fileName=[Payload]
+
+vs.installSize
+  SystemDrive=0
+  TargetDrive=0
+  SharedDrive=0
+
+vs.payloads
+    vs.payload source=$(BinDir)Microsoft.Build.UnGAC.exe
