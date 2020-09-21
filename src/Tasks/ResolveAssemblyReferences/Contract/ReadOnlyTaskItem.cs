@@ -41,10 +41,12 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
                     foreach (DictionaryEntry singleMetadata in metadata)
                     {
                         string key = (string)singleMetadata.Key;
-                        if (key != null)
+                        if (key == null)
                         {
-                            MetadataNameToValue[key] = (string)singleMetadata.Value ?? string.Empty;
+                            return;
                         }
+
+                        MetadataNameToValue[key] = (string)singleMetadata.Value ?? string.Empty;
                     }
                 }
             }

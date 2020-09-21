@@ -15,11 +15,11 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        /// <param name="searchPathElement">The search path element.</param>
-        /// <param name="getAssemblyName">Delegate to get the assembly name object.</param>
-        /// <param name="fileExists">Delegate to check if the file exists.</param>
+        /// <param name="searchPathElement">The corresponding element from the search path</param>
+        /// <param name="getAssemblyName">Delegate that gets the assembly name.</param>
+        /// <param name="fileExists">Delegate that returns if the file exists.</param>
         /// <param name="getRuntimeVersion">Delegate to get the runtime version.</param>
-        /// <param name="targetedRuntimeVesion">The targeted runtime version.</param>
+        /// <param name="targetedRuntimeVesion">>Delegate that returns the clr runtime version for the file.</param>
         public AssemblyFoldersResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
             : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false)
         {

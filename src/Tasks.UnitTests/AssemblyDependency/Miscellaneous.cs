@@ -3304,18 +3304,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Single(parentReferenceFolders);
             Assert.Equal(reference2.ResolvedSearchPath, parentReferenceFolders[0]);
         }
-        
+
         /// <summary>
         /// Generate a fake reference which has been resolved from the gac. We will use it to verify the creation of the exclusion list.
         /// </summary>
         /// <returns></returns>
         private ReferenceTable GenerateTableWithAssemblyFromTheGlobalLocation(string location)
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null, null,
-#if FEATURE_WIN32_REGISTRY
-                null, null, null,
-#endif
-                null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null);
+            ReferenceTable referenceTable = MakeEmptyReferenceTable(null);
 
             AssemblyNameExtension assemblyNameExtension = new AssemblyNameExtension(new AssemblyName("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"));
             TaskItem taskItem = new TaskItem("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
@@ -5939,7 +5935,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RedistListGenerateBlackListGoodListsSubsetIsSubsetOfRedist()
         {
-            string redistFile = CreateGenericRedistList(); 
+            string redistFile = CreateGenericRedistList();
             string goodSubsetFile = FileUtilities.GetTemporaryFile();
             try
             {
@@ -6775,11 +6771,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ReferenceTableDependentItemsInBlackList4()
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
-#if FEATURE_WIN32_REGISTRY
-                null, null, null,
-#endif
-                null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null);
+            ReferenceTable referenceTable = MakeEmptyReferenceTable(null);
+
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
             Dictionary<string, string> blackList;

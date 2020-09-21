@@ -3,24 +3,24 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Versioning;
+using System.Threading;
+using System.Threading.Tasks;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Tasks.AssemblyDependency;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences.Server;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences.Services;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
-using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
-using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
+using Nerdbank.Streams;
 using Xunit;
 using Xunit.Abstractions;
-using Shouldly;
-using Nerdbank.Streams;
-using Microsoft.Build.Tasks.ResolveAssemblyReferences.Server;
-using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
-using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.Build.Tasks.ResolveAssemblyReferences.Services;
+using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
+using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
+using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -2988,7 +2988,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             public Task<ResolveAssemblyReferenceResult> ExecuteAsync(ResolveAssemblyReferenceRequest input, CancellationToken cancellationToken = default)
             {
-                return System.Threading.Tasks.Task.FromResult(Execute(input));
+                return Task.FromResult(Execute(input));
             }
 
             internal ResolveAssemblyReferenceResult Execute(ResolveAssemblyReferenceRequest input)

@@ -141,7 +141,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Server
             {
                 return pipeServerStream;
             }
-            Console.WriteLine("ERROR: Didn't validate handshake");
 
             // We couldn't validate connection, so don't use this connection at all.
             pipeServerStream.Dispose();

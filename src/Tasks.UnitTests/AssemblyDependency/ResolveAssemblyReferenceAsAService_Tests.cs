@@ -1,4 +1,9 @@
-﻿using MessagePack;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using MessagePack;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Client;
@@ -10,11 +15,6 @@ using Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests;
 using Microsoft.Build.Utilities;
 using Nerdbank.Streams;
 using Shouldly;
-using System;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
 using Task = System.Threading.Tasks.Task;
@@ -76,6 +76,33 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
             ResolveAssemblyReferenceComparer.CompareOutput(response, responseDes).ShouldBeTrue();
         }
+
+        [Fact]
+        public void RarOutputPropertyTest()
+        {
+            ResolveAssemblyReferenceResponse expectedResponse = GetPopulatedObject<ResolveAssemblyReferenceResponse>("test", new[] { "testArr" }, true, new[] { new ReadOnlyTaskItem("test") });
+
+            ResolveAssemblyReference rar = new ResolveAssemblyReference();
+            rar.ResolveAssemblyReferenceOutput = expectedResponse;
+            ResolveAssemblyReferenceResponse response = rar.ResolveAssemblyReferenceOutput;
+
+            ResolveAssemblyReferenceComparer.CompareOutput(expectedResponse, response).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void RarIputPropertyTest()
+        {
+            ResolveAssemblyReferenceRequest expectedRequest = GetPopulatedObject<ResolveAssemblyReferenceRequest>("test", new[] { "testArr" }, true, new[] { new ReadOnlyTaskItem("test") });
+            expectedRequest.CurrentPath = Directory.GetCurrentDirectory();
+            expectedRequest.WarnOrErrorOnTargetArchitectureMismatch = "None"; // Serialized into enum, so we have to provide correct value
+
+            ResolveAssemblyReference rar = new ResolveAssemblyReference();
+            rar.ResolveAssemblyReferenceInput = expectedRequest;
+            ResolveAssemblyReferenceRequest request = rar.ResolveAssemblyReferenceInput;
+
+            ResolveAssemblyReferenceComparer.CompareInput(expectedRequest, request).ShouldBeTrue();
+        }
+
 
         [Fact]
         public void TransmitDataTest()
