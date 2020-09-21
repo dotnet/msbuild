@@ -13,7 +13,7 @@ namespace Microsoft.Build.Utilities
     /// <summary>
     /// All waves are enabled by default, meaning all features behind change waves are enabled.
     /// </summary>
-    internal class ChangeWaves
+    public class ChangeWaves
     {
         public static readonly string[] AllWaves = { Wave16_8, Wave16_10, Wave17_0 };
         public const string Wave16_8 = "16.8";
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Utilities
 
         private static string cachedWave = null;
 
-        internal static string DisabledWave
+        public static string DisabledWave
         {
             get
             {

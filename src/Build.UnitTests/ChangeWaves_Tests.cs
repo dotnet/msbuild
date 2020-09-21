@@ -29,8 +29,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                ChangeWaves.DisabledWave = null;
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.EnableAllFeatures);
+                env.SetChangeWave(ChangeWaves.EnableAllFeatures);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
                 ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
 
@@ -62,7 +61,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                ChangeWaves.DisabledWave = null;
+                env.SetChangeWave("");
                 ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = @"
@@ -95,7 +94,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "16.8");
+                env.SetChangeWave("16.8");
                 Shouldly.Should.Throw<InternalErrorException>(() => ChangeWaves.IsChangeWaveEnabled(waveToCheck));
             }
         }
@@ -109,8 +108,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                ChangeWaves.DisabledWave = null;
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFromWave);
+                env.SetChangeWave(disableFromWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
                 ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
 
@@ -143,9 +141,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                _output.WriteLine(ChangeWaves.DisabledWave);
-                ChangeWaves.DisabledWave = null;
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFromWave);
+                env.SetChangeWave(disableFromWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 string projectFile = @"
@@ -165,7 +161,6 @@ namespace Microsoft.Build.Engine.UnitTests
                 p.Build().ShouldBeTrue();
 
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-                _output.WriteLine(ChangeWaves.DisabledWave);
 
                 log.AssertLogContains("out of rotation");
                 log.AssertLogContains("Hello World!");
@@ -177,8 +172,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                ChangeWaves.DisabledWave = null;
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.HighestWave);
+                env.SetChangeWave(ChangeWaves.HighestWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 for (int i = 0; i < ChangeWaves.AllWaves.Length-1; i++)
@@ -202,12 +196,9 @@ namespace Microsoft.Build.Engine.UnitTests
                     p.Build().ShouldBeTrue();
 
                     BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-                    ChangeWaves.DisabledWave = null;
 
                     log.AssertLogContains("Hello World!");
-
                 }
-
             }
         }
 
@@ -216,9 +207,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                ChangeWaves.DisabledWave = null;
-
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.LowestWave);
+                env.SetChangeWave(ChangeWaves.LowestWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 foreach (string wave in ChangeWaves.AllWaves)
