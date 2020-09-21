@@ -3251,15 +3251,7 @@ namespace Microsoft.Build.Tasks
                 new GetAssemblyPathInGac(GetAssemblyPathInGac),
                 new IsWinMDFile(AssemblyInformation.IsWinMDFile),
                 new ReadMachineTypeFromPEHeader(ReferenceTable.ReadMachineTypeFromPEHeader),
-                (path) =>
-                {
-                    if (Path.IsPathRooted(path))
-                    {
-                        return FileUtilities.NormalizePath(path);
-                    }
-
-                    return FileUtilities.NormalizePath(input.CurrentPath, path);
-                }
+                path => FileUtilities.NormalizePath(Path.IsPathRooted(path) ? string.Empty : input.CurrentPath, path)
             );
 
             return new ResolveAssemblyReferenceResult(result, ResolveAssemblyReferenceOutput);
