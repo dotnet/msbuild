@@ -16,10 +16,7 @@ using System;
 using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
-using NuGet.ProjectModel;
-using NuGet.Common;
 using Newtonsoft.Json.Linq;
-using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -319,6 +316,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("net461", new[] { "NETFRAMEWORK", "NET461" }, true)]
         [InlineData("netcoreapp1.0", new[] { "NETCOREAPP", "NETCOREAPP1_0" }, false)]
         [InlineData("netcoreapp3.0", new[] { "NETCOREAPP", "NETCOREAPP3_0" }, false)]
+        [InlineData("net5.0", new[] { "NETCOREAPP", "NET", "NET5_0" }, false)]
         [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { }, false)]
         [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NETFRAMEWORK", "NET40" }, false)]
         [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS", "XAMARINIOS1_0" }, false)]
@@ -390,72 +388,11 @@ namespace Microsoft.NET.Build.Tests
             definedConstants.Should().BeEquivalentTo(new[] { "DEBUG", "TRACE" }.Concat(expectedDefines).ToArray());
         }
 
-        [RequiresMSBuildVersionTheory("16.7.0-preview-20310-07")]
-        [InlineData("net5.0", new[] { "NETCOREAPP3_1", "NET5_0" })]
-        [InlineData("net6.0", new[] { "NETCOREAPP3_1", "NET5_0", "NET6_0" })]
-        public void It_implicitly_defines_compilation_constants_for_the_target_framework_with_backwards_compatibility(string targetFramework, string[] expectedDefines)
-        {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework)
-                .WithSource()
-                .WithTargetFramework(targetFramework)
-                .WithProjectChanges(project =>
-                {
-                    var ns = project.Root.Name.Namespace;
-                    var propGroup = new XElement(ns + "PropertyGroup");
-                    project.Root.Add(propGroup);
-                    var maxVersion = new XElement(ns + "NETCoreAppMaximumVersion", "6.0");
-                    propGroup.Add(maxVersion);
-                    var errorOnMissing = new XElement(ns + "GenerateErrorForMissingTargetingPacks", "false");
-                    propGroup.Add(errorOnMissing);
-
-                    var itemGroup = new XElement(ns + "ItemGroup");
-                    project.Root.Add(itemGroup);
-                    var supportedFramework = new XElement(ns + "SupportedNETCoreAppTargetFramework",
-                        new XAttribute("Include", ".NETCoreApp,Version=v6.0"),
-                        new XAttribute("DisplayName", ".NET 6.0"));
-                    itemGroup.Add(supportedFramework);
-                });
-
-            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET"}.Concat(expectedDefines).ToArray());
-        }
-
         [Theory]
-        [InlineData("ios", "1.1", new[] { "IOS", "IOS1_1" })]
-        [InlineData("android", "2.2", new[] { "ANDROID", "ANDROID2_2" })]
-        [InlineData("windows", "7.0", new[] { "WINDOWS", "WINDOWS7_0" })]
-        public void It_implicitly_defines_compilation_constants_for_the_target_platform(string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
-        {
-            var targetFramework = "net5.0";
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework)
-                .WithSource()
-                .WithTargetFramework(targetFramework)
-                .WithProjectChanges(project =>
-                {
-                    //  Manually set target plaform properties
-                    var ns = project.Root.Name.Namespace;
-                    var propGroup = new XElement(ns + "PropertyGroup");
-                    project.Root.Add(propGroup);
-
-                    var platformIdentifier = new XElement(ns + "TargetPlatformIdentifier", targetPlatformIdentifier);
-                    propGroup.Add(platformIdentifier);
-                    var platformVersion = new XElement(ns + "TargetPlatformVersion", targetPlatformVersion);
-                    propGroup.Add(platformVersion);
-                    var platformSupported = new XElement(ns + "TargetPlatformSupported", true);
-                    propGroup.Add(platformSupported);
-                    var disableUnnecessaryImplicitFrameworkReferencesForThisTest = new XElement(ns + "DisableImplicitFrameworkReferences", "true");
-                    propGroup.Add(disableUnnecessaryImplicitFrameworkReferencesForThisTest);
-                });
-
-            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "NET5_0", "NETCOREAPP3_1" }.Concat(expectedDefines).ToArray());
-        }
-
-        [Theory]
-        [InlineData(new[] { "1.0", "1.1" }, "ios", "1.1", new[] { "IOS", "IOS1_1", "IOS1_0" })]
-        [InlineData(new[] { "11.11", "12.12", "13.13" }, "android", "12.12", new[] { "ANDROID", "ANDROID11_11", "ANDROID12_12" })]
-        [InlineData(new string[] { /* Use the built in SdkSupportedTargetPlatform items */}, "windows", "10.0.19041.0", new[] { "WINDOWS", "WINDOWS7_0", "WINDOWS8_0", "WINDOWS10_0_17763_0", "WINDOWS10_0_18362_0", "WINDOWS10_0_19041_0" })]
-        public void It_implicitly_defines_compilation_constants_for_the_target_platform_with_backwards_compatibility(string[] sdkSupportedTargetPlatform, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
+        [InlineData(new string[] { }, "windows", "10.0.19041.0", new[] { "WINDOWS" })]
+        [InlineData(new[] { "1.0", "1.1" }, "ios", "1.1", new[] { "IOS" })]
+        [InlineData(new[] { "11.11", "12.12", "13.13" }, "android", "12.12", new[] { "ANDROID" })]
+        public void It_implicitly_defines_compilation_constants_for_the_target_platform(string[] sdkSupportedTargetPlatformVersion, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
         {
             var targetFramework = "net5.0";
             var testAsset = _testAssetsManager
@@ -480,13 +417,13 @@ namespace Microsoft.NET.Build.Tests
 
                     var itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
-                    foreach (var targetPlatform in sdkSupportedTargetPlatform)
+                    foreach (var targetPlatform in sdkSupportedTargetPlatformVersion)
                     {
-                        itemGroup.Add(new XElement(ns + "SdkSupportedTargetPlatform", new XAttribute("Include", targetPlatform)));
+                        itemGroup.Add(new XElement(ns + "SdkSupportedTargetPlatformVersion", new XAttribute("Include", targetPlatform)));
                     }
                 });
 
-            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "NET5_0", "NETCOREAPP3_1" }.Concat(expectedDefines).ToArray());
+            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "NET5_0" }.Concat(expectedDefines).ToArray());
         }
 
         private void AssertDefinedConstantsOutput(TestAsset testAsset, string targetFramework, string[] expectedDefines)
@@ -512,7 +449,7 @@ namespace Microsoft.NET.Build.Tests
 
         [WindowsOnlyTheory]
         [InlineData("netcoreapp3.1", new[] { "NETCOREAPP", "NETCOREAPP3_1" })]
-        [InlineData("net5.0", new[] { "NETCOREAPP", "NETCOREAPP3_1", "NET", "NET5_0", "WINDOWS", "WINDOWS7_0" }, "windows", "7.0")]
+        [InlineData("net5.0", new[] { "NETCOREAPP", "NET", "NET5_0", "WINDOWS" }, "windows", "7.0")]
         public void It_can_use_implicitly_defined_compilation_constants(string targetFramework, string[] expectedOutput, string targetPlatformIdentifier = null, string targetPlatformVersion = null)
         {
             var testProj = new TestProject()
@@ -552,14 +489,8 @@ class Program
         #if WINDOWS
             Console.WriteLine(""WINDOWS"");
         #endif
-        #if WINDOWS7_0
-            Console.WriteLine(""WINDOWS7_0"");
-        #endif
         #if IOS
             Console.WriteLine(""IOS"");
-        #endif
-        #if IOS7_0
-            Console.WriteLine(""IOS7_0"");
         #endif
     }
 }");

@@ -142,7 +142,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
 
-            var newCommand = new DotnetCommand(Log, "new", "winforms", "--no-restore");
+            var newCommand = new DotnetCommand(Log, "new", "winforms", "--no-restore",  "--debug:ephemeral-hive");
             newCommand.WorkingDirectory = testDirectory;
             newCommand.Execute().Should().Pass();
 

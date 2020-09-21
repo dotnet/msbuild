@@ -191,3 +191,6 @@ indent_size = 2
 end_of_line = lf
 [*.{cmd, bat}]
 end_of_line = crlf
+
+# IDE0040: Add accessibility modifiers
+dotnet_diagnostic.IDE0040.severity = warning

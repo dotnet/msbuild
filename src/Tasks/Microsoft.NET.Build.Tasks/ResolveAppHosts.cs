@@ -51,6 +51,10 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] KnownAppHostPacks { get; set; }
 
+        public bool NuGetRestoreSupported { get; set; } = true;
+
+        public string NetCoreTargetingPackRoot { get; set; }
+
         [Output]
         public ITaskItem[] PackagesToDownload { get; set; }
 
@@ -279,6 +283,19 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
+                    // C++/CLI does not support package download && dedup error
+                    if (!NuGetRestoreSupported && !packagesToDownload.Any(p => p.ItemSpec == hostPackName))
+                    {
+                        Log.LogError(
+                                    Strings.TargetingApphostPackMissingCannotRestore,
+                                    "Apphost",
+                                    $"{NetCoreTargetingPackRoot}\\{hostPackName}",
+                                    selectedAppHostPack.GetMetadata("TargetFramework") ?? "",
+                                    hostPackName,
+                                    appHostPackVersion
+                                    );
+                    }
+
                     //  Download apphost pack
                     TaskItem packageToDownload = new TaskItem(hostPackName);
                     packageToDownload.SetMetadata(MetadataKeys.Version, appHostPackVersion);

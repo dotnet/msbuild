@@ -262,6 +262,46 @@ namespace FrameworkReferenceTest
         }
 
         [Fact]
+        public void KnownFrameworkReferencesOnlyApplyToCorrectTargetPlatform()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "FrameworkReferenceTest",
+                TargetFrameworks = "net5.0-windows",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    project.Root.Add(itemGroup);
+
+                    //  Add a KnownFrameworkReference where the TargetPlatformVersion matches but the TargetPlatformIdentifier does not
+
+                    itemGroup.Add(new XElement(ns + "KnownFrameworkReference",
+                                               new XAttribute("Include", "NonExistentTestFrameworkReference"),
+                                               new XAttribute("TargetFramework", "net5.0-notwindows7.0"),
+                                               new XAttribute("RuntimeFrameworkName", "NonExistentTestFrameworkReference"),
+                                               new XAttribute("DefaultRuntimeFrameworkVersion", "7.0"),
+                                               new XAttribute("LatestRuntimeFrameworkVersion", "7.0"),
+                                               new XAttribute("TargetingPackName", "NonExistentTestFrameworkReference"),
+                                               new XAttribute("TargetingPackVersion", "7.0")));
+                });
+
+            var buildCommand = new BuildCommand(testAsset);
+
+            //  The build should succeed because the fake KnownFrameworkReference should not match, and the SDK shouldn't try to download
+            //  the nonexistent targeting pack.
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+        }
+
+        [Fact]
         public void TargetingPackDownloadCanBeDisabled()
         {
             var testProject = new TestProject()

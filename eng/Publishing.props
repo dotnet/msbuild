@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
+  <PropertyGroup>
+    <PublishingVersion>3</PublishingVersion>
+  </PropertyGroup>
 
   <PropertyGroup>
     <Product>Sdk</Product>
@@ -68,13 +71,14 @@
     <PushToAzureDevOpsArtifacts
       ItemsToPush="@(ToolsetAssetsToPushToBlobFeed)"
       ManifestBuildData="@(ManifestBuildData)"
-      ManifestRepoUri="$(BUILD_REPOSITORY_URI)"
+      ManifestRepoUri="$(BUILD_REPOSITORY_NAME)"
       ManifestBranch="$(BUILD_SOURCEBRANCH)"
       ManifestBuildId="$(BUILD_BUILDNUMBER)"
       ManifestCommit="$(BUILD_SOURCEVERSION)"
       PublishFlatContainer="true"
       AssetManifestPath="$(SdkAssetsManifestFilePath)"
-      AssetsTemporaryDirectory="$(TempWorkingDirectory)" />
+      AssetsTemporaryDirectory="$(TempWorkingDirectory)" 
+      PublishingVersion="3"/>
 
     <Copy
       SourceFiles="$(SdkAssetsManifestFilePath)"

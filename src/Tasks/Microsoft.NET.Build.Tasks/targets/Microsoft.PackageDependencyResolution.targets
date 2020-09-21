@@ -188,7 +188,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ProjectAssetsFile="$(ProjectAssetsFile)"
       ProjectLanguage="$(Language)"
       EmitLegacyAssetsFileItems="$(EmitLegacyAssetsFileItems)"
-      TargetFrameworkMoniker="$(NuGetTargetMoniker)"
+      TargetFramework="$(TargetFramework)"
       ContinueOnError="ErrorAndContinue">
 
       <Output TaskParameter="PackageDefinitions" ItemName="PackageDefinitions" />

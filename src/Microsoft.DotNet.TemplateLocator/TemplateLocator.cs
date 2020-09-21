@@ -12,20 +12,26 @@ namespace Microsoft.DotNet.TemplateLocator
 {
     public sealed class TemplateLocator
     {
+        private IWorkloadManifestProvider? _workloadManifestProvider;
+        private IWorkloadResolver? _workloadResolver;
         private readonly Lazy<NETCoreSdkResolver> _netCoreSdkResolver;
 
         public TemplateLocator()
-            : this(Environment.GetEnvironmentVariable, VSSettings.Ambient)
+            : this(Environment.GetEnvironmentVariable, VSSettings.Ambient, null, null)
         {
         }
 
         /// <summary>
         /// Test constructor
         /// </summary>
-        public TemplateLocator(Func<string, string> getEnvironmentVariable, VSSettings vsSettings)
+        public TemplateLocator(Func<string, string> getEnvironmentVariable, VSSettings vsSettings,
+            IWorkloadManifestProvider? workloadManifestProvider, IWorkloadResolver? workloadResolver)
         {
             _netCoreSdkResolver =
                 new Lazy<NETCoreSdkResolver>(() => new NETCoreSdkResolver(getEnvironmentVariable, vsSettings));
+
+            _workloadManifestProvider = workloadManifestProvider;
+            _workloadResolver = workloadResolver;
         }
 
         public IReadOnlyCollection<IOptionalSdkTemplatePackageInfo> GetDotnetSdkTemplatePackages(
@@ -39,56 +45,18 @@ namespace Microsoft.DotNet.TemplateLocator
 
             if (string.IsNullOrWhiteSpace(dotnetRootPath))
             {
-                throw new ArgumentException($"'{nameof(dotnetRootPath)}' cannot be null or whitespace", nameof(dotnetRootPath));
+                throw new ArgumentException($"'{nameof(dotnetRootPath)}' cannot be null or whitespace",
+                    nameof(dotnetRootPath));
             }
 
-            if (!Version.TryParse(sdkVersion.Split('-')[0], out var sdkVersionParsed))
-            {
-                throw new ArgumentException($"'{nameof(sdkVersion)}' should be a version, but get {sdkVersion}");
-            }
+            _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion);
+            _workloadResolver ??= new WorkloadResolver(_workloadManifestProvider, dotnetRootPath);
 
-            bool FindSameVersionBand(DirectoryInfo manifestDirectory)
-            {
-                var directoryVersion = Version.Parse(manifestDirectory.Name);
-                return directoryVersion.Major == sdkVersionParsed.Major &&
-                       directoryVersion.Minor == sdkVersionParsed.Minor &&
-                       (directoryVersion.Revision / 100) == (sdkVersionParsed.Revision / 100);
-            }
-
-            var manifestsDirectory = Path.Combine(dotnetRootPath, "workloadmanifests");
-            if (!Directory.Exists(manifestsDirectory))
-            {
-                return Array.Empty<IOptionalSdkTemplatePackageInfo>();
-            }
-
-            var bondManifestDirectory = new DirectoryInfo(manifestsDirectory).GetDirectories().Where(FindSameVersionBand)
-                .OrderByDescending(d => Version.Parse(d.Name)).FirstOrDefault();
-
-            if (bondManifestDirectory == null)
-            {
-                return Array.Empty<IOptionalSdkTemplatePackageInfo>();
-            }
-
-            var manifestContent =
-                WorkloadManifest.LoadFromFolder(bondManifestDirectory.FullName);
-            var dotnetSdkTemplatePackages = new List<IOptionalSdkTemplatePackageInfo>();
-            foreach (var pack in manifestContent.SdkPackDetail)
-            {
-                if (pack.Value.kind.Equals("Template", StringComparison.OrdinalIgnoreCase))
-                {
-                    var optionalSdkTemplatePackageInfo = new OptionalSdkTemplatePackageInfo(
-                        pack.Key,
-                        pack.Value.version,
-                        Path.Combine(dotnetRootPath, "template-packs",
-                            pack.Key.ToLower() + "." + pack.Value.version.ToLower() + ".nupkg"));
-                    dotnetSdkTemplatePackages.Add(optionalSdkTemplatePackageInfo);
-                }
-            }
-
-            return dotnetSdkTemplatePackages;
+            return _workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template)
+                .Select(pack => new OptionalSdkTemplatePackageInfo(pack.Id, pack.Version, pack.Path)).ToList();
         }
 
-        public bool TryGetDotnetSdkVersionUsedInVs(string vsVersion, out string sdkVersion)
+        public bool TryGetDotnetSdkVersionUsedInVs(string vsVersion, out string? sdkVersion)
         {
             string dotnetExeDir = _netCoreSdkResolver.Value.GetDotnetExeDirectory();
 
@@ -102,7 +70,8 @@ namespace Microsoft.DotNet.TemplateLocator
             var msbuildMajorMinorVersion = new Version(parsedVsVersion.Major, parsedVsVersion.Minor, 0);
 
             var resolverResult =
-                _netCoreSdkResolver.Value.ResolveNETCoreSdkDirectory(null, msbuildMajorMinorVersion, true, dotnetExeDir);
+                _netCoreSdkResolver.Value.ResolveNETCoreSdkDirectory(null, msbuildMajorMinorVersion, true,
+                    dotnetExeDir);
 
             if (resolverResult.ResolvedSdkDirectory == null)
             {
