@@ -23,6 +23,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                ChangeWaves.DisabledWave = null;
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.EnableAllFeatures);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
                 ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
@@ -42,7 +43,6 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 collection.LoadProject(file.Path).Build().ShouldBeTrue();
                 log.AssertLogContains("Hello World!");
-                ChangeWaves.DisabledWave = null;
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
@@ -56,6 +56,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                ChangeWaves.DisabledWave = null;
                 ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = @"
@@ -73,7 +74,6 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 collection.LoadProject(file.Path).Build().ShouldBeTrue();
                 log.AssertLogContains("Hello World!");
-                ChangeWaves.DisabledWave = null;
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
@@ -103,6 +103,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                ChangeWaves.DisabledWave = null;
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFromWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
                 ChangeWaves.IsChangeWaveEnabled(featureWave).ShouldBe(true);
@@ -125,7 +126,6 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 log.AssertLogContains("invalid format");
                 log.AssertLogContains("Hello World!");
-                ChangeWaves.DisabledWave = null;
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
@@ -137,6 +137,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                ChangeWaves.DisabledWave = null;
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFromWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
@@ -158,7 +159,6 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 log.AssertLogContains("out of rotation");
                 log.AssertLogContains("Hello World!");
-                ChangeWaves.DisabledWave = null;
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
@@ -168,6 +168,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                ChangeWaves.DisabledWave = null;
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.HighestWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
@@ -203,6 +204,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                ChangeWaves.DisabledWave = null;
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.LowestWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
@@ -225,9 +227,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                     Project p = collection.LoadProject(file.Path);
                     p.Build().ShouldBeTrue();
-
                     log.AssertLogContains("Hello World!");
-                    ChangeWaves.DisabledWave = null;
                 }
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
