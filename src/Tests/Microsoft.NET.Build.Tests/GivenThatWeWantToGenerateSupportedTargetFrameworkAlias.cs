@@ -42,7 +42,7 @@ namespace Microsoft.NET.Build.Tests
                 });
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("net5.0-windows")]
         [InlineData("net6.0-windows")]
         public void It_generates_supported_target_framework_alias_items_when_targeting_windows(string currentTargetFramework)
@@ -60,17 +60,19 @@ namespace Microsoft.NET.Build.Tests
                 });
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
+        [InlineData("net5.0", "UseWpf")]
+        [InlineData("net5.0", "UseWindowsForms")]
         [InlineData("netcoreapp3.1", "UseWpf")]
         [InlineData("netcoreapp3.1", "UseWindowsForms")]
-        public void It_generates_supported_target_framework_alias_items_when_retargeting_to_windows(string currentTargetFramework, string propertyName)
+        public void It_generates_supported_target_framework_alias_items_when_using_wpf_or_winforms(string currentTargetFramework, string propertyName)
         {
             TestTargetFrameworkAlias(currentTargetFramework, propertySetToTrue: propertyName, new[]
                 {
                     "netcoreapp3.0",
                     "netcoreapp3.1",
-                    "net5.0-windows7.0",
-                    "net6.0-windows7.0",
+                    "net5.0-windows",
+                    "net6.0-windows",
                     "netstandard2.0",
                     "netstandard2.1",
                     "net471",

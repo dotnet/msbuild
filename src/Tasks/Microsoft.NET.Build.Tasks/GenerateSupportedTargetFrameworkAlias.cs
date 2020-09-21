@@ -32,21 +32,21 @@ namespace Microsoft.NET.Build.Tasks
             var targetFramework = NuGetFramework.Parse(TargetFrameworkMoniker);
             if (!(targetFramework.Framework.Equals(".NETCoreApp") && targetFramework.Version >= new Version(5, 0)))
             {
-                if (UseWpf || UseWindowsForms)
-                {
-                    // Continue with windows as the target platform
-                }
-                else
-                {
-                    // Target platform properties were defaulted to windows prior to 5.0, ignore these values
-                    TargetPlatformMoniker = string.Empty;
-                }
+                // Target platform properties were defaulted to windows prior to 5.0, ignore these values
+                TargetPlatformMoniker = string.Empty;
             }
 
             IList<ITaskItem> convertedTfms = new List<ITaskItem>();
             foreach (var tfm in SupportedTargetFramework)
             {
-                var targetFrameworkAlias = NuGetFramework.ParseComponents(tfm.ItemSpec, TargetPlatformMoniker).GetShortFolderName();
+                var currentTargetFramework = NuGetFramework.ParseComponents(tfm.ItemSpec, TargetPlatformMoniker);
+                var targetFrameworkAlias = currentTargetFramework.GetShortFolderName();
+                if ((UseWindowsForms || UseWpf) && currentTargetFramework.Framework.Equals(".NETCoreApp") && currentTargetFramework.Version >= new Version(5, 0))
+                {
+                    // Set versionless windows as target platform for wpf and windows forms
+                    targetFrameworkAlias = $"{targetFrameworkAlias}-windows";
+                }
+
                 var displayName = string.IsNullOrWhiteSpace(tfm.GetMetadata("DisplayName"))? targetFrameworkAlias : tfm.GetMetadata("DisplayName");
                 convertedTfms.Add(new TaskItem(targetFrameworkAlias, new Dictionary<string, string>() { { "DisplayName", displayName } }));
             }
