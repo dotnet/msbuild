@@ -247,7 +247,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .Fail();
         }
 
-        [FullMSBuildOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/12560")]
+        [FullMSBuildOnlyFact]
         public void ItListsFSharpProject()
         {
             var testAssetName = "FSharpTestAppSimple";

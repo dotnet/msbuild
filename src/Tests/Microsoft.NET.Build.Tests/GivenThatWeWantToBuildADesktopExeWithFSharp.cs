@@ -58,8 +58,7 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        // https://github.com/dotnet/sdk/issues/12560
-        [CoreMSBuildAndWindowsOnlyFact]
+        [WindowsOnlyFact]
         public void It_builds_a_simple_net50_app()
         {
             var testAsset = _testAssetsManager
