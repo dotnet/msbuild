@@ -13,6 +13,12 @@ namespace Microsoft.Build.Engine.UnitTests
 {
     sealed public class ChangeWaves_Tests
     {
+        ITestOutputHelper _output;
+        public ChangeWaves_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         [Theory]
         [InlineData("16.8")]
         [InlineData("16.10")]
@@ -137,6 +143,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                _output.WriteLine(ChangeWaves.DisabledWave);
                 ChangeWaves.DisabledWave = null;
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFromWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
@@ -157,9 +164,11 @@ namespace Microsoft.Build.Engine.UnitTests
                 Project p = collection.LoadProject(file.Path);
                 p.Build().ShouldBeTrue();
 
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+                _output.WriteLine(ChangeWaves.DisabledWave);
+
                 log.AssertLogContains("out of rotation");
                 log.AssertLogContains("Hello World!");
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
 
@@ -192,10 +201,13 @@ namespace Microsoft.Build.Engine.UnitTests
                     Project p = collection.LoadProject(file.Path);
                     p.Build().ShouldBeTrue();
 
-                    log.AssertLogContains("Hello World!");
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
                     ChangeWaves.DisabledWave = null;
+
+                    log.AssertLogContains("Hello World!");
+
                 }
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
             }
         }
 
@@ -205,6 +217,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.DisabledWave = null;
+
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.LowestWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
@@ -227,6 +240,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                     Project p = collection.LoadProject(file.Path);
                     p.Build().ShouldBeTrue();
+
                     log.AssertLogContains("Hello World!");
                 }
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
