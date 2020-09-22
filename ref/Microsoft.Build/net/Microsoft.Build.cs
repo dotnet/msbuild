@@ -2065,8 +2065,8 @@ namespace Microsoft.Build.Utilities
         public const string Wave17_0 = "17.0";
         public ChangeWaves() { }
         public static string DisabledWave { get { throw null; } set { } }
-        public static bool IsChangeWaveEnabled(string wave) { throw null; }
-        public static bool IsChangeWaveEnabled(System.Version wave) { throw null; }
-        public static bool IsChangeWaveOutOfRotation(System.Version v) { throw null; }
+        public static bool IsFeatureEnabled(string wave) { throw null; }
+        public static bool IsFeatureEnabled(System.Version wave) { throw null; }
+        public static bool IsVersionOutOfRotation(System.Version v) { throw null; }
     }
 }
