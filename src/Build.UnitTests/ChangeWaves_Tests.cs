@@ -36,12 +36,12 @@ namespace Microsoft.Build.Engine.UnitTests
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
                 ChangeWaves.IsFeatureEnabled(featureWave).ShouldBe(true);
 
-                string projectFile = @"
-                    <Project>
-                        <Target Name='HelloWorld' Condition=""'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '" + ChangeWaves.EnableAllFeatures + @"' and $([MSBuild]::IsChangeWaveEnabled('" + featureWave + @"'))"">
-                            <Message Text='Hello World!'/>
-                        </Target>
-                    </Project>";
+                string projectFile = $"" +
+                    $"<Project>" +
+                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.EnableAllFeatures}' and $([MSBuild]::IsChangeWaveEnabled('{featureWave}'))\">" +
+                            $"<Message Text='Hello World!'/>" +
+                        $"</Target>" +
+                    $"</Project>";
 
                 TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
 
@@ -67,12 +67,12 @@ namespace Microsoft.Build.Engine.UnitTests
                 env.SetChangeWave("");
                 ChangeWaves.IsFeatureEnabled(featureWave).ShouldBe(true);
 
-                string projectFile = @"
-                    <Project>
-                        <Target Name='HelloWorld' Condition="" '$(MSBUILDDISABLEFEATURESFROMVERSION)' == '" + ChangeWaves.EnableAllFeatures + @"' and $([MSBuild]::IsChangeWaveEnabled('" + featureWave + @"'))"">
-                            <Message Text='Hello World!'/>
-                        </Target>
-                    </Project>";
+                string projectFile = $"" +
+                    $"<Project>" +
+                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.EnableAllFeatures}' and $([MSBuild]::IsChangeWaveEnabled('{featureWave}'))\">" +
+                            $"<Message Text='Hello World!'/>" +
+                        $"</Target>" +
+                    $"</Project>";
 
                 TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
 
@@ -115,12 +115,12 @@ namespace Microsoft.Build.Engine.UnitTests
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
                 ChangeWaves.IsFeatureEnabled(featureWave).ShouldBe(true);
 
-                string projectFile = @"
-                    <Project>
-                        <Target Name='HelloWorld' Condition=""'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '" + ChangeWaves.EnableAllFeatures + @"' and $([MSBuild]::IsChangeWaveEnabled('" + featureWave + @"'))"">
-                            <Message Text='Hello World!'/>
-                        </Target>
-                    </Project>";
+                string projectFile = $"" +
+                    $"<Project>" +
+                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.EnableAllFeatures}' and $([MSBuild]::IsChangeWaveEnabled('{featureWave}'))\">" +
+                            $"<Message Text='Hello World!'/>" +
+                        $"</Target>" +
+                    $"</Project>";
 
                 TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
 
@@ -147,12 +147,12 @@ namespace Microsoft.Build.Engine.UnitTests
                 env.SetChangeWave(disableFromWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
-                string projectFile = @"
-                    <Project>
-                        <Target Name='HelloWorld' Condition=""'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '" + ChangeWaves.LowestWave + @"' and $([MSBuild]::IsChangeWaveEnabled('" + ChangeWaves.LowestWave + @"')) == false"">
-                            <Message Text='Hello World!'/>
-                        </Target>
-                    </Project>";
+                string projectFile = $"" +
+                    $"<Project>" +
+                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.LowestWave}' and $([MSBuild]::IsChangeWaveEnabled('{ChangeWaves.LowestWave}')) == false\">" +
+                            $"<Message Text='Hello World!'/>" +
+                        $"</Target>" +
+                    $"</Project>";
 
                 TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
 
@@ -182,12 +182,12 @@ namespace Microsoft.Build.Engine.UnitTests
                 {
                     ChangeWaves.IsFeatureEnabled(ChangeWaves.AllWaves[i]).ShouldBe(true);
 
-                    string projectFile = @"
-                        <Project>
-                            <Target Name='HelloWorld' Condition=""$([MSBuild]::VersionLessThan('" + ChangeWaves.AllWaves[i] + @"', '$(MSBUILDDISABLEFEATURESFROMVERSION)'))"">
-                                <Message Text='Hello World!'/>
-                            </Target>
-                        </Project>";
+                    string projectFile = $"" +
+                        $"<Project>" +
+                            $"<Target Name='HelloWorld' Condition=\"$([MSBuild]::IsChangeWaveEnabled('{ChangeWaves.AllWaves[i]}'))\">" +
+                                $"<Message Text='Hello World!'/>" +
+                            $"</Target>" +
+                        $"</Project>";
 
                     TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
 
@@ -217,12 +217,12 @@ namespace Microsoft.Build.Engine.UnitTests
                 {
                     ChangeWaves.IsFeatureEnabled(wave).ShouldBeFalse();
 
-                    string projectFile = @"
-                        <Project>
-                            <Target Name='HelloWorld' Condition=""$([MSBuild]::IsChangeWaveEnabled('" + wave + @"')) == false"">
-                                <Message Text='Hello World!'/>
-                            </Target>
-                        </Project>";
+                    string projectFile = $"" +
+                        $"<Project>" +
+                            $"<Target Name='HelloWorld' Condition=\"$([MSBuild]::IsChangeWaveEnabled('{wave}')) == false\">" +
+                                $"<Message Text='Hello World!'/>" +
+                            $"</Target>" +
+                        $"</Project>";
 
                     TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
 
