@@ -251,7 +251,7 @@ namespace Microsoft.Build.Collections
         /// <returns>True if they are equivalent, false otherwise.</returns>
         public bool Equals(CopyOnWritePropertyDictionary<T> other)
         {
-            if (null == other)
+            if (other == null)
             {
                 return false;
             }
@@ -318,7 +318,7 @@ namespace Microsoft.Build.Collections
         {
             value = this[key];
 
-            return (value != null);
+            return value != null;
         }
 
         #endregion

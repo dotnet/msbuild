@@ -140,7 +140,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                _targetPlatformIdentifier = _targetPlatformIdentifier ?? String.Empty;
+                _targetPlatformIdentifier ??= String.Empty;
                 return _targetPlatformIdentifier;
             }
 
@@ -155,7 +155,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                _projectName = _projectName ?? String.Empty;
+                _projectName ??= String.Empty;
                 return _projectName;
             }
 
@@ -241,7 +241,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                _targetPlatformVersion = _targetPlatformVersion ?? s_defaultTargetPlatformVersion;
+                _targetPlatformVersion ??= s_defaultTargetPlatformVersion;
                 return _targetPlatformVersion;
             }
 
@@ -1381,7 +1381,7 @@ namespace Microsoft.Build.Tasks
 
                                 // If we have not seen this architecture before (and it has a compatible configuration with what we are targeting) then add it. 
                                 // Also, replace the entry if we have already added an entry for a non configuration specific entry and we now have a configuration specific entry that matches what we are targeting.
-                                if ((configurationComponent == null && !containsKey) || (configurationComponent != null && configurationComponent.Equals(sdkConfiguration, StringComparison.OrdinalIgnoreCase)))
+                                if ((configurationComponent == null && !containsKey) || (configurationComponent?.Equals(sdkConfiguration, StringComparison.OrdinalIgnoreCase) == true))
                                 {
                                     AddStatusMessage("ResolveSDKReference.FoundAppxLocation", appxLocation.Key + "=" + appxLocation.Value);
 

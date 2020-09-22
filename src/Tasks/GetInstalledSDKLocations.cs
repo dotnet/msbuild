@@ -149,7 +149,7 @@ namespace Microsoft.Build.Tasks
 
             var outputItems = new List<ITaskItem>();
 
-            if (installedSDKs != null && installedSDKs.Count > 0)
+            if (installedSDKs?.Count > 0)
             {
                 Log.LogMessageFromResources(MessageImportance.Low, "GetInstalledSDKs.FoundSDKs", installedSDKs.Count);
                 Log.LogMessageFromResources(MessageImportance.Low, "GetInstalledSDKs.ListInstalledSDKs");

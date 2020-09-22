@@ -21,7 +21,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     ///
     /// This approach with extension methods helps us put all implementation in one place, and only standard copy and pace "hookup" is needed for each classes.
     /// </summary>
-
     internal interface IProjectElementContainerLinkHelper
     {
         ProjectCollectionLinker Linker { get; }

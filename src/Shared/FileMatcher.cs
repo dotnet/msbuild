@@ -186,11 +186,11 @@ namespace Microsoft.Build.Shared
         internal static bool HasWildcardsSemicolonItemOrPropertyReferences(string filespec)
         {
             return
-                (
+
                 (-1 != filespec.IndexOfAny(s_wildcardAndSemicolonCharacters)) ||
                 filespec.Contains("$(") ||
                 filespec.Contains("@(")
-                );
+                ;
         }
 
         /// <summary>
@@ -444,9 +444,8 @@ namespace Microsoft.Build.Shared
 
             string[] parts = path.Split(directorySeparatorCharacters);
             string pathRoot;
-            int startingElement = 0;
-
             bool isUnc = path.StartsWith(s_directorySeparator + s_directorySeparator, StringComparison.Ordinal);
+            int startingElement;
             if (isUnc)
             {
                 pathRoot = s_directorySeparator + s_directorySeparator;
@@ -685,7 +684,6 @@ namespace Microsoft.Build.Shared
             }
         }
 
-
         /// <summary>
         /// Checks if the char is a DirectorySeparatorChar or a AltDirectorySeparatorChar
         /// </summary>
@@ -693,7 +691,7 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool IsDirectorySeparator(char c)
         {
-            return (c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar);
+            return c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar;
         }
         /// <summary>
         /// Removes the current directory converting the file back to relative path 
@@ -867,7 +865,7 @@ namespace Microsoft.Build.Shared
                         continue;
                     }
                 }
-                files = files ?? new List<string>();
+                files ??= new List<string>();
                 files.Add(file);
             }
             // Add all matched files at once to reduce thread contention
@@ -1129,7 +1127,7 @@ namespace Microsoft.Build.Shared
                 FileSpecRegexMinLength == FileSpecRegexParts.FixedDirGroupStart.Length
                 + FileSpecRegexParts.WildcardGroupStart.Length
                 + FileSpecRegexParts.FilenameGroupStart.Length
-                + FileSpecRegexParts.GroupEnd.Length * 3
+                + (FileSpecRegexParts.GroupEnd.Length * 3)
                 + FileSpecRegexParts.EndOfLine.Length,
                 "Checked-in length of known regex components differs from computed length. Update checked-in constant."
             );
@@ -1143,7 +1141,6 @@ namespace Microsoft.Build.Shared
                 return matchFileExpression.ToString();
             }
         }
-
 
         /// <summary>
         /// Determine if the filespec is legal according to the following conditions:
@@ -1188,7 +1185,6 @@ namespace Microsoft.Build.Shared
             }
             return false;
         }
-
 
         /// <summary>
         /// Append the regex equivalents for character sequences in the fixed directory part of a filespec:
@@ -1867,7 +1863,6 @@ namespace Microsoft.Build.Shared
             List<string> excludeSpecsUnescaped = null
             )
         {
-
             // For performance. Short-circuit iff there is no wildcard.
             if (!HasWildcards(filespecUnescaped))
             {
@@ -2073,9 +2068,9 @@ namespace Microsoft.Build.Shared
 
             var searchData = new FilesSearchData(
                 // if using the regular expression, ignore the file pattern
-                (matchWithRegex ? null : filenamePart),
+                matchWithRegex ? null : filenamePart,
                 // if using the file pattern, ignore the regular expression
-                (matchWithRegex ? new Regex(matchFileExpression, RegexOptions.IgnoreCase) : null),
+                matchWithRegex ? new Regex(matchFileExpression, RegexOptions.IgnoreCase) : null,
                 needsRecursion);
 
             result.SearchData = searchData;
@@ -2180,7 +2175,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsValidDriveChar(char value)
         {
-            return ((value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z'));
+            return (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z');
         }
 
         static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, List<string> excludeSpecsUnescaped)
@@ -2189,7 +2184,6 @@ namespace Microsoft.Build.Shared
             {
                 foreach (string excludeSpec in excludeSpecsUnescaped)
                 {
-
                     // Try a path equality check first to:
                     // - avoid the expensive regex
                     // - maintain legacy behaviour where an illegal filespec is treated as a normal string
@@ -2289,7 +2283,7 @@ namespace Microsoft.Build.Shared
                     var excludeBaseDirectory = excludeState.BaseDirectory;
                     var includeBaseDirectory = state.BaseDirectory;
 
-                    if (string.Compare(excludeBaseDirectory, includeBaseDirectory, StringComparison.OrdinalIgnoreCase) != 0)
+                    if (!string.Equals(excludeBaseDirectory, includeBaseDirectory, StringComparison.OrdinalIgnoreCase))
                     {
                         //  What to do if the BaseDirectory for the exclude search doesn't match the one for inclusion?
                         //  - If paths don't match (one isn't a prefix of the other), then ignore the exclude search.  Examples:
@@ -2376,7 +2370,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            if (searchesToExclude != null && searchesToExclude.Count == 0)
+            if (searchesToExclude?.Count == 0)
             {
                 searchesToExclude = null;
             }

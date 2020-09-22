@@ -152,11 +152,11 @@ namespace Xunit.NetCore.Extensions
             TypeInfo ti = t.GetTypeInfo();
 
             MethodInfo mi = ti.GetDeclaredMethod(name);
-            if (mi != null && mi.IsStatic && mi.GetParameters().Length == 0 && mi.ReturnType == typeof(bool))
+            if (mi?.IsStatic == true && mi.GetParameters().Length == 0 && mi.ReturnType == typeof(bool))
                 return mi;
 
             PropertyInfo pi = ti.GetDeclaredProperty(name);
-            if (pi != null && pi.PropertyType == typeof(bool) && pi.GetMethod != null && pi.GetMethod.IsStatic && pi.GetMethod.GetParameters().Length == 0)
+            if (pi?.PropertyType == typeof(bool) && pi.GetMethod?.IsStatic == true && pi.GetMethod.GetParameters().Length == 0)
                 return pi.GetMethod;
 
             return LookupConditionalMethod(ti.BaseType, name);

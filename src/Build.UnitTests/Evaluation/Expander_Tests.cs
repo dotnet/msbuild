@@ -1490,6 +1490,65 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// Exercises ExpandIntoStringAndUnescape and ExpanderOptions.Truncate
+        /// </summary>
+        [Fact]
+        public void ExpandAllIntoStringTruncated()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            var manySpaces = "".PadLeft(2000);
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            pg.Set(ProjectPropertyInstance.Create("ManySpacesProperty", manySpaces));
+            var itemMetadataTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "ManySpacesMetadata", manySpaces }
+            };
+            var itemMetadata = new StringMetadataTable(itemMetadataTable);
+            var projectItemGroups = new ItemDictionary<ProjectItemInstance>();
+            var itemGroup = new List<ProjectItemInstance>();
+            for (int i = 0; i < 50; i++)
+            {
+                var item = new ProjectItemInstance(project, "ManyItems", $"ThisIsAFairlyLongFileName_{i}.bmp", project.FullPath);
+                item.SetMetadata("Foo", $"ThisIsAFairlyLongMetadataValue_{i}");
+                itemGroup.Add(item);
+            }
+            var lookup = new Lookup(projectItemGroups, pg);
+            lookup.EnterScope("x");
+            lookup.PopulateWithItems("ManySpacesItem", new []
+            {
+                new ProjectItemInstance (project, "ManySpacesItem", "Foo", project.FullPath),
+                new ProjectItemInstance (project, "ManySpacesItem", manySpaces, project.FullPath),
+                new ProjectItemInstance (project, "ManySpacesItem", "Bar", project.FullPath),
+            });
+            lookup.PopulateWithItems("Exactly1024", new[]
+            {
+                new ProjectItemInstance (project, "Exactly1024", "".PadLeft(1024), project.FullPath),
+                new ProjectItemInstance (project, "Exactly1024", "Foo", project.FullPath),
+            });
+            lookup.PopulateWithItems("ManyItems", itemGroup);
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(lookup, lookup, itemMetadata, FileSystems.Default);
+
+            XmlAttribute xmlattribute = (new XmlDocument()).CreateAttribute("dummy");
+            xmlattribute.Value = "'%(ManySpacesMetadata)' != '' and '$(ManySpacesProperty)' != '' and '@(ManySpacesItem)' != '' and '@(Exactly1024)' != '' and '@(ManyItems)' != '' and '@(ManyItems->'%(Foo)')' != '' and '@(ManyItems->'%(Nonexistent)')' != ''";
+
+            var expected =
+                $"'{"",1021}...' != '' and " +
+                $"'{"",1021}...' != '' and " +
+                $"'Foo;{"",1017}...' != '' and " +
+                $"'{"",1024};...' != '' and " +
+                "'ThisIsAFairlyLongFileName_0.bmp;ThisIsAFairlyLongFileName_1.bmp;ThisIsAFairlyLongFileName_2.bmp;...' != '' and " +
+                "'ThisIsAFairlyLongMetadataValue_0;ThisIsAFairlyLongMetadataValue_1;ThisIsAFairlyLongMetadataValue_2;...' != '' and " +
+                $"';;;...' != ''";
+            // NOTE: semicolons in the last part are *weird* because they don't actually mean anything and you get logging like
+            //     Target "Build" skipped, due to false condition; ( '@(I->'%(nonexistent)')' == '' ) was evaluated as ( ';' == '' ).
+            // but that goes back to MSBuild 4.something so I'm codifying it in this test. If you're here because you cleaned it up
+            // and want to fix the test my current opinion is that's fine.
+
+            Assert.Equal(expected, expander.ExpandIntoStringAndUnescape(xmlattribute.Value, ExpanderOptions.ExpandAll | ExpanderOptions.Truncate, MockElementLocation.Instance));
+        }
+
+        /// <summary>
         /// Exercises ExpandAllIntoString with a string that does not need expanding.
         /// In this case the expanded string should be reference identical to the passed in string.
         /// </summary>
@@ -2865,6 +2924,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [InlineData("net45", ".NETFramework", "4.5")]
         [InlineData("netcoreapp3.1", ".NETCoreApp", "3.1")]
         [InlineData("netstandard2.1", ".NETStandard", "2.1")]
+        [InlineData("net5.0-ios12.0", ".NETCoreApp", "5.0")]
         [InlineData("foo", "Unsupported", "0.0")]
         public void PropertyFunctionTargetFrameworkParsing(string tfm, string expectedIdentifier, string expectedVersion)
         {
@@ -2876,7 +2936,52 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Theory]
+        [InlineData("net45", 2, "4.5")]
+        [InlineData("net45", 3, "4.5.0")]
+        [InlineData("net472", 3, "4.7.2")]
+        [InlineData("net472", 2, "4.7.2")]
+        public void PropertyFunctionTargetFrameworkVersionMultipartParsing(string tfm, int versionPartCount, string expectedVersion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedVersion, $"$([MSBuild]::GetTargetFrameworkVersion('{tfm}', {versionPartCount}))");
+        }
+
+        [Theory]
+        [InlineData("net5.0-windows10.1.2.3", 4, "10.1.2.3")]
+        [InlineData("net5.0-windows10.1.2.3", 2, "10.1.2.3")]
+        [InlineData("net5.0-windows10.0.0.3", 2, "10.0.0.3")]
+        [InlineData("net5.0-windows0.0.0.3", 2, "0.0.0.3")]
+        public void PropertyFunctionTargetPlatformVersionMultipartParsing(string tfm, int versionPartCount, string expectedVersion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedVersion, $"$([MSBuild]::GetTargetPlatformVersion('{tfm}', {versionPartCount}))");
+        }
+
+        [Theory]
+        [InlineData("net5.0-ios12.0", "ios", "12.0")]
+        [InlineData("net5.1-android1.1", "android", "1.1")]
+        [InlineData("net6.0-windows99.99", "windows", "99.99")]
+        [InlineData("net5.0-ios", "ios", "0.0")]
+        [InlineData("foo", "", "0.0")]
+        public void PropertyFunctionTargetPlatformParsing(string tfm, string expectedIdentifier, string expectedVersion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            AssertSuccess(expander, expectedIdentifier, $"$([MSBuild]::GetTargetPlatformIdentifier('{tfm}'))");
+            AssertSuccess(expander, expectedVersion, $"$([MSBuild]::GetTargetPlatformVersion('{tfm}'))");
+        }
+
+        [Theory]
         [InlineData("net5.0", "net5.0", true)]
+        [InlineData("net5.0-windows10.0", "net5.0-windows10.0", true)]
+        [InlineData("net5.0-ios", "net5.0-andriod", false)]
+        [InlineData("net5.0-ios12.0", "net5.0-ios11.0", true)]
+        [InlineData("net5.0-ios11.0", "net5.0-ios12.0", false)]
         [InlineData("net45", "net46", false)]
         [InlineData("net46", "net45", true)]
         [InlineData("netcoreapp3.1", "netcoreapp1.0", true)]
@@ -3775,7 +3880,7 @@ $(
                     caughtException = true;
                 }
                 Assert.True(
-                        (success == false || caughtException == true),
+                        !success || caughtException,
                         "FAILURE: Expected '" + errorTests[i] + "' to not parse or not be evaluated but it evaluated to '" + result + "'"
                     );
             }
@@ -3892,7 +3997,7 @@ $(
         {
             string vsInstallRoot = EscapingUtilities.Escape(IntrinsicFunctions.GetVsInstallRoot());
 
-            vsInstallRoot = (vsInstallRoot == null) ? "" : vsInstallRoot;
+            vsInstallRoot ??= "";
 
             TestPropertyFunction("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::GetVsInstallRoot())", "X", "_", vsInstallRoot);
         }

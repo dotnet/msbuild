@@ -65,10 +65,10 @@ namespace Microsoft.Build.ObjectModelRemoting
 
         /// <summary>
         /// Helper utility for External projects provider implementation to get access of the EvaluatedValueEscaped
+        /// </summary>
         public static string GetEvaluatedValueEscaped(ProjectProperty property)
         {
-            return property.EvaluatedValueEscapedIntenral;
+            return property.EvaluatedValueEscapedInternal;
         }
     }
-
 }

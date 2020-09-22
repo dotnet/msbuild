@@ -199,7 +199,7 @@ namespace Microsoft.Build.BuildEngine
                 else
                 {
                     // The customer serialization methods are not availiable, default to .net serialization
-                    writer.BaseStream.Position = writer.BaseStream.Position - 1;
+                    writer.BaseStream.Position--;
                     writer.Write((byte)0);
                     binaryFormatter.Serialize(writer.BaseStream, e);
                 }
@@ -269,7 +269,6 @@ namespace Microsoft.Build.BuildEngine
                             resolver = null;
                         }
                     }
-                
             }
         }
         #endregion

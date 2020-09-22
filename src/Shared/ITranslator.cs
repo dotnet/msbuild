@@ -258,6 +258,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="byteArray">The array to be translated.</param>
         void Translate(ref byte[] byteArray);
+        
+        /// <summary>
+        /// Translates a byte array
+        /// </summary>
+        /// <param name="byteArray">The array to be translated.</param>
+        /// <param name="length">The length of array which will be used in translation</param>
+        void Translate(ref byte[] byteArray, ref int length);
 
         /// <summary>
         /// Translates an array of objects implementing INodePacketTranslatable.

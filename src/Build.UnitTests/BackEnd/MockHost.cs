@@ -163,32 +163,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         public IBuildComponent GetComponent(BuildComponentType type)
         {
-            switch (type)
+            return type switch
             {
-                case BuildComponentType.ConfigCache:
-                    return (IBuildComponent)_configCache;
-
-                case BuildComponentType.LoggingService:
-                    return (IBuildComponent)_loggingService;
-
-                case BuildComponentType.RequestEngine:
-                    return (IBuildComponent)_requestEngine;
-
-                case BuildComponentType.TargetBuilder:
-                    return (IBuildComponent)_targetBuilder;
-
-                case BuildComponentType.ResultsCache:
-                    return (IBuildComponent)_resultsCache;
-
-                case BuildComponentType.RequestBuilder:
-                    return (IBuildComponent)_requestBuilder;
-
-                case BuildComponentType.SdkResolverService:
-                    return (IBuildComponent)_sdkResolverService;
-
-                default:
-                    throw new ArgumentException("Unexpected type " + type);
-            }
+                BuildComponentType.ConfigCache => (IBuildComponent)_configCache,
+                BuildComponentType.LoggingService => (IBuildComponent)_loggingService,
+                BuildComponentType.RequestEngine => (IBuildComponent)_requestEngine,
+                BuildComponentType.TargetBuilder => (IBuildComponent)_targetBuilder,
+                BuildComponentType.ResultsCache => (IBuildComponent)_resultsCache,
+                BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
+                BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,
+                _ => throw new ArgumentException("Unexpected type " + type),
+            };
         }
 
         /// <summary>

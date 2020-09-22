@@ -3,16 +3,19 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Xml;
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
@@ -69,7 +72,6 @@ namespace Microsoft.Build.UnitTests
                 return s_msbuildAssemblyVersion;
             }
         }
-
 
         /// <summary>
         /// Helper method to tell us whether a particular metadata name is an MSBuild well-known metadata
@@ -354,7 +356,7 @@ namespace Microsoft.Build.UnitTests
                         // If the items are expected to be in the same order, then the expected item
                         // should always be found at index zero, because we remove items from the expected
                         // list as we find them.
-                        if ((expectedItemIndex != 0) && (orderOfItemsShouldMatch))
+                        if ((expectedItemIndex != 0) && orderOfItemsShouldMatch)
                         {
                             outOfOrder = true;
                         }
@@ -431,7 +433,6 @@ namespace Microsoft.Build.UnitTests
             foreach (var key in expected.Keys)
             {
                 item.GetMetadataValue(key).ShouldBe(expected[key]);
-
             }
         }
 
@@ -778,7 +779,6 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(newExpectedProjectContents, newActualProjectContents); // "Project XML does not match expected XML.  See 'Standard Out' tab for details."
         }
 
-
         private static string s_tempProjectDir;
 
         /// <summary>
@@ -1045,11 +1045,11 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Get items of item type "i" with using the item xml fragment passed in
         /// </summary>
-        internal static IList<ProjectItem> GetItemsFromFragment(string fragment, bool allItems = false)
+        internal static IList<ProjectItem> GetItemsFromFragment(string fragment, bool allItems = false, bool ignoreCondition = false)
         {
             string content = FormatProjectContentsWithItemGroupFragment(fragment);
 
-            IList<ProjectItem> items = GetItems(content, allItems);
+            IList<ProjectItem> items = GetItems(content, allItems, ignoreCondition);
             return items;
         }
 
@@ -1061,11 +1061,14 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Get the items of type "i" in the project provided
         /// </summary>
-        internal static IList<ProjectItem> GetItems(string content, bool allItems = false)
+        internal static IList<ProjectItem> GetItems(string content, bool allItems = false, bool ignoreCondition = false)
         {
             var projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(CleanupFileContents(content))));
             Project project = new Project(projectXml);
-            IList<ProjectItem> item = Helpers.MakeList(allItems ? project.Items : project.GetItems("i"));
+            IList<ProjectItem> item = Helpers.MakeList(
+                ignoreCondition ?
+                (allItems ? project.ItemsIgnoringCondition : project.GetItemsIgnoringCondition("i")) :
+                (allItems ? project.Items : project.GetItems("i")));
 
             return item;
         }
@@ -1351,7 +1354,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (var buildManager = new BuildManager())
             {
-                parameters = parameters ?? new BuildParameters();
+                parameters ??= new BuildParameters();
 
                 if (logger != null)
                 {
@@ -1560,7 +1563,7 @@ namespace Microsoft.Build.UnitTests
             
             foreach (var defaultTarget in (defaultTargets ?? string.Empty).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
             {
-                sb.Append($"<Target Name='{defaultTarget}'/>");
+                sb.Append("<Target Name='").Append(defaultTarget).Append("'/>");
             }
 
             sb.Append(extraContent ?? string.Empty);
@@ -1607,7 +1610,7 @@ namespace Microsoft.Build.UnitTests
             IEnumerable<int> entryPoints = null,
             ProjectCollection projectCollection = null)
         {
-            createProjectFile = createProjectFile ?? CreateProjectFile;
+            createProjectFile ??= CreateProjectFile;
 
             var nodes = new Dictionary<int, (bool IsRoot, string ProjectPath)>();
 
@@ -1656,7 +1659,7 @@ namespace Microsoft.Build.UnitTests
             {
                 foreach (var nodeDependencies in dependencyEdges)
                 {
-                    if (nodeDependencies.Value != null && nodeDependencies.Value.Contains(node))
+                    if (nodeDependencies.Value?.Contains(node) == true)
                     {
                         return false;
                     }
@@ -1842,8 +1845,6 @@ namespace Microsoft.Build.UnitTests
                     : "sleep {0}";
         }
 
-
-
         /// <summary>
         /// Break the provided string into an array, on newlines
         /// </summary>
@@ -1898,7 +1899,6 @@ namespace Microsoft.Build.UnitTests
 
             public MockLogger Logger { get; set; }
 
-
             public BuildManagerSession(
                 TestEnvironment env,
                 BuildParameters buildParametersPrototype = null,
@@ -1940,6 +1940,134 @@ namespace Microsoft.Build.UnitTests
             {
                 _buildManager.EndBuild();
                 _buildManager.Dispose();
+            }
+        }
+
+        internal class LoggingFileSystem : MSBuildFileSystemBase
+        {
+            private readonly IFileSystem _wrappingFileSystem;
+            private int _fileSystemCalls;
+
+            public int FileSystemCalls => _fileSystemCalls;
+
+            public ConcurrentDictionary<string, int> ExistenceChecks { get; } = new ConcurrentDictionary<string, int>();
+
+            public LoggingFileSystem(IFileSystem wrappingFileSystem = null)
+            {
+                _wrappingFileSystem = wrappingFileSystem ?? FileSystems.Default;
+            }
+
+            public override TextReader ReadFile(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.ReadFile(path);
+            }
+
+            public override Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.GetFileStream(path, mode, access, share);
+            }
+
+            public override string ReadFileAllText(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.ReadFileAllText(path);
+            }
+
+            public override byte[] ReadFileAllBytes(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.ReadFileAllBytes(path);
+            }
+
+            public override IEnumerable<string> EnumerateFiles(
+                string path,
+                string searchPattern = "*",
+                SearchOption searchOption = SearchOption.TopDirectoryOnly
+            )
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.EnumerateFiles(path, searchPattern, searchOption);
+            }
+
+            public override IEnumerable<string> EnumerateDirectories(
+                string path,
+                string searchPattern = "*",
+                SearchOption searchOption = SearchOption.TopDirectoryOnly
+            )
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.EnumerateDirectories(path, searchPattern, searchOption);
+            }
+
+            public override IEnumerable<string> EnumerateFileSystemEntries(
+                string path,
+                string searchPattern = "*",
+                SearchOption searchOption = SearchOption.TopDirectoryOnly
+            )
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.EnumerateFileSystemEntries(path, searchPattern, searchOption);
+            }
+
+            public override FileAttributes GetAttributes(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.GetAttributes(path);
+            }
+
+            public override DateTime GetLastWriteTimeUtc(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+
+                return _wrappingFileSystem.GetLastWriteTimeUtc(path);
+            }
+
+            public override bool DirectoryExists(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+                IncrementExistenceChecks(path);
+
+                return _wrappingFileSystem.DirectoryExists(path);
+            }
+
+            public override bool FileExists(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+                IncrementExistenceChecks(path);
+
+                return _wrappingFileSystem.FileExists(path);
+            }
+
+            private int _directoryEntryExistsCalls;
+            public int DirectoryEntryExistsCalls => _directoryEntryExistsCalls;
+
+            public override bool FileOrDirectoryExists(string path)
+            {
+                IncrementCalls(ref _fileSystemCalls);
+                IncrementCalls(ref _directoryEntryExistsCalls);
+                IncrementExistenceChecks(path);
+
+                return _wrappingFileSystem.DirectoryEntryExists(path);
+            }
+
+            private void IncrementCalls(ref int incremented)
+            {
+                Interlocked.Increment(ref incremented);
+            }
+
+            private void IncrementExistenceChecks(string path)
+            {
+                ExistenceChecks.AddOrUpdate(path, p => 1, (p, c) => c + 1);
             }
         }
     }

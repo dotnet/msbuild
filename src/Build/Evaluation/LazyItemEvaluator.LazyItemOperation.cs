@@ -157,7 +157,7 @@ namespace Microsoft.Build.Evaluation
 
                 private string RouteCall(string itemType, string name, Func<IMetadataTable, string, string, string> getEscapedValueFunc)
                 {
-                    if (itemType == null || itemType.Equals(_operationItem.Key, StringComparison.OrdinalIgnoreCase))
+                    if (itemType?.Equals(_operationItem.Key, StringComparison.OrdinalIgnoreCase) != false)
                     {
                         return getEscapedValueFunc(_operationItem, itemType, name);
                     }
@@ -298,7 +298,7 @@ namespace Microsoft.Build.Evaluation
 
                 bool needToExpandMetadataForEachItem = false;
 
-                if (itemsAndMetadataFound.Metadata != null && itemsAndMetadataFound.Metadata.Values.Count > 0)
+                if (itemsAndMetadataFound.Metadata?.Values.Count > 0)
                 {
                     // If there is bare metadata of any kind, and the Include involved an item list, we should
                     // run items individually, as even non-built-in metadata might differ between items

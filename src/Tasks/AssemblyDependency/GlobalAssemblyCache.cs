@@ -34,6 +34,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="assemblyName">The assembly name.</param>
         /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64.</param>
+        /// <param name="getRuntimeVersion">Delegate to get the clr version of the file.</param>
+        /// <param name="targetedRuntime">Version of the targetted runtime.</param>
+        /// <param name="fileExists">Delegate to check whether the file exists.</param>
+        /// <param name="getPathFromFusionName">Delegate to get path to a file based on the fusion name.</param>
+        /// <param name="getGacEnumerator">Delegate to get the enumerator which will enumerate over the GAC.</param>
+        /// <param name="specificVersion">Whether to check for a specific version.</param>
         /// <returns>The path to the assembly. Empty if none exists.</returns>
         private static string GetLocationImpl(AssemblyNameExtension assemblyName, string targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntime, FileExists fileExists, GetPathFromFusionName getPathFromFusionName, GetGacEnumerator getGacEnumerator, bool specificVersion)
         {
@@ -128,7 +134,7 @@ namespace Microsoft.Build.Tasks
                         {
                             if (targetedRuntime.CompareTo(runtimeVersion) >= 0 || specificVersion)
                             {
-                                SortedDictionary<AssemblyNameExtension, string> assembliesWithRuntime = null;
+                                SortedDictionary<AssemblyNameExtension, string> assembliesWithRuntime;
                                 assembliesWithValidRuntimes.TryGetValue(runtimeVersion, out assembliesWithRuntime);
 
                                 // Create a new list if one does not exist.
@@ -211,7 +217,11 @@ namespace Microsoft.Build.Tasks
         /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64.</param>
         /// <param name="getRuntimeVersion">Delegate to get the runtime version from a file path</param>
         /// <param name="targetedRuntimeVersion">What version of the runtime are we targeting</param>
-        /// <param name="fullFusionName">Are we guranteed to have a full fusion name. This really can only happen if we have already resolved the assembly</param>
+        /// <param name="fullFusionName">Are we guaranteed to have a full fusion name. This really can only happen if we have already resolved the assembly</param>
+        /// <param name="fileExists">Delegate to check whether the file exists.</param>
+        /// <param name="getPathFromFusionName">Delegate to get path to a file based on the fusion name.</param>
+        /// <param name="getGacEnumerator">Delegate to get the enumerator which will enumerate over the GAC.</param>
+        /// <param name="specificVersion">Whether to check for a specific version.</param>
         /// <returns>The path to the assembly. Empty if none exists.</returns>
         internal static string GetLocation
         (
@@ -232,11 +242,16 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Given a strong name, find its path in the GAC.
         /// </summary>
+        /// <param name="buildEngine">The build engine</param>
         /// <param name="strongName">The strong name.</param>
         /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64.</param>
         /// <param name="getRuntimeVersion">Delegate to get the runtime version from a file path</param>
         /// <param name="targetedRuntimeVersion">What version of the runtime are we targeting</param>
         /// <param name="fullFusionName">Are we guranteed to have a full fusion name. This really can only happen if we have already resolved the assembly</param>
+        /// <param name="fileExists">Delegate to check whether the file exists.</param>
+        /// <param name="getPathFromFusionName">Delegate to get path to a file based on the fusion name.</param>
+        /// <param name="getGacEnumerator">Delegate to get the enumerator which will enumerate over the GAC.</param>
+        /// <param name="specificVersion">Whether to check for a specific version.</param>
         /// <returns>The path to the assembly. Empty if none exists.</returns>
         internal static string GetLocation
         (
@@ -284,10 +299,10 @@ namespace Microsoft.Build.Tasks
             }
 
             // A delegate was not passed in to use the default one
-            getPathFromFusionName = getPathFromFusionName ?? pathFromFusionName;
+            getPathFromFusionName ??= pathFromFusionName;
 
             // A delegate was not passed in to use the default one
-            getGacEnumerator = getGacEnumerator ?? gacEnumerator;
+            getGacEnumerator ??= gacEnumerator;
 
             // If we have no processor architecture set then we can tryout a number of processor architectures.
             string location;

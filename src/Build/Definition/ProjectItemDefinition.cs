@@ -54,8 +54,8 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal ProjectItemDefinition(Project project, string itemType)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project, "project");
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, "itemType");
+            ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
+            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
 
             _project = project;
             _itemType = itemType;
@@ -119,7 +119,7 @@ namespace Microsoft.Build.Evaluation
         [DebuggerStepThrough]
         public ProjectMetadata GetMetadata(string name)
         {
-            return Link != null ? Link.GetMetadata(name) : (_metadata == null) ? null : _metadata[name];
+            return Link != null ? Link.GetMetadata(name) : _metadata?[name];
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace Microsoft.Build.Evaluation
 
             ProjectMetadataElement metadatumXml = itemDefinition.AddMetadata(name, unevaluatedValue);
 
-            _metadata = _metadata ?? new PropertyDictionary<ProjectMetadata>();
+            _metadata ??= new PropertyDictionary<ProjectMetadata>();
 
             string evaluatedValueEscaped = _project.ExpandMetadataValueBestEffortLeaveEscaped(this, unevaluatedValue, metadatumXml.Location);
 
@@ -192,7 +192,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         ProjectMetadata IItemDefinition<ProjectMetadata>.SetMetadata(ProjectMetadataElement metadataElement, string evaluatedValue, ProjectMetadata predecessor)
         {
-            _metadata = _metadata ?? new PropertyDictionary<ProjectMetadata>();
+            _metadata ??= new PropertyDictionary<ProjectMetadata>();
 
             ProjectMetadata metadatum = new ProjectMetadata(this, metadataElement, evaluatedValue, predecessor);
             _metadata.Set(metadatum);

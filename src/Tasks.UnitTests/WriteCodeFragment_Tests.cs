@@ -619,7 +619,10 @@ namespace Microsoft.Build.UnitTests
             string content = File.ReadAllText(task.OutputFile.ItemSpec);
             Console.WriteLine(content);
 
-            CheckContentCSharp(content, @"[assembly: AssemblyTrademarkAttribute(""Microsoft"", Date=""2009"", Copyright=""(C)"")]");
+            // NOTE: order here is defined by dictionary traversal order and may change
+            // based on implementation details there, but named parameters can have different
+            // orders so that's ok.
+            CheckContentCSharp(content, @"[assembly: AssemblyTrademarkAttribute(""Microsoft"", Copyright=""(C)"", Date=""2009"")]");
 
             File.Delete(task.OutputFile.ItemSpec);
         }

@@ -22,6 +22,10 @@ namespace Microsoft.Build.Framework
         /// Creates an instance of the UninitializedPropertyReadEventArgs class
         /// </summary>
         /// <param name="propertyName">The name of the uninitialized property that was read.</param>
+        /// <param name="message">The message of the uninitialized property that was read.</param>
+        /// <param name="helpKeyword">The helpKeyword of the uninitialized property that was read.</param>
+        /// <param name="senderName">The sender name of the event.</param>
+        /// <param name="importance">The message importance of the event.</param>
         public UninitializedPropertyReadEventArgs(
             string propertyName,
             string message,

@@ -213,7 +213,7 @@ namespace Microsoft.Build.BuildEngine
         {
             while (nodeReserveHandle == null)
             {
-                bool createdNew = false;
+                bool createdNew;
                 nodeReserveHandle = 
                     new EventWaitHandle(false, EventResetMode.ManualReset, LocalNodeProviderGlobalNames.NodeReserveEventName(currentNodeNumber), out createdNew);
                 if (!createdNew)
@@ -232,7 +232,6 @@ namespace Microsoft.Build.BuildEngine
                         nodeReserveHandle = null;
                         currentNodeNumber++;
                     }
-
                 }
             }
         }

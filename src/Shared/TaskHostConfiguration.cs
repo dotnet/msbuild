@@ -86,6 +86,7 @@ namespace Microsoft.Build.BackEnd
 
         private Dictionary<string, string> _globalParameters;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Constructor
         /// </summary>
@@ -102,6 +103,25 @@ namespace Microsoft.Build.BackEnd
         /// <param name="taskName">Name of the task.</param>
         /// <param name="taskLocation">Location of the assembly the task is to be loaded from.</param>
         /// <param name="taskParameters">Parameters to apply to the task.</param>
+        /// <param name="globalParameters">global properties for the current project.</param>
+#else
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="nodeId">The ID of the node being configured.</param>
+        /// <param name="startupDirectory">The startup directory for the task being executed.</param>
+        /// <param name="buildProcessEnvironment">The set of environment variables to apply to the task execution process.</param>
+        /// <param name="culture">The culture of the thread that will execute the task.</param>
+        /// <param name="uiCulture">The UI culture of the thread that will execute the task.</param>
+        /// <param name="lineNumberOfTask">The line number of the location from which this task was invoked.</param>
+        /// <param name="columnNumberOfTask">The column number of the location from which this task was invoked.</param>
+        /// <param name="projectFileOfTask">The project file from which this task was invoked.</param>
+        /// <param name="continueOnError">Flag to continue with the build after a the task failed</param>
+        /// <param name="taskName">Name of the task.</param>
+        /// <param name="taskLocation">Location of the assembly the task is to be loaded from.</param>
+        /// <param name="taskParameters">Parameters to apply to the task.</param>
+        /// <param name="globalParameters">global properties for the current project.</param>
+#endif
         public TaskHostConfiguration
             (
                 int nodeId,
@@ -122,8 +142,8 @@ namespace Microsoft.Build.BackEnd
                 Dictionary<string, string> globalParameters
             )
         {
-            ErrorUtilities.VerifyThrowInternalLength(taskName, "taskName");
-            ErrorUtilities.VerifyThrowInternalLength(taskLocation, "taskLocation");
+            ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
+            ErrorUtilities.VerifyThrowInternalLength(taskLocation, nameof(taskLocation));
 
             _nodeId = nodeId;
             _startupDirectory = startupDirectory;

@@ -52,8 +52,7 @@
          need to be in a specific location that does not mesh with NuGet. To resolve this, we include the default
          PackageReference assets but will remove them from the Reference ItemGroup before RAR runs and avoid the warnings -->
     <ItemGroup>
-        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Build.Utilities.v4.0'))' == 'True'" />
-        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Build.Framework'))' == 'True'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Build'))' == 'True'" />
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGet.'))' == 'True'" />
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Newtonsoft.Json'))' == 'True'" />
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGetSdkResolver'))' == 'True'" />

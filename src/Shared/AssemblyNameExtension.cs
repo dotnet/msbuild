@@ -99,7 +99,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Construct from a string, but immediately construct a real AssemblyName.
-        /// This will cause an exception to be thrown up front if the assembly name 
+        /// This will cause an exception to be thrown up front if the assembly name
         /// isn't well formed.
         /// </summary>
         /// <param name="assemblyName">
@@ -320,7 +320,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Is the assembly a complex name or a simple name. A simple name is where only the name is set 
+        /// Is the assembly a complex name or a simple name. A simple name is where only the name is set
         /// a complex name is where the version, culture or publickeytoken is also set
         /// </summary>
         internal bool IsSimpleName
@@ -496,8 +496,7 @@ namespace Microsoft.Build.Shared
                 }
 
                 // Will not return 0 as the this != that check above takes care of the case where they are equal.
-                result = this.Version.CompareTo(that.Version);
-                return result;
+                return this.Version.CompareTo(that.Version);
             }
 
             // We need some final collating order for these, alphabetical by FullName seems as good as any.
@@ -545,7 +544,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// An implementation of compare that compares two base 
+        /// An implementation of compare that compares two base
         /// names as quickly as possible.
         /// </summary>
         /// <param name="that"></param>
@@ -713,7 +712,7 @@ namespace Microsoft.Build.Shared
             }
 
             // If that is null then this and that are not equal. Also, this would cause a crash on the next line.
-            if (object.ReferenceEquals(that, null))
+            if (that is null)
             {
                 return false;
             }
@@ -847,7 +846,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Return a string that has AssemblyName special characters escaped. 
+        /// Return a string that has AssemblyName special characters escaped.
         /// Those characters are Equals(=), Comma(,), Quote("), Apostrophe('), Backslash(\).
         /// </summary>
         /// <remarks>
@@ -896,9 +895,9 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Do a partial comparison between two assembly name extensions.
         /// Compare the fields of A and B on the following conditions:
-        /// 1) A.Field has a non null value 
+        /// 1) A.Field has a non null value
         /// 2) The field has been selected in the comparison flags or the default comparison flags are passed in.
-        /// 
+        ///
         /// If A.Field is null then we will not compare A.Field and B.Field even when the comparison flag is set for that field unless skipNullFields is false.
         /// </summary>
         internal bool PartialNameCompare(AssemblyNameExtension that, PartialComparisonFlags comparisonFlags)
@@ -909,9 +908,9 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Do a partial comparison between two assembly name extensions.
         /// Compare the fields of A and B on the following conditions:
-        /// 1) A.Field has a non null value 
+        /// 1) A.Field has a non null value
         /// 2) The field has been selected in the comparison flags or the default comparison flags are passed in.
-        /// 
+        ///
         /// If A.Field is null then we will not compare A.Field and B.Field even when the comparison flag is set for that field unless skipNullFields is false.
         /// </summary>
         internal bool PartialNameCompare(AssemblyNameExtension that, PartialComparisonFlags comparisonFlags, bool considerRetargetableFlag)
@@ -923,7 +922,7 @@ namespace Microsoft.Build.Shared
             }
 
             // If that is null then this and that are not equal. Also, this would cause a crash on the next line.
-            if (object.ReferenceEquals(that, null))
+            if (that is null)
             {
                 return false;
             }

@@ -767,7 +767,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void VerifyThrowArgumentLengthIfNotNull(string parameter, string parameterName)
         {
-            if (parameter != null && parameter.Length == 0 && s_throwExceptions)
+            if (parameter?.Length == 0 && s_throwExceptions)
             {
                 throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
             }

@@ -816,10 +816,7 @@ namespace Microsoft.Build.Execution
                     Reset();
                     _buildManagerState = BuildManagerState.Idle;
 
-                    if (_threadException != null)
-                    {
-                        _threadException.Throw();
-                    }
+                    _threadException?.Throw();
 
                     if (BuildParameters.DumpOpportunisticInternStats)
                     {
@@ -894,7 +891,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void ShutdownAllNodes()
         {
-            if (null == _nodeManager)
+            if (_nodeManager == null)
             {
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
             }
@@ -1294,7 +1291,7 @@ namespace Microsoft.Build.Execution
         {
             if (ex is InvalidProjectFileException projectException)
             {
-                if (projectException.HasBeenLogged != true)
+                if (!projectException.HasBeenLogged)
                 {
                     BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                     ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(buildEventContext, projectException);
@@ -1321,7 +1318,7 @@ namespace Microsoft.Build.Execution
         {
             if (ex is InvalidProjectFileException projectException)
             {
-                if (projectException.HasBeenLogged != true)
+                if (!projectException.HasBeenLogged)
                 {
                     BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                     ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(buildEventContext, projectException);
@@ -1373,7 +1370,7 @@ namespace Microsoft.Build.Execution
                 InvalidProjectFileException projectException = ex as InvalidProjectFileException;
                 if (projectException != null)
                 {
-                    if (projectException.HasBeenLogged != true)
+                    if (!projectException.HasBeenLogged)
                     {
                         BuildEventContext projectBuildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                         ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, projectException);
@@ -1529,7 +1526,7 @@ namespace Microsoft.Build.Execution
                     foreach (var innerException in aggregateException.InnerExceptions)
                     {
                         var projectException = (InvalidProjectFileException) innerException;
-                        if (projectException.HasBeenLogged != true)
+                        if (!projectException.HasBeenLogged)
                         {
                             BuildEventContext projectBuildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                             ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, projectException);
@@ -1974,7 +1971,7 @@ namespace Microsoft.Build.Execution
                         {
                             NodeInfo createdNode = _nodeManager.CreateNode(GetNodeConfiguration(), response.RequiredNodeType);
 
-                            if (null != createdNode)
+                            if (createdNode != null)
                             {
                                 _noNodesActiveEvent.Reset();
                                 _activeNodes.Add(createdNode.NodeId);
@@ -2019,6 +2016,26 @@ namespace Microsoft.Build.Execution
                         break;
                 }
             }
+        }
+
+        internal bool CreateRarNode()
+        {
+            // If the _buildParametrs is not set, we are in OutOfProc mode, so continue
+            // Else check if users specified that he want to use multiple nodes, if so use RARaaS
+            if (_buildParameters?.MaxNodeCount == 1)
+                return false;
+
+            string nodeLocation = _buildParameters?.NodeExeLocation ?? BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
+            if (string.IsNullOrEmpty(nodeLocation))
+            {
+                // Couldn't find a path to MSBuild.exe; can't create a new node.
+                return false;
+            }
+
+            bool nodeReuse = _buildParameters?.EnableNodeReuse ?? true;
+            bool lowPriority = _buildParameters?.LowPriority ?? false;
+            string commandLineArgs = $"/nologo /nodemode:3 /nodeReuse:{nodeReuse} /low:{lowPriority}";
+            return NodeProviderOutOfProcBase.LaunchNode(nodeLocation, commandLineArgs) != -1;
         }
 
         /// <summary>
@@ -2145,7 +2162,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private NodeConfiguration GetNodeConfiguration()
         {
-            if (null == _nodeConfiguration)
+            if (_nodeConfiguration == null)
             {
                 // Get the remote loggers
                 ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent(BuildComponentType.LoggingService) as ILoggingService;
@@ -2367,7 +2384,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void SetOverallResultIfWarningsAsErrors(BuildResult result)
         {
-            if (result != null && result.OverallResult == BuildResultCode.Success)
+            if (result?.OverallResult == BuildResultCode.Success)
             {
                 ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
 

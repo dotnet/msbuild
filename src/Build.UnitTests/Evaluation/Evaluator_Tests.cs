@@ -2463,7 +2463,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             if (!string.IsNullOrEmpty(expected))
             {
-                expected = expected + @"\MSBuild";
+                expected += @"\MSBuild";
             }
 
             Project project = new Project();
@@ -4538,7 +4538,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         .AllBuildEvents
                         .OfType<PropertyInitialValueSetEventArgs>()
                         .ShouldBeEmpty();
-
                 });
         }
 
@@ -4568,7 +4567,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         .AllBuildEvents
                         .OfType<PropertyInitialValueSetEventArgs>()
                         .ShouldBeEmpty();
-
                 });
         }
 
@@ -4916,7 +4914,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         private void VerifyImportTargetRelativePath(string directory, string directory2, string[] imports)
         {
-            string file0 = null;
             string file1 = null;
             string file2 = null;
             string file3 = null;
@@ -4929,7 +4926,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     FileUtilities.DeleteWithoutTrailingBackslash(directory);
                 }
 
-                file0 = Path.Combine(directory, "my.proj");
+                string file0 = Path.Combine(directory, "my.proj");
                 file1 = Path.Combine(directory, "1.targets");
                 file2 = Path.Combine(directory2, "2.targets");
                 file3 = Path.Combine(directory2, "3.cpp.targets");

@@ -36,7 +36,7 @@ namespace Microsoft.Build.Tasks
         NoBecausePrerequisite,
 
         /// <summary>
-        /// The Reference should be CopyLocal='false' because the the Private attribute is set to 'false' in the project. 
+        /// The Reference should be CopyLocal='false' because the Private attribute is set to 'false' in the project.
         /// </summary>
         NoBecauseReferenceItemHadMetadata,
 

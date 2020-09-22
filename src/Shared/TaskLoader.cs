@@ -34,11 +34,11 @@ namespace Microsoft.Build.Shared
         /// <returns>true, if specified type is a task</returns>
         internal static bool IsTaskClass(Type type, object unused)
         {
-            return (type.GetTypeInfo().IsClass && !type.GetTypeInfo().IsAbstract && (
+            return type.GetTypeInfo().IsClass && !type.GetTypeInfo().IsAbstract && (
 #if FEATURE_TYPE_GETINTERFACE
-                type.GetTypeInfo().GetInterface("Microsoft.Build.Framework.ITask") != null));
+                type.GetTypeInfo().GetInterface("Microsoft.Build.Framework.ITask") != null);
 #else
-                type.GetInterfaces().Any(interfaceType => interfaceType.FullName == "Microsoft.Build.Framework.ITask")));
+                type.GetInterfaces().Any(interfaceType => interfaceType.FullName == "Microsoft.Build.Framework.ITask"));
 #endif
         }
 
@@ -115,7 +115,7 @@ namespace Microsoft.Build.Shared
 
 #if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
                         // Hook up last minute dumping of any exceptions 
-                        taskAppDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandling.UnhandledExceptionHandler);
+                        taskAppDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
 #endif
                     }
                 }
@@ -181,7 +181,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static Assembly AssemblyResolver(object sender, ResolveEventArgs args)
         {
-            if ((s_resolverLoadedType != null) && (s_resolverLoadedType.LoadedAssembly != null))
+            if ((s_resolverLoadedType?.LoadedAssembly != null))
             {
                 // Match the name being requested by the resolver with the FullName of the assembly we have loaded
                 if (args.Name.Equals(s_resolverLoadedType.LoadedAssembly.FullName, StringComparison.Ordinal))

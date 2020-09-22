@@ -61,7 +61,7 @@ namespace Microsoft.Build.Tasks
                 }
                 if ((value == null && baseLinkedFileDirectory != null) ||
                      (value != null && baseLinkedFileDirectory == null) ||
-                     (String.Compare(baseLinkedFileDirectory, value, StringComparison.OrdinalIgnoreCase) != 0))
+                     (!String.Equals(baseLinkedFileDirectory, value, StringComparison.OrdinalIgnoreCase)))
                 {
                     // Ok, this is slightly complicated.  Changing the base directory in any manner may
                     // result in changes to how we find .resx files.  Therefore, we must clear our out
@@ -132,7 +132,7 @@ namespace Microsoft.Build.Tasks
 
             // The file is in our cache.  Make sure it's up to date.  If not, discard
             // this entry from the cache and rebuild all the state at a later point.
-            if (retVal != null && retVal.HasFileChanged())
+            if (retVal?.HasFileChanged() == true)
             {
                 portableLibraries.RemoveDependencyFile(libraryPath);
                 _isDirty = true;
@@ -252,7 +252,7 @@ namespace Microsoft.Build.Tasks
                         // contains the .resx file as the path from which it should resolve
                         // relative paths. So we should base our timestamp/existence checking
                         // on the same switch & resolve in the same manner as ResGen.
-                        resxReader.BasePath = (baseLinkedFileDirectory == null) ? Path.GetDirectoryName(filename) : baseLinkedFileDirectory;
+                        resxReader.BasePath = baseLinkedFileDirectory ?? Path.GetDirectoryName(filename);
 
                         foreach (DictionaryEntry dictEntry in resxReader)
                         {

@@ -83,8 +83,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> taskParameters, string taskElementContents, IBuildEngine taskFactoryLoggingHost)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskName, "taskName");
-            ErrorUtilities.VerifyThrowArgumentNull(taskParameters, "taskParameters");
+            ErrorUtilities.VerifyThrowArgumentNull(taskName, nameof(taskName));
+            ErrorUtilities.VerifyThrowArgumentNull(taskParameters, nameof(taskParameters));
 
             var log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName)
             {
@@ -176,7 +176,7 @@ namespace Microsoft.Build.Tasks
 
                     if (debugXamlTask)
                     {
-                        errorList.AppendLine(String.Format(Thread.CurrentThread.CurrentUICulture, "({0},{1}) {2}", error.Line, error.Column, error.ErrorText));
+                        errorList.AppendFormat(Thread.CurrentThread.CurrentUICulture, "({0},{1}) {2}", error.Line, error.Column, error.ErrorText).AppendLine();
                     }
                     else
                     {
@@ -211,7 +211,7 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, "task");
+            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
         }
 
         /// <summary>

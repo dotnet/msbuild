@@ -43,89 +43,89 @@ namespace Microsoft.Build.Evaluation
     {
         /// <summary>
         /// these files list all default tasks and task assemblies that do not need to be explicitly declared by projects
-        /// </summary> 
+        /// </summary>
         private const string DefaultTasksFilePattern = "*.tasks";
 
         /// <summary>
         /// these files list all Override tasks and task assemblies that do not need to be explicitly declared by projects
-        /// </summary> 
+        /// </summary>
         private const string OverrideTasksFilePattern = "*.overridetasks";
 
 #if FEATURE_WIN32_REGISTRY
         /// <summary>
-        /// Regkey that we check to see whether Dev10 is installed.  This should exist if any SKU of Dev10 is installed, 
-        /// but is not removed even when the last version of Dev10 is uninstalled, due to 10.0\bsln sticking around. 
+        /// Regkey that we check to see whether Dev10 is installed.  This should exist if any SKU of Dev10 is installed,
+        /// but is not removed even when the last version of Dev10 is uninstalled, due to 10.0\bsln sticking around.
         /// </summary>
         private const string Dev10OverallInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0";
 
         /// <summary>
-        /// Regkey that we check to see whether Dev10 Ultimate is installed.  This will exist if it is installed, and be 
-        /// properly removed after it has been uninstalled.  
+        /// Regkey that we check to see whether Dev10 Ultimate is installed.  This will exist if it is installed, and be
+        /// properly removed after it has been uninstalled.
         /// </summary>
         private const string Dev10UltimateInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\vstscore";
 
         /// <summary>
-        /// Regkey that we check to see whether Dev10 Premium is installed.  This will exist if it is installed, and be 
-        /// properly removed after it has been uninstalled.  
+        /// Regkey that we check to see whether Dev10 Premium is installed.  This will exist if it is installed, and be
+        /// properly removed after it has been uninstalled.
         /// </summary>
         private const string Dev10PremiumInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\vstdcore";
 
         /// <summary>
-        /// Regkey that we check to see whether Dev10 Professional is installed.  This will exist if it is installed, and be 
-        /// properly removed after it has been uninstalled.  
+        /// Regkey that we check to see whether Dev10 Professional is installed.  This will exist if it is installed, and be
+        /// properly removed after it has been uninstalled.
         /// </summary>
         private const string Dev10ProfessionalInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\procore";
 
         /// <summary>
-        /// Regkey that we check to see whether C# Express 2010 is installed.  This will exist if it is installed, and be 
-        /// properly removed after it has been uninstalled.  
+        /// Regkey that we check to see whether C# Express 2010 is installed.  This will exist if it is installed, and be
+        /// properly removed after it has been uninstalled.
         /// </summary>
         private const string Dev10VCSExpressInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vcs\Servicing\10.0\xcor";
 
         /// <summary>
-        /// Regkey that we check to see whether VB Express 2010 is installed.  This will exist if it is installed, and be 
-        /// properly removed after it has been uninstalled.  
+        /// Regkey that we check to see whether VB Express 2010 is installed.  This will exist if it is installed, and be
+        /// properly removed after it has been uninstalled.
         /// </summary>
         private const string Dev10VBExpressInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vb\Servicing\10.0\xcor";
 
         /// <summary>
-        /// Regkey that we check to see whether VC Express 2010 is installed.  This will exist if it is installed, and be 
-        /// properly removed after it has been uninstalled.  
+        /// Regkey that we check to see whether VC Express 2010 is installed.  This will exist if it is installed, and be
+        /// properly removed after it has been uninstalled.
         /// </summary>
         private const string Dev10VCExpressInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vc\Servicing\10.0\xcor";
 
         /// <summary>
-        /// Regkey that we check to see whether VWD Express 2010 is installed.  This will exist if it is installed, and be 
-        /// properly removed after it has been uninstalled.  
+        /// Regkey that we check to see whether VWD Express 2010 is installed.  This will exist if it is installed, and be
+        /// properly removed after it has been uninstalled.
         /// </summary>
         private const string Dev10VWDExpressInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vns\Servicing\10.0\xcor";
 
         /// <summary>
-        /// Regkey that we check to see whether LightSwitch 2010 is installed.  This will exist if it is installed, and be 
-        /// properly removed after it has been uninstalled.  
+        /// Regkey that we check to see whether LightSwitch 2010 is installed.  This will exist if it is installed, and be
+        /// properly removed after it has been uninstalled.
         /// </summary>
         private const string Dev10LightSwitchInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\vslscore";
 
         /// <summary>
-        /// Null if it hasn't been figured out yet; true if (some variation of) Visual Studio 2010 is installed on 
-        /// the current machine, false otherwise. 
+        /// Null if it hasn't been figured out yet; true if (some variation of) Visual Studio 2010 is installed on
+        /// the current machine, false otherwise.
         /// </summary>
         private static bool? s_dev10IsInstalled = null;
 #endif // FEATURE_WIN32_REGISTRY
 
         /// <summary>
         /// Name of the tools version
-        /// </summary> 
+        /// </summary>
         private string _toolsVersion;
 
         /// <summary>
         /// The MSBuildBinPath (and ToolsPath) for this tools version
-        /// </summary> 
+        /// </summary>
         private string _toolsPath;
 
         /// <summary>
         /// The properties defined by the toolset.
-        /// </summary> 
+        /// </summary>
         private PropertyDictionary<ProjectPropertyInstance> _properties;
 
         /// <summary>
@@ -150,22 +150,22 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// indicates if the default tasks file has already been scanned
-        /// </summary> 
+        /// </summary>
         private bool _defaultTasksRegistrationAttempted;
 
         /// <summary>
         /// indicates if the override tasks file has already been scanned
-        /// </summary> 
+        /// </summary>
         private bool _overrideTasksRegistrationAttempted;
 
         /// <summary>
         /// holds all the default tasks we know about and the assemblies they exist in
-        /// </summary> 
+        /// </summary>
         private TaskRegistry _defaultTaskRegistry;
 
         /// <summary>
         /// holds all the override tasks we know about and the assemblies they exist in
-        /// </summary> 
+        /// </summary>
         private TaskRegistry _overrideTaskRegistry;
 
         /// <summary>
@@ -194,13 +194,13 @@ namespace Microsoft.Build.Evaluation
         private PropertyDictionary<ProjectPropertyInstance> _propertyBag;
 
         /// <summary>
-        /// SubToolsets that map to this toolset. 
+        /// SubToolsets that map to this toolset.
         /// </summary>
         private Dictionary<string, SubToolset> _subToolsets;
 
         /// <summary>
-        /// If no sub-toolset is specified, this is the default sub-toolset version.  Null == no default 
-        /// sub-toolset, just use the base toolset. 
+        /// If no sub-toolset is specified, this is the default sub-toolset version.  Null == no default
+        /// sub-toolset, just use the base toolset.
         /// </summary>
         private string _defaultSubToolsetVersion;
 
@@ -253,7 +253,7 @@ namespace Microsoft.Build.Evaluation
             : this(toolsVersion, toolsPath, null, projectCollection.EnvironmentProperties, projectCollection.GlobalPropertiesCollection, subToolsets, msbuildOverrideTasksPath, defaultOverrideToolsVersion: null)
         {
             _properties = new PropertyDictionary<ProjectPropertyInstance>();
-            if (null != buildProperties)
+            if (buildProperties != null)
             {
                 foreach (KeyValuePair<string, string> keyValuePair in buildProperties)
                 {
@@ -273,10 +273,10 @@ namespace Microsoft.Build.Evaluation
         /// <param name="defaultOverrideToolsVersion">ToolsVersion to use as the default ToolsVersion for this version of MSBuild.</param>
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, "toolsVersion");
-            ErrorUtilities.VerifyThrowArgumentLength(toolsPath, "toolsPath");
-            ErrorUtilities.VerifyThrowArgumentNull(environmentProperties, "environmentProperties");
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, "globalProperties");
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
+            ErrorUtilities.VerifyThrowArgumentLength(toolsPath, nameof(toolsPath));
+            ErrorUtilities.VerifyThrowArgumentNull(environmentProperties, nameof(environmentProperties));
+            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
 
             _toolsVersion = toolsVersion;
             this.ToolsPath = toolsPath;
@@ -284,7 +284,6 @@ namespace Microsoft.Build.Evaluation
             _environmentProperties = environmentProperties;
             _overrideTasksPath = msbuildOverrideTasksPath;
             _defaultOverrideToolsVersion = defaultOverrideToolsVersion;
-            
         }
 
         /// <summary>
@@ -353,8 +352,8 @@ namespace Microsoft.Build.Evaluation
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, ProjectCollection projectCollection, DirectoryGetFiles getFiles, LoadXmlFromPath loadXmlFromPath, string msbuildOverrideTasksPath, DirectoryExists directoryExists)
             : this(toolsVersion, toolsPath, buildProperties, projectCollection.EnvironmentProperties, projectCollection.GlobalPropertiesCollection, null, msbuildOverrideTasksPath, null)
         {
-            ErrorUtilities.VerifyThrowInternalNull(getFiles, "getFiles");
-            ErrorUtilities.VerifyThrowInternalNull(loadXmlFromPath, "loadXmlFromPath");
+            ErrorUtilities.VerifyThrowInternalNull(getFiles, nameof(getFiles));
+            ErrorUtilities.VerifyThrowInternalNull(loadXmlFromPath, nameof(loadXmlFromPath));
 
             _directoryExists = directoryExists;
             _getFiles = getFiles;
@@ -465,16 +464,16 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Returns the default sub-toolset version for this sub-toolset.  Heuristic used is: 
-        /// 1) If Visual Studio 2010 is installed and our ToolsVersion is "4.0", use the base toolset, and return 
-        ///    a sub-toolset version of "10.0", to be set as a publicly visible property so that e.g. targets can 
-        ///    consume it.  This is to handle the fact that Visual Studio 2010 did not have any concept of sub-toolsets. 
-        /// 2) Otherwise, use the highest-versioned sub-toolset found.  Sub-toolsets with numbered versions will 
-        ///    be ordered numerically; any additional sub-toolsets will be prepended to the beginning of the list in 
-        ///    the order found. We use the highest-versioned sub-toolset because, in the absence of any other information, 
-        ///    we assume that higher-versioned tools will be more likely to be able to generate something more correct.  
-        /// 
-        /// Will return null if there is no sub-toolset available (and Dev10 is not installed). 
+        /// Returns the default sub-toolset version for this sub-toolset.  Heuristic used is:
+        /// 1) If Visual Studio 2010 is installed and our ToolsVersion is "4.0", use the base toolset, and return
+        ///    a sub-toolset version of "10.0", to be set as a publicly visible property so that e.g. targets can
+        ///    consume it.  This is to handle the fact that Visual Studio 2010 did not have any concept of sub-toolsets.
+        /// 2) Otherwise, use the highest-versioned sub-toolset found.  Sub-toolsets with numbered versions will
+        ///    be ordered numerically; any additional sub-toolsets will be prepended to the beginning of the list in
+        ///    the order found. We use the highest-versioned sub-toolset because, in the absence of any other information,
+        ///    we assume that higher-versioned tools will be more likely to be able to generate something more correct.
+        ///
+        /// Will return null if there is no sub-toolset available (and Dev10 is not installed).
         /// </summary>
         public string DefaultSubToolsetVersion
         {
@@ -521,11 +520,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Null if it hasn't been figured out yet; true if (some variation of) Visual Studio 2010 is installed on 
-        /// the current machine, false otherwise. 
+        /// Null if it hasn't been figured out yet; true if (some variation of) Visual Studio 2010 is installed on
+        /// the current machine, false otherwise.
         /// </summary>
         /// <comments>
-        /// Internal so that unit tests can use it too. 
+        /// Internal so that unit tests can use it too.
         /// </comments>
         internal static bool Dev10IsInstalled
         {
@@ -632,13 +631,13 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Generates the sub-toolset version to be used with this toolset.  Sub-toolset version is based on:
-        /// 1. If "VisualStudioVersion" is set as a property on the toolset itself (global or environment), 
-        ///    use that. 
-        /// 2. Otherwise, use the default sub-toolset version for this toolset. 
-        /// 
-        /// The sub-toolset version returned may be null; if so, that means that no sub-toolset should be used, 
-        /// just the base toolset on its own. The sub-toolset version returned may not map to an existing 
-        /// sub-toolset.  
+        /// 1. If "VisualStudioVersion" is set as a property on the toolset itself (global or environment),
+        ///    use that.
+        /// 2. Otherwise, use the default sub-toolset version for this toolset.
+        ///
+        /// The sub-toolset version returned may be null; if so, that means that no sub-toolset should be used,
+        /// just the base toolset on its own. The sub-toolset version returned may not map to an existing
+        /// sub-toolset.
         /// </summary>
         public string GenerateSubToolsetVersion()
         {
@@ -648,17 +647,17 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Generates the sub-toolset version to be used with this toolset.  Sub-toolset version is based on:
-        /// 1. If the "VisualStudioVersion" global property exists in the set of properties passed to us, use it. 
-        /// 2. Otherwise, if "VisualStudioVersion" is set as a property on the toolset itself (global or environment), 
-        ///    use that. 
-        /// 3. Otherwise, use Visual Studio version from solution file if it maps to an existing sub-toolset. 
-        /// 4. Otherwise, use the default sub-toolset version for this toolset. 
-        /// 
-        /// The sub-toolset version returned may be null; if so, that means that no sub-toolset should be used, 
-        /// just the base toolset on its own. The sub-toolset version returned may not map to an existing 
-        /// sub-toolset.  
-        /// 
-        /// The global properties dictionary may be null. 
+        /// 1. If the "VisualStudioVersion" global property exists in the set of properties passed to us, use it.
+        /// 2. Otherwise, if "VisualStudioVersion" is set as a property on the toolset itself (global or environment),
+        ///    use that.
+        /// 3. Otherwise, use Visual Studio version from solution file if it maps to an existing sub-toolset.
+        /// 4. Otherwise, use the default sub-toolset version for this toolset.
+        ///
+        /// The sub-toolset version returned may be null; if so, that means that no sub-toolset should be used,
+        /// just the base toolset on its own. The sub-toolset version returned may not map to an existing
+        /// sub-toolset.
+        ///
+        /// The global properties dictionary may be null.
         /// </summary>
         [SuppressMessage("Microsoft.Usage", "CA2233:OperationsShouldNotOverflow", MessageId = "solutionVersion-1", Justification = "Method called in restricted places. Checks done by the callee and inside the method.")]
         public string GenerateSubToolsetVersion(IDictionary<string, string> overrideGlobalProperties, int solutionVersion)
@@ -667,9 +666,9 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Given a property name and a sub-toolset version, searches for that property first in the 
-        /// sub-toolset, then falls back to the base toolset if necessary, and returns the property 
-        /// if it was found. 
+        /// Given a property name and a sub-toolset version, searches for that property first in the
+        /// sub-toolset, then falls back to the base toolset if necessary, and returns the property
+        /// if it was found.
         /// </summary>
         public ProjectPropertyInstance GetProperty(string propertyName, string subToolsetVersion)
         {
@@ -702,7 +701,7 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                if (null != getFiles)
+                if (getFiles != null)
                 {
                     defaultTasksFiles = getFiles(searchPath, taskPattern);
                 }
@@ -751,50 +750,47 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Generates the sub-toolset version to be used with this toolset.  Sub-toolset version is based on:
-        /// 1. If the "VisualStudioVersion" global property exists in the set of properties passed to us, use it. 
-        /// 2. Otherwise, if "VisualStudioVersion" is set as a property on the toolset itself (global or environment), 
-        ///    use that. 
-        /// 3. Otherwise, use Visual Studio version from solution file if it maps to an existing sub-toolset. 
-        /// 4. Otherwise, use the default sub-toolset version for this toolset. 
-        /// 
-        /// The sub-toolset version returned may be null; if so, that means that no sub-toolset should be used, 
-        /// just the base toolset on its own. The sub-toolset version returned may not map to an existing 
-        /// sub-toolset.  
-        /// 
-        /// The global properties dictionary may be null. 
+        /// 1. If the "VisualStudioVersion" global property exists in the set of properties passed to us, use it.
+        /// 2. Otherwise, if "VisualStudioVersion" is set as a property on the toolset itself (global or environment),
+        ///    use that.
+        /// 3. Otherwise, use Visual Studio version from solution file if it maps to an existing sub-toolset.
+        /// 4. Otherwise, use the default sub-toolset version for this toolset.
+        ///
+        /// The sub-toolset version returned may be null; if so, that means that no sub-toolset should be used,
+        /// just the base toolset on its own. The sub-toolset version returned may not map to an existing
+        /// sub-toolset.
+        ///
+        /// The global properties dictionary may be null.
         /// </summary>
         internal string GenerateSubToolsetVersion(PropertyDictionary<ProjectPropertyInstance> overrideGlobalProperties)
         {
-            ProjectPropertyInstance subToolsetProperty = null;
-            string visualStudioVersion = null;
             if (overrideGlobalProperties != null)
             {
-                subToolsetProperty = overrideGlobalProperties[Constants.SubToolsetVersionPropertyName];
+                ProjectPropertyInstance subToolsetProperty = overrideGlobalProperties[Constants.SubToolsetVersionPropertyName];
 
                 if (subToolsetProperty != null)
                 {
-                    visualStudioVersion = subToolsetProperty.EvaluatedValue;
-                    return visualStudioVersion;
+                    return subToolsetProperty.EvaluatedValue;
                 }
             }
 
-            visualStudioVersion = GenerateSubToolsetVersion(0 /* don't care about solution version */);
-            return visualStudioVersion;
+            /* don't care about solution version */
+            return GenerateSubToolsetVersion(0);
         }
 
         /// <summary>
         /// Generates the sub-toolset version to be used with this toolset.  Sub-toolset version is based on:
-        /// 1. If the "VisualStudioVersion" global property exists in the set of properties passed to us, use it. 
-        /// 2. Otherwise, if "VisualStudioVersion" is set as a property on the toolset itself (global or environment), 
-        ///    use that. 
-        /// 3. Otherwise, use Visual Studio version from solution file if it maps to an existing sub-toolset. 
-        /// 4. Otherwise, use the default sub-toolset version for this toolset. 
-        /// 
-        /// The sub-toolset version returned may be null; if so, that means that no sub-toolset should be used, 
-        /// just the base toolset on its own. The sub-toolset version returned may not map to an existing 
-        /// sub-toolset.  
-        /// 
-        /// The global properties dictionary may be null. 
+        /// 1. If the "VisualStudioVersion" global property exists in the set of properties passed to us, use it.
+        /// 2. Otherwise, if "VisualStudioVersion" is set as a property on the toolset itself (global or environment),
+        ///    use that.
+        /// 3. Otherwise, use Visual Studio version from solution file if it maps to an existing sub-toolset.
+        /// 4. Otherwise, use the default sub-toolset version for this toolset.
+        ///
+        /// The sub-toolset version returned may be null; if so, that means that no sub-toolset should be used,
+        /// just the base toolset on its own. The sub-toolset version returned may not map to an existing
+        /// sub-toolset.
+        ///
+        /// The global properties dictionary may be null.
         /// </summary>
         internal string GenerateSubToolsetVersion(int visualStudioVersionFromSolution)
         {
@@ -835,7 +831,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Return a task registry stub for the tasks in the *.tasks file for this toolset         
+        /// Return a task registry stub for the tasks in the *.tasks file for this toolset
         /// </summary>
         /// <param name="loggingServices">The logging services used to log during task registration.</param>
         /// <param name="buildEventContext">The build event context used to log during task registration.</param>
@@ -852,18 +848,17 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal string GenerateSubToolsetVersionUsingVisualStudioVersion(IDictionary<string, string> overrideGlobalProperties, int visualStudioVersionFromSolution)
         {
-            string visualStudioVersion = null;
+            string visualStudioVersion;
             if (overrideGlobalProperties != null && overrideGlobalProperties.TryGetValue(Constants.SubToolsetVersionPropertyName, out visualStudioVersion))
             {
                 return visualStudioVersion;
             }
 
-            visualStudioVersion = GenerateSubToolsetVersion(visualStudioVersionFromSolution);
-            return visualStudioVersion;
+            return GenerateSubToolsetVersion(visualStudioVersionFromSolution);
         }
 
         /// <summary>
-        /// Return a task registry for the override tasks in the *.overridetasks file for this toolset         
+        /// Return a task registry for the override tasks in the *.overridetasks file for this toolset
         /// </summary>
         /// <param name="loggingServices">The logging services used to log during task registration.</param>
         /// <param name="buildEventContext">The build event context used to log during task registration.</param>
@@ -1002,7 +997,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (Path.IsPathRooted(_overrideTasksPath))
                             {
-                                if (null != _directoryExists)
+                                if (_directoryExists != null)
                                 {
                                     overrideDirectoryExists = _directoryExists(_overrideTasksPath);
                                 }
@@ -1068,7 +1063,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         ProjectUsingTaskElement usingTask = elementXml as ProjectUsingTaskElement;
 
-                        if (null == usingTask)
+                        if (usingTask == null)
                         {
                             ProjectErrorUtilities.ThrowInvalidProject
                                 (

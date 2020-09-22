@@ -38,7 +38,7 @@ namespace Microsoft.Build.Shared
         internal static string ExtractMessageCode(bool msbuildCodeOnly, string message, out string code)
         {
 #if !BUILDINGAPPXTASKS
-            ErrorUtilities.VerifyThrowInternalNull(message, "message");
+            ErrorUtilities.VerifyThrowInternalNull(message, nameof(message));
 #endif
 
             code = null;
@@ -69,7 +69,7 @@ namespace Microsoft.Build.Shared
 
                 code = message.Substring(i, 7);
 
-                i = i + 8;
+                i += 8;
             }
             else
 #endif
@@ -136,7 +136,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The MSBuild F1-help keyword string.</returns>
         private static string GetHelpKeyword(string resourceName)
         {
-            return ("MSBuild." + resourceName);
+            return "MSBuild." + resourceName;
         }
 
 #if !BUILDINGAPPXTASKS
@@ -227,7 +227,7 @@ namespace Microsoft.Build.Shared
             string formatted = unformatted;
 
             // NOTE: String.Format() does not allow a null arguments array
-            if ((args != null) && (args.Length > 0))
+            if ((args?.Length > 0))
             {
 #if DEBUG
 

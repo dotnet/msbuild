@@ -100,6 +100,11 @@
         <target state="translated">Строка версии имела неверный формат.</target>
         <note />
       </trans-unit>
+      <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
+        <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
+        <target state="new">"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">Уровень детализации журнала: {0}.</target>
@@ -124,7 +129,7 @@
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
         <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="new">A required NuGet assembly was not found. Expected Path: {0}</target>
+        <target state="translated">Не найдена обязательная сборка NuGet. Ожидаемый путь: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -137,22 +142,22 @@
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
         <source>Only one item type may be referenced when removing with MatchOnMetadata.</source>
-        <target state="new">Only one item type may be referenced when removing with MatchOnMetadata.</target>
+        <target state="translated">При удалении с помощью MatchOnMetadata можно ссылаться только на один тип элемента.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
         <source>MatchOnMetadata only applies to Remove operations on items.</source>
-        <target state="new">MatchOnMetadata only applies to Remove operations on items.</target>
+        <target state="translated">MatchOnMetadata применяется только к операциям удаления элементов.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOptionsOnlyApplicableToItemsWithMatchOnMetadata">
         <source>MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</source>
-        <target state="new">MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</target>
+        <target state="translated">MatchOnMetadataOptions может использоваться только при удалении элементов с помощью MatchOnMetadata.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_NoMatchOnMetadataOutsideTargets">
         <source>MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</source>
-        <target state="new">MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</target>
+        <target state="translated">MatchOnMetadata не может использоваться вне &lt;Target&gt;.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
@@ -173,6 +178,11 @@
         <target state="translated">Начальное значение свойства: $({0})="{1}" Источник: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="RarControllerReflectionError">
+        <source>Couldn't create an instance of IRarController for '{0}' type</source>
+        <target state="new">Couldn't create an instance of IRarController for '{0}' type</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: проект "{0}" пропустил ограничения изоляции графа в проекте "{1}", на который указывает ссылка.</target>
@@ -182,14 +192,14 @@
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
         <source>MSB4261: Multiple entry points with solutions detected: {0}. If static graph is loaded from a solution, that that solution must be the only entry point.</source>
-        <target state="needs-review-translation">MSB4261: статический граф принимает решение только в качестве единственной точки входа. Обнаружено несколько точек входа: {0}</target>
+        <target state="translated">MSB4261: обнаружено несколько точек входа с решениями: {0}. Если статический граф загружен из решения, то это решение должно быть единственной точкой входа.</target>
         <note>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>
       </trans-unit>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</source>
-        <target state="new">"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</target>
+        <target state="translated">"Статический граф загружен за {0} с: узлов — {1}, ребер — {2}."</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">

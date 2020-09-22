@@ -81,7 +81,7 @@ namespace Microsoft.Build.BackEnd.Logging
         public void Initialize(IEventSource eventSource)
         {
             ErrorUtilities.VerifyThrow(eventSource != null, "eventSource is null");
-            eventSource.AnyEventRaised += new AnyEventHandler(EventSource_AnyEventRaised);
+            eventSource.AnyEventRaised += EventSource_AnyEventRaised;
 
             IEventSource2 eventSource2 = eventSource as IEventSource2;
             if (eventSource2 != null)
@@ -114,10 +114,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // If no central logger was registered with the system
             // there will not be a build event redirector as there is 
             // nowhere to forward the events to.
-            if (BuildEventRedirector != null)
-            {
-                BuildEventRedirector.ForwardEvent(buildEvent);
-            }
+            BuildEventRedirector?.ForwardEvent(buildEvent);
         }
 
         #endregion

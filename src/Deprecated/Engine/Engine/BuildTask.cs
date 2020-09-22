@@ -55,7 +55,7 @@ namespace Microsoft.Build.BuildEngine
         #region Constructors
         /// <summary>
         /// This constructor initializes a persisted task from an existing task
-        /// element which exists either in the main project file or one of the 
+        /// element which exists either in the main project file or one of the
         /// imported files.
         /// </summary>
         /// <param name="taskElement"></param>
@@ -96,7 +96,7 @@ namespace Microsoft.Build.BuildEngine
 
                     // this only makes sense in the context of the new OM, 
                     // so just ignore it.  
-                    case XMakeAttributes.msbuildRuntime: 
+                    case XMakeAttributes.msbuildRuntime:
                         // do nothing
                         break;
 
@@ -112,8 +112,8 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Default constructor.  This is not allowed, because it leaves the 
-        /// BuildTask in a bad state. But we have to have it, otherwise FXCop 
+        /// Default constructor.  This is not allowed, because it leaves the
+        /// BuildTask in a bad state. But we have to have it, otherwise FXCop
         /// complains.
         /// </summary>
         /// <owner>rgoel</owner>
@@ -142,7 +142,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Accessor for the task's "name" element.  
+        /// Accessor for the task's "name" element.
         /// </summary>
         /// <owner>RGoel</owner>
         public string Name
@@ -202,7 +202,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     return true;
                 }
-                else 
+                else
                 {
                     return false;
                 }
@@ -237,7 +237,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// System.Type object corresponding to the task class that implements 
+        /// System.Type object corresponding to the task class that implements
         /// the functionality that runs this task object.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -258,7 +258,7 @@ namespace Microsoft.Build.BuildEngine
                                                    parentProject.ProjectBuildEventContext.TaskId
                                                );
 
-                int handleId = parentEngine.EngineCallback.CreateTaskContext(parentProject, ParentTarget, null, taskElement, 
+                int handleId = parentEngine.EngineCallback.CreateTaskContext(parentProject, ParentTarget, null, taskElement,
                                                                                 EngineCallback.inProcNode, taskContext);
                 EngineLoggingServices loggingServices = parentEngine.LoggingServices;
                 TaskExecutionModule taskExecutionModule = parentEngine.NodeManager.TaskExecutionModule;
@@ -313,12 +313,12 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
 
         /// <summary>
-        /// This retrieves the list of all parameter names from the element 
-        /// node of this task. Note that it excludes anything that a specific 
-        /// property is exposed for or that isn't valid here (Name, Condition, 
+        /// This retrieves the list of all parameter names from the element
+        /// node of this task. Note that it excludes anything that a specific
+        /// property is exposed for or that isn't valid here (Name, Condition,
         /// ContinueOnError).
-        /// 
-        /// Note that if there are none, it returns string[0], rather than null, 
+        ///
+        /// Note that if there are none, it returns string[0], rather than null,
         /// as it makes writing foreach statements over the return value so
         /// much simpler.
         /// </summary>
@@ -336,7 +336,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 string attributeValue = attrib.Name;
 
-                if (!XMakeAttributes.IsSpecialTaskAttribute(attributeValue)) 
+                if (!XMakeAttributes.IsSpecialTaskAttribute(attributeValue))
                 {
                     list.Add(attributeValue);
                 }
@@ -349,7 +349,7 @@ namespace Microsoft.Build.BuildEngine
         /// This retrieves an arbitrary attribute from the task element.  These
         /// are attributes that the project author has placed on the task element
         /// that have no meaning to MSBuild other than that they get passed to the
-        /// task itself as arguments.  
+        /// task itself as arguments.
         /// </summary>
         /// <owner>RGoel</owner>
         public string GetParameterValue
@@ -365,20 +365,16 @@ namespace Microsoft.Build.BuildEngine
             error.VerifyThrowInvalidOperation(this.taskElement != null,
                 "CannotUseParameters");
 
-            string attributeValue; 
-
             // If this is a persisted Task, grab the attribute directly from the
             // task element.
-            attributeValue = taskElement.GetAttribute(attributeName);
-
-            return (attributeValue == null) ? String.Empty : attributeValue;
+            return taskElement.GetAttribute(attributeName) ?? string.Empty;
         }
 
         /// <summary>
         /// This sets an arbitrary attribute on the task element.  These
         /// are attributes that the project author has placed on the task element
         /// that get passed in to the task.
-        /// 
+        ///
         /// This optionally escapes the parameter value so it will be treated as a literal.
         /// </summary>
         /// <param name="parameterName"></param>
@@ -509,7 +505,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Indicates that something has changed within the task element, so the project
-        /// needs to be saved and re-evaluated at next build.  Send the "dirtiness" 
+        /// needs to be saved and re-evaluated at next build.  Send the "dirtiness"
         /// notification up the chain.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -517,11 +513,11 @@ namespace Microsoft.Build.BuildEngine
             (
             )
         {
-            if (this.ParentTarget != null)
-            {
+               
+            
                 // This is a change to the contents of the target.
-                this.ParentTarget.MarkTargetAsDirty();
-            }
+                this.ParentTarget?.MarkTargetAsDirty();
+            
         }
 
         #endregion

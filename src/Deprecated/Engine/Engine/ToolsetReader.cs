@@ -19,12 +19,12 @@ namespace Microsoft.Build.BuildEngine
 
         public PropertyDefinition(string name, string value, string source)
         {
-            error.VerifyThrowArgumentLength(name, "name");
-            error.VerifyThrowArgumentLength(source, "source");
+            error.VerifyThrowArgumentLength(name, nameof(name));
+            error.VerifyThrowArgumentLength(source, nameof(source));
 
             // value can be the empty string but not null
-            error.VerifyThrowArgumentNull(value, "value");
-            
+            error.VerifyThrowArgumentNull(value, nameof(value));
+
             this.name = name;
             this.value = value;
             this.source = source;
@@ -54,7 +54,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// A description of the location where the property was defined,
-        /// such as a registry key path or a path to a config file and 
+        /// such as a registry key path or a path to a config file and
         /// line number.
         /// </summary>
         public string Source
@@ -65,7 +65,7 @@ namespace Microsoft.Build.BuildEngine
             }
         }
     }
-    
+
     internal abstract class ToolsetReader
     {
         /// <summary>
@@ -132,21 +132,17 @@ namespace Microsoft.Build.BuildEngine
             // The ordering here is important because the configuration file should have greater precedence
             // than the registry
             string defaultToolsVersionFromRegistry = null;
-
-            ToolsetRegistryReader registryReaderToUse = null;
             if ((locations & ToolsetDefinitionLocations.Registry) == ToolsetDefinitionLocations.Registry)
             {
-                registryReaderToUse = registryReader == null ? new ToolsetRegistryReader() : registryReader;
+                ToolsetRegistryReader registryReaderToUse = registryReader ?? new ToolsetRegistryReader();
                 // We do not accumulate properties when reading them from the registry, because the order
                 // in which values are returned to us is essentially random: so we disallow one property
                 // in the registry to refer to another also in the registry
-                defaultToolsVersionFromRegistry = 
+                defaultToolsVersionFromRegistry =
                     registryReaderToUse.ReadToolsets(toolsets, globalProperties, initialProperties, false /* do not accumulate properties */);
             }
 
             string defaultToolsVersionFromConfiguration = null;
-            
-            ToolsetConfigurationReader configurationReaderToUse = null;
             if ((locations & ToolsetDefinitionLocations.ConfigurationFile) == ToolsetDefinitionLocations.ConfigurationFile)
             {
                 if (configurationReader == null && ConfigurationFileMayHaveToolsets())
@@ -159,13 +155,13 @@ namespace Microsoft.Build.BuildEngine
 
                 if (configurationReader != null)
                 {
-                    configurationReaderToUse = configurationReader == null ? new ToolsetConfigurationReader() : configurationReader;
+                    ToolsetConfigurationReader configurationReaderToUse = configurationReader ?? new ToolsetConfigurationReader();
                     // Accumulation of properties is okay in the config file because it's deterministically ordered
                     defaultToolsVersionFromConfiguration =
                         configurationReaderToUse.ReadToolsets(toolsets, globalProperties, initialProperties, true /* accumulate properties */);
                 }
             }
-            
+
             // We'll use the default from the configuration file if it was specified, otherwise we'll try
             // the one from the registry.  It's possible (and valid) that neither the configuration file
             // nor the registry specify a default, in which case we'll just return null.
@@ -209,9 +205,9 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Creating a ToolsetConfigurationReader, and also reading toolsets from the 
-        /// configuration file, are a little expensive. To try to avoid this cost if it's 
-        /// not necessary, we'll check if the file exists first. If it exists, we'll scan for 
+        /// Creating a ToolsetConfigurationReader, and also reading toolsets from the
+        /// configuration file, are a little expensive. To try to avoid this cost if it's
+        /// not necessary, we'll check if the file exists first. If it exists, we'll scan for
         /// the string "toolsVersion" to see if it might actually have any tools versions
         /// defined in it.
         /// </summary>
@@ -252,7 +248,7 @@ namespace Microsoft.Build.BuildEngine
                                      BuildPropertyGroup initialProperties,
                                      bool accumulateProperties)
         {
-            error.VerifyThrowArgumentNull(toolsets, "toolsets");
+            error.VerifyThrowArgumentNull(toolsets, nameof(toolsets));
 
             ReadEachToolset(toolsets, globalProperties, initialProperties, accumulateProperties);
 
@@ -265,7 +261,7 @@ namespace Microsoft.Build.BuildEngine
             // they'll get a nice error saying that toolset isn't available and listing those that are.
             return defaultToolsVersion;
         }
-        
+
         /// <summary>
         /// Reads all the toolsets and populates the given ToolsetCollection with them
         /// </summary>
@@ -313,13 +309,13 @@ namespace Microsoft.Build.BuildEngine
             string toolsPath = null;
             string binPath = null;
             BuildPropertyGroup properties = new BuildPropertyGroup();
-            
+
             IEnumerable<PropertyDefinition> rawProperties = GetPropertyDefinitions(toolsVersion.Name);
             Expander expander = new Expander(initialProperties);
 
             foreach (PropertyDefinition property in rawProperties)
             {
-                if (0 == String.Compare(property.Name, ReservedPropertyNames.toolsPath, StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(property.Name, ReservedPropertyNames.toolsPath, StringComparison.OrdinalIgnoreCase))
                 {
                     toolsPath = ExpandProperty(property, expander);
                     toolsPath = ExpandRelativePathsRelativeToExeLocation(toolsPath);
@@ -334,7 +330,7 @@ namespace Microsoft.Build.BuildEngine
                         );
                     }
                 }
-                else if (0 == String.Compare(property.Name, ReservedPropertyNames.binPath, StringComparison.OrdinalIgnoreCase))
+                else if (String.Equals(property.Name, ReservedPropertyNames.binPath, StringComparison.OrdinalIgnoreCase))
                 {
                     binPath = ExpandProperty(property, expander);
                     binPath = ExpandRelativePathsRelativeToExeLocation(binPath);
@@ -360,7 +356,7 @@ namespace Microsoft.Build.BuildEngine
                     // It's an arbitrary property
                     string propertyValue = ExpandProperty(property, expander);
                     PropertyDefinition expandedProperty = new PropertyDefinition(property.Name, propertyValue, property.Source);
-                    
+
                     SetProperty(expandedProperty, properties, globalProperties);
 
                     if (accumulateProperties)
@@ -368,7 +364,7 @@ namespace Microsoft.Build.BuildEngine
                         SetProperty(expandedProperty, initialProperties, globalProperties);
                     }
                 }
-                
+
                 if (accumulateProperties)
                 {
                     expander = new Expander(initialProperties);
@@ -388,10 +384,10 @@ namespace Microsoft.Build.BuildEngine
             }
 
             Toolset toolset = null;
-            
+
             try
             {
-                toolset = new Toolset(toolsVersion.Name, toolsPath == null ? binPath : toolsPath, properties);
+                toolset = new Toolset(toolsVersion.Name, toolsPath ?? binPath, properties);
             }
             catch (ArgumentException e)
             {

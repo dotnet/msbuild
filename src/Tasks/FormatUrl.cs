@@ -19,8 +19,13 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
+#if RUNTIME_TYPE_NETCORE
+            Log.LogErrorFromResources("TaskRequiresFrameworkFailure", nameof(FormatUrl));
+            return false;
+#else
             OutputUrl = InputUrl != null ? PathUtil.Format(InputUrl) : String.Empty;
             return true;
+#endif
         }
     }
 }

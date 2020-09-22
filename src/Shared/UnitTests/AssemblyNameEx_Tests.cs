@@ -368,25 +368,25 @@ namespace Microsoft.Build.UnitTests
             extension = new AssemblyNameExtension("A, Version=2.0.0.0, PublicKeyToken=b03f5f7f11d50a3a");
             Assert.Equal("A", extension.Name);
             Assert.True(extension.Version.Equals(new Version("2.0.0.0")));
-            Assert.True(Object.ReferenceEquals(extension.CultureInfo, null));
+            Assert.True(extension.CultureInfo is null);
             Assert.Contains("b03f5f7f11d50a3a", extension.FullName);
 
             extension = new AssemblyNameExtension("A, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
             Assert.Equal("A", extension.Name);
-            Assert.True(Object.ReferenceEquals(extension.Version, null));
+            Assert.True(extension.Version is null);
             Assert.True(extension.CultureInfo.Equals(new CultureInfo("en")));
             Assert.Contains("b03f5f7f11d50a3a", extension.FullName);
 
             extension = new AssemblyNameExtension("A, PublicKeyToken=b03f5f7f11d50a3a");
             Assert.Equal("A", extension.Name);
-            Assert.True(Object.ReferenceEquals(extension.Version, null));
-            Assert.True(Object.ReferenceEquals(extension.CultureInfo, null));
+            Assert.True(extension.Version is null);
+            Assert.True(extension.CultureInfo is null);
             Assert.Contains("b03f5f7f11d50a3a", extension.FullName);
 
             extension = new AssemblyNameExtension("A");
             Assert.Equal("A", extension.Name);
-            Assert.True(Object.ReferenceEquals(extension.Version, null));
-            Assert.True(Object.ReferenceEquals(extension.CultureInfo, null));
+            Assert.True(extension.Version is null);
+            Assert.True(extension.CultureInfo is null);
         }
 
         /// <summary>
@@ -712,7 +712,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VerifyAssemblyNameExSerializationWithRemappedFrom()
         {
-            
             AssemblyNameExtension assemblyNameOriginal = new AssemblyNameExtension("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension assemblyRemappedFrom = new AssemblyNameExtension("System.Xml, Version=9.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
             assemblyRemappedFrom.MarkImmutable();

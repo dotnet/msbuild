@@ -23,7 +23,7 @@ namespace Microsoft.Build.Framework
     public class BuildWarningEventArgs : LazyFormattedBuildEventArgs
     {
         /// <summary>
-        /// Default constructor 
+        /// Default constructor
         /// </summary>
         protected BuildWarningEventArgs()
             : base()
@@ -123,6 +123,42 @@ namespace Microsoft.Build.Framework
             string senderName,
             DateTime eventTimestamp,
             params object[] messageArgs
+        ) : this(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, null, eventTimestamp, messageArgs)
+        {
+            // do nothing
+        }
+
+        /// <summary>
+        /// This constructor allows timestamp to be set
+        /// </summary>
+        /// <param name="subcategory">event subcategory</param>
+        /// <param name="code">event code</param>
+        /// <param name="file">file associated with the event</param>
+        /// <param name="lineNumber">line number (0 if not applicable)</param>
+        /// <param name="columnNumber">column number (0 if not applicable)</param>
+        /// <param name="endLineNumber">end line number (0 if not applicable)</param>
+        /// <param name="endColumnNumber">end column number (0 if not applicable)</param>
+        /// <param name="message">text message</param>
+        /// <param name="helpKeyword">help keyword </param>
+        /// <param name="helpLink">A link pointing to more  information about the warning</param>
+        /// <param name="senderName">name of event sender</param>
+        /// <param name="eventTimestamp">custom timestamp for the event</param>
+        /// <param name="messageArgs">message arguments</param>
+        public BuildWarningEventArgs
+        (
+            string subcategory,
+            string code,
+            string file,
+            int lineNumber,
+            int columnNumber,
+            int endLineNumber,
+            int endColumnNumber,
+            string message,
+            string helpKeyword,
+            string senderName,
+            string helpLink,
+            DateTime eventTimestamp,
+            params object[] messageArgs
         )
             : base(message, helpKeyword, senderName, eventTimestamp, messageArgs)
         {
@@ -133,6 +169,7 @@ namespace Microsoft.Build.Framework
             this.columnNumber = columnNumber;
             this.endLineNumber = endLineNumber;
             this.endColumnNumber = endColumnNumber;
+            this.helpLink = helpLink;
         }
 
         private string subcategory;
@@ -143,6 +180,7 @@ namespace Microsoft.Build.Framework
         private int columnNumber;
         private int endLineNumber;
         private int endColumnNumber;
+        private string helpLink;
 
         #region CustomSerializationToStream
         /// <summary>
@@ -162,6 +200,8 @@ namespace Microsoft.Build.Framework
             writer.Write((Int32)columnNumber);
             writer.Write((Int32)endLineNumber);
             writer.Write((Int32)endColumnNumber);
+
+            writer.WriteOptionalString(helpLink);
         }
 
         /// <summary>
@@ -186,41 +226,50 @@ namespace Microsoft.Build.Framework
             columnNumber = reader.ReadInt32();
             endLineNumber = reader.ReadInt32();
             endColumnNumber = reader.ReadInt32();
+
+            if (version >= 40)
+            {
+                helpLink = reader.ReadByte() == 0 ? null : reader.ReadString();
+            }
+            else
+            {
+                helpLink = null;
+            }
         }
         #endregion
 
         /// <summary>
-        /// The custom sub-type of the event.         
+        /// The custom sub-type of the event.
         /// </summary>
         public string Subcategory => subcategory;
 
         /// <summary>
-        /// Code associated with event. 
+        /// Code associated with event.
         /// </summary>
         public string Code => code;
 
         /// <summary>
-        /// File associated with event.   
+        /// File associated with event.
         /// </summary>
         public string File => file;
 
         /// <summary>
-        /// Line number of interest in associated file. 
+        /// Line number of interest in associated file.
         /// </summary>
         public int LineNumber => lineNumber;
 
         /// <summary>
-        /// Column number of interest in associated file. 
+        /// Column number of interest in associated file.
         /// </summary>
         public int ColumnNumber => columnNumber;
 
         /// <summary>
-        /// Ending line number of interest in associated file. 
+        /// Ending line number of interest in associated file.
         /// </summary>
         public int EndLineNumber => endLineNumber;
 
         /// <summary>
-        /// Ending column number of interest in associated file. 
+        /// Ending column number of interest in associated file.
         /// </summary>
         public int EndColumnNumber => endColumnNumber;
 
@@ -232,5 +281,10 @@ namespace Microsoft.Build.Framework
             get => projectFile;
             set => projectFile = value;
         }
+
+        /// <summary>
+        /// A link pointing to more information about the warning.
+        /// </summary>
+        public string HelpLink => helpLink;
     }
 }

@@ -257,12 +257,12 @@ namespace Microsoft.Build.BackEnd
 
             if (_taskFactoryWrapper.TaskFactoryLoadedType.HasSTAThreadAttribute())
             {
-                requirements = requirements | TaskRequirements.RequireSTAThread;
+                requirements |= TaskRequirements.RequireSTAThread;
             }
 
             if (_taskFactoryWrapper.TaskFactoryLoadedType.HasLoadInSeparateAppDomainAttribute())
             {
-                requirements = requirements | TaskRequirements.RequireSeparateAppDomain;
+                requirements |= TaskRequirements.RequireSeparateAppDomain;
 
                 // we're going to be remoting across the appdomain boundary, so
                 // create the list that we'll use to disconnect the taskitems once we're done
@@ -294,7 +294,7 @@ namespace Microsoft.Build.BackEnd
             // here. Instead, NDP will try to Load (not LoadFrom!) the task assembly into our AppDomain, and since
             // we originally used LoadFrom, it will fail miserably not knowing where to find it.
             // We need to temporarily subscribe to the AppDomain.AssemblyResolve event to fix it.
-            if (null == _resolver)
+            if (_resolver == null)
             {
                 _resolver = new TaskEngineAssemblyResolver();
                 _resolver.Initialize(_taskFactoryWrapper.TaskFactoryLoadedType.Assembly.AssemblyFile);
@@ -865,19 +865,19 @@ namespace Microsoft.Build.BackEnd
             if (!_intrinsicTasks.TryGetValue(_taskName, out TaskFactoryWrapper returnClass))
             {
                 returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, taskIdentityParameters, true /* exact match */, _targetLoggingContext, _taskLocation);
-                if (null == returnClass)
+                if (returnClass == null)
                 {
                     returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, taskIdentityParameters, false /* fuzzy match */, _targetLoggingContext, _taskLocation);
 
-                    if (null == returnClass)
+                    if (returnClass == null)
                     {
                         returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, null, true /* exact match */, _targetLoggingContext, _taskLocation);
 
-                        if (null == returnClass)
+                        if (returnClass == null)
                         {
                             returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, null, false /* fuzzy match */, _targetLoggingContext, _taskLocation);
 
-                            if (null == returnClass)
+                            if (returnClass == null)
                             {
                                 _targetLoggingContext.LogError
                                     (
@@ -1480,7 +1480,7 @@ namespace Microsoft.Build.BackEnd
                         // if individual items in the array are null, ignore them
                         if (output != null)
                         {
-                            joinedOutputs = joinedOutputs ?? new StringBuilder();
+                            joinedOutputs ??= new StringBuilder();
 
                             if (joinedOutputs.Length > 0)
                             {
@@ -1556,7 +1556,7 @@ namespace Microsoft.Build.BackEnd
                         // if individual outputs in the array are null, ignore them
                         if (output != null)
                         {
-                            joinedOutputs = joinedOutputs ?? new StringBuilder();
+                            joinedOutputs ??= new StringBuilder();
 
                             if (joinedOutputs.Length > 0)
                             {

@@ -26,6 +26,7 @@ namespace Microsoft.Build
         /// adds the resulting string to the cache, and returns it, setting cacheHit to false.
         /// </summary>
         /// <param name="internable">The internable describing the string we're looking for.</param>
+        /// <param name="cacheHit">true if match found in cache, false otherwise.</param>
         /// <returns>A string matching the given internable.</returns>
         /// <remarks>
         /// This method performs two operations on the underlying ConcurrentDictionary on both cache hit and cache miss.

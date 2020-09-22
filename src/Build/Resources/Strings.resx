@@ -1831,4 +1831,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="StaticGraphConstructionMetrics" xml:space="preserve">
     <value>"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</value>
   </data>
+  <data name="IsolatedContextDoesNotSupportFileSystem" xml:space="preserve">
+    <value>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</value>
+  </data>
+  <data name="RarControllerReflectionError" xml:space="preserve">
+    <value>Couldn't create an instance of IRarController for '{0}' type</value>
+  </data>
 </root>

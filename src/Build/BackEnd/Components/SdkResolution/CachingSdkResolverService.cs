@@ -12,7 +12,6 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
-
     internal sealed class CachingSdkResolverService: SdkResolverService
     {
         /// <summary>
@@ -34,13 +33,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _cache.Clear();
         }
 
-        public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive)
+        public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
             SdkResult result;
 
             if (Traits.Instance.EscapeHatches.DisableSdkResolutionCache)
             {
-                result = base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive);
+                result = base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
             }
             else
             {
@@ -53,7 +52,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                  */
                 Lazy<SdkResult> resultLazy = cached.GetOrAdd(
                     sdk.Name,
-                    key => new Lazy<SdkResult>(() => base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive)));
+                    key => new Lazy<SdkResult>(() => base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio)));
 
                 // Get the lazy value which will block all waiting threads until the SDK is resolved at least once while subsequent calls get cached results.
                 result = resultLazy.Value;

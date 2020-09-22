@@ -8,17 +8,18 @@ using System.IO;
 using System.IO.Pipes;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
-using Microsoft.Build.Shared;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
-
-using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
-using System.Threading.Tasks;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+
+using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -75,7 +76,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         protected void SendData(NodeContext context, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, "packet");
+            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
             context.SendData(packet);
         }
 
@@ -91,19 +92,14 @@ namespace Microsoft.Build.BackEnd
 
             foreach (NodeContext nodeContext in contextsToShutDown)
             {
-                if (null != nodeContext)
-                {
-                    nodeContext.SendData(new NodeBuildComplete(enableReuse));
-                }
+                nodeContext?.SendData(new NodeBuildComplete(enableReuse));
             }
         }
 
         /// <summary>
         /// Shuts down all of the managed nodes permanently.
         /// </summary>
-        /// <param name="hostHandshake">host handshake key</param>
-        /// <param name="hostHandshakeWithLowPriority">host handshake key with low priority added</param>
-        /// <param name="clientHandshake">client handshake key</param>
+        /// <param name="nodeReuse">Whether to reuse the node</param>
         /// <param name="terminateNode">Delegate used to tell the node provider that a context has terminated</param>
         protected void ShutdownAllNodes(bool nodeReuse, NodeContextTerminateDelegate terminateNode)
         {
@@ -125,15 +121,18 @@ namespace Microsoft.Build.BackEnd
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.
-                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHostHandshake(nodeReuse, false), NodeProviderOutOfProc.GetClientHandshake(nodeReuse, false));
+                Stream nodeStream = NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: false, specialNode: false));
 
-                if (null == nodeStream)
-                {
-                    // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHostHandshake(nodeReuse, true), NodeProviderOutOfProc.GetClientHandshake(nodeReuse, true));
-                }
+                // If we couldn't connect attempt to connect to the process with the handshake including low priority.
+                nodeStream ??= NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: true, specialNode: false));
 
-                if (null != nodeStream)
+                // Attempt to connect to the non-worker process
+                // Attempt to connect to the process with the handshake without low priority.
+                nodeStream ??= NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: false, specialNode: true));
+                // If we couldn't connect attempt to connect to the process with the handshake including low priority.
+                nodeStream ??= NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: true, specialNode: true));
+
+                if (nodeStream != null)
                 {
                     // If we're able to connect to such a process, send a packet requesting its termination
                     CommunicationsUtilities.Trace("Shutting down node with pid = {0}", nodeProcess.Id);
@@ -148,7 +147,7 @@ namespace Microsoft.Build.BackEnd
         /// Finds or creates a child process which can act as a node.
         /// </summary>
         /// <returns>The pipe stream representing the node.</returns>
-        protected NodeContext GetNode(string msbuildLocation, string commandLineArgs, int nodeId, INodePacketFactory factory, long hostHandshake, long clientHandshake, NodeContextTerminateDelegate terminateNode)
+        protected NodeContext GetNode(string msbuildLocation, string commandLineArgs, int nodeId, INodePacketFactory factory, Handshake hostHandshake, NodeContextTerminateDelegate terminateNode)
         {
 #if DEBUG
             if (Execution.BuildManager.WaitForDebugger)
@@ -188,7 +187,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     // Get the full context of this inspection so that we can always skip this process when we have the same taskhost context
-                    string nodeLookupKey = GetProcessesToIgnoreKey(hostHandshake, clientHandshake, nodeProcess.Id);
+                    string nodeLookupKey = GetProcessesToIgnoreKey(hostHandshake, nodeProcess.Id);
                     if (_processesToIgnore.Contains(nodeLookupKey))
                     {
                         continue;
@@ -198,7 +197,7 @@ namespace Microsoft.Build.BackEnd
                     _processesToIgnore.Add(nodeLookupKey);
 
                     // Attempt to connect to each process in turn.
-                    Stream nodeStream = TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake, clientHandshake);
+                    Stream nodeStream = NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
@@ -242,14 +241,14 @@ namespace Microsoft.Build.BackEnd
 
                 // Create the node process
                 int msbuildProcessId = LaunchNode(msbuildLocation, commandLineArgs);
-                _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, clientHandshake, msbuildProcessId));
+                _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, msbuildProcessId));
 
                 // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
                 // gotten back from CreateProcess is that of the debugger, which causes this to try to connect
                 // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
 
                 // Now try to connect to it.
-                Stream nodeStream = TryConnectToProcess(msbuildProcessId, TimeoutForNewNodeCreation, hostHandshake, clientHandshake);
+                Stream nodeStream = NamedPipeUtil.TryConnectToProcess(msbuildProcessId, TimeoutForNewNodeCreation, hostHandshake);
                 if (nodeStream != null)
                 {
                     // Connection successful, use this node.
@@ -292,111 +291,18 @@ namespace Microsoft.Build.BackEnd
         /// Generate a string from task host context and the remote process to be used as key to lookup processes we have already
         /// attempted to connect to or are already connected to
         /// </summary>
-        private string GetProcessesToIgnoreKey(long hostHandshake, long clientHandshake, int nodeProcessId)
+        private string GetProcessesToIgnoreKey(Handshake hostHandshake, int nodeProcessId)
         {
-            return hostHandshake.ToString(CultureInfo.InvariantCulture) + "|" + clientHandshake.ToString(CultureInfo.InvariantCulture) + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
-        }
-
-#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-        //  This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
-        //  on non-Windows operating systems
-        private void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
-        {
-            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
-#if FEATURE_PIPE_SECURITY
-            PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
-#else
-            var remoteSecurity = new PipeSecurity(nodeStream.SafePipeHandle, System.Security.AccessControl.AccessControlSections.Access |
-                System.Security.AccessControl.AccessControlSections.Owner | System.Security.AccessControl.AccessControlSections.Group);
-#endif
-            IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
-            if (remoteOwner != identifier)
-            {
-                CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
-                throw new UnauthorizedAccessException();
-            }
-        }
-#endif
-
-        /// <summary>
-        /// Attempts to connect to the specified process.
-        /// </summary>
-        private Stream TryConnectToProcess(int nodeProcessId, int timeout, long hostHandshake, long clientHandshake)
-        {
-            // Try and connect to the process.
-            string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + nodeProcessId);
-
-            NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
-#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                                                                         | PipeOptions.CurrentUserOnly
-#endif
-                                                                         );
-            CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId, pipeName, timeout);
-
-            try
-            {
-                nodeStream.Connect(timeout);
-
-#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                if (NativeMethodsShared.IsWindows && !NativeMethodsShared.IsMono)
-                {
-                    // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
-                    // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
-                    // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
-                    // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
-                    // remote node could set the owner to something else would also let it change owners on other objects, so
-                    // this would be a security flaw upstream of us.
-                    ValidateRemotePipeSecurityOnWindows(nodeStream);
-
-                }
-#endif
-
-                CommunicationsUtilities.Trace("Writing handshake to pipe {0}", pipeName);
-                nodeStream.WriteLongForHandshake(hostHandshake);
-
-                CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
-#if NETCOREAPP2_1 || MONO
-                long handshake = nodeStream.ReadLongForHandshake(timeout);
-#else
-                long handshake = nodeStream.ReadLongForHandshake();
-#endif
-
-                if (handshake != clientHandshake)
-                {
-                    CommunicationsUtilities.Trace("Handshake failed. Received {0} from client not {1}. Probably the client is a different MSBuild build.", handshake, clientHandshake);
-                    throw new InvalidOperationException();
-                }
-
-                // We got a connection.
-                CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
-                return nodeStream;
-            }
-            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-            {
-                // Can be:
-                // UnauthorizedAccessException -- Couldn't connect, might not be a node.
-                // IOException -- Couldn't connect, already in use.
-                // TimeoutException -- Couldn't connect, might not be a node.
-                // InvalidOperationException – Couldn’t connect, probably a different build
-                CommunicationsUtilities.Trace("Failed to connect to pipe {0}. {1}", pipeName, e.Message.TrimEnd());
-
-                // If we don't close any stream, we might hang up the child
-                if (nodeStream != null)
-                {
-                    nodeStream.Dispose();
-                }
-            }
-
-            return null;
+            return hostHandshake.ToString() + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>
         /// Creates a new MSBuild process
         /// </summary>
-        private int LaunchNode(string msbuildLocation, string commandLineArgs)
+        internal static int LaunchNode(string msbuildLocation, string commandLineArgs)
         {
             // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, "msbuildLocation");
+            ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
 
             if (!FileSystems.Default.FileExists(msbuildLocation))
             {
@@ -429,12 +335,12 @@ namespace Microsoft.Build.BackEnd
                     startInfo.hStdInput = BackendNativeMethods.InvalidHandle;
                     startInfo.hStdOutput = BackendNativeMethods.InvalidHandle;
                     startInfo.dwFlags = BackendNativeMethods.STARTFUSESTDHANDLES;
-                    creationFlags = creationFlags | BackendNativeMethods.CREATENOWINDOW;
+                    creationFlags |= BackendNativeMethods.CREATENOWINDOW;
                 }
             }
             else
             {
-                creationFlags = creationFlags | BackendNativeMethods.CREATE_NEW_CONSOLE;
+                creationFlags |= BackendNativeMethods.CREATE_NEW_CONSOLE;
             }
 
             BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new BackendNativeMethods.SECURITY_ATTRIBUTES();
@@ -458,7 +364,6 @@ namespace Microsoft.Build.BackEnd
 
             if (!NativeMethodsShared.IsWindows)
             {
-
                 ProcessStartInfo processStartInfo = new ProcessStartInfo();
                 processStartInfo.FileName = exeName;
                 processStartInfo.Arguments = commandLineArgs;
@@ -829,7 +734,7 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
                         Process childProcess = Process.GetProcessById(_processId);
-                        if (childProcess == null || childProcess.HasExited)
+                        if (childProcess?.HasExited != false)
                         {
                             CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} has exited.", _processId);
                         }
@@ -887,6 +792,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 int packetLength = BitConverter.ToInt32(_headerByte, 1);
+                MSBuildEventSource.Log.PacketReadSize(packetLength);
 
                 byte[] packetData;
                 if (packetLength < _smallReadBuffer.Length)

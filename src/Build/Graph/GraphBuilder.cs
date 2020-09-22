@@ -347,7 +347,6 @@ namespace Microsoft.Build.Graph
                     solutionDependencies[FileUtilities.NormalizePath(projectWithDependencies.AbsolutePath)] = projectWithDependencies.Dependencies.Select(
                         dependencyGuid =>
                         {
-
                             // code snippet cloned from SolutionProjectGenerator.AddPropertyGroupForSolutionConfiguration
 
                             if (!solutionFile.ProjectsByGuid.TryGetValue(dependencyGuid, out var dependencyProject))
@@ -576,8 +575,7 @@ namespace Microsoft.Build.Graph
                 if (i != 0)
                 {
                     errorMessage.Append(projectsInCycle[i])
-                        .Append(" ->")
-                        .AppendLine();
+                        .AppendLine(" ->");
                 }
                 else
                 {

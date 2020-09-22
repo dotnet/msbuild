@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks
         {
             MessageImportance messageImportance;
 
-            if ((Importance == null) || (Importance.Length == 0))
+            if (string.IsNullOrEmpty(Importance))
             {
                 messageImportance = MessageImportance.Normal;
             }

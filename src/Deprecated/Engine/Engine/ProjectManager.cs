@@ -156,7 +156,7 @@ namespace Microsoft.Build.BuildEngine
             // Get the list of projects that have this full path.
             ArrayList projectsWithThisFullPath = (ArrayList) this.projects[projectFileFullPath];
 
-            if ((projectsWithThisFullPath != null) && (projectsWithThisFullPath.Count > 0))
+            if ((projectsWithThisFullPath?.Count > 0))
             {
                 return (Project) projectsWithThisFullPath[0];
             }
@@ -396,7 +396,7 @@ namespace Microsoft.Build.BuildEngine
                 // Loop through them and find the one with the matching set of global properties.
                 foreach (ProjectEntry projectEntry in projectsWithFullPath)
                 {
-                    if ((String.Compare(projectEntry.toolsVersion, toolsVersion, StringComparison.OrdinalIgnoreCase) == 0) &&
+                    if ((String.Equals(projectEntry.toolsVersion, toolsVersion, StringComparison.OrdinalIgnoreCase)) &&
                         projectEntry.globalProperties.IsEquivalent(globalProperties))
                     {
                         return projectEntry;

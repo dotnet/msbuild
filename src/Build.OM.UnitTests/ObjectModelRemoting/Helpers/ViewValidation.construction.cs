@@ -57,7 +57,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public ElementLinkPair<CT> AddNewChaildWithVerify<CT>(ObjectType where, string id, Func<T, string, CT> adder, Func<CT, string, bool> matcher)
             where CT : ProjectElement
         {
-
             var c1Where = adder(this.Get(where), id);
             Assert.NotNull(c1Where);
 

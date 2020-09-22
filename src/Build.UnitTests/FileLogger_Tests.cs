@@ -13,8 +13,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 
-
-
 using EventSourceSink = Microsoft.Build.BackEnd.Logging.EventSourceSink;
 using Project = Microsoft.Build.Evaluation.Project;
 using Xunit;
@@ -66,13 +64,12 @@ namespace Microsoft.Build.UnitTests
                 SetUpFileLoggerAndLogMessage("logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 VerifyFileContent(log, "message here");
 
-
                 byte[] content = ReadRawBytes(log);
                 Assert.Equal((byte)109, content[0]); // 'm'
             }
             finally
             {
-                if (null != log) File.Delete(log);
+                if (log != null) File.Delete(log);
             }
         }
 
@@ -95,7 +92,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    if (null != log) File.Delete(log);
+                    if (log != null) File.Delete(log);
                 }
             }
            );
@@ -124,7 +121,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (null != log) File.Delete(log);
+                if (log != null) File.Delete(log);
             }
         }
 
@@ -197,7 +194,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    if (null != log) File.Delete(log);
+                    if (log != null) File.Delete(log);
                 }
             }
            );
@@ -223,7 +220,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (null != log) File.Delete(log);
+                if (log != null) File.Delete(log);
             }
         }
 
@@ -248,7 +245,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (null != log) File.Delete(log);
+                if (log != null) File.Delete(log);
             }
         }
 
@@ -290,7 +287,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (null != log) File.Delete(log);
+                if (log != null) File.Delete(log);
             }
         }
 
@@ -311,7 +308,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (null != log) File.Delete(log);
+                if (log != null) File.Delete(log);
             }
         }
 

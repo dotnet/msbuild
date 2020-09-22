@@ -8,7 +8,6 @@ using System.Collections.Generic;
 
 namespace Microsoft.Build.ObjectModelRemoting
 {
-
     /// <summary>
     /// implemented by MSBuild objects that support remote linking;
     /// </summary>
@@ -76,15 +75,15 @@ namespace Microsoft.Build.ObjectModelRemoting
 
         public ProjectItem Create(ProjectItemLink link, Project project = null, ProjectItemElement xml = null)
         {
-            project = project ?? link.Project;
-            xml = xml ?? link.Xml;
+            project ??= link.Project;
+            xml ??= link.Xml;
 
             return new LinkedProjectItem(xml, project, link);
         }
 
         public ProjectItemDefinition Create(ProjectItemDefinitionLink link, Project project = null)
         {
-            project = project ?? link.Project;
+            project ??= link.Project;
 
             return new LinkedProjectItemDefinition(link, project, link.ItemType);
         }
@@ -101,14 +100,14 @@ namespace Microsoft.Build.ObjectModelRemoting
 
         public ProjectMetadata Create(ProjectMetadataLink link, object parent = null)
         {
-            parent = parent ?? link.Parent;
+            parent ??= link.Parent;
 
             return new LinkedProjectMetadata(parent, link);
         }
 
         public ProjectProperty Create(ProjectPropertyLink link, Project project = null )
         {
-            project = project ?? link.Project;
+            project ??= link.Project;
 
             return new LinkedProjectProperty(project, link);
         }
@@ -270,7 +269,6 @@ namespace Microsoft.Build.ObjectModelRemoting
 
             internal override ProjectMetadataLink Link { get; }
             object ILinkableObject.Link => Link;
-
         }
 
         private class LinkedProjectProperty : ProjectProperty, ILinkableObject
@@ -310,10 +308,9 @@ namespace Microsoft.Build.ObjectModelRemoting
 
             public override bool IsImported => Link.IsImported;
 
-            internal override string EvaluatedValueEscapedIntenral => Link.EvaluatedIncludeEscaped;
+            internal override string EvaluatedValueEscapedInternal => Link.EvaluatedIncludeEscaped;
         }
         #endregion
     }
-
 
 }

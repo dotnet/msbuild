@@ -29,18 +29,20 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             Warnings = warnings;
         }
 
-        public SdkResult(SdkReference sdkReference, string path, string version, IEnumerable<string> warnings)
+        public SdkResult(SdkReference sdkReference, string path, string version, IEnumerable<string> warnings,
+            IDictionary<string, string> propertiesToAdd = null, IDictionary<string, SdkResultItem> itemsToAdd = null)
         {
             Success = true;
             SdkReference = sdkReference;
             Path = path;
             Version = version;
             Warnings = warnings;
+            PropertiesToAdd = propertiesToAdd;
+            ItemsToAdd = itemsToAdd;
         }
 
         public SdkResult()
         {
-
         }
 
         public SdkResult(SdkReference sdkReference, IEnumerable<string> paths, string version, IDictionary<string, string> propertiesToAdd,
@@ -152,32 +154,32 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         public override int GetHashCode()
         {
             int hashCode = -1043047289;
-            hashCode = hashCode * -1521134295 + _success.GetHashCode();
-            hashCode = hashCode * -1521134295 + StringComparer.OrdinalIgnoreCase.GetHashCode(_path);
-            hashCode = hashCode * -1521134295 + StringComparer.OrdinalIgnoreCase.GetHashCode(_version);
-            hashCode = hashCode * -1521134295 + EqualityComparer<SdkReference>.Default.GetHashCode(_sdkReference);
+            hashCode = (hashCode * -1521134295) + _success.GetHashCode();
+            hashCode = (hashCode * -1521134295) + StringComparer.OrdinalIgnoreCase.GetHashCode(_path);
+            hashCode = (hashCode * -1521134295) + StringComparer.OrdinalIgnoreCase.GetHashCode(_version);
+            hashCode = (hashCode * -1521134295) + EqualityComparer<SdkReference>.Default.GetHashCode(_sdkReference);
 
             if (_additionalPaths != null)
             {
                 foreach (var additionalPath in _additionalPaths)
                 {
-                    hashCode = hashCode * -1521134295 + StringComparer.OrdinalIgnoreCase.GetHashCode(additionalPath);
+                    hashCode = (hashCode * -1521134295) + StringComparer.OrdinalIgnoreCase.GetHashCode(additionalPath);
                 }
             }
             if (_propertiesToAdd != null)
             {
                 foreach (var propertyToAdd in _propertiesToAdd)
                 {
-                    hashCode = hashCode * -1521134295 + propertyToAdd.Key.GetHashCode();
-                    hashCode = hashCode * -1521134295 + propertyToAdd.Value.GetHashCode();
+                    hashCode = (hashCode * -1521134295) + propertyToAdd.Key.GetHashCode();
+                    hashCode = (hashCode * -1521134295) + propertyToAdd.Value.GetHashCode();
                 }
             }
             if (_itemsToAdd != null)
             {
                 foreach (var itemToAdd in _itemsToAdd)
                 {
-                    hashCode = hashCode * -1521134295 + itemToAdd.Key.GetHashCode();
-                    hashCode = hashCode * -1521134295 + itemToAdd.Value.GetHashCode();
+                    hashCode = (hashCode * -1521134295) + itemToAdd.Key.GetHashCode();
+                    hashCode = (hashCode * -1521134295) + itemToAdd.Value.GetHashCode();
                 }
             }
 

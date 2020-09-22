@@ -16,6 +16,11 @@ namespace Microsoft.Build.Framework
         public virtual bool Interactive { get; protected set; }
 
         /// <summary>
+        /// Gets a value indicating if the resolver is running in Visual Studio.
+        /// </summary>
+        public virtual bool IsRunningInVisualStudio { get; protected set; }
+
+        /// <summary>
         ///     Logger to log real-time messages back to MSBuild.
         /// </summary>
         public virtual SdkLogger Logger { get; protected set; }

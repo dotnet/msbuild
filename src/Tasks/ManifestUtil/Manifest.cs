@@ -69,6 +69,19 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
+        /// Assembly name passed to the manifest generation task
+        /// </summary>
+        [XmlIgnore]
+        public string AssemblyName { get; set; }
+
+        /// <summary>
+        /// Indicates if manifest is part of Launcher-based deployment, which requires
+        /// somewhat different manifest generation and validation.
+        /// </summary>
+        [XmlIgnore]
+        public bool LauncherBasedDeployment { get; set; } = false;
+
+        /// <summary>
         /// Specifies a textual description for the manifest.
         /// </summary>
         [XmlIgnore]
@@ -424,21 +437,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             if (a.AssemblyIdentity == null)
             {
-                switch (a.ReferenceType)
+                a.AssemblyIdentity = a.ReferenceType switch
                 {
-                    case AssemblyReferenceType.ClickOnceManifest:
-                        a.AssemblyIdentity = AssemblyIdentity.FromManifest(a.ResolvedPath);
-                        break;
-                    case AssemblyReferenceType.ManagedAssembly:
-                        a.AssemblyIdentity = AssemblyIdentity.FromManagedAssembly(a.ResolvedPath);
-                        break;
-                    case AssemblyReferenceType.NativeAssembly:
-                        a.AssemblyIdentity = AssemblyIdentity.FromNativeAssembly(a.ResolvedPath);
-                        break;
-                    default:
-                        a.AssemblyIdentity = AssemblyIdentity.FromFile(a.ResolvedPath);
-                        break;
-                }
+                    AssemblyReferenceType.ClickOnceManifest => AssemblyIdentity.FromManifest(a.ResolvedPath),
+                    AssemblyReferenceType.ManagedAssembly => AssemblyIdentity.FromManagedAssembly(a.ResolvedPath),
+                    AssemblyReferenceType.NativeAssembly => AssemblyIdentity.FromNativeAssembly(a.ResolvedPath),
+                    _ => AssemblyIdentity.FromFile(a.ResolvedPath),
+                };
             }
 
             if (!a.IsPrerequisite)
@@ -474,7 +479,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-        private static void UpdateFileReference(BaseReference f, string targetFrameworkVersion)
+        private void UpdateFileReference(BaseReference f, string targetFrameworkVersion)
         {
             if (String.IsNullOrEmpty(f.ResolvedPath))
             {
@@ -493,6 +498,21 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             f.Hash = hash;
             f.Size = size;
+
+            //
+            // .NETCore Launcher.exe based Deployment: If the filereference is for apphost.exe, we need to change
+            // the ResolvedPath and TargetPath to {assemblyname}.exe before we write the manifest, so that the
+            // manifest does not have a file reference to apphost.exe
+            //
+            string fileName = Path.GetFileName(f.ResolvedPath);
+            if (LauncherBasedDeployment &&
+                fileName.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) &&
+                !String.IsNullOrEmpty(AssemblyName))
+            {
+                f.ResolvedPath = Path.Combine(Path.GetDirectoryName(f.ResolvedPath), AssemblyName);
+                f.TargetPath = BaseReference.GetDefaultTargetPath(f.ResolvedPath);
+            }
+
             if (String.IsNullOrEmpty(f.TargetPath))
             {
                 if (!String.IsNullOrEmpty(f.SourcePath))
@@ -597,7 +617,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     {
                         identityList.Add(key, false);
                     }
-                    else if (identityList[key] == false)
+                    else if (!identityList[key])
                     {
                         OutputMessages.AddWarningMessage("GenerateManifest.DuplicateAssemblyIdentity", identity);
                         identityList[key] = true; // only warn once per identity

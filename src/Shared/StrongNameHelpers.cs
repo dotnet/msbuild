@@ -143,7 +143,7 @@ namespace Microsoft.Runtime.Hosting
         public static bool StrongNameSignatureGeneration(string pwzFilePath, string pwzKeyContainer, IntPtr pbKeyBlob, int cbKeyBlob)
         {
             IntPtr ppbSignatureBlob = IntPtr.Zero;
-            int cbSignatureBlob = 0;
+            int cbSignatureBlob;
             return StrongNameSignatureGeneration(pwzFilePath, pwzKeyContainer, pbKeyBlob, cbKeyBlob, ref ppbSignatureBlob, out cbSignatureBlob);
         }
 
@@ -280,7 +280,7 @@ namespace Microsoft.Runtime.Hosting
         public static bool StrongNameSignatureGeneration(string pwzFilePath, string pwzKeyContainer, byte[] bKeyBlob, int cbKeyBlob)
         {
             IntPtr ppbSignatureBlob = IntPtr.Zero;
-            int cbSignatureBlob = 0;
+            int cbSignatureBlob;
             return StrongNameSignatureGeneration(pwzFilePath, pwzKeyContainer, bKeyBlob, cbKeyBlob, ref ppbSignatureBlob, out cbSignatureBlob);
         }
 

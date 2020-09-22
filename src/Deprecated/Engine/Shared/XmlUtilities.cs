@@ -44,11 +44,11 @@ namespace Microsoft.Build.BuildEngine.Shared
                 newElement.AppendChild(newChildNode);
             }
 
-            if (oldElement.ParentNode != null)
-            {
+               
+            
                 // Add the new element in the same place the old element was.
-                oldElement.ParentNode.ReplaceChild(newElement, oldElement);
-            }
+                oldElement.ParentNode?.ReplaceChild(newElement, oldElement);
+            
 
             return newElement;
         }
@@ -69,7 +69,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             string file = defaultFile;
 
             // NOTE: the XML node may not have a filename if it's purely an in-memory node
-            if ((node.OwnerDocument.BaseURI != null) && (node.OwnerDocument.BaseURI.Length > 0))
+            if (!string.IsNullOrEmpty(node.OwnerDocument.BaseURI))
             {
                 file = new Uri(node.OwnerDocument.BaseURI).LocalPath;
             }
@@ -89,13 +89,13 @@ namespace Microsoft.Build.BuildEngine.Shared
         {
             // "A Document node can have the following child node types: XmlDeclaration,
             // Element (maximum of one), ProcessingInstruction, Comment, and DocumentType."
-            return (
+            return
                    (node.NodeType != XmlNodeType.Comment) &&
                    (node.NodeType != XmlNodeType.Whitespace) &&
                    (node.NodeType != XmlNodeType.XmlDeclaration) &&
                    (node.NodeType != XmlNodeType.ProcessingInstruction) &&
                    (node.NodeType != XmlNodeType.DocumentType)
-                   );
+                   ;
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>true, if name is valid</returns>
         internal static bool IsValidElementName(string name)
         {
-            return (LocateFirstInvalidElementNameCharacter(name) == -1);
+            return LocateFirstInvalidElementNameCharacter(name) == -1;
         }
 
         /// <summary>
@@ -211,14 +211,14 @@ namespace Microsoft.Build.BuildEngine.Shared
                     {
                         if (xmlReader.NodeType == XmlNodeType.Element)
                         {
-                            if (String.Compare(xmlReader.Name, elementName, StringComparison.OrdinalIgnoreCase) == 0)
+                            if (String.Equals(xmlReader.Name, elementName, StringComparison.OrdinalIgnoreCase))
                             {
                                 if (xmlReader.HasAttributes)
                                 {
                                     for (int i = 0; i < xmlReader.AttributeCount; i++)
                                     {
                                         xmlReader.MoveToAttribute(i);
-                                        if (String.Compare(xmlReader.Name, attributeName, StringComparison.OrdinalIgnoreCase) == 0)
+                                        if (String.Equals(xmlReader.Name, attributeName, StringComparison.OrdinalIgnoreCase))
                                         {
                                             attributeValue = xmlReader.Value;
                                             break;

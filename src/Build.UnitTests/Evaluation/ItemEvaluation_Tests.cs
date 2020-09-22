@@ -537,7 +537,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             StringBuilder content = new StringBuilder();
             for (int i = 0; i < INCLUDE_COUNT; i++)
             {
-                content.AppendLine($"<i Include='ItemValue{i}' />");
+                content.Append("<i Include='ItemValue").Append(i).AppendLine("' />");
             }
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content.ToString());

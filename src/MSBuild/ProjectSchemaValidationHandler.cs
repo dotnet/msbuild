@@ -38,10 +38,10 @@ namespace Microsoft.Build.CommandLine
             string binPath
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
-            ErrorUtilities.VerifyThrowArgumentNull(binPath, "binPath");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
+            ErrorUtilities.VerifyThrowArgumentNull(binPath, nameof(binPath));
 
-            if ((schemaFile == null) || (schemaFile.Length == 0))
+            if (string.IsNullOrEmpty(schemaFile))
             {
                 schemaFile = Path.Combine(binPath, "Microsoft.Build.xsd");
             }
@@ -76,8 +76,8 @@ namespace Microsoft.Build.CommandLine
             string schemaFile
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(schemaFile, "schemaFile");
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
+            ErrorUtilities.VerifyThrowArgumentNull(schemaFile, nameof(schemaFile));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
 
             // Options for XmlReader object can be set only in constructor. After the object is created, they
             // become read-only. Because of that we need to create
@@ -86,7 +86,7 @@ namespace Microsoft.Build.CommandLine
             XmlReaderSettings validatorSettings = new XmlReaderSettings();
             validatorSettings.ValidationType = ValidationType.Schema;
             validatorSettings.XmlResolver = null;
-            validatorSettings.ValidationEventHandler += new ValidationEventHandler(this.OnSchemaValidationError);
+            validatorSettings.ValidationEventHandler += this.OnSchemaValidationError;
 
             XmlTextReader schemaReader = new XmlTextReader(schemaFile);
             schemaReader.DtdProcessing = DtdProcessing.Ignore;

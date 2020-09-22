@@ -64,7 +64,6 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal const string fullDotNetFrameworkSdkRegistryKeyV40 = "HKEY_LOCAL_MACHINE\\" + dotNetFrameworkSdkRegistryPathV40;
         internal const string dotNetFrameworkSdkInstallKeyValueV40 = "InstallationFolder";
 
-
         private const string dotNetFrameworkAssemblyFoldersRegistryKeyV40 = dotNetFrameworkAssemblyFoldersRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV40;
         private const string secondaryDotNetFrameworkSdkRegistryPathV40 = "SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows";
         internal const string secondaryDotNetFrameworkSdkInstallKeyValueV40 = "CurrentInstallFolder";
@@ -85,7 +84,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                     }
                     else
                     {
-
                         FrameworkLocationHelper.pathToDotNetFrameworkV11 =
                             FindDotNetFrameworkPath(
                                 Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
@@ -113,7 +111,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                     }
                     else
                     {
-
                         FrameworkLocationHelper.pathToDotNetFrameworkV20 =
                             FindDotNetFrameworkPath(
                                 Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
@@ -141,7 +138,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                     }
                     else
                     {
-
                         FrameworkLocationHelper.pathToDotNetFrameworkV30 =
                             FindDotNetFrameworkPath(
                                 Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
@@ -269,7 +265,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                             secondaryDotNetFrameworkSdkRegistryPathV35,
                             secondaryDotNetFrameworkSdkInstallKeyValueV35);
                     }
-
                 }
 
                 return FrameworkLocationHelper.pathToDotNetFrameworkSdkV35;
@@ -302,7 +297,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                             secondaryDotNetFrameworkSdkRegistryPathV40,
                             secondaryDotNetFrameworkSdkInstallKeyValueV40);
                     }
-
                 }
 
                 return FrameworkLocationHelper.pathToDotNetFrameworkSdkV40;
@@ -347,7 +341,6 @@ namespace Microsoft.Build.BuildEngine.Shared
                     {
                         FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV35 = GenerateReferenceAssemblyDirectory(dotNetFrameworkVersionFolderPrefixV35);
                     }
-
                 }
 
                 return FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV35;
@@ -432,27 +425,23 @@ namespace Microsoft.Build.BuildEngine.Shared
             string registryKeyName
         )
         {
-            string keyValueAsString = String.Empty;
-
             Microsoft.Win32.RegistryKey baseKey = Microsoft.Win32.Registry
                 .LocalMachine
                 .OpenSubKey(registryBaseKeyName);
 
-            if (null == baseKey)
+            if (baseKey == null)
             {
                 return null;
             }
 
             object keyValue = baseKey.GetValue(registryKeyName);
 
-            if (null == keyValue)
+            if (keyValue == null)
             {
                 return null;
             }
 
-            keyValueAsString = keyValue.ToString();
-
-            return keyValueAsString;
+            return keyValue.ToString();
         }
 
         /// <summary>
@@ -472,7 +461,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             if (String.IsNullOrEmpty(complusInstallRoot) && String.IsNullOrEmpty(complusVersion))
             {
                 // If the registry entry is 1 then the framework is installed. Go ahead and find the directory. If it is not 1 then the framework is not installed, return null.
-                return String.Compare("1", FindRegistryValueUnderKey(registryEntryToCheckInstall, registryValueToCheckInstall), StringComparison.OrdinalIgnoreCase) == 0;
+                return String.Equals("1", FindRegistryValueUnderKey(registryEntryToCheckInstall, registryValueToCheckInstall), StringComparison.OrdinalIgnoreCase);
             }
 
             return true;
@@ -524,7 +513,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // This was removed in beta2
             // We should favor \v3.5 over \v3.5.xxxxx
             // versions previous to 2.0 have .xxxx version numbers.  3.0 and 3.5 do not.
-            if (max.EndsWith(prefix, StringComparison.OrdinalIgnoreCase) != true )
+            if (!max.EndsWith(prefix, StringComparison.OrdinalIgnoreCase))
             {
                 for (int i = 1; i < directories.Length; ++i)
                 {

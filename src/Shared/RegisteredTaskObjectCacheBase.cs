@@ -60,10 +60,7 @@ namespace Microsoft.Build.Shared
         {
             ConcurrentDictionary<object, object> dict = GetCollectionForLifetime(lifetime, dontCreate: false);
 
-            if (dict != null)
-            {
-                dict.TryAdd(key, obj);
-            }
+            dict?.TryAdd(key, obj);
         }
 
         /// <summary>
@@ -73,10 +70,7 @@ namespace Microsoft.Build.Shared
         {
             ConcurrentDictionary<object, object> dict = GetCollectionForLifetime(lifetime, dontCreate: true);
             object obj = null;
-            if (dict != null)
-            {
-                dict.TryGetValue(key, out obj);
-            }
+            dict?.TryGetValue(key, out obj);
 
             return obj;
         }
@@ -88,10 +82,7 @@ namespace Microsoft.Build.Shared
         {
             ConcurrentDictionary<object, object> dict = GetCollectionForLifetime(lifetime, dontCreate: true);
             object obj = null;
-            if (dict != null)
-            {
-                dict.TryRemove(key, out obj);
-            }
+            dict?.TryRemove(key, out obj);
 
             return obj;
         }
@@ -155,10 +146,7 @@ namespace Microsoft.Build.Shared
                     try
                     {
                         IDisposable disposable = obj as IDisposable;
-                        if (disposable != null)
-                        {
-                            disposable.Dispose();
-                        }
+                        disposable?.Dispose();
                     }
                     catch (Exception ex)
                     {

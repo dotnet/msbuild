@@ -82,7 +82,7 @@ namespace Microsoft.Build.Tasks
             int IComparer.Compare(Object taskItem1, Object taskItem2)
             {
                 // simply calls string.Compare on the item specs of the items
-                return (string.Compare(((ITaskItem)taskItem1).ItemSpec, ((ITaskItem)taskItem2).ItemSpec, StringComparison.OrdinalIgnoreCase));
+                return string.Compare(((ITaskItem)taskItem1).ItemSpec, ((ITaskItem)taskItem2).ItemSpec, StringComparison.OrdinalIgnoreCase);
             }
         }
         #endregion
@@ -144,7 +144,7 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception)
                     {
-                        Debug.Assert(false, "Unexpected exception in ResolveNativeReference.Execute. " + 
+                        Debug.Assert(false, "Unexpected exception in ResolveNativeReference.Execute. " +
                             "Please log a MSBuild bug specifying the steps to reproduce the problem.");
                         throw;
                     }

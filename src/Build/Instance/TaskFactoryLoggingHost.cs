@@ -58,8 +58,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public TaskFactoryLoggingHost(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "loggingContext");
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
+            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, nameof(loggingContext));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 
             _activeProxy = true;
             _isRunningWithMultipleNodes = isRunningWithMultipleNodes;
@@ -69,11 +69,11 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Returns true in the multiproc case
-        /// REVIEW: Should this mean the same thing in the distributed build case?  If we have 
+        /// REVIEW: Should this mean the same thing in the distributed build case?  If we have
         /// a build which happens to be on a distributed cluster, but the build manager has only
         /// alotted a single machine to this build, is this true?  Because the build manager
         /// could later decide to add more nodes to this build.
-        /// UNDONE: This means we are building with multiple processes. If we are building on 
+        /// UNDONE: This means we are building with multiple processes. If we are building on
         /// one machine then I think the maxcpu-count is still 1. In my mind this means multiple nodes either distributed or on the same machine.
         /// </summary>
         public bool IsRunningMultipleNodes
@@ -152,7 +152,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The event args</param>
         public void LogErrorEvent(Microsoft.Build.Framework.BuildErrorEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             VerifyActiveProxy();
 
             // If we are in building across process we need the events to be serializable. This method will 
@@ -173,7 +173,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The event args</param>
         public void LogWarningEvent(Microsoft.Build.Framework.BuildWarningEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             VerifyActiveProxy();
 
             // If we are in building across process we need the events to be serializable. This method will 
@@ -194,7 +194,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The event args</param>
         public void LogMessageEvent(Microsoft.Build.Framework.BuildMessageEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             VerifyActiveProxy();
 
             // If we are in building across process we need the events to be serializable. This method will 
@@ -215,7 +215,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The event args</param>
         public void LogCustomEvent(Microsoft.Build.Framework.CustomBuildEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             VerifyActiveProxy();
 
             // If we are in building across process we need the events to be serializable. This method will 
@@ -247,7 +247,7 @@ namespace Microsoft.Build.BackEnd
 
 #if FEATURE_APPDOMAIN
         /// <summary>
-        /// InitializeLifetimeService is called when the remote object is activated. 
+        /// InitializeLifetimeService is called when the remote object is activated.
         /// This method will determine how long the lifetime for the object will be.
         /// </summary>
         /// <returns>The lease object to control this object's lifetime.</returns>
@@ -321,10 +321,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ILease lease = (ILease)RemotingServices.GetLifetimeService(this);
 
-                if (lease != null)
-                {
-                    lease.Unregister(_sponsor);
-                }
+                lease?.Unregister(_sponsor);
 
                 _sponsor.Close();
                 _sponsor = null;
@@ -352,7 +349,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void VerifyActiveProxy()
         {
-            ErrorUtilities.VerifyThrow(_activeProxy == true, "Attempted to use an inactive task factory logging host.");
+            ErrorUtilities.VerifyThrow(_activeProxy, "Attempted to use an inactive task factory logging host.");
         }
     }
 }

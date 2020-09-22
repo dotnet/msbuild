@@ -100,6 +100,11 @@
         <target state="translated">La cadena de versión no tenía el formato correcto.</target>
         <note />
       </trans-unit>
+      <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
+        <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
+        <target state="new">"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">El nivel de detalle de registro está establecido en {0}.</target>
@@ -124,7 +129,7 @@
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
         <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="new">A required NuGet assembly was not found. Expected Path: {0}</target>
+        <target state="translated">No se encontró un ensamblado de NuGet necesario. Ruta de acceso esperada: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -137,22 +142,22 @@
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
         <source>Only one item type may be referenced when removing with MatchOnMetadata.</source>
-        <target state="new">Only one item type may be referenced when removing with MatchOnMetadata.</target>
+        <target state="translated">Solo se puede hacer referencia a un tipo de elemento al quitarlo con MatchOnMetadata.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
         <source>MatchOnMetadata only applies to Remove operations on items.</source>
-        <target state="new">MatchOnMetadata only applies to Remove operations on items.</target>
+        <target state="translated">MatchOnMetadata solo se aplica a operaciones de eliminación en elementos.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOptionsOnlyApplicableToItemsWithMatchOnMetadata">
         <source>MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</source>
-        <target state="new">MatchOnMetadataOptions is valid only when removing items using MatchOnMetadata.</target>
+        <target state="translated">MatchOnMetadataOptions solo es válido cuando se quitan elementos mediante MatchOnMetadata.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_NoMatchOnMetadataOutsideTargets">
         <source>MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</source>
-        <target state="new">MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</target>
+        <target state="translated">MatchOnMetadata no se puede usar fuera de un elemento &lt;Target&gt;.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
@@ -173,6 +178,11 @@
         <target state="translated">Valor inicial de la propiedad: $({0})="{1}" Origen: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="RarControllerReflectionError">
+        <source>Couldn't create an instance of IRarController for '{0}' type</source>
+        <target state="new">Couldn't create an instance of IRarController for '{0}' type</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: El proyecto "{0}" ha omitido las restricciones de aislamiento de gráficos en el proyecto "{1}" al que se hace referencia.</target>
@@ -182,14 +192,14 @@
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
         <source>MSB4261: Multiple entry points with solutions detected: {0}. If static graph is loaded from a solution, that that solution must be the only entry point.</source>
-        <target state="needs-review-translation">MSB4261: Un grafo estático solo acepta una solución como único punto de entrada. Se han detectado varios puntos de entrada: {0}</target>
+        <target state="translated">MSB4261: Se detectaron varios puntos de entrada con soluciones: {0}. Si el gráfico estático se carga a partir de una solución, esa solución debe ser el único punto de entrada.</target>
         <note>
       LOCALIZATION: {0} is a semicolon delimited list of files
     </note>
       </trans-unit>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</source>
-        <target state="new">"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</target>
+        <target state="translated">"Grafo estático cargado en {0} segundos: {1} nodos, {2} bordes"</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">

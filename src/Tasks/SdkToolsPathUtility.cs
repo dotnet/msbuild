@@ -10,8 +10,8 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// This class will provide the ability for classes given an SdkToolsPath and their tool name to find that tool. 
-    /// The tool will be looked for either under the SDKToolPath passed into the task or as fallback to look for the toolname using the toolslocation helper. 
+    /// This class will provide the ability for classes given an SdkToolsPath and their tool name to find that tool.
+    /// The tool will be looked for either under the SDKToolPath passed into the task or as fallback to look for the toolname using the toolslocation helper.
     /// </summary>
     internal static class SdkToolsPathUtility
     {
@@ -38,10 +38,10 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// This method will take a sdkToolsPath and a toolName and return the path to the tool if it is found and exists.
-        /// 
+        ///
         /// First the method will try and find the tool under the sdkToolsPath taking into account the current processor architecture
         /// If the tool could not be found the method will try and find the tool under the sdkToolsPath (which should point to the x86 sdk directory).
-        /// 
+        ///
         /// Finally if the method has not found the tool yet it will fallback and use the toolslocation helper method to try and find the tool.
         /// </summary>
         /// <returns>Path including the toolName of the tool if found, null if it is not found</returns>
@@ -54,25 +54,15 @@ namespace Microsoft.Build.Tasks
                 string processorSpecificToolDirectory;
                 try
                 {
-                    switch (currentArchitecture)
+                    processorSpecificToolDirectory = currentArchitecture switch
                     {
                         // There may not be an arm directory so we will fall back to the x86 tool location
                         // but if there is then we should try and use it.
-                        case ProcessorArchitecture.ARM:
-                            processorSpecificToolDirectory = Path.Combine(sdkToolsPath, "arm");
-                            break;
-                        case ProcessorArchitecture.AMD64:
-                            processorSpecificToolDirectory = Path.Combine(sdkToolsPath, "x64");
-                            break;
-                        case ProcessorArchitecture.IA64:
-                            processorSpecificToolDirectory = Path.Combine(sdkToolsPath, "ia64");
-                            break;
-                        case ProcessorArchitecture.X86:
-                        default:
-                            processorSpecificToolDirectory = sdkToolsPath;
-                            break;
-                    }
-
+                        ProcessorArchitecture.ARM => Path.Combine(sdkToolsPath, "arm"),
+                        ProcessorArchitecture.AMD64 => Path.Combine(sdkToolsPath, "x64"),
+                        ProcessorArchitecture.IA64 => Path.Combine(sdkToolsPath, "ia64"),
+                        _ => sdkToolsPath,
+                    };
                     pathToTool = Path.Combine(processorSpecificToolDirectory, toolName);
 
                     if (!fileExists(pathToTool))
@@ -120,7 +110,7 @@ namespace Microsoft.Build.Tasks
             // Fall back and see if we can find it with the toolsLocation helper methods. This is not optimal because 
             // the location they are looking at is based on when the Microsoft.Build.Utilities.dll was compiled
             // but it is better than nothing.
-            if (null == pathToTool || !fileExists(pathToTool))
+            if (pathToTool == null || !fileExists(pathToTool))
             {
                 pathToTool = FindSDKToolUsingToolsLocationHelper(toolName);
 

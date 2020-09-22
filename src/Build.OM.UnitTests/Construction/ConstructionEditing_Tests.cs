@@ -890,7 +890,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         <m>v</m>
                       </i>"
                 };
-
             }
         }
 
@@ -1014,7 +1013,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         <b>value_b</b>
                       </i>"
                 };
-
             }
         }
 
@@ -3192,9 +3190,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>";
             expectedItem = AdjustSpacesForItem(expectedItem);
 
-            expected = ObjectModelHelpers.CleanupFileContents(string.Format(expected, expectedItem));
-
-            return expected;
+            return ObjectModelHelpers.CleanupFileContents(string.Format(expected, expectedItem));
         }
 
         /// <summary>
@@ -3261,18 +3257,17 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
             else
             {
-                sb.AppendLine(itemSpace + splits[0]);
+                sb.Append(itemSpace).AppendLine(splits[0]);
 
                 for (var i = 1; i < splits.Length - 1; i++)
                 {
-                    sb.AppendLine(metadataSpace + splits[i]);
+                    sb.Append(metadataSpace).AppendLine(splits[i]);
                 }
 
-                sb.Append(itemSpace + splits[splits.Length -1]);
+                sb.Append(itemSpace).Append(splits[splits.Length - 1]);
             }
 
-            expectedItem = sb.ToString();
-            return expectedItem;
+            return sb.ToString();
         }
     }
 }

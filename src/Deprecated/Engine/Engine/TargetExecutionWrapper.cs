@@ -115,8 +115,8 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return (inProgressBuildState == InProgressBuildState.BuildingDependencies ||
-                        inProgressBuildState == InProgressBuildState.BuildingErrorClause);
+                return inProgressBuildState == InProgressBuildState.BuildingDependencies ||
+                        inProgressBuildState == InProgressBuildState.BuildingErrorClause;
             }
         }
 
@@ -220,8 +220,8 @@ namespace Microsoft.Build.BuildEngine
             string nameDependentTarget = dependsOnTargetNames[currentDependentTarget];
 
             ErrorUtilities.VerifyThrow(
-                parentProject.Targets[nameDependentTarget].TargetBuildState != Target.BuildState.InProgress &&
-                parentProject.Targets[nameDependentTarget].TargetBuildState != Target.BuildState.NotStarted ||
+                (parentProject.Targets[nameDependentTarget].TargetBuildState != Target.BuildState.InProgress &&
+                parentProject.Targets[nameDependentTarget].TargetBuildState != Target.BuildState.NotStarted) ||
                 buildContext.CurrentBuildContextState == ProjectBuildState.BuildContextState.ExceptionThrown,
                 "This target should only be updated once the dependent target is completed");
 
@@ -291,8 +291,8 @@ namespace Microsoft.Build.BuildEngine
             string nameErrorTarget = onErrorTargets[currentErrorTarget];
 
             ErrorUtilities.VerifyThrow(
-                parentProject.Targets[nameErrorTarget].TargetBuildState != Target.BuildState.InProgress &&
-                parentProject.Targets[nameErrorTarget].TargetBuildState != Target.BuildState.NotStarted ||
+                (parentProject.Targets[nameErrorTarget].TargetBuildState != Target.BuildState.InProgress &&
+                parentProject.Targets[nameErrorTarget].TargetBuildState != Target.BuildState.NotStarted) ||
                 buildContext.CurrentBuildContextState == ProjectBuildState.BuildContextState.ExceptionThrown,
                 "This target should only be updated once the error target is completed");
 
@@ -533,9 +533,6 @@ namespace Microsoft.Build.BuildEngine
             ErrorUtilities.VerifyThrow(inProgressBuildState == InProgressBuildState.RunningTasks, "Wrong state");
             // Check if the current task number is valid
             ErrorUtilities.VerifyThrow(currentBucket < buckets.Count, "No buckets left");
-
-            Hashtable changedTargetInputs = null;
-            Hashtable upToDateTargetInputs = null;
             howToBuild = DependencyAnalysisResult.FullBuild;
             ItemBucket bucket = (ItemBucket)buckets[currentBucket];
 
@@ -555,6 +552,9 @@ namespace Microsoft.Build.BuildEngine
 
             // Figure out how we should build the target
             TargetDependencyAnalyzer dependencyAnalyzer = new TargetDependencyAnalyzer(parentProject.ProjectDirectory, targetClass, parentEngine.LoggingServices, targetBuildEventContext);
+
+            Hashtable changedTargetInputs;
+            Hashtable upToDateTargetInputs;
             howToBuild = dependencyAnalyzer.PerformDependencyAnalysis(bucket, out changedTargetInputs, out upToDateTargetInputs);
 
             targetBuildSuccessful = true;
@@ -576,7 +576,7 @@ namespace Microsoft.Build.BuildEngine
                 // if we're doing an incremental build, we need to effectively run the task twice -- once
                 // to infer the outputs for up-to-date input items, and once to actually execute the task;
                 // as a result we need separate sets of item and property collections to track changes
-                if (howToBuild == DependencyAnalysisResult.IncrementalBuild)    
+                if (howToBuild == DependencyAnalysisResult.IncrementalBuild)
                 {
                     // subset the relevant items to those that are up-to-date
                     foreach (DictionaryEntry upToDateTargetInputsEntry in upToDateTargetInputs)
@@ -690,7 +690,7 @@ namespace Microsoft.Build.BuildEngine
             // Send the task for execution 
             SubmitNonIntrinsicTask(
                 (XmlElement)targetChildNode,
-                ((BuildTask)taskElementList[(currentTask - skippedNodeCount)]).HostObject,
+                ((BuildTask)taskElementList[currentTask - skippedNodeCount]).HostObject,
                 buildContext);
 
             return;
@@ -713,7 +713,7 @@ namespace Microsoft.Build.BuildEngine
             if ((howToBuild == DependencyAnalysisResult.FullBuild) ||
                 (howToBuild == DependencyAnalysisResult.IncrementalBuild))
             {
-                executionMode = executionMode | TaskExecutionMode.ExecuteTaskAndGatherOutputs;
+                executionMode |= TaskExecutionMode.ExecuteTaskAndGatherOutputs;
             }
             return executionMode;
         }
@@ -740,7 +740,7 @@ namespace Microsoft.Build.BuildEngine
             BuildEventContext buildEventContext = PrepareBuildEventContext(true);
             TaskExecutionMode executionMode = DetermineExecutionMode();
 
-            IntrinsicTask task = new IntrinsicTask(taskNode, 
+            IntrinsicTask task = new IntrinsicTask(taskNode,
                                                    parentEngine.LoggingServices,
                                                    buildEventContext,
                                                    parentProject.ProjectDirectory,
@@ -826,10 +826,10 @@ namespace Microsoft.Build.BuildEngine
                             // by bad user input), the build should be terminated. The exception
                             // will be logged as a fatal build error in engine. The exceptions caused
                             // by user code are converted into LogFatalTaskError messages by the TaskEngine
-                            RemoteErrorException.Throw(executionContext.ThrownException, 
-                                                       targetBuildEventContext, 
+                            RemoteErrorException.Throw(executionContext.ThrownException,
+                                                       targetBuildEventContext,
                                                        "RemoteErrorDuringTaskExecution",
-                                                       parentProject.FullFileName, 
+                                                       parentProject.FullFileName,
                                                        targetClass.Name);
                         }
                     }
@@ -876,7 +876,7 @@ namespace Microsoft.Build.BuildEngine
                 targetClass.Name,
                 this.parentProject.FullFileName,
                 targetClass.ProjectFileOfTargetElement,
-                (overallSuccess && targetBuildSuccessful));
+                overallSuccess && targetBuildSuccessful);
             loggedTargetStart = false;
 
             // Get the next bucket
@@ -889,7 +889,7 @@ namespace Microsoft.Build.BuildEngine
             foreach (ItemBucket bucket in buckets)
             {
                 bucket.Lookup.LeaveScope();
-            }         
+            }
 
             // and also leave the extra scope we created with the cloned project items
             projectContent.LeaveScope();
@@ -909,7 +909,7 @@ namespace Microsoft.Build.BuildEngine
                     buildContext.NameOfBlockingTarget == null)
                 {
                     ErrorUtilities.VerifyThrow(
-                        String.Compare(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), targetClass.Name, StringComparison.OrdinalIgnoreCase) == 0,
+                        String.Equals(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), targetClass.Name, StringComparison.OrdinalIgnoreCase),
                         "The name of the target in progress is inconsistent with the target being built");
 
                     ErrorUtilities.VerifyThrow(targetOutputItems != null,
@@ -979,7 +979,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Iterate over the contexts waiting for the target - triggering updates for each of them since the target 
+        /// Iterate over the contexts waiting for the target - triggering updates for each of them since the target
         /// is complete
         /// </summary>
         internal void NotifyWaitingTargets(ProjectBuildState errorContext)
@@ -1008,7 +1008,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     continue;
                 }
-                
+
                 parentEngine.Scheduler.NotifyOfUnblockedRequest(buildContext.BuildRequest);
 
                 ErrorUtilities.VerifyThrow(
@@ -1019,7 +1019,7 @@ namespace Microsoft.Build.BuildEngine
                 if (buildContext.NameOfBlockingTarget == null)
                 {
                     ErrorUtilities.VerifyThrow(
-                        String.Compare(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), targetClass.Name, StringComparison.OrdinalIgnoreCase) == 0,
+                        String.Equals(EscapingUtilities.UnescapeAll(buildContext.NameOfTargetInProgress), targetClass.Name, StringComparison.OrdinalIgnoreCase),
                         "The name of the target in progress is inconsistent with the target being built");
 
                     // This target was part of a sequential request so we need to notify the parent project
@@ -1035,7 +1035,7 @@ namespace Microsoft.Build.BuildEngine
                     // The target on the waiting list must be waiting for this target to complete due to
                     // a dependent or onerror relationship between targets
                     ErrorUtilities.VerifyThrow(
-                        String.Compare(buildContext.NameOfBlockingTarget, targetClass.Name, StringComparison.OrdinalIgnoreCase) == 0,
+                        String.Equals(buildContext.NameOfBlockingTarget, targetClass.Name, StringComparison.OrdinalIgnoreCase),
                         "This target should only be updated once the dependent target is completed");
 
                     if (Engine.debugMode)
@@ -1045,8 +1045,8 @@ namespace Microsoft.Build.BuildEngine
                 }
 
                 // Post a dummy context to the queue to cause the target to run in this context
-                TaskExecutionContext taskExecutionContext = 
-                    new TaskExecutionContext(parentProject, null, null, buildContext, 
+                TaskExecutionContext taskExecutionContext =
+                    new TaskExecutionContext(parentProject, null, null, buildContext,
                                              EngineCallback.invalidEngineHandle, EngineCallback.inProcNode, null);
                 parentEngine.PostTaskOutputUpdates(taskExecutionContext);
             }

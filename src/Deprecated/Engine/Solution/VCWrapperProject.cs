@@ -99,7 +99,7 @@ namespace Microsoft.Build.BuildEngine
 
             newTask.SetParameterValue("SolutionFile", solutionPath);
 
-            if ((vcbuildTargetName != null) && (vcbuildTargetName.Length > 0))
+            if (!string.IsNullOrEmpty(vcbuildTargetName))
             {
                 newTask.SetParameterValue(vcbuildTargetName, "true");
             }
@@ -138,8 +138,7 @@ namespace Microsoft.Build.BuildEngine
         static internal XmlDocument GenerateVCWrapperProject(Engine parentEngine, string vcProjectFilename, string toolsVersion)
         {
             string projectPath = Path.GetFullPath(vcProjectFilename);
-            Project msbuildProject = null;
-
+            Project msbuildProject;
             try
             {
                 msbuildProject = new Project(parentEngine, toolsVersion);
@@ -228,7 +227,6 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// constants for VS9 Pro and above SKUs
         /// </summary>
-
         // root registry key for VS9
         private const string vs9RegKey = @"SOFTWARE\Microsoft\VisualStudio\9.0";
         // the name of the value containing disk install directory for the IDE components 
@@ -242,7 +240,6 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// constants for the VC9 Express SKU
         /// </summary>
-
         // root registry key for VC9
         private const string vc9RegKey = @"SOFTWARE\Microsoft\VCExpress\9.0";
         // the name of the value containing disk install directory for the IDE components 
@@ -268,7 +265,7 @@ namespace Microsoft.Build.BuildEngine
                 string location = TryLocationFromRegistry(baseKey, vs9RegKey, vs9InstallDirValueName,
                     vs9RelativePathToVCBuildLayouts, vs9RelativePathToVCBuildBatch);
 
-                if (null != location)
+                if (location != null)
                 {
                     return location;
                 }
@@ -277,7 +274,7 @@ namespace Microsoft.Build.BuildEngine
                 location = TryLocationFromRegistry(baseKey, vc9RegKey, vc9InstallDirValueName,
                     vc9RelativePathToVCBuildLayouts, vc9RelativePathToVCBuildBatch);
 
-                if (null != location)
+                if (location != null)
                 {
                     return location;
                 }
@@ -328,7 +325,7 @@ namespace Microsoft.Build.BuildEngine
 
                         // if not found in layouts location, try the alternate dir if any,
                         // which contains vcbuild for batch installs
-                        if (null != relativePathFromValueOnBatch)
+                        if (relativePathFromValueOnBatch != null)
                         {
                             vcBuildPath = Path.Combine(rootDir, relativePathFromValueOnBatch);
                             if (File.Exists(vcBuildPath))

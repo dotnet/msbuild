@@ -869,6 +869,7 @@ namespace Microsoft.Build.Evaluation.Context
     {
         internal EvaluationContext() { }
         public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy) { throw null; }
+        public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy, Microsoft.Build.FileSystem.MSBuildFileSystemBase fileSystem) { throw null; }
         public enum SharingPolicy
         {
             Isolated = 1,
@@ -1376,6 +1377,12 @@ namespace Microsoft.Build.Execution
         public string TaskParameter { get { throw null; } }
         public override Microsoft.Build.Construction.ElementLocation TaskParameterLocation { get { throw null; } }
     }
+    public sealed partial class RarNode
+    {
+        public RarNode() { }
+        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool nodeReuse, bool lowPriority, out System.Exception shutdownException, System.Threading.CancellationToken cancellationToken=default(System.Threading.CancellationToken)) { shutdownException = default(System.Exception); throw null; }
+        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
+    }
     public partial class RequestedProjectState
     {
         public RequestedProjectState() { }
@@ -1394,6 +1401,25 @@ namespace Microsoft.Build.Execution
         Failure = (byte)2,
         Skipped = (byte)0,
         Success = (byte)1,
+    }
+}
+namespace Microsoft.Build.FileSystem
+{
+    public abstract partial class MSBuildFileSystemBase
+    {
+        protected MSBuildFileSystemBase() { }
+        public abstract bool DirectoryExists(string path);
+        public abstract System.Collections.Generic.IEnumerable<string> EnumerateDirectories(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        public abstract System.Collections.Generic.IEnumerable<string> EnumerateFiles(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        public abstract System.Collections.Generic.IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        public abstract bool FileExists(string path);
+        public abstract bool FileOrDirectoryExists(string path);
+        public abstract System.IO.FileAttributes GetAttributes(string path);
+        public abstract System.IO.Stream GetFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share);
+        public abstract System.DateTime GetLastWriteTimeUtc(string path);
+        public abstract System.IO.TextReader ReadFile(string path);
+        public abstract byte[] ReadFileAllBytes(string path);
+        public abstract string ReadFileAllText(string path);
     }
 }
 namespace Microsoft.Build.Globbing

@@ -22,6 +22,7 @@ namespace Microsoft.Build.Tasks
         /// internal constructor
         /// </summary>
         /// <param name="taskLoggingHelper">task logger instance used for logging</param>
+        /// <param name="silent">true if this task should log only errors, no warnings or messages; false otherwise</param>
         /// <param name="resolverCallback">callback interface for resolving dependent COM refs/NET assemblies</param>
         /// <param name="referenceInfo">cached reference information (typelib pointer, original task item, typelib name etc.)</param>
         /// <param name="itemName">reference name (for better logging experience)</param>
@@ -29,9 +30,10 @@ namespace Microsoft.Build.Tasks
         /// <param name="delaySign">delay sign wrappers?</param>
         /// <param name="keyFile">file containing public/private keys</param>
         /// <param name="keyContainer">container name for public/private keys</param>
-        /// <param name="executeAsTool">True if GenerateWrapper() should generate the wrapper out-of-proc using aximp.exe</param>
+        /// <param name="includeTypeLibVersionInName">True if the interop name should include the typelib's version</param>
         /// <param name="sdkToolsPath">Path to the SDK tools directory where aximp.exe can be found</param>
         /// <param name="buildEngine">BuildEngine of parent task; needed for logging purposes when generating wrapper out-of-proc</param>
+        /// <param name="environmentVariables">Array of equals-separated pairs of environment variables that should be passed to the spawned executable, in addition to (or selectively overriding) the regular environment block.</param>
         internal AxReference(TaskLoggingHelper taskLoggingHelper, bool silent, IComReferenceResolver resolverCallback, ComReferenceInfo referenceInfo, string itemName, string outputDirectory,
             bool delaySign, string keyFile, string keyContainer, bool includeTypeLibVersionInName, string sdkToolsPath, IBuildEngine buildEngine, string[] environmentVariables)
             : base(taskLoggingHelper, silent, resolverCallback, referenceInfo, itemName, outputDirectory, delaySign, keyFile, keyContainer, includeTypeLibVersionInName, true /* always execute as tool */, sdkToolsPath, buildEngine, environmentVariables)
@@ -56,7 +58,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal bool GenerateWrapper(out ComReferenceWrapperInfo wrapperInfo)
         {
-            wrapperInfo = null;
 
             // The tool gets the public key for itself, but we get it here anyway to
             // give nice messages in errors cases.

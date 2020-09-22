@@ -95,7 +95,7 @@ namespace Microsoft.Build.BackEnd
 
             Type wrappedParameterType = wrappedParameter.GetType();
 
-            if ((wrappedParameter as Exception) != null)
+            if (wrappedParameter is Exception)
             {
                 _parameterType = TaskParameterType.Invalid;
                 _wrappedParameter = wrappedParameter;
@@ -274,11 +274,9 @@ namespace Microsoft.Build.BackEnd
         private ITaskItem CreateNewTaskItemFrom(ITaskItem copyFrom)
         {
             ITaskItem2 copyFromAsITaskItem2 = copyFrom as ITaskItem2;
-
-            string escapedItemSpec = null;
-            string escapedDefiningProject = null;
-            Dictionary<string, string> escapedMetadata = null;
-
+            string escapedItemSpec;
+            string escapedDefiningProject;
+            Dictionary<string, string> escapedMetadata;
             if (copyFromAsITaskItem2 != null)
             {
                 escapedItemSpec = copyFromAsITaskItem2.EvaluatedIncludeEscaped;
@@ -311,7 +309,7 @@ namespace Microsoft.Build.BackEnd
                 IDictionary customMetadata = copyFrom.CloneCustomMetadata();
                 escapedMetadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                if (customMetadata != null && customMetadata.Count > 0)
+                if (customMetadata?.Count > 0)
                 {
                     foreach (string key in customMetadata.Keys)
                     {
@@ -523,7 +521,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public TaskParameterTaskItem(string escapedItemSpec, string escapedDefiningProject, Dictionary<string, string> escapedMetadata)
             {
-                ErrorUtilities.VerifyThrowInternalNull(escapedItemSpec, "escapedItemSpec");
+                ErrorUtilities.VerifyThrowInternalNull(escapedItemSpec, nameof(escapedItemSpec));
 
                 _escapedItemSpec = escapedItemSpec;
                 _escapedDefiningProject = escapedDefiningProject;
@@ -576,7 +574,7 @@ namespace Microsoft.Build.BackEnd
                 get
                 {
                     int count = (_customEscapedMetadata == null) ? 0 : _customEscapedMetadata.Count;
-                    return (count + FileUtilities.ItemSpecModifiers.All.Length);
+                    return count + FileUtilities.ItemSpecModifiers.All.Length;
                 }
             }
 
@@ -614,13 +612,13 @@ namespace Microsoft.Build.BackEnd
             /// <param name="metadataValue">The metadata value.</param>
             public void SetMetadata(string metadataName, string metadataValue)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(metadataName, "metadataName");
+                ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
 
                 // Non-derivable metadata can only be set at construction time.
                 // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
                 ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
 
-                _customEscapedMetadata = _customEscapedMetadata ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                _customEscapedMetadata ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 _customEscapedMetadata[metadataName] = metadataValue ?? String.Empty;
             }
@@ -631,7 +629,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="metadataName">The name of the metadata to remove.</param>
             public void RemoveMetadata(string metadataName)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(metadataName, "metadataName");
+                ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
                 ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
 
                 if (_customEscapedMetadata == null)
@@ -654,7 +652,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="destinationItem">The item to copy metadata to.</param>
             public void CopyMetadataTo(ITaskItem destinationItem)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(destinationItem, "destinationItem");
+                ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
 
                 // also copy the original item-spec under a "magic" metadata -- this is useful for tasks that forward metadata
                 // between items, and need to know the source item where the metadata came from
@@ -721,7 +719,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             string ITaskItem2.GetMetadataValueEscaped(string metadataName)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(metadataName, "metadataName");
+                ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
 
                 string metadataValue = null;
 
@@ -736,7 +734,7 @@ namespace Microsoft.Build.BackEnd
                     _customEscapedMetadata.TryGetValue(metadataName, out metadataValue);
                 }
 
-                return (metadataValue == null) ? String.Empty : metadataValue;
+                return metadataValue ?? String.Empty;
             }
 
             /// <summary>

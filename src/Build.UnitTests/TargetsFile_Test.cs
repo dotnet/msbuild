@@ -919,13 +919,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void SynthesizeLinkMetadataForItemsOnWhitelist()
         {
-            string[] files = null;
             string outputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string directoryToDelete = null;
 
             try
             {
-                files = Helpers.CreateFiles("class1.cs", "File1.txt", "Content1.foo", "a.proj");
+                string[] files = Helpers.CreateFiles("class1.cs", "File1.txt", "Content1.foo", "a.proj");
 
                 directoryToDelete = Path.GetDirectoryName(files[0]);
                 string subProjectDirectory = Path.Combine(Path.GetDirectoryName(files[0]), "SubFolder");
@@ -998,13 +997,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DontSynthesizeLinkMetadataIfPropertyNotSet()
         {
-            string[] files = null;
             string outputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             string directoryToDelete = null;
 
             try
             {
-                files = Helpers.CreateFiles("class1.cs", "File1.txt", "Content1.foo", "a.proj");
+                string[] files = Helpers.CreateFiles("class1.cs", "File1.txt", "Content1.foo", "a.proj");
 
                 directoryToDelete = Path.GetDirectoryName(files[0]);
                 string subProjectDirectory = Path.Combine(Path.GetDirectoryName(files[0]), "SubFolder");

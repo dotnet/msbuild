@@ -236,7 +236,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static bool GetTypeLibNameForITypeLib(TaskLoggingHelper log, bool silent, ITypeLib typeLib, string typeLibId, out string typeLibName)
         {
-            typeLibName = "";
 
             // see if the type library supports ITypeLib2
             if (!(typeLib is ITypeLib2 typeLib2))
@@ -254,7 +253,7 @@ namespace Microsoft.Build.Tasks
 
                 // if returned namespace is null or its type is not System.String, fall back to the default 
                 // way of getting the type lib name (just to be safe)
-                if (data == null || string.Compare(data.GetType().ToString(), "system.string", StringComparison.OrdinalIgnoreCase) != 0)
+                if (data == null || !string.Equals(data.GetType().ToString(), "system.string", StringComparison.OrdinalIgnoreCase))
                 {
                     typeLibName = Marshal.GetTypeLibName(typeLib);
                     return true;
@@ -265,7 +264,7 @@ namespace Microsoft.Build.Tasks
 
                 if (typeLibName.Length >= 4)
                 {
-                    if (string.Compare(typeLibName.Substring(typeLibName.Length - 4), ".dll", StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Equals(typeLibName.Substring(typeLibName.Length - 4), ".dll", StringComparison.OrdinalIgnoreCase))
                     {
                         typeLibName = typeLibName.Substring(0, typeLibName.Length - 4);
                     }
@@ -328,6 +327,7 @@ namespace Microsoft.Build.Tasks
         /// Strips type library number from a type library path (for example, "ref.dll\2" becomes "ref.dll")
         /// </summary>
         /// <param name="typeLibPath">type library path with possible typelib number appended to it</param>
+        /// <param name="fileExists">Delegate to check whether the file exists</param>
         /// <returns>proper file path to the type library</returns>
         internal static string StripTypeLibNumberFromPath(string typeLibPath, FileExists fileExists)
         {
@@ -452,7 +452,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            if (typeLibPath != null && typeLibPath.Length > 0)
+            if (!string.IsNullOrEmpty(typeLibPath))
             {
                 // We have to check for NULL here because QueryPathOfRegTypeLib() returns
                 // a BSTR with a NULL character appended to it.

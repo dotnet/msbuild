@@ -123,7 +123,7 @@ namespace Microsoft.Build.BuildEngine
             Dictionary<string, MetadataReference> consumedMetadataReferences = pair.Metadata;
 
             ArrayList buckets = null;
-            if (consumedMetadataReferences != null && consumedMetadataReferences.Count > 0)
+            if (consumedMetadataReferences?.Count > 0)
             {
                 // Add any item types that we were explicitly told to assume.
                 if (implicitBatchableItemType != null)
@@ -337,7 +337,7 @@ namespace Microsoft.Build.BuildEngine
 
                         // If we didn't find a bucket that matches this item, create a new one, adding
                         // this item to the bucket.
-                        if (null == matchingBucket)
+                        if (matchingBucket == null)
                         {
                             matchingBucket = new ItemBucket(itemListsToBeBatched.Keys, itemMetadataValues, lookup, buckets.Count);
 
@@ -392,7 +392,7 @@ namespace Microsoft.Build.BuildEngine
 
                 if  (
                         (metadataItemName != null) &&
-                        (0 != String.Compare(item.Name, metadataItemName, StringComparison.OrdinalIgnoreCase))
+                        (!String.Equals(item.Name, metadataItemName, StringComparison.OrdinalIgnoreCase))
                     )
                 {
                     itemMetadataValues[metadataQualifiedName] = String.Empty;
@@ -413,7 +413,6 @@ namespace Microsoft.Build.BuildEngine
 
             return itemMetadataValues;
         }
-
 
         #endregion
     }
