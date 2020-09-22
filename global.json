@@ -7,9 +7,8 @@
       ]
     },
     "vs-opt": {
-      "version": "16.9"
-    },
-    "xcopy-msbuild": "16.8.0-preview3"
+      "version": "16.8"
+    }
   },
   "msbuild-sdks": {
     "Microsoft.DotNet.Arcade.Sdk": "5.0.0-beta.20467.6",
