@@ -90,7 +90,7 @@ namespace Microsoft.Build.Utilities
             }
 
             // If the change wave is out of rotation, log a warning and disable all features.
-            else if (ChangeWaves.IsChangeWaveOutOfRotation(changeWave))
+            else if (ChangeWaves.IsVersionOutOfRotation(changeWave))
             {
                 result = ChangeWaveConversionState.OutOfRotation;
                 return DisabledWave = ChangeWaves.AllWaves[0];
@@ -147,7 +147,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="v"></param>
         /// <returns></returns>
-        public static bool IsChangeWaveOutOfRotation(Version v)
+        public static bool IsVersionOutOfRotation(Version v)
         {
             return v != EnableAllFeaturesVersion && (v < LowestWaveVersion || v > HighestWaveVersion);
         }
