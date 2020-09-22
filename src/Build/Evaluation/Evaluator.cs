@@ -1103,7 +1103,7 @@ namespace Microsoft.Build.Evaluation
 
             if (changeWaveState == ChangeWaveConversionState.InvalidFormat)
             {
-                _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", ChangeWaves.DisabledWave);
+                _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion);
             }
             else if(changeWaveState == ChangeWaveConversionState.OutOfRotation)
             {
