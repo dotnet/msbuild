@@ -394,8 +394,7 @@ namespace Microsoft.Build.Tasks
         private FileState ComputeFileStateFromCachesAndDisk(string path)
         {
             DateTime lastModified = GetAndCacheLastModified(path);
-            FileState cachedInstanceFileState = (FileState)instanceLocalFileStateCache[path];
-            bool isCachedInInstance = cachedInstanceFileState != null;
+            bool isCachedInInstance = instanceLocalFileStateCache.TryGetValue(path, out FileState cachedInstanceFileState);
             bool isCachedInProcess =
                 s_processWideFileStateCache.TryGetValue(path, out FileState cachedProcessFileState);
             
@@ -614,12 +613,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log)
         {
-            Hashtable newInstanceLocalFileStateCache = new Hashtable(instanceLocalFileStateCache.Count);
-            foreach (DictionaryEntry kvp in instanceLocalFileStateCache)
+            Dictionary<string, FileState> newInstanceLocalFileStateCache = new Dictionary<string, FileState>(instanceLocalFileStateCache.Count);
+            foreach (KeyValuePair<string, FileState> kvp in instanceLocalFileStateCache)
             {
                 // Add MVID to allow us to verify that we are using the same assembly later
-                string absolutePath = (string)kvp.Key;
-                FileState fileState = (FileState)kvp.Value;
+                string absolutePath = kvp.Key;
+                FileState fileState = kvp.Value;
                 using (var reader = new PEReader(File.OpenRead(absolutePath)))
                 {
                     var metadataReader = reader.GetMetadataReader();

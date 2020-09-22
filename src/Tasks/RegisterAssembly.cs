@@ -74,8 +74,7 @@ namespace Microsoft.Build.Tasks
 
             if ((AssemblyListFile != null) && (AssemblyListFile.ItemSpec.Length > 0))
             {
-                cacheFile = (AssemblyRegistrationCache)StateFileBase.DeserializeCache(AssemblyListFile.ItemSpec, Log, typeof(AssemblyRegistrationCache)) ??
-                            new AssemblyRegistrationCache();
+                cacheFile = StateFileBase.DeserializeCache<AssemblyRegistrationCache>(AssemblyListFile.ItemSpec, Log) ?? new AssemblyRegistrationCache();
             }
 
             bool taskReturnValue = true;
