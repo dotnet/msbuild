@@ -117,11 +117,25 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetPlatformIdentifier)' != ''
-                         and '$(SupportedOSPlatform)' != ''
+                         and '$(TargetPlatformVersion)' != ''
                          and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                          and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">
-      <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute">
-        <_Parameter1>$(TargetPlatformIdentifier)$(SupportedOSPlatform)</_Parameter1>
+      <AssemblyAttribute Include="System.Runtime.Versioning.TargetPlatformAttribute">
+        <_Parameter1>$(TargetPlatformIdentifier)$(TargetPlatformVersion)</_Parameter1>
+      </AssemblyAttribute>
+    </ItemGroup>
+    
+    <ItemGroup Condition="'$(TargetPlatformIdentifier)' != ''
+                         and '$(SupportedOSPlatformVersion)' != ''
+                         and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                         and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">
+      <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute"
+                         Condition="!$([MSBuild]::VersionEquals($(SupportedOSPlatformVersion), '0.0'))" >
+        <_Parameter1>$(TargetPlatformIdentifier)$(SupportedOSPlatformVersion)</_Parameter1>
+      </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatformAttribute"
+                         Condition="$([MSBuild]::VersionEquals($(SupportedOSPlatformVersion), '0.0'))" >
+        <_Parameter1>$(TargetPlatformIdentifier)</_Parameter1>
       </AssemblyAttribute>
     </ItemGroup>
   </Target>

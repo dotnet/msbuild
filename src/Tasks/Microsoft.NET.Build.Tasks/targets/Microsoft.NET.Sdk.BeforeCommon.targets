@@ -184,6 +184,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_FrameworkVersionForImplicitDefine Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework'">$(_FrameworkVersionForImplicitDefine.Replace('_', ''))</_FrameworkVersionForImplicitDefine>
 
     <ImplicitFrameworkDefine>$(_FrameworkIdentifierForImplicitDefine)$(_FrameworkVersionForImplicitDefine)</ImplicitFrameworkDefine>
+
+    <BackwardsCompatFrameworkDefine Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))">$(TargetFrameworkIdentifier.Replace('.', '').ToUpperInvariant())</BackwardsCompatFrameworkDefine>
   </PropertyGroup>
 
   <!-- Add conditional compilation symbols for the target platform (for example ANDROID, IOS, WINDOWS) -->
@@ -191,39 +193,16 @@ Copyright (c) .NET Foundation. All rights reserved.
         Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) " >
     <PropertyGroup>
       <_PlatformIdentifierForImplicitDefine>$(TargetPlatformIdentifier.ToUpperInvariant())</_PlatformIdentifierForImplicitDefine>
-      <_PlatformVersionForImplicitDefine>$(TargetPlatformVersion.Replace('.', '_'))</_PlatformVersionForImplicitDefine>
     </PropertyGroup>
     <ItemGroup>
       <_ImplicitDefineConstant Include="$(_PlatformIdentifierForImplicitDefine)" />
-      <_ImplicitDefineConstant Include="$(_PlatformIdentifierForImplicitDefine)$(_PlatformVersionForImplicitDefine)" />
-    </ItemGroup>
-  </Target>
-
-  <!-- Add conditional compilation symbols for target framework backwards compatibility with .NET 5.0 and later (for example .NET 6.0 defines NET5_0 and NETCOREAPP3_1) -->
-  <Target Name="GenerateNETCompatibleDefineConstants"
-          Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) " >
-    <ItemGroup>
-      <_NetCoreAppFrameworkVersions Include="@(SupportedNETCoreAppTargetFramework->'%(Identity)'->TrimStart('.NETCoreApp,Version=v'))" />
-      <_NetCoreAppCompatibleVersions Include="@(_NetCoreAppFrameworkVersions)" Condition=" $([MSBuild]::VersionGreaterThan(%(Identity), 3.1)) and $([MSBuild]::VersionLessThan(%(Identity), $(TargetFrameworkVersion))) " />
-      <_ImplicitDefineConstant Include="NETCOREAPP" />
-      <_ImplicitDefineConstant Include="NETCOREAPP3_1" />
-      <_ImplicitDefineConstant Include="@(_NetCoreAppCompatibleVersions->'NET%(Identity)'->Replace('.', '_'))" />
-    </ItemGroup>
-  </Target>
-
-  <!-- Add conditional compilation symbols for target platform backwards compatibility. -->
-  <Target Name="GeneratePlatformCompatibleDefineConstants"
-          Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) " >
-    <ItemGroup>
-      <_SupportedPlatformCompatibleVersions Include="@(SdkSupportedTargetPlatform)" Condition=" %(Identity) != '' and $([MSBuild]::VersionLessThan(%(Identity), $(TargetPlatformVersion))) " />
-      <_ImplicitDefineConstant Include="@(_SupportedPlatformCompatibleVersions->'$(TargetPlatformIdentifier.ToUpper())%(Identity)'->Replace('.', '_'))" />
     </ItemGroup>
   </Target>
 
   <!-- Add implicitly defined preprocessor symbols to DefineConstants -->
   <Target Name="AddImplicitDefineConstants"
           Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' "
-          DependsOnTargets="GenerateTargetPlatformDefineConstants;GenerateNETCompatibleDefineConstants;GeneratePlatformCompatibleDefineConstants"
+          DependsOnTargets="GenerateTargetPlatformDefineConstants"
           BeforeTargets="CoreCompile" >
     <PropertyGroup>
       <DefineConstants Condition=" '@(_ImplicitDefineConstant)' != '' " >$(DefineConstants);@(_ImplicitDefineConstant)</DefineConstants>

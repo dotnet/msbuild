@@ -171,8 +171,8 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             string lockFileContent = CreateLockFileSnippet(
                 targets: new string[] {
-                    CreateTarget(".NETCoreApp,Version=v1.0", TargetLibA, TargetLibB, TargetLibC),
-                    CreateTarget(".NETCoreApp,Version=v1.0/osx.10.11-x64", TargetLibA, TargetLibB, TargetLibC),
+                    CreateTarget("netcoreapp1.0", TargetLibA, TargetLibB, TargetLibC),
+                    CreateTarget("netcoreapp1.0/osx.10.11-x64", TargetLibA, TargetLibB, TargetLibC),
                 },
                 libraries: new string[] { LibADefn, LibBDefn, LibCDefn },
                 projectFileDependencyGroups: new string[] { NETCoreGroup, NETCoreOsxGroup },
@@ -191,7 +191,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 }
             );
 
-            var task = GetExecutedTaskFromContents(lockFileContent, out _, target: target1);
+            var task = GetExecutedTaskFromContents(lockFileContent, out _, target: "netcoreapp1.0");
 
             var defs = task.PackageDefinitions.ToLookup(def => def.ItemSpec);
 
@@ -850,7 +850,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 ProjectPath = _projectPath,
                 ProjectLanguage = null,
                 EmitLegacyAssetsFileItems = emitLegacyAssetsFileItems,
-                TargetFrameworkMoniker = target
+                TargetFramework = target
             };
 
             task.Execute().Should().BeTrue();

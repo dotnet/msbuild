@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ru" original="../Strings.resx">
+    <body>
+      <trans-unit id="ConcreteWorkloadHasNoDescription">
+        <source>Workload definition '{0}' is a concrete dev workload but has no description</source>
+        <target state="new">Workload definition '{0}' is a concrete dev workload but has no description</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DuplicateKeyAtOffset">
+        <source>Duplicate key '{0}' at offset {1}</source>
+        <target state="new">Duplicate key '{0}' at offset {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedBoolAtOffset">
+        <source>Expected boolean value at offset {0}</source>
+        <target state="new">Expected boolean value at offset {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedStringAtOffset">
+        <source>Expected string value at offset {0}</source>
+        <target state="new">Expected string value at offset {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExpectedTokenAtOffset">
+        <source>Expected {0} token at offset {1}</source>
+        <target state="new">Expected {0} token at offset {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IncompleteDocument">
+        <source>Document ended prematurely</source>
+        <target state="new">Document ended prematurely</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingOrInvalidManifestVersion">
+        <source>Missing or invalid manifest version</source>
+        <target state="new">Missing or invalid manifest version</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingWorkloadPackKind">
+        <source>Missing kind for workload pack '{0}'</source>
+        <target state="new">Missing kind for workload pack '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingWorkloadPackVersion">
+        <source>Missing version for workload pack '{0}'</source>
+        <target state="new">Missing version for workload pack '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnexpectedTokenAtOffset">
+        <source>Unexpected token '{0}' at offset {1}</source>
+        <target state="new">Unexpected token '{0}' at offset {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownKeyAtOffset">
+        <source>Unknown key '{0}' at offset {1}</source>
+        <target state="new">Unknown key '{0}' at offset {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownWorkloadDefinitionKind">
+        <source>Unknown workload definition kind '{0}' at offset {1}</source>
+        <target state="new">Unknown workload definition kind '{0}' at offset {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownWorkloadPackKind">
+        <source>Unknown workload pack kind '{0}' at offset {1}</source>
+        <target state="new">Unknown workload pack kind '{0}' at offset {1}</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

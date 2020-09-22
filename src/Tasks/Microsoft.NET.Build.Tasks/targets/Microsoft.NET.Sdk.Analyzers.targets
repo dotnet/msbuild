@@ -42,12 +42,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Compiler warning level, defaulted to 4. We promote it to 5 if the user has set analysis level to 5 or higher
          NOTE: at this time only the C# compiler supports warning waves -->
     <WarningLevel Condition="'$(Language)' == 'C#' And
-                             '$(WarningLevel)' == '' And
                              '$(EffectiveAnalysisLevel)' != '' And
                              $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '5.0'))">5</WarningLevel>
     <!-- If the user specified 'preview' we want to pick a very high warning level to opt into the highest possible warning wave -->
     <WarningLevel Condition="'$(Language)' == 'C#' And
-                             '$(WarningLevel)' == '' And
                              '$(AnalysisLevel)' == 'preview'">9999</WarningLevel>
 
   </PropertyGroup>

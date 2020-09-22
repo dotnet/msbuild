@@ -12,6 +12,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Microsoft.DotNet.TemplateLocator\Microsoft.DotNet.TemplateLocator.csproj" />
+    <ProjectReference Include="..\..\Resolvers\Microsoft.DotNet.SdkResolver\Microsoft.DotNet.SdkResolver.csproj" />
+    <ProjectReference Include="..\..\Resolvers\Microsoft.NET.Sdk.WorkloadManifestReader\Microsoft.NET.Sdk.WorkloadManifestReader.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Manifests\WorkloadManifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Manifests\AndroidWorkloadManifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

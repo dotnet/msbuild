@@ -11,7 +11,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ItemGroup Condition=" '$(_IncludeWindowsSDKRefFrameworkReferences)' == 'true' ">
+  <ItemGroup Condition=" '$(IncludeWindowsSDKRefFrameworkReferences)' == 'true' ">
     <FrameworkReference Include="Microsoft.Windows.SDK.NET.Ref" IsImplicitlyDefined="true" Pack="false" PrivateAssets="All" />
   </ItemGroup>
 
