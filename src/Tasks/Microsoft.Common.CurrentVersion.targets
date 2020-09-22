@@ -3984,6 +3984,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Generates Launcher and obtains its Framework version and moniker -->
     <GenerateLauncher
+        AssemblyName="$(_DeploymentApplicationManifestIdentity)"
         EntryPoint="@(EntryPointForLauncher)"
         OutputPath="$(IntermediateOutputPath)"
         VisualStudioVersion="$(VisualStudioVersion)">
@@ -4133,17 +4134,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Create list of items for manifest generation -->
     <ResolveManifestFiles
-        TargetFrameworkVersion="$(TargetFrameworkVersion)"
-        TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
-        SigningManifests="$(SignManifests)"
+        AssemblyName="$(_DeploymentApplicationManifestIdentity)"
         EntryPoint="@(_DeploymentClickOnceApplicationExecutable)"
         ExtraFiles="@(_DebugSymbolsIntermediatePath);$(IntermediateOutputPath)$(TargetName).xml;@(_ReferenceRelatedPaths)"
         Files="@(ClickOnceFiles)"
+        LauncherBasedDeployment="$(_DeploymentLauncherBased)"
         ManagedAssemblies="@(_ManifestManagedReferences)"
         NativeAssemblies="@(NativeReferenceFile);@(_DeploymentNativePrerequisite)"
         PublishFiles="@(PublishFile)"
         SatelliteAssemblies="@(_SatelliteAssemblies)"
-        TargetCulture="$(TargetCulture)">
+        SigningManifests="$(SignManifests)"
+        TargetCulture="$(TargetCulture)"
+        TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
+        TargetFrameworkVersion="$(TargetFrameworkVersion)">
 
       <Output TaskParameter="OutputAssemblies" ItemName="_DeploymentManifestDependenciesUnfiltered"/>
       <Output TaskParameter="OutputFiles" ItemName="_DeploymentManifestFiles"/>

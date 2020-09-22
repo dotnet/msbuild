@@ -2857,10 +2857,6 @@
     <value>MSB3965: No output path specified in build settings.</value>
     <comment>{StrBegin="MSB3965: "}</comment>
   </data>
-  <data name="GenerateLauncher.EmptyEntryPoint">
-    <value>MSB3966: EntryPoint input parameter cannot be empty in the GenerateLauncher task.</value>
-    <comment>{StrBegin="MSB3965: "}</comment>
-  </data>
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 
