@@ -13,6 +13,7 @@ using System.Reflection.PortableExecutable;
 using System.Runtime.Serialization;
 using System.Runtime.Versioning;
 using System.Security.Permissions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
@@ -557,7 +558,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads in cached data from stateFiles to build an initial cache. Avoids logging warnings or errors.
         /// </summary>
-        internal static SystemState DeserializePrecomputedCaches(string[] stateFiles, TaskLoggingHelper log, Type requiredReturnType, GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
+        internal static SystemState DeserializePrecomputedCaches(ITaskItem[] stateFiles, TaskLoggingHelper log, Type requiredReturnType, GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
         {
             SystemState retVal = new SystemState();
             retVal.SetGetLastWriteTime(getLastWriteTime);
@@ -565,10 +566,10 @@ namespace Microsoft.Build.Tasks
             retVal.isDirty = stateFiles.Length > 0;
             HashSet<string> assembliesFound = new HashSet<string>();
 
-            foreach (string stateFile in stateFiles)
+            foreach (ITaskItem stateFile in stateFiles)
             {
                 // Verify that it's a real stateFile; log message but do not error if not
-                SystemState sysState = DeserializeCache<SystemState>(stateFile, log, false);
+                SystemState sysState = DeserializeCache<SystemState>(stateFile.ToString(), log, false);
                 if (sysState == null)
                 {
                     continue;
@@ -581,7 +582,7 @@ namespace Microsoft.Build.Tasks
                         FileState fileState = kvp.Value;
                         // Verify that the assembly is correct
                         Guid mvid;
-                        string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stateFile), relativePath));
+                        string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stateFile.ToString()), relativePath));
                         if (FileSystems.Default.FileExists(fullPath))
                         {
                             using (var reader = new PEReader(File.OpenRead(fullPath)))

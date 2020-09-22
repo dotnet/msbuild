@@ -1863,7 +1863,7 @@ namespace Microsoft.Build.Tasks
 
             if (_cache == null)
             {
-                _cache = SystemState.DeserializePrecomputedCaches(CacheInputPaths ?? Array.Empty<string>(), Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo);
+                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths ?? Array.Empty<ITaskItem>(), Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo);
             }
             else
             {
@@ -1877,9 +1877,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void WriteStateFile()
         {
-            if (!string.IsNullOrEmpty(CacheOutputPath))
+            if (!string.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
             {
-                _cache.SerializePrecomputedCache(CacheOutputPath, Log);
+                _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log);
             }
             else if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
