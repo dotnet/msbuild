@@ -314,15 +314,15 @@
     </comment>
   </data>
   <data name="ChangeWave_InvalidFormat" xml:space="preserve">
-    <value>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to invalid format. Enabling all change waves. Entered value: {0}.</value>
+    <value>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</value>
     <comment>
        Value should be of the format: xx.yy
     </comment>
   </data>
   <data name="ChangeWave_OutOfRotation" xml:space="preserve">
-    <value>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a wave that is out of rotation. Defaulting to change wave: {0}. Entered value: {1}.</value>
+    <value>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}.</value>
     <comment>
-       Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current changewaves are.
+       Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current Change Waves are.
     </comment>
   </data>
   <data name="SearchPathsForMSBuildExtensionsPath" xml:space="preserve">
