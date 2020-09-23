@@ -400,9 +400,6 @@ namespace Microsoft.Build.Execution
                 case ChangeWaveConversionState.OutOfRotation:
                     log.LogWarning(BuildEventContext.Invalid, "", new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.AllWaves[0], Traits.Instance.MSBuildDisableFeaturesFromVersion);
                     break;
-                case ChangeWaveConversionState.InvalidVersion:
-                    log.LogWarning(BuildEventContext.Invalid, "", new BuildEventFileInfo(""), "ChangeWave_InvalidVersion", ChangeWaves.DisabledWave);
-                    break;
             }
         }
 
