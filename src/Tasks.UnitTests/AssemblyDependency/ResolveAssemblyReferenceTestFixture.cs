@@ -3024,7 +3024,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool succeeded = false;
 
             bool usingRarService = UseRARaaS;
-            System.Threading.Tasks.Task serverTask = null;
+            Task serverTask = null;
             Stream clientStream = null, serverStream = null;
             if (usingRarService)
             {
