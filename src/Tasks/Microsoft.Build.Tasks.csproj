@@ -351,11 +351,10 @@
     <Compile Include="ResolveAssemblyReferences\Client\RarClient.cs" />
     <Compile Include="ResolveAssemblyReferences\Contract\IResolveAssemblyReferenceTaskHandler.cs" />
     <Compile Include="ResolveAssemblyReferences\Contract\ResolveAssemblyReferenceResult.cs" />
-    <Compile Include="ResolveAssemblyReferences\Contract\ReadOnlyTaskItem.cs" />
     <Compile Include="ResolveAssemblyReferences\Contract\ResolveAssemblyReferenceRequest.cs" />
     <Compile Include="ResolveAssemblyReferences\Contract\ResolveAssemblyReferenceResponse.cs" />
     <Compile Include="ResolveAssemblyReferences\Formatters\BuildEventArgsFormatter.cs" />
-    <Compile Include="ResolveAssemblyReferences\Formatters\ReadOnlyTaskItemFormatter.cs" />
+    <Compile Include="ResolveAssemblyReferences\Formatters\TaskItemFormatter.cs" />
     <Compile Include="ResolveAssemblyReferences\Formatters\RequestFormatter.cs" />
     <Compile Include="ResolveAssemblyReferences\Formatters\ResponseFormatter.cs" />
     <Compile Include="ResolveAssemblyReferences\Formatters\ResultFormatter.cs" />

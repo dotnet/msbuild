@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.CodeDom;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
@@ -42,7 +41,7 @@ namespace Microsoft.Build.Execution
             Handshake handshake = NodeProviderOutOfProc.GetHandshake(enableNodeReuse: nodeReuse,
                                                                      enableLowPriority: lowPriority, specialNode: true);
 
-            Console.WriteLine(pipeName);
+            CommunicationsUtilities.Trace("RAR node name: {0}", pipeName);
             IRarController controller = GetController(pipeName, handshake);
 
             Task<int> rarTask = controller.StartAsync(cts.Token);
@@ -63,11 +62,6 @@ namespace Microsoft.Build.Execution
             catch (OperationCanceledException)
             {
                 return NodeEngineShutdownReason.BuildComplete;
-            }
-            catch (Exception e)
-            {
-                shutdownException = e;
-                return NodeEngineShutdownReason.Error;
             }
 
             cts.Cancel();

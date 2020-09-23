@@ -26,58 +26,17 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
             }
 
             options.Security.DepthStep(ref reader);
-            int length = reader.ReadArrayHeader();
-            string message = null;
-            string helpKeyword = null;
-            string senderName = null;
-            int columnNumber = default;
-            int endColumnNumber = default;
-            int endLineNumber = default;
-            int lineNumber = default;
-            string code = default;
-            string file = default;
-            string subCategory = default;
-
-            for (int key = 0; key < length; key++)
-            {
-                switch (key)
-                {
-                    case 0:
-                        message = reader.ReadString();
-                        break;
-                    case 1:
-                        helpKeyword = reader.ReadString();
-                        break;
-                    case 2:
-                        senderName = reader.ReadString();
-                        break;
-                    case 3:
-                        columnNumber = reader.ReadInt32();
-                        break;
-                    case 4:
-                        endColumnNumber = reader.ReadInt32();
-                        break;
-                    case 5:
-                        endLineNumber = reader.ReadInt32();
-                        break;
-                    case 6:
-                        lineNumber = reader.ReadInt32();
-                        break;
-                    case 7:
-                        code = reader.ReadString();
-                        break;
-                    case 8:
-                        file = reader.ReadString();
-                        break;
-                    case 9:
-                        subCategory = reader.ReadString();
-                        break;
-                    default:
-                        reader.Skip();
-                        break;
-                }
-            }
-
+            _ = reader.ReadArrayHeader();
+            string message = reader.ReadString();
+            string helpKeyword = reader.ReadString();
+            string senderName = reader.ReadString();
+            int columnNumber = reader.ReadInt32();
+            int endColumnNumber = reader.ReadInt32();
+            int endLineNumber = reader.ReadInt32();
+            int lineNumber = reader.ReadInt32();
+            string code = reader.ReadString();
+            string file = reader.ReadString();
+            string subCategory = reader.ReadString();
 
             BuildWarningEventArgs buildEvent =
                 new BuildWarningEventArgs(
@@ -128,57 +87,17 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
             }
 
             options.Security.DepthStep(ref reader);
-            int length = reader.ReadArrayHeader();
-            string message = null;
-            string helpKeyword = null;
-            string senderName = null;
-            int columnNumber = default;
-            int endColumnNumber = default;
-            int endLineNumber = default;
-            int lineNumber = default;
-            string code = default;
-            string file = default;
-            string subCategory = default;
-
-            for (int key = 0; key < length; key++)
-            {
-                switch (key)
-                {
-                    case 0:
-                        message = reader.ReadString();
-                        break;
-                    case 1:
-                        helpKeyword = reader.ReadString();
-                        break;
-                    case 2:
-                        senderName = reader.ReadString();
-                        break;
-                    case 3:
-                        columnNumber = reader.ReadInt32();
-                        break;
-                    case 4:
-                        endColumnNumber = reader.ReadInt32();
-                        break;
-                    case 5:
-                        endLineNumber = reader.ReadInt32();
-                        break;
-                    case 6:
-                        lineNumber = reader.ReadInt32();
-                        break;
-                    case 7:
-                        code = reader.ReadString();
-                        break;
-                    case 8:
-                        file = reader.ReadString();
-                        break;
-                    case 9:
-                        subCategory = reader.ReadString();
-                        break;
-                    default:
-                        reader.Skip();
-                        break;
-                }
-            }
+            _ = reader.ReadArrayHeader();
+            string message = reader.ReadString();
+            string helpKeyword = reader.ReadString();
+            string senderName = reader.ReadString();
+            int columnNumber = reader.ReadInt32();
+            int endColumnNumber = reader.ReadInt32();
+            int endLineNumber = reader.ReadInt32();
+            int lineNumber = reader.ReadInt32();
+            string code = reader.ReadString();
+            string file = reader.ReadString();
+            string subCategory = reader.ReadString();
 
             BuildErrorEventArgs buildEvent =
                 new BuildErrorEventArgs(
@@ -228,61 +147,18 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
             }
 
             options.Security.DepthStep(ref reader);
-            int length = reader.ReadArrayHeader();
-            string message = null;
-            string helpKeyword = null;
-            string senderName = null;
-            int columnNumber = default;
-            int endColumnNumber = default;
-            int endLineNumber = default;
-            int lineNumber = default;
-            string code = default;
-            string file = default;
-            string subCategory = default;
-            int importance = default;
-
-            for (int key = 0; key < length; key++)
-            {
-                switch (key)
-                {
-                    case 0:
-                        message = reader.ReadString();
-                        break;
-                    case 1:
-                        helpKeyword = reader.ReadString();
-                        break;
-                    case 2:
-                        senderName = reader.ReadString();
-                        break;
-                    case 3:
-                        columnNumber = reader.ReadInt32();
-                        break;
-                    case 4:
-                        endColumnNumber = reader.ReadInt32();
-                        break;
-                    case 5:
-                        endLineNumber = reader.ReadInt32();
-                        break;
-                    case 6:
-                        lineNumber = reader.ReadInt32();
-                        break;
-                    case 7:
-                        code = reader.ReadString();
-                        break;
-                    case 8:
-                        file = reader.ReadString();
-                        break;
-                    case 9:
-                        subCategory = reader.ReadString();
-                        break;
-                    case 10:
-                        importance = reader.ReadInt32();
-                        break;
-                    default:
-                        reader.Skip();
-                        break;
-                }
-            }
+            _ = reader.ReadArrayHeader();
+            string message = reader.ReadString();
+            string helpKeyword = reader.ReadString();
+            string senderName = reader.ReadString();
+            int columnNumber = reader.ReadInt32();
+            int endColumnNumber = reader.ReadInt32();
+            int endLineNumber = reader.ReadInt32();
+            int lineNumber = reader.ReadInt32();
+            string code = reader.ReadString();
+            string file = reader.ReadString();
+            string subCategory = reader.ReadString();
+            int importance = reader.ReadInt32();
 
             BuildMessageEventArgs buildEvent =
                new BuildMessageEventArgs(
@@ -297,6 +173,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
                        helpKeyword,
                        senderName,
                        (MessageImportance)importance);
+
             reader.Depth--;
 
             return buildEvent;
@@ -388,37 +265,12 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
             }
 
             options.Security.DepthStep(ref reader);
-            int length = reader.ReadArrayHeader();
-            string message = null;
-            string helpKeyword = null;
-            string senderName = null;
-            string projectFile = default;
-            string targetNames = default;
-
-            for (int key = 0; key < length; key++)
-            {
-                switch (key)
-                {
-                    case 0:
-                        message = reader.ReadString();
-                        break;
-                    case 1:
-                        helpKeyword = reader.ReadString();
-                        break;
-                    case 2:
-                        senderName = reader.ReadString();
-                        break;
-                    case 3:
-                        projectFile = reader.ReadString();
-                        break;
-                    case 4:
-                        targetNames = reader.ReadString();
-                        break;
-                    default:
-                        reader.Skip();
-                        break;
-                }
-            }
+            _ = reader.ReadArrayHeader();
+            string message = reader.ReadString();
+            string helpKeyword = reader.ReadString();
+            string senderName = reader.ReadString();
+            string projectFile = reader.ReadString();
+            string targetNames = reader.ReadString();
 
             ExternalProjectStartedEventArgs buildEvent =
                new ExternalProjectStartedEventArgs(
@@ -456,37 +308,12 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
             }
 
             options.Security.DepthStep(ref reader);
-            int length = reader.ReadArrayHeader();
-            string message = null;
-            string helpKeyword = null;
-            string senderName = null;
-            string projectFile = default;
-            bool succeeded = default;
-
-            for (int key = 0; key < length; key++)
-            {
-                switch (key)
-                {
-                    case 0:
-                        message = reader.ReadString();
-                        break;
-                    case 1:
-                        helpKeyword = reader.ReadString();
-                        break;
-                    case 2:
-                        senderName = reader.ReadString();
-                        break;
-                    case 3:
-                        projectFile = reader.ReadString();
-                        break;
-                    case 4:
-                        succeeded = reader.ReadBoolean();
-                        break;
-                    default:
-                        reader.Skip();
-                        break;
-                }
-            }
+            _ = reader.ReadArrayHeader();
+            string message = reader.ReadString();
+            string helpKeyword = reader.ReadString();
+            string senderName = reader.ReadString();
+            string projectFile = reader.ReadString();
+            bool succeeded = reader.ReadBoolean();
 
             ExternalProjectFinishedEventArgs buildEvent =
                new ExternalProjectFinishedEventArgs(

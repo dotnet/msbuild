@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
+
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 {
     internal sealed class ResolveAssemblyReferenceRequest
@@ -13,9 +15,9 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 
         public string AppConfigFile { get; set; }
 
-        public ReadOnlyTaskItem[] Assemblies { get; set; }
+        public ITaskItem[] Assemblies { get; set; }
 
-        public ReadOnlyTaskItem[] AssemblyFiles { get; set; }
+        public ITaskItem[] AssemblyFiles { get; set; }
 
         public bool AutoUnify { get; set; }
 
@@ -35,7 +37,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 
         public bool FindSerializationAssemblies { get; set; }
 
-        public ReadOnlyTaskItem[] FullFrameworkAssemblyTables { get; set; }
+        public ITaskItem[] FullFrameworkAssemblyTables { get; set; }
 
         public string[] FullFrameworkFolders { get; set; }
 
@@ -49,15 +51,15 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 
         public bool IgnoreVersionForFrameworkReferences { get; set; }
 
-        public ReadOnlyTaskItem[] InstalledAssemblySubsetTables { get; set; }
+        public ITaskItem[] InstalledAssemblySubsetTables { get; set; }
 
-        public ReadOnlyTaskItem[] InstalledAssemblyTables { get; set; }
+        public ITaskItem[] InstalledAssemblyTables { get; set; }
 
         public string[] LatestTargetFrameworkDirectories { get; set; }
 
         public string ProfileName { get; set; }
 
-        public ReadOnlyTaskItem[] ResolvedSDKReferences { get; set; }
+        public ITaskItem[] ResolvedSDKReferences { get; set; }
 
         public string[] SearchPaths { get; set; }
 
@@ -91,6 +93,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract
 
         public string AssemblyInformationCacheOutputPath { get; set; }
 
-        public ReadOnlyTaskItem[] AssemblyInformationCachePaths { get; set; }
+        public ITaskItem[] AssemblyInformationCachePaths { get; set; }
     }
 }

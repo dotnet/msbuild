@@ -1,15 +1,18 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 {
     internal static class ResolveAssemblyReferenceComparer
     {
-        internal static bool CompareInput(ResolveAssemblyReferenceRequest x, ResolveAssemblyReferenceRequest y)
+        internal static bool CompareRequest(ResolveAssemblyReferenceRequest x, ResolveAssemblyReferenceRequest y)
         {
             if (x == y)
             {
@@ -68,7 +71,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
                    AreStringListsEqual(x.TargetFrameworkSubsets, y.TargetFrameworkSubsets);
         }
 
-        internal static bool CompareOutput(ResolveAssemblyReferenceResponse x, ResolveAssemblyReferenceResponse y)
+        internal static bool CompareResponse(ResolveAssemblyReferenceResponse x, ResolveAssemblyReferenceResponse y)
         {
             if (x == y)
             {
@@ -121,7 +124,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
             return true;
         }
 
-        private static bool AreTaskItemListsEqual(ReadOnlyTaskItem[] x, ReadOnlyTaskItem[] y)
+        private static bool AreTaskItemListsEqual(ITaskItem[] x, ITaskItem[] y)
         {
             if (x == y)
             {
@@ -149,7 +152,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
             return true;
         }
 
-        private static bool AreTaskItemsEqual(ReadOnlyTaskItem x, ReadOnlyTaskItem y)
+        private static bool AreTaskItemsEqual(ITaskItem x, ITaskItem y)
         {
             if (x == y)
             {
@@ -161,20 +164,24 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
                 return false;
             }
 
-            if (x.ItemSpec != y.ItemSpec || x.MetadataNameToValue.Count != y.MetadataNameToValue.Count)
+            if (x.ItemSpec != y.ItemSpec || x.MetadataCount != y.MetadataCount)
             {
                 return false;
             }
 
-            foreach (KeyValuePair<string, string> metadataNameWithValue in x.MetadataNameToValue)
+            IEnumerable<string> xMetadataNames = x.MetadataNames.Cast<string>();
+
+            if(!xMetadataNames.SequenceEqual(y.MetadataNames.Cast<string>()))
             {
-                string metadataName = metadataNameWithValue.Key;
-                string metadataValue = metadataNameWithValue.Value;
+                return false;
+            }
 
-                bool hasMetadata = y.MetadataNameToValue.TryGetValue(metadataName, out string metadataValueToCompare);
-                bool isMetadataEqual = hasMetadata && metadataValue == metadataValueToCompare;
-
-                if (!isMetadataEqual)
+            foreach (string metdataName in xMetadataNames)
+            {
+                string xMetdata = x.GetMetadata(metdataName);
+                string yMetdata = y.GetMetadata(metdataName);
+                
+                if (xMetdata != yMetdata)
                 {
                     return false;
                 }

@@ -11,6 +11,8 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters
 {
     internal sealed class ResultFormatter : IMessagePackFormatter<ResolveAssemblyReferenceResult>
     {
+        internal const int MemberCount = 3;
+
         public void Serialize(ref MessagePackWriter writer, ResolveAssemblyReferenceResult value, MessagePackSerializerOptions options)
         {
             if (value == null)
@@ -20,7 +22,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters
             }
 
             IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(3);
+            writer.WriteArrayHeader(MemberCount);
             formatterResolver.GetFormatter<List<BuildEventArgs>>().Serialize(ref writer, value.BuildEvents, options);
             formatterResolver.GetFormatter<ResolveAssemblyReferenceResponse>().Serialize(ref writer, value.Response, options);
             writer.Write(value.TaskResult);
@@ -35,28 +37,12 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters
 
             options.Security.DepthStep(ref reader);
             IFormatterResolver formatterResolver = options.Resolver;
-            int length = reader.ReadArrayHeader();
-
+            int _ = reader.ReadArrayHeader();
             ResolveAssemblyReferenceResult result = new ResolveAssemblyReferenceResult();
 
-            for (int i = 0; i < length; i++)
-            {
-                switch (i)
-                {
-                    case 2:
-                        result.TaskResult = reader.ReadBoolean();
-                        break;
-                    case 1:
-                        result.Response = formatterResolver.GetFormatter<ResolveAssemblyReferenceResponse>().Deserialize(ref reader, options);
-                        break;
-                    case 0:
-                        result.BuildEvents = formatterResolver.GetFormatter<List<BuildEventArgs>>().Deserialize(ref reader, options);
-                        break;
-                    default:
-                        reader.Skip();
-                        break;
-                }
-            }
+            result.BuildEvents = formatterResolver.GetFormatter<List<BuildEventArgs>>().Deserialize(ref reader, options);
+            result.Response = formatterResolver.GetFormatter<ResolveAssemblyReferenceResponse>().Deserialize(ref reader, options);
+            result.TaskResult = reader.ReadBoolean();
 
             reader.Depth--;
             return result;

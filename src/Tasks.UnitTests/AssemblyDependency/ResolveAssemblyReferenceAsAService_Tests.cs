@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,6 +12,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Client;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Contract;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences.Formatters;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Server;
 using Microsoft.Build.Tasks.ResolveAssemblyReferences.Services;
 using Microsoft.Build.UnitTests;
@@ -27,72 +32,75 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
         {
         }
 
-        [Fact]
-        public void EnsureInputPropertiesMatch()
+        [InlineData(typeof(ResolveAssemblyReferenceRequest), false)]
+        [InlineData(typeof(ResolveAssemblyReferenceResponse), true)]
+        [Theory]
+        public void EnsurePropertiesMatch(Type t, bool isOutputProperty)
         {
-            string[] rarInputProperties = typeof(ResolveAssemblyReference).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                .Where(p => !p.GetCustomAttributes(typeof(OutputAttribute), inherit: true).Any()).Select(p => p.Name).ToArray();
-            string[] inputProperties = typeof(ResolveAssemblyReferenceRequest).GetProperties().Select(p => p.Name).ToArray();
+            string[] rarProperties = typeof(ResolveAssemblyReference).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                .Where(p => isOutputProperty == p.GetCustomAttributes(typeof(OutputAttribute), inherit: true).Any()).Select(p => p.Name).ToArray();
+            string[] properties = t.GetProperties().Select(p => p.Name).ToArray();
 
-            foreach (var item in rarInputProperties)
+            foreach (var item in rarProperties)
             {
-                inputProperties.ShouldContain(item);
+                properties.ShouldContain(item);
             }
         }
 
-        [Fact]
-        public void EnsureOutputPropertiesMatch()
+        [InlineData(typeof(ResolveAssemblyReferenceRequest), RequestFormatter.MemberCount)]
+        [InlineData(typeof(ResolveAssemblyReferenceResponse), ResponseFormatter.MemberCount)]
+        [InlineData(typeof(ResolveAssemblyReferenceResult), ResultFormatter.MemberCount)]
+        [Theory]
+        public void FormatterHeaderSizeMatchTest(Type type, int memberCount)
         {
-            string[] rarInputProperties = typeof(ResolveAssemblyReference).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                .Where(p => p.GetCustomAttributes(typeof(OutputAttribute), true).Any()).Select(p => p.Name).ToArray();
-            string[] inputProperties = typeof(ResolveAssemblyReferenceResponse).GetProperties().Select(p => p.Name).ToArray();
+            int propertyCount = type.GetProperties().Length;
 
-            foreach (var item in rarInputProperties)
+            propertyCount.ShouldBe(memberCount);
+        }
+
+        [InlineData(typeof(ResolveAssemblyReferenceRequest))]
+        [InlineData(typeof(ResolveAssemblyReferenceResponse))]
+        [Theory]
+        public void TransferredObjectsEqual(Type type)
+        {
+            MessagePackSerializerOptions options = MessagePackSerializerOptions.Standard.WithResolver(ResolveAssemblyReferneceResolver.Instance);
+            object obj = GetPopulatedObject(type, "test", new[] { "testArr" }, true, new[] { new TaskItem("test") });
+
+            byte[] data = MessagePackSerializer.Serialize(type, obj, options);
+            object objDes = MessagePackSerializer.Deserialize(type, data, options);
+
+            objDes.ShouldBeOfType(type);
+
+            if (typeof(ResolveAssemblyReferenceRequest).Equals(type))
             {
-                inputProperties.ShouldContain(item);
+                ResolveAssemblyReferenceComparer.CompareRequest((ResolveAssemblyReferenceRequest)obj, (ResolveAssemblyReferenceRequest)objDes).ShouldBeTrue();
             }
-        }
-
-        [Fact]
-        public void TransferredRequestEquals()
-        {
-            MessagePackSerializerOptions options = MessagePackSerializerOptions.Standard.WithResolver(ResolveAssemblyReferneceResolver.Instance);
-            ResolveAssemblyReferenceRequest request = GetPopulatedObject<ResolveAssemblyReferenceRequest>("test", new[] { "testArr" }, true, new[] { new ReadOnlyTaskItem("test") });
-
-            byte[] data = MessagePackSerializer.Serialize(request, options);
-            ResolveAssemblyReferenceRequest requestDes = MessagePackSerializer.Deserialize<ResolveAssemblyReferenceRequest>(data, options);
-
-            ResolveAssemblyReferenceComparer.CompareInput(request, requestDes).ShouldBeTrue();
-        }
-
-        [Fact]
-        public void TransferredResponseEquals()
-        {
-            MessagePackSerializerOptions options = MessagePackSerializerOptions.Standard.WithResolver(ResolveAssemblyReferneceResolver.Instance);
-            ResolveAssemblyReferenceResponse response = GetPopulatedObject<ResolveAssemblyReferenceResponse>("test", new[] { "testArr" }, true, new[] { new ReadOnlyTaskItem("test") });
-
-            byte[] data = MessagePackSerializer.Serialize(response, options);
-            ResolveAssemblyReferenceResponse responseDes = MessagePackSerializer.Deserialize<ResolveAssemblyReferenceResponse>(data, options);
-
-            ResolveAssemblyReferenceComparer.CompareOutput(response, responseDes).ShouldBeTrue();
+            else if (typeof(ResolveAssemblyReferenceResponse).Equals(type))
+            {
+                ResolveAssemblyReferenceComparer.CompareResponse((ResolveAssemblyReferenceResponse)obj, (ResolveAssemblyReferenceResponse)objDes).ShouldBeTrue();
+            }
+            else
+            {
+                objDes.ShouldBe(obj);
+            }
         }
 
         [Fact]
         public void RarOutputPropertyTest()
         {
-            ResolveAssemblyReferenceResponse expectedResponse = GetPopulatedObject<ResolveAssemblyReferenceResponse>("test", new[] { "testArr" }, true, new[] { new ReadOnlyTaskItem("test") });
+            ResolveAssemblyReferenceResponse expectedResponse = GetPopulatedObject<ResolveAssemblyReferenceResponse>("test", new[] { "testArr" }, true, new[] { new TaskItem("test") });
 
             ResolveAssemblyReference rar = new ResolveAssemblyReference();
             rar.ResolveAssemblyReferenceOutput = expectedResponse;
             ResolveAssemblyReferenceResponse response = rar.ResolveAssemblyReferenceOutput;
 
-            ResolveAssemblyReferenceComparer.CompareOutput(expectedResponse, response).ShouldBeTrue();
+            ResolveAssemblyReferenceComparer.CompareResponse(expectedResponse, response).ShouldBeTrue();
         }
 
         [Fact]
         public void RarIputPropertyTest()
         {
-            ResolveAssemblyReferenceRequest expectedRequest = GetPopulatedObject<ResolveAssemblyReferenceRequest>("test", new[] { "testArr" }, true, new[] { new ReadOnlyTaskItem("test") });
+            ResolveAssemblyReferenceRequest expectedRequest = GetPopulatedObject<ResolveAssemblyReferenceRequest>("test", new[] { "testArr" }, true, new[] { new TaskItem("test") });
             expectedRequest.CurrentPath = Directory.GetCurrentDirectory();
             expectedRequest.WarnOrErrorOnTargetArchitectureMismatch = "None"; // Serialized into enum, so we have to provide correct value
 
@@ -100,7 +108,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             rar.ResolveAssemblyReferenceInput = expectedRequest;
             ResolveAssemblyReferenceRequest request = rar.ResolveAssemblyReferenceInput;
 
-            ResolveAssemblyReferenceComparer.CompareInput(expectedRequest, request).ShouldBeTrue();
+            ResolveAssemblyReferenceComparer.CompareRequest(expectedRequest, request).ShouldBeTrue();
         }
 
 
@@ -134,24 +142,27 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             ResolveAssemblyReferenceResult result = client.Execute(rar.ResolveAssemblyReferenceInput);
             cts.Cancel();
 
-            ResolveAssemblyReferenceComparer.CompareOutput(expectedResult.Response, result.Response).ShouldBeTrue();
+            ResolveAssemblyReferenceComparer.CompareResponse(expectedResult.Response, result.Response).ShouldBeTrue();
 
             serverStream.Dispose();
             clientStream.Dispose();
         }
 
-        private T GetPopulatedObject<T>(string str, string[] strArray, bool boolVal, ReadOnlyTaskItem[] taskItems) where T : new()
+        private T GetPopulatedObject<T>(string str, string[] strArray, bool boolVal, ITaskItem[] taskItems) where T : new()
+        {
+            return (T)GetPopulatedObject(typeof(T), str, strArray, boolVal, taskItems);
+        }
+
+        private object GetPopulatedObject(Type type, string str, string[] strArray, bool boolVal, ITaskItem[] taskItems)
         {
             int count = 0;
-            T request = new T();
-            Type t = typeof(T);
-            t.GetConstructor(Type.EmptyTypes).Invoke(null);
-            foreach (var prop in t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+            object obj = Activator.CreateInstance(type);
+            foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
             {
                 var propType = prop.PropertyType;
                 if (propType == typeof(string))
                 {
-                    prop.SetValue(request, str + count++);
+                    prop.SetValue(obj, str + count++);
                 }
                 else if (propType == typeof(string[]))
                 {
@@ -160,20 +171,20 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                         strArray[0] += count++;
                     }
 
-                    prop.SetValue(request, strArray);
+                    prop.SetValue(obj, strArray);
                 }
                 else if (propType == typeof(bool))
                 {
-                    prop.SetValue(request, boolVal);
+                    prop.SetValue(obj, boolVal);
                 }
-                else if (propType == typeof(ReadOnlyTaskItem[]))
+                else if (propType == typeof(ITaskItem[]))
                 {
                     if (taskItems?.Length > 0 && taskItems[0] != null)
                     {
                         taskItems[0].ItemSpec += count++;
                     }
 
-                    prop.SetValue(request, taskItems);
+                    prop.SetValue(obj, taskItems);
                 }
                 else
                 {
@@ -181,7 +192,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                     throw new NotImplementedException($"Invalid type: {propType.FullName}");
                 }
             }
-            return request;
+            return obj;
         }
     }
 }

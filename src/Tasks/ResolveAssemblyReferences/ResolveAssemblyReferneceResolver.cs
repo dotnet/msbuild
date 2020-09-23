@@ -49,10 +49,10 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
         {
             lookup = new Dictionary<Type, int>
             {
-                { typeof(ReadOnlyTaskItem[]), 0 },
+                { typeof(ITaskItem[]), 0 },
                 { typeof(Dictionary<string, string>), 1 },
                 { typeof(List<BuildEventArgs>), 2 },
-                { typeof(ReadOnlyTaskItem), 3 },
+                { typeof(ITaskItem), 3 },
                 { typeof(ResolveAssemblyReferenceRequest), 4 },
                 { typeof(ResolveAssemblyReferenceResponse), 5 },
                 { typeof(ResolveAssemblyReferenceResult), 6 },
@@ -70,10 +70,10 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
 
             return key switch
             {
-                0 => new ArrayFormatter<ReadOnlyTaskItem>(),
+                0 => new ArrayFormatter<ITaskItem>(),
                 1 => new DictionaryFormatter<string, string>(),
                 2 => new ListFormatter<BuildEventArgs>(),
-                3 => new ReadOnlyTaskItemFormatter(),
+                3 => new TaskItemFormatter(),
                 4 => new RequestFormatter(),
                 5 => new ResponseFormatter(),
                 6 => new ResultFormatter(),
