@@ -1089,8 +1089,6 @@ namespace Microsoft.Build.Evaluation
         {
             string startupDirectory = BuildParameters.StartupDirectory;
 
-            ChangeWaveConversionState changeWaveState;
-
             SetBuiltInProperty(ReservedPropertyNames.toolsVersion, _data.Toolset.ToolsVersion);
             SetBuiltInProperty(ReservedPropertyNames.toolsPath, _data.Toolset.ToolsPath);
             SetBuiltInProperty(ReservedPropertyNames.binPath, _data.Toolset.ToolsPath);
@@ -1099,20 +1097,7 @@ namespace Microsoft.Build.Evaluation
             SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32);
             SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion);
             SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild);
-            SetBuiltInProperty(ReservedPropertyNames.msbuilddisablefeaturesfromversion, ChangeWaves.ApplyChangeWave(out changeWaveState));
-
-            switch (changeWaveState)
-            {
-                case ChangeWaveConversionState.InvalidFormat:
-                    _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion);
-                    break;
-                case ChangeWaveConversionState.OutOfRotation:
-                    _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.AllWaves[0], Traits.Instance.MSBuildDisableFeaturesFromVersion);
-                    break;
-                case ChangeWaveConversionState.InvalidVersion:
-                    _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(""), "ChangeWave_InvalidVersion", ChangeWaves.DisabledWave);
-                    break;
-            }
+            SetBuiltInProperty(ReservedPropertyNames.msbuilddisablefeaturesfromversion, ChangeWaves.ApplyChangeWave());
 
             // Fake OS env variables when not on Windows
             if (!NativeMethodsShared.IsWindows)

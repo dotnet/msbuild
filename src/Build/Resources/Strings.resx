@@ -325,7 +325,7 @@
        Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current Change Waves are.
     </comment>
   </data>
-  <data name="ChangeWave_InRotationButInvalid" xml:space="preserve">
+  <data name="ChangeWave_InvalidVersion" xml:space="preserve">
     <value>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is not set to a valid version. Defaulting to Change Wave version: {0}.</value>
     <comment>
        Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current Change Waves are.

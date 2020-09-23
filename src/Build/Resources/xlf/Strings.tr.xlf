@@ -62,18 +62,18 @@
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
-      <trans-unit id="ChangeWave_InRotationButInvalid">
-        <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is not set to a valid version. Defaulting to Change Wave version: {0}.</source>
-        <target state="new">Environment variable MSBUILDDISABLEFEATURESFROMVERSION is not set to a valid version. Defaulting to Change Wave version: {0}.</target>
-        <note>
-       Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current Change Waves are.
-    </note>
-      </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
         <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</source>
         <target state="new">Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</target>
         <note>
        Value should be of the format: xx.yy
+    </note>
+      </trans-unit>
+      <trans-unit id="ChangeWave_InvalidVersion">
+        <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is not set to a valid version. Defaulting to Change Wave version: {0}.</source>
+        <target state="new">Environment variable MSBUILDDISABLEFEATURESFROMVERSION is not set to a valid version. Defaulting to Change Wave version: {0}.</target>
+        <note>
+       Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current Change Waves are.
     </note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
