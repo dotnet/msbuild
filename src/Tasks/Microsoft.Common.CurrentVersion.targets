@@ -962,6 +962,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="BuildGenerateSources" DependsOnTargets="BuildGenerateSourcesTraverse;$(BuildGenerateSourcesAction)" />
 
   <Target Name="BuildGenerateSourcesTraverse" DependsOnTargets="PrepareProjectReferences">
+
+    <PropertyGroup Condition="'$(PassOutputPathToReferencedProjects)'=='false' And '$(OutputPathRemovedFromGlobalPropertiesToPass)'=='true'">
+      <MSBuildGlobalPropertiesToRemoveFromProjectReferences>$(MSBuildGlobalPropertiesToRemoveFromProjectReferences);OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
+      <OutputPathRemovedFromGlobalPropertiesToPass>true</OutputPathRemovedFromGlobalPropertiesToPass>
+    </PropertyGroup>
+    
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildGenerateSources"
@@ -969,7 +975,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework);"
         Condition="'$(BuildPassReferences)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceExistent)' != '' and '%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true'"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(MSBuildGlobalPropertiesToRemoveFromProjectReferences)">
     </MSBuild>
   </Target>
 
@@ -987,6 +993,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="BuildCompile" DependsOnTargets="BuildCompileTraverse;$(BuildCompileAction)" />
 
   <Target Name="BuildCompileTraverse" DependsOnTargets="PrepareProjectReferences">
+
+    <PropertyGroup Condition="'$(PassOutputPathToReferencedProjects)'=='false' And '$(OutputPathRemovedFromGlobalPropertiesToPass)'=='true'">
+      <MSBuildGlobalPropertiesToRemoveFromProjectReferences>$(MSBuildGlobalPropertiesToRemoveFromProjectReferences);OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
+      <OutputPathRemovedFromGlobalPropertiesToPass>true</OutputPathRemovedFromGlobalPropertiesToPass>
+    </PropertyGroup>
+    
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildCompile"
@@ -994,7 +1006,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'$(BuildPassReferences)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceExistent)' != ''  and '%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true'"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(MSBuildGlobalPropertiesToRemoveFromProjectReferences)">
     </MSBuild>
   </Target>
 
@@ -1012,6 +1024,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="BuildLink" DependsOnTargets="BuildLinkTraverse;$(BuildLinkAction)" />
 
   <Target Name="BuildLinkTraverse" DependsOnTargets="PrepareProjectReferences" >
+
+    <PropertyGroup Condition="'$(PassOutputPathToReferencedProjects)'=='false' And '$(OutputPathRemovedFromGlobalPropertiesToPass)'=='true'">
+      <MSBuildGlobalPropertiesToRemoveFromProjectReferences>$(MSBuildGlobalPropertiesToRemoveFromProjectReferences);OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
+      <OutputPathRemovedFromGlobalPropertiesToPass>true</OutputPathRemovedFromGlobalPropertiesToPass>
+    </PropertyGroup>
+    
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildLink"
@@ -1019,7 +1037,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'$(BuildPassReferences)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceExistent)' != ''  and '%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true'"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(MSBuildGlobalPropertiesToRemoveFromProjectReferences)">
     </MSBuild>
   </Target>
 
@@ -1622,6 +1640,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
 
+    <PropertyGroup Condition="'$(PassOutputPathToReferencedProjects)'=='false' And '$(OutputPathRemovedFromGlobalPropertiesToPass)'=='true'">
+      <MSBuildGlobalPropertiesToRemoveFromProjectReferences>$(MSBuildGlobalPropertiesToRemoveFromProjectReferences);OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
+      <OutputPathRemovedFromGlobalPropertiesToPass>true</OutputPathRemovedFromGlobalPropertiesToPass>
+    </PropertyGroup>
+
     <!--
        Get reference target framework lists.
        Note: A future optimization could cache the closest match and set the target framework on
@@ -1634,7 +1657,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         BuildInParallel="$(BuildInParallel)"
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform)"
         ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier$(MSBuildGlobalPropertiesToRemoveFromProjectReferences)"
         Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'"
         SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetFrameworkPossibilities" />
@@ -1824,8 +1847,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         much information as possible will be passed to the compilers.
         -->
 
-    <PropertyGroup>
-      <MSBuildGlobalPropertiesToRemoveFromProjectReferences Condition="'$(PassOutputPathToReferencedProjects)'=='false'">$(MSBuildGlobalPropertiesToRemoveFromProjectReferences);OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
+    <PropertyGroup Condition="'$(PassOutputPathToReferencedProjects)'=='false' And '$(OutputPathRemovedFromGlobalPropertiesToPass)'=='true'">
+      <MSBuildGlobalPropertiesToRemoveFromProjectReferences>$(MSBuildGlobalPropertiesToRemoveFromProjectReferences);OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
+      <OutputPathRemovedFromGlobalPropertiesToPass>true</OutputPathRemovedFromGlobalPropertiesToPass>
     </PropertyGroup>
 
     <MSBuild
@@ -1852,7 +1876,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform);  %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
         Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingInsideVisualStudio)' != 'true' and '$(BuildProjectReferences)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="$(ContinueOnError)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(MSBuildGlobalPropertiesToRemoveFromProjectReferences)">
 
       <Output TaskParameter="TargetOutputs" ItemName="_ResolvedProjectReferencePaths" Condition="'%(_MSBuildProjectReferenceExistent.ReferenceOutputAssembly)'=='true' or '$(DesignTimeBuild)' == 'true'"/>
       <Output TaskParameter="TargetOutputs" ItemName="%(_MSBuildProjectReferenceExistent.OutputItemType)" Condition="'%(_MSBuildProjectReferenceExistent.OutputItemType)' != ''"/>
@@ -1870,7 +1894,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingProject)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="$(ContinueOnError)"
         SkipNonexistentTargets="true"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(MSBuildGlobalPropertiesToRemoveFromProjectReferences)">
 
       <Output TaskParameter="TargetOutputs" ItemName="NativeReference" Condition="'%(_MSBuildProjectReferenceExistent.ReferenceOutputAssembly)' == 'true'"/>
     </MSBuild>
@@ -2456,13 +2480,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    </Target>
 
   <Target Name="GetReferenceTargetPlatformMonikers" DependsOnTargets="PrepareProjectReferences">
+
+    <PropertyGroup Condition="'$(PassOutputPathToReferencedProjects)'=='false' And '$(OutputPathRemovedFromGlobalPropertiesToPass)'=='true'">
+      <MSBuildGlobalPropertiesToRemoveFromProjectReferences>$(MSBuildGlobalPropertiesToRemoveFromProjectReferences);OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
+      <OutputPathRemovedFromGlobalPropertiesToPass>true</OutputPathRemovedFromGlobalPropertiesToPass>
+    </PropertyGroup>
+    
     <MSBuild
       Projects="@(_MSBuildProjectReferenceExistent)"
       Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
       Targets="GetTargetPathWithTargetPlatformMoniker"
       BuildInParallel="$(BuildInParallel)"
       ContinueOnError="!$(BuildingProject)"
-      RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+      RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(MSBuildGlobalPropertiesToRemoveFromProjectReferences)">
 
       <Output TaskParameter="TargetOutputs" ItemName="TargetPathWithTargetPlatformMoniker" />
     </MSBuild>
@@ -4506,6 +4536,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     DependsOnTargets="_PopulateCommonStateForGetCopyToOutputDirectoryItems"
     Returns="@(_TransitiveItemsToCopyToOutputDirectory)">
 
+    <PropertyGroup Condition="'$(PassOutputPathToReferencedProjects)'=='false' And '$(OutputPathRemovedFromGlobalPropertiesToPass)'=='true'">
+      <MSBuildGlobalPropertiesToRemoveFromProjectReferences>$(MSBuildGlobalPropertiesToRemoveFromProjectReferences);OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
+      <OutputPathRemovedFromGlobalPropertiesToPass>true</OutputPathRemovedFromGlobalPropertiesToPass>
+    </PropertyGroup>
+
     <!-- Get items from child projects first. -->
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
@@ -4515,7 +4550,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Condition="'@(_MSBuildProjectReferenceExistent)' != '' and '$(_GetChildProjectCopyToOutputDirectoryItems)' == 'true' and '%(_MSBuildProjectReferenceExistent.Private)' != 'false' and '$(UseCommonOutputDirectory)' != 'true'"
         ContinueOnError="$(ContinueOnError)"
         SkipNonexistentTargets="true"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(MSBuildGlobalPropertiesToRemoveFromProjectReferences)">
 
       <Output TaskParameter="TargetOutputs" ItemName="_AllChildProjectItemsWithTargetPath"/>
 
@@ -5144,6 +5179,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="CleanReferencedProjects"
       DependsOnTargets="PrepareProjectReferences">
 
+    <PropertyGroup Condition="'$(PassOutputPathToReferencedProjects)'=='false' And '$(OutputPathRemovedFromGlobalPropertiesToPass)'=='true'">
+      <MSBuildGlobalPropertiesToRemoveFromProjectReferences>$(MSBuildGlobalPropertiesToRemoveFromProjectReferences);OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
+      <OutputPathRemovedFromGlobalPropertiesToPass>true</OutputPathRemovedFromGlobalPropertiesToPass>
+    </PropertyGroup>
+
     <!--
         When building the project directly from the command-line, clean those referenced projects
         that exist on disk.  For IDE builds and command-line .SLN builds, the solution build manager
@@ -5156,7 +5196,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         BuildInParallel="$(BuildInParallel)"
         Condition="'$(BuildingInsideVisualStudio)' != 'true' and '$(BuildProjectReferences)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="$(ContinueOnError)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)"/>
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(MSBuildGlobalPropertiesToRemoveFromProjectReferences)"/>
 
   </Target>
 
