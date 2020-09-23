@@ -38,8 +38,14 @@ namespace Microsoft.Build.Collections
         /// allocating new comparers objects.
         /// </summary>
         private readonly static ImmutableDictionary<string, V> NameComparerDictionaryPrototype = ImmutableDictionary.Create<string, V>((IEqualityComparer<string>)MSBuildNameIgnoreCaseComparer.Default);
-#endif
+
+        /// <summary>
+        /// Empty dictionary with <see cref="StringComparer.OrdinalIgnoreCase" />,
+        /// used as the basis of new dictionaries with that comparer to avoid
+        /// allocating new comparers objects.
+        /// </summary>
         private readonly static ImmutableDictionary<string, V> OrdinalIgnoreCaseComparerDictionaryPrototype = ImmutableDictionary.Create<string, V>((IEqualityComparer<string>)StringComparer.OrdinalIgnoreCase);
+#endif
 
 
         /// <summary>
