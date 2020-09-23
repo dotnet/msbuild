@@ -2059,6 +2059,7 @@ namespace Microsoft.Build.Utilities
     public partial class ChangeWaves
     {
         public static readonly string[] AllWaves;
+        public static readonly System.Version[] AllWavesAsVersion;
         public const string EnableAllFeatures = "999.999";
         public const string Wave16_10 = "16.10";
         public const string Wave16_8 = "16.8";

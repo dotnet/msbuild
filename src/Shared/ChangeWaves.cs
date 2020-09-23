@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Shared;
 using System;
+using System.Linq;
 
 namespace Microsoft.Build.Utilities
 {
@@ -10,7 +11,8 @@ namespace Microsoft.Build.Utilities
     {
         Valid,
         InvalidFormat,
-        OutOfRotation
+        OutOfRotation,
+        InvalidVersion
     }
 
     /// <summary>
@@ -19,6 +21,7 @@ namespace Microsoft.Build.Utilities
     public class ChangeWaves
     {
         public static readonly string[] AllWaves = { Wave16_8, Wave16_10, Wave17_0 };
+        public static readonly Version[] AllWavesAsVersion = Array.ConvertAll<string, Version>(AllWaves, Version.Parse);
         public const string Wave16_8 = "16.8";
         public const string Wave16_10 = "16.10";
         public const string Wave17_0 = "17.0";
@@ -28,9 +31,9 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public const string EnableAllFeatures = "999.999";
 
-        internal static readonly Version LowestWaveVersion = new Version(AllWaves[0]);
-        internal static readonly Version HighestWaveVersion = new Version(AllWaves[AllWaves.Length - 1]);
-        internal static readonly Version EnableAllFeaturesVersion = new Version(EnableAllFeatures);
+        internal static readonly Version LowestWaveAsVersion = new Version(AllWaves[0]);
+        internal static readonly Version HighestWaveAsVersion = new Version(AllWaves[AllWaves.Length - 1]);
+        internal static readonly Version EnableAllFeaturesAsVersion = new Version(EnableAllFeatures);
 
         internal static string LowestWave
         {
@@ -88,17 +91,35 @@ namespace Microsoft.Build.Utilities
                 result = ChangeWaveConversionState.InvalidFormat;
                 return DisabledWave = ChangeWaves.EnableAllFeatures;
             }
-
+            // If the version is 999.999, we're done.
+            else if (changeWave == EnableAllFeaturesAsVersion)
+            {
+                result = ChangeWaveConversionState.Valid;
+                return DisabledWave = changeWave.ToString();
+            }
             // If the version is out of rotation, log a warning and clamp the value.
-            else if (changeWave != EnableAllFeaturesVersion && changeWave < LowestWaveVersion)
+            else if (changeWave < LowestWaveAsVersion)
             {
                 result = ChangeWaveConversionState.OutOfRotation;
                 return DisabledWave = LowestWave;
             }
-            else if (changeWave != EnableAllFeaturesVersion && changeWave > HighestWaveVersion)
+            else if (changeWave > HighestWaveAsVersion)
             {
                 result = ChangeWaveConversionState.OutOfRotation;
                 return DisabledWave = HighestWave;
+            }
+
+            // Ensure it's set to an existing version within the current rotation
+            if (!AllWavesAsVersion.Contains(changeWave))
+            {
+                foreach (Version wave in AllWavesAsVersion)
+                {
+                    if (wave > changeWave)
+                    {
+                        result = ChangeWaveConversionState.InvalidVersion;
+                        return DisabledWave = wave.ToString();
+                    }
+                }
             }
 
             result = ChangeWaveConversionState.Valid;

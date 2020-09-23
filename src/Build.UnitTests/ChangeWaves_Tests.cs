@@ -216,6 +216,39 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        public void VersionSetToValidValueButInvalidVersionSetsNextVersion()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetChangeWave($"{ChangeWaves.LowestWaveAsVersion.Major}.{ChangeWaves.LowestWaveAsVersion.Minor}.{ChangeWaves.LowestWaveAsVersion.Build+1}");
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                // All waves should be disabled
+                    string projectFile = $"" +
+                        $"<Project>" +
+                            $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.AllWaves[1]}' and $([MSBuild]::AreFeaturesEnabled('{ChangeWaves.LowestWave}'))\">" +
+                                $"<Message Text='Hello World!'/>" +
+                            $"</Target>" +
+                        $"</Project>";
+
+                    TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
+
+                    ProjectCollection collection = new ProjectCollection();
+                    MockLogger log = new MockLogger();
+                    collection.RegisterLogger(log);
+
+                    Project p = collection.LoadProject(file.Path);
+                    p.Build().ShouldBeTrue();
+
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                    log.AssertLogContains("not set to a valid version");
+                    log.AssertLogContains("Hello World!");
+
+            }
+        }
+
+        [Fact]
         public void CorrectlyDetermineEnabledFeatures()
         {
             using (TestEnvironment env = TestEnvironment.Create())

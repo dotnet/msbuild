@@ -1101,13 +1101,17 @@ namespace Microsoft.Build.Evaluation
             SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild);
             SetBuiltInProperty(ReservedPropertyNames.msbuilddisablefeaturesfromversion, ChangeWaves.ApplyChangeWave(out changeWaveState));
 
-            if (changeWaveState == ChangeWaveConversionState.InvalidFormat)
+            switch (changeWaveState)
             {
-                _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion);
-            }
-            else if(changeWaveState == ChangeWaveConversionState.OutOfRotation)
-            {
-                _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.AllWaves[0], Traits.Instance.MSBuildDisableFeaturesFromVersion);
+                case ChangeWaveConversionState.InvalidFormat:
+                    _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion);
+                    break;
+                case ChangeWaveConversionState.OutOfRotation:
+                    _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.AllWaves[0], Traits.Instance.MSBuildDisableFeaturesFromVersion);
+                    break;
+                case ChangeWaveConversionState.InvalidVersion:
+                    _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(""), "ChangeWave_InvalidVersion", ChangeWaves.DisabledWave);
+                    break;
             }
 
             // Fake OS env variables when not on Windows
