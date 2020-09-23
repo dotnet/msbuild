@@ -14,7 +14,7 @@ namespace Microsoft.Build.Utilities
     }
 
     /// <summary>
-    /// All waves are enabled by default, meaning all features behind change waves are enabled.
+    /// All waves are enabled by default, meaning all features behind change wave versions are enabled.
     /// </summary>
     public class ChangeWaves
     {
@@ -70,7 +70,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Ensure the the environment variable MSBuildDisableFeaturesFromWave is set to a proper value.
         /// </summary>
-        /// <returns> String representation of the set change wave. "999.999" if unset or invalid, and the lowest version in rotation if out of bounds. </returns>
+        /// <returns> String representation of the set change wave. "999.999" if unset or invalid, and clamped if out of bounds. </returns>
         internal static string ApplyChangeWave(out ChangeWaveConversionState result)
         {
             Version changeWave;
@@ -82,18 +82,23 @@ namespace Microsoft.Build.Utilities
                 return DisabledWave = ChangeWaves.EnableAllFeatures;
             }
 
-            // If the user-set change wave is of invalid format, log a warning and enable all features.
+            // If the version is of invalid format, log a warning and enable all features.
             if (!Version.TryParse(DisabledWave, out changeWave))
             {
                 result = ChangeWaveConversionState.InvalidFormat;
                 return DisabledWave = ChangeWaves.EnableAllFeatures;
             }
 
-            // If the change wave is out of rotation, log a warning and disable all features.
-            else if (ChangeWaves.IsVersionOutOfRotation(changeWave))
+            // If the version is out of rotation, log a warning and clamp the value.
+            else if (changeWave != EnableAllFeaturesVersion && changeWave < LowestWaveVersion)
             {
                 result = ChangeWaveConversionState.OutOfRotation;
-                return DisabledWave = ChangeWaves.AllWaves[0];
+                return DisabledWave = LowestWave;
+            }
+            else if (changeWave != EnableAllFeaturesVersion && changeWave > HighestWaveVersion)
+            {
+                result = ChangeWaveConversionState.OutOfRotation;
+                return DisabledWave = HighestWave;
             }
 
             result = ChangeWaveConversionState.Valid;
@@ -105,7 +110,7 @@ namespace Microsoft.Build.Utilities
         /// Version MUST be of the format: "xx.yy".
         /// </summary>
         /// <param name="wave">The version to compare.</param>
-        /// <returns>A bool indicating whether the feature behind a change wave is enabled.</returns>
+        /// <returns>A bool indicating whether the feature behind a version is enabled.</returns>
         public static bool AreFeaturesEnabled(string wave)
         {
             Version waveToCheck;
@@ -140,16 +145,6 @@ namespace Microsoft.Build.Utilities
             }
 
             return wave < currentSetWave;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="v"></param>
-        /// <returns></returns>
-        public static bool IsVersionOutOfRotation(Version v)
-        {
-            return v != EnableAllFeaturesVersion && (v < LowestWaveVersion || v > HighestWaveVersion);
         }
     }
 }

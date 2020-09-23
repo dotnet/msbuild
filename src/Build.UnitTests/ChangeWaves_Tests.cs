@@ -139,34 +139,79 @@ namespace Microsoft.Build.Engine.UnitTests
 
         [Theory]
         [InlineData("0.8")]
-        [InlineData("203.45")]
-        public void OutOfRotationWavesThrowsWarningAndDisablesFeatures(string disableFromWave)
+        [InlineData("4.5")]
+        [InlineData("10.0")]
+        public void VersionTooLowClampsToLowestVersionInRotation(string disableFromWave)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetChangeWave(disableFromWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
-                string projectFile = $"" +
-                    $"<Project>" +
-                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.LowestWave}' and $([MSBuild]::AreFeaturesEnabled('{ChangeWaves.LowestWave}')) == false\">" +
-                            $"<Message Text='Hello World!'/>" +
-                        $"</Target>" +
-                    $"</Project>";
+                // All waves should be disabled
+                for (int i = 0; i < ChangeWaves.AllWaves.Length; i++)
+                {
+                    ChangeWaves.DisabledWave = null;
+                    string projectFile = $"" +
+                        $"<Project>" +
+                            $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.LowestWave}' and $([MSBuild]::AreFeaturesEnabled('{ChangeWaves.AllWaves[i]}')) == false\">" +
+                                $"<Message Text='Hello World!'/>" +
+                            $"</Target>" +
+                        $"</Project>";
 
-                TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
+                    TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
 
-                ProjectCollection collection = new ProjectCollection();
-                MockLogger log = new MockLogger();
-                collection.RegisterLogger(log);
+                    ProjectCollection collection = new ProjectCollection();
+                    MockLogger log = new MockLogger();
+                    collection.RegisterLogger(log);
 
-                Project p = collection.LoadProject(file.Path);
-                p.Build().ShouldBeTrue();
+                    Project p = collection.LoadProject(file.Path);
+                    p.Build().ShouldBeTrue();
 
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                    log.AssertLogContains("out of rotation");
+                    log.AssertLogContains("Hello World!");
+                }
+
+            }
+        }
+
+        [Theory]
+        [InlineData("100.10")]
+        [InlineData("203.45")]
+        public void VersionTooHighClampsToHighestVersionInRotation(string disableFromWave)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetChangeWave(disableFromWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
-                log.AssertLogContains("out of rotation");
-                log.AssertLogContains("Hello World!");
+                // all waves but the highest should pass
+                for (int i = 0; i < ChangeWaves.AllWaves.Length-1; i++)
+                {
+                    ChangeWaves.DisabledWave = null;
+                    string projectFile = $"" +
+                        $"<Project>" +
+                            $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.HighestWave}' and $([MSBuild]::AreFeaturesEnabled('{ChangeWaves.AllWaves[i]}'))\">" +
+                                $"<Message Text='Hello World!'/>" +
+                            $"</Target>" +
+                        $"</Project>";
+
+                    TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
+
+                    ProjectCollection collection = new ProjectCollection();
+                    MockLogger log = new MockLogger();
+                    collection.RegisterLogger(log);
+
+                    Project p = collection.LoadProject(file.Path);
+                    p.Build().ShouldBeTrue();
+
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                    log.AssertLogContains("out of rotation");
+                    log.AssertLogContains("Hello World!");
+                }
             }
         }
 
@@ -180,6 +225,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 for (int i = 0; i < ChangeWaves.AllWaves.Length-1; i++)
                 {
+                    ChangeWaves.DisabledWave = null;
                     ChangeWaves.AreFeaturesEnabled(ChangeWaves.AllWaves[i]).ShouldBe(true);
 
                     string projectFile = $"" +

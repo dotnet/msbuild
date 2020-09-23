@@ -2067,6 +2067,5 @@ namespace Microsoft.Build.Utilities
         public static string DisabledWave { get { throw null; } set { } }
         public static bool AreFeaturesEnabled(string wave) { throw null; }
         public static bool AreFeaturesEnabled(System.Version wave) { throw null; }
-        public static bool IsVersionOutOfRotation(System.Version v) { throw null; }
     }
 }
