@@ -25,10 +25,10 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void Indexer_ReferenceFound()
         {
-            object k1 = new Object();
+            string k1 = new string(nameof(Indexer_ReferenceFound).ToCharArray()); // force create new string
             object v1 = new Object();
 
-            var dictionary = new CopyOnWriteDictionary<object, object>();
+            var dictionary = new CopyOnWriteDictionary<object>();
             dictionary[k1] = v1;
 
             // Now look for the same key we inserted
@@ -46,8 +46,8 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         {
             Assert.Throws<KeyNotFoundException>(() =>
             {
-                var dictionary = new CopyOnWriteDictionary<object, object>();
-                object value = dictionary[new Object()];
+                var dictionary = new CopyOnWriteDictionary<object>();
+                object value = dictionary[string.Empty];
             }
            );
         }
@@ -57,10 +57,10 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void TryGetValue_ReferenceFound()
         {
-            object k1 = new Object();
+            string k1 = new string(nameof(TryGetValue_ReferenceFound).ToCharArray());
             object v1 = new Object();
 
-            var dictionary = new CopyOnWriteDictionary<object, object>();
+            var dictionary = new CopyOnWriteDictionary<object>();
             dictionary[k1] = v1;
 
             // Now look for the same key we inserted
@@ -77,14 +77,14 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void TryGetValue_ReferenceNotFound()
         {
-            var dictionary = new CopyOnWriteDictionary<object, object>();
+            var dictionary = new CopyOnWriteDictionary<object>();
 
             object v;
-            bool result = dictionary.TryGetValue(new Object(), out v);
+            bool result = dictionary.TryGetValue(string.Empty, out v);
 
             Assert.False(result);
             Assert.Null(v);
-            Assert.False(dictionary.ContainsKey(new Object()));
+            Assert.False(dictionary.ContainsKey(string.Empty));
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             string k1 = String.Concat("ke", "y");
             object v1 = new Object();
 
-            var dictionary = new CopyOnWriteDictionary<string, object>();
+            var dictionary = new CopyOnWriteDictionary<object>();
             dictionary[k1] = v1;
 
             // Now look for a different but equatable key
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void CloneVisibility()
         {
-            var dictionary = new CopyOnWriteDictionary<string, string>();
+            var dictionary = new CopyOnWriteDictionary<string>();
             dictionary["test"] = "1";
             Assert.Equal("1", dictionary["test"]);
 
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void CloneComparer()
         {
-            var dictionary = new CopyOnWriteDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var dictionary = new CopyOnWriteDictionary<string>(StringComparer.OrdinalIgnoreCase);
             dictionary["test"] = "1";
             Assert.Equal("1", dictionary["test"]);
 
@@ -147,7 +147,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void OriginalWritesNotVisibleToClones()
         {
-            var dictionary = new CopyOnWriteDictionary<string, string>();
+            var dictionary = new CopyOnWriteDictionary<string>();
             dictionary["test"] = "1";
             dictionary["test"].ShouldBe("1");
 
@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void CloneWritesNotVisibleToOriginal()
         {
-            var dictionary = new CopyOnWriteDictionary<string, string>();
+            var dictionary = new CopyOnWriteDictionary<string>();
             dictionary["test"] = "1";
             Assert.Equal("1", dictionary["test"]);
 
@@ -201,8 +201,8 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void SerializeDeserialize()
         {
-            CopyOnWriteDictionary<int, string> dictionary = new CopyOnWriteDictionary<int, string>();
-            dictionary.Add(1, "1");
+            CopyOnWriteDictionary<string> dictionary = new CopyOnWriteDictionary<string>();
+            dictionary.Add("Key1", "1");
 
             using (MemoryStream stream = new MemoryStream())
             {
@@ -211,13 +211,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 formatter.Serialize(stream, dictionary);
                 stream.Position = 0;
 
-                var dictionary2 = (CopyOnWriteDictionary<int, string>)formatter.Deserialize(stream);
+                var dictionary2 = (CopyOnWriteDictionary<string>)formatter.Deserialize(stream);
 
                 Assert.Equal(dictionary.Count, dictionary2.Count);
                 Assert.Equal(dictionary.Comparer, dictionary2.Comparer);
-                Assert.Equal("1", dictionary2[1]);
+                Assert.Equal("1", dictionary2["Key1"]);
 
-                dictionary2.Add(2, "2");
+                dictionary2.Add("key2", "2");
             }
         }
 
@@ -227,7 +227,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         [Fact]
         public void SerializeDeserialize2()
         {
-            CopyOnWriteDictionary<string, string> dictionary = new CopyOnWriteDictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+            CopyOnWriteDictionary<string> dictionary = new CopyOnWriteDictionary<string>(MSBuildNameIgnoreCaseComparer.Default);
 
             using (MemoryStream stream = new MemoryStream())
             {
@@ -236,7 +236,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 formatter.Serialize(stream, dictionary);
                 stream.Position = 0;
 
-                CopyOnWriteDictionary<string, string> deserialized = (CopyOnWriteDictionary<string, string>)formatter.Deserialize(stream);
+                CopyOnWriteDictionary<string> deserialized = (CopyOnWriteDictionary<string>)formatter.Deserialize(stream);
 
                 deserialized.Count.ShouldBe(dictionary.Count);
                 deserialized.Comparer.ShouldBeOfType<MSBuildNameIgnoreCaseComparer>();
