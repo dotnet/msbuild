@@ -1549,6 +1549,74 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// Exercises ExpandIntoStringAndUnescape and ExpanderOptions.Truncate
+        /// </summary>
+        [Fact]
+        public void ExpandAllIntoStringNotTruncated()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetChangeWave(ChangeWaves.Wave16_8);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+                ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+                var manySpaces = "".PadLeft(2000);
+                var pg = new PropertyDictionary<ProjectPropertyInstance>();
+                pg.Set(ProjectPropertyInstance.Create("ManySpacesProperty", manySpaces));
+                var itemMetadataTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "ManySpacesMetadata", manySpaces }
+                };
+                var itemMetadata = new StringMetadataTable(itemMetadataTable);
+                var projectItemGroups = new ItemDictionary<ProjectItemInstance>();
+                var itemGroup = new List<ProjectItemInstance>();
+                StringBuilder longFileName = new StringBuilder();
+                StringBuilder longMetadataName = new StringBuilder();
+                for (int i = 0; i < 50; i++)
+                {
+                    var item = new ProjectItemInstance(project, "ManyItems", $"ThisIsAFairlyLongFileName_{i}.bmp", project.FullPath);
+                    item.SetMetadata("Foo", $"ThisIsAFairlyLongMetadataValue_{i}");
+                    longFileName.Append($"ThisIsAFairlyLongFileName_{i}.bmp" + (i == 49 ? string.Empty : ";"));
+                    longMetadataName.Append($"ThisIsAFairlyLongMetadataValue_{i}" + (i == 49 ? string.Empty : ";"));
+                    itemGroup.Add(item);
+                }
+                var lookup = new Lookup(projectItemGroups, pg);
+                lookup.EnterScope("x");
+                lookup.PopulateWithItems("ManySpacesItem", new[]
+                {
+                    new ProjectItemInstance (project, "ManySpacesItem", "Foo", project.FullPath),
+                    new ProjectItemInstance (project, "ManySpacesItem", manySpaces, project.FullPath),
+                    new ProjectItemInstance (project, "ManySpacesItem", "Bar", project.FullPath),
+                });
+                lookup.PopulateWithItems("Exactly1024", new[]
+                {
+                    new ProjectItemInstance (project, "Exactly1024", "".PadLeft(1024), project.FullPath),
+                    new ProjectItemInstance (project, "Exactly1024", "Foo", project.FullPath),
+                });
+                lookup.PopulateWithItems("ManyItems", itemGroup);
+
+                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(lookup, lookup, itemMetadata, FileSystems.Default);
+
+                XmlAttribute xmlattribute = (new XmlDocument()).CreateAttribute("dummy");
+                xmlattribute.Value = "'%(ManySpacesMetadata)' != '' and '$(ManySpacesProperty)' != '' and '@(ManySpacesItem)' != '' and '@(Exactly1024)' != '' and '@(ManyItems)' != '' and '@(ManyItems->'%(Foo)')' != '' and '@(ManyItems->'%(Nonexistent)')' != ''";
+
+                var expected =
+                    $"'{"",2000}' != '' and " +
+                    $"'{"",2000}' != '' and " +
+                    $"'Foo;{"",2000};Bar' != '' and " +
+                    $"'{"",1024};Foo' != '' and " +
+                    $"'{longFileName}' != '' and " +
+                    $"'{longMetadataName}' != '' and " +
+                    "';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;' != ''";
+                var actual = expander.ExpandIntoStringAndUnescape(xmlattribute.Value, ExpanderOptions.ExpandAll | ExpanderOptions.Truncate, MockElementLocation.Instance);
+                // NOTE: semicolons in the last part are *weird* because they don't actually mean anything and you get logging like
+                //     Target "Build" skipped, due to false condition; ( '@(I->'%(nonexistent)')' == '' ) was evaluated as ( ';' == '' ).
+                // but that goes back to MSBuild 4.something so I'm codifying it in this test. If you're here because you cleaned it up
+                // and want to fix the test my current opinion is that's fine.
+                actual.ShouldBe(expected);
+            }
+        }
+
+        /// <summary>
         /// Exercises ExpandAllIntoString with a string that does not need expanding.
         /// In this case the expanded string should be reference identical to the passed in string.
         /// </summary>
