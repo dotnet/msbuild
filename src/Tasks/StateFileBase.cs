@@ -7,7 +7,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using System.Text.Json;
 
 namespace Microsoft.Build.Tasks
 {
