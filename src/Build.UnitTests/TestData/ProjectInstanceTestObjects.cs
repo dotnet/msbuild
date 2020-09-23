@@ -115,8 +115,8 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
             var stringCounter = CounterToString(counter);
 
             var readonlyParameters = parameters != null
-                ? new CopyOnWriteDictionary<string, (string, ElementLocation)>(parameters)
-                : new CopyOnWriteDictionary<string, (string, ElementLocation)>();
+                ? new CopyOnWriteDictionary<(string, ElementLocation)>(parameters)
+                : new CopyOnWriteDictionary<(string, ElementLocation)>();
 
             outputs ??= new List<ProjectTaskInstanceChild>();
 

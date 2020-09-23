@@ -18,7 +18,6 @@ namespace Microsoft.Build.Collections
     /// A dictionary that has copy-on-write semantics.
     /// KEYS AND VALUES MUST BE IMMUTABLE OR COPY-ON-WRITE FOR THIS TO WORK.
     /// </summary>
-    /// <typeparam name="K">The key type.</typeparam>
     /// <typeparam name="V">The value type.</typeparam>
     /// <remarks>
     /// Thread safety: for all users, this class is as thread safe as the underlying Dictionary implementation, that is,
@@ -30,20 +29,37 @@ namespace Microsoft.Build.Collections
     /// be run in a separate appdomain.
     /// </comment>
     [Serializable]
-    internal class CopyOnWriteDictionary<K, V> : IDictionary<K, V>, IDictionary, ISerializable
+    internal class CopyOnWriteDictionary<V> : IDictionary<string, V>, IDictionary, ISerializable
     {
+#if !NET35 // MSBuildNameIgnoreCaseComparer not compiled into MSBuildTaskHost but also allocations not interesting there.
+        /// <summary>
+        /// Empty dictionary with a <see cref="MSBuildNameIgnoreCaseComparer" />,
+        /// used as the basis of new dictionaries with that comparer to avoid
+        /// allocating new comparers objects.
+        /// </summary>
+        private readonly static ImmutableDictionary<string, V> NameComparerDictionaryPrototype = ImmutableDictionary.Create<string, V>((IEqualityComparer<string>)MSBuildNameIgnoreCaseComparer.Default);
+
+        /// <summary>
+        /// Empty dictionary with <see cref="StringComparer.OrdinalIgnoreCase" />,
+        /// used as the basis of new dictionaries with that comparer to avoid
+        /// allocating new comparers objects.
+        /// </summary>
+        private readonly static ImmutableDictionary<string, V> OrdinalIgnoreCaseComparerDictionaryPrototype = ImmutableDictionary.Create<string, V>((IEqualityComparer<string>)StringComparer.OrdinalIgnoreCase);
+#endif
+
+
         /// <summary>
         /// The backing dictionary.
         /// Lazily created.
         /// </summary>
-        private ImmutableDictionary<K, V> _backing;
+        private ImmutableDictionary<string, V> _backing;
 
         /// <summary>
         /// Constructor. Consider supplying a comparer instead.
         /// </summary>
         internal CopyOnWriteDictionary()
         {
-            _backing = ImmutableDictionary<K, V>.Empty;
+            _backing = ImmutableDictionary<string, V>.Empty;
         }
 
         /// <summary>
@@ -57,7 +73,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Constructor taking a specified comparer for the keys
         /// </summary>
-        internal CopyOnWriteDictionary(IEqualityComparer<K> keyComparer)
+        internal CopyOnWriteDictionary(IEqualityComparer<string> keyComparer)
             : this(0, keyComparer)
         {
         }
@@ -65,9 +81,9 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Constructor taking a specified comparer for the keys and an initial capacity
         /// </summary>
-        internal CopyOnWriteDictionary(int capacity, IEqualityComparer<K>? keyComparer)
+        internal CopyOnWriteDictionary(int capacity, IEqualityComparer<string>? keyComparer)
         {
-            _backing = ImmutableDictionary.Create<K, V>(keyComparer);
+            _backing = GetInitialDictionary(keyComparer);
         }
 
         /// <summary>
@@ -76,24 +92,37 @@ namespace Microsoft.Build.Collections
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "context", Justification = "Not needed")]
         protected CopyOnWriteDictionary(SerializationInfo info, StreamingContext context)
         {
-            object v = info.GetValue(nameof(_backing), typeof(KeyValuePair<K, V>[]));
+            object v = info.GetValue(nameof(_backing), typeof(KeyValuePair<string, V>[]));
 
-            object comparer = info.GetValue(nameof(Comparer), typeof(IEqualityComparer<K>));
+            object comparer = info.GetValue(nameof(Comparer), typeof(IEqualityComparer<string>));
 
-            var b = ImmutableDictionary.Create<K, V>((IEqualityComparer<K>)comparer);
+            var b = GetInitialDictionary((IEqualityComparer<string>)comparer);
 
-            _backing = b.AddRange((KeyValuePair<K, V>[])v);
+            _backing = b.AddRange((KeyValuePair<string, V>[])v);
+        }
+
+        private static ImmutableDictionary<string, V> GetInitialDictionary(IEqualityComparer<string>? keyComparer)
+        {
+#if NET35
+            return ImmutableDictionary.Create<string, V>(keyComparer);
+#else
+            return keyComparer is MSBuildNameIgnoreCaseComparer
+                            ? NameComparerDictionaryPrototype
+                            : keyComparer == StringComparer.OrdinalIgnoreCase
+                              ? OrdinalIgnoreCaseComparerDictionaryPrototype
+                              : ImmutableDictionary.Create<string, V>(keyComparer);
+#endif
         }
 
         /// <summary>
         /// Cloning constructor. Defers the actual clone.
         /// </summary>
-        private CopyOnWriteDictionary(CopyOnWriteDictionary<K, V> that)
+        private CopyOnWriteDictionary(CopyOnWriteDictionary<V> that)
         {
             _backing = that._backing;
         }
 
-        public CopyOnWriteDictionary(IDictionary<K, V> dictionary)
+        public CopyOnWriteDictionary(IDictionary<string, V> dictionary)
         {
             _backing = dictionary.ToImmutableDictionary();
         }
@@ -101,12 +130,12 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns the collection of keys in the dictionary.
         /// </summary>
-        public ICollection<K> Keys => ((IDictionary<K, V>)_backing).Keys;
+        public ICollection<string> Keys => ((IDictionary<string, V>)_backing).Keys;
 
         /// <summary>
         /// Returns the collection of values in the dictionary.
         /// </summary>
-        public ICollection<V> Values => ((IDictionary<K, V>)_backing).Values;
+        public ICollection<V> Values => ((IDictionary<string, V>)_backing).Values;
 
         /// <summary>
         /// Returns the number of items in the collection.
@@ -116,7 +145,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns true if the collection is read-only.
         /// </summary>
-        public bool IsReadOnly => ((IDictionary<K, V>)_backing).IsReadOnly;
+        public bool IsReadOnly => ((IDictionary<string, V>)_backing).IsReadOnly;
 
         /// <summary>
         /// IDictionary implementation
@@ -156,7 +185,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Comparer used for keys
         /// </summary>
-        internal IEqualityComparer<K> Comparer
+        internal IEqualityComparer<string> Comparer
         {
             get => _backing.KeyComparer;
             private set => _backing = _backing.WithComparers(keyComparer: value);
@@ -165,7 +194,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Accesses the value for the specified key.
         /// </summary>
-        public V this[K key]
+        public V this[string key]
         {
             get => _backing[key];
 
@@ -183,18 +212,18 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                TryGetValue((K) key, out V val);
+                TryGetValue((string) key, out V val);
                 return val;
             }
 
-            set => this[(K)key] = (V)value;
+            set => this[(string)key] = (V)value;
         }
 #nullable restore
 
         /// <summary>
         /// Adds a value to the dictionary.
         /// </summary>
-        public void Add(K key, V value)
+        public void Add(string key, V value)
         {
             _backing = _backing.SetItem(key, value);
         }
@@ -202,7 +231,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns true if the dictionary contains the specified key.
         /// </summary>
-        public bool ContainsKey(K key)
+        public bool ContainsKey(string key)
         {
             return _backing.ContainsKey(key);
         }
@@ -210,9 +239,9 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Removes the entry for the specified key from the dictionary.
         /// </summary>
-        public bool Remove(K key)
+        public bool Remove(string key)
         {
-            ImmutableDictionary<K, V> initial = _backing;
+            ImmutableDictionary<string, V> initial = _backing;
 
             _backing = _backing.Remove(key);
 
@@ -222,7 +251,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Attempts to find the value for the specified key in the dictionary.
         /// </summary>
-        public bool TryGetValue(K key, out V value)
+        public bool TryGetValue(string key, out V value)
         {
             return _backing.TryGetValue(key, out value);
         }
@@ -230,7 +259,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Adds an item to the collection.
         /// </summary>
-        public void Add(KeyValuePair<K, V> item)
+        public void Add(KeyValuePair<string, V> item)
         {
             _backing = _backing.SetItem(item.Key, item.Value);
         }
@@ -246,7 +275,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns true ff the collection contains the specified item.
         /// </summary>
-        public bool Contains(KeyValuePair<K, V> item)
+        public bool Contains(KeyValuePair<string, V> item)
         {
             return _backing.Contains(item);
         }
@@ -254,17 +283,17 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Copies all of the elements of the collection to the specified array.
         /// </summary>
-        public void CopyTo(KeyValuePair<K, V>[] array, int arrayIndex)
+        public void CopyTo(KeyValuePair<string, V>[] array, int arrayIndex)
         {
-            ((IDictionary<K, V>)_backing).CopyTo(array, arrayIndex);
+            ((IDictionary<string, V>)_backing).CopyTo(array, arrayIndex);
         }
 
         /// <summary>
         /// Remove an item from the dictionary.
         /// </summary>
-        public bool Remove(KeyValuePair<K, V> item)
+        public bool Remove(KeyValuePair<string, V> item)
         {
-            ImmutableDictionary<K, V> initial = _backing;
+            ImmutableDictionary<string, V> initial = _backing;
 
             _backing = _backing.Remove(item.Key);
 
@@ -274,7 +303,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Implementation of generic IEnumerable.GetEnumerator()
         /// </summary>
-        public IEnumerator<KeyValuePair<K, V>> GetEnumerator()
+        public IEnumerator<KeyValuePair<string, V>> GetEnumerator()
         {
             return _backing.GetEnumerator();
         }
@@ -284,7 +313,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable<KeyValuePair<K, V>>)this).GetEnumerator();
+            return ((IEnumerable<KeyValuePair<string, V>>)this).GetEnumerator();
         }
 
         /// <summary>
@@ -292,7 +321,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         void IDictionary.Add(object key, object value)
         {
-            Add((K)key, (V)value);
+            Add((string)key, (V)value);
         }
 
         /// <summary>
@@ -308,7 +337,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         bool IDictionary.Contains(object key)
         {
-            return ContainsKey((K)key);
+            return ContainsKey((string)key);
         }
 
         /// <summary>
@@ -324,7 +353,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         void IDictionary.Remove(object key)
         {
-            Remove((K)key);
+            Remove((string)key);
         }
 
         /// <summary>
@@ -333,7 +362,7 @@ namespace Microsoft.Build.Collections
         void ICollection.CopyTo(Array array, int index)
         {
             int i = 0;
-            foreach (KeyValuePair<K, V> entry in this)
+            foreach (KeyValuePair<string, V> entry in this)
             {
                 array.SetValue(new DictionaryEntry(entry.Key, entry.Value), index + i);
                 i++;
@@ -343,23 +372,23 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Clone, with the actual clone deferred
         /// </summary>
-        internal CopyOnWriteDictionary<K, V> Clone()
+        internal CopyOnWriteDictionary<V> Clone()
         {
-            return new CopyOnWriteDictionary<K, V>(this);
+            return new CopyOnWriteDictionary<V>(this);
         }
 
         /// <summary>
         /// Returns true if these dictionaries have the same backing.
         /// </summary>
-        internal bool HasSameBacking(CopyOnWriteDictionary<K, V> other)
+        internal bool HasSameBacking(CopyOnWriteDictionary<V> other)
         {
             return ReferenceEquals(other._backing, _backing);
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            ImmutableDictionary<K, V> snapshot = _backing;
-            KeyValuePair<K, V>[] array = snapshot.ToArray();
+            ImmutableDictionary<string, V> snapshot = _backing;
+            KeyValuePair<string, V>[] array = snapshot.ToArray();
 
             info.AddValue(nameof(_backing), array);
             info.AddValue(nameof(Comparer), Comparer);
