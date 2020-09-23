@@ -506,9 +506,9 @@ namespace Microsoft.Build.Evaluation
             return NuGetFramework.Value.GetTargetPlatformVersion(tfm, versionPartCount);
         }
 
-        internal static bool IsChangeWaveEnabled(string wave)
+        internal static bool AreFeaturesEnabled(string wave)
         {
-            return string.IsNullOrEmpty(wave) ? false : ChangeWaves.IsFeatureEnabled(wave);
+            return string.IsNullOrEmpty(wave) ? false : ChangeWaves.AreFeaturesEnabled(wave);
         }
 
         public static string GetCurrentToolsDirectory()

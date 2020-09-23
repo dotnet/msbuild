@@ -106,7 +106,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="wave">The version to compare.</param>
         /// <returns>A bool indicating whether the feature behind a change wave is enabled.</returns>
-        public static bool IsFeatureEnabled(string wave)
+        public static bool AreFeaturesEnabled(string wave)
         {
             Version waveToCheck;
 
@@ -115,7 +115,7 @@ namespace Microsoft.Build.Utilities
                                        $"Argument 'wave' passed with invalid format." +
                                        $"Please use pre-existing const strings or define one with format 'xx.yy");
 
-            return IsFeatureEnabled(waveToCheck);
+            return AreFeaturesEnabled(waveToCheck);
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="wave">The version to compare.</param>
         /// <returns>A bool indicating whether the version is enabled.</returns>
-        public static bool IsFeatureEnabled(Version wave)
+        public static bool AreFeaturesEnabled(Version wave)
         {
             // This is opt out behavior, all waves are enabled by default.
             if (string.IsNullOrEmpty(DisabledWave))

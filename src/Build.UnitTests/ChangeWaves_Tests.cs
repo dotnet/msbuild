@@ -34,11 +34,11 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 env.SetChangeWave(ChangeWaves.EnableAllFeatures);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-                ChangeWaves.IsFeatureEnabled(featureWave).ShouldBe(true);
+                ChangeWaves.AreFeaturesEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = $"" +
                     $"<Project>" +
-                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.EnableAllFeatures}' and $([MSBuild]::IsChangeWaveEnabled('{featureWave}'))\">" +
+                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.EnableAllFeatures}' and $([MSBuild]::AreFeaturesEnabled('{featureWave}'))\">" +
                             $"<Message Text='Hello World!'/>" +
                         $"</Target>" +
                     $"</Project>";
@@ -65,11 +65,11 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetChangeWave("");
-                ChangeWaves.IsFeatureEnabled(featureWave).ShouldBe(true);
+                ChangeWaves.AreFeaturesEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = $"" +
                     $"<Project>" +
-                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.EnableAllFeatures}' and $([MSBuild]::IsChangeWaveEnabled('{featureWave}'))\">" +
+                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.EnableAllFeatures}' and $([MSBuild]::AreFeaturesEnabled('{featureWave}'))\">" +
                             $"<Message Text='Hello World!'/>" +
                         $"</Target>" +
                     $"</Project>";
@@ -98,7 +98,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetChangeWave("16.8");
-                Shouldly.Should.Throw<InternalErrorException>(() => ChangeWaves.IsFeatureEnabled(waveToCheck));
+                Shouldly.Should.Throw<InternalErrorException>(() => ChangeWaves.AreFeaturesEnabled(waveToCheck));
             }
         }
 
@@ -113,11 +113,11 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 env.SetChangeWave(disableFromWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-                ChangeWaves.IsFeatureEnabled(featureWave).ShouldBe(true);
+                ChangeWaves.AreFeaturesEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = $"" +
                     $"<Project>" +
-                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.EnableAllFeatures}' and $([MSBuild]::IsChangeWaveEnabled('{featureWave}'))\">" +
+                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.EnableAllFeatures}' and $([MSBuild]::AreFeaturesEnabled('{featureWave}'))\">" +
                             $"<Message Text='Hello World!'/>" +
                         $"</Target>" +
                     $"</Project>";
@@ -149,7 +149,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 string projectFile = $"" +
                     $"<Project>" +
-                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.LowestWave}' and $([MSBuild]::IsChangeWaveEnabled('{ChangeWaves.LowestWave}')) == false\">" +
+                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.LowestWave}' and $([MSBuild]::AreFeaturesEnabled('{ChangeWaves.LowestWave}')) == false\">" +
                             $"<Message Text='Hello World!'/>" +
                         $"</Target>" +
                     $"</Project>";
@@ -180,11 +180,11 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 for (int i = 0; i < ChangeWaves.AllWaves.Length-1; i++)
                 {
-                    ChangeWaves.IsFeatureEnabled(ChangeWaves.AllWaves[i]).ShouldBe(true);
+                    ChangeWaves.AreFeaturesEnabled(ChangeWaves.AllWaves[i]).ShouldBe(true);
 
                     string projectFile = $"" +
                         $"<Project>" +
-                            $"<Target Name='HelloWorld' Condition=\"$([MSBuild]::IsChangeWaveEnabled('{ChangeWaves.AllWaves[i]}'))\">" +
+                            $"<Target Name='HelloWorld' Condition=\"$([MSBuild]::AreFeaturesEnabled('{ChangeWaves.AllWaves[i]}'))\">" +
                                 $"<Message Text='Hello World!'/>" +
                             $"</Target>" +
                         $"</Project>";
@@ -215,11 +215,11 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 foreach (string wave in ChangeWaves.AllWaves)
                 {
-                    ChangeWaves.IsFeatureEnabled(wave).ShouldBeFalse();
+                    ChangeWaves.AreFeaturesEnabled(wave).ShouldBeFalse();
 
                     string projectFile = $"" +
                         $"<Project>" +
-                            $"<Target Name='HelloWorld' Condition=\"$([MSBuild]::IsChangeWaveEnabled('{wave}')) == false\">" +
+                            $"<Target Name='HelloWorld' Condition=\"$([MSBuild]::AreFeaturesEnabled('{wave}')) == false\">" +
                                 $"<Message Text='Hello World!'/>" +
                             $"</Target>" +
                         $"</Project>";
