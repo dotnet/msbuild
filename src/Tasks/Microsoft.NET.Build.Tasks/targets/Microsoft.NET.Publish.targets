@@ -34,7 +34,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
 
-  <Import Project="Microsoft.NET.$(PublishProtocol).targets" Condition="'$(PublishProtocol)' != '' and Exists('Microsoft.NET.$(PublishProtocol).targets')" />
+  <Import Project="Microsoft.NET.ClickOnce.targets" Condition="'$(PublishProtocol)' == 'ClickOnce'" />
 
   <PropertyGroup>
     <!-- We still need to resolve references even if we are not building during publish. -->
