@@ -27,7 +27,6 @@ namespace Microsoft.DotNet.Tools.Test
         public static TestCommand FromArgs(string[] args, string[] settings, string msbuildPath = null)
         {
             var parser = Parser.Instance;
-
             var result = parser.ParseFrom("dotnet test", args);
 
             UpdateRunSettingsArgumentsText();
@@ -73,6 +72,9 @@ namespace Microsoft.DotNet.Tools.Test
                 parsedTest.Arguments,
                 noRestore,
                 msbuildPath);
+
+            // Apply environment variables if set
+            SetCustomEnvironmentVariables(testCommand, parsedTest.AppliedOptions, "environment");
 
             // Set DOTNET_PATH if it isn't already set in the environment as it is required
             // by the testhost which uses the apphost feature (Windows only).
@@ -129,7 +131,7 @@ namespace Microsoft.DotNet.Tools.Test
         private static bool ContainsBuiltTestSources(string[] args)
         {
             foreach (var arg in args)
-            {               
+            {
                 if (!arg.StartsWith("-") &&
                     (arg.EndsWith("dll", StringComparison.OrdinalIgnoreCase) || arg.EndsWith("exe", StringComparison.OrdinalIgnoreCase)))
                 {
@@ -166,6 +168,29 @@ namespace Microsoft.DotNet.Tools.Test
         {
             DefaultHelpViewText.Synopsis.AdditionalArguments = " [[--] <RunSettings arguments>...]]";
             DefaultHelpViewText.AdditionalArgumentsSection = LocalizableStrings.RunSettingsArgumentsDescription;
+        }
+
+        private static void SetCustomEnvironmentVariables(TestCommand testCommand, AppliedOptionSet optionSet, string optionName)
+        {
+            if (!optionSet.Contains(optionName))
+            {
+                return;
+            }
+
+            foreach (var env in optionSet[optionName].Arguments)
+            {
+                var name = env;
+                var value = string.Empty;
+
+                var equalsIndex = env.IndexOf('=');
+                if (equalsIndex > 0)
+                {
+                    name = env.Substring(0, equalsIndex);
+                    value = env.Substring(equalsIndex + 1);
+                }
+
+                testCommand.EnvironmentVariable(name, value);
+            }
         }
     }
 }
