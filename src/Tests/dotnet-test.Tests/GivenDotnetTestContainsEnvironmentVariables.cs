@@ -7,19 +7,10 @@ using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using System.IO;
 using System;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Xml;
-using System.Xml.Linq;
-using System.Reflection;
-using dotnet.Tests;
-using System.Runtime.InteropServices;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
-using Microsoft.NET.TestFramework.Utilities;
-using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {
@@ -90,7 +81,6 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             var outputDll = Path.Combine(testRoot, "bin", configuration, "netcoreapp3.1", $"{TestAppName}.dll");
 
-            // Call dotnet test + dll
             var result = new DotnetTestCommand(Log, EnvironmentVariables)
                 .Execute(outputDll, $"{ConsoleLoggerOutputDetailed[0]}:{ConsoleLoggerOutputDetailed[1]}");
 

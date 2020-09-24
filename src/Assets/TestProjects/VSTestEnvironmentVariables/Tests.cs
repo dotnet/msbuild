@@ -8,7 +8,7 @@ using System.Collections;
 namespace TestNamespace
 {
     [TestClass]
-    public class VSTestTests
+    public class Tests
     {
         [TestMethod]
         public void TestEnvironmentVariables()

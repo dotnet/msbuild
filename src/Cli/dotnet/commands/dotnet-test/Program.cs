@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Tools.Test
                 msbuildPath);
 
             // Apply environment variables if set
-            SetCustomEnvironmentVariables(testCommand, parsedTest.AppliedOptions, "environment");
+            SetCustomEnvironmentVariables(testCommand, parsedTest.AppliedOptions);
 
             // Set DOTNET_PATH if it isn't already set in the environment as it is required
             // by the testhost which uses the apphost feature (Windows only).
@@ -170,8 +170,10 @@ namespace Microsoft.DotNet.Tools.Test
             DefaultHelpViewText.AdditionalArgumentsSection = LocalizableStrings.RunSettingsArgumentsDescription;
         }
 
-        private static void SetCustomEnvironmentVariables(TestCommand testCommand, AppliedOptionSet optionSet, string optionName)
+        private static void SetCustomEnvironmentVariables(TestCommand testCommand, AppliedOptionSet optionSet)
         {
+            const string optionName = "environment";
+
             if (!optionSet.Contains(optionName))
             {
                 return;
