@@ -64,6 +64,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
         [Theory]
         [InlineData(".NETCoreApp,Version=v5.0", "Windows,Version=7.0")]
+        [InlineData(".netcoreapp,version=v5.0", "windows,version=7.0")]
         [InlineData(".NETCoreApp,Version=v6.0", "Windows,Version=7.0")]
         public void It_generates_supported_target_framework_alias_items_when_targeting_windows(string targetFrameworkMoniker, string targetPlatformMoniker)
         {
