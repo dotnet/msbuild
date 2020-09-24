@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using System;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace Microsoft.Build.Utilities
 {
     internal enum ChangeWaveConversionState
     {
+        NotConvertedYet,
         Valid,
         InvalidFormat,
         OutOfRotation,
@@ -59,7 +61,7 @@ namespace Microsoft.Build.Utilities
             {
                 if (cachedWave == null)
                 {
-                    cachedWave = Traits.Instance.MSBuildDisableFeaturesFromVersion;
+                    cachedWave = Traits.Instance.MSBuildDisableFeaturesFromVersion ?? ChangeWaves.EnableAllFeatures;
                 }
 
                 return cachedWave;
@@ -83,39 +85,44 @@ namespace Microsoft.Build.Utilities
         /// Ensure the the environment variable MSBuildDisableFeaturesFromWave is set to a proper value.
         /// </summary>
         /// <returns> String representation of the set change wave. "999.999" if unset or invalid, and clamped if out of bounds. </returns>
-        internal static string ApplyChangeWave()
+        internal static void ApplyChangeWave()
         {
             Version changeWave;
 
             // If unset, enable all features.
-            if (string.IsNullOrEmpty(DisabledWave))
+            if (DisabledWave.Length == 0)
             {
                 _state = ChangeWaveConversionState.Valid;
-                return DisabledWave = ChangeWaves.EnableAllFeatures;
+                DisabledWave = ChangeWaves.EnableAllFeatures;
+                return;
             }
 
             // If the version is of invalid format, log a warning and enable all features.
             if (!Version.TryParse(DisabledWave, out changeWave))
             {
                 _state = ChangeWaveConversionState.InvalidFormat;
-                return DisabledWave = ChangeWaves.EnableAllFeatures;
+                DisabledWave = ChangeWaves.EnableAllFeatures;
+                return;
             }
             // If the version is 999.999, we're done.
             else if (changeWave == EnableAllFeaturesAsVersion)
             {
                 _state = ChangeWaveConversionState.Valid;
-                return DisabledWave = changeWave.ToString();
+                DisabledWave = changeWave.ToString();
+                return;
             }
             // If the version is out of rotation, log a warning and clamp the value.
             else if (changeWave < LowestWaveAsVersion)
             {
                 _state = ChangeWaveConversionState.OutOfRotation;
-                return DisabledWave = LowestWave;
+                DisabledWave = LowestWave;
+                return;
             }
             else if (changeWave > HighestWaveAsVersion)
             {
                 _state = ChangeWaveConversionState.OutOfRotation;
-                return DisabledWave = HighestWave;
+                DisabledWave = HighestWave;
+                return;
             }
 
             // Ensure it's set to an existing version within the current rotation
@@ -126,13 +133,14 @@ namespace Microsoft.Build.Utilities
                     if (wave > changeWave)
                     {
                         _state = ChangeWaveConversionState.InvalidVersion;
-                        return DisabledWave = wave.ToString();
+                        DisabledWave = wave.ToString();
+                        return;
                     }
                 }
             }
 
             _state = ChangeWaveConversionState.Valid;
-            return DisabledWave = changeWave.ToString();
+            DisabledWave = changeWave.ToString();
         }
 
         /// <summary>
@@ -161,7 +169,7 @@ namespace Microsoft.Build.Utilities
         public static bool AreFeaturesEnabled(Version wave)
         {
             // This is opt out behavior, all waves are enabled by default.
-            if (string.IsNullOrEmpty(DisabledWave))
+            if (DisabledWave.Length == 0 || DisabledWave == EnableAllFeatures)
             {
                 return true;
             }
@@ -175,6 +183,15 @@ namespace Microsoft.Build.Utilities
             }
 
             return wave < currentSetWave;
+        }
+
+        /// <summary>
+        /// Resets the state and value of the currently disabled version.
+        /// </summary>
+        public static void ResetChangeWavesForTests()
+        {
+            DisabledWave = null;
+            _state = ChangeWaveConversionState.NotConvertedYet;
         }
     }
 }

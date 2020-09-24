@@ -1097,7 +1097,11 @@ namespace Microsoft.Build.Evaluation
             SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32);
             SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion);
             SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild);
-            SetBuiltInProperty(ReservedPropertyNames.msbuilddisablefeaturesfromversion, ChangeWaves.ApplyChangeWave());
+
+            if (ChangeWaves.ConversionState == ChangeWaveConversionState.NotConvertedYet)
+                ChangeWaves.ApplyChangeWave();
+
+            SetBuiltInProperty(ReservedPropertyNames.msbuilddisablefeaturesfromversion, ChangeWaves.DisabledWave);
 
             // Fake OS env variables when not on Windows
             if (!NativeMethodsShared.IsWindows)

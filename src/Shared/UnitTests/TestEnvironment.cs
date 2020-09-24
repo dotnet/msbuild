@@ -93,8 +93,7 @@ namespace Microsoft.Build.UnitTests
 
         public void SetChangeWave(string wave)
         {
-            ChangeWaves.DisabledWave = null;
-
+            ChangeWaves.ResetChangeWavesForTests();
             SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", wave);
         }
 

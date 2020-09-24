@@ -392,6 +392,9 @@ namespace Microsoft.Build.Execution
 
         private void ValidateChangeWaveState(ILoggingService log)
         {
+            if (ChangeWaves.ConversionState == ChangeWaveConversionState.NotConvertedYet)
+                ChangeWaves.ApplyChangeWave();
+
             switch (ChangeWaves.ConversionState)
             {
                 case ChangeWaveConversionState.InvalidFormat:
