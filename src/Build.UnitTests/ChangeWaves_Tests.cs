@@ -64,7 +64,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                ChangeWaves.ResetChangeWavesForTests();
+                ChangeWaves.ResetStateForTests();
                 ChangeWaves.AreFeaturesEnabled(featureWave).ShouldBe(true);
 
                 string projectFile = $"" +
@@ -151,7 +151,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 // All waves should be disabled
                 for (int i = 0; i < ChangeWaves.AllWaves.Length; i++)
                 {
-                    ChangeWaves.ResetChangeWavesForTests();
+                    ChangeWaves.ResetStateForTests();
                     string projectFile = $"" +
                         $"<Project>" +
                             $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.LowestWave}' and $([MSBuild]::AreFeaturesEnabled('{ChangeWaves.AllWaves[i]}')) == false\">" +
@@ -190,7 +190,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 // all waves but the highest should pass
                 for (int i = 0; i < ChangeWaves.AllWaves.Length-1; i++)
                 {
-                    ChangeWaves.ResetChangeWavesForTests();
+                    ChangeWaves.ResetStateForTests();
                     string projectFile = $"" +
                         $"<Project>" +
                             $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.HighestWave}' and $([MSBuild]::AreFeaturesEnabled('{ChangeWaves.AllWaves[i]}'))\">" +

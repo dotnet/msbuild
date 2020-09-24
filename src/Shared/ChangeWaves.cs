@@ -78,6 +78,14 @@ namespace Microsoft.Build.Utilities
             {
                 return _state;
             }
+            set
+            {
+                // Keep state persistent.
+                if (_state == ChangeWaveConversionState.NotConvertedYet)
+                {
+                    _state = value;
+                }
+            }
         }
 
         /// <summary>
@@ -91,7 +99,7 @@ namespace Microsoft.Build.Utilities
             // If unset, enable all features.
             if (DisabledWave.Length == 0)
             {
-                _state = ChangeWaveConversionState.Valid;
+                ConversionState = ChangeWaveConversionState.Valid;
                 DisabledWave = ChangeWaves.EnableAllFeatures;
                 return;
             }
@@ -99,27 +107,27 @@ namespace Microsoft.Build.Utilities
             // If the version is of invalid format, log a warning and enable all features.
             if (!Version.TryParse(DisabledWave, out changeWave))
             {
-                _state = ChangeWaveConversionState.InvalidFormat;
+                ConversionState = ChangeWaveConversionState.InvalidFormat;
                 DisabledWave = ChangeWaves.EnableAllFeatures;
                 return;
             }
             // If the version is 999.999, we're done.
             else if (changeWave == EnableAllFeaturesAsVersion)
             {
-                _state = ChangeWaveConversionState.Valid;
+                ConversionState = ChangeWaveConversionState.Valid;
                 DisabledWave = changeWave.ToString();
                 return;
             }
             // If the version is out of rotation, log a warning and clamp the value.
             else if (changeWave < LowestWaveAsVersion)
             {
-                _state = ChangeWaveConversionState.OutOfRotation;
+                ConversionState = ChangeWaveConversionState.OutOfRotation;
                 DisabledWave = LowestWave;
                 return;
             }
             else if (changeWave > HighestWaveAsVersion)
             {
-                _state = ChangeWaveConversionState.OutOfRotation;
+                ConversionState = ChangeWaveConversionState.OutOfRotation;
                 DisabledWave = HighestWave;
                 return;
             }
@@ -131,14 +139,14 @@ namespace Microsoft.Build.Utilities
                 {
                     if (wave > changeWave)
                     {
-                        _state = ChangeWaveConversionState.InvalidVersion;
+                        ConversionState = ChangeWaveConversionState.InvalidVersion;
                         DisabledWave = wave.ToString();
                         return;
                     }
                 }
             }
 
-            _state = ChangeWaveConversionState.Valid;
+            ConversionState = ChangeWaveConversionState.Valid;
             DisabledWave = changeWave.ToString();
         }
 
@@ -187,7 +195,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Resets the state and value of the currently disabled version.
         /// </summary>
-        public static void ResetChangeWavesForTests()
+        public static void ResetStateForTests()
         {
             DisabledWave = null;
             _state = ChangeWaveConversionState.NotConvertedYet;
