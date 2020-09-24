@@ -390,22 +390,6 @@ namespace Microsoft.Build.Execution
             _deferredBuildMessages = null;
         }
 
-        private void ValidateChangeWaveState(ILoggingService log)
-        {
-            if (ChangeWaves.ConversionState == ChangeWaveConversionState.NotConvertedYet)
-                ChangeWaves.ApplyChangeWave();
-
-            switch (ChangeWaves.ConversionState)
-            {
-                case ChangeWaveConversionState.InvalidFormat:
-                    log.LogWarning(BuildEventContext.Invalid, "", new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion);
-                    break;
-                case ChangeWaveConversionState.OutOfRotation:
-                    log.LogWarning(BuildEventContext.Invalid, "", new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.AllWaves[0], Traits.Instance.MSBuildDisableFeaturesFromVersion);
-                    break;
-            }
-        }
-
         /// <summary>
         /// Prepares the BuildManager to receive build requests.
         /// </summary>
@@ -447,8 +431,6 @@ namespace Microsoft.Build.Execution
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
                 var loggingService = InitializeLoggingService();
-
-                ValidateChangeWaveState(loggingService);
 
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
