@@ -191,7 +191,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Tags = new Dictionary<string, ICacheTag>(StringComparer.Ordinal)
             {
                 {
-                    "Framework", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "netcoreapp2.0", "netcoreapp2.1" })
+                    "Framework", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "netcoreapp2.0", "netcoreapp2.1", "netcoreapp3.1" })
                 },
                 {
                     "language", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "C#" })
