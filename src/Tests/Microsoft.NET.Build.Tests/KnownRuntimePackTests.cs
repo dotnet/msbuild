@@ -137,28 +137,6 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
-        public void ItCanPublishArm64Winforms()
-        {
-            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
-
-            var newCommand = new DotnetCommand(Log, "new", "winforms", "--no-restore",  "--debug:ephemeral-hive");
-            newCommand.WorkingDirectory = testDirectory;
-            newCommand.Execute().Should().Pass();
-
-            new PublishCommand(Log, testDirectory)
-                .Execute("/p:RuntimeIdentifier=win-arm64")
-                .Should()
-                .Pass();
-
-            var selfContainedPublishDir = new DirectoryInfo(testDirectory)
-                .Sub("bin").Sub("Debug").GetDirectories().FirstOrDefault()
-                .Sub("win-arm64").Sub("publish");
-
-            selfContainedPublishDir.Should().HaveFilesMatching("System.Windows.Forms.dll", SearchOption.TopDirectoryOnly);
-            selfContainedPublishDir.Should().HaveFilesMatching($"{new DirectoryInfo(testDirectory).Name}.dll", SearchOption.TopDirectoryOnly);
-        }
-
        [WindowsOnlyFact]
         public void ItCantPublishArm64Wpf()
         {
