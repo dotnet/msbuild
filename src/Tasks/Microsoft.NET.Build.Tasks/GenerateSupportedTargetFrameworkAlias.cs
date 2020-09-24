@@ -40,16 +40,20 @@ namespace Microsoft.NET.Build.Tasks
             foreach (var tfm in SupportedTargetFramework)
             {
                 var currentTargetFramework = NuGetFramework.ParseComponents(tfm.ItemSpec, TargetPlatformMoniker);
-                var targetFrameworkAlias = currentTargetFramework.GetShortFolderName();
-                if ((UseWindowsForms || UseWpf) && currentTargetFramework.Framework.Equals(".NETCoreApp") && currentTargetFramework.Version >= new Version(5, 0))
+                if (currentTargetFramework.Framework.Equals(targetFramework.Framework))
                 {
-                    // Set versionless windows as target platform for wpf and windows forms
-                    targetFrameworkAlias = $"{targetFrameworkAlias}-windows";
-                }
+                    var targetFrameworkAlias = currentTargetFramework.GetShortFolderName();
+                    if ((UseWindowsForms || UseWpf) && currentTargetFramework.Framework.Equals(".NETCoreApp") && currentTargetFramework.Version >= new Version(5, 0))
+                    {
+                        // Set versionless windows as target platform for wpf and windows forms
+                        targetFrameworkAlias = $"{targetFrameworkAlias}-windows";
+                    }
 
-                var displayName = string.IsNullOrWhiteSpace(tfm.GetMetadata("DisplayName"))? targetFrameworkAlias : tfm.GetMetadata("DisplayName");
-                convertedTfms.Add(new TaskItem(targetFrameworkAlias, new Dictionary<string, string>() { { "DisplayName", displayName } }));
+                    var displayName = string.IsNullOrWhiteSpace(tfm.GetMetadata("DisplayName")) ? targetFrameworkAlias : tfm.GetMetadata("DisplayName");
+                    convertedTfms.Add(new TaskItem(targetFrameworkAlias, new Dictionary<string, string>() { { "DisplayName", displayName } }));
+                }
             }
+
             SupportedTargetFrameworkAlias = convertedTfms.ToArray();
         }
     }

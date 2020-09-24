@@ -25,29 +25,46 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 ( ".NETFramework,Version=v4.8", ".NET Framework 4.8"),
             };
 
-        [Theory]
-        [InlineData(".NETCoreApp,Version=v3.1")]
-        [InlineData(".NETCoreApp,Version=v5.0")]
-        [InlineData(".NETCoreApp,Version=v6.0")]
-        [InlineData(".NETStandard,Version=v2.1")]
-        [InlineData(".NETFramework,Version=v4.8")]
-        public void It_generates_supported_target_framework_alias_items(string targetFrameworkMoniker)
+        [Fact]
+        public void It_generates_supported_net_standard_target_framework_alias_items()
         {
+            var targetFrameworkMoniker = ".NETStandard,Version=v2.1";
             RunTask(targetFrameworkMoniker, targetPlatformMoniker: string.Empty, UseWpf: false, UseWindowsForms: false, expectedResult: new List<(string, string)>
                 {
-                    ("netcoreapp3.0", ".NET Core 3.0"),
-                    ("netcoreapp3.1", ".NET Core 3.1"),
-                    ("net5.0", ".NET 5"),
-                    ("net6.0", ".NET 6"),
                     ("netstandard2.0", ".NET Standard 2.0"),
                     ("netstandard2.1", ".NET Standard 2.1"),
+                });
+        }
+
+        [Fact]
+        public void It_generates_supported_net_framework_target_framework_alias_items()
+        {
+            var targetFrameworkMoniker = ".NETFramework,Version=v4.8";
+            RunTask(targetFrameworkMoniker, targetPlatformMoniker: string.Empty, UseWpf: false, UseWindowsForms: false, expectedResult: new List<(string, string)>
+                {
                     ("net471", ".NET Framework 4.7.1"),
                     ("net48", ".NET Framework 4.8")
                 });
         }
 
         [Theory]
+        [InlineData(".NETCoreApp,Version=v3.1")]
+        [InlineData(".NETCoreApp,Version=v5.0")]
+        [InlineData(".NETCoreApp,Version=v6.0")]
+        public void It_generates_supported_net_core_target_framework_alias_items(string targetFrameworkMoniker)
+        {
+            RunTask(targetFrameworkMoniker, targetPlatformMoniker: string.Empty, UseWpf: false, UseWindowsForms: false, expectedResult: new List<(string, string)>
+                {
+                    ("netcoreapp3.0", ".NET Core 3.0"),
+                    ("netcoreapp3.1", ".NET Core 3.1"),
+                    ("net5.0", ".NET 5"),
+                    ("net6.0", ".NET 6")
+                });
+        }
+
+        [Theory]
         [InlineData(".NETCoreApp,Version=v5.0", "Windows,Version=7.0")]
+        [InlineData(".netcoreapp,version=v5.0", "windows,version=7.0")]
         [InlineData(".NETCoreApp,Version=v6.0", "Windows,Version=7.0")]
         public void It_generates_supported_target_framework_alias_items_when_targeting_windows(string targetFrameworkMoniker, string targetPlatformMoniker)
         {
@@ -56,11 +73,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     ("netcoreapp3.0", ".NET Core 3.0"),
                     ("netcoreapp3.1", ".NET Core 3.1"),
                     ("net5.0-windows7.0", ".NET 5"),
-                    ("net6.0-windows7.0", ".NET 6"),
-                    ("netstandard2.0", ".NET Standard 2.0"),
-                    ("netstandard2.1", ".NET Standard 2.1"),
-                    ("net471", ".NET Framework 4.7.1"),
-                    ("net48", ".NET Framework 4.8")
+                    ("net6.0-windows7.0", ".NET 6")
                 });
         }
 
@@ -78,11 +91,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     ("netcoreapp3.0", ".NET Core 3.0"),
                     ("netcoreapp3.1", ".NET Core 3.1"),
                     ("net5.0-windows", ".NET 5"),
-                    ("net6.0-windows", ".NET 6"),
-                    ("netstandard2.0", ".NET Standard 2.0"),
-                    ("netstandard2.1", ".NET Standard 2.1"),
-                    ("net471", ".NET Framework 4.7.1"),
-                    ("net48", ".NET Framework 4.8")
+                    ("net6.0-windows", ".NET 6")
                 });
         }
 
