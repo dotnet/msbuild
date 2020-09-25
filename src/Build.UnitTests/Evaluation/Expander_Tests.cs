@@ -1495,62 +1495,57 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ExpandAllIntoStringTruncated()
         {
-            using (TestEnvironment env = TestEnvironment.Create())
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            var manySpaces = "".PadLeft(2000);
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            pg.Set(ProjectPropertyInstance.Create("ManySpacesProperty", manySpaces));
+            var itemMetadataTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                env.SetChangeWave(string.Empty);
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-                ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-                var manySpaces = "".PadLeft(2000);
-                var pg = new PropertyDictionary<ProjectPropertyInstance>();
-                pg.Set(ProjectPropertyInstance.Create("ManySpacesProperty", manySpaces));
-                var itemMetadataTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "ManySpacesMetadata", manySpaces }
-                };
-                var itemMetadata = new StringMetadataTable(itemMetadataTable);
-                var projectItemGroups = new ItemDictionary<ProjectItemInstance>();
-                var itemGroup = new List<ProjectItemInstance>();
-                for (int i = 0; i < 50; i++)
-                {
-                    var item = new ProjectItemInstance(project, "ManyItems", $"ThisIsAFairlyLongFileName_{i}.bmp", project.FullPath);
-                    item.SetMetadata("Foo", $"ThisIsAFairlyLongMetadataValue_{i}");
-                    itemGroup.Add(item);
-                }
-                var lookup = new Lookup(projectItemGroups, pg);
-                lookup.EnterScope("x");
-                lookup.PopulateWithItems("ManySpacesItem", new[]
-                {
+                { "ManySpacesMetadata", manySpaces }
+            };
+            var itemMetadata = new StringMetadataTable(itemMetadataTable);
+            var projectItemGroups = new ItemDictionary<ProjectItemInstance>();
+            var itemGroup = new List<ProjectItemInstance>();
+            for (int i = 0; i < 50; i++)
+            {
+                var item = new ProjectItemInstance(project, "ManyItems", $"ThisIsAFairlyLongFileName_{i}.bmp", project.FullPath);
+                item.SetMetadata("Foo", $"ThisIsAFairlyLongMetadataValue_{i}");
+                itemGroup.Add(item);
+            }
+            var lookup = new Lookup(projectItemGroups, pg);
+            lookup.EnterScope("x");
+            lookup.PopulateWithItems("ManySpacesItem", new []
+            {
                 new ProjectItemInstance (project, "ManySpacesItem", "Foo", project.FullPath),
                 new ProjectItemInstance (project, "ManySpacesItem", manySpaces, project.FullPath),
                 new ProjectItemInstance (project, "ManySpacesItem", "Bar", project.FullPath),
-                });
-                lookup.PopulateWithItems("Exactly1024", new[]
-                {
-                    new ProjectItemInstance (project, "Exactly1024", "".PadLeft(1024), project.FullPath),
-                    new ProjectItemInstance (project, "Exactly1024", "Foo", project.FullPath),
-                });
-                lookup.PopulateWithItems("ManyItems", itemGroup);
+            });
+            lookup.PopulateWithItems("Exactly1024", new[]
+            {
+                new ProjectItemInstance (project, "Exactly1024", "".PadLeft(1024), project.FullPath),
+                new ProjectItemInstance (project, "Exactly1024", "Foo", project.FullPath),
+            });
+            lookup.PopulateWithItems("ManyItems", itemGroup);
 
-                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(lookup, lookup, itemMetadata, FileSystems.Default);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(lookup, lookup, itemMetadata, FileSystems.Default);
 
-                XmlAttribute xmlattribute = (new XmlDocument()).CreateAttribute("dummy");
-                xmlattribute.Value = "'%(ManySpacesMetadata)' != '' and '$(ManySpacesProperty)' != '' and '@(ManySpacesItem)' != '' and '@(Exactly1024)' != '' and '@(ManyItems)' != '' and '@(ManyItems->'%(Foo)')' != '' and '@(ManyItems->'%(Nonexistent)')' != ''";
+            XmlAttribute xmlattribute = (new XmlDocument()).CreateAttribute("dummy");
+            xmlattribute.Value = "'%(ManySpacesMetadata)' != '' and '$(ManySpacesProperty)' != '' and '@(ManySpacesItem)' != '' and '@(Exactly1024)' != '' and '@(ManyItems)' != '' and '@(ManyItems->'%(Foo)')' != '' and '@(ManyItems->'%(Nonexistent)')' != ''";
 
-                var expected =
-                    $"'{"",1021}...' != '' and " +
-                    $"'{"",1021}...' != '' and " +
-                    $"'Foo;{"",1017}...' != '' and " +
-                    $"'{"",1024};...' != '' and " +
-                    "'ThisIsAFairlyLongFileName_0.bmp;ThisIsAFairlyLongFileName_1.bmp;ThisIsAFairlyLongFileName_2.bmp;...' != '' and " +
-                    "'ThisIsAFairlyLongMetadataValue_0;ThisIsAFairlyLongMetadataValue_1;ThisIsAFairlyLongMetadataValue_2;...' != '' and " +
-                    $"';;;...' != ''";
-                // NOTE: semicolons in the last part are *weird* because they don't actually mean anything and you get logging like
-                //     Target "Build" skipped, due to false condition; ( '@(I->'%(nonexistent)')' == '' ) was evaluated as ( ';' == '' ).
-                // but that goes back to MSBuild 4.something so I'm codifying it in this test. If you're here because you cleaned it up
-                // and want to fix the test my current opinion is that's fine.
+            var expected =
+                $"'{"",1021}...' != '' and " +
+                $"'{"",1021}...' != '' and " +
+                $"'Foo;{"",1017}...' != '' and " +
+                $"'{"",1024};...' != '' and " +
+                "'ThisIsAFairlyLongFileName_0.bmp;ThisIsAFairlyLongFileName_1.bmp;ThisIsAFairlyLongFileName_2.bmp;...' != '' and " +
+                "'ThisIsAFairlyLongMetadataValue_0;ThisIsAFairlyLongMetadataValue_1;ThisIsAFairlyLongMetadataValue_2;...' != '' and " +
+                $"';;;...' != ''";
+            // NOTE: semicolons in the last part are *weird* because they don't actually mean anything and you get logging like
+            //     Target "Build" skipped, due to false condition; ( '@(I->'%(nonexistent)')' == '' ) was evaluated as ( ';' == '' ).
+            // but that goes back to MSBuild 4.something so I'm codifying it in this test. If you're here because you cleaned it up
+            // and want to fix the test my current opinion is that's fine.
 
-                Assert.Equal(expected, expander.ExpandIntoStringAndUnescape(xmlattribute.Value, ExpanderOptions.ExpandAll | ExpanderOptions.Truncate, MockElementLocation.Instance));
-            }
+            Assert.Equal(expected, expander.ExpandIntoStringAndUnescape(xmlattribute.Value, ExpanderOptions.ExpandAll | ExpanderOptions.Truncate, MockElementLocation.Instance));
         }
 
         /// <summary>
