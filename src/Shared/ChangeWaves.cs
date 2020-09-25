@@ -12,8 +12,7 @@ namespace Microsoft.Build.Utilities
         NotConvertedYet,
         Valid,
         InvalidFormat,
-        OutOfRotation,
-        InvalidVersion
+        OutOfRotation
     }
 
     /// <summary>
@@ -139,7 +138,7 @@ namespace Microsoft.Build.Utilities
                 {
                     if (wave > changeWave)
                     {
-                        ConversionState = ChangeWaveConversionState.InvalidVersion;
+                        ConversionState = ChangeWaveConversionState.Valid;
                         DisabledWave = wave.ToString();
                         return;
                     }
@@ -176,7 +175,7 @@ namespace Microsoft.Build.Utilities
         public static bool AreFeaturesEnabled(Version wave)
         {
             // This is opt out behavior, all waves are enabled by default.
-            if (DisabledWave.Length == 0 || DisabledWave == EnableAllFeatures)
+            if (DisabledWave.Length == 0 || DisabledWave.Equals(EnableAllFeatures, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }

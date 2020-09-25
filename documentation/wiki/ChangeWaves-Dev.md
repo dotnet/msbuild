@@ -39,15 +39,15 @@ Surround your feature with the following:
 ```c#
     // If you pass an incorrectly formatted change wave, this will throw.
     // Use the const string that was created in the previous step.
-    if (ChangeWaves.IsChangeWaveEnabled(ChangeWaves.Wave17_4))
+    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
     {
         <your feature>
     }
 ```
 
-If you need to condition a Task or Target, use the built in `IsChangeWaveEnabled` function.
+If you need to condition a Task or Target, use the built in `AreFeaturesEnabled` function.
 ```xml
-<Target Name="SomeRiskyChange" Condition="$([MSBuild]::IsChangeWaveEnabled('17.4'))"">
+<Target Name="SomeRiskyChange" Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))"">
 <!-- Where '17.4' is the change wave assigned to your feature. -->
 ```
 
@@ -65,7 +65,7 @@ using (TestEnvironment env = TestEnvironment.Create())
 
     string projectFile = @"
         <Project>
-            <Target Name='HelloWorld' Condition=""$([MSBuild]::IsChangeWaveEnabled('17.4'))"">
+            <Target Name='HelloWorld' Condition=""$([MSBuild]::AreFeaturesEnabled('17.4'))"">
                 <Message Text='Hello World!'/>
             </Target>
         </Project>";
@@ -84,6 +84,6 @@ using (TestEnvironment env = TestEnvironment.Create())
 ## Change Wave 'End of Lifespan' Procedure
 These features will eventually become standard functionality. When a change wave rotates out, do the following:
 1. Start by deleting the constant `Wave17_4` that was created in step one.
-2. Remove `ChangeWave.IsFeatureEnabled` or `$([MSBuild]::IsChangeWaveEnabled('17.4'))` conditions surrounding features that were assigned that change wave.
+2. Remove `ChangeWave.AreFeaturesEnabled` or `$([MSBuild]::AreFeaturesEnabled('17.4'))` conditions surrounding features that were assigned that change wave.
 3. Remove tests associated with ensuring features would not run if this wave were set.
 4. Clear all other issues that arose from deleting the constant.

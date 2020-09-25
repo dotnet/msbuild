@@ -97,8 +97,6 @@ namespace Microsoft.Build.UnitTests
             SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", wave);
         }
 
-        delegate TransientTestState asd();
-
         /// <summary>
         ///     Evaluate the test with the given invariant.
         /// </summary>

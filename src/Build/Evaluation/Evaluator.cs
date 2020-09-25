@@ -1085,7 +1085,9 @@ namespace Microsoft.Build.Evaluation
         private void ValidateChangeWaveState()
         {
             if (ChangeWaves.ConversionState == ChangeWaveConversionState.NotConvertedYet)
+            {
                 ChangeWaves.ApplyChangeWave();
+            }
 
             switch (ChangeWaves.ConversionState)
             {
