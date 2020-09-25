@@ -88,6 +88,10 @@ namespace Microsoft.Build.UnitTests
                 // Assert invariants
                 foreach (var item in _invariants)
                     item.AssertInvariant(Output);
+
+                // Reset change waves
+                SetChangeWave(string.Empty);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
 

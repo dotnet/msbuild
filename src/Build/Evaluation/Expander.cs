@@ -481,7 +481,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static bool IsTruncationEnabled(ExpanderOptions options)
         {
-            return (options & ExpanderOptions.Truncate) != 0 && !Traits.Instance.EscapeHatches.DoNotTruncateConditions;
+            return (options & ExpanderOptions.Truncate) != 0 && !Traits.Instance.EscapeHatches.DoNotTruncateConditions && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_8);
         }
 
         /// <summary>

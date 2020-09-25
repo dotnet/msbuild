@@ -1725,7 +1725,7 @@ namespace Microsoft.Build.CommandLine
                                 // .NET Core on Windows returns a core count limited to the current NUMA node
                                 //     https://github.com/dotnet/runtime/issues/29686
                                 // so always double-check it.
-                                if (NativeMethodsShared.IsWindows
+                                if (NativeMethodsShared.IsWindows && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_8)
 #if NETFRAMEWORK
                                      // .NET Framework calls Windows APIs that have a core count limit (32/64 depending on process bitness).
                                      // So if we get a high core count on full framework, double-check it.
