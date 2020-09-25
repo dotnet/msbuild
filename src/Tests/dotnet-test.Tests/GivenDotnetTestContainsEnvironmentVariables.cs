@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         }
 
         [Fact]
-        public void TestsShouldIncludeEnvironmentVariablesDll()
+        public void ItPassesEnvironmentVariablesFromCommandLineParametersWhenRunningViaDll()
         {
             var testAsset = _testAssetsManager.CopyTestAsset(TestAppName)
                 .WithSource()
