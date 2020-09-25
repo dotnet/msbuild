@@ -313,6 +313,18 @@
        t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency.
     </comment>
   </data>
+  <data name="ChangeWave_InvalidFormat" xml:space="preserve">
+    <value>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</value>
+    <comment>
+       Value should be of the format: xx.yy
+    </comment>
+  </data>
+  <data name="ChangeWave_OutOfRotation" xml:space="preserve">
+    <value>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}.</value>
+    <comment>
+       Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current Change Waves are.
+    </comment>
+  </data>
   <data name="SearchPathsForMSBuildExtensionsPath" xml:space="preserve">
     <value>Search paths being used for {0} are {1}</value>
   </data>
