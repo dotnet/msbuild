@@ -59,7 +59,7 @@ namespace Microsoft.Build.Utilities
             {
                 if (cachedWave == null)
                 {
-                    cachedWave = Traits.Instance.MSBuildDisableFeaturesFromVersion ?? ChangeWaves.EnableAllFeatures;
+                    cachedWave = Traits.Instance.MSBuildDisableFeaturesFromVersion ?? "";
                 }
 
                 return cachedWave;
@@ -96,7 +96,7 @@ namespace Microsoft.Build.Utilities
             Version changeWave;
 
             // If unset, enable all features.
-            if (DisabledWave.Length == 0)
+            if (DisabledWave.Length == 0 || DisabledWave.Equals(EnableAllFeatures, StringComparison.OrdinalIgnoreCase))
             {
                 ConversionState = ChangeWaveConversionState.Valid;
                 DisabledWave = ChangeWaves.EnableAllFeatures;
@@ -174,6 +174,11 @@ namespace Microsoft.Build.Utilities
         /// <returns>A bool indicating whether the version is enabled.</returns>
         public static bool AreFeaturesEnabled(Version wave)
         {
+            if (_state == ChangeWaveConversionState.NotConvertedYet)
+            {
+                ApplyChangeWave();
+            }
+
             // This is opt out behavior, all waves are enabled by default.
             if (DisabledWave.Length == 0 || DisabledWave.Equals(EnableAllFeatures, StringComparison.OrdinalIgnoreCase))
             {
