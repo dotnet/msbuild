@@ -614,7 +614,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <!-- Users familiar with how some other repos work try to use NoWarn with MSBuild in place of MSBuildWarningsAsMessages. -->
-  <PropertyGroup Condition="'$(MSBuildWarningsAsMessages)'=='' And $([MSBuild]::IsChangeWaveEnabled('16.8'))">
+  <PropertyGroup Condition="'$(MSBuildWarningsAsMessages)'=='' And $([MSBuild]::AreFeaturesEnabled('16.8'))">
     <MSBuildWarningsAsMessages>$(NoWarn)</MSBuildWarningsAsMessages>
   </PropertyGroup>
 
