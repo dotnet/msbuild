@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         };
 
         [Fact]
-        public void TestsShouldBuildAndIncludeEnvironmentVariables()
+        public void ItPassesEnvironmentVariablesFromCommandLineParametersWhenRunningViaCsproj()
         {
             var testAsset = _testAssetsManager.CopyTestAsset(TestAppName)
                 .WithSource()
