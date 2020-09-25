@@ -23,6 +23,8 @@ namespace TestNamespace
                 Console.WriteLine($"{key}={value}");
             }
 
+            // This project is compiled, and executed by the tests in "src/Tests/dotnet-test.Tests/GivenDotnetTestContainsEnvironmentVariables.cs"
+            // The values are set there.
             AssertEnvironmentVariable("__DOTNET_TEST_ENVIRONMENT_VARIABLE_EMPTY", string.Empty);
             AssertEnvironmentVariable("__DOTNET_TEST_ENVIRONMENT_VARIABLE_1", "VALUE1");
             AssertEnvironmentVariable("__DOTNET_TEST_ENVIRONMENT_VARIABLE_2", "VALUE WITH SPACE");
