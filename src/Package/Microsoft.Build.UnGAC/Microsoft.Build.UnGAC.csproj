@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Setup runs on net45 and may not have installed newer yet. -->
+    <TargetFramework>net45</TargetFramework>
+    <!-- Set as an exe because this project publishes its own output. -->
+    <OutputType>Exe</OutputType>
+    <!-- Forcing the 'vsix' output to be json output. Workaround for https://github.com/dotnet/arcade/issues/6120 -->
+    <TargetVsixContainerName>Microsoft.Build.UnGAC.exe</TargetVsixContainerName>
+    <!-- VS Insertion -->
+    <VisualStudioInsertionComponent>Microsoft.Build.UnGAC</VisualStudioInsertionComponent>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_SwixArgs Include="PackageType=manifest"/>
+    <!-- If we don't set TargetExt to .json, arcade defaults to generating a .vsix -->
+    <_SwixArgs Include="TargetExt=.json"/>
+  </ItemGroup>
+
+  <!-- SwrProperty is an arcade concept. -->
+  <ItemGroup>
+    <!-- BinDir is set via SwrProperty to be passed to the swr compiler. OutDir is the path to the bin folder. See exe.swr to see how this is used. -->
+    <SwrProperty Include="BinDir=$(OutDir)" />
+    <!-- Version must constantly update in order for our exe package to run on install and update. -->
+    <SwrProperty Include="Version=$(VsixVersion)" />
+
+    <!-- our swr file must be picked up, this is how we set that. -->
+    <SwrFile Include="exe.swr" Condition=" '$(MSBuildRuntimeType)' == 'Full' " />
+  </ItemGroup>
+</Project>

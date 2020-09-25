@@ -46,6 +46,7 @@ namespace Microsoft.Build.Tasks
         private CultureInfo _targetCulture;
         private bool _includeAllSatellites;
 
+        private string _targetFrameworkIdentifier;
         private string _targetFrameworkVersion;
         // if signing manifests is on and not all app files are included, then the project can't be published.
         private bool _canPublish;
@@ -109,6 +110,10 @@ namespace Microsoft.Build.Tasks
 
         public bool SigningManifests { get; set; }
 
+        public string AssemblyName { get; set; }
+
+        public bool LauncherBasedDeployment {get; set; } = false;
+
         public string TargetFrameworkVersion
         {
             get
@@ -120,6 +125,19 @@ namespace Microsoft.Build.Tasks
                 return _targetFrameworkVersion;
             }
             set => _targetFrameworkVersion = value;
+        }
+
+        public string TargetFrameworkIdentifier
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_targetFrameworkIdentifier))
+                {
+                    return Constants.DotNetFrameworkIdentifier;
+                }
+                return _targetFrameworkIdentifier;
+            }
+            set => _targetFrameworkIdentifier = value;
         }
 
         #endregion
@@ -238,13 +256,27 @@ namespace Microsoft.Build.Tasks
         }
 
         // Creates an output item for a file, with optional Group and IsData attributes.
-        private static ITaskItem CreateFileItem(ITaskItem item, string group, string targetPath, string includeHash, bool isDataFile)
+        private ITaskItem CreateFileItem(ITaskItem item, string group, string targetPath, string includeHash, bool isDataFile)
         {
             ITaskItem outputItem = new TaskItem(item.ItemSpec);
             item.CopyMetadataTo(outputItem);
             if (String.IsNullOrEmpty(targetPath))
             {
-                targetPath = GetItemTargetPath(outputItem);
+                targetPath = Path.GetFileName(item.ItemSpec);
+                //
+                // .NETCore Launcher.exe based deployment: If the file is apphost.exe, we need to set 'TargetPath' metadata
+                // to {assemblyname}.exe so that the file gets published as {assemblyname}.exe and not apphost.exe.
+                //
+                if (LauncherBasedDeployment && 
+                    targetPath.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) &&
+                    !String.IsNullOrEmpty(AssemblyName))
+                {
+                    targetPath = AssemblyName;
+                }
+                else
+                {
+                    targetPath = GetItemTargetPath(outputItem);
+                }
             }
             outputItem.SetMetadata(ItemMetadataNames.targetPath, targetPath);
             if (!String.IsNullOrEmpty(group) && !isDataFile)
@@ -630,7 +662,14 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            if (identity?.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion) == true)
+            if (String.Equals(TargetFrameworkIdentifier, Constants.DotNetCoreAppIdentifier, StringComparison.InvariantCultureIgnoreCase))
+            {
+                if (identity?.IsInFramework(Constants.DotNetCoreIdentifier, null) == true)
+                {
+                    return true;
+                }
+            }
+            else if (identity?.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion) == true)
             {
                 return true;
             }

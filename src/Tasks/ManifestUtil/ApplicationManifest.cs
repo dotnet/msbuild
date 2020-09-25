@@ -655,7 +655,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             foreach (FileReference file in FileReferences)
             {
                 // Check that file is not an assembly...
-                if (!String.IsNullOrEmpty(file.ResolvedPath) && PathUtil.IsAssembly(file.ResolvedPath))
+                // Unless this is a Launcher-based deployments where all files except launcher
+                // are added as regular file references and not assembly references.
+                if (!LauncherBasedDeployment &&
+                    !String.IsNullOrEmpty(file.ResolvedPath) && PathUtil.IsAssembly(file.ResolvedPath))
                 {
                     OutputMessages.AddWarningMessage("GenerateManifest.AssemblyAsFile", file.ToString());
                 }

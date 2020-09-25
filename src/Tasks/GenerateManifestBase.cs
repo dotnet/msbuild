@@ -42,6 +42,8 @@ namespace Microsoft.Build.Tasks
 
         public ITaskItem InputManifest { get; set; }
 
+        public bool LauncherBasedDeployment { get; set; }
+
         public int MaxTargetPath { get; set; }
 
         [Output]
@@ -481,6 +483,8 @@ namespace Microsoft.Build.Tasks
             {
                 _manifest.Description = Description;
             }
+            _manifest.LauncherBasedDeployment = LauncherBasedDeployment;
+            _manifest.AssemblyName = AssemblyName;
 
             return true;
         }

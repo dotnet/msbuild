@@ -15,6 +15,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences.Client;
 using Microsoft.Build.Utilities;
 
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
@@ -202,6 +203,11 @@ namespace Microsoft.Build.Tasks
                 _ignoreTargetFrameworkAttributeVersionMismatch = value;
             }
         }
+
+        /// <summary>
+        /// Indicates if ResolveAssemblyReference task should be run in its own node or not.
+        /// </summary>
+        public bool UseResolveAssemblyReferenceService { get; set; }
 
         /// <summary>
         /// Force dependencies to be walked even when a reference is marked with ExternallyResolved=true
@@ -440,6 +446,18 @@ namespace Microsoft.Build.Tasks
             get { return _targetedRuntimeVersionRawValue; }
             set { _targetedRuntimeVersionRawValue = value; }
         }
+
+        /// <summary>
+        /// If not null, serializes information about <see cref="AssemblyFiles" /> inputs to the named file.
+        /// This overrides the usual outputs, so do not use this unless you are building an SDK with many references.
+        /// </summary>
+        public string AssemblyInformationCacheOutputPath { get; set; }
+
+        /// <summary>
+        /// If not null, uses this set of caches as inputs if RAR cannot find the usual cache in the obj folder. Typically
+        /// used for demos and first-run scenarios.
+        /// </summary>
+        public ITaskItem[] AssemblyInformationCachePaths { get; set; }
 
         /// <summary>
         /// List of locations to search for assemblyFiles when resolving dependencies.
@@ -2973,6 +2991,37 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
+            if (UseResolveAssemblyReferenceService && BuildEngine is IRarBuildEngine rarBuildEngine)
+            {
+                using var client = new RarClient(rarBuildEngine);
+
+                var connected = client.Connect();
+                if (!connected)
+                {
+                    Log.LogMessageFromResources(MessageImportance.Low, "RarCouldntConnect");
+                    bool nodeCreated = false;
+                    try
+                    {
+                        nodeCreated = client.CreateNode();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.LogWarningFromException(e);
+                    }
+
+                    if (nodeCreated)
+                    {
+                        connected = client.Connect(5000);
+                    }
+                }
+
+                if (connected)
+                {
+                    // Client is connected to the RAR node, we can execute RAR task remotely
+                    // return client.Execute(); // TODO: Let it do something.
+                }
+            }
+
             return Execute
             (
                 new FileExists(p => FileUtilities.FileExistsNoThrow(p)),

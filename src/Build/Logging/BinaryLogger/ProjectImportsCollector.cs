@@ -15,10 +15,30 @@ namespace Microsoft.Build.Logging
     /// </summary>
     internal class ProjectImportsCollector
     {
-        private FileStream _fileStream;
+        private Stream _stream;
+        public byte[] GetAllBytes()
+        {
+            if (_stream == null)
+            {
+                return Array.Empty<byte>();
+            }
+            else if (ArchiveFilePath == null)
+            {
+                var stream = _stream as MemoryStream;
+                // Before we can use the zip archive, it must be closed.
+                Close(false);
+                return stream.ToArray();
+            }
+            else
+            {
+                Close();
+                return File.ReadAllBytes(ArchiveFilePath);
+            }
+        }
+
         private ZipArchive _zipArchive;
 
-        public string ArchiveFilePath { get; set; }
+        private string ArchiveFilePath { get; set; }
 
         /// <summary>
         /// Avoid visiting each file more than once.
@@ -28,29 +48,35 @@ namespace Microsoft.Build.Logging
         // this will form a chain of file write tasks, running sequentially on a background thread
         private Task _currentTask = Task.CompletedTask;
 
-        public ProjectImportsCollector(string logFilePath, string sourcesArchiveExtension = ".ProjectImports.zip")
+        public ProjectImportsCollector(string logFilePath, bool createFile, string sourcesArchiveExtension = ".ProjectImports.zip")
         {
-            ArchiveFilePath = Path.ChangeExtension(logFilePath, sourcesArchiveExtension);
-
             try
             {
-                _fileStream = new FileStream(ArchiveFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Delete);
-                _zipArchive = new ZipArchive(_fileStream, ZipArchiveMode.Create);
+                if (createFile)
+                {
+                    ArchiveFilePath = Path.ChangeExtension(logFilePath, sourcesArchiveExtension);
+                    _stream = new FileStream(ArchiveFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Delete);
+                }
+                else
+                {
+                    _stream = new MemoryStream();
+                }
+                _zipArchive = new ZipArchive(_stream, ZipArchiveMode.Create, true);
             }
             catch
             {
                 // For some reason we weren't able to create a file for the archive.
                 // Disable the file collector.
-                _fileStream = null;
+                _stream = null;
                 _zipArchive = null;
             }
         }
 
         public void AddFile(string filePath)
         {
-            if (filePath != null && _fileStream != null)
+            if (filePath != null && _stream != null)
             {
-                lock (_fileStream)
+                lock (_stream)
                 {
                     // enqueue the task to add a file and return quickly
                     // to avoid holding up the current thread
@@ -70,9 +96,9 @@ namespace Microsoft.Build.Logging
 
         public void AddFileFromMemory(string filePath, string data)
         {
-            if (filePath != null && data != null && _fileStream != null)
+            if (filePath != null && data != null && _stream != null)
             {
-                lock (_fileStream)
+                lock (_stream)
                 {
                     // enqueue the task to add a file and return quickly
                     // to avoid holding up the current thread
@@ -169,7 +195,7 @@ namespace Microsoft.Build.Logging
             return archivePath;
         }
 
-        public void Close()
+        public void Close(bool closeStream = true)
         {
             // wait for all pending file writes to complete
             _currentTask.Wait();
@@ -180,10 +206,10 @@ namespace Microsoft.Build.Logging
                 _zipArchive = null;
             }
 
-            if (_fileStream != null)
+            if (closeStream && (_stream != null))
             {
-                _fileStream.Dispose();
-                _fileStream = null;
+                _stream.Dispose();
+                _stream = null;
             }
         }
     }

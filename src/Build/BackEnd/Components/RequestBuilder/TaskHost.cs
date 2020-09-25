@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO.Pipes;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
@@ -23,6 +24,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
 using System.Reflection;
 using Microsoft.Build.Eventing;
+using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -34,7 +36,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine7
+        IBuildEngine7, IRarBuildEngine
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set.
@@ -982,6 +984,35 @@ namespace Microsoft.Build.BackEnd
         private void VerifyActiveProxy()
         {
             ErrorUtilities.VerifyThrow(_activeProxy, "Attempted to use an inactive task host.");
+        }
+
+        /// <summary>
+        /// Initialize new RAR node
+        /// </summary>
+        bool IRarBuildEngine.CreateRarNode()
+        {
+            return BuildManager.DefaultBuildManager.CreateRarNode();
+        }
+
+        /// <summary>
+        /// Provides RAR node name for current configuration
+        /// </summary>
+        string IRarBuildEngine.GetRarPipeName()
+        {
+            BuildParameters parameters = _host.BuildParameters;
+            return CommunicationsUtilities.GetRarPipeName(parameters.EnableNodeReuse, parameters.LowPriority);
+        }
+
+        /// <summary>
+        /// Constructs <seealso cref="NamedPipeClientStream"/>
+        /// </summary>
+        NamedPipeClientStream IRarBuildEngine.GetRarClientStream(string pipeName, int timeout)
+        {
+            BuildParameters parameters = _host.BuildParameters;
+            Handshake handshake = NodeProviderOutOfProc.GetHandshake(enableNodeReuse: parameters.EnableNodeReuse,
+                                                         enableLowPriority: parameters.LowPriority, specialNode: true);
+
+            return NamedPipeUtil.TryConnectToProcess(pipeName, timeout, handshake);
         }
     }
 }

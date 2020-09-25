@@ -68,7 +68,7 @@ namespace Microsoft.Build.ObjectModelRemoting
         /// </summary>
         public static string GetEvaluatedValueEscaped(ProjectProperty property)
         {
-            return property.EvaluatedValueEscapedIntenral;
+            return property.EvaluatedValueEscapedInternal;
         }
     }
 }

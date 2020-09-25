@@ -31,6 +31,8 @@ namespace Microsoft.Build.Utilities
 
         public EscapeHatches EscapeHatches { get; }
 
+        internal readonly string MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION"); 
+
         /// <summary>
         /// Do not expand wildcards that match a certain pattern
         /// </summary>
@@ -140,6 +142,11 @@ namespace Microsoft.Build.Utilities
         /// Disables truncation of Condition messages in Tasks/Targets via ExpanderOptions.Truncate.
         /// </summary>
         public readonly bool DoNotTruncateConditions = Environment.GetEnvironmentVariable("MSBuildDoNotTruncateConditions") == "1";
+
+        /// <summary>
+        /// Disables skipping full drive/filesystem globs that are behind a false condition.
+        /// </summary>
+        public readonly bool AlwaysEvaluateDangerousGlobs = Environment.GetEnvironmentVariable("MSBuildAlwaysEvaluateDangerousGlobs") == "1";
 
         /// <summary>
         /// Emit events for project imports.

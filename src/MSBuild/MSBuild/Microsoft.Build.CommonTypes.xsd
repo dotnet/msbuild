@@ -31,7 +31,7 @@ elementFormDefault="qualified">
                                     <xs:documentation><!-- _locID_text="Reference_FusionName" _locComment="" -->Fusion name of the assembly (optional)</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
-                            <xs:element name="SpecificVersion">
+                            <xs:element name="SpecificVersion" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Reference_SpecificVersion" _locComment="" -->Whether only the version in the fusion name should be referenced (optional, boolean)</xs:documentation>
                                 </xs:annotation>
@@ -41,7 +41,7 @@ elementFormDefault="qualified">
                                     <xs:documentation><!-- _locID_text="Reference_Aliases" _locComment="" -->Aliases for the reference (optional)</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
-                            <xs:element name="Private">
+                            <xs:element name="Private" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Reference_Private" _locComment="" -->Whether the reference should be copied to the output folder (optional, boolean)</xs:documentation>
                                 </xs:annotation>
@@ -133,7 +133,7 @@ elementFormDefault="qualified">
                                     <xs:documentation><!-- _locID_text="COMReference_WrapperTool" _locComment="" -->Wrapper tool, such as tlbimp</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
-                            <xs:element name="Isolated">
+                            <xs:element name="Isolated" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="COMReference_Isolated" _locComment="" -->Is it isolated (boolean)</xs:documentation>
                                 </xs:annotation>
@@ -703,7 +703,7 @@ elementFormDefault="qualified">
                         <xs:choice>
                             <xs:element name="SubType"/>
                             <xs:element name="DependentUpon"/>
-                            <xs:element name="AutoGen">
+                            <xs:element name="AutoGen" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Compile_AutoGen" _locComment="" -->Whether file was generated from another file (boolean)</xs:documentation>
                                 </xs:annotation>
@@ -715,7 +715,7 @@ elementFormDefault="qualified">
                                 </xs:annotation>
                             </xs:element>
                             <xs:element name="DesignTimeSharedInput"/>
-                            <xs:element name="Visible">
+                            <xs:element name="Visible" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Compile_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
@@ -764,7 +764,7 @@ elementFormDefault="qualified">
                                     <xs:documentation><!-- _locID_text="EmbeddedResource_Link" _locComment="" -->Notional path within project to display if the file is physically located outside of the project file's cone (optional)</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
-                            <xs:element name="Visible">
+                            <xs:element name="Visible" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="EmbeddedResource_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
@@ -813,18 +813,18 @@ elementFormDefault="qualified">
                                 </xs:annotation>
                             </xs:element>
                             <xs:element name="IsAssembly"/>
-                            <xs:element name="Visible">
+                            <xs:element name="Visible" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Content_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
                             <xs:element name="SubType"/>
-                            <xs:element name="CopyToOutputDirectory">
+                            <xs:element name="CopyToOutputDirectory" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Content_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, boolean, default false)</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
-                            <xs:element name="CopyToPublishDirectory">
+                            <xs:element name="CopyToPublishDirectory" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Content_CopyToPublishDirectory" _locComment="" -->Copy file to publish directory (optional, boolean, default false)</xs:documentation>
                                 </xs:annotation>
@@ -865,7 +865,7 @@ elementFormDefault="qualified">
                             </xs:element>
                             <xs:element name="Group"/>
                             <xs:element name="SubType"/>
-                            <xs:element name="CopyToOutputDirectory">
+                            <xs:element name="CopyToOutputDirectory" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Page_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, boolean, default false)</xs:documentation>
                                 </xs:annotation>
@@ -906,7 +906,7 @@ elementFormDefault="qualified">
                             </xs:element>
                             <xs:element name="Group"/>
                             <xs:element name="SubType"/>
-                            <xs:element name="CopyToOutputDirectory">
+                            <xs:element name="CopyToOutputDirectory" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="Resource_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, boolean, default false)</xs:documentation>
                                 </xs:annotation>
@@ -947,7 +947,7 @@ elementFormDefault="qualified">
                             </xs:element>
                             <xs:element name="Group"/>
                             <xs:element name="SubType"/>
-                            <xs:element name="CopyToOutputDirectory">
+                            <xs:element name="CopyToOutputDirectory" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="ApplicationDefinition_CopyToOutputDirectory" _locComment="" -->Copy file to output directory (optional, boolean, default false)</xs:documentation>
                                 </xs:annotation>
@@ -980,7 +980,7 @@ elementFormDefault="qualified">
                                     <xs:documentation><!-- _locID_text="None_Link" _locComment="" -->Notional path within project to display if the file is physically located outside of the project file's cone (optional)</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
-                            <xs:element name="Visible">
+                            <xs:element name="Visible" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="None_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
@@ -1047,7 +1047,7 @@ elementFormDefault="qualified">
                 <xs:extension base="msb:SimpleItemType">
                     <xs:sequence minOccurs="0" maxOccurs="unbounded">
                         <xs:choice>
-                            <xs:element name="Visible">
+                            <xs:element name="Visible" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="FileAssociation_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
@@ -1067,7 +1067,7 @@ elementFormDefault="qualified">
                 <xs:extension base="msb:SimpleItemType">
                     <xs:sequence minOccurs="0" maxOccurs="unbounded">
                         <xs:choice>
-                            <xs:element name="Visible">
+                            <xs:element name="Visible" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="BootstrapperFile_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
@@ -1086,18 +1086,18 @@ elementFormDefault="qualified">
                 <xs:extension base="msb:SimpleItemType">
                     <xs:sequence minOccurs="0" maxOccurs="unbounded">
                         <xs:choice>
-                            <xs:element name="Visible">
+                            <xs:element name="Visible" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="PublishFile_InProject" _locComment="" -->Display in user interface (optional, boolean)</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
                             <xs:element name="Group"/>
-                            <xs:element name="IncludeHash">
+                            <xs:element name="IncludeHash" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="PublishFile_IncludeHash" _locComment="" -->(boolean)</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
-                            <xs:element name="IsAssembly">
+                            <xs:element name="IsAssembly" type="msb:boolean">
                                 <xs:annotation>
                                     <xs:documentation><!-- _locID_text="PublishFile_IsAssembly" _locComment="" -->(boolean)</xs:documentation>
                                 </xs:annotation>
@@ -1158,6 +1158,18 @@ elementFormDefault="qualified">
     <xs:element name="MinimumVisualStudioVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AdditionalFileItemNames" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AllowUnsafeBlocks" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="AnalysisMode" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="AnalysisMode" _locComment="" -->Customizes the set of rules that are enabled by default.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="Default" />
+          <xs:enumeration value="AllEnabledByDefault" />
+          <xs:enumeration value="AllDisabledByDefault" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:element>
     <xs:element name="AppConfigForCompiler" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ApplicationIcon" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ApplicationRevision" type="msb:StringPropertyType" substitutionGroup="msb:Property">
@@ -1202,7 +1214,7 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="AutorunEnabled" _locComment="" -->Indicates whether BindingRedirect elements should be automatically generated for referenced assemblies.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="AutorunEnabled" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="AutorunEnabled" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="AutorunEnabled" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
@@ -1214,7 +1226,7 @@ elementFormDefault="qualified">
         </xs:annotation>
     </xs:element>
     <xs:element name="BootstrapperComponentsUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="BootstrapperEnabled" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="BootstrapperEnabled" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="BootstrapperEnabled" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
@@ -1228,14 +1240,14 @@ elementFormDefault="qualified">
     <xs:element name="ConfigurationName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ConfigurationOverrideFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="CreateDesktopShortcut" type="msb:boolean" substitutionGroup="msb:Property" />
-    <xs:element name="CreateWebPageOnPublish" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="CreateWebPageOnPublish" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="CreateWebPageOnPublish" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="CurrentSolutionConfigurationContents" type="msb:GenericPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DebugSecurityZoneURL" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="DebugSymbols" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="DebugSymbols" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="DebugSymbols" _locComment="" -->Whether to emit symbols (boolean)</xs:documentation>
         </xs:annotation>
@@ -1249,19 +1261,19 @@ elementFormDefault="qualified">
     <xs:element name="DefaultHTMLPageLayout" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DefaultTargetSchema" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DefineConstants" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="DefineDebug" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="DefineDebug" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="DefineDebug" _locComment="" -->Whether DEBUG is defined (boolean)</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="DefineTrace" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="DefineTrace" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="DefineTrace" _locComment="" -->Whether TRACE is defined (boolean)</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="DelaySign" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DisableLangXtns" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="DisallowUrlActivation" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="DisallowUrlActivation" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="DisallowUrlActivation" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
@@ -1501,6 +1513,11 @@ elementFormDefault="qualified">
     <xs:element name="EnableSQLServerDebugging" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="EnableSecurityDebugging" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="EnableUnmanagedDebugging" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="EnforceCodeStyleInBuild" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnforceCodeStyleInBuild" _locComment="" -->Controls whether code style analysis rules configured as warnings or errors should execute on build and report violations. The default is false.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="ErrorLog" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ErrorReport" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="EmbedManifest" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1544,6 +1561,31 @@ elementFormDefault="qualified">
     <xs:element name="AnalysisLevel" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="InstallUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="IsCodeSharingProject" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="IsPackable" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="IsPackable" _locComment="" -->Indicates whether the project can be used to create a NuGet package.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableNETAnalyzers" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableNETAnalyzers" _locComment="" -->Indicates whether the .NET analyzers are enabled. They are enabled by default for projects that target .NET 5.0 or later.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableDefaultCompileItems" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableDefaultCompileItems" _locComment="" -->Enable default Compile item globs for source files.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableDefaultNoneItems" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableDefaultNoneItems" _locComment="" -->Enable default None item globs (which cover most files in the project not covered by other globs).</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableDefaultItems" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableDefaultItems" _locComment="" -->Defaults to true, and if set to false will disable all default item globs.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="IsWebBootstrapper" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="JCPA" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="Keyword" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1554,7 +1596,7 @@ elementFormDefault="qualified">
     <xs:element name="LinkIncremental" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ManifestCertificateThumbprint" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ManifestKeyFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="MapFileExtensions" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="MapFileExtensions" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="MapFileExtensions" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
@@ -1583,7 +1625,7 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="NoConfig" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="NoStandardLibraries" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="NoStdLib" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="NoStdLib" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="NoStdLib" _locComment="" -->Whether standard libraries (such as mscorlib) should be referenced automatically (boolean)</xs:documentation>
         </xs:annotation>
@@ -1597,12 +1639,12 @@ elementFormDefault="qualified">
     <xs:element name="OutDir" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetExt" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="OpenBrowserOnPublish" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="OpenBrowserOnPublish" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OpenBrowserOnPublish" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="Optimize" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="Optimize" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="Optimize" _locComment="" -->Should compiler optimize output (boolean)</xs:documentation>
         </xs:annotation>
@@ -1711,6 +1753,21 @@ elementFormDefault="qualified">
       </xs:annotation>
     </xs:element>
     <xs:element name="ResponseFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="RunAnalyzers" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="RunAnalyzers" _locComment="" -->Disables analyzers at both build and design time. This property takes precedence over RunAnalyzersDuringBuild and RunAnalyzersDuringLiveAnalysis. Default is true.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="RunAnalyzersDuringBuild" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="RunAnalyzersDuringBuild" _locComment="" -->Controls whether analyzers run at build time. Default is true.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="RunAnalyzersDuringLiveAnalysis" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="RunAnalyzersDuringLiveAnalysis" _locComment="" -->Controls whether analyzers analyze code live at design time. Default is true.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="RootNamespace" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="RuntimeIdentifier" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
@@ -1772,7 +1829,7 @@ elementFormDefault="qualified">
     <xs:element name="TargetPlatformMinVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetZone" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TreatWarningsAsErrors" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="TrustUrlParameters" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="TrustUrlParameters" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="TrustUrlParameters" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
@@ -1780,7 +1837,7 @@ elementFormDefault="qualified">
     <xs:element name="TypeComplianceDiagnostics" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="UICulture" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="UpgradeBackupLocation" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="UpdateEnabled" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="UpdateEnabled" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="UpdateEnabled" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
@@ -1796,12 +1853,12 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="UpdateMode" _locComment="" -->Foreground or Background</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="UpdatePeriodically" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="UpdatePeriodically" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="UpdatePeriodically" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="UpdateRequired" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+    <xs:element name="UpdateRequired" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="UpdateRequired" _locComment="" -->boolean</xs:documentation>
         </xs:annotation>
@@ -2562,6 +2619,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="IconFile" />
                     <xs:attribute name="InputManifest" />
                     <xs:attribute name="IsolatedComReferences" />
+                    <xs:attribute name="LauncherBasedDeployment" type="msb:boolean" />
                     <xs:attribute name="ManifestType" />
                     <xs:attribute name="MaxTargetPath" />
                     <xs:attribute name="OSVersion" />
@@ -2621,6 +2679,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="ErrorReportUrl" />
                     <xs:attribute name="InputManifest" />
                     <xs:attribute name="Install" type="msb:boolean" />
+                    <xs:attribute name="LauncherBasedDeployment" type="msb:boolean" />
                     <xs:attribute name="MapFileExtensions" type="msb:boolean" />
                     <xs:attribute name="MaxTargetPath" />
                     <xs:attribute name="MinimumRequiredVersion" />
@@ -2638,6 +2697,17 @@ elementFormDefault="qualified">
                     <xs:attribute name="UpdateInterval" />
                     <xs:attribute name="UpdateMode" />
                     <xs:attribute name="UpdateUnit" />
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="GenerateLauncher" substitutionGroup="msb:Task">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:TaskType">
+                    <xs:attribute name="EntryPoint" />
+                    <xs:attribute name="OutputPath" />
+                    <xs:attribute name="VisualStudioVersion" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>

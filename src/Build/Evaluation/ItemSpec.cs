@@ -4,11 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.EscapingStringExtensions;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -419,19 +417,17 @@ namespace Microsoft.Build.Evaluation
         protected string ProjectDirectory { get; }
 
         // not a Lazy to reduce memory
-        private FileSpecMatcherTester FileMatcher
+        private ref FileSpecMatcherTester FileMatcher
         {
             get
             {
-                if (_fileMatcherInitialized)
+                if (!_fileMatcherInitialized)
                 {
-                    return _fileMatcher;
+                    _fileMatcher = CreateFileSpecMatcher();
+                    _fileMatcherInitialized = true;
                 }
 
-                _fileMatcher = CreateFileSpecMatcher();
-                _fileMatcherInitialized = true;
-
-                return _fileMatcher;
+                return ref _fileMatcher;
             }
         }
 
@@ -475,7 +471,7 @@ namespace Microsoft.Build.Evaluation
 
         protected virtual IMSBuildGlob CreateMsBuildGlob()
         {
-            return MSBuildGlob.Parse(ProjectDirectory, TextFragment.Unescape());
+            return MSBuildGlob.Parse(ProjectDirectory, EscapingUtilities.UnescapeAll(TextFragment));
         }
 
         private FileSpecMatcherTester CreateFileSpecMatcher()
@@ -498,5 +494,14 @@ namespace Microsoft.Build.Evaluation
             : base(textFragment, projectDirectory)
         {
         }
+
+        /// <summary>
+        /// True if TextFragment starts with /**/ or a variation thereof with backslashes.
+        /// </summary>
+        public bool IsFullFileSystemScan => TextFragment.Length >= 4
+            && FileUtilities.IsAnySlash(TextFragment[0])
+            && TextFragment[1] == '*'
+            && TextFragment[2] == '*'
+            && FileUtilities.IsAnySlash(TextFragment[3]);
     }
 }
