@@ -6039,6 +6039,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
        Needed for certain build environments that import partial sets of targets. -->
   <Target Name="CollectReferencedNuGetPackages" Returns="@(ReferencedNuGetPackages)"/>
 
+  <!-- Get the TargetFrameworks that are supported for the Visual Studio TargetFramework drop down -->
+  <Target Name="GenerateSupportedTargetFrameworkAlias" Returns="@(SupportedTargetFrameworkAlias)"/>
+
   <!--
     ============================================================
                                         PriFilesOutputGroup
