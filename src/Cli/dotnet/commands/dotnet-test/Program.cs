@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Tools.Test
                 noRestore,
                 msbuildPath);
 
-            // Apply environment variables if set
+            // Apply environment variables provided by the user via --environment (-e) parameter, if present
             SetCustomEnvironmentVariables(testCommand, parsedTest.AppliedOptions);
 
             // Set DOTNET_PATH if it isn't already set in the environment as it is required
