@@ -98,6 +98,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetChangeWave("16.8");
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
                 Shouldly.Should.Throw<InternalErrorException>(() => ChangeWaves.AreFeaturesEnabled(waveToCheck));
             }
         }
@@ -131,6 +132,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 Project p = collection.LoadProject(file.Path);
                 p.Build().ShouldBeTrue();
 
+                log.WarningCount.ShouldBe(1);
                 log.AssertLogContains("invalid format");
                 log.AssertLogContains("Hello World!");
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
@@ -170,6 +172,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                     BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
+                    log.WarningCount.ShouldBe(1);
                     log.AssertLogContains("out of rotation");
                     log.AssertLogContains("Hello World!");
                 }
@@ -209,6 +212,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                     BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
+                    log.WarningCount.ShouldBe(1);
                     log.AssertLogContains("out of rotation");
                     log.AssertLogContains("Hello World!");
                 }
@@ -276,7 +280,6 @@ namespace Microsoft.Build.Engine.UnitTests
                     p.Build().ShouldBeTrue();
 
                     BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
                     log.AssertLogContains("Hello World!");
                 }
             }
