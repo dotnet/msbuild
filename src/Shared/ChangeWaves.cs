@@ -20,22 +20,17 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     public class ChangeWaves
     {
-        public static readonly string[] AllWaves = { Wave16_8, Wave16_10, Wave17_0 };
-        public static readonly Version[] AllWavesAsVersion = Array.ConvertAll<string, Version>(AllWaves, Version.Parse);
-        public const string Wave16_8 = "16.8";
-        public const string Wave16_10 = "16.10";
-        public const string Wave17_0 = "17.0";
+        public static readonly Version Wave16_8 = new Version(16, 8);
+        public static readonly Version Wave16_10 = new Version(16, 10);
+        public static readonly Version Wave17_0 = new Version(17, 0);
+        public static readonly Version[] AllWaves = { Wave16_8, Wave16_10, Wave17_0 };
 
         /// <summary>
         /// Special value indicating that all features behind change-waves should be enabled.
         /// </summary>
-        public const string EnableAllFeatures = "999.999";
+        internal static readonly Version EnableAllFeatures = new Version(999, 999);
 
-        internal static readonly Version LowestWaveAsVersion = new Version(AllWaves[0]);
-        internal static readonly Version HighestWaveAsVersion = new Version(AllWaves[AllWaves.Length - 1]);
-        internal static readonly Version EnableAllFeaturesAsVersion = new Version(EnableAllFeatures);
-
-        internal static string LowestWave
+        internal static Version LowestWave
         {
             get
             {
@@ -43,7 +38,7 @@ namespace Microsoft.Build.Utilities
             }
         }
 
-        internal static string HighestWave
+        internal static Version HighestWave
         {
             get
             {
@@ -51,22 +46,17 @@ namespace Microsoft.Build.Utilities
             }
         }
 
-        private static string cachedWave = null;
-
-        public static string DisabledWave
+        private static Version _cachedWave;
+        public static Version DisabledWave
         {
             get
             {
-                if (cachedWave == null)
-                {
-                    cachedWave = Traits.Instance.MSBuildDisableFeaturesFromVersion ?? "";
-                }
-
-                return cachedWave;
+                // If null, call applychangewave()?
+                return _cachedWave;
             }
-            set
+            internal set
             {
-                cachedWave = value;
+                _cachedWave = value;
             }
         }
 
@@ -88,43 +78,32 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Ensure the the environment variable MSBuildDisableFeaturesFromWave is set to a proper value.
+        /// Read from environment variable MSBuildDisableFeaturesFromWave is and cache the version properly.
         /// </summary>
-        /// <returns> String representation of the set change wave. "999.999" if unset or invalid, and clamped if out of bounds. </returns>
         internal static void ApplyChangeWave()
         {
-            Version changeWave;
-
-            // If unset, enable all features.
-            if (DisabledWave.Length == 0 || DisabledWave.Equals(EnableAllFeatures, StringComparison.OrdinalIgnoreCase))
+            // Most common scenarios, no set change wave version or set to EnableAllFeatures
+            if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableFeaturesFromVersion) || DisabledWave == EnableAllFeatures)
             {
                 ConversionState = ChangeWaveConversionState.Valid;
                 DisabledWave = ChangeWaves.EnableAllFeatures;
                 return;
             }
-
-            // If the version is of invalid format, log a warning and enable all features.
-            if (!Version.TryParse(DisabledWave, out changeWave))
+            // If disabledwave hasn't been set yet, try to parse it
+            else if (DisabledWave == null && !Version.TryParse(Traits.Instance.MSBuildDisableFeaturesFromVersion, out _cachedWave))
             {
                 ConversionState = ChangeWaveConversionState.InvalidFormat;
                 DisabledWave = ChangeWaves.EnableAllFeatures;
                 return;
             }
-            // If the version is 999.999, we're done.
-            else if (changeWave == EnableAllFeaturesAsVersion)
-            {
-                ConversionState = ChangeWaveConversionState.Valid;
-                DisabledWave = changeWave.ToString();
-                return;
-            }
             // If the version is out of rotation, log a warning and clamp the value.
-            else if (changeWave < LowestWaveAsVersion)
+            else if (DisabledWave != EnableAllFeatures && DisabledWave < LowestWave)
             {
                 ConversionState = ChangeWaveConversionState.OutOfRotation;
                 DisabledWave = LowestWave;
                 return;
             }
-            else if (changeWave > HighestWaveAsVersion)
+            else if (DisabledWave != EnableAllFeatures && DisabledWave > HighestWave)
             {
                 ConversionState = ChangeWaveConversionState.OutOfRotation;
                 DisabledWave = HighestWave;
@@ -132,39 +111,20 @@ namespace Microsoft.Build.Utilities
             }
 
             // Ensure it's set to an existing version within the current rotation
-            if (!AllWavesAsVersion.Contains(changeWave))
+            if (!AllWaves.Contains(DisabledWave))
             {
-                foreach (Version wave in AllWavesAsVersion)
+                foreach (Version wave in AllWaves)
                 {
-                    if (wave > changeWave)
+                    if (wave > DisabledWave)
                     {
                         ConversionState = ChangeWaveConversionState.Valid;
-                        DisabledWave = wave.ToString();
+                        DisabledWave = wave;
                         return;
                     }
                 }
             }
 
             ConversionState = ChangeWaveConversionState.Valid;
-            DisabledWave = changeWave.ToString();
-        }
-
-        /// <summary>
-        /// Compares the passed wave to the MSBuildDisableFeaturesFromVersion environment variable.
-        /// Version MUST be of the format: "xx.yy".
-        /// </summary>
-        /// <param name="wave">The version to compare.</param>
-        /// <returns>A bool indicating whether the feature behind a version is enabled.</returns>
-        public static bool AreFeaturesEnabled(string wave)
-        {
-            Version waveToCheck;
-
-            // When a caller passes an invalid wave, fail the build.
-            ErrorUtilities.VerifyThrow(Version.TryParse(wave.ToString(), out waveToCheck),
-                                       $"Argument 'wave' passed with invalid format." +
-                                       $"Please use pre-existing const strings or define one with format 'xx.yy");
-
-            return AreFeaturesEnabled(waveToCheck);
         }
 
         /// <summary>
@@ -174,26 +134,18 @@ namespace Microsoft.Build.Utilities
         /// <returns>A bool indicating whether the version is enabled.</returns>
         public static bool AreFeaturesEnabled(Version wave)
         {
-            if (_state == ChangeWaveConversionState.NotConvertedYet)
+            if (_state == ChangeWaveConversionState.NotConvertedYet || DisabledWave == null)
             {
                 ApplyChangeWave();
             }
 
             // This is opt out behavior, all waves are enabled by default.
-            if (DisabledWave.Length == 0 || DisabledWave.Equals(EnableAllFeatures, StringComparison.OrdinalIgnoreCase))
+            if (DisabledWave == EnableAllFeatures)
             {
                 return true;
             }
 
-            Version currentSetWave;
-
-            // If we can't parse the environment variable, default to enabling features.
-            if (!Version.TryParse(DisabledWave, out currentSetWave))
-            {
-                return true;
-            }
-
-            return wave < currentSetWave;
+            return wave < DisabledWave;
         }
 
         /// <summary>

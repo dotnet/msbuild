@@ -1084,7 +1084,7 @@ namespace Microsoft.Build.Evaluation
 
         private void ValidateChangeWaveState()
         {
-            if (ChangeWaves.ConversionState == ChangeWaveConversionState.NotConvertedYet)
+            if (ChangeWaves.ConversionState == ChangeWaveConversionState.NotConvertedYet || ChangeWaves.DisabledWave == null)
             {
                 ChangeWaves.ApplyChangeWave();
             }
@@ -1118,7 +1118,7 @@ namespace Microsoft.Build.Evaluation
 
             ValidateChangeWaveState();
 
-            SetBuiltInProperty(ReservedPropertyNames.msbuilddisablefeaturesfromversion, ChangeWaves.DisabledWave);
+            SetBuiltInProperty(ReservedPropertyNames.msbuilddisablefeaturesfromversion, ChangeWaves.DisabledWave?.ToString());
 
             // Fake OS env variables when not on Windows
             if (!NativeMethodsShared.IsWindows)
