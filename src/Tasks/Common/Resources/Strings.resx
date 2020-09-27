@@ -686,4 +686,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1145: The {0} pack is not installed and NuGet package restore is not supported. Upgrade Visual Studio, remove global.json if it specifies a certain SDK version, and uninstall the newer SDK. For more options visit   https://aka.ms/targeting-apphost-pack-missing  Pack Type:{0}, Pack directory: {1}, targetframework: {2}, Pack PackageId: {3}, Pack Package Version: {4}</value>
     <comment>{StrBegin="NETSDK1145: "}</comment>
   </data>
+  <data name="WorkloadNotInstalled" xml:space="preserve">
+    <value>NETSDK1146: The following workload packs were not installed: {0}</value>
+    <comment>{StrBegin="NETSDK1146: "}</comment>
+  </data>
 </root>

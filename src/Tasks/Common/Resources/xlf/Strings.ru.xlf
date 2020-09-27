@@ -730,6 +730,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="new">NETSDK1136: The target platform must be set to Windows (usually by including '-windows' in the TargetFramework property) when using Windows Forms or WPF, or referencing projects or packages that do so.</target>
         <note>{StrBegin="NETSDK1136: "}</note>
       </trans-unit>
+      <trans-unit id="WorkloadNotInstalled">
+        <source>NETSDK1146: The following workload packs were not installed: {0}</source>
+        <target state="new">NETSDK1146: The following workload packs were not installed: {0}</target>
+        <note>{StrBegin="NETSDK1146: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -1,6 +1,8 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable disable
+
 namespace Microsoft.DotNet.MSBuildSdkResolver
 {
     // Note: This is SemVer 2.0.0 https://semver.org/spec/v2.0.0.html

@@ -6,6 +6,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
+#nullable disable
+
 namespace Microsoft.DotNet.DotNetSdkResolver
 {
     internal static partial class Interop

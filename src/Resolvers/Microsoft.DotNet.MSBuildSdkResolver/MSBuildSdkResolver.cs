@@ -10,6 +10,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
+#nullable disable
+
 namespace Microsoft.DotNet.MSBuildSdkResolver
 {
     // Thread-safety note:

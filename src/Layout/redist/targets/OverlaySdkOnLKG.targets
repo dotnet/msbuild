@@ -42,4 +42,25 @@
     <Exec Command="$(RedistLayoutPath)dotnet new"
           EnvironmentVariables="DOTNET_CLI_HOME=$(ArtifactsTmpDir)" />
   </Target>
+  
+  
+  <Target Name="PublishTestWorkloads"
+          AfterTargets="OverlaySdkOnLKG">
+    <PropertyGroup>
+      <!-- TODO: Update this to actually calculate the band (ie the band should still be 5.0.100 if the VersionPrefix is 5.0.101 -->
+      <VersionBand>$(VersionPrefix)</VersionBand>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <WorkloadManifestContent Include="$(RepoRoot)\src\Assets\TestWorkloads\manifests\**\*.*" />
+      <WorkloadPackContent Include="$(RepoRoot)\src\Assets\TestWorkloads\packs\**\*.*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(WorkloadManifestContent)"
+          DestinationFiles="@(WorkloadManifestContent->'$(RedistLayoutPath)\sdk-manifests\$(VersionBand)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(WorkloadPackContent)"
+      DestinationFiles="@(WorkloadPackContent->'$(RedistLayoutPath)\packs\%(RecursiveDir)%(Filename)%(Extension)')" />
+    
+  </Target>
 </Project>

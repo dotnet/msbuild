@@ -1,0 +1,9 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TargetPlatformSupported>true</TargetPlatformSupported>
+    <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == ''">42.0</TargetPlatformVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <SdkSupportedTargetPlatformVersion Include="42.0" />
+  </ItemGroup>
+</Project>

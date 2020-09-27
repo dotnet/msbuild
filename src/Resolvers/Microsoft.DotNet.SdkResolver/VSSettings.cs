@@ -10,6 +10,8 @@ using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Setup.Configuration;
 #endif
 
+#nullable disable
+
 namespace Microsoft.DotNet.DotNetSdkResolver
 {
     public sealed class VSSettings

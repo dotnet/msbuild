@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
+#nullable disable
+
 namespace Microsoft.DotNet.DotNetSdkResolver
 {
     public class SdkResolutionResult
