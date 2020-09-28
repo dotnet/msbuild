@@ -15,9 +15,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public WorkloadDefinitionId(string id)
         {
-            if (string.IsNullOrWhiteSpace(id))
+            if (string.IsNullOrEmpty(id))
             {
-                throw new ArgumentException($"'{nameof(id)}' cannot be null or whitespace", nameof(id));
+                throw new ArgumentException($"'{nameof(id)}' cannot be null or empty", nameof(id));
             }
 
             _id = id;

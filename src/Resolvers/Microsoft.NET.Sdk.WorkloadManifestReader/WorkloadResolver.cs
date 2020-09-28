@@ -148,11 +148,30 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
         }
 
+        /// <summary>
+        /// Gets the IDs of all the packs that are installed
+        /// </summary>
+        private HashSet<WorkloadPackId> GetInstalledPacks()
+        {
+            var installedPacks = new HashSet<WorkloadPackId>();
+            foreach (var pack in _packs)
+            {
+                var aliasedId = pack.Value.TryGetAliasForPlatformIds(_platformIds) ?? pack.Value.Id;
+                var packPath = GetPackPath(_dotNetRootPath, aliasedId, pack.Value.Version, pack.Value.Kind);
+
+                if (PackExists(packPath, pack.Value.Kind))
+                {
+                    installedPacks.Add(pack.Key);
+                }
+            }
+            return installedPacks;
+        }
+
         public IEnumerable<string> GetPacksInWorkload(string workloadId)
         {
-            if (string.IsNullOrWhiteSpace(workloadId))
+            if (string.IsNullOrEmpty(workloadId))
             {
-                throw new ArgumentException($"'{nameof(workloadId)}' cannot be null or whitespace", nameof(workloadId));
+                throw new ArgumentException($"'{nameof(workloadId)}' cannot be null or empty", nameof(workloadId));
             }
 
             var id = new WorkloadDefinitionId(workloadId);
@@ -164,7 +183,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             if (workload.Extends?.Count > 0)
             {
-                return ExpandWorkload(workload).Select (p => p.ToString());
+                return GetPacksInWorkload(workload).Select (p => p.ToString());
             }
 
 #nullable disable
@@ -172,7 +191,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 #nullable restore
         }
 
-        private IEnumerable<WorkloadPackId> ExpandWorkload (WorkloadDefinition workload)
+        internal IEnumerable<WorkloadPackId> GetPacksInWorkload(WorkloadDefinition workload)
         {
             var dedup = new HashSet<WorkloadDefinitionId>();
 
@@ -239,159 +258,14 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// </remarks>
         public ISet<WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packIds)
         {
-            var installedPacks = new HashSet<WorkloadPackId>();
             var requestedPacks = new HashSet<WorkloadPackId>(packIds.Select(p => new WorkloadPackId(p)));
-
-            foreach (var pack in _packs)
-            {
-                var aliasedId = pack.Value.TryGetAliasForPlatformIds(_platformIds) ?? pack.Value.Id;
-                var packPath = GetPackPath(_dotNetRootPath, aliasedId, pack.Value.Version, pack.Value.Kind);
-
-                if (PackExists(packPath, pack.Value.Kind))
-                {
-                    installedPacks.Add(pack.Key);
-                }
-            }
-
-            // find workloads that contain any of the requested packs
-            var incompleteCandidates = new List<WorkloadSuggestionCandidate>();
-            var completeCandidates = new HashSet<WorkloadSuggestionCandidate>();
-
-            foreach (var workload in _workloads)
-            {
-                var expanded = new HashSet<WorkloadPackId>(ExpandWorkload(workload.Value));
-                if (expanded.Any(e => requestedPacks.Contains(e)))
-                {
-                    var stillMissing = new HashSet<WorkloadPackId>(requestedPacks.Where(p => !expanded.Contains(p)));
-                    var satisfied = requestedPacks.Count - stillMissing.Count;
-
-                    var candidate = new WorkloadSuggestionCandidate(new HashSet<WorkloadDefinitionId>() { workload.Key }, expanded, stillMissing);
-
-                    if (candidate.IsComplete)
-                    {
-                        completeCandidates.Add(candidate);
-                    }
-                    else
-                    {
-                        incompleteCandidates.Add(candidate);
-                    }
-                }
-            }
-
-            //find all valid complete permutations by recursively exploring possible branches from a root
-            void FindCandidates (WorkloadSuggestionCandidate root, List<WorkloadSuggestionCandidate> branches)
-            {
-                foreach (var branch in branches)
-                {
-                    //skip branches identical to ones that have already already been taken
-                    //there's probably a more efficient way to do this but this is easy to reason about
-                    if (root.Workloads.IsSupersetOf(branch.Workloads))
-                    {
-                        continue;
-                    }
-
-                    //skip branches that don't reduce the number of missing packs
-                    //the branch may be a more optimal solution, but this will be handled elsewhere in the permutation space where it is treated as a root
-                    if (!root.StillMissingPacks.Overlaps(branch.Packs))
-                    {
-                        continue;
-                    }
-
-                    //construct the new condidate by combining the root and the branch
-                    var combinedIds = new HashSet<WorkloadDefinitionId>(root.Workloads);
-                    combinedIds.UnionWith(branch.Workloads);
-                    var combinedPacks = new HashSet<WorkloadPackId>(root.Packs);
-                    combinedPacks.UnionWith(branch.Packs);
-                    var stillMissing = new HashSet<WorkloadPackId>(root.StillMissingPacks);
-                    stillMissing.ExceptWith(branch.Packs);
-                    var candidate = new WorkloadSuggestionCandidate(combinedIds, combinedPacks, stillMissing);
-
-                    //if the candidate contains all the requested packs, it's complete. else, recurse to try adding more branches to it.
-                    if (candidate.IsComplete)
-                    {
-                        completeCandidates.Add(candidate);
-                    }
-                    else
-                    {
-                        FindCandidates(candidate, branches);
-                    }
-                }
-            }
-
-            foreach (var c in incompleteCandidates)
-            {
-                FindCandidates(c, incompleteCandidates);
-            }
-
-            // minimize number of unnecessary packs installed by the suggestion, then minimize number of workloads ids listed in the suggestion
-            // eventually a single pass to find the "best" would be more efficient but this this more readable and easier to tweak
-            var scoredList = completeCandidates.Select(
-                c =>
-                {
-                    var installedCount = c.Packs.Count(p => installedPacks.Contains(p));
-                    var extraPacks = c.Packs.Count - installedCount - requestedPacks.Count;
-                    return (c.Workloads, extraPacks);
-                });
-
-            var result = FindBest(
-                scoredList,
-                (x, y) => y.extraPacks - x.extraPacks,
-                (x, y) => y.Workloads.Count - x.Workloads.Count);
+            var expandedWorkloads = _workloads.Select(w => (w.Key, new HashSet<WorkloadPackId>(GetPacksInWorkload(w.Value))));
+            var finder = new WorkloadSuggestionFinder(GetInstalledPacks(), requestedPacks, expandedWorkloads);
 
             return new HashSet<WorkloadInfo>
             (
-                result.Workloads.Select(s => new WorkloadInfo(s.ToString(), _workloads[s].Description))
+                finder.GetBestSuggestion().Workloads.Select(s => new WorkloadInfo(s.ToString(), _workloads[s].Description))
             );
-        }
-
-        private T FindBest<T>(IEnumerable<T> values, params Comparison<T>[] comparators)
-        {
-            T best = values.First();
-
-            foreach(T val in values.Skip(1))
-            {
-                foreach(Comparison<T> c in comparators)
-                {
-                    var cmp = c(val, best);
-                    if (cmp > 0)
-                    {
-                        best = val;
-                        break;
-                    }
-                    else if (cmp < 0)
-                    {
-                        break;
-                    }
-                }
-            }
-            return best;
-        }
-
-        private class WorkloadSuggestionCandidate : IEquatable<WorkloadSuggestionCandidate>
-        {
-            public WorkloadSuggestionCandidate(HashSet<WorkloadDefinitionId> id, HashSet<WorkloadPackId> packs, HashSet<WorkloadPackId> missingPacks)
-            {
-                Packs = packs;
-                StillMissingPacks = missingPacks;
-                Workloads = id;
-            }
-
-            public HashSet<WorkloadDefinitionId> Workloads { get; }
-            public HashSet<WorkloadPackId> Packs { get; }
-            public HashSet<WorkloadPackId> StillMissingPacks { get; }
-            public bool IsComplete => StillMissingPacks.Count == 0;
-
-            public bool Equals(WorkloadSuggestionCandidate? other) => other != null && Workloads.SetEquals(other.Workloads);
-
-            public override int GetHashCode()
-            {
-                int hashcode = 0;
-                foreach(var id in Workloads)
-                {
-                    hashcode ^= id.GetHashCode();
-                }
-                return hashcode;
-            }
         }
 
         public class PackInfo
