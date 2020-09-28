@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{50A89C27
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9CAEE03D-60F1-4E77-B25B-9CD8757E1F09}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		build.cmd = build.cmd
@@ -199,6 +200,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CopyTargets", "CopyTargets", "{683F3DA5-3713-4F8C-8AA2-586D3F6B4E30}"
 	ProjectSection(SolutionItems) = preProject
 		src\WebSdk\Publish\Targets\CopyTargets\Microsoft.NET.Sdk.Publish.CopyFiles.targets = src\WebSdk\Publish\Targets\CopyTargets\Microsoft.NET.Sdk.Publish.CopyFiles.targets
+		src\WebSdk\Publish\Targets\CopyTargets\Microsoft.NET.Sdk.Publish.FilterFiles.targets = src\WebSdk\Publish\Targets\CopyTargets\Microsoft.NET.Sdk.Publish.FilterFiles.targets
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DotNetCLIToolTargets", "DotNetCLIToolTargets", "{6186F09D-9FFA-4C83-860F-93BA74368A5B}"
@@ -254,7 +256,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MSBuildSdk
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.SdkResolver", "src\Resolvers\Microsoft.DotNet.SdkResolver\Microsoft.DotNet.SdkResolver.csproj", "{29D14D1A-F236-4D11-8E2A-8DCEBC4FAEC0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.WorkloadManifestReader", "src\Resolvers\Microsoft.DotNet.WorkloadManifestReader\Microsoft.DotNet.WorkloadManifestReader.csproj", "{7CB05F08-1674-44CE-93E3-6C6026154EE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.WorkloadManifestReader", "src\Resolvers\Microsoft.NET.Sdk.WorkloadManifestReader\Microsoft.NET.Sdk.WorkloadManifestReader.csproj", "{C22A85E0-C09F-4E2D-81F6-82AB97932FE2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkloadManifestValidator", "src\Resolvers\WorkloadManifestValidator\WorkloadManifestValidator.csproj", "{565411E4-E89D-4DF3-ADD5-55D3295F30EE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.WorkloadManifestReader.Tests", "src\Tests\Microsoft.NET.Sdk.WorkloadManifestReader.Tests\Microsoft.NET.Sdk.WorkloadManifestReader.Tests.csproj", "{988D4839-B97F-42BB-A045-C79157CA7780}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -454,10 +460,18 @@ Global
 		{29D14D1A-F236-4D11-8E2A-8DCEBC4FAEC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29D14D1A-F236-4D11-8E2A-8DCEBC4FAEC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29D14D1A-F236-4D11-8E2A-8DCEBC4FAEC0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7CB05F08-1674-44CE-93E3-6C6026154EE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7CB05F08-1674-44CE-93E3-6C6026154EE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7CB05F08-1674-44CE-93E3-6C6026154EE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7CB05F08-1674-44CE-93E3-6C6026154EE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C22A85E0-C09F-4E2D-81F6-82AB97932FE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C22A85E0-C09F-4E2D-81F6-82AB97932FE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C22A85E0-C09F-4E2D-81F6-82AB97932FE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C22A85E0-C09F-4E2D-81F6-82AB97932FE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{565411E4-E89D-4DF3-ADD5-55D3295F30EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{565411E4-E89D-4DF3-ADD5-55D3295F30EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{565411E4-E89D-4DF3-ADD5-55D3295F30EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{565411E4-E89D-4DF3-ADD5-55D3295F30EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{988D4839-B97F-42BB-A045-C79157CA7780}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{988D4839-B97F-42BB-A045-C79157CA7780}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{988D4839-B97F-42BB-A045-C79157CA7780}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{988D4839-B97F-42BB-A045-C79157CA7780}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -542,7 +556,9 @@ Global
 		{8F22FBD6-BDC8-431E-8402-B7460D3A9724} = {22AB674F-ED91-4FBC-BFEE-8A1E82F9F05E}
 		{2207EE89-63BC-4498-A5BE-F285FBCC8FD9} = {8F22FBD6-BDC8-431E-8402-B7460D3A9724}
 		{29D14D1A-F236-4D11-8E2A-8DCEBC4FAEC0} = {8F22FBD6-BDC8-431E-8402-B7460D3A9724}
-		{7CB05F08-1674-44CE-93E3-6C6026154EE0} = {8F22FBD6-BDC8-431E-8402-B7460D3A9724}
+		{C22A85E0-C09F-4E2D-81F6-82AB97932FE2} = {8F22FBD6-BDC8-431E-8402-B7460D3A9724}
+		{565411E4-E89D-4DF3-ADD5-55D3295F30EE} = {8F22FBD6-BDC8-431E-8402-B7460D3A9724}
+		{988D4839-B97F-42BB-A045-C79157CA7780} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}

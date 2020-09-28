@@ -6,6 +6,9 @@
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <DisableImplicitNETCorePlatformsReference>true</DisableImplicitNETCorePlatformsReference>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <!-- do not import analyzer assemblies from the sdk as they will be double loaded -->
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
   </PropertyGroup>
 
   <Import Project="targets\BuildToolsetTasks.targets" />
@@ -28,8 +31,8 @@
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
     <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="$(MicrosoftCodeAnalysisNetAnalyzersVersion)" ExcludeAssets="All" GeneratePathProperty="true"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="3.8.0-3.20425.2" ExcludeAssets="All" GeneratePathProperty="true"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.CodeStyle" Version="3.8.0-3.20425.2" ExcludeAssets="All" GeneratePathProperty="true"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.CodeStyle" Version="$(MicrosoftNetCompilersToolsetPackageVersion)" ExcludeAssets="All" GeneratePathProperty="true"/>
 
     <!-- Lift up dependencies of dependencies to prevent build tasks from getting pinned to older versions -->
     <PackageReference Include="System.CodeDom" Version="$(SystemCodeDomPackageVersion)" />

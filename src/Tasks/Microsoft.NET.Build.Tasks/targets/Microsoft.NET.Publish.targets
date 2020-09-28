@@ -34,6 +34,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
 
+  <Import Project="Microsoft.NET.ClickOnce.targets" Condition="'$(PublishProtocol)' == 'ClickOnce'" />
+
   <PropertyGroup>
     <!-- We still need to resolve references even if we are not building during publish. -->
     <!-- BuildOnlySettings are required for RAR to find satellites and dependencies -->
@@ -49,6 +51,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_CorePublishTargets>
       PrepareForPublish;
       ComputeAndCopyFilesToPublishDirectory;
+      $(PublishProtocolProviderTargets);
     </_CorePublishTargets>
 
     <_PublishNoBuildAlternativeDependsOn>$(_BeforePublishNoBuildTargets);$(_CorePublishTargets)</_PublishNoBuildAlternativeDependsOn>
@@ -700,8 +703,13 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        Condition="'$(PublishReferencesDocumentationFiles)' == 'true' or '%(ReferenceCopyLocalPaths.Extension)' != '.xml'">
         <DestinationSubPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(ReferenceCopyLocalPaths.Filename)%(ReferenceCopyLocalPaths.Extension)</DestinationSubPath>
       </_ResolvedCopyLocalPublishAssets>
-    </ItemGroup>
 
+      <!-- Include RuntimePackAsset where RuntimePackAlwaysCopyLocal is true -->
+      <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)"
+                              Condition="'%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true'">
+        <DestinationSubPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(ReferenceCopyLocalPaths.Filename)%(ReferenceCopyLocalPaths.Extension)</DestinationSubPath>
+      </_ResolvedCopyLocalPublishAssets>
+    </ItemGroup>
   </Target>
 
   <!--

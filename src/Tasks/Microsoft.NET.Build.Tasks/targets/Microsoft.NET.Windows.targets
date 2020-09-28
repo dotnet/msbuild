@@ -19,15 +19,24 @@ Copyright (c) .NET Foundation. All rights reserved.
                              and '$(TargetPlatformIdentifier)' == 'Windows'
                              and '$(TargetPlatformVersion)' != ''
                              and $([MSBuild]::VersionGreaterThanOrEquals($(TargetPlatformVersion), '10.0'))
-                             and '$(Language)' != 'C++'">
-    <_IncludeWindowsSDKRefFrameworkReferences>true</_IncludeWindowsSDKRefFrameworkReferences>
+                             and '$(Language)' != 'C++'
+                             and '$(IncludeWindowsSDKRefFrameworkReferences)' == ''">
+    <IncludeWindowsSDKRefFrameworkReferences>true</IncludeWindowsSDKRefFrameworkReferences>
   </PropertyGroup>
 
   <!-- Set 7.0 as the TargetPlatformVersion for windows. -->
   <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'windows' and '$(TargetPlatformVersion)' == ''" >
     <TargetPlatformVersion>7.0</TargetPlatformVersion>
-    <!-- Automatic generation of TargetPlatformMoniker and TargetPlatformDisplayName have already been evaluated so we need to hardcode these values. -->
-    <TargetPlatformMoniker>Windows,Version=7.0</TargetPlatformMoniker>
-    <TargetPlatformDisplayName>Windows 7.0</TargetPlatformDisplayName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'Windows'">
+    <!-- When targeting Windows, sync the SupportedOSPlatformVersion and TargetPlatformMinVersion.  If either one isn't set, set it to the
+         other value. -->
+    <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == ''">$(TargetPlatformMinVersion)</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">$(SupportedOSPlatformVersion)</TargetPlatformMinVersion>
+  
+    <!-- If neither were set, then use the TargetPlatformVersion value for both -->
+    <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == ''">$(TargetPlatformVersion)</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">$(TargetPlatformVersion)</TargetPlatformMinVersion>    
   </PropertyGroup>
 </Project>

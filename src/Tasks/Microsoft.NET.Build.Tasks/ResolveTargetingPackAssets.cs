@@ -22,6 +22,10 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool GenerateErrorForMissingTargetingPacks { get; set; }
 
+        public bool NuGetRestoreSupported { get; set; } = true;
+
+        public string NetCoreTargetingPackRoot { get; set; }
+
         [Output]
         public ITaskItem[] ReferencesToAdd { get; set; }
 
@@ -67,7 +71,21 @@ namespace Microsoft.NET.Build.Tasks
                         }
                         else
                         {
-                            Log.LogError(Strings.TargetingPackNeedsRestore, frameworkReference.ItemSpec);
+                            if (NuGetRestoreSupported)
+                            {
+                                Log.LogError(Strings.TargetingPackNeedsRestore, frameworkReference.ItemSpec);
+                            }
+                            else
+                            {
+                                Log.LogError(
+                                    Strings.TargetingApphostPackMissingCannotRestore,
+                                    "Targeting",
+                                    $"{NetCoreTargetingPackRoot}\\{targetingPack.GetMetadata("NuGetPackageId") ?? ""}",
+                                    targetingPack.GetMetadata("TargetFramework") ?? "",
+                                    targetingPack.GetMetadata("NuGetPackageId") ?? "",
+                                    targetingPack.GetMetadata("NuGetPackageVersion") ?? ""
+                                    );
+                            }
                         }
                     }
                 }

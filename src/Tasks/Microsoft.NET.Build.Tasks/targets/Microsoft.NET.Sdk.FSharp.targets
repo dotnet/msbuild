@@ -25,7 +25,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Condition=" '$(UseBundledFSharpTargets)' == 'true' and  '$(IsCrossTargetingBuild)' != 'true' and Exists('$(FSharpOverridesTargetsShim)') " Project="$(FSharpOverridesTargetsShim)" />
 
   <PropertyGroup>
-    <DefineConstants>$(DefineConstants);$(VersionlessImplicitFrameworkDefine);$(ImplicitFrameworkDefine)</DefineConstants>
+    <DefineConstants>$(DefineConstants);$(VersionlessImplicitFrameworkDefine);$(ImplicitFrameworkDefine);$(BackwardsCompatFrameworkDefine)</DefineConstants>
   </PropertyGroup>
 
 </Project>

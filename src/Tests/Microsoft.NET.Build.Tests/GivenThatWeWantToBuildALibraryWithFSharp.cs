@@ -15,10 +15,6 @@ using System.Collections.Generic;
 using System;
 using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
-using Microsoft.NET.TestFramework.ProjectConstruction;
-using NuGet.ProjectModel;
-using NuGet.Common;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -182,6 +178,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("net45", new[] { "NETFRAMEWORK", "NET45" }, true)]
         [InlineData("net461", new[] { "NETFRAMEWORK", "NET461" }, true)]
         [InlineData("netcoreapp2.0", new[] { "NETCOREAPP", "NETCOREAPP2_0" }, false)]
+        [InlineData("net5.0", new[] { "NETCOREAPP", "NET", "NET5_0" }, false)]
         public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines, bool buildOnlyOnWindows)
         {
             bool shouldCompile = true;

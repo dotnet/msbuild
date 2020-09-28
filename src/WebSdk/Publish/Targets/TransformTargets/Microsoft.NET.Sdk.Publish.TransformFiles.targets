@@ -48,7 +48,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     
 
     <TransformWebConfig
-        Condition="'$(_IsAspNetCoreProject)' == 'true' And '$(IsTransformWebConfigDisabled)' != 'true' And '$(IsWebConfigTransformDisabled)' != 'true'"
+        Condition="'$(_IsAspNetCoreProject)' == 'true' 
+        And '$(IsTransformWebConfigDisabled)' != 'true' 
+        And '$(IsWebConfigTransformDisabled)' != 'true'
+        And '$(PublishIISAssets)' != 'false'"
         TargetPath="$(TargetPath)"
         PublishDir="$(PublishIntermediateOutputPath)"
         UseAppHost="$(_UseAppHost)"
@@ -76,7 +79,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <TransformXmlStackTraceEnabled Condition="'$(TransformXmlStackTraceEnabled)' == ''">true</TransformXmlStackTraceEnabled>
       <!-- Forcing the property value to be boolean -->
       <TransformXmlStackTraceEnabled Condition="'$(TransformXmlStackTraceEnabled)' != 'true'">false</TransformXmlStackTraceEnabled>
-      <_WebConfigTransformCompleted Condition="'$(_IsAspNetCoreProject)' == 'true' And '$(IsTransformWebConfigDisabled)' != 'true' And '$(IsWebConfigTransformDisabled)' != 'true'">true</_WebConfigTransformCompleted>
+      <_WebConfigTransformCompleted Condition="'$(_IsAspNetCoreProject)' == 'true' 
+                                    And '$(IsTransformWebConfigDisabled)' != 'true' 
+                                    And '$(IsWebConfigTransformDisabled)' != 'true' 
+                                    And '$(PublishIISAssets)' != 'false'">true</_WebConfigTransformCompleted>
       <_WebConfigTransformCompleted Condition="'$(_WebConfigTransformCompleted)' == ''">false</_WebConfigTransformCompleted>
       <RunXdt Condition="'$(RunXdt)' == ''">$(_WebConfigTransformCompleted)</RunXdt>
     </PropertyGroup>

@@ -1,0 +1,86 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.ClickOnce.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved. 
+***********************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PublishDirName>app.publish</PublishDirName>
+    <PublishDir>$(OutputPath)app.publish\</PublishDir>
+    <GenerateManifests>true</GenerateManifests>
+    <_DeploymentSignClickOnceManifests Condition="'$(SignManifests)' == 'true'">true</_DeploymentSignClickOnceManifests>
+    <PublishProtocolProviderTargets>ClickOncePublish</PublishProtocolProviderTargets>
+  </PropertyGroup>
+
+  <!-- 
+    For .NET Core ClickOnce publish in Single File mode, the ClickOnce manifest generation needs to run 
+    after ComputeFilesToPublish. This is so that the bundle EXE which is included in the ClickOnce manifest 
+    is generated before the manifest is created.
+  -->
+  <PropertyGroup Condition="'$(PublishSingleFile)' == 'true'">
+    <DeploymentComputeClickOnceManifestInfoDependsOn>
+      $(DeploymentComputeClickOnceManifestInfoDependsOn);
+      ComputeFilesToPublish
+    </DeploymentComputeClickOnceManifestInfoDependsOn>
+  </PropertyGroup>
+
+  <!-- Ensure runtimeconfig.json is built before clickonce manifest generation -->
+  <PropertyGroup Condition="'$(GenerateRuntimeConfigurationFiles)'=='true'">
+    <GenerateManifestsDependsOn>
+       GenerateBuildRuntimeConfigurationFiles;
+       $(GenerateManifestsDependsOn)
+    </GenerateManifestsDependsOn>
+  </PropertyGroup>
+
+  <!-- Ensure deps.json is available before clickonce manifest generation -->
+  <PropertyGroup Condition="'$(GenerateDependencyFile)' == 'true'">
+    <GenerateManifestsDependsOn>
+      _ComputeUseBuildDependencyFile;
+      GenerateBuildDependencyFile;
+      GeneratePublishDependencyFile;
+      GetNetCoreRuntimeJsonFilesForClickOnce;
+      $(GenerateManifestsDependsOn)
+    </GenerateManifestsDependsOn>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(GenerateRuntimeConfigurationFiles)'=='true'">
+    <ProjectRuntimeConfigFilesForClickOnce Include="$(ProjectRuntimeConfigFilePath)"/>
+  </ItemGroup>
+
+  <Target Name="GetNetCoreRuntimeJsonFilesForClickOnce" 
+          Condition="'$(GenerateDependencyFile)' == 'true'">
+
+    <!-- Get correct deps json files based on _UseBuildDependencyFile -->
+    <ItemGroup>
+      <ProjectDepsFilesForClickOnce Condition="'$(_UseBuildDependencyFile)' == 'true'" Include="$(ProjectDepsFilePath)"/>
+      <ProjectDepsFilesForClickOnce Condition="'$(_UseBuildDependencyFile)' != 'true'" Include="$(PublishDepsFilePath)"/>
+    </ItemGroup>
+
+    <!-- Add runtimeconfig and deps json file to item group that's included in files for clickonce publishing -->
+    <ItemGroup>
+       <NetCoreRuntimeJsonFilesForClickOnce Include="@(ProjectRuntimeConfigFilesForClickOnce);@(ProjectDepsFilesForClickOnce)"/>
+    </ItemGroup>
+  </Target>  
+
+  <!-- 
+    Add necessary clickonce targets that need to run during publish process.
+    These targets are defined in MS.Common.CurrentVersion.targets in the msbuild repo.
+  -->
+  <PropertyGroup>
+    <ClickOncePublishDependsOn>
+      $(ClickOncePublishDependsOn);
+      _CopyFilesToPublishFolder;
+      _DeploymentGenerateBootstrapper;
+      ResolveKeySource;
+      _DeploymentSignClickOnceDeployment;
+    </ClickOncePublishDependsOn>
+  </PropertyGroup>
+
+  <Target Name="ClickOncePublish" Condition="'$(PublishableProject)'=='true'" DependsOnTargets="$(ClickOncePublishDependsOn)" />
+</Project>

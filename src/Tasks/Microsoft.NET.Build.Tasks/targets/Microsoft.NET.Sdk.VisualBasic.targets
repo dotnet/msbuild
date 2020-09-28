@@ -58,6 +58,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <FinalDefineConstants Condition="'$(VersionlessImplicitFrameworkDefine)' != ''">$(FinalDefineConstants),$(VersionlessImplicitFrameworkDefine)=-1</FinalDefineConstants>
     <FinalDefineConstants Condition="'$(ImplicitFrameworkDefine)' != ''">$(FinalDefineConstants),$(ImplicitFrameworkDefine)=-1</FinalDefineConstants>
+    <FinalDefineConstants Condition="'$(BackwardsCompatFrameworkDefine)' != ''">$(FinalDefineConstants),$(BackwardsCompatFrameworkDefine)=-1</FinalDefineConstants>
     <FinalDefineConstants Condition="'$(DefineDebug)' != 'true' and '$(ImplicitConfigurationDefine)' != ''">$(FinalDefineConstants),$(ImplicitConfigurationDefine)=-1</FinalDefineConstants>
   </PropertyGroup>
 

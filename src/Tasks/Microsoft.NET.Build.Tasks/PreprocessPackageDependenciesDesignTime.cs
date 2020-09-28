@@ -16,7 +16,7 @@ namespace Microsoft.NET.Build.Tasks
     /// Only top-level package references are retained (i.e. those referenced directly by the project, not
     /// those only brought in transitively).
     ///
-    /// Only package references applicable to <see cref="TargetFrameworkMoniker"/> are retained.
+    /// Only package references applicable to <see cref="TargetFramework"/> are retained.
     /// 
     /// Changes to the implementation of this class must be coordinated with <c>PackageRuleHandler</c>
     /// in the dotnet/project-system repo.

@@ -961,6 +961,26 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemDefinitionGroup>
 
   <!--
+    ============================================================
+                            GenerateSupportedTargetFrameworkAlias
+    Generate a list of valid TargetFramework aliases for the project 
+    system to consume for the target framework properties page drop down
+    ============================================================
+  -->
+  <UsingTask TaskName="GenerateSupportedTargetFrameworkAlias" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <Target Name="GenerateSupportedTargetFrameworkAlias"
+          Returns="@(SupportedTargetFrameworkAlias)">
+    <GenerateSupportedTargetFrameworkAlias SupportedTargetFramework="@(SupportedTargetFramework)"
+                                           TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
+                                           TargetPlatformMoniker="$(TargetPlatformMoniker)"
+                                           UseWpf="$(UseWpf)"
+                                           UseWindowsForms="$(UseWindowsForms)">
+      <Output TaskParameter="SupportedTargetFrameworkAlias" ItemName="SupportedTargetFrameworkAlias" />
+    </GenerateSupportedTargetFrameworkAlias>
+  </Target>
+
+  <!--
   ============================================================
                                          Project Capabilities
   ============================================================
@@ -983,7 +1003,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup Condition=" '$(ImportWindowsDesktopTargets)' == ''
                  and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
-                 and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))
+                 and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '3.0'))
                  and '$(TargetPlatformIdentifier)' == 'Windows'
                  and ('$(UseWpf)' == 'true' Or '$(UseWindowsForms)' == 'true')">
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
@@ -1009,4 +1029,16 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.Analyzers.targets" Condition="'$(Language)' == 'C#' or '$(Language)' == 'VB'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Windows.targets" Condition="'$(TargetPlatformIdentifier)' == 'Windows'" />
   <Import Project="$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.targets" Condition="'$(ImportWindowsDesktopTargets)' == 'true'"/>
+
+  <!-- TargetPlatformMoniker and TargetPlatformDisplayName would normally be set in Microsoft.Common.CurrentVersion.targets.  However, the
+       TargetPlatformVersion may have been set later than that in evaluation by platform-specific targets.  So fix up those properties here -->
+  <PropertyGroup Condition="'$(TargetPlatformMoniker)' == '' and '$(TargetPlatformIdentifier)' != '' and '$(TargetPlatformVersion)' != ''">
+    <TargetPlatformMoniker>$(TargetPlatformIdentifier),Version=$(TargetPlatformVersion)</TargetPlatformMoniker>
+    <TargetPlatformDisplayName>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKDisplayName($(TargetPlatformIdentifier), $(TargetPlatformVersion)))</TargetPlatformDisplayName>
+  </PropertyGroup>
+
+  <!-- Default SupportedOSPlatformVersion to TargetPlatformVersion -->
+  <PropertyGroup Condition="'$(SupportedOSPlatformVersion)' == ''">
+    <SupportedOSPlatformVersion>$(TargetPlatformVersion)</SupportedOSPlatformVersion>
+  </PropertyGroup>
 </Project>
