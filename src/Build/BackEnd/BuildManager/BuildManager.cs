@@ -26,6 +26,7 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
@@ -374,6 +375,23 @@ namespace Microsoft.Build.Execution
                 Text = text;
             }
         }
+        private void ValidateChangeWaveState(ILoggingService log)
+        {
+            if (ChangeWaves.ConversionState == ChangeWaveConversionState.NotConvertedYet)
+            {
+                ChangeWaves.ApplyChangeWave();
+            }
+
+            switch (ChangeWaves.ConversionState)
+            {
+                case ChangeWaveConversionState.InvalidFormat:
+                    log.LogWarning(BuildEventContext.Invalid, "", new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion);
+                    break;
+                case ChangeWaveConversionState.OutOfRotation:
+                    log.LogWarning(BuildEventContext.Invalid, "", new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.DisabledWave, Traits.Instance.MSBuildDisableFeaturesFromVersion);
+                    break;
+            }
+        }
 
         /// <summary>
         /// Prepares the BuildManager to receive build requests.
@@ -430,6 +448,8 @@ namespace Microsoft.Build.Execution
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
                 var loggingService = InitializeLoggingService();
+
+                ValidateChangeWaveState(loggingService);
 
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
