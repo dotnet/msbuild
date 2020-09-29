@@ -192,11 +192,6 @@
         <target state="translated">属性初始值: $({0})=“{1}”，源: {2}</target>
         <note />
       </trans-unit>
-      <trans-unit id="RarControllerReflectionError">
-        <source>Couldn't create an instance of IRarController for '{0}' type</source>
-        <target state="translated">无法为“{0}”类型创建 IRarController 的实例</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: 项目“{0}”已跳过所引用的项目“{1}”上的图形隔离约束</target>

@@ -192,11 +192,6 @@
         <target state="translated">プロパティの初期値: $({0})="{1}" ソース: {2}</target>
         <note />
       </trans-unit>
-      <trans-unit id="RarControllerReflectionError">
-        <source>Couldn't create an instance of IRarController for '{0}' type</source>
-        <target state="translated">'{0}' 型の IRarController のインスタンスを作成できませんでした</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: プロジェクト "{0}" は、参照先のプロジェクト "{1}" で、グラフの分離制約をスキップしました</target>
