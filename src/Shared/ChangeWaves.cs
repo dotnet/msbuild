@@ -51,12 +51,12 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                // If null, call applychangewave()?
+                if (ConversionState == ChangeWaveConversionState.NotConvertedYet)
+                {
+                    ApplyChangeWave();
+                }
+
                 return _cachedWave;
-            }
-            internal set
-            {
-                _cachedWave = value;
             }
         }
 
@@ -83,42 +83,42 @@ namespace Microsoft.Build.Utilities
         internal static void ApplyChangeWave()
         {
             // Most common scenarios, no set change wave version or set to EnableAllFeatures
-            if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableFeaturesFromVersion) || DisabledWave == EnableAllFeatures)
+            if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableFeaturesFromVersion) || _cachedWave == EnableAllFeatures)
             {
                 ConversionState = ChangeWaveConversionState.Valid;
-                DisabledWave = ChangeWaves.EnableAllFeatures;
+                _cachedWave = ChangeWaves.EnableAllFeatures;
                 return;
             }
             // If disabledwave hasn't been set yet, try to parse it
-            else if (DisabledWave == null && !Version.TryParse(Traits.Instance.MSBuildDisableFeaturesFromVersion, out _cachedWave))
+            else if (_cachedWave == null && !Version.TryParse(Traits.Instance.MSBuildDisableFeaturesFromVersion, out _cachedWave))
             {
                 ConversionState = ChangeWaveConversionState.InvalidFormat;
-                DisabledWave = ChangeWaves.EnableAllFeatures;
+                _cachedWave = ChangeWaves.EnableAllFeatures;
                 return;
             }
             // If the version is out of rotation, log a warning and clamp the value.
-            else if (DisabledWave != EnableAllFeatures && DisabledWave < LowestWave)
+            else if (_cachedWave != EnableAllFeatures && _cachedWave < LowestWave)
             {
                 ConversionState = ChangeWaveConversionState.OutOfRotation;
-                DisabledWave = LowestWave;
+                _cachedWave = LowestWave;
                 return;
             }
-            else if (DisabledWave != EnableAllFeatures && DisabledWave > HighestWave)
+            else if (_cachedWave != EnableAllFeatures && _cachedWave > HighestWave)
             {
                 ConversionState = ChangeWaveConversionState.OutOfRotation;
-                DisabledWave = HighestWave;
+                _cachedWave = HighestWave;
                 return;
             }
 
             // Ensure it's set to an existing version within the current rotation
-            if (!AllWaves.Contains(DisabledWave))
+            if (!AllWaves.Contains(_cachedWave))
             {
                 foreach (Version wave in AllWaves)
                 {
-                    if (wave > DisabledWave)
+                    if (wave > _cachedWave)
                     {
                         ConversionState = ChangeWaveConversionState.Valid;
-                        DisabledWave = wave;
+                        _cachedWave = wave;
                         return;
                     }
                 }
@@ -153,7 +153,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public static void ResetStateForTests()
         {
-            DisabledWave = null;
+            _cachedWave = null;
             _state = ChangeWaveConversionState.NotConvertedYet;
         }
     }
