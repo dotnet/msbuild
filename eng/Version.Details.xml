@@ -125,7 +125,15 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>9f4d4746483fcc2cbfe9c473d0abbc76d2b54a4b</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.App.Ref.Internal" Version="5.0.0-rtm.20479.8">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>9f4d4746483fcc2cbfe9c473d0abbc76d2b54a4b</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.AspNetCore.App.Runtime.win-x64" Version="5.0.0-rtm.20479.8">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>9f4d4746483fcc2cbfe9c473d0abbc76d2b54a4b</Sha>
+    </Dependency>
+    <Dependency Name="VS.Redist.Common.AspNetCore.TargetingPack.x64.5.0" Version="5.0.0-rtm.20479.8">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>9f4d4746483fcc2cbfe9c473d0abbc76d2b54a4b</Sha>
     </Dependency>
