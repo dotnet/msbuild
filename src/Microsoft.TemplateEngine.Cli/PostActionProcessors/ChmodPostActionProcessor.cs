@@ -43,7 +43,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                     {
                         RedirectStandardError = false,
                         RedirectStandardOutput = false,
-                        UseShellExecute = true,
+                        UseShellExecute = false,
                         CreateNoWindow = false,
                         WorkingDirectory = outputBasePath,
                         FileName = "/bin/sh",
