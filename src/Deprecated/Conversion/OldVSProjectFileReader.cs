@@ -5,8 +5,6 @@ using System;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml;
-using System.Globalization;
 
 using error = Microsoft.Build.Shared.ErrorUtilities;
 

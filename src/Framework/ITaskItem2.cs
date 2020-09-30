@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Runtime.InteropServices;
-using System.Collections.Generic;
 
 namespace Microsoft.Build.Framework
 {

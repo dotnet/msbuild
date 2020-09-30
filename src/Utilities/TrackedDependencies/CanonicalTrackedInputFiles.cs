@@ -21,7 +21,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     public class CanonicalTrackedInputFiles
     {
-        #region Member Data
+#region Member Data
         // The most recently modified output time
         private DateTime _outputNewestTime = DateTime.MinValue;
         // The table of dependencies
@@ -49,9 +49,9 @@ namespace Microsoft.Build.Utilities
         private readonly HashSet<string> _excludedInputPaths = new HashSet<string>(StringComparer.Ordinal);
         // Cache of last write times
         private readonly ConcurrentDictionary<string, DateTime> _lastWriteTimeCache = new ConcurrentDictionary<string, DateTime>(StringComparer.Ordinal);
-        #endregion
+#endregion
 
-        #region Properties
+#region Properties
 
         // This is provided to facilitate unit testing
         internal ITaskItem[] SourcesNeedingCompilation { get; set; }
@@ -62,9 +62,9 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public Dictionary<string, Dictionary<string, string>> DependencyTable { get; private set; }
 
-        #endregion
+#endregion
 
-        #region Constructors
+#region Constructors
         /// <summary>
         /// Constructor for multiple input source files
         /// </summary>
@@ -173,9 +173,9 @@ namespace Microsoft.Build.Utilities
                 ConstructDependencyTable();
             }
         }
-        #endregion
+#endregion
 
-        #region Methods
+#region Methods
         /// <summary>
         /// This method computes the sources that need to be compiled based on the output files and the
         /// full dependency graph of inputs
@@ -1099,7 +1099,7 @@ namespace Microsoft.Build.Utilities
                 DependencyTable[rootingMarker] = dependenciesWithoutMissingFiles;
             }
         }
-        #endregion
+#endregion
     }
 }
 

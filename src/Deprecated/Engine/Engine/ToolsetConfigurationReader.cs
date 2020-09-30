@@ -4,11 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.IO;
-using System.Text;
 using error = Microsoft.Build.BuildEngine.Shared.ErrorUtilities;
-using System.Globalization;
-using System.Reflection;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.BuildEngine

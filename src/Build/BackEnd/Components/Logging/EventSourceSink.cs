@@ -4,7 +4,6 @@
 // <summary>Sink which will take in a build event and raise it on its internal event source</summary>
 
 using System;
-using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 

@@ -1,12 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-// FxCop Suppression file
-// To Use:
-// Add module level suppressions to this file to have them suppressed in the assembly
-//
-
-using System.Diagnostics.CodeAnalysis;
-
+﻿
 #if CODE_ANALYSIS
 [module: SuppressMessage("Microsoft.Design","CA1020:AvoidNamespacesWithFewTypes", Scope="namespace", Target="Microsoft.Build.Debugging", Justification="This deserves its own namespace")]
 [module: SuppressMessage("Microsoft.Naming", "CA1703:ResourceStringsShouldBeSpelledCorrectly", Scope="resource", Target="Microsoft.Build.Strings.resources", MessageId="itemname", Justification="itemname is spelled correctly")]

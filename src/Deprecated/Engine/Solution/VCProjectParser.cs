@@ -3,12 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml;
 
 namespace Microsoft.Build.BuildEngine
 {
-	static internal class VCProjectParser
+    static internal class VCProjectParser
 	{
         /// <summary>
         /// For a given VC project, retrieves the projects it references 

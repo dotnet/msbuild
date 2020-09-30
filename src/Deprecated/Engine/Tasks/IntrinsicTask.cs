@@ -3,15 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 using System.Xml;
-using System.Reflection;
-using System.Globalization;
 using System.Collections;
-using System.Diagnostics;
 
 namespace Microsoft.Build.BuildEngine
 {

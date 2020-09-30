@@ -6,9 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Construction;
 using Xunit;
 using Shouldly;
 

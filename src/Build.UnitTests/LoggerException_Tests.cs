@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Exceptions;
-using System.Text.RegularExpressions;
 using Xunit;
 using System.Runtime.Serialization.Formatters.Binary;
 

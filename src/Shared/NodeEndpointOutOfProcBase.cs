@@ -15,7 +15,6 @@ using Microsoft.Build.Shared;
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
 #endif
-using System.Security.Principal;
 #if !FEATURE_APM
 using System.Threading.Tasks;
 #endif

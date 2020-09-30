@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
 using System.Collections;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Unittest;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using System.Threading.Tasks;

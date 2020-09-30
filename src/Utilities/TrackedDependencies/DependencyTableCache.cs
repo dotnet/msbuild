@@ -28,7 +28,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         internal static Dictionary<string, DependencyTableCacheEntry> DependencyTable { get; } = new Dictionary<string, DependencyTableCacheEntry>(StringComparer.OrdinalIgnoreCase);
 
-        #region Methods
+#region Methods
         /// <summary>
         /// Determine if a cache entry is up to date
         /// </summary>
@@ -188,9 +188,9 @@ namespace Microsoft.Build.Utilities
             }
         }
 
-        #endregion
+#endregion
 
-        #region TaskItemItemSpecIgnoreCaseComparer
+#region TaskItemItemSpecIgnoreCaseComparer
 
         /// <summary>
         /// EqualityComparer for ITaskItems that only looks at the itemspec
@@ -224,7 +224,7 @@ namespace Microsoft.Build.Utilities
             public int GetHashCode(ITaskItem obj) => obj == null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(obj.ItemSpec);
         }
 
-        #endregion
+#endregion
     }
 
     /// <summary>

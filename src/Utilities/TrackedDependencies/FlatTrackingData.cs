@@ -21,12 +21,12 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     public class FlatTrackingData
     {
-        #region Constants
+#region Constants
         // The maximum number of outputs that should be logged, if more than this, then no outputs are logged
         private const int MaxLogCount = 100;
-        #endregion
+#endregion
 
-        #region Member Data
+#region Member Data
         // The .write. trackg log files
 
         // The tlog marker is used if the tracking data is empty
@@ -56,9 +56,9 @@ namespace Microsoft.Build.Utilities
 
         // The set of paths that contain files that are to be ignored during up to date check - these directories or their subdirectories
         private readonly List<string> _excludedInputPaths = new List<string>();
-        #endregion
+#endregion
 
-        #region Properties
+#region Properties
 
         // The output dependency table
         internal Dictionary<string, DateTime> DependencyTable { get; private set; } = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
@@ -166,9 +166,9 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public bool TlogsAvailable { get; set; }
 
-        #endregion
+#endregion
 
-        #region Constructors
+#region Constructors
         /// <summary>
         /// Constructor
         /// </summary>
@@ -334,9 +334,9 @@ namespace Microsoft.Build.Utilities
                 ConstructFileTable();
             }
         }
-        #endregion
+#endregion
 
-        #region Methods
+#region Methods
         /// <summary>
         /// Construct our dependency table for our source files
         /// </summary>
@@ -676,9 +676,9 @@ namespace Microsoft.Build.Utilities
             return fileModifiedTimeUtc;
         }
 
-        #endregion
+#endregion
 
-        #region Static Methods
+#region Static Methods
 
         /// <summary>
         /// Checks to see if the tracking data indicates that everything is up to date according to UpToDateCheckType.
@@ -893,7 +893,7 @@ namespace Microsoft.Build.Utilities
                 }
             }
         }
-        #endregion
+#endregion
     }
 
     /// <summary>

@@ -11,7 +11,6 @@ using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
 #endif
 using System.Threading;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;

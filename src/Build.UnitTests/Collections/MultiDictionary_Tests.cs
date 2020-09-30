@@ -4,12 +4,6 @@
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using System;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.UnitTests;
-using System.Collections;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Construction;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Collections

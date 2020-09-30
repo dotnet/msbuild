@@ -6,7 +6,6 @@ using System.IO;
 using System.IO.Pipes;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Threading;
 using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Shared

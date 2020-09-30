@@ -3,7 +3,6 @@
 
 using System.IO;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;

@@ -2,14 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Construction;
-using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System;
-using Microsoft.Build.Definition;
 using Microsoft.Build.Unittest;
 using Xunit;
 using Microsoft.Build.Framework;

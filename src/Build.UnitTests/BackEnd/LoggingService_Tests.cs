@@ -12,7 +12,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
-using System.IO;
 using System.Threading;
 using System.Reflection;
 using System.Collections.Generic;

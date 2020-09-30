@@ -7,9 +7,6 @@ using System.Collections.Generic;
 using System.Configuration;
 #endif
 using System.IO;
-using System.Text;
-using System.Globalization;
-using System.Reflection;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
@@ -306,7 +303,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal sealed class PropertyElementCollection : ConfigurationElementCollection
         {
-            #region Private Fields
+    #region Private Fields
 
             /// <summary>
             /// We use this dictionary to track whether or not we've seen a given
@@ -315,9 +312,9 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private Dictionary<string, string> _previouslySeenPropertyNames = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
 
-            #endregion
+    #endregion
 
-            #region Properties
+    #region Properties
 
             /// <summary>
             /// Collection type
@@ -353,9 +350,9 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            #endregion
+    #endregion
 
-            #region Methods
+    #region Methods
 
             /// <summary>
             /// Gets an element with the specified name
@@ -435,7 +432,7 @@ namespace Microsoft.Build.Evaluation
                 _previouslySeenPropertyNames.Add(propertyName, string.Empty);
             }
 
-            #endregion
+    #endregion
         }
 
         /// <summary>

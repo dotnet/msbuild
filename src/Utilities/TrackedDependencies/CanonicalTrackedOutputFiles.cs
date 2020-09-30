@@ -19,25 +19,25 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     public class CanonicalTrackedOutputFiles
     {
-        #region Member Data
+#region Member Data
         // The .write. tracking log files
         private ITaskItem[] _tlogFiles;
         // The TaskLoggingHelper that we log progress to
         private TaskLoggingHelper _log;
         // Are the tracking logs that we were constructed with actually available
         private bool _tlogAvailable;
-        #endregion
+#endregion
 
-        #region Properties
+#region Properties
 
         /// <summary>
         /// Gets the dependency table.
         /// </summary>
         public Dictionary<string, Dictionary<string, DateTime>> DependencyTable { get; private set; }
 
-        #endregion
+#endregion
 
-        #region Constructors
+#region Constructors
         /// <summary>
         /// Constructor
         /// </summary>
@@ -85,9 +85,9 @@ namespace Microsoft.Build.Utilities
                 ConstructOutputTable();
             }
         }
-        #endregion
+#endregion
 
-        #region Methods
+#region Methods
         /// <summary>
         /// Construct our dependency table for our source files
         /// </summary>
@@ -791,7 +791,7 @@ namespace Microsoft.Build.Utilities
                 DependencyTable[rootingMarker] = dependenciesWithoutMissingFiles;
             }
         }
-        #endregion
+#endregion
     }
 }
 

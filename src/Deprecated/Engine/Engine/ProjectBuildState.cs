@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Collections;
-using System.Text;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;

@@ -2,19 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Xml;
 using System.Text;
 using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
 using System.Globalization;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
-using System.Runtime.Remoting;
 
 namespace Microsoft.Build.BuildEngine
 {
