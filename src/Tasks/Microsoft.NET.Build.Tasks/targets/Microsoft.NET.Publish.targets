@@ -627,7 +627,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     
     
       <ItemGroup>
-        <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)" Condition="'$(SelfContained)' == 'true'" />
+        <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)"
+                                         Condition="'$(SelfContained)' == 'true' Or '%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true'" />
       </ItemGroup>
 
       <ItemGroup Condition="'$(_UseBuildDependencyFile)' != 'true'">
@@ -704,11 +705,6 @@ Copyright (c) .NET Foundation. All rights reserved.
         <DestinationSubPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(ReferenceCopyLocalPaths.Filename)%(ReferenceCopyLocalPaths.Extension)</DestinationSubPath>
       </_ResolvedCopyLocalPublishAssets>
 
-      <!-- Include RuntimePackAsset where RuntimePackAlwaysCopyLocal is true -->
-      <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)"
-                              Condition="'%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true'">
-        <DestinationSubPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(ReferenceCopyLocalPaths.Filename)%(ReferenceCopyLocalPaths.Extension)</DestinationSubPath>
-      </_ResolvedCopyLocalPublishAssets>
     </ItemGroup>
   </Target>
 
