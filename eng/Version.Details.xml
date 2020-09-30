@@ -133,6 +133,10 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>99d108994641677500c4113add7742a32b7e9e3e</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.App.Ref.Internal" Version="5.0.0-rtm.20479.19">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>99d108994641677500c4113add7742a32b7e9e3e</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.AspNetCore.App.Runtime.win-x64" Version="5.0.0-rtm.20479.19">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>99d108994641677500c4113add7742a32b7e9e3e</Sha>
