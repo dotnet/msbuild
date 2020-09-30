@@ -5,6 +5,9 @@ using System;
 using System.Linq;
 using System.Xml.Linq;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools.List.PackageReferences;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -270,5 +273,37 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .And.NotHaveStdErr();
         }
 
+        [Theory]
+        [InlineData(false, "--vulnerable")]
+        [InlineData(false, "--vulnerable", "--include-transitive")]
+        [InlineData(false, "--vulnerable", "--include-prerelease")]
+        [InlineData(false, "--deprecated", "--highest-minor")]
+        [InlineData(false, "--deprecated", "--highest-patch")]
+        [InlineData(false, "--outdated", "--include-prerelease")]
+        [InlineData(false, "--outdated", "--highest-minor")]
+        [InlineData(false, "--outdated", "--highest-patch")]
+        [InlineData(false, "--config")]
+        [InlineData(false, "--source")]
+        [InlineData(false, "--config", "--deprecated")]
+        [InlineData(false, "--source", "--vulnerable")]
+        [InlineData(true, "--vulnerable", "--deprecated")]
+        [InlineData(true, "--vulnerable", "--outdated")]
+        [InlineData(true, "--deprecated", "--outdated")]
+        public void ItEnforcesOptionRules(bool throws, params string[] options)
+        {
+            var parser = Parser.Instance;
+            var parseResult = parser.ParseFrom($"dotnet list package", options);
+            var appliedCommand = parseResult.AppliedCommand();
+            Action checkRules = () => ListPackageReferencesCommand.EnforceOptionRules(appliedCommand);
+
+            if (throws)
+            {
+                Assert.Throws<GracefulException>(checkRules);
+            }
+            else
+            {
+                checkRules(); // Test for no throw
+            }
+        }
     }
 }
