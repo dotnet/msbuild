@@ -510,6 +510,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1053: 封裝為工具不支援包含本身。</target>
         <note>{StrBegin="NETSDK1053: "}</note>
       </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportTargetPlatformIdentifier">
+        <source>NETSDK1146: PackAsTool does not support TargetPlatformIdentifier being set. For example, TargetFramework cannot be net5.0-windows, only net5.0. PackAsTool also does not support UseWPF or UseWindowsForms when targeting .NET 5 and higher.</source>
+        <target state="new">NETSDK1146: PackAsTool does not support TargetPlatformIdentifier being set. For example, TargetFramework cannot be net5.0-windows, only net5.0. PackAsTool also does not support UseWPF or UseWindowsForms when targeting .NET 5 and higher.</target>
+        <note>{StrBegin="NETSDK1146: "}</note>
+      </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
         <target state="translated">NETSDK1064: 找不到套件 {0}，版本 {1}。該套件可能因 NuGet restore 還原而刪除，或是可能因為路徑長度上限的限制，而讓 NuGet restore 可能只有部分完成所致。</target>
