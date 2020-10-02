@@ -49,7 +49,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache of system state information, used to optimize performance.
         /// </summary>
-        private SystemState _cache = null;
+        internal SystemState _cache = null;
 
         /// <summary>
         /// Construct
@@ -1857,7 +1857,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the state file (if present) into the cache. If not present, attempts to read from CacheInputPaths, then creates a new cache if necessary.
         /// </summary>
-        private void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
+        internal void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
         {
             _cache = StateFileBase.DeserializeCache<SystemState>(_stateFile, Log);
 
@@ -1875,7 +1875,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// If CacheOutputPath is non-null, writes out a cache to that location. Otherwise, writes out the state file if a state name was supplied and the cache is dirty.
         /// </summary>
-        private void WriteStateFile()
+        internal void WriteStateFile()
         {
             if (!string.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
             {

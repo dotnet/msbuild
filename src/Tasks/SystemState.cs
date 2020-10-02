@@ -36,7 +36,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache at the SystemState instance level. It is serialized and reused between instances.
         /// </summary>
-        private Dictionary<string, FileState> instanceLocalFileStateCache = new Dictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
+        internal Dictionary<string, FileState> instanceLocalFileStateCache = new Dictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// LastModified information is purely instance-local. It doesn't make sense to
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Tasks
         /// Class that holds the current file state.
         /// </summary>
         [Serializable]
-        private sealed class FileState : ISerializable
+        internal sealed class FileState : ISerializable
         {
             /// <summary>
             /// The last modified time for this file.
