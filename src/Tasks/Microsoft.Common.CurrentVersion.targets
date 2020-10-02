@@ -256,6 +256,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_DeploymentBuiltUpdateIntervalUnits Condition="'$(UpdatePeriodically)'!='true'">Days</_DeploymentBuiltUpdateIntervalUnits>
     <_DeploymentBuiltMinimumRequiredVersion Condition="'$(UpdateRequired)'=='true' and '$(Install)'=='true'">$(MinimumRequiredVersion)</_DeploymentBuiltMinimumRequiredVersion>
 
+    <_DeploymentLauncherBased Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</_DeploymentLauncherBased>
+
     <MaxTargetPath Condition="'$(MaxTargetPath)'==''">100</MaxTargetPath>
   </PropertyGroup>
 
@@ -3827,6 +3829,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <ResolveManifestFiles
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         SigningManifests="$(SignManifests)"
         DeploymentManifestEntryPoint="@(ApplicationManifest)"
         PublishFiles="@(_DeploymentPublishFileOfTypeManifestEntryPoint)">
@@ -3863,6 +3866,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="GenerateApplicationManifest"
       DependsOnTargets="
+            _DeploymentSetClickOnceVersions;
+            _DeploymentGenerateLauncher;
             _DeploymentComputeNativeManifestInfo;
             _DeploymentComputeClickOnceManifestInfo;
             ResolveComReferences;
@@ -3908,11 +3913,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         IconFile="@(_DeploymentManifestIconFile)"
         InputManifest="$(_DeploymentBaseManifest)"
         IsolatedComReferences="@(ResolvedIsolatedComModules)"
+        LauncherBasedDeployment="$(_DeploymentLauncherBased)"
         ManifestType="$(_DeploymentManifestType)"
         MaxTargetPath="$(MaxTargetPath)"
         OutputManifest="@(ApplicationManifest)"
         OSVersion="$(OSVersion)"
-        Platform="$(PlatformTarget)"
+        Platform="$(_DeploymentPlatformTarget)"
         Product="$(ProductName)"
         Publisher="$(PublisherName)"
         RequiresMinimumFramework35SP1="$(_DeploymentRequiresMinimumFramework35SP1)"
@@ -3921,7 +3927,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         TargetCulture="$(TargetCulture)"
         TargetFrameworkSubset="$(TargetFrameworkSubset)"
         TargetFrameworkProfile="$(TargetFrameworkProfile)"
-        TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        TargetFrameworkVersion="$(_DeploymentManifestTargetFrameworkVersion)"
         TrustInfoFile="@(_DeploymentIntermediateTrustInfoFile)"
         UseApplicationTrust="$(UseApplicationTrust)">
 
@@ -3933,6 +3939,90 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_DeploymentCopyApplicationManifest>true</_DeploymentCopyApplicationManifest>
     </PropertyGroup>
 
+  </Target>
+
+  <!--
+    ============================================================
+                                        _DeploymentSetClickOnceVersions
+
+    Sets ClickOnce versions
+    ============================================================
+    -->
+  <Target
+      Name="_DeploymentSetClickOnceVersions"
+      Condition="'$(GenerateClickOnceManifests)'=='true'">
+
+    <PropertyGroup>
+      <_DeploymentManifestTargetFrameworkMoniker>$(TargetFrameworkMoniker)</_DeploymentManifestTargetFrameworkMoniker>
+      <_DeploymentManifestTargetFrameworkVersion>$(TargetFrameworkVersion)</_DeploymentManifestTargetFrameworkVersion>
+    </PropertyGroup>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _DeploymentGenerateLauncher
+
+    Generates Launcher if needed
+    ============================================================
+    -->
+  <Target
+      Name="_DeploymentGenerateLauncher"
+      Condition="'$(GenerateClickOnceManifests)'=='true' and '$(_DeploymentLauncherBased)' == 'true'">
+
+    <!-- 
+      If apphost based built EXE is found, use that as the Launcher.exe's entry point otherwise
+      use the built DLL as the entry point
+    -->
+    <ItemGroup Condition="'$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true' and exists('$(AppHostIntermediatePath)')">
+      <EntryPointForLauncher Include="$(AppHostIntermediatePath)"/>
+      <ContentWithTargetPath Include="@(EntryPointForLauncher)"/>
+    </ItemGroup>
+    <ItemGroup Condition="'$(EntryPointForLauncher)'==''">
+      <EntryPointForLauncher Include="$(_DeploymentManifestEntryPoint)"/>
+    </ItemGroup>
+
+    <!-- Generates Launcher and obtains its Framework version and moniker -->
+    <GenerateLauncher
+        AssemblyName="$(_DeploymentApplicationManifestIdentity)"
+        EntryPoint="@(EntryPointForLauncher)"
+        OutputPath="$(IntermediateOutputPath)"
+        VisualStudioVersion="$(VisualStudioVersion)">
+
+      <Output TaskParameter="OutputEntryPoint" ItemName="_DeploymentManifestLauncherEntryPoint"/>
+    </GenerateLauncher>
+
+    <!--
+      .NET Core ClickOnce deployments use Launcher, which targets .NET FX 4.5 as the minimum
+      supported ClickOnce runtime version on target user's machine.
+
+      TargetFramework Verion and Moniker properties are used in Deployment manifest generation
+      task to set compatibleFrameworks element, which needs to match Launcher's target version.
+
+      Version can be overriden with DeploymentManifestTargetFrameworkVersionOverride property.
+    -->
+    <PropertyGroup>
+      <_DeploymentManifestTargetFrameworkVersion Condition="'$(DeploymentManifestTargetFrameworkVersionOverride)' == ''">v4.5</_DeploymentManifestTargetFrameworkVersion>
+      <_DeploymentManifestTargetFrameworkVersion Condition="'$(DeploymentManifestTargetFrameworkVersionOverride)' != ''">$(DeploymentManifestTargetFrameworkVersionOverride)</_DeploymentManifestTargetFrameworkVersion>
+      <_DeploymentManifestTargetFrameworkMoniker>.NETFramework,Version=$(_DeploymentManifestTargetFrameworkVersion)</_DeploymentManifestTargetFrameworkMoniker>
+    </PropertyGroup>
+
+    <!-- Sign Launcher EXE -->
+    <SignFile
+        CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
+        TimestampUrl="$(ManifestTimestampUrl)"
+        SigningTarget="@(_DeploymentManifestLauncherEntryPoint)"
+        TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        Condition="'$(_DeploymentSignClickOnceManifests)'=='true'" />
+
+    <!--
+      Replace entry-point with Launcher and move original project's entry-point to content group.
+    -->
+    <ItemGroup>
+      <ContentWithTargetPath Include="@(_DeploymentManifestEntryPoint)"/>
+      <_DeploymentManifestEntryPoint Remove="@(_DeploymentManifestEntryPoint)"/>
+      <_DeploymentManifestEntryPoint Include="@(_DeploymentManifestLauncherEntryPoint)"/>
+    </ItemGroup>
   </Target>
 
   <!--
@@ -3966,6 +4056,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   </Target>
 
+  <PropertyGroup>
+    <DeploymentComputeClickOnceManifestInfoDependsOn>
+      CleanPublishFolder;
+      _DeploymentGenerateTrustInfo
+      $(DeploymentComputeClickOnceManifestInfoDependsOn)
+    </DeploymentComputeClickOnceManifestInfoDependsOn>
+  </PropertyGroup>
+
   <!--
     ============================================================
                                         _DeploymentComputeClickOnceManifestInfo
@@ -3973,12 +4071,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     Compute info for  ClickOnce manifest generation
     ============================================================
     -->
+
   <Target
       Name="_DeploymentComputeClickOnceManifestInfo"
       Condition="'$(GenerateClickOnceManifests)'=='true'"
-      DependsOnTargets="
-            CleanPublishFolder;
-            _DeploymentGenerateTrustInfo">
+      DependsOnTargets="$(DeploymentComputeClickOnceManifestInfoDependsOn)">
 
     <!-- Grab just the serialization assemblies for a referenced assembly.  There may also be a symbols file in ReferenceRelatedPaths -->
     <ItemGroup>
@@ -4000,8 +4097,22 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <IsPrimary>true</IsPrimary>
       </_DeploymentReferencePaths>
       <_DeploymentReferencePaths Include="@(_DeploymentReferencePaths);@(_CopyLocalFalseRefPathsWithExclusion)" />
+    </ItemGroup>
+
+    <!-- Include managed references in clickonce manifest only if single file publish is false -->
+    <ItemGroup Condition="'$(PublishSingleFile)' != 'true'">
       <_ManifestManagedReferences Include="@(_DeploymentReferencePaths);@(ReferenceDependencyPaths);@(_SGenDllsRelatedToCurrentDll);@(SerializationAssembly);@(ReferenceCOMWrappersToCopyLocal)"
                                Exclude="@(_SatelliteAssemblies);@(_ReferenceScatterPaths);@(_ExcludedAssembliesFromManifestGeneration)" />
+    </ItemGroup>
+
+    <!-- Include the following files in clickonce manifest only if single file publish is false -->
+    <ItemGroup Condition="'$(PublishSingleFile)' != 'true'">
+      <ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce)"/>
+    </ItemGroup>
+
+    <!-- For single file publish, we only need to include the SF EXE in the clickonce manifest -->
+    <ItemGroup Condition="'$(PublishSingleFile)' == 'true'">
+      <ClickOnceFiles Include="$(PublishedSingleFilePath)"/>
     </ItemGroup>
 
     <!-- Copy the application executable from Obj folder to app.publish folder.
@@ -4023,16 +4134,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Create list of items for manifest generation -->
     <ResolveManifestFiles
-        TargetFrameworkVersion="$(TargetFrameworkVersion)"
-        SigningManifests="$(SignManifests)"
+        AssemblyName="$(_DeploymentApplicationManifestIdentity)"
         EntryPoint="@(_DeploymentClickOnceApplicationExecutable)"
         ExtraFiles="@(_DebugSymbolsIntermediatePath);$(IntermediateOutputPath)$(TargetName).xml;@(_ReferenceRelatedPaths)"
-        Files="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath)"
+        Files="@(ClickOnceFiles)"
+        LauncherBasedDeployment="$(_DeploymentLauncherBased)"
         ManagedAssemblies="@(_ManifestManagedReferences)"
         NativeAssemblies="@(NativeReferenceFile);@(_DeploymentNativePrerequisite)"
         PublishFiles="@(PublishFile)"
         SatelliteAssemblies="@(_SatelliteAssemblies)"
-        TargetCulture="$(TargetCulture)">
+        SigningManifests="$(SignManifests)"
+        TargetCulture="$(TargetCulture)"
+        TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
+        TargetFrameworkVersion="$(TargetFrameworkVersion)">
 
       <Output TaskParameter="OutputAssemblies" ItemName="_DeploymentManifestDependenciesUnfiltered"/>
       <Output TaskParameter="OutputFiles" ItemName="_DeploymentManifestFiles"/>
@@ -4049,6 +4163,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
       <_DeploymentManifestType>ClickOnce</_DeploymentManifestType>
+    </PropertyGroup>
+
+    <!--
+      Manifest platform should always be MSIL for Launcher-based deployments, as the Launcher is MSIL.
+      Do not set _DeploymentPlatformTarget property in Launcher case - this is interpreted as MSIL,
+      by GenerateApplicationManifest and GenerateDeploymentManifest tasks.
+      Otherwise, set it to PlatformTarget.
+    -->
+    <PropertyGroup>
+      <_DeploymentPlatformTarget Condition="'$(_DeploymentLauncherBased)' != 'true'">$(PlatformTarget)</_DeploymentPlatformTarget>
     </PropertyGroup>
 
     <!-- Obtain manifest version from ApplicationVersion and ApplicationRevision properties -->
@@ -4127,18 +4251,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           EntryPoint="@(_DeploymentResolvedDeploymentManifestEntryPoint)"
           ErrorReportUrl="$(_DeploymentFormattedErrorReportUrl)"
           Install="$(Install)"
+          LauncherBasedDeployment="$(_DeploymentLauncherBased)"
           MapFileExtensions="$(MapFileExtensions)"
           MaxTargetPath="$(MaxTargetPath)"
           MinimumRequiredVersion="$(_DeploymentBuiltMinimumRequiredVersion)"
           OutputManifest="@(DeployManifest)"
-          Platform="$(PlatformTarget)"
+          Platform="$(_DeploymentPlatformTarget)"
           Product="$(ProductName)"
           Publisher="$(PublisherName)"
           SuiteName="$(SuiteName)"
           SupportUrl="$(_DeploymentFormattedSupportUrl)"
           TargetCulture="$(TargetCulture)"
-          TargetFrameworkVersion="$(TargetFrameworkVersion)"
-          TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
+          TargetFrameworkVersion="$(_DeploymentManifestTargetFrameworkVersion)"
+          TargetFrameworkMoniker="$(_DeploymentManifestTargetFrameworkMoniker)"
           TrustUrlParameters="$(TrustUrlParameters)"
           UpdateEnabled="$(UpdateEnabled)"
           UpdateInterval="$(_DeploymentBuiltUpdateInterval)"
@@ -5464,6 +5589,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Copy files to publish folder -->
     <Copy
+        Condition="'$(PublishSingleFile)' != 'true'"
         SourceFiles=
                 "@(_ApplicationManifestFinal);
                 @(_DeploymentResolvedManifestEntryPoint);
@@ -5494,9 +5620,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
         UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)"
-        Condition="'%(_DeploymentManifestDependencies.DependencyType)'=='Install'"/>
+        Condition="'$(PublishSingleFile)' != 'true' and '%(_DeploymentManifestDependencies.DependencyType)'=='Install'"/>
 
     <Copy
+        Condition="'$(PublishSingleFile)' != 'true'"
         SourceFiles="@(_ReferenceScatterPaths)"
         DestinationFiles="@(_ReferenceScatterPaths->'$(_DeploymentApplicationDir)%(Filename)%(Extension)$(_DeploymentFileMappingExtension)')"
         SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
@@ -5506,6 +5633,28 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
         UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)"
             />
+
+    <ItemGroup Condition="'$(PublishSingleFile)' == 'true'">
+      <PublishedSingleFileToBeCopied Include="$(PublishedSingleFilePath)" TargetPath="$(PublishedSingleFileName)"/>
+    </ItemGroup>
+
+    <!-- For single-file publish case, we need to only copy the clickonce manifest, manifest entry point (launcher) and the SF EXE -->
+    <Copy
+        Condition="'$(PublishSingleFile)' == 'true'"
+        SourceFiles=
+                "@(_ApplicationManifestFinal);
+                 @(_DeploymentResolvedManifestEntryPoint);
+                 @(PublishedSingleFileToBeCopied);"
+        DestinationFiles=
+                "@(_ApplicationManifestFinal->'$(_DeploymentApplicationDir)%(TargetPath)');
+                 @(_DeploymentManifestEntryPoint->'$(_DeploymentApplicationDir)%(TargetPath)$(_DeploymentFileMappingExtension)');
+                 @(PublishedSingleFileToBeCopied->'$(_DeploymentApplicationDir)%(TargetPath)$(_DeploymentFileMappingExtension)')"
+        SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+        OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+        Retries="$(CopyRetryCount)"
+        UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+        UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)"
+        RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"/>
 
     <FormatUrl InputUrl="$(_DeploymentApplicationUrl)">
       <Output TaskParameter="OutputUrl" PropertyName="_DeploymentFormattedApplicationUrl"/>
@@ -5562,7 +5711,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Update entry point path in deploy manifest -->
     <UpdateManifest
         ApplicationPath="$(_DeploymentApplicationFolderName)\$(_DeploymentTargetApplicationManifestFileName)"
-        TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        TargetFrameworkVersion="$(_DeploymentManifestTargetFrameworkVersion)"
         ApplicationManifest="$(_DeploymentApplicationDir)$(_DeploymentTargetApplicationManifestFileName)"
         InputManifest="$(OutDir)$(TargetDeployManifestFileName)"
         OutputManifest="$(PublishDir)$(TargetDeployManifestFileName)">
@@ -5889,6 +6038,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!-- Target will return no results by default but will be populated by other targets elsewhere.
        Needed for certain build environments that import partial sets of targets. -->
   <Target Name="CollectReferencedNuGetPackages" Returns="@(ReferencedNuGetPackages)"/>
+
+  <!-- Get the TargetFrameworks that are supported for the Visual Studio TargetFramework drop down -->
+  <Target Name="GenerateSupportedTargetFrameworkAlias" Returns="@(SupportedTargetFrameworkAlias)"/>
 
   <!--
     ============================================================

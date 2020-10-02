@@ -54,6 +54,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\ChangeWaves.cs">
+      <Link>SharedUtilities\ChangeWaves.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\EncodingUtilities.cs">
       <Link>SharedUtilities\EncodingUtilities.cs</Link>
     </Compile>
@@ -698,9 +701,6 @@
     </Compile>
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <Link>SharedUtilities\ExceptionHandling.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\EscapingStringExtensions\EscapingStringExtensions.cs">
-      <Link>SharedUtilities\EscapingStringExtensions\EscapingStringExtensions.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileMatcher.cs">
       <Link>SharedUtilities\FileMatcher.cs</Link>

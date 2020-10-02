@@ -481,7 +481,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static bool IsTruncationEnabled(ExpanderOptions options)
         {
-            return (options & ExpanderOptions.Truncate) != 0 && !Traits.Instance.EscapeHatches.DoNotTruncateConditions;
+            return (options & ExpanderOptions.Truncate) != 0 && !Traits.Instance.EscapeHatches.DoNotTruncateConditions && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_8);
         }
 
         /// <summary>
@@ -734,11 +734,6 @@ namespace Microsoft.Build.Evaluation
                 try
                 {
                     if ((options & ExpanderOptions.ExpandMetadata) == 0)
-                    {
-                        return expression;
-                    }
-
-                    if (expression.Length == 0)
                     {
                         return expression;
                     }
@@ -1487,10 +1482,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     string directory = Path.GetDirectoryName(elementLocation.File);
                     int rootLength = Path.GetPathRoot(directory).Length;
-                    string directoryNoRoot = directory.Substring(rootLength);
-                    directoryNoRoot = FileUtilities.EnsureTrailingSlash(directoryNoRoot);
-                    directoryNoRoot = FileUtilities.EnsureNoLeadingSlash(directoryNoRoot);
-                    value = directoryNoRoot;
+                    value = FileUtilities.EnsureTrailingNoLeadingSlash(directory, rootLength);
                 }
 
                 return value;
@@ -1938,7 +1930,7 @@ namespace Microsoft.Build.Evaluation
             internal static string ExpandItemVectorsIntoString<T>(Expander<P, I> expander, string expression, IItemProvider<T> items, ExpanderOptions options, IElementLocation elementLocation)
                 where T : class, IItem
             {
-                if (((options & ExpanderOptions.ExpandItems) == 0) || (expression.Length == 0))
+                if ((options & ExpanderOptions.ExpandItems) == 0 || expression.Length == 0)
                 {
                     return expression;
                 }
@@ -4022,6 +4014,14 @@ namespace Microsoft.Build.Evaluation
                             if (TryGetArg(args, out string arg0))
                             {
                                 returnVal = IntrinsicFunctions.StableStringHash(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.AreFeaturesEnabled), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.AreFeaturesEnabled(arg0);
                                 return true;
                             }
                         }

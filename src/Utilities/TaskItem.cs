@@ -44,7 +44,7 @@ namespace Microsoft.Build.Utilities
         // project file via XML child elements of the item element.  These have
         // no meaning to MSBuild, but tasks may use them.
         // Values are stored in escaped form.
-        private CopyOnWriteDictionary<string, string> _metadata;
+        private CopyOnWriteDictionary<string> _metadata;
 
         // cache of the fullpath value
         private string _fullPath;
@@ -102,7 +102,7 @@ namespace Microsoft.Build.Utilities
 
             if (itemMetadata.Count > 0)
             {
-                _metadata = new CopyOnWriteDictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                _metadata = new CopyOnWriteDictionary<string>(MSBuildNameIgnoreCaseComparer.Default);
 
                 foreach (DictionaryEntry singleMetadata in itemMetadata)
                 {
@@ -214,7 +214,7 @@ namespace Microsoft.Build.Utilities
         /// another appdomain, as the CLR has implemented remoting policies that disallow accessing 
         /// private fields in remoted items. 
         /// </summary>
-        private CopyOnWriteDictionary<string, string> Metadata
+        private CopyOnWriteDictionary<string> Metadata
         {
             get
             {
@@ -264,7 +264,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName),
                 "Shared.CannotChangeItemSpecModifiers", metadataName);
 
-            _metadata ??= new CopyOnWriteDictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+            _metadata ??= new CopyOnWriteDictionary<string>(MSBuildNameIgnoreCaseComparer.Default);
 
             _metadata[metadataName] = metadataValue ?? string.Empty;
         }
@@ -360,7 +360,7 @@ namespace Microsoft.Build.Utilities
         /// </comments>
         public IDictionary CloneCustomMetadata()
         {
-            var dictionary = new CopyOnWriteDictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+            var dictionary = new CopyOnWriteDictionary<string>(MSBuildNameIgnoreCaseComparer.Default);
 
             if (_metadata != null)
             {
@@ -444,7 +444,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <returns>The cloned metadata.</returns>
         IDictionary ITaskItem2.CloneCustomMetadataEscaped() => _metadata == null
-            ? new CopyOnWriteDictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default)
+            ? new CopyOnWriteDictionary<string>(MSBuildNameIgnoreCaseComparer.Default)
             : _metadata.Clone();
 
         #endregion

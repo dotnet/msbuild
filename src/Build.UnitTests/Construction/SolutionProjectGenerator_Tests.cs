@@ -114,15 +114,17 @@ namespace Microsoft.Build.UnitTests.Construction
                   </Target>
                   </Project>
                     ");
+
+                // Slashes here (and in the .slnf) are hardcoded as backslashes intentionally to support the common case.
                 TransientTestFile solutionFile = testEnvironment.CreateFile(simpleProjectFolder, "SimpleProject.sln",
                     @"
                     Microsoft Visual Studio Solution File, Format Version 12.00
                     # Visual Studio Version 16
                     VisualStudioVersion = 16.0.29326.124
                     MinimumVisualStudioVersion = 10.0.40219.1
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""SimpleProject"", """ + Path.Combine("SimpleProject", "SimpleProject.csproj") + @""", ""{79B5EBA6-5D27-4976-BC31-14422245A59A}""
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""SimpleProject"", ""SimpleProject\SimpleProject.csproj"", ""{79B5EBA6-5D27-4976-BC31-14422245A59A}""
                     EndProject
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""ClassLibrary"", """ + Path.Combine("..", "ClassLibrary", "ClassLibrary", "ClassLibrary.csproj") + @""", ""{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}""
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""ClassLibrary"", ""..\ClassLibrary\ClassLibrary\ClassLibrary.csproj"", ""{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}""
                     EndProject
                     Global
                         GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -155,9 +157,9 @@ namespace Microsoft.Build.UnitTests.Construction
                     @"
                 {
                   ""solution"": {
-                    ""path"": """ + Path.Combine(".", "SimpleProject", "SimpleProject.sln").Replace("\\", "\\\\") + @""",
+                    ""path"": "".\\SimpleProject\\SimpleProject.sln"",
                     ""projects"": [
-                      """ + Path.Combine("SimpleProject", "SimpleProject.csproj").Replace("\\", "\\\\") + @"""
+                      ""SimpleProject\\SimpleProject.csproj""
                     ]
                     }
                 }

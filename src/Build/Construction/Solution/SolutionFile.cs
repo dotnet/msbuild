@@ -86,9 +86,11 @@ namespace Microsoft.Build.Construction
         private const string solutionFolderGuid = "{2150E333-8FDC-42A3-9474-1A3956D46DE8}";
         private const string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
 
+        private const char CommentStartChar = '#';
         #endregion
         #region Member data
         private string _solutionFile;                 // Could be absolute or relative path to the .SLN file.
+        private string _solutionFilterFile;          // Could be absolute or relative path to the .SLNF file.
         private HashSet<string> _solutionFilter;     // The project files to include in loading the solution.
         private bool _parsingForConversionOnly;      // Are we parsing this solution to get project reference data during
                                                      // conversion, or in preparation for actually building the solution?
@@ -236,7 +238,7 @@ namespace Microsoft.Build.Construction
 
         internal bool ProjectShouldBuild(string projectFile)
         {
-            return _solutionFilter?.Contains(projectFile) != false;
+            return _solutionFilter?.Contains(FileUtilities.FixFilePath(projectFile)) != false;
         }
 
         /// <summary>
@@ -364,6 +366,7 @@ namespace Microsoft.Build.Construction
 
         private void ParseSolutionFilter(string solutionFilterFile)
         {
+            _solutionFilterFile = solutionFilterFile;
             try
             {
                 _solutionFile = ParseSolutionFromSolutionFilter(solutionFilterFile, out JsonElement solution);
@@ -381,7 +384,7 @@ namespace Microsoft.Build.Construction
                 _solutionFilter = new HashSet<string>(NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
                 foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
                 {
-                    _solutionFilter.Add(project.GetString());
+                    _solutionFilter.Add(FileUtilities.FixFilePath(project.GetString()));
                 }
             }
             catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
@@ -404,7 +407,7 @@ namespace Microsoft.Build.Construction
             {
                 JsonDocument text = JsonDocument.Parse(File.ReadAllText(solutionFilterFile));
                 solution = text.RootElement.GetProperty("solution");
-                return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(solutionFilterFile), solution.GetProperty("path").GetString()));
+                return FileUtilities.GetFullPath(solution.GetProperty("path").GetString(), Path.GetDirectoryName(solutionFilterFile));
             }
             catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
             {
@@ -544,7 +547,7 @@ namespace Microsoft.Build.Construction
                 HashSet<string> projectPaths = new HashSet<string>(_projectsInOrder.Count, NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
                 foreach (ProjectInSolution project in _projectsInOrder)
                 {
-                    projectPaths.Add(project.RelativePath);
+                    projectPaths.Add(FileUtilities.FixFilePath(project.RelativePath));
                 }
                 foreach (string project in _solutionFilter)
                 {
@@ -553,9 +556,9 @@ namespace Microsoft.Build.Construction
                         ProjectFileErrorUtilities.ThrowInvalidProjectFile
                         (
                             "SubCategoryForSolutionParsingErrors",
-                            new BuildEventFileInfo(project),
+                            new BuildEventFileInfo(FileUtilities.GetFullPath(project, Path.GetDirectoryName(_solutionFile))),
                             "SolutionFilterFilterContainsProjectNotInSolution",
-                            _solutionFilter,
+                            _solutionFilterFile,
                             project,
                             _solutionFile
                         );
@@ -1328,7 +1331,8 @@ namespace Microsoft.Build.Construction
                     break;
                 }
 
-                if (String.IsNullOrWhiteSpace(str))
+                // Ignore empty line or comment
+                if (String.IsNullOrWhiteSpace(str) || str[0] == CommentStartChar)
                 {
                     continue;
                 }
@@ -1375,7 +1379,8 @@ namespace Microsoft.Build.Construction
                     break;
                 }
 
-                if (String.IsNullOrWhiteSpace(str))
+                // Ignore empty line or comment
+                if (String.IsNullOrWhiteSpace(str) || str[0] == CommentStartChar)
                 {
                     continue;
                 }
@@ -1440,7 +1445,8 @@ namespace Microsoft.Build.Construction
                     break;
                 }
 
-                if (String.IsNullOrWhiteSpace(str))
+                // Ignore empty line or comment
+                if (String.IsNullOrWhiteSpace(str) || str[0] == CommentStartChar)
                 {
                     continue;
                 }

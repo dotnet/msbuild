@@ -124,7 +124,7 @@ namespace Microsoft.Build.Logging
 
                 if (CollectProjectImports != ProjectImportsCollectionMode.None)
                 {
-                    projectImportsCollector = new ProjectImportsCollector(FilePath);
+                    projectImportsCollector = new ProjectImportsCollector(FilePath, CollectProjectImports == ProjectImportsCollectionMode.ZipFile);
                 }
 
                 if (eventSource is IEventSource3 eventSource3)
@@ -175,20 +175,11 @@ namespace Microsoft.Build.Logging
 
             if (projectImportsCollector != null)
             {
-                projectImportsCollector.Close();
-
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
                 {
-                    var archiveFilePath = projectImportsCollector.ArchiveFilePath;
-
-                    // It is possible that the archive couldn't be created for some reason.
-                    // Only embed it if it actually exists.
-                    if (FileSystems.Default.FileExists(archiveFilePath))
-                    {
-                        eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, File.ReadAllBytes(archiveFilePath));
-                        File.Delete(archiveFilePath);
-                    }
+                    eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, projectImportsCollector.GetAllBytes());
                 }
+                projectImportsCollector.Close();
 
                 projectImportsCollector = null;
             }

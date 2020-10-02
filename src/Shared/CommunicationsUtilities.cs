@@ -80,8 +80,11 @@ namespace Microsoft.Build.Internal
             // This indicates in the first byte that we are a modern build.
             options = (int)nodeType | (((int)CommunicationsUtilities.handshakeVersion) << 24);
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+            CommunicationsUtilities.Trace("Handshake salt is " + handshakeSalt);
             string toolsDirectory = (nodeType & HandshakeOptions.X64) == HandshakeOptions.X64 ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+            CommunicationsUtilities.Trace("Tools directory is " + toolsDirectory);
             salt = CommunicationsUtilities.GetHashCode(handshakeSalt + toolsDirectory);
+            salt = CommunicationsUtilities.GetHandshakeHashCode(handshakeSalt + toolsDirectory);
             Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
             fileVersionMajor = fileVersion.Major;
             fileVersionMinor = fileVersion.Minor;

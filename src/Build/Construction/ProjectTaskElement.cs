@@ -35,7 +35,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// The parameters (excepting condition and continue-on-error)
         /// </summary>
-        private CopyOnWriteDictionary<string, (string, ElementLocation)> _parameters;
+        private CopyOnWriteDictionary<(string, ElementLocation)> _parameters;
 
         /// <summary>
         /// Protection for the parameters cache
@@ -210,7 +210,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Retrieves a copy of the parameters as used during evaluation.
         /// </summary>
-        internal CopyOnWriteDictionary<string, (string, ElementLocation)> ParametersForEvaluation
+        internal CopyOnWriteDictionary<(string, ElementLocation)> ParametersForEvaluation
         {
             get
             {
@@ -443,7 +443,7 @@ namespace Microsoft.Build.Construction
         {
             if (_parameters == null)
             {
-                _parameters = new CopyOnWriteDictionary<string, (string, ElementLocation)>(XmlElement.Attributes.Count, StringComparer.OrdinalIgnoreCase);
+                _parameters = new CopyOnWriteDictionary<(string, ElementLocation)>(XmlElement.Attributes.Count, StringComparer.OrdinalIgnoreCase);
 
                 foreach (XmlAttributeWithLocation attribute in XmlElement.Attributes)
                 {
