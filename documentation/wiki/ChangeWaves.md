@@ -1,5 +1,5 @@
 # What are Change Waves?
-A Change Wave is a version in which a set of risky features under the same opt-out flag. This flag happens to be the version of MSBuild that the features were developed for. The purpose of this is to warn developers of risky changes that will become standard functionality down the line. 
+A Change Wave is a version in which a set of risky features exists under the same opt-out flag. This flag happens to be the version of MSBuild that the features were developed for. The purpose of this is to warn developers of risky changes that will become standard functionality down the line. 
 
 ## How do they work?
 The opt out comes in the form of setting the environment variable `MSBuildDisableFeaturesFromVersion` to the Change Wave (or version) that contains the feature you want **disabled**. See the mapping of change waves to features below.
