@@ -83,7 +83,7 @@ namespace Microsoft.Build.Internal
             CommunicationsUtilities.Trace("Handshake salt is " + handshakeSalt);
             string toolsDirectory = (nodeType & HandshakeOptions.X64) == HandshakeOptions.X64 ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
             CommunicationsUtilities.Trace("Tools directory is " + toolsDirectory);
-            salt = CommunicationsUtilities.GetHandshakeHashCode(handshakeSalt + toolsDirectory);
+            salt = CommunicationsUtilities.GetHashCode(handshakeSalt + toolsDirectory);
             Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
             fileVersionMajor = fileVersion.Major;
             fileVersionMinor = fileVersion.Minor;
@@ -622,7 +622,7 @@ namespace Microsoft.Build.Internal
         /// but stripped out architecture specific defines
         /// that causes the hashcode to be different and this causes problem in cross-architecture handshaking
         /// </summary>
-        internal static int GetHandshakeHashCode(string fileVersion)
+        internal static int GetHashCode(string fileVersion)
         {
             unsafe
             {
