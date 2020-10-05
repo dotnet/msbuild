@@ -219,10 +219,6 @@
     <value>MSB4218: Failed to successfully launch or connect to a child MSBuild.exe process. Verify that the MSBuild.exe "{0}" launches successfully, and that it is loading the same microsoft.build.dll that the launching process loaded. If the location seems incorrect, try specifying the correct location in the BuildParameters object, or with the MSBUILD_EXE_PATH environment variable.</value>
     <comment>{StrBegin="MSB4218: "}</comment>
   </data>
-  <data name="InvalidConnectionTimeout" xml:space="preserve">
-    <value>MSB4264: Failed to launch an in-process worker node as the timeout was too small. Set MSBUILDNODECONNECTIONTIMEOUT to a higher value (or unset it).</value>
-    <comment>{StrBegin="MSB4264: "}</comment>
-  </data>
   <data name="CannotModifyReservedItem" xml:space="preserve">
     <value>MSB4117: The "{0}" item name is reserved, and cannot be used.</value>
     <comment>{StrBegin="MSB4117: "}UE: This message is shown when the user tries to redefine one of the reserved MSBuild items e.g. @(Choose)</comment>

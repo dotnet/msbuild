@@ -109,11 +109,6 @@
         <target state="translated">MSB4255: 다음 입력 결과 캐시 파일이 존재하지 않습니다. "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="InvalidConnectionTimeout">
-        <source>MSB4264: Failed to launch an in-process worker node as the timeout was too small. Set MSBUILDNODECONNECTIONTIMEOUT to a higher value (or unset it).</source>
-        <target state="new">MSB4264: Failed to launch an in-process worker node as the timeout was too small. Set MSBUILDNODECONNECTIONTIMEOUT to a higher value (or unset it).</target>
-        <note>{StrBegin="MSB4264: "}</note>
-      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">버전 문자열의 형식이 잘못되었습니다.</target>
