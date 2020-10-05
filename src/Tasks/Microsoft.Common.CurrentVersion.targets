@@ -755,7 +755,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
 
   <Target Name="AddOutputPathToGlobalPropertiesToRemove">
-    <MSBuildGlobalPropertiesToRemoveFromProjectReferences Condition="'$(PassOutputPathToReferencedProjects)'=='false'">$(MSBuildGlobalPropertiesToRemoveFromProjectReferences);OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
+    <PropertyGroup>
+      <MSBuildGlobalPropertiesToRemoveFromProjectReferences Condition="'$(PassOutputPathToReferencedProjects)'=='false'">$(MSBuildGlobalPropertiesToRemoveFromProjectReferences);OutputPath</MSBuildGlobalPropertiesToRemoveFromProjectReferences>
+    </PropertyGroup>
   </Target>
 
   <!--
