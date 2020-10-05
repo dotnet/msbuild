@@ -1020,6 +1020,8 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem EntryPoint { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] ExtraFiles { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] Files { get { throw null; } set { } }
+        public bool IsSelfContainedPublish { get { throw null; } set { } }
+        public bool IsSingleFilePublish { get { throw null; } set { } }
         public bool LauncherBasedDeployment { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] ManagedAssemblies { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] NativeAssemblies { get { throw null; } set { } }
@@ -1032,6 +1034,7 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] OutputFiles { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] PublishFiles { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] RuntimePackAssets { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] SatelliteAssemblies { get { throw null; } set { } }
         public bool SigningManifests { get { throw null; } set { } }
         public string TargetCulture { get { throw null; } set { } }
