@@ -46,12 +46,20 @@ namespace Microsoft.Build.Utilities
             }
         }
 
+        private static bool ShouldApplyChangeWave
+        {
+            get
+            {
+                return ConversionState == ChangeWaveConversionState.NotConvertedYet || _cachedWave == null;
+            }
+        }
+
         private static Version _cachedWave;
         public static Version DisabledWave
         {
             get
             {
-                if (ConversionState == ChangeWaveConversionState.NotConvertedYet)
+                if (ShouldApplyChangeWave)
                 {
                     ApplyChangeWave();
                 }
@@ -82,6 +90,12 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         internal static void ApplyChangeWave()
         {
+            // Once set, change wave should not need to be set again.
+            if (!ShouldApplyChangeWave)
+            {
+                return;
+            }
+
             // Is `MSBuildDisableFeaturesFromVersion` not set?
             if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableFeaturesFromVersion))
             {
@@ -122,7 +136,7 @@ namespace Microsoft.Build.Utilities
                 return;
             }
 
-            // What we know about _cachedWave:
+            // What we know about _cachedWave at this point:
             // 1. It's a valid wave
             // 2. It's within the bounds of the lowest and highest
             // 3. Is not a pre-existing wave
@@ -139,7 +153,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>A bool indicating whether the version is enabled.</returns>
         public static bool AreFeaturesEnabled(Version wave)
         {
-            if (_state == ChangeWaveConversionState.NotConvertedYet)
+            if (ShouldApplyChangeWave)
             {
                 ApplyChangeWave();
             }

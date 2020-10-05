@@ -377,10 +377,7 @@ namespace Microsoft.Build.Execution
         }
         private void ValidateChangeWaveState(ILoggingService log)
         {
-            if (ChangeWaves.ConversionState == ChangeWaveConversionState.NotConvertedYet)
-            {
-                ChangeWaves.ApplyChangeWave();
-            }
+            ChangeWaves.ApplyChangeWave();
 
             switch (ChangeWaves.ConversionState)
             {
