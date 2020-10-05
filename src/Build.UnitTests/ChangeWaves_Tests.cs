@@ -65,7 +65,6 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 //TODO: Test without calling env.setchangewave and with calling it with ("");
                 Version featureAsVersion = Version.Parse(featureVersion);
-                ChangeWaves.ResetStateForTests();
                 ChangeWaves.AreFeaturesEnabled(featureAsVersion).ShouldBe(true);
 
                 string projectFile = $"" +
