@@ -8,9 +8,10 @@ The opt out comes in the form of setting the environment variable `MSBuildDisabl
 | `MSBuildDisableFeaturesFromVersion` Value                         | Result        | Receive Warning? |
 | :-------------                                                    | :----------   | :----------: |
 | Unset                                                             | All Change Waves will be enabled, meaning all features behind each Change Wave will be enabled.               | No   |
-| `16.8` (or any valid & current Change Wave)                       | All features behind Change Wave `16.8` and higher will be disabled.                                           | No   |
-| Invalid Value (Invalid Change Wave, or out-of-rotation version)   | You will be defaulted to the closest valid value (ascending). Ex: Setting `16.9` will default you to `16.10`. | Yes  |
-| Invalid Format (ex: `16x8`, `17_0`, `garbage`)                    | All waves will be enabled.                                                                                    | Yes  |
+| Any valid & current Change Wave (Ex: `16.8`)                      | All features behind Change Wave `16.8` and higher will be disabled.                                           | No   |
+| Invalid Value (Ex: `16.9` when valid waves are `16.8` and `16.10`)| Default to the closest valid value (ascending). Ex: Setting `16.9` will default you to `16.10`.               | No   |
+| Out of Rotation (Ex: `17.1` when the highest wave is `17.0`)      | Clamp to the closest valid value. Ex: `17.1` clamps to `17.0`, and `16.5` clamps to `16.8`                    | Yes  |
+| Invalid Format (Ex: `16x8`, `17_0`, `garbage`)                    | All Change Waves will be enabled, meaning all features behind each Change Wave will be enabled.               | Yes  |
 
 # Change Waves & Associated Features
 

@@ -82,6 +82,6 @@ using (TestEnvironment env = TestEnvironment.Create())
 ## Change Wave 'End-of-Lifespan' Procedure
 These features will eventually become standard functionality. When a change wave rotates out, do the following:
 1. Start by deleting the constant `Wave17_4` that was created in [Creating a Change Wave](#creating-a-change-wave).
-2. Remove `ChangeWave.AreFeaturesEnabled` or `$[MSBuild]::AreFeaturesEnabled` conditions surrounding features that were assigned that change wave.
+2. Remove `ChangeWave.AreFeaturesEnabled` or `[MSBuild]::AreFeaturesEnabled` conditions surrounding features that were assigned that change wave.
 3. Remove tests associated with ensuring features would not run if this wave were set.
 4. Clear all other issues that arose from deleting the constant.
