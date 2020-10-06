@@ -1149,6 +1149,7 @@ namespace Microsoft.Build.Tasks
         public string CertificateThumbprint { get { throw null; } set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public Microsoft.Build.Framework.ITaskItem SigningTarget { get { throw null; } set { } }
+        public string TargetFrameworkIdentifier { get { throw null; } set { } }
         public string TargetFrameworkVersion { get { throw null; } set { } }
         public string TimestampUrl { get { throw null; } set { } }
         public override bool Execute() { throw null; }
@@ -2304,6 +2305,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static void SignFile(string certPath, System.Security.SecureString certPassword, System.Uri timestampUrl, string path) { }
         public static void SignFile(string certThumbprint, System.Uri timestampUrl, string path) { }
         public static void SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion) { }
+        public static void SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion, string targetFrameworkIdentifier) { }
         public static System.Security.PermissionSet XmlToPermissionSet(System.Xml.XmlElement element) { throw null; }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(false)]
