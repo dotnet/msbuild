@@ -4018,6 +4018,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         TimestampUrl="$(ManifestTimestampUrl)"
         SigningTarget="@(_DeploymentManifestLauncherEntryPoint)"
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         Condition="'$(_DeploymentSignClickOnceManifests)'=='true'" />
 
     <!--
@@ -5710,6 +5711,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
         TimestampUrl="$(ManifestTimestampUrl)"
         SigningTarget="$(_DeploymentApplicationDir)$(_DeploymentTargetApplicationManifestFileName)"
+        TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
         Condition="'$(_DeploymentSignClickOnceManifests)'=='true'" />
 
@@ -5729,6 +5731,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
         TimestampUrl="$(ManifestTimestampUrl)"
         SigningTarget="$(PublishDir)$(TargetDeployManifestFileName)"
+        TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
         Condition="'$(_DeploymentSignClickOnceManifests)'=='true'" />
 
@@ -5737,11 +5740,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         TimestampUrl="$(ManifestTimestampUrl)"
         SigningTarget="$(PublishDir)\setup.exe"
         Condition="'$(BootstrapperEnabled)'=='true' and '$(_DeploymentSignClickOnceManifests)'=='true'" />
-
-
   </Target>
-
-
 
 
   <!--

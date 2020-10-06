@@ -1936,6 +1936,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static void SignFile(string certPath, System.Security.SecureString certPassword, System.Uri timestampUrl, string path) { }
         public static void SignFile(string certThumbprint, System.Uri timestampUrl, string path) { }
         public static void SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion) { }
+        public static void SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion, string targetFrameworkIdentifier) { }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(false)]
     public sealed partial class TrustInfo
