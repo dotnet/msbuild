@@ -255,6 +255,16 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Contain(i => i.RelativePath == "WinRT.Runtime.dll" && Path.GetFileName(i.Identity) == "WinRT.Runtime.dll",
                          because: "wapproj should copy cswinrt dlls");
+
+            // ready to run is supported
+            publishCommand.Execute("-p:SelfContained=true", $"-p:RuntimeIdentifier={runtimeIdentifier}", $"-p:PublishReadyToRun=true")
+                .Should()
+                .Pass();
+
+            // PublishSingleFile is supported
+            publishCommand.Execute("-p:SelfContained=true", $"-p:RuntimeIdentifier={runtimeIdentifier}", $"-p:PublishSingleFile=true")
+                .Should()
+                .Pass();
         }
 
         private TestAsset CreateWindowsDesktopSdkTestAsset(string projectName, string uiFrameworkProperty)

@@ -30,6 +30,8 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string TargetFrameworkMoniker { get; set; }
 
+        public string TargetPlatformMoniker { get; set; }
+
         [Output]
         public ITaskItem[] ResolvedFileToPublishWithPackagePath { get; private set; }
 
@@ -53,7 +55,9 @@ namespace Microsoft.NET.Build.Tasks
                     relativePath));
                 var i = new TaskItem(fullpath);
 
-                var shortFrameworkName = NuGetFramework.Parse(TargetFrameworkMoniker).GetShortFolderName();
+                var shortFrameworkName = NuGetFramework
+                    .ParseComponents(TargetFrameworkMoniker, TargetPlatformMoniker)
+                    .GetShortFolderName();
 
                 i.SetMetadata("PackagePath", $"tools/{shortFrameworkName}/any/{GetDirectoryPathInRelativePath(relativePath)}");
                 result.Add(i);

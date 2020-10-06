@@ -688,6 +688,10 @@ The following are names of parameters or literal values and should not be transl
   </data>
   <data name="WorkloadNotInstalled" xml:space="preserve">
     <value>NETSDK1146: The following workload packs were not installed: {0}</value>
-    <comment>{StrBegin="NETSDK1146: "}</comment>
+      <comment>{StrBegin="NETSDK1146: "}</comment>
+  </data>
+  <data name="PackAsToolCannotSupportTargetPlatformIdentifier" xml:space="preserve">
+    <value>NETSDK1146: PackAsTool does not support TargetPlatformIdentifier being set. For example, TargetFramework cannot be net5.0-windows, only net5.0. PackAsTool also does not support UseWPF or UseWindowsForms when targeting .NET 5 and higher.</value>
+    <comment>{StrBegin="NETSDK1147: "}</comment>
   </data>
 </root>

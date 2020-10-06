@@ -24,6 +24,7 @@
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <ItemGroup>
       <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('NuGetPackageId', 'Newtonsoft.Json'))" />
     </ItemGroup>
   </Target>
   

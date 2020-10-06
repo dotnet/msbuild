@@ -510,6 +510,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1053: 도구로서 팩은 자체 포함을 지원하지 않습니다.</target>
         <note>{StrBegin="NETSDK1053: "}</note>
       </trans-unit>
+      <trans-unit id="PackAsToolCannotSupportTargetPlatformIdentifier">
+        <source>NETSDK1146: PackAsTool does not support TargetPlatformIdentifier being set. For example, TargetFramework cannot be net5.0-windows, only net5.0. PackAsTool also does not support UseWPF or UseWindowsForms when targeting .NET 5 and higher.</source>
+        <target state="new">NETSDK1146: PackAsTool does not support TargetPlatformIdentifier being set. For example, TargetFramework cannot be net5.0-windows, only net5.0. PackAsTool also does not support UseWPF or UseWindowsForms when targeting .NET 5 and higher.</target>
+        <note>{StrBegin="NETSDK1146: "}</note>
+      </trans-unit>
       <trans-unit id="PackageNotFound">
         <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
         <target state="translated">NETSDK1064: 패키지 {0}, 버전 {1}을(를) 찾을 수 없습니다. NuGet 복원 이후 삭제되었을 수 있습니다. 아니면, 최대 경로 길이 제한으로 인해 NuGet 복원이 부분적으로만 완료되었을 수 있습니다.</target>
