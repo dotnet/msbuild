@@ -736,9 +736,9 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1136: "}</note>
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
-        <source>NETSDK1146: The following workload packs were not installed: {0}</source>
-        <target state="new">NETSDK1146: The following workload packs were not installed: {0}</target>
-        <note>{StrBegin="NETSDK1146: "}</note>
+        <source>NETSDK1147: The following workload packs were not installed: {0}</source>
+        <target state="new">NETSDK1147: The following workload packs were not installed: {0}</target>
+        <note>{StrBegin="NETSDK1147: "}</note>
       </trans-unit>
     </body>
   </file>
