@@ -10,7 +10,7 @@ jobs:
   - task: Powershell@2
     displayName: build
     inputs:
-      filename: Common/Build.ps1
+      filePath: eng/common/build.ps1
       arguments: '-restore -build -ci /p:CreateBootstrap=false /nr:false'
   - task: RichCodeNavIndexer@0
     displayName: RichCodeNav Upload
