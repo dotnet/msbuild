@@ -2922,32 +2922,33 @@ namespace Microsoft.Build.CommandLine
         /// </returns>
         private static bool ValidateSwitchIndicatorInUnquotedArgument(string unquotedCommandLineArgument)
         {
-            return unquotedCommandLineArgument.StartsWith("-", StringComparison.Ordinal)
-                || unquotedCommandLineArgument.StartsWith("/", StringComparison.Ordinal)
-                || unquotedCommandLineArgument.StartsWith("--", StringComparison.Ordinal);
+            return unquotedCommandLineArgument.StartsWith("--", StringComparison.Ordinal)
+                || unquotedCommandLineArgument.StartsWith("-", StringComparison.Ordinal)
+                || unquotedCommandLineArgument.StartsWith("/", StringComparison.Ordinal);
         }
 
         /// <summary>
         /// Gets the length of the switch indicator (- or / or --)
         /// <br/>The length returned from this method is deduced from the beginning sequence of unquoted argument.
-        /// This way it will "assume" that there's no further error (e.g. //  or ---) which would also be considered as a correct indicator.
+        /// <br/>This way it will "assume" that there's no further error (e.g. //  or ---) which would also be considered as a correct indicator.
         /// </summary>
         /// <param name="unquotedSwitch">Unquoted argument with leading indicator and name</param>
         /// <returns>Correct length of used indicator
         /// <br/>0 if no leading sequence recognized as correct indicator</returns>
-        internal static int GetLengthOfSwitchIndicator( string unquotedSwitch )
+        /// Internal for testing purposes
+        internal static int GetLengthOfSwitchIndicator(string unquotedSwitch)
         {
             if (unquotedSwitch.StartsWith("--", StringComparison.Ordinal))
             {
-                return 2;
+                return "--".Length;
             }
             else if (unquotedSwitch.StartsWith("-", StringComparison.Ordinal) || unquotedSwitch.StartsWith("/", StringComparison.Ordinal))
             {
-                return 1;
+                return "-".Length;
             }
             else
             {
-                return 0;
+                return "".Length;
             }
         }
 
