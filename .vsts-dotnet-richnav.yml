@@ -6,6 +6,8 @@ jobs:
   displayName: "Rich Navigation Indexing"
   pool:
     vmImage: 'windows-2019'
+  variables:
+    EnableRichCodeNavigation: true
   steps:
   - task: Powershell@2
     displayName: build
