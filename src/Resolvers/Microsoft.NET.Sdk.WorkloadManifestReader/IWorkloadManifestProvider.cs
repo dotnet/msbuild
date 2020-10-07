@@ -14,5 +14,6 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     public interface IWorkloadManifestProvider
     {
         IEnumerable<Stream> GetManifests();
+        IEnumerable<string> GetManifestDirectories();
     }
 }

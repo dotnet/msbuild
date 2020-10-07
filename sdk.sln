@@ -262,6 +262,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkloadManifestValidator",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.WorkloadManifestReader.Tests", "src\Tests\Microsoft.NET.Sdk.WorkloadManifestReader.Tests\Microsoft.NET.Sdk.WorkloadManifestReader.Tests.csproj", "{988D4839-B97F-42BB-A045-C79157CA7780}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver", "src\Resolvers\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver.csproj", "{56F189B0-6A8E-4A9D-B7AE-24241204E98D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -472,6 +474,10 @@ Global
 		{988D4839-B97F-42BB-A045-C79157CA7780}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{988D4839-B97F-42BB-A045-C79157CA7780}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{988D4839-B97F-42BB-A045-C79157CA7780}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56F189B0-6A8E-4A9D-B7AE-24241204E98D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56F189B0-6A8E-4A9D-B7AE-24241204E98D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56F189B0-6A8E-4A9D-B7AE-24241204E98D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56F189B0-6A8E-4A9D-B7AE-24241204E98D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -559,6 +565,7 @@ Global
 		{C22A85E0-C09F-4E2D-81F6-82AB97932FE2} = {8F22FBD6-BDC8-431E-8402-B7460D3A9724}
 		{565411E4-E89D-4DF3-ADD5-55D3295F30EE} = {8F22FBD6-BDC8-431E-8402-B7460D3A9724}
 		{988D4839-B97F-42BB-A045-C79157CA7780} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{56F189B0-6A8E-4A9D-B7AE-24241204E98D} = {8F22FBD6-BDC8-431E-8402-B7460D3A9724}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}

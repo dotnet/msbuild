@@ -98,7 +98,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             public int CurrentDepth => reader.CurrentDepth;
 
+#nullable disable
             public string GetString() => reader.GetString();
+#nullable restore
             public bool TryGetInt64(out long value) => reader.TryGetInt64(out value);
             public bool GetBool() => reader.GetBoolean();
         }

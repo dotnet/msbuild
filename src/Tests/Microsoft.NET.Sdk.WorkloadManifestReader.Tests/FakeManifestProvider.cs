@@ -16,7 +16,9 @@ namespace ManifestReaderTests
                 _filePaths = filePaths;
             }
 
-            public IEnumerable<Stream> GetManifests()
+        public IEnumerable<string> GetManifestDirectories() => throw new System.NotImplementedException();
+
+        public IEnumerable<Stream> GetManifests()
             {
                 foreach (var filePath in _filePaths)
                 {
