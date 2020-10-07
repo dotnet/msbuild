@@ -437,6 +437,22 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void GetLengthOfSwitchIndicatorTest()
+        {
+            var commandLineSwitchWithSlash = "/Switch";
+            var commandLineSwitchWithSingleDash = "-Switch";
+            var commandLineSwitchWithDoubleDash = "--Switch";
+
+            var commandLineSwitchWithNoneOrIncorrectIndicator = "zSwitch";
+
+            MSBuildApp.GetLengthOfSwitchIndicator(commandLineSwitchWithSlash).ShouldBe(1);
+            MSBuildApp.GetLengthOfSwitchIndicator(commandLineSwitchWithSingleDash).ShouldBe(1);
+            MSBuildApp.GetLengthOfSwitchIndicator(commandLineSwitchWithDoubleDash).ShouldBe(2);
+
+            MSBuildApp.GetLengthOfSwitchIndicator(commandLineSwitchWithNoneOrIncorrectIndicator).ShouldBe(0);
+        }
+
+        [Fact]
         public void Help()
         {
                 MSBuildApp.Execute(
