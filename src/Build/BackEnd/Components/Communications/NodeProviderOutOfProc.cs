@@ -66,7 +66,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="specialNode">/Indicates if node can not accept standard MSBuild work</param>
         internal static Handshake GetHandshake(bool enableNodeReuse, bool enableLowPriority, bool specialNode)
         {
-            CommunicationsUtilities.Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", enableNodeReuse={2}, enableLowPriority={3}", Traits.MSBuildNodeHandshakeSalt, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, enableNodeReuse, enableLowPriority);
+            CommunicationsUtilities.Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", enableNodeReuse={2}, enableLowPriority={3}, specialNode={4}", Traits.MSBuildNodeHandshakeSalt, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, enableNodeReuse, enableLowPriority, specialNode);
             return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, nodeReuse: enableNodeReuse, lowPriority: enableLowPriority, specialNode: specialNode, is64Bit: EnvironmentUtilities.Is64BitProcess));
         }
 
