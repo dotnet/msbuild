@@ -111,7 +111,7 @@ jobs:
                   $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
-		  $(_InternalRuntimeDownloadArgs)
+                  $(_InternalRuntimeDownloadArgs)
                   /p:Test=false
         displayName: Build
         env:
@@ -166,7 +166,7 @@ jobs:
                   $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
-		  $(_InternalRuntimeDownloadArgs)
+                  $(_InternalRuntimeDownloadArgs)
                   -p:Test=false
         displayName: Build
         env:
