@@ -3,7 +3,6 @@
 
 using System.IO;
 
-using Nerdbank.Streams;
 using StreamJsonRpc;
 
 #nullable enable
@@ -13,7 +12,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences
     {
         internal static IJsonRpcMessageHandler GetRarMessageHandler(Stream stream)
         {
-            return new LengthHeaderMessageHandler(stream.UsePipe(), new MessagePackFormatter());
+            return new LengthHeaderMessageHandler(stream, stream, new MessagePackFormatter());
         }
     }
 }
