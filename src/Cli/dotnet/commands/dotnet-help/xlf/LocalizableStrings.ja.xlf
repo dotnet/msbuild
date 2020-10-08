@@ -184,12 +184,12 @@
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
         <source>Display .NET SDK version in use.</source>
-        <target state="needs-review-translation">使用中の .NET Core SDK バージョンを表示します。</target>
+        <target state="translated">使用中の .NET SDK バージョンを表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
         <source>Display .NET information.</source>
-        <target state="needs-review-translation">.NET Core 情報を表示します。</target>
+        <target state="translated">.NET 情報を表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKListSdksCommandDefinition">
@@ -279,12 +279,12 @@
       </trans-unit>
       <trans-unit id="SDKCommandUsageDescription">
         <source>Execute a .NET SDK command.</source>
-        <target state="needs-review-translation">.NET Core SDK コマンドを実行します。</target>
+        <target state="translated">.NET SDK コマンドを実行します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET application.</source>
-        <target state="needs-review-translation">.NET Core アプリケーションを実行します。</target>
+        <target state="translated">.NET アプリケーションを実行します。</target>
         <note />
       </trans-unit>
       <trans-unit id="FsiDefinition">

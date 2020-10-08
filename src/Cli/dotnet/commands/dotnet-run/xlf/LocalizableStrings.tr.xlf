@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="RunCommandBuilding">
         <source>Building...</source>
-        <target state="new">Building...</target>
+        <target state="translated">Derleniyor...</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
@@ -64,9 +64,9 @@ Projeniz birden fazla Framework'ü hedefliyor. '{0}' kullanarak hangi Framework'
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, net5.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">Projeniz çalıştırılamıyor.
+        <target state="translated">Projeniz çalıştırılamıyor.
 Çalıştırılabilir bir proje türüne sahip olduğunuzdan ve bu projenin '{0}' tarafından desteklendiğinden emin olun.
-Çalıştırılabilir bir proje, çalıştırılabilir bir TFM’yi (örneğin, netcoreapp2.0) hedeflemeli ve OutputType 'Exe' dosyasına sahip olmalıdır.
+Çalıştırılabilir proje, çalıştırılabilir bir TFM’yi (örneğin, net5.0) hedeflemeli ve OutputType değeri 'Exe' olmalıdır.
 Geçerli {1}: '{2}'.</target>
         <note />
       </trans-unit>

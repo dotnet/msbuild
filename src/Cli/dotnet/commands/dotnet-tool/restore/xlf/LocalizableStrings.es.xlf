@@ -41,7 +41,7 @@
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="translated">ORIGEN</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="MalformedText">
         <source>Malformed command text '{0}'</source>
@@ -28,11 +28,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">无法执行，因为找不到指定的命令或文件。
+        <target state="translated">无法执行，因为找不到指定的命令或文件。
 可能的原因包括:
-  *你拼错了内置的 dotnet 命令。
-  *你打算执行 .NET Core 程序，但 {0} 不存在。
-  *你打算运行全局工具，但在路径上找不到名称前缀为 dotnet 的可执行文件。</target>
+  *内置的 dotnet 命令拼写错误。
+  *你打算执行 .NET 程序，但 {0} 不存在。
+  *你打算运行全局工具，但在路径上找不到具有此名称且前缀为 dotnet 的可执行文件。</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -77,7 +77,7 @@ Possible reasons for this include:
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
         <source>.NET SDK (reflecting any global.json):</source>
-        <target state="needs-review-translation">.NET Core SDK（反映任何 global.json）:</target>
+        <target state="translated">.NET SDK (反映任何 global.json):</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
@@ -111,7 +111,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET SDK</source>
-        <target state="needs-review-translation">.NET Core SDK</target>
+        <target state="translated">.NET SDK</target>
         <note />
       </trans-unit>
     </body>

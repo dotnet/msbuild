@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CommandPrereleaseOptionDescription">
         <source>Allows prerelease packages to be installed.</source>
-        <target state="new">Allows prerelease packages to be installed.</target>
+        <target state="translated">Permet d'installer les packages de préversion.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
@@ -714,17 +714,17 @@ export PATH="$PATH:{0}"
       </trans-unit>
       <trans-unit id="EnvironmentPathLinuxNeedLogout">
         <source>Since you just installed the .NET SDK, you will need to logout or restart your session before running the tool you installed.</source>
-        <target state="needs-review-translation">Dans la mesure où vous venez d'installer le kit SDK .NET Core, vous devez vous déconnecter ou redémarrer votre session avant d'exécuter l'outil que vous avez installé.</target>
+        <target state="translated">Dans la mesure où vous venez d'installer le kit SDK .NET, vous devez vous déconnecter ou redémarrer votre session avant d'exécuter l'outil que vous avez installé.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="needs-review-translation">Dans la mesure où vous venez d'installer le kit SDK .NET Core, vous devez rouvrir le terminal avant d'exécuter l'outil que vous avez installé.</target>
+        <target state="translated">Dans la mesure où vous venez d'installer le kit SDK .NET, vous devez rouvrir le terminal avant d'exécuter l'outil que vous avez installé.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
         <source>Since you just installed the .NET SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
-        <target state="needs-review-translation">Dans la mesure où vous venez d'installer le kit SDK .NET Core, vous devez rouvrir la fenêtre d'invite de commandes avant d'exécuter l'outil que vous avez installé.</target>
+        <target state="translated">Dans la mesure où vous venez d'installer le kit SDK .NET, vous devez rouvrir la fenêtre d'invite de commandes avant d'exécuter l'outil que vous avez installé.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMissingCommandName">
@@ -931,7 +931,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
-        <target state="translated">SUFFIXE_VERSION</target>
+        <target state="translated">VERSION_SUFFIX</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentDescription">
@@ -941,7 +941,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentName">
         <source>PROJECT | SOLUTION</source>
-        <target state="translated">PROJET | SOLUTION</target>
+        <target state="translated">PROJECT | SOLUTION</target>
         <note />
       </trans-unit>
     </body>

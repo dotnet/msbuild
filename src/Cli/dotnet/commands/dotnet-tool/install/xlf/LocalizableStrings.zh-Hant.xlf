@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
         <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Specify only one of the options: {0}.</source>
@@ -142,14 +142,14 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">工具 '{0}' 無法安裝。此失敗的原因可能是:
+        <target state="translated">無法安裝工具 '{0}'。此失敗的原因可能為:
 
-* 您嘗試要安裝預覽版本，但未使用 --version 選項來指定版本。
-* 找到此名稱的套件，但其並非 .NET Core 工具。
-* 無法存取必要的 NuGet 摘要，可能是網際網路連線問題所致。
-* 您打錯了工具的名稱。
+* 您嘗試要安裝預覽版本，但並未使用 --version 選項來指定版本。
+* 出現了此名稱的套件，但其並非 .NET 工具。
+* 無法存取必要的 NuGet 摘要，可能是因為網際網路連線問題所致。
+* 拼錯了工具的名稱。
 
-如需詳細原因，包括套件命名強制，請前往 https://aka.ms/failure-installing-tool</target>
+如需了解其他原因，包括套件命名的強制規定，請前往 https://aka.ms/failure-installing-tool</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">

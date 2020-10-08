@@ -61,7 +61,7 @@
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="translated">SÜRÜM</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageFailedToRestore">

@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="NoSelfContainedOptionDescription">
         <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
-        <target state="needs-review-translation">Veröffentlichen Sie Ihre Anwendung als Framework-abhängige Anwendung ohne .NET Core-Runtime. Es muss eine unterstützte .NET Core-Runtime installiert sein, um Ihre Anwendung auszuführen.</target>
+        <target state="translated">Hiermit wird Ihre Anwendung als Framework-abhängige Anwendung ohne .NET-Runtime veröffentlicht. Es muss eine unterstützte .NET-Runtime installiert sein, um Ihre Anwendung auszuführen.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -72,8 +72,8 @@ Standardmäßig wird eine Framework-abhängige Anwendung veröffentlicht.</targe
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Hiermit wird die .NET Core-Runtime mit Ihrer Anwendung veröffentlicht, sodass die Runtime nicht auf dem Zielcomputer installiert werden muss.
-Der Standardwert ist TRUE, wenn eine Runtime-ID angegeben wird.</target>
+        <target state="translated">Hiermit wird die .NET-Runtime mit Ihrer Anwendung veröffentlicht, sodass die Runtime nicht auf dem Zielcomputer installiert werden muss.
+Der Standardwert lautet TRUE, wenn eine Runtime-ID angegeben wird.</target>
         <note />
       </trans-unit>
     </body>

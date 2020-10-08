@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
         <source>.NET Run Command</source>
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="RunCommandBuilding">
         <source>Building...</source>
-        <target state="new">Building...</target>
+        <target state="translated">正在建置...</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
@@ -64,9 +64,9 @@ Your project targets multiple frameworks. Specify which framework to run using '
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, net5.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">無法執行您的專案。
-請確定您有可執行的專案類型，同時確定 '{0}' 支援此專案。
-可執行專案應以可執行的 TFM (例如，netcoreapp2.0) 為目標，且 OutputType 為 'Exe'。
+        <target state="translated">無法執行您的專案。
+請確定您有可執行的專案類型，並確定 '{0}' 支援此專案。
+可執行的專案應以可執行的 TFM (例如 net5.0) 為目標，且 OutputType 應為 'Exe'。
 目前的 {1} 為 '{2}'。</target>
         <note />
       </trans-unit>

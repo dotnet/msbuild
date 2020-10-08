@@ -94,7 +94,7 @@ i odpowiednie identyfikatory pakietów zainstalowanych narzędzi można znaleź�
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="translated">ŚCIEŻKA</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">

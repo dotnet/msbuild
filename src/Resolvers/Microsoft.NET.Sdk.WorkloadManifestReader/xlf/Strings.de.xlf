@@ -4,67 +4,67 @@
     <body>
       <trans-unit id="ConcreteWorkloadHasNoDescription">
         <source>Workload definition '{0}' is a concrete dev workload but has no description</source>
-        <target state="new">Workload definition '{0}' is a concrete dev workload but has no description</target>
+        <target state="translated">Die Workloaddefinition "{0}" ist eine konkrete Entwicklungsworkload, enthält aber keine Beschreibung.</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateKeyAtOffset">
         <source>Duplicate key '{0}' at offset {1}</source>
-        <target state="new">Duplicate key '{0}' at offset {1}</target>
+        <target state="translated">Doppelter Schlüssel "{0}" bei Offset {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedBoolAtOffset">
         <source>Expected boolean value at offset {0}</source>
-        <target state="new">Expected boolean value at offset {0}</target>
+        <target state="translated">Boolescher Wert bei Offset {0} erwartet.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedStringAtOffset">
         <source>Expected string value at offset {0}</source>
-        <target state="new">Expected string value at offset {0}</target>
+        <target state="translated">Zeichenfolgenwert bei Offset {0} erwartet.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedTokenAtOffset">
         <source>Expected {0} token at offset {1}</source>
-        <target state="new">Expected {0} token at offset {1}</target>
+        <target state="translated">Token "{0}" bei Offset {1} erwartet.</target>
         <note />
       </trans-unit>
       <trans-unit id="IncompleteDocument">
         <source>Document ended prematurely</source>
-        <target state="new">Document ended prematurely</target>
+        <target state="translated">Dokument ist unvollständig.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingOrInvalidManifestVersion">
         <source>Missing or invalid manifest version</source>
-        <target state="new">Missing or invalid manifest version</target>
+        <target state="translated">Manifestversion fehlt oder ist ungültig.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingWorkloadPackKind">
         <source>Missing kind for workload pack '{0}'</source>
-        <target state="new">Missing kind for workload pack '{0}'</target>
+        <target state="translated">Fehlende Art für Workloadpaket "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingWorkloadPackVersion">
         <source>Missing version for workload pack '{0}'</source>
-        <target state="new">Missing version for workload pack '{0}'</target>
+        <target state="translated">Version für Workloadpaket "{0}" fehlt.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
-        <target state="new">Unexpected token '{0}' at offset {1}</target>
+        <target state="translated">Unerwartetes Token "{0}" bei Offset {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownKeyAtOffset">
         <source>Unknown key '{0}' at offset {1}</source>
-        <target state="new">Unknown key '{0}' at offset {1}</target>
+        <target state="translated">Unbekannter Schlüssel "{0}" bei Offset {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownWorkloadDefinitionKind">
         <source>Unknown workload definition kind '{0}' at offset {1}</source>
-        <target state="new">Unknown workload definition kind '{0}' at offset {1}</target>
+        <target state="translated">Unbekannte Art der Workloaddefinition ({0}) bei Offset {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownWorkloadPackKind">
         <source>Unknown workload pack kind '{0}' at offset {1}</source>
-        <target state="new">Unknown workload pack kind '{0}' at offset {1}</target>
+        <target state="translated">Unbekannte Art des Workloadpakets ({0}) bei Offset {1}.</target>
         <note />
       </trans-unit>
     </body>

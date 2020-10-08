@@ -1,120 +1,120 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="Authors">
         <source>Authors</source>
-        <target state="new">Authors</target>
+        <target state="translated">作者</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Search dotnet tools in nuget.org</source>
-        <target state="new">Search dotnet tools in nuget.org</target>
+        <target state="translated">在 nuget.org 中搜索 dotnet 工具</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsColumn">
         <source>Commands</source>
-        <target state="new">Commands</target>
+        <target state="translated">命令</target>
         <note />
       </trans-unit>
       <trans-unit id="Description">
         <source>Description</source>
-        <target state="new">Description</target>
+        <target state="translated">说明</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="DetailArgumentName">
         <source>Detail</source>
-        <target state="new">Detail</target>
+        <target state="translated">详细信息</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailDescription">
         <source>Show detail result of the query.</source>
-        <target state="new">Show detail result of the query.</target>
+        <target state="translated">显示查询的详细结果。</target>
         <note />
       </trans-unit>
       <trans-unit id="Downloads">
         <source>Downloads</source>
-        <target state="new">Downloads</target>
+        <target state="translated">下载</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="InvalidInputTypeInteger">
         <source>{0} should be an integer</source>
-        <target state="new">{0} should be an integer</target>
+        <target state="translated">{0} 应为整数</target>
         <note />
       </trans-unit>
       <trans-unit id="LatestVersion">
         <source>Latest Version</source>
-        <target state="new">Latest Version</target>
+        <target state="translated">最新版本</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="NoResult">
         <source>Could not find any results.</source>
-        <target state="new">Could not find any results.</target>
+        <target state="translated">找不到任何结果。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageId">
         <source>Package ID</source>
-        <target state="new">Package ID</target>
+        <target state="translated">包 ID</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="PrereleaseDescription">
         <source>determining whether to include pre-release packages.</source>
-        <target state="new">determining whether to include pre-release packages.</target>
+        <target state="translated">正在确定是否包括预发行包。</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermArgumentName">
         <source>Search Term</source>
-        <target state="new">Search Term</target>
+        <target state="translated">搜索词</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermDescription">
         <source>Search term from package id or package description. Require at least one character.</source>
-        <target state="new">Search term from package id or package description. Require at least one character.</target>
+        <target state="translated">包 ID 或包说明中的搜索词。至少需要一个字符。</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipArgumentName">
         <source>Skip</source>
-        <target state="new">Skip</target>
+        <target state="translated">Skip</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipDescription">
         <source>The number of results to skip, for pagination.</source>
-        <target state="new">The number of results to skip, for pagination.</target>
+        <target state="translated">用于分页的要跳过的结果数。</target>
         <note />
       </trans-unit>
       <trans-unit id="Summary">
         <source>Summary</source>
-        <target state="new">Summary</target>
+        <target state="translated">摘要</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="Tags">
         <source>Tags</source>
-        <target state="new">Tags</target>
+        <target state="translated">标记</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="TakeArgumentName">
         <source>Take</source>
-        <target state="new">Take</target>
+        <target state="translated">Take</target>
         <note />
       </trans-unit>
       <trans-unit id="TakeDescription">
         <source>The number of results to return, for pagination.</source>
-        <target state="new">The number of results to return, for pagination.</target>
+        <target state="translated">用于分页的要返回的结果数。</target>
         <note />
       </trans-unit>
       <trans-unit id="Verified">
         <source>Verified</source>
-        <target state="new">Verified</target>
+        <target state="translated">已验证</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="Version">
         <source>Version</source>
-        <target state="new">Version</target>
+        <target state="translated">版本</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="Versions">
         <source>Versions</source>
-        <target state="new">Versions</target>
+        <target state="translated">版本</target>
         <note>Table lable</note>
       </trans-unit>
     </body>

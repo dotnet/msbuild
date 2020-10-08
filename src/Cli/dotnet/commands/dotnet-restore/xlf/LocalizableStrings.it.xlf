@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdArgument">
         <source>PROJECT</source>
-        <target state="translated">PROGETTO</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentDescription">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdSourceOption">
         <source>SOURCE</source>
-        <target state="translated">ORIGINE</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
         <source>PACKAGES_DIR</source>
-        <target state="translated">DIR_PACCHETTI</target>
+        <target state="translated">PACKAGES_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="translated">IDENTIFICATORE_RUNTIME</target>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
@@ -96,7 +96,7 @@ Equivale a eliminare project.assets.json.</target>
       </trans-unit>
       <trans-unit id="CmdLockFilePathOption">
         <source>LOCK_FILE_PATH</source>
-        <target state="translated">PERCORSO_FILE_DI_BLOCCO</target>
+        <target state="translated">LOCK_FILE_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLockFilePathOptionDescription">

@@ -28,10 +28,10 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">Non è stato possibile completare l'esecuzione perché il comando o il file specificato non è stato trovato.
+        <target state="translated">Non è stato possibile completare l'esecuzione perché il comando o il file specificato non è stato trovato.
 Motivi possibili:
   * Il nome di un comando dotnet predefinito non è stato digitato correttamente.
-  * Si intendeva eseguire un programma .NET Core, ma {0} non esiste.
+  * Si intendeva eseguire un programma .NET, ma {0} non esiste.
   * Si intendeva eseguire uno strumento globale, ma in PATH non è stato trovato alcun eseguibile con questo nome e prefisso dotnet.</target>
         <note />
       </trans-unit>
@@ -77,7 +77,7 @@ Motivi possibili:
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
         <source>.NET SDK (reflecting any global.json):</source>
-        <target state="needs-review-translation">.NET Core SDK (che rispecchia un qualsiasi file global.json):</target>
+        <target state="translated">.NET SDK (che rispecchia un qualsiasi file global.json):</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
@@ -111,7 +111,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET SDK</source>
-        <target state="needs-review-translation">.NET Core SDK</target>
+        <target state="translated">.NET SDK</target>
         <note />
       </trans-unit>
     </body>

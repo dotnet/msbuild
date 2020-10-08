@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
-        <target state="translated">ARCHITEKTURA | ARCHITEKTURA\RID</target>
+        <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="CmdConfig">
         <source>CONFIG_FILE</source>
-        <target state="translated">KONFIG_SOUBOR</target>
+        <target state="translated">CONFIG_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
