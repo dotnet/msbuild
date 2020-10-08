@@ -1857,13 +1857,13 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the state file (if present) into the cache. If not present, attempts to read from CacheInputPaths, then creates a new cache if necessary.
         /// </summary>
-        internal void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
+        internal void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo, Func<string, Guid> calculateMvid = null, Func<string, bool> fileExists = null)
         {
             _cache = StateFileBase.DeserializeCache<SystemState>(_stateFile, Log);
 
             if (_cache == null)
             {
-                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths ?? Array.Empty<ITaskItem>(), Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo);
+                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths ?? Array.Empty<ITaskItem>(), Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo, calculateMvid, fileExists);
             }
             else
             {
@@ -1875,11 +1875,11 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// If CacheOutputPath is non-null, writes out a cache to that location. Otherwise, writes out the state file if a state name was supplied and the cache is dirty.
         /// </summary>
-        internal void WriteStateFile()
+        internal void WriteStateFile(Func<string, Guid> calculateMvid = null)
         {
             if (!string.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
             {
-                _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log);
+                _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log, calculateMvid);
             }
             else if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {

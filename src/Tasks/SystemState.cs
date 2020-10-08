@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -295,6 +294,7 @@ namespace Microsoft.Build.Tasks
         internal bool IsDirty
         {
             get { return isDirty; }
+            set { isDirty = value; }
         }
 
         /// <summary>
@@ -558,13 +558,15 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads in cached data from stateFiles to build an initial cache. Avoids logging warnings or errors.
         /// </summary>
-        internal static SystemState DeserializePrecomputedCaches(ITaskItem[] stateFiles, TaskLoggingHelper log, Type requiredReturnType, GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
+        internal static SystemState DeserializePrecomputedCaches(ITaskItem[] stateFiles, TaskLoggingHelper log, Type requiredReturnType, GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo, Func<string, Guid> calculateMvid, Func<string, bool> fileExists)
         {
             SystemState retVal = new SystemState();
             retVal.SetGetLastWriteTime(getLastWriteTime);
             retVal.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
             retVal.isDirty = stateFiles.Length > 0;
             HashSet<string> assembliesFound = new HashSet<string>();
+            calculateMvid ??= CalculateMvid;
+            fileExists ??= FileSystems.Default.FileExists;
 
             foreach (ITaskItem stateFile in stateFiles)
             {
@@ -581,22 +583,13 @@ namespace Microsoft.Build.Tasks
                     {
                         FileState fileState = kvp.Value;
                         // Verify that the assembly is correct
-                        Guid mvid;
                         string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stateFile.ToString()), relativePath));
-                        if (FileSystems.Default.FileExists(fullPath))
+                        if (fileExists(fullPath) && calculateMvid(fullPath).Equals(fileState.ModuleVersionID))
                         {
-                            using (var reader = new PEReader(File.OpenRead(fullPath)))
-                            {
-                                var metadataReader = reader.GetMetadataReader();
-                                mvid = metadataReader.GetGuid(metadataReader.GetModuleDefinition().Mvid);
-                            }
-                            if (mvid.Equals(fileState.ModuleVersionID))
-                            {
-                                // Correct file path and timestamp
-                                fileState.LastModified = retVal.getLastWriteTime(fullPath);
-                                retVal.instanceLocalFileStateCache[fullPath] = fileState;
-                                assembliesFound.Add(relativePath);
-                            }
+                            // Correct file path and timestamp
+                            fileState.LastModified = retVal.getLastWriteTime(fullPath);
+                            retVal.instanceLocalFileStateCache[fullPath] = fileState;
+                            assembliesFound.Add(relativePath);
                         }
                     }
                 }
@@ -608,19 +601,16 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Modifies this object to be more portable across machines, then writes it to stateFile.
         /// </summary>
-        internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log)
+        internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log, Func<string, Guid> calculateMvid)
         {
             Dictionary<string, FileState> newInstanceLocalFileStateCache = new Dictionary<string, FileState>(instanceLocalFileStateCache.Count);
+            calculateMvid ??= CalculateMvid;
             foreach (KeyValuePair<string, FileState> kvp in instanceLocalFileStateCache)
             {
                 // Add MVID to allow us to verify that we are using the same assembly later
                 string absolutePath = kvp.Key;
                 FileState fileState = kvp.Value;
-                using (var reader = new PEReader(File.OpenRead(absolutePath)))
-                {
-                    var metadataReader = reader.GetMetadataReader();
-                    fileState.ModuleVersionID = metadataReader.GetGuid(metadataReader.GetModuleDefinition().Mvid);
-                }
+                fileState.ModuleVersionID = calculateMvid(absolutePath);
 
                 string relativePath = FileUtilities.MakeRelative(Path.GetDirectoryName(stateFile), absolutePath);
                 newInstanceLocalFileStateCache[relativePath] = fileState;
@@ -632,6 +622,15 @@ namespace Microsoft.Build.Tasks
                 log.LogWarningWithCodeFromResources("General.StateFileAlreadyPresent", stateFile);
             }
             SerializeCache(stateFile, log);
+        }
+
+        private static Guid CalculateMvid(string path)
+        {
+            using (var reader = new PEReader(File.OpenRead(path)))
+            {
+                var metadataReader = reader.GetMetadataReader();
+                return metadataReader.GetGuid(metadataReader.GetModuleDefinition().Mvid);
+            }
         }
 
             /// <summary>

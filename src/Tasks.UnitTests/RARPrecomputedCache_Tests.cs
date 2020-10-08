@@ -13,28 +13,41 @@ namespace Microsoft.Build.Tasks.UnitTests
 {
     public class RARPrecomputedCache_Tests
     {
+        private Dictionary<string, Guid> guidStore = new Dictionary<string, Guid>();
+
+        private Guid calculateMvid(string path)
+        {
+            if (!guidStore.ContainsKey(path))
+            {
+                guidStore.Add(path, Guid.NewGuid());
+            }
+            return guidStore[path];
+        }
+
         [Fact]
         public void TestPrecomputedCacheOutput()
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                TransientTestFile standardCache = env.CreateFile(".cache");
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
                 t._cache = new SystemState();
                 t._cache.instanceLocalFileStateCache = new Dictionary<string, SystemState.FileState>() {
-                    { "assembly1", new SystemState.FileState(DateTime.Now) },
-                    { "assembly2", new SystemState.FileState(DateTime.Now) { Assembly = new Shared.AssemblyNameExtension("hi") } } };
-                TransientTestFile standardCache = env.CreateFile(".cache");
+                    { Path.Combine(standardCache.Path, "assembly1"), new SystemState.FileState(DateTime.Now) },
+                    { Path.Combine(standardCache.Path, "assembly2"), new SystemState.FileState(DateTime.Now) { Assembly = new Shared.AssemblyNameExtension("hi") } } };
+                t._cache.IsDirty = true;
                 t.StateFile = standardCache.Path;
-                t.WriteStateFile();
+                t.WriteStateFile(calculateMvid);
                 int standardLen = File.ReadAllText(standardCache.Path).Length;
                 File.Delete(standardCache.Path);
                 standardLen.ShouldBeGreaterThan(0);
 
-                TransientTestFile precomputedCache = env.CreateFile(standardCache.Path + ".cache", string.Empty);
-                t.AssemblyInformationCacheOutputPath = precomputedCache.Path;
-                t.WriteStateFile();
+                string precomputedPath = standardCache.Path + ".cache";
+                t._cache.IsDirty = true;
+                t.AssemblyInformationCacheOutputPath = precomputedPath;
+                t.WriteStateFile(calculateMvid);
                 File.Exists(standardCache.Path).ShouldBeFalse();
-                int preLen = File.ReadAllText(precomputedCache.Path).Length;
+                int preLen = File.ReadAllText(precomputedPath).Length;
                 preLen.ShouldBeGreaterThan(0);
                 preLen.ShouldNotBe(standardLen);
             }
@@ -44,38 +57,42 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void TestPreComputedCacheInputAndOutput()
         {
             using (TestEnvironment env = TestEnvironment.Create()) {
+                TransientTestFile standardCache = env.CreateFile(".cache");
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
                 t._cache = new SystemState();
                 t._cache.instanceLocalFileStateCache = new Dictionary<string, SystemState.FileState>() {
-                    { "assembly1", new SystemState.FileState(DateTime.Now) },
-                    { "assembly2", new SystemState.FileState(DateTime.Now) { Assembly = new Shared.AssemblyNameExtension("hi") } } };
-                TransientTestFile standardCache = env.CreateFile(".cache");
+                    { Path.Combine(standardCache.Path, "assembly1"), new SystemState.FileState(DateTime.Now) },
+                    { Path.Combine(standardCache.Path, "assembly2"), new SystemState.FileState(DateTime.Now) { Assembly = new Shared.AssemblyNameExtension("hi") } } };
                 t.StateFile = standardCache.Path;
-                t.WriteStateFile();
+                t._cache.IsDirty = true;
+                t.WriteStateFile(calculateMvid);
 
-                t._cache.instanceLocalFileStateCache.Add("..\\.nuget\\packages\\system.text.encodings.web\\4.7.0\\lib\\netstandard2.0\\System.Text.Encodings.Web.dll",
+                string dllName = Path.Combine(Path.GetDirectoryName(standardCache.Path), "randomFolder", "dll.dll");
+                t._cache.instanceLocalFileStateCache.Add(dllName,
                     new SystemState.FileState(DateTime.Now) {
                         Assembly = null,
                         RuntimeVersion = "v4.0.30319",
                         FrameworkNameAttribute = new System.Runtime.Versioning.FrameworkName(".NETFramework", Version.Parse("4.7.2"), "Profile"),
                         scatterFiles = new string[] { "first", "second" } });
-                TransientTestFile precomputedCache = env.CreateFile(standardCache.Path + ".cache", string.Empty);
-                t.AssemblyInformationCacheOutputPath = precomputedCache.Path;
-                t.WriteStateFile();
+                string precomputedCachePath = standardCache.Path + ".cache";
+                t.AssemblyInformationCacheOutputPath = precomputedCachePath;
+                t._cache.IsDirty = true;
+                t.WriteStateFile(calculateMvid);
 
                 ResolveAssemblyReference u = new ResolveAssemblyReference();
                 u.StateFile = standardCache.Path;
                 u.AssemblyInformationCachePaths = new ITaskItem[]
                 {
-                    new TaskItem(precomputedCache.Path)
+                    new TaskItem(precomputedCachePath)
                 };
 
-                u.ReadStateFile(File.GetLastWriteTime, Array.Empty<AssemblyTableInfo>());
-                u._cache.instanceLocalFileStateCache.ShouldNotContainKey("..\\.nuget\\packages\\system.text.encodings.web\\4.7.0\\lib\\netstandard2.0\\System.Text.Encodings.Web.dll");
+                u.ReadStateFile(File.GetLastWriteTime, Array.Empty<AssemblyTableInfo>(), calculateMvid, p => true);
+                u._cache.instanceLocalFileStateCache.ShouldNotContainKey(dllName);
                 File.Delete(standardCache.Path);
-                u.ReadStateFile(File.GetLastWriteTime, Array.Empty<AssemblyTableInfo>());
-                u._cache.instanceLocalFileStateCache.ShouldContainKey("..\\.nuget\\packages\\system.text.encodings.web\\4.7.0\\lib\\netstandard2.0\\System.Text.Encodings.Web.dll");
-                SystemState.FileState a3 = u._cache.instanceLocalFileStateCache["..\\.nuget\\packages\\system.text.encodings.web\\4.7.0\\lib\\netstandard2.0\\System.Text.Encodings.Web.dll"];
+                u._cache = null;
+                u.ReadStateFile(File.GetLastWriteTime, Array.Empty<AssemblyTableInfo>(), calculateMvid, p => true);
+                u._cache.instanceLocalFileStateCache.ShouldContainKey(dllName);
+                SystemState.FileState a3 = u._cache.instanceLocalFileStateCache[dllName];
                 a3.Assembly.ShouldBeNull();
                 a3.RuntimeVersion.ShouldBe("v4.0.30319");
                 a3.FrameworkNameAttribute.Version.ShouldBe(Version.Parse("4.7.2"));
