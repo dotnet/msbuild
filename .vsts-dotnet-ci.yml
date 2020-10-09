@@ -62,7 +62,6 @@ jobs:
     displayName: RichCodeNav Upload
     inputs:
       languages: 'csharp'
-      richNavLogOutputDirectory: $(Build.SourcesDirectory)/artifacts/bin
     continueOnError: true
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
