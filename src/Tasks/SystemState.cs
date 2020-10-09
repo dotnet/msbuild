@@ -310,7 +310,7 @@ namespace Microsoft.Build.Tasks
 
             public override void Write(Utf8JsonWriter writer, SystemState stateFile, JsonSerializerOptions options)
             {
-                Hashtable cache = stateFile.instanceLocalFileStateCache;
+                Dictionary<string, FileState> cache = stateFile.instanceLocalFileStateCache;
                 writer.WriteStartObject();
                 JsonSerializerOptions aneOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
                 AssemblyNameExtension.Converter converter = new AssemblyNameExtension.Converter();
@@ -699,7 +699,7 @@ namespace Microsoft.Build.Tasks
                 // Verify that it's a real stateFile; log message but do not error if not
                 var deserializeOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
                 deserializeOptions.Converters.Add(new SystemState.Converter());
-                SystemState sysBase = JsonSerializer.Deserialize<SystemState>(File.ReadAllText(stateFile), deserializeOptions);
+                SystemState sysBase = JsonSerializer.Deserialize<SystemState>(File.ReadAllText(stateFile.ToString()), deserializeOptions);
                 if (sysBase == null)
                 {
                     continue;
