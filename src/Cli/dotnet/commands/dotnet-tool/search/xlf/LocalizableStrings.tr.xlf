@@ -4,117 +4,117 @@
     <body>
       <trans-unit id="Authors">
         <source>Authors</source>
-        <target state="new">Authors</target>
+        <target state="translated">Yazarlar</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Search dotnet tools in nuget.org</source>
-        <target state="new">Search dotnet tools in nuget.org</target>
+        <target state="translated">Nuget.org'da dotnet araçlarını arayın</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsColumn">
         <source>Commands</source>
-        <target state="new">Commands</target>
+        <target state="translated">Komutlar</target>
         <note />
       </trans-unit>
       <trans-unit id="Description">
         <source>Description</source>
-        <target state="new">Description</target>
+        <target state="translated">Açıklama</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="DetailArgumentName">
         <source>Detail</source>
-        <target state="new">Detail</target>
+        <target state="translated">Ayrıntı</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailDescription">
         <source>Show detail result of the query.</source>
-        <target state="new">Show detail result of the query.</target>
+        <target state="translated">Sorgunun ayrıntılı sonucunu gösterir.</target>
         <note />
       </trans-unit>
       <trans-unit id="Downloads">
         <source>Downloads</source>
-        <target state="new">Downloads</target>
+        <target state="translated">İndirmeler</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="InvalidInputTypeInteger">
         <source>{0} should be an integer</source>
-        <target state="new">{0} should be an integer</target>
+        <target state="translated">{0} bir tamsayı olmalıdır</target>
         <note />
       </trans-unit>
       <trans-unit id="LatestVersion">
         <source>Latest Version</source>
-        <target state="new">Latest Version</target>
+        <target state="translated">En Son Sürüm</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="NoResult">
         <source>Could not find any results.</source>
-        <target state="new">Could not find any results.</target>
+        <target state="translated">Sonuç bulunamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageId">
         <source>Package ID</source>
-        <target state="new">Package ID</target>
+        <target state="translated">Paket Kimliği</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="PrereleaseDescription">
         <source>determining whether to include pre-release packages.</source>
-        <target state="new">determining whether to include pre-release packages.</target>
+        <target state="translated">yayın öncesi paketlerin eklenip eklenmeyeceğini belirleme.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermArgumentName">
         <source>Search Term</source>
-        <target state="new">Search Term</target>
+        <target state="translated">Arama Terimi</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermDescription">
         <source>Search term from package id or package description. Require at least one character.</source>
-        <target state="new">Search term from package id or package description. Require at least one character.</target>
+        <target state="translated">Paket kimliğinden veya paket açıklamasından terim arayın. En az bir karakter gerektirin.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipArgumentName">
         <source>Skip</source>
-        <target state="new">Skip</target>
+        <target state="translated">Atla</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipDescription">
         <source>The number of results to skip, for pagination.</source>
-        <target state="new">The number of results to skip, for pagination.</target>
+        <target state="translated">Sayfalandırma için atlanacak sonuç sayısı.</target>
         <note />
       </trans-unit>
       <trans-unit id="Summary">
         <source>Summary</source>
-        <target state="new">Summary</target>
+        <target state="translated">Özet</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="Tags">
         <source>Tags</source>
-        <target state="new">Tags</target>
+        <target state="translated">Etiketler</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="TakeArgumentName">
         <source>Take</source>
-        <target state="new">Take</target>
+        <target state="translated">Al</target>
         <note />
       </trans-unit>
       <trans-unit id="TakeDescription">
         <source>The number of results to return, for pagination.</source>
-        <target state="new">The number of results to return, for pagination.</target>
+        <target state="translated">Sayfalandırma için döndürülecek sonuç sayısı.</target>
         <note />
       </trans-unit>
       <trans-unit id="Verified">
         <source>Verified</source>
-        <target state="new">Verified</target>
+        <target state="translated">Doğrulandı</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="Version">
         <source>Version</source>
-        <target state="new">Version</target>
+        <target state="translated">SÜRÜM</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="Versions">
         <source>Versions</source>
-        <target state="new">Versions</target>
+        <target state="translated">Sürümler</target>
         <note>Table lable</note>
       </trans-unit>
     </body>

@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOption">
         <source>FRAMEWORK</source>
-        <target state="translated">PLATAFORMA</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
@@ -24,12 +24,12 @@
       </trans-unit>
       <trans-unit id="NoSelfContainedOptionDescription">
         <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
-        <target state="needs-review-translation">Publique la aplicación como dependiente del marco de trabajo sin el runtime de .NET Core. Para ejecutar la aplicación, debe instalarse un runtime de .NET Core admitido.</target>
+        <target state="translated">Publique la aplicación como dependiente del marco de trabajo sin el entorno de ejecución .NET. Para ejecutar la aplicación, debe instalarse un entorno de ejecución .NET admitido.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
-        <target state="translated">DIRECTORIO_DE_SALIDA</target>
+        <target state="translated">OUTPUT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
@@ -72,8 +72,8 @@ El valor predeterminado es publicar una aplicación dependiente del marco.</targ
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Publique el tiempo de ejecución de .NET Core con la aplicación para que no sea necesario instalar el tiempo de ejecución en el equipo de destino.
-El valor predeterminado es "true" si se especifica un identificador de tiempo de ejecución.</target>
+        <target state="translated">Publique el entorno de ejecución .NET con la aplicación para que no sea necesario instalar dicho entorno en la máquina de destino.
+El valor predeterminado es "true" si se especifica un identificador de entorno de ejecución.</target>
         <note />
       </trans-unit>
     </body>

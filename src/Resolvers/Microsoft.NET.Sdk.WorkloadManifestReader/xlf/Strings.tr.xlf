@@ -4,67 +4,67 @@
     <body>
       <trans-unit id="ConcreteWorkloadHasNoDescription">
         <source>Workload definition '{0}' is a concrete dev workload but has no description</source>
-        <target state="new">Workload definition '{0}' is a concrete dev workload but has no description</target>
+        <target state="translated">'{0}' iş yükü tanımı, somut bir geliştirici iş yükü ancak açıklaması yok</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateKeyAtOffset">
         <source>Duplicate key '{0}' at offset {1}</source>
-        <target state="new">Duplicate key '{0}' at offset {1}</target>
+        <target state="translated">{1} uzaklığında yinelenen '{0}' anahtarı</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedBoolAtOffset">
         <source>Expected boolean value at offset {0}</source>
-        <target state="new">Expected boolean value at offset {0}</target>
+        <target state="translated">{0} uzaklığında boolean değeri bekleniyordu</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedStringAtOffset">
         <source>Expected string value at offset {0}</source>
-        <target state="new">Expected string value at offset {0}</target>
+        <target state="translated">{0} uzaklığında dize değeri bekleniyordu</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedTokenAtOffset">
         <source>Expected {0} token at offset {1}</source>
-        <target state="new">Expected {0} token at offset {1}</target>
+        <target state="translated">{1} uzaklığında {0} belirteci bekleniyordu</target>
         <note />
       </trans-unit>
       <trans-unit id="IncompleteDocument">
         <source>Document ended prematurely</source>
-        <target state="new">Document ended prematurely</target>
+        <target state="translated">Belge zamanından önce sonlandırıldı</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingOrInvalidManifestVersion">
         <source>Missing or invalid manifest version</source>
-        <target state="new">Missing or invalid manifest version</target>
+        <target state="translated">Bildirim sürümü eksik veya geçersiz</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingWorkloadPackKind">
         <source>Missing kind for workload pack '{0}'</source>
-        <target state="new">Missing kind for workload pack '{0}'</target>
+        <target state="translated">'{0}' iş yükü paketi için tip eksik</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingWorkloadPackVersion">
         <source>Missing version for workload pack '{0}'</source>
-        <target state="new">Missing version for workload pack '{0}'</target>
+        <target state="translated">'{0}' iş yükü paketi için sürüm eksik</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
-        <target state="new">Unexpected token '{0}' at offset {1}</target>
+        <target state="translated">{1} uzaklığında beklenmeyen '{0}' belirteci</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownKeyAtOffset">
         <source>Unknown key '{0}' at offset {1}</source>
-        <target state="new">Unknown key '{0}' at offset {1}</target>
+        <target state="translated">{1} uzaklığında bilinmeyen '{0}' anahtarı</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownWorkloadDefinitionKind">
         <source>Unknown workload definition kind '{0}' at offset {1}</source>
-        <target state="new">Unknown workload definition kind '{0}' at offset {1}</target>
+        <target state="translated">{1} uzaklığında bilinmeyen '{0}' iş yükü tanımı tipi</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownWorkloadPackKind">
         <source>Unknown workload pack kind '{0}' at offset {1}</source>
-        <target state="new">Unknown workload pack kind '{0}' at offset {1}</target>
+        <target state="translated">{1} uzaklığında bilinmeyen '{0}' iş yükü paketi tipi</target>
         <note />
       </trans-unit>
     </body>

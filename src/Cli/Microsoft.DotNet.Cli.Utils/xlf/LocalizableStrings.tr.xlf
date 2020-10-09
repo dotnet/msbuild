@@ -28,11 +28,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">Belirtilen komut veya dosya bulunamadığından yürütülemedi.
+        <target state="translated">Belirtilen komut veya dosya bulunamadığından yürütülemedi.
 Bunun nedeni şunlardan biri olabilir:
   * Yerleşik bir dotnet komutunu yanlış yazdınız.
-  * Bir .NET Core programını yürütmeyi amaçladınız, ancak {0} mevcut değil.
-  * Genel bir aracı çalıştırmayı amaçladınız, ancak adı bu olan dotnet ön ekli yürütülebilir dosya PATH üzerinde bulunamadı.</target>
+  * Bir .NET programını yürütmeyi amaçladınız, ancak {0} yok.
+  * Genel bir aracı çalıştırmayı amaçladınız, ancak bu ada sahip dotnet ön ekli yürütülebilir dosya PATH üzerinde bulunamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -77,7 +77,7 @@ Bunun nedeni şunlardan biri olabilir:
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
         <source>.NET SDK (reflecting any global.json):</source>
-        <target state="needs-review-translation">.NET Core SDK (varsa global.json’u yansıtır):</target>
+        <target state="translated">.NET SDK (varsa global.json dosyasını yansıtır):</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
@@ -111,7 +111,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET SDK</source>
-        <target state="needs-review-translation">.NET Core SDK'sı</target>
+        <target state="translated">.NET SDK</target>
         <note />
       </trans-unit>
     </body>

@@ -75,7 +75,7 @@ Se si vuole creare un manifesto, usare `dotnet new tool-manifest`, in genere nel
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
-        <target state="translated">ID_PACCHETTO</target>
+        <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
@@ -142,10 +142,10 @@ Se si vuole creare un manifesto, usare `dotnet new tool-manifest`, in genere nel
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">Non è stato possibile installare lo strumento '{0}'. Le cause di questo errore sono le seguenti:
+        <target state="translated">Non è stato possibile installare lo strumento '{0}'. Le cause di questo errore sono le seguenti:
 
 * Si sta provando a installare una versione precedente e non è stata usata l'opzione --version per specificare la versione.
-* È stato trovato un pacchetto con questo nome, ma non corrisponde a uno strumento .NET Core.
+* È stato trovato un pacchetto con questo nome, ma non corrisponde a uno strumento .NET.
 * Non è possibile accedere al feed NuGet richiesto, probabilmente a causa di un problema di connessione Internet.
 * Il nome dello strumento non è stato digitato correttamente.
 
@@ -159,12 +159,12 @@ Per altri motivi, inclusa l'aggiunta obbligatoria del prefisso microsoft ai nomi
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="translated">ORIGINE</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="translated">VERSIONE</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
@@ -179,7 +179,7 @@ Per altri motivi, inclusa l'aggiunta obbligatoria del prefisso microsoft ai nomi
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="translated">PERCORSO</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
