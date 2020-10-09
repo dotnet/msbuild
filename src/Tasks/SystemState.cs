@@ -395,7 +395,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        public SystemState()
+        internal SystemState()
         {
         }
 
