@@ -2939,15 +2939,15 @@ namespace Microsoft.Build.CommandLine
         {
             if (unquotedSwitch.StartsWith("--", StringComparison.Ordinal))
             {
-                return "--".Length;
+                return 2;
             }
             else if (unquotedSwitch.StartsWith("-", StringComparison.Ordinal) || unquotedSwitch.StartsWith("/", StringComparison.Ordinal))
             {
-                return "-".Length;
+                return 1;
             }
             else
             {
-                return "".Length;
+                return 0;
             }
         }
 
