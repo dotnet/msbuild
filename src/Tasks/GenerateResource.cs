@@ -3825,10 +3825,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Add a resource from an XML or binary format file to the internal data structures
         /// </summary>
-        /// <param name="reader">Reader info</param>
-        /// <param name="name">Resource name</param>
-        /// <param name="value">Resource value</param>
-        /// <param name="inputFileName">Input file for messages</param>
+        /// <param name="reader">Reader information.</param>
+        /// <param name="name">Resource name.</param>
+        /// <param name="value">Resource value.</param>
+        /// <param name="inputFileName">Input file for messages.</param>
         private void AddResource(ReaderInfo reader, string name, object value, String inputFileName)
         {
             AddResource(reader, name, value, inputFileName, 0, 0);

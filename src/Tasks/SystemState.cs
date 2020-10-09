@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,7 +14,10 @@ using System.Runtime.Versioning;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Security.Permissions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 
@@ -36,7 +38,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache at the SystemState instance level. It is serialized and reused between instances.
         /// </summary>
-        private Hashtable instanceLocalFileStateCache = new Hashtable(StringComparer.OrdinalIgnoreCase);
+        internal Dictionary<string, FileState> instanceLocalFileStateCache = new Dictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// LastModified information is purely instance-local. It doesn't make sense to
@@ -113,7 +115,7 @@ namespace Microsoft.Build.Tasks
         /// Class that holds the current file state.
         /// </summary>
         [Serializable]
-        private sealed class FileState
+        internal sealed class FileState
         {
             /// <summary>
             /// The assemblies that this file depends on.
@@ -149,25 +151,25 @@ namespace Microsoft.Build.Tasks
             /// Gets the last modified date.
             /// </summary>
             /// <value></value>
-            public DateTime LastModified { get; set; }
+            internal DateTime LastModified { get; set; }
 
             /// <summary>
             /// Get or set the assemblyName.
             /// </summary>
             /// <value></value>
-            public AssemblyNameExtension Assembly { get; set; }
+            internal AssemblyNameExtension Assembly { get; set; }
 
             /// <summary>
             /// Get or set the runtimeVersion
             /// </summary>
             /// <value></value>
-            public string RuntimeVersion { get; set; }
+            internal string RuntimeVersion { get; set; }
 
             /// <summary>
             /// Get or set the framework name the file was built against
             /// </summary>
             [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Could be used in other assemblies")]
-            public FrameworkName FrameworkNameAttribute
+            internal FrameworkName FrameworkNameAttribute
             {
                 get { return frameworkName; }
                 set { frameworkName = value; }
@@ -176,7 +178,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Get or set the ID of this assembly. Used to verify it is the same version.
             /// </summary>
-            public Guid ModuleVersionID { get; set; }
+            internal Guid ModuleVersionID { get; set; }
         }
 
         internal sealed class Converter : JsonConverter<SystemState>
@@ -399,10 +401,10 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Set the target framework paths.
-        /// This is used to optimize IO in the case of files requested from one 
+        /// This is used to optimize IO in the case of files requested from one
         /// of the FX folders.
         /// </summary>
-        /// <param name="installedAssemblyTableInfos"></param>
+        /// <param name="installedAssemblyTableInfos">List of Assembly Table Info.</param>
         internal void SetInstalledAssemblyInformation
         (
             AssemblyTableInfo[] installedAssemblyTableInfos
@@ -418,6 +420,7 @@ namespace Microsoft.Build.Tasks
         internal bool IsDirty
         {
             get { return isDirty; }
+            set { isDirty = value; }
         }
 
         /// <summary>
@@ -514,8 +517,7 @@ namespace Microsoft.Build.Tasks
         private FileState ComputeFileStateFromCachesAndDisk(string path)
         {
             DateTime lastModified = GetAndCacheLastModified(path);
-            FileState cachedInstanceFileState = (FileState)instanceLocalFileStateCache[path];
-            bool isCachedInInstance = cachedInstanceFileState != null;
+            bool isCachedInInstance = instanceLocalFileStateCache.TryGetValue(path, out FileState cachedInstanceFileState);
             bool isCachedInProcess =
                 s_processWideFileStateCache.TryGetValue(path, out FileState cachedProcessFileState);
             
@@ -682,42 +684,41 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads in cached data from stateFiles to build an initial cache. Avoids logging warnings or errors.
         /// </summary>
-        internal static SystemState DeserializePrecomputedCaches(string[] stateFiles, TaskLoggingHelper log, Type requiredReturnType, GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
+        internal static SystemState DeserializePrecomputedCaches(ITaskItem[] stateFiles, TaskLoggingHelper log, Type requiredReturnType, GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo, Func<string, Guid> calculateMvid, Func<string, bool> fileExists)
         {
             SystemState retVal = new SystemState();
             retVal.SetGetLastWriteTime(getLastWriteTime);
             retVal.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
             retVal.isDirty = stateFiles.Length > 0;
             HashSet<string> assembliesFound = new HashSet<string>();
+            calculateMvid ??= CalculateMvid;
+            fileExists ??= FileSystems.Default.FileExists;
 
-            foreach (string stateFile in stateFiles)
+            foreach (ITaskItem stateFile in stateFiles)
             {
                 // Verify that it's a real stateFile; log message but do not error if not
                 var deserializeOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
                 deserializeOptions.Converters.Add(new SystemState.Converter());
                 SystemState sysBase = JsonSerializer.Deserialize<SystemState>(File.ReadAllText(stateFile), deserializeOptions);
-                foreach (string relativePath in sysBase.instanceLocalFileStateCache.Keys)
+                if (sysBase == null)
                 {
+                    continue;
+                }
+
+                foreach (KeyValuePair<string, FileState> kvp in sysBase.instanceLocalFileStateCache)
+                {
+                    string relativePath = kvp.Key;
                     if (!assembliesFound.Contains(relativePath))
                     {
-                        FileState fileState = (FileState)sysBase.instanceLocalFileStateCache[relativePath];
+                        FileState fileState = kvp.Value;
                         // Verify that the assembly is correct
-                        Guid mvid;
-                        string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stateFile), relativePath));
-                        if (File.Exists(fullPath))
+                        string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stateFile.ToString()), relativePath));
+                        if (fileExists(fullPath) && calculateMvid(fullPath).Equals(fileState.ModuleVersionID))
                         {
-                            using (var reader = new PEReader(File.OpenRead(fullPath)))
-                            {
-                                var metadataReader = reader.GetMetadataReader();
-                                mvid = metadataReader.GetGuid(metadataReader.GetModuleDefinition().Mvid);
-                            }
-                            if (mvid.Equals(fileState.ModuleVersionID))
-                            {
-                                // Correct file path and timestamp
-                                fileState.LastModified = retVal.getLastWriteTime(fullPath);
-                                retVal.instanceLocalFileStateCache[fullPath] = fileState;
-                                assembliesFound.Add(relativePath);
-                            }
+                            // Correct file path and timestamp
+                            fileState.LastModified = retVal.getLastWriteTime(fullPath);
+                            retVal.instanceLocalFileStateCache[fullPath] = fileState;
+                            assembliesFound.Add(relativePath);
                         }
                     }
                 }
@@ -729,20 +730,18 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Modifies this object to be more portable across machines, then writes it to stateFile.
         /// </summary>
-        internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log)
+        internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log, Func<string, Guid> calculateMvid)
         {
-            Hashtable newInstanceLocalFileStateCache = new Hashtable();
-            foreach (string path in instanceLocalFileStateCache.Keys)
+            Dictionary<string, FileState> newInstanceLocalFileStateCache = new Dictionary<string, FileState>(instanceLocalFileStateCache.Count);
+            calculateMvid ??= CalculateMvid;
+            foreach (KeyValuePair<string, FileState> kvp in instanceLocalFileStateCache)
             {
                 // Add MVID to allow us to verify that we are using the same assembly later
-                FileState fileState = (FileState)instanceLocalFileStateCache[path];
-                using (var reader = new PEReader(File.OpenRead(path)))
-                {
-                    var metadataReader = reader.GetMetadataReader();
-                    fileState.ModuleVersionID = metadataReader.GetGuid(metadataReader.GetModuleDefinition().Mvid);
-                }
+                string absolutePath = kvp.Key;
+                FileState fileState = kvp.Value;
+                fileState.ModuleVersionID = calculateMvid(absolutePath);
 
-                string relativePath = FileUtilities.MakeRelative(Path.GetDirectoryName(stateFile), path);
+                string relativePath = FileUtilities.MakeRelative(Path.GetDirectoryName(stateFile), absolutePath);
                 newInstanceLocalFileStateCache[relativePath] = fileState;
             }
             instanceLocalFileStateCache = newInstanceLocalFileStateCache;
@@ -754,6 +753,15 @@ namespace Microsoft.Build.Tasks
             JsonSerializerOptions options = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
             options.Converters.Add(new SystemState.Converter());
             File.WriteAllText(stateFile, JsonSerializer.Serialize(this, options));
+        }
+
+        private static Guid CalculateMvid(string path)
+        {
+            using (var reader = new PEReader(File.OpenRead(path)))
+            {
+                var metadataReader = reader.GetMetadataReader();
+                return metadataReader.GetGuid(metadataReader.GetModuleDefinition().Mvid);
+            }
         }
 
             /// <summary>

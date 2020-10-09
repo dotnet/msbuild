@@ -7,7 +7,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using System.Text.Json;
 
 namespace Microsoft.Build.Tasks
 {
@@ -65,9 +64,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the specified file from disk into a StateFileBase derived object.
         /// </summary>
-        internal static StateFileBase DeserializeCache(string stateFile, TaskLoggingHelper log, Type requiredReturnType, bool logWarnings = true)
+        internal static T DeserializeCache<T>(string stateFile, TaskLoggingHelper log, bool logWarnings = true) where T : StateFileBase
         {
-            StateFileBase retVal = null;
+            T retVal = null;
             object deserializedObject = null;
 
             // First, we read the cache from disk if one exists, or if one does not exist
@@ -80,7 +79,7 @@ namespace Microsoft.Build.Tasks
                     {
                         var formatter = new BinaryFormatter();
                         deserializedObject = formatter.Deserialize(s);
-                        retVal = deserializedObject as StateFileBase;
+                        retVal = deserializedObject as T;
                     }
                     // If the deserialized object is null then there would be no cast error but retVal would still be null
                     // only log the message if there would have been a cast error
@@ -91,7 +90,7 @@ namespace Microsoft.Build.Tasks
                         // If there is an invalid cast, a message rather than a warning should be emitted.
                         log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
                     }
-                    else if (retVal != null && (!requiredReturnType.IsInstanceOfType(retVal)))
+                    else if (retVal != null && !(retVal is T))
                     {
                         if (logWarnings)
                         {

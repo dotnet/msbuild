@@ -699,9 +699,6 @@
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <Link>SharedUtilities\ExceptionHandling.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\EscapingStringExtensions\EscapingStringExtensions.cs">
-      <Link>SharedUtilities\EscapingStringExtensions\EscapingStringExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\FileMatcher.cs">
       <Link>SharedUtilities\FileMatcher.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

@@ -308,7 +308,7 @@ namespace Microsoft.Build.ObjectModelRemoting
 
             public override bool IsImported => Link.IsImported;
 
-            internal override string EvaluatedValueEscapedIntenral => Link.EvaluatedIncludeEscaped;
+            internal override string EvaluatedValueEscapedInternal => Link.EvaluatedIncludeEscaped;
         }
         #endregion
     }

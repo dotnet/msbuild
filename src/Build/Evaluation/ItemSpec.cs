@@ -4,11 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.EscapingStringExtensions;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -473,7 +471,7 @@ namespace Microsoft.Build.Evaluation
 
         protected virtual IMSBuildGlob CreateMsBuildGlob()
         {
-            return MSBuildGlob.Parse(ProjectDirectory, TextFragment.Unescape());
+            return MSBuildGlob.Parse(ProjectDirectory, EscapingUtilities.UnescapeAll(TextFragment));
         }
 
         private FileSpecMatcherTester CreateFileSpecMatcher()
