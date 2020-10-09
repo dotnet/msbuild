@@ -3,6 +3,7 @@
         <TargetFrameworks>netstandard2.0</TargetFrameworks>
         <Description>Template creation for the dotnet CLI</Description>
         <IsPackable>true</IsPackable>
+		<IsShipping>false</IsShipping>
     </PropertyGroup>
 
     <ItemGroup>
