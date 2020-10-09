@@ -18,5 +18,4 @@ jobs:
     displayName: RichCodeNav Upload
     inputs:
       languages: 'csharp'
-      richNavLogOutputDirectory: $(Build.SourcesDirectory)/artifacts/bin
     continueOnError: true
