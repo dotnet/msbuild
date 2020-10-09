@@ -2922,8 +2922,7 @@ namespace Microsoft.Build.CommandLine
         /// </returns>
         private static bool ValidateSwitchIndicatorInUnquotedArgument(string unquotedCommandLineArgument)
         {
-            return unquotedCommandLineArgument.StartsWith("--", StringComparison.Ordinal)
-                || unquotedCommandLineArgument.StartsWith("-", StringComparison.Ordinal)
+            return unquotedCommandLineArgument.StartsWith("-", StringComparison.Ordinal) // superset of "--"
                 || unquotedCommandLineArgument.StartsWith("/", StringComparison.Ordinal);
         }
 
