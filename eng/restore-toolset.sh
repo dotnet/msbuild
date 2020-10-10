@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 function InitializeCustomSDKToolset {
   if [[ "$restore" != true ]]; then
     return
@@ -9,9 +11,19 @@ function InitializeCustomSDKToolset {
     return
   fi
 
+  DISTRO=
+  MAJOR_VERSION=
+  if [ -e /etc/os-release ]; then
+      . /etc/os-release
+      DISTRO="$ID"
+      MAJOR_VERSION="${VERSION_ID:+${VERSION_ID%%.*}}"
+  fi
+
   InitializeDotNetCli true
-  InstallDotNetSharedFramework "1.0.5"
-  InstallDotNetSharedFramework "1.1.2"
+  if [[ "$DISTRO" != "ubuntu" || "$MAJOR_VERSION" -le 16 ]]; then
+    InstallDotNetSharedFramework "1.0.5"
+    InstallDotNetSharedFramework "1.1.2"
+  fi
   InstallDotNetSharedFramework "2.1.0"
   InstallDotNetSharedFramework "2.2.8"
   InstallDotNetSharedFramework "3.1.0"
