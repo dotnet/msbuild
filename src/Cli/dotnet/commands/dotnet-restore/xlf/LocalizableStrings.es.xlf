@@ -22,6 +22,11 @@
         <target state="translated">Ruta de acceso opcional a un archivo de proyecto o argumentos de MSBuild.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdCurrentRuntimeOptionDescription">
+        <source>Use host runtime to build the target.</source>
+        <target state="new">Use host runtime to build the target.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdSourceOption">
         <source>SOURCE</source>
         <target state="translated">ORIGEN</target>

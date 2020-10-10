@@ -22,6 +22,11 @@
         <target state="translated">프로젝트 파일의 선택적 경로 또는 MSBuild 인수입니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdCurrentRuntimeOptionDescription">
+        <source>Use host runtime to build the target.</source>
+        <target state="new">Use host runtime to build the target.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdSourceOption">
         <source>SOURCE</source>
         <target state="translated">SOURCE</target>

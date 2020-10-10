@@ -50,6 +50,7 @@ namespace Microsoft.DotNet.Cli
                         .With(name: LocalizableStrings.FrameworkVersionOption)
                         .ForwardAsSingle(o => $"-property:RuntimeFrameworkVersion={o.Arguments.Single()}")),
                 CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
+                CommonOptions.CurrentRuntimeOption(LocalizableStrings.CurrentRuntimeOptionDescription),
                 Create.Option(
                     "-o|--output",
                     LocalizableStrings.OutputOptionDescription,

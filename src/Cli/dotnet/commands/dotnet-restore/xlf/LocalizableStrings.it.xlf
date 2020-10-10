@@ -22,6 +22,11 @@
         <target state="translated">Percorso facoltativo di un file di progetto o di argomenti di MSBuild.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdCurrentRuntimeOptionDescription">
+        <source>Use host runtime to build the target.</source>
+        <target state="new">Use host runtime to build the target.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdSourceOption">
         <source>SOURCE</source>
         <target state="translated">ORIGINE</target>

@@ -7,6 +7,11 @@
         <target state="translated">存储为 .NET 平台指定的程序集。默认情况下，这些程序集将针对目标运行时和框架进行优化。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CurrentRuntimeOptionDescription">
+        <source>Use host runtime to build the target.</source>
+        <target state="new">Use host runtime to build the target.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>

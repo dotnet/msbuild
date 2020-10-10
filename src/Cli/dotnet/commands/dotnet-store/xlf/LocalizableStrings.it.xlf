@@ -7,6 +7,11 @@
         <target state="translated">Consente di archiviare gli assembly specificati per la piattaforma .NET. Per impostazione predefinita, gli assembly verranno ottimizzati per il framework e il runtime di destinazione.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CurrentRuntimeOptionDescription">
+        <source>Use host runtime to build the target.</source>
+        <target state="new">Use host runtime to build the target.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">DIR_OUTPUT</target>
