@@ -397,7 +397,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-                    ProjectTaskOutputPropertyInstance outputItem = new ProjectTaskOutputPropertyInstance
+                    ProjectTaskOutputPropertyInstance outputProperty = new ProjectTaskOutputPropertyInstance
                         (
                         output.PropertyName,
                         output.TaskParameter,
@@ -408,7 +408,7 @@ namespace Microsoft.Build.Evaluation
                         output.ConditionLocation
                         );
 
-                    taskOutputs.Add(outputItem);
+                    taskOutputs.Add(outputProperty);
                 }
             }
 
