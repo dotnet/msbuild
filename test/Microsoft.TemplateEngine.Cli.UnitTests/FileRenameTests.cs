@@ -5,8 +5,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
     public class FileRenameTests : EndToEndTestBase
     {
         [Theory(DisplayName = nameof(VerifyTemplateContentRenames))]
-        [InlineData("TestAssets.TemplateWithRenames --foo baz", "FileRenamesTest.json")]
-        [InlineData("TestAssets.TemplateWithSourceName --name baz", "FileRenamesTest.json")]
+        [InlineData("TestAssets.TemplateWithRenames --foo baz --testForms TestProject", "FileRenamesTest.json")]
+        [InlineData("TestAssets.TemplateWithSourceName --name baz", "SourceNameFileRenamesTest.json")]
         [InlineData("TestAssets.TemplateWithUnspecifiedSourceName --name baz", "NegativeFileRenamesTest.json")]
         [InlineData("TestAssets.TemplateWithSourceNameAndCustomSourcePath --name bar", "CustomSourcePathRenameTest.json")]
         [InlineData("TestAssets.TemplateWithSourceNameAndCustomTargetPath --name bar", "CustomTargetPathRenameTest.json")]

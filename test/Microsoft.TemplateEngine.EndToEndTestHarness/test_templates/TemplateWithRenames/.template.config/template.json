@@ -1,4 +1,4 @@
-﻿{
+{
   "author": "Test Asset",
   "classifications": [ "Test Asset" ],
   "name": "TemplateWithRenames",
@@ -12,6 +12,31 @@
       "type": "parameter",
       "dataType": "string",
       "fileRename": "bar"
+    },
+    "fooUC": {
+      "type": "generated",
+      "generator": "casing",
+      "parameters": {
+        "source": "foo",
+        "toLower": false
+      },
+      "fileRename": "bar_uc"
+    },
+    "testForms": {
+      "type": "parameter",
+      "dataType": "string",
+      "fileRename": "MyProject",
+      "forms": {
+        "global": [ "identity", "uc", "lc" ]
+      }
+    }
+  },
+  "forms": {
+    "uc": {
+      "identifier": "uppercase"
+    },
+    "lc": {
+      "identifier": "lowercase"
     }
   }
 }
