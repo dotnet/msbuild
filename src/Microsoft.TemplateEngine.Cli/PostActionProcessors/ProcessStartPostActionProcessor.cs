@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
@@ -29,7 +30,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
             settings.Host.LogMessage(string.Format(LocalizableStrings.RunningCommand, actionConfig.Args["executable"] + " " + args));
 
-            string resolvedExecutablePath = ResolveExecutableFilePath(actionConfig.Args["executable"], outputBasePath);
+            string resolvedExecutablePath = ResolveExecutableFilePath(settings.Host.FileSystem, actionConfig.Args["executable"], outputBasePath);
 
             System.Diagnostics.Process commandResult = System.Diagnostics.Process.Start(new ProcessStartInfo
             {
@@ -60,12 +61,12 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             return allSucceeded;
         }
 
-        private static string ResolveExecutableFilePath(string executableFileName, string outputBasePath)
+        private static string ResolveExecutableFilePath(IPhysicalFileSystem fileSystem, string executableFileName, string outputBasePath)
         {
-            if (!string.IsNullOrEmpty(outputBasePath) && Directory.Exists(outputBasePath))
+            if (!string.IsNullOrEmpty(outputBasePath) && fileSystem.DirectoryExists(outputBasePath))
             {
                 string executableCombinedFileName = Path.Combine(Path.GetFullPath(outputBasePath), executableFileName);
-                if (File.Exists(executableCombinedFileName))
+                if (fileSystem.FileExists(executableCombinedFileName))
                 {
                     return executableCombinedFileName;
                 }
