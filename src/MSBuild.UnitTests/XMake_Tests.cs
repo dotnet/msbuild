@@ -455,13 +455,37 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Help()
         {
-                MSBuildApp.Execute(
+            MSBuildApp.Execute(
 #if FEATURE_GET_COMMANDLINE
-                    @"c:\bin\msbuild.exe -? "
+                @"c:\bin\msbuild.exe -? "
 #else
-                    new [] {@"c:\bin\msbuild.exe", "-?"}
+                new [] {@"c:\bin\msbuild.exe", "-?"}
 #endif
-                ).ShouldBe(MSBuildApp.ExitType.Success);
+            ).ShouldBe(MSBuildApp.ExitType.Success);
+
+            MSBuildApp.Execute(
+#if FEATURE_GET_COMMANDLINE
+                @"c:\bin\msbuild.exe -h "
+#else
+                new [] {@"c:\bin\msbuild.exe", "-h"}
+#endif
+            ).ShouldBe( MSBuildApp.ExitType.Success );
+
+            MSBuildApp.Execute(
+#if FEATURE_GET_COMMANDLINE
+                @"c:\bin\msbuild.exe --help "
+#else
+                new [] {@"c:\bin\msbuild.exe", "--help"}
+#endif
+            ).ShouldBe( MSBuildApp.ExitType.Success );
+
+            MSBuildApp.Execute(
+#if FEATURE_GET_COMMANDLINE
+                @"c:\bin\msbuild.exe /h "
+#else
+                new [] {@"c:\bin\msbuild.exe", "/h"}
+#endif
+            ).ShouldBe( MSBuildApp.ExitType.Success );
         }
 
         [Fact]
