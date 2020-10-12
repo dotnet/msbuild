@@ -63,6 +63,7 @@ jobs:
     inputs:
       languages: 'csharp'
     continueOnError: true
+    condition: succeeded()
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:

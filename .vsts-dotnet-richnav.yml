@@ -1,8 +1,10 @@
 trigger:
 - master
+- exp/*
+- vs*
 
 jobs:
-- job: BootstrapMSBuildOnFullFrameworkWindows
+- job: RichCodeNavigationIndexingOnWindows
   displayName: "Rich Navigation Indexing"
   pool:
     vmImage: 'windows-2019'
@@ -13,9 +15,10 @@ jobs:
     displayName: build
     inputs:
       filePath: eng/common/build.ps1
-      arguments: '-restore -build -ci /p:CreateBootstrap=false /nr:false'
+      arguments: '-restore -build -ci /nr:false'
   - task: RichCodeNavIndexer@0
     displayName: RichCodeNav Upload
     inputs:
       languages: 'csharp'
     continueOnError: true
+    condition: succeeded()
