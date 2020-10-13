@@ -103,23 +103,23 @@
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="5.0.0">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>be9cc45df18ee78da3f0854857e1831d374378c0</Sha>
+      <Sha>f71c290fe83df29cc58acd862fc0749f43e6e377</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.0-rtm.20512.2">
+    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.0-rtm.20512.3">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>be9cc45df18ee78da3f0854857e1831d374378c0</Sha>
+      <Sha>f71c290fe83df29cc58acd862fc0749f43e6e377</Sha>
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="5.0.0">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>be9cc45df18ee78da3f0854857e1831d374378c0</Sha>
+      <Sha>f71c290fe83df29cc58acd862fc0749f43e6e377</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="5.0.0-rtm.20511.1" CoherentParentDependency="Microsoft.WindowsDesktop.App">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="5.0.0-rtm.20512.1" CoherentParentDependency="Microsoft.WindowsDesktop.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>847a413284b297c7f0ec7d0f2f111db4595b4ffe</Sha>
+      <Sha>b540d98fe45e61f195e9135e5436b0a3b40c8dd7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="5.0.0-rtm.20511.1" CoherentParentDependency="Microsoft.WindowsDesktop.App">
+    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="5.0.0-rtm.20512.1" CoherentParentDependency="Microsoft.WindowsDesktop.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>847a413284b297c7f0ec7d0f2f111db4595b4ffe</Sha>
+      <Sha>b540d98fe45e61f195e9135e5436b0a3b40c8dd7</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Dotnet.WinForms.ProjectTemplates" Version="5.0.0-rtm.20511.1" CoherentParentDependency="Microsoft.WindowsDesktop.App">
       <Uri>https://github.com/dotnet/winforms</Uri>
