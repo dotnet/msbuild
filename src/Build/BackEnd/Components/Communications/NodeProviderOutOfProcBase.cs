@@ -349,7 +349,7 @@ namespace Microsoft.Build.BackEnd
                 int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
                 for (int i = 0; i < handshakeComponents.Length; i++)
                 {
-                    CommunicationsUtilities.Trace("Writing handshake part {0} to pipe {1}", i, pipeName);
+                    CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], pipeName);
                     nodeStream.WriteIntForHandshake(handshakeComponents[i]);
                 }
 

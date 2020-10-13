@@ -321,7 +321,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Indicates whether to emit a default error if a task returns false without logging an error.
         /// </summary>
-        public bool AllowFailureWithoutError { get; set; } = true;
+        public bool AllowFailureWithoutError { get; set; } = false;
 
         /// <summary>
         /// Gets the environment variables which were set when this build was created.
