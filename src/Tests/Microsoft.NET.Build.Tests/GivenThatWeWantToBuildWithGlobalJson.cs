@@ -24,11 +24,9 @@ namespace Microsoft.NET.Build.Tests
         public void It_fails_build_on_failed_sdk_resolution(bool runningInVS)
         {
             var prevIncludeDefault = Environment.GetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER");
-            var prevAdditionalFolder = Environment.GetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER");
             try
             {
                 Environment.SetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER", "false");
-                Environment.SetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER", TestContext.Current.ToolsetUnderTest.SdkResolverPath);
                 TestProject testProject = new TestProject()
                 {
                     Name = "FailedResolution",
@@ -70,7 +68,6 @@ namespace Microsoft.NET.Build.Tests
             finally
             {
                 Environment.SetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER", prevIncludeDefault);
-                Environment.SetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER", prevAdditionalFolder);
             }
         }
     }
