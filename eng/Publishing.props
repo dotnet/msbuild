@@ -69,7 +69,15 @@
     <MakeDir Directories="$(TempWorkingDirectory)"/>
 
     <PushToAzureDevOpsArtifacts
+      AzureDevOpsCollectionUri="$(SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)"
+      AzureDevOpsProject="$(SYSTEM_TEAMPROJECT)"
+      AzureDevOpsBuildId="$(BUILD_BUILDID)"
       ItemsToPush="@(ToolsetAssetsToPushToBlobFeed)"
+      ItemsToSign="@(ItemsToSignPostBuild)"
+      CertificatesSignInfo="@(CertificatesSignInfo)"
+      StrongNameSignInfo="@(StrongNameSignInfo)"
+      FileSignInfo="@(FileSignInfo)"
+      FileExtensionSignInfo="@(FileExtensionSignInfo)"
       ManifestBuildData="@(ManifestBuildData)"
       ManifestRepoUri="$(BUILD_REPOSITORY_NAME)"
       ManifestBranch="$(BUILD_SOURCEBRANCH)"

@@ -19,6 +19,18 @@
     
     <!-- Binary test asset -->
     <FileSignInfo Include="testwpf.dll" CertificateName="None" />
+
+    <!-- Files in the layout that should not be signed -->
+    <FileSignInfo Include="apphost.exe" CertificateName="None" />
+
+    <!-- .ttf and .js files come in from some older aspnetcore packages (e.g. 2.1).
+          These files in the 5.0 packages are NOT signed. When doing postbuild signing,
+          SignTool will recognize that the files in the installer zips came from the 5.0 packages
+          pulled in from aspnetcore, and aspnetcore said not to sign them. This info is not
+          available for the 2.1 packages, so we need to avoid signing these in this repo. -->
+    <FileExtensionSignInfo Include=".ttf" CertificateName="None" />
+    <FileExtensionSignInfo Remove=".js" />
+    <FileExtensionSignInfo Include=".js" CertificateName="None" />
   </ItemGroup>
 
   <!--
@@ -26,6 +38,10 @@
     are already signed. However, they must be signed with a 3rd party certificate.
   -->
   <ItemGroup>
+    <FileSignInfo Include="MessagePack.Annotations.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="MessagePack.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="Nerdbank.Streams.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="StreamJsonRpc.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="Newtonsoft.Json.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="CommandLine.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="FluentAssertions.dll" CertificateName="3PartySHA2" />
@@ -36,5 +52,9 @@
     <FileSignInfo Include="xunit.performance.core.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="xunit.performance.execution.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="xunit.performance.metrics.dll" CertificateName="3PartySHA2" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(PostBuildSign)' == 'true'">
+    <ItemsToSignPostBuild Include="$(ArtifactsNonShippingPackagesDir)*.zip" />
   </ItemGroup>
 </Project>
