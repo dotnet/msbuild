@@ -1,0 +1,9 @@
+<Project>
+    <Import Project="Sdk.targets"
+            Sdk="Microsoft.NET.SDK.TestWorkload.Pack"
+            Condition="'$(TargetPlatformIdentifier)'=='WorkloadTestPlatform'" />
+
+    <Import Project="Sdk.targets"
+            Sdk="Microsoft.NET.SDK.MissingTestWorkload.Pack"
+            Condition="'$(TargetPlatformIdentifier)'=='MissingWorkloadTestPlatform'" />
+</Project>

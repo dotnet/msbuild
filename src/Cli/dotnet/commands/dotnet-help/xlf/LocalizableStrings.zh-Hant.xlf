@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="RollForwardDefinition">
         <source>Roll forward to framework version  (LatestPatch, Minor, LatestMinor, Major, LatestMajor, Disable).</source>
@@ -184,12 +184,12 @@
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
         <source>Display .NET SDK version in use.</source>
-        <target state="needs-review-translation">顯示使用中的 .NET Core SDK 版本。</target>
+        <target state="translated">顯示使用中的 .NET SDK 版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
         <source>Display .NET information.</source>
-        <target state="needs-review-translation">顯示 .NET Core 資訊。</target>
+        <target state="translated">顯示 .NET 資訊。</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKListSdksCommandDefinition">
@@ -279,12 +279,12 @@
       </trans-unit>
       <trans-unit id="SDKCommandUsageDescription">
         <source>Execute a .NET SDK command.</source>
-        <target state="needs-review-translation">執行 .NET Core SDK 命令。</target>
+        <target state="translated">執行 .NET SDK 命令。</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET application.</source>
-        <target state="needs-review-translation">執行 .NET Core 應用程式。</target>
+        <target state="translated">執行 .NET 應用程式。</target>
         <note />
       </trans-unit>
       <trans-unit id="FsiDefinition">

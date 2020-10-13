@@ -54,7 +54,7 @@
       </trans-unit>
       <trans-unit id="SolutionArgumentName">
         <source>SLN_FILE</source>
-        <target state="translated">&lt;SLN_FILE&gt;</target>
+        <target state="translated">SLN_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionArgumentDescription">

@@ -184,12 +184,12 @@
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
         <source>Display .NET SDK version in use.</source>
-        <target state="needs-review-translation">Muestra la versión del SDK de .NET Core en uso.</target>
+        <target state="translated">Muestra la versión del SDK de .NET en uso.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
         <source>Display .NET information.</source>
-        <target state="needs-review-translation">Muestra la información de .NET Core.</target>
+        <target state="translated">Muestra la información de .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKListSdksCommandDefinition">
@@ -279,12 +279,12 @@
       </trans-unit>
       <trans-unit id="SDKCommandUsageDescription">
         <source>Execute a .NET SDK command.</source>
-        <target state="needs-review-translation">Ejecute un comando de SDK de .NET Core.</target>
+        <target state="translated">Ejecute un comando del SDK de .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET application.</source>
-        <target state="needs-review-translation">Ejecute una aplicación de .NET Core.</target>
+        <target state="translated">Ejecute una aplicación de .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="FsiDefinition">

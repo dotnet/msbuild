@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.DotNet.DotNetSdkResolver
 {
     public class NETCoreSdkResolver
@@ -176,7 +178,7 @@ namespace Microsoft.DotNet.DotNetSdkResolver
         public string GetDotnetExeDirectory()
         {
             string environmentOverride = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR");
-            if (environmentOverride != null)
+            if (!string.IsNullOrEmpty(environmentOverride))
             {
                 return environmentOverride;
             }

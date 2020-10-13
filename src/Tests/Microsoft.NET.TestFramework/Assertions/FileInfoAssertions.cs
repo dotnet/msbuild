@@ -45,10 +45,6 @@ namespace Microsoft.NET.TestFramework.Assertions
         {
             var lastWriteTimeUtc = _fileInfo.LastWriteTimeUtc;
 
-            Execute.Assertion
-                .ForCondition(lastWriteTimeUtc != default)
-                .BecauseOf(because, reasonArgs)
-                .FailWith($"Expected File {_fileInfo.FullName} to have a LastWriteTimeUTC, but it is default.");
             return new AndWhichConstraint<FileInfoAssertions, DateTimeOffset>(this, lastWriteTimeUtc);
         }
     }

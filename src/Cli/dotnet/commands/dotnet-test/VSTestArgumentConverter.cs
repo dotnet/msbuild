@@ -384,7 +384,7 @@ namespace Microsoft.DotNet.Cli
 
             if (CollectCrashDump || CollectHangDump)
             {
-                newArgList.Add($@"--blame:""{string.Join(";", crashDumpArgs, hangDumpArgs).Trim(';')}""");
+                newArgList.Add($@"--blame:{string.Join(";", crashDumpArgs, hangDumpArgs).Trim(';')}");
             }
             else
             {

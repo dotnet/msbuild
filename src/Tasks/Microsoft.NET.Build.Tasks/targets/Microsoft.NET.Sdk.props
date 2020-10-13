@@ -116,6 +116,17 @@ Copyright (c) .NET Foundation. All rights reserved.
   
   <!-- Default item includes (globs and implicit references) -->
   <Import Project="Microsoft.NET.Sdk.DefaultItems.props" />
+
+  <!-- Put workload resolution behind a feature flag.  It can be enabled either by setting the MSBuildEnableWorkloadResolver environment variable to true, or by
+       putting an EnableWorkloadResolver.sentinel file beside the MSBuild SDK resolver DLL -->
+  <PropertyGroup Condition="'$(MSBuildEnableWorkloadResolver)' == ''">
+    <__EnableWorkloadResolverSentinelPath Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildBinPath)\EnableWorkloadResolver.sentinel</__EnableWorkloadResolverSentinelPath>
+    <__EnableWorkloadResolverSentinelPath Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildBinPath)\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\EnableWorkloadResolver.sentinel</__EnableWorkloadResolverSentinelPath>
+    <MSBuildEnableWorkloadResolver Condition="Exists('$(__EnableWorkloadResolverSentinelPath)')">true</MSBuildEnableWorkloadResolver>
+  </PropertyGroup>
+
+  <!-- Import workload props -->
+  <Import Project="Microsoft.NET.Sdk.ImportWorkloads.props" Condition="'$(MSBuildEnableWorkloadResolver)' == 'true'" />
   
   <!-- List of supported .NET Core and .NET Standard TFMs -->
   <Import Project="Microsoft.NET.SupportedTargetFrameworks.props" />

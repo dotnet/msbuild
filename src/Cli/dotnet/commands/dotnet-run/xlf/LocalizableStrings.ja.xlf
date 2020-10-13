@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="RunCommandBuilding">
         <source>Building...</source>
-        <target state="new">Building...</target>
+        <target state="translated">ビルドしています...</target>
         <note />
       </trans-unit>
       <trans-unit id="RunCommandException">
@@ -64,9 +64,9 @@ Your project targets multiple frameworks. Specify which framework to run using '
 Ensure you have a runnable project type and ensure '{0}' supports this project.
 A runnable project should target a runnable TFM (for instance, net5.0) and have OutputType 'Exe'.
 The current {1} is '{2}'.</source>
-        <target state="needs-review-translation">プロジェクトを実行できません。
+        <target state="translated">プロジェクトを実行できません。
 プロジェクト タイプが実行可能であること、このプロジェクトが '{0}' でサポートされていることを確認してください。
-実行可能なプロジェクトは実行可能な TFM (たとえば、netcoreapp2.0) を対象としている必要があり、OutputType 'Exe' が必要です。
+実行可能なプロジェクトは実行可能な TFM (たとえば、net5.0) を対象としている必要があり、OutputType 'Exe' が必要です。
 現在の {1} は '{2}' です。</target>
         <note />
       </trans-unit>

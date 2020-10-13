@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK | FRAMEWORK\RID</source>
-        <target state="translated">프레임워크 | FRAMEWORK\RID</target>
+        <target state="translated">FRAMEWORK | FRAMEWORK\RID</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">

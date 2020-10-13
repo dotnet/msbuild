@@ -4,117 +4,117 @@
     <body>
       <trans-unit id="Authors">
         <source>Authors</source>
-        <target state="new">Authors</target>
+        <target state="translated">Autorzy</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Search dotnet tools in nuget.org</source>
-        <target state="new">Search dotnet tools in nuget.org</target>
+        <target state="translated">Wyszukaj narzędzia dotnet w witrynie nuget.org</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsColumn">
         <source>Commands</source>
-        <target state="new">Commands</target>
+        <target state="translated">Polecenia</target>
         <note />
       </trans-unit>
       <trans-unit id="Description">
         <source>Description</source>
-        <target state="new">Description</target>
+        <target state="translated">Opis</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="DetailArgumentName">
         <source>Detail</source>
-        <target state="new">Detail</target>
+        <target state="translated">Szczegółowy</target>
         <note />
       </trans-unit>
       <trans-unit id="DetailDescription">
         <source>Show detail result of the query.</source>
-        <target state="new">Show detail result of the query.</target>
+        <target state="translated">Pokaż szczegółowy wynik zapytania.</target>
         <note />
       </trans-unit>
       <trans-unit id="Downloads">
         <source>Downloads</source>
-        <target state="new">Downloads</target>
+        <target state="translated">Pliki do pobrania</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="InvalidInputTypeInteger">
         <source>{0} should be an integer</source>
-        <target state="new">{0} should be an integer</target>
+        <target state="translated">Wartość {0} powinna być liczbą całkowitą</target>
         <note />
       </trans-unit>
       <trans-unit id="LatestVersion">
         <source>Latest Version</source>
-        <target state="new">Latest Version</target>
+        <target state="translated">Najnowsza wersja</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="NoResult">
         <source>Could not find any results.</source>
-        <target state="new">Could not find any results.</target>
+        <target state="translated">Nie można znaleźć żadnych wyników.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageId">
         <source>Package ID</source>
-        <target state="new">Package ID</target>
+        <target state="translated">Identyfikator pakietu</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="PrereleaseDescription">
         <source>determining whether to include pre-release packages.</source>
-        <target state="new">determining whether to include pre-release packages.</target>
+        <target state="translated">określanie, czy uwzględniać pakiety wersji wstępnej.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermArgumentName">
         <source>Search Term</source>
-        <target state="new">Search Term</target>
+        <target state="translated">Wyszukaj termin</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTermDescription">
         <source>Search term from package id or package description. Require at least one character.</source>
-        <target state="new">Search term from package id or package description. Require at least one character.</target>
+        <target state="translated">Wyszukaj termin na podstawie identyfikatora pakietu lub opisu pakietu. Wymagaj co najmniej jednego znaku.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipArgumentName">
         <source>Skip</source>
-        <target state="new">Skip</target>
+        <target state="translated">Pomiń</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipDescription">
         <source>The number of results to skip, for pagination.</source>
-        <target state="new">The number of results to skip, for pagination.</target>
+        <target state="translated">Liczba wyników do pominięcia na potrzeby dzielenia na strony.</target>
         <note />
       </trans-unit>
       <trans-unit id="Summary">
         <source>Summary</source>
-        <target state="new">Summary</target>
+        <target state="translated">Podsumowanie</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="Tags">
         <source>Tags</source>
-        <target state="new">Tags</target>
+        <target state="translated">Tagi</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="TakeArgumentName">
         <source>Take</source>
-        <target state="new">Take</target>
+        <target state="translated">Pobierz</target>
         <note />
       </trans-unit>
       <trans-unit id="TakeDescription">
         <source>The number of results to return, for pagination.</source>
-        <target state="new">The number of results to return, for pagination.</target>
+        <target state="translated">Liczba wyników do zwrócenia na potrzeby dzielenia na strony.</target>
         <note />
       </trans-unit>
       <trans-unit id="Verified">
         <source>Verified</source>
-        <target state="new">Verified</target>
+        <target state="translated">Zweryfikowane</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="Version">
         <source>Version</source>
-        <target state="new">Version</target>
+        <target state="translated">Wersja</target>
         <note>Table lable</note>
       </trans-unit>
       <trans-unit id="Versions">
         <source>Versions</source>
-        <target state="new">Versions</target>
+        <target state="translated">Wersje</target>
         <note>Table lable</note>
       </trans-unit>
     </body>

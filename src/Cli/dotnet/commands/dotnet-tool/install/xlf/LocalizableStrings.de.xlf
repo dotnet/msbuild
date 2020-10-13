@@ -142,10 +142,10 @@ Wenn Sie ein Manifest erstellen möchten, verwenden Sie "dotnet new tool-manifes
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">Fehler bei der Installation des Tools "{0}". Dieser Fehler kann folgende Ursachen haben:
+        <target state="translated">Fehler bei der Installation des Tools "{0}". Dieser Fehler kann folgende Ursachen haben:
 
 * Sie versuchen, eine Vorschauversion zu installieren und haben nicht die Option "--version" verwendet, um die Version anzugeben.
-* Ein Paket mit diesem Namen wurde gefunden, aber es handelte sich nicht um ein .NET Core-Tool.
+* Ein Paket mit diesem Namen wurde gefunden, aber es handelte sich nicht um ein .NET-Tool.
 * Auf den erforderlichen NuGet-Feed kann nicht zugegriffen werden, möglicherweise aufgrund eines Problems mit der Internetverbindung.
 * Sie haben den Namen des Tools falsch eingegeben.
 

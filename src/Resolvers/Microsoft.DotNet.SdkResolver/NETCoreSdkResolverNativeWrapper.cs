@@ -4,6 +4,8 @@
 using System;
 using System.Diagnostics;
 
+#nullable disable
+
 namespace Microsoft.DotNet.DotNetSdkResolver
 {
     internal static class NETCoreSdkResolverNativeWrapper

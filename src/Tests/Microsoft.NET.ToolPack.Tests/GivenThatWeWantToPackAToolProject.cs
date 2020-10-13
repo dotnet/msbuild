@@ -70,11 +70,50 @@ namespace Microsoft.NET.ToolPack.Tests
         public void It_finds_the_entry_point_dll_and_command_name_and_put_in_setting_file(bool multiTarget)
         {
             var nugetPackage = SetupNuGetPackage(multiTarget);
+            AssertFiles(nugetPackage);
+        }
+
+        [Fact]
+        public void Given_nuget_alias_It_finds_the_entry_point_dll_and_command_name_and_put_in_setting_file()
+        {
+            TestAsset helloWorldAsset = _testAssetsManager
+                .CopyTestAsset("PortableTool")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    XNamespace ns = project.Root.Name.Namespace;
+                    XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Elements("TargetFramework").First().SetValue("targetframeworkAlias");
+                    XElement conditionPropertyGroup = new XElement("PropertyGroup");
+                    project.Root.Add(conditionPropertyGroup);
+                    conditionPropertyGroup.SetAttributeValue("Condition", "'$(TargetFramework)' == 'targetframeworkAlias'");
+                    conditionPropertyGroup.SetElementValue("TargetFrameworkIdentifier", ".NETCoreApp");
+                    conditionPropertyGroup.SetElementValue("TargetFrameworkVersion", "v3.1");
+                    conditionPropertyGroup.SetElementValue("TargetFrameworkMoniker", ".NETCoreApp,Version=v3.1");
+                });
+
+            _testRoot = helloWorldAsset.TestRoot;
+
+            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+
+            var result = packCommand.Execute();
+            result.Should().Pass();
+
+            var nugetPackage = packCommand.GetNuGetPackage();
+            AssertFiles(nugetPackage);
+        }
+
+        private void AssertFiles(string nugetPackage)
+        {
             using (var nupkgReader = new PackageArchiveReader(nugetPackage))
             {
                 var anyTfm = nupkgReader.GetSupportedFrameworks().First().GetShortFolderName();
                 var tmpfilePath = Path.Combine(_testRoot, "temp", Path.GetRandomFileName());
                 string copiedFile = nupkgReader.ExtractFile($"tools/{anyTfm}/any/DotnetToolSettings.xml", tmpfilePath, null);
+
+                var allItems = nupkgReader.GetToolItems().SelectMany(i => i.Items).ToList();
+                allItems.Should().Contain($"tools/{anyTfm}/any/consoledemo.runtimeconfig.json");
+
                 XElement command = XDocument.Load(copiedFile)
                                       .Element("DotNetCliTool")
                                       .Element("Commands")
@@ -240,6 +279,28 @@ namespace Microsoft.NET.ToolPack.Tests
                     allItems.Should().Contain($"tools/{framework.GetShortFolderName()}/any/Newtonsoft.Json.dll");
                 }
             }
+        }
+
+        [Fact]
+        public void Given_targetplatform_set_It_should_error()
+        {
+            TestAsset helloWorldAsset = _testAssetsManager
+                .CopyTestAsset("PortableTool")
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    XNamespace ns = project.Root.Name.Namespace;
+                    XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Elements("TargetFramework").First().SetValue("net5.0-windows");
+                });
+
+            _testRoot = helloWorldAsset.TestRoot;
+
+            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+
+            var result = packCommand.Execute();
+            result.Should().Fail().And.HaveStdOutContaining("NETSDK1146");
+
         }
     }
 }

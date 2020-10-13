@@ -142,10 +142,10 @@ Pokud chcete vytvořit manifest, použijte příkaz dotnet new tool-manifest, ob
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">Nástroj {0} se nepodařilo nainstalovat. Možné příčiny:
+        <target state="translated">Nástroj {0} se nepovedlo nainstalovat. Možné příčiny:
 
 * Pokoušíte se nainstalovat verzi Preview, ale nespecifikovali jste ji pomocí možnosti --version.
-* Byl nalezen balíček s tímto názvem, ale není to nástroj .NET Core.
+* Byl nalezen balíček s tímto názvem, ale není to nástroj .NET.
 * Požadovaný informační kanál NuGet je nedostupný, pravděpodobně z důvodu potíží s připojením k internetu.
 * Zadali jste chybně název nástroje.
 

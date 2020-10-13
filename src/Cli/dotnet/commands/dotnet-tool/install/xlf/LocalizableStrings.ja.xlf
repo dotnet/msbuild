@@ -142,12 +142,12 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">ツール '{0}' をインストールできませんでした。この失敗は次の原因で生じた可能性があります。
+        <target state="translated">ツール '{0}' をインストールできませんでした。この失敗は次の原因で生じた可能性があります。
 
 * プレビュー リリースをインストールしようとしており、--version オプションを使用してバージョンを指定しなかった。
-* この名前のパッケージが見つかったが、.NET Core ツールではなかった。
+* この名前のパッケージが見つかったが、.NET ツールではなかった。
 * 恐らくインターネットの接続の問題で、必須の NuGet フィードにアクセスできない。
-* ツールの名前のタイプミス。
+* ツールの名前の誤入力。
 
 パッケージの名前付けの強制を含む他の理由については、https://aka.ms/failure-installing-tool にアクセスしてください</target>
         <note />

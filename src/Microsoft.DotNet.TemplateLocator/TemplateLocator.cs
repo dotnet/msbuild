@@ -15,11 +15,12 @@ namespace Microsoft.DotNet.TemplateLocator
         private IWorkloadManifestProvider? _workloadManifestProvider;
         private IWorkloadResolver? _workloadResolver;
         private readonly Lazy<NETCoreSdkResolver> _netCoreSdkResolver;
-
+#nullable disable
         public TemplateLocator()
             : this(Environment.GetEnvironmentVariable, VSSettings.Ambient, null, null)
         {
         }
+#nullable restore
 
         /// <summary>
         /// Test constructor

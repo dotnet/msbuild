@@ -142,14 +142,14 @@ If you would like to create a manifest, use `dotnet new tool-manifest`, usually 
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">Не удалось установить средство "{0}". Возможные причины сбоя:
+        <target state="translated">Не удалось установить средство "{0}". Возможные причины сбоя:
 
-– Вы пытаетесь установить предварительный выпуск и не указали версию с помощью параметра --version.
-– Пакет с таким именем найден, но он не является инструментом .NET Core.
-– Требуемый веб-канал NuGet недоступен, возможно, из-за проблемы с подключением к Интернету.
-– Неверно введено имя средства.
+* вы пытаетесь установить предварительный выпуск и не указали версию с помощью параметра --version;
+* пакет с таким именем найден, но он не является инструментом .NET;
+* требуемый веб-канал NuGet недоступен, возможно, из-за проблемы с подключением к Интернету;
+* неверно введено имя средства.
 
-Сведения о других возможных причинах сбоя, в том числе о принудительном именовании пакетов, см. на странице https://aka.ms/failure-installing-tool.</target>
+Сведения о других возможных причинах сбоя, в том числе о принудительном именовании пакетов, см. на странице https://aka.ms/failure-installing-tool.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
