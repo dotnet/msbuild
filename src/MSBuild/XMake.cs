@@ -1675,8 +1675,8 @@ namespace Microsoft.Build.CommandLine
                         string switchName;
                         string switchParameters;
 
-                        // all switches should start with - or / unless a project is being specified
-                        if (!unquotedCommandLineArg.StartsWith("-", StringComparison.Ordinal) && (!unquotedCommandLineArg.StartsWith("/", StringComparison.Ordinal) || FileUtilities.LooksLikeUnixFilePath(unquotedCommandLineArg)))
+                        // all switches should start with - or / or -- unless a project is being specified
+                        if (!ValidateSwitchIndicatorInUnquotedArgument(unquotedCommandLineArg) || FileUtilities.LooksLikeUnixFilePath(unquotedCommandLineArg))
                         {
                             switchName = null;
                             // add a (fake) parameter indicator for later parsing
@@ -1687,17 +1687,20 @@ namespace Microsoft.Build.CommandLine
                             // check if switch has parameters (look for the : parameter indicator)
                             int switchParameterIndicator = unquotedCommandLineArg.IndexOf(':');
 
+                            // get the length of the beginning sequence considered as a switch indicator (- or / or --)
+                            int switchIndicatorsLength = GetLengthOfSwitchIndicator(unquotedCommandLineArg);
+
                             // extract the switch name and parameters -- the name is sandwiched between the switch indicator (the
-                            // leading - or /) and the parameter indicator (if the switch has parameters); the parameters (if any)
+                            // leading - or / or --) and the parameter indicator (if the switch has parameters); the parameters (if any)
                             // follow the parameter indicator
                             if (switchParameterIndicator == -1)
                             {
-                                switchName = unquotedCommandLineArg.Substring(1);
+                                switchName = unquotedCommandLineArg.Substring(switchIndicatorsLength);
                                 switchParameters = String.Empty;
                             }
                             else
                             {
-                                switchName = unquotedCommandLineArg.Substring(1, switchParameterIndicator - 1);
+                                switchName = unquotedCommandLineArg.Substring(switchIndicatorsLength, switchParameterIndicator - 1);
                                 switchParameters = ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, switchName, switchParameterIndicator);
                             }
                         }
@@ -2905,6 +2908,46 @@ namespace Microsoft.Build.CommandLine
                     // Make sure that no wild cards are in the string because for now we dont allow wild card extensions.
                     InitializationException.VerifyThrow(extension.IndexOfAny(s_wildcards) == -1, "InvalidExtensionToIgnore", extension, null, false);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Checks whether an argument given as a parameter starts with valid indicator,
+        /// <br/>which means, whether switch begins with one of: "/", "-", "--"
+        /// </summary>
+        /// <param name="unquotedCommandLineArgument">Command line argument with beginning indicator (e.g. --help).
+        /// <br/>This argument has to be unquoted, otherwise the first character will always be a quote character "</param>
+        /// <returns>true if argument's beginning matches one of possible indicators
+        /// <br/>false if argument's beginning doesn't match any of correct indicator
+        /// </returns>
+        private static bool ValidateSwitchIndicatorInUnquotedArgument(string unquotedCommandLineArgument)
+        {
+            return unquotedCommandLineArgument.StartsWith("-", StringComparison.Ordinal) // superset of "--"
+                || unquotedCommandLineArgument.StartsWith("/", StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Gets the length of the switch indicator (- or / or --)
+        /// <br/>The length returned from this method is deduced from the beginning sequence of unquoted argument.
+        /// <br/>This way it will "assume" that there's no further error (e.g. //  or ---) which would also be considered as a correct indicator.
+        /// </summary>
+        /// <param name="unquotedSwitch">Unquoted argument with leading indicator and name</param>
+        /// <returns>Correct length of used indicator
+        /// <br/>0 if no leading sequence recognized as correct indicator</returns>
+        /// Internal for testing purposes
+        internal static int GetLengthOfSwitchIndicator(string unquotedSwitch)
+        {
+            if (unquotedSwitch.StartsWith("--", StringComparison.Ordinal))
+            {
+                return 2;
+            }
+            else if (unquotedSwitch.StartsWith("-", StringComparison.Ordinal) || unquotedSwitch.StartsWith("/", StringComparison.Ordinal))
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
             }
         }
 
