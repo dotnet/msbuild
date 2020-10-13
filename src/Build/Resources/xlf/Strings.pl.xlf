@@ -192,11 +192,6 @@
         <target state="translated">Wartość początkowa właściwości: $({0})=„{1}” Źródło: {2}</target>
         <note />
       </trans-unit>
-      <trans-unit id="RarControllerReflectionError">
-        <source>Couldn't create an instance of IRarController for '{0}' type</source>
-        <target state="translated">Nie można było utworzyć wystąpienia elementu IRarController dla typu „{0}”</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: W przypadku projektu „{0}” pominięto ograniczenia izolacji grafu dla przywoływanego projektu „{1}”</target>
