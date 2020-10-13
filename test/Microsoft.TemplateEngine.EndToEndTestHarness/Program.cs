@@ -89,7 +89,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
                 Console.Error.WriteLine(fileName.Substring(outputPath.Length));
             }
 
-            return result != 0 ? result : verificationsPassed ? 0 : 1;
+            return result != 0 ? result : batteryCount == 0 ? 0 : verificationsPassed ? 0 : 1;
         }
 
         private static bool CheckFileDoesNotContain(IPhysicalFileSystem fs, JObject config, string outputPath)
