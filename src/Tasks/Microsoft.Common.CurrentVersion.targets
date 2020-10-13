@@ -4093,7 +4093,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_SatelliteAssemblies Include="@(IntermediateSatelliteAssembliesWithTargetPath);@(ReferenceSatellitePaths)" />
       <_DeploymentReferencePaths Include="@(ReferenceCopyLocalPaths)"
-                                 Condition="'%(Extension)' == '.dll' Or '%(Extension)' == '.exe'">
+                                 Condition="'%(Extension)' == '.dll' Or '%(Extension)' == '.exe' Or '%(Extension)' == '.md'">
         <IsPrimary>true</IsPrimary>
       </_DeploymentReferencePaths>
       <_DeploymentReferencePaths Include="@(_DeploymentReferencePaths);@(_CopyLocalFalseRefPathsWithExclusion)" />
@@ -4139,10 +4139,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         EntryPoint="@(_DeploymentClickOnceApplicationExecutable)"
         ExtraFiles="@(_DebugSymbolsIntermediatePath);$(IntermediateOutputPath)$(TargetName).xml;@(_ReferenceRelatedPaths)"
         Files="@(ClickOnceFiles)"
+        IsSelfContainedPublish="$(SelfContained)"
+        IsSingleFilePublish="$(PublishSingleFile)"
         LauncherBasedDeployment="$(_DeploymentLauncherBased)"
         ManagedAssemblies="@(_ManifestManagedReferences)"
         NativeAssemblies="@(NativeReferenceFile);@(_DeploymentNativePrerequisite)"
         PublishFiles="@(PublishFile)"
+        RuntimePackAssets="@(RuntimePackAsset)"
         SatelliteAssemblies="@(_SatelliteAssemblies)"
         SigningManifests="$(SignManifests)"
         TargetCulture="$(TargetCulture)"
