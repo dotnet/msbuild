@@ -452,40 +452,20 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.GetLengthOfSwitchIndicator(commandLineSwitchWithNoneOrIncorrectIndicator).ShouldBe(0);
         }
 
-        [Fact]
-        public void Help()
+        [Theory]
+        [InlineData("-?")]
+        [InlineData("-h")]
+        [InlineData("--help")]
+        [InlineData(@"/h")]
+        public void Help(string indicator)
         {
             MSBuildApp.Execute(
 #if FEATURE_GET_COMMANDLINE
-                @"c:\bin\msbuild.exe -? "
+                @$"c:\bin\msbuild.exe {indicator} "
 #else
-                new [] {@"c:\bin\msbuild.exe", "-?"}
+                new [] {@"c:\bin\msbuild.exe", indicator}
 #endif
             ).ShouldBe(MSBuildApp.ExitType.Success);
-
-            MSBuildApp.Execute(
-#if FEATURE_GET_COMMANDLINE
-                @"c:\bin\msbuild.exe -h "
-#else
-                new [] {@"c:\bin\msbuild.exe", "-h"}
-#endif
-            ).ShouldBe( MSBuildApp.ExitType.Success );
-
-            MSBuildApp.Execute(
-#if FEATURE_GET_COMMANDLINE
-                @"c:\bin\msbuild.exe --help "
-#else
-                new [] {@"c:\bin\msbuild.exe", "--help"}
-#endif
-            ).ShouldBe( MSBuildApp.ExitType.Success );
-
-            MSBuildApp.Execute(
-#if FEATURE_GET_COMMANDLINE
-                @"c:\bin\msbuild.exe /h "
-#else
-                new [] {@"c:\bin\msbuild.exe", "/h"}
-#endif
-            ).ShouldBe( MSBuildApp.ExitType.Success );
         }
 
         [Fact]
