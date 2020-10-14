@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Restore.LocalizableStrings;
