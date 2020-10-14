@@ -11,6 +11,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     {
         private readonly string _sdkRootPath;
         private readonly string _sdkVersionBand;
+        private readonly string _manifestDirectory;
 
         public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion)
         {
@@ -40,18 +41,34 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             _sdkRootPath = sdkRootPath;
             _sdkVersionBand = sdkVersionBand;
+
+            var manifestDirectoryEnvironmentVariable = Environment.GetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOT");
+            if (!string.IsNullOrEmpty(manifestDirectoryEnvironmentVariable))
+            {
+                _manifestDirectory = manifestDirectoryEnvironmentVariable;
+            }
+            else
+            {
+                _manifestDirectory = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
+            }
         }
 
         public IEnumerable<Stream> GetManifests()
         {
-            var manifestDirectory = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
-
-            if (Directory.Exists(manifestDirectory))
+            foreach (var workloadManifestDirectory in GetManifestDirectories())
             {
-                foreach (var workloadName in Directory.EnumerateDirectories(manifestDirectory))
+                var workloadManifest = Path.Combine(workloadManifestDirectory, "WorkloadManifest.json");
+                yield return File.OpenRead(workloadManifest);
+            }
+        }
+
+        public IEnumerable<string> GetManifestDirectories()
+        {
+            if (Directory.Exists(_manifestDirectory))
+            {
+                foreach (var workloadManifestDirectory in Directory.EnumerateDirectories(_manifestDirectory))
                 {
-                    var workloadManifest = Path.Combine(workloadName, "WorkloadManifest.json");
-                    yield return File.OpenRead(workloadManifest);
+                    yield return workloadManifestDirectory;
                 }
             }
         }

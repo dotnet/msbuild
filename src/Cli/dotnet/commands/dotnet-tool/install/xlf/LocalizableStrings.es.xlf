@@ -142,10 +142,10 @@ Si desea crear un manifiesto, utilice "dotnet new tool-manifest", normalmente en
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">Error al instalar la herramienta "{0}". El error puede deberse a lo siguiente:
+        <target state="translated">Error al instalar la herramienta "{0}". El error puede deberse a lo siguiente:
 
 * Intenta instalar una versión preliminar y no usó la opción --version para especificar la versión.
-* Se encontró un paquete con este nombre, pero no era una herramienta de .NET Core.
+* Se encontró un paquete con este nombre, pero no era una herramienta de .NET.
 * No se puede acceder a la fuente NuGet requerida, quizá debido a un problema de conexión a Internet.
 * El nombre de la herramienta no se escribió correctamente.
 
@@ -159,7 +159,7 @@ Para ver más razones, como el cumplimiento de la nomenclatura de los paquetes, 
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="translated">ORIGEN</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionName">
@@ -174,7 +174,7 @@ Para ver más razones, como el cumplimiento de la nomenclatura de los paquetes, 
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
-        <target state="translated">PLATAFORMA</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionName">

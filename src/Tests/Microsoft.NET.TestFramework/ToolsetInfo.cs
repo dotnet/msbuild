@@ -65,6 +65,8 @@ namespace Microsoft.NET.TestFramework
 
         public string FullFrameworkMSBuildPath { get; set; }
 
+        public string SdkResolverPath { get; set; }
+
         public ToolsetInfo(string dotNetRoot)
         {
             DotNetRoot = dotNetRoot;
@@ -147,7 +149,15 @@ namespace Microsoft.NET.TestFramework
             if (ShouldUseFullFrameworkMSBuild)
             {
                 string sdksPath = Path.Combine(DotNetRoot, "sdk", SdkVersion, "Sdks");
-                command.Environment["DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR"] = sdksPath;
+
+                //  Use stage 2 MSBuild SDK resolver
+                command.Environment["MSBUILDADDITIONALSDKRESOLVERSFOLDER"] = SdkResolverPath;
+
+                //  Avoid using stage 0 dotnet install dir
+                command.Environment["DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR"] = "";
+
+                //  Put stage 2 on the Path (this is how the MSBuild SDK resolver finds dotnet)
+                command.Environment["Path"] = DotNetRoot + ";" + Environment.GetEnvironmentVariable("Path");
 
                 if (!string.IsNullOrEmpty(MicrosoftNETBuildExtensionsPathOverride))
                 {
@@ -272,6 +282,12 @@ namespace Microsoft.NET.TestFramework
                 string sdksPath = Path.Combine(repoArtifactsDir, "bin", configuration, "Sdks");
                 var buildExtensionsSdkPath = Path.Combine(sdksPath, "Microsoft.NET.Build.Extensions");
                 ret.MicrosoftNETBuildExtensionsPathOverride = Path.Combine(buildExtensionsSdkPath, "msbuildExtensions", "Microsoft", "Microsoft.NET.Build.Extensions");
+            }
+
+            if (ret.ShouldUseFullFrameworkMSBuild)
+            {
+                // Find path to MSBuildSdkResolver for full framework
+                ret.SdkResolverPath = Path.Combine(repoArtifactsDir, "bin", "Microsoft.DotNet.MSBuildSdkResolver", configuration, "net472", "Resolver");
             }
 
             if (repoRoot != null)

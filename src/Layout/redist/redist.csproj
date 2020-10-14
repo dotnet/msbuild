@@ -6,6 +6,7 @@
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <DisableImplicitNETCorePlatformsReference>true</DisableImplicitNETCorePlatformsReference>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <!-- do not import analyzer assemblies from the sdk as they will be double loaded -->
     <EnableNETAnalyzers>false</EnableNETAnalyzers>
   </PropertyGroup>
@@ -48,6 +49,7 @@
                       ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\Tasks\Microsoft.NET.Build.Extensions.Tasks\Microsoft.NET.Build.Extensions.Tasks.csproj"
                       ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\Resolvers\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -19,6 +19,8 @@ Copyright (c) .NET Foundation. All rights reserved.
             AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Build.Tasks.GetEmbeddedApphostPaths"
       AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.GetNuGetShortFolderName"
+             AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!--
     Mark all dependency as private assets. But keep them as Publish. So dependency DLLs will be included in NuGet package, while
@@ -42,14 +44,15 @@ Copyright (c) .NET Foundation. All rights reserved.
       AppHostIntermediatePath="$(AppHostIntermediatePath)"
       ResolvedFileToPublish="@(ResolvedFileToPublish)"
       PublishDir="$(PublishDir)"
-      TargetFrameworkMoniker="$(TargetFrameworkMoniker)">
+      TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
+      TargetPlatformMoniker="$(TargetPlatformMoniker)">
 
       <Output TaskParameter="ResolvedFileToPublishWithPackagePath" ItemName="_ResolvedFileToPublishWithPackagePath" />
     </ResolveToolPackagePaths>
 
     <ItemGroup>
       <TfmSpecificPackageFile Include="@(_GeneratedFiles)">
-        <PackagePath>tools/$(TargetFramework)/any/%(_GeneratedFiles.RecursiveDir)%(_GeneratedFiles.Filename)%(_GeneratedFiles.Extension)</PackagePath>
+        <PackagePath>tools/$(_NuGetShortFolderName)/any/%(_GeneratedFiles.RecursiveDir)%(_GeneratedFiles.Filename)%(_GeneratedFiles.Extension)</PackagePath>
       </TfmSpecificPackageFile>
 
       <TfmSpecificPackageFile Include="@(_ResolvedFileToPublishWithPackagePath)">
@@ -71,6 +74,15 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="_PackToolValidation" Condition=" '$(PackAsTool)' == 'true' ">
+
+    <GetNuGetShortFolderName
+      TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
+      TargetPlatformMoniker="$(TargetPlatformMoniker)">
+
+      <Output TaskParameter="NuGetShortFolderName" PropertyName="_NuGetShortFolderName" />
+
+    </GetNuGetShortFolderName>
+
     <NETSdkError Condition=" '$(SelfContained)' == 'true' "
              ResourceName="PackAsToolCannotSupportSelfContained" />
 
@@ -79,6 +91,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkError Condition=" '$(_TargetFrameworkVersionWithoutV)' &lt; '2.1' "
                  ResourceName="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21" />
+
+    <NETSdkError Condition=" '$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0))"
+             ResourceName="PackAsToolCannotSupportTargetPlatformIdentifier" />
   </Target>
 
   <!--
@@ -108,7 +123,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ApphostsForShimRuntimeIdentifiers="@(_ApphostsForShimRuntimeIdentifiers)"
       IntermediateAssembly="@(IntermediateAssembly->'%(FullPath)')"
       OutputType="$(OutputType)"
-      PackagedShimOutputDirectory="$(PackagedShimOutputRootDirectory)/shims/$(TargetFramework)"
+      PackagedShimOutputDirectory="$(PackagedShimOutputRootDirectory)/shims/$(_NuGetShortFolderName)"
       PackageId="$(PackageId)"
       PackageVersion="$(PackageVersion)"
       ShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
@@ -137,7 +152,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="_ComputeExpectedEmbeddedApphostPaths">
     <GetEmbeddedApphostPaths
-      PackagedShimOutputDirectory="$(PackagedShimOutputRootDirectory)/shims/$(TargetFramework)"
+      PackagedShimOutputDirectory="$(PackagedShimOutputRootDirectory)/shims/$(_NuGetShortFolderName)"
       ShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
       ToolCommandName="$(ToolCommandName)">
 

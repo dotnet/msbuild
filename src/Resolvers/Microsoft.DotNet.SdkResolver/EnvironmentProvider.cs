@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
+#nullable disable
+
 namespace Microsoft.DotNet.DotNetSdkResolver
 {
     internal class EnvironmentProvider

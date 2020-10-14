@@ -28,11 +28,11 @@ Possible reasons for this include:
   * You misspelled a built-in dotnet command.
   * You intended to execute a .NET program, but {0} does not exist.
   * You intended to run a global tool, but a dotnet-prefixed executable with this name could not be found on the PATH.</source>
-        <target state="needs-review-translation">Impossible d'effectuer l'exécution, car la commande ou le fichier spécifié est introuvable.
+        <target state="translated">Impossible d'effectuer l'exécution, car la commande ou le fichier spécifié est introuvable.
 Raisons possibles :
   * Vous avez mal orthographié une commande dotnet intégrée.
-  * Vous aviez l'intention d'exécuter un programme .NET Core, mais {0} n'existe pas.
-  * Vous aviez l'intention d'exécuter un outil global, mais l'exécutable portant le nom indiqué précédé de dotnet est introuvable dans le CHEMIN.</target>
+  * Vous avez voulu exécuter un programme .NET, mais {0} n'existe pas.
+  * Vous avez voulu exécuter un outil global, mais l'exécutable de ce nom avec le préfixe dotnet est introuvable dans le CHEMIN.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">
@@ -77,7 +77,7 @@ Raisons possibles :
       </trans-unit>
       <trans-unit id="DotNetSdkInfoLabel">
         <source>.NET SDK (reflecting any global.json):</source>
-        <target state="needs-review-translation">SDK .NET Core (reflétant tous les global.json) :</target>
+        <target state="translated">SDK .NET (reflétant tous les fichiers global.json) :</target>
         <note />
       </trans-unit>
       <trans-unit id="DotNetRuntimeInfoLabel">
@@ -111,7 +111,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotNetSdkInfo">
         <source>.NET SDK</source>
-        <target state="needs-review-translation">Kit SDK .NET Core</target>
+        <target state="translated">SDK .NET</target>
         <note />
       </trans-unit>
     </body>

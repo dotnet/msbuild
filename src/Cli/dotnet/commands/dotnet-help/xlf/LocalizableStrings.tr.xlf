@@ -184,12 +184,12 @@
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
         <source>Display .NET SDK version in use.</source>
-        <target state="needs-review-translation">Kullanılmakta olan .NET Core SDK sürümünü gösterir.</target>
+        <target state="translated">Kullanımdaki .NET SDK sürümünü görüntüleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
         <source>Display .NET information.</source>
-        <target state="needs-review-translation">.NET Core bilgilerini gösterir.</target>
+        <target state="translated">.NET bilgilerini görüntüleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKListSdksCommandDefinition">
@@ -279,12 +279,12 @@
       </trans-unit>
       <trans-unit id="SDKCommandUsageDescription">
         <source>Execute a .NET SDK command.</source>
-        <target state="needs-review-translation">Bir .NET Core SDK komutunu yürütür.</target>
+        <target state="translated">.NET SDK komutu yürütün.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET application.</source>
-        <target state="needs-review-translation">Bir .NET Core uygulamasını yürütür.</target>
+        <target state="translated">.NET uygulaması yürütün.</target>
         <note />
       </trans-unit>
       <trans-unit id="FsiDefinition">

@@ -169,7 +169,7 @@
       </trans-unit>
       <trans-unit id="CommandArgumentName">
         <source>COMMAND_NAME</source>
-        <target state="translated">NAZWA_POLECENIA</target>
+        <target state="translated">COMMAND_NAME</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandArgumentDescription">
@@ -184,12 +184,12 @@
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
         <source>Display .NET SDK version in use.</source>
-        <target state="needs-review-translation">Wyświetl używaną wersję zestawu .NET Core SDK.</target>
+        <target state="translated">Wyświetl używaną wersję zestawu .NET SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
         <source>Display .NET information.</source>
-        <target state="needs-review-translation">Wyświetl informacje o programie .NET Core.</target>
+        <target state="translated">Wyświetl informacje o platformie .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKListSdksCommandDefinition">
@@ -279,12 +279,12 @@
       </trans-unit>
       <trans-unit id="SDKCommandUsageDescription">
         <source>Execute a .NET SDK command.</source>
-        <target state="needs-review-translation">Wykonaj polecenie zestawu .NET Core SDK.</target>
+        <target state="translated">Wykonaj polecenie zestawu .NET SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET application.</source>
-        <target state="needs-review-translation">Wykonaj aplikację platformy .NET Core.</target>
+        <target state="translated">Wykonaj aplikację platformy .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="FsiDefinition">

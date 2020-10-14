@@ -142,10 +142,10 @@ Si vous souhaitez créer un manifeste, utilisez 'dotnet new tool-manifest', gén
 * You mistyped the name of the tool.
 
 For more reasons, including package naming enforcement, visit https://aka.ms/failure-installing-tool</source>
-        <target state="needs-review-translation">Échec de l'installation de l'outil '{0}'. Causes possibles de cet échec :
+        <target state="translated">L'installation de l'outil '{0}' a échoué. Causes possibles de cet échec :
 
-* Vous essayez d'installer une préversion, et vous n'avez pas utilisé l'option --version pour spécifier la version.
-* Un package portant ce nom a été trouvé, mais il ne s'agit pas d'un outil .NET Core.
+* Vous essayez d'installer une préversion et vous n'avez pas utilisé l'option --version pour spécifier la version.
+* Un package de ce nom a été trouvé, mais il ne s'agit pas d'un outil .NET.
 * Le flux NuGet nécessaire n'est pas accessible, peut-être en raison d'un problème de connexion à Internet.
 * Vous avez mal tapé le nom de l'outil.
 
