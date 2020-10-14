@@ -84,11 +84,7 @@ namespace Microsoft.DotNet.Cli
                           .WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
                           .With(name: LocalizableStrings.CmdRuntimeOption)
                           .ForwardAsSingle(o => $"-property:RuntimeIdentifiers={string.Join("%3B", o.Arguments)}")),
-                Create.Option(
-                    "--use-current-runtime",
-                    LocalizableStrings.CmdCurrentRuntimeOptionDescription,
-                    Accept.NoArguments()
-                          .ForwardAs("-property:UseCurrentRuntimeIdentifier=True")),
+                CommonOptions.CurrentRuntimeOption(LocalizableStrings.CmdCurrentRuntimeOptionDescription),
                 Create.Option(
                     "--packages",
                     showHelp ? LocalizableStrings.CmdPackagesOptionDescription : string.Empty,
