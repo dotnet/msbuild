@@ -257,15 +257,6 @@ namespace Microsoft.NET.TestFramework
             }
 
             var ret = new ToolsetInfo(dotnetRoot);
-            
-            // if (!string.IsNullOrWhiteSpace(commandLine.MSBuildSDKsPath))
-            // {
-            //     ret.SdksPath = commandLine.MSBuildSDKsPath;
-            // }
-            // else if (repoRoot != null)
-            // {
-            //     ret.SdksPath = Path.Combine(repoArtifactsDir, "bin", configuration, "Sdks");
-            // }
 
             if (!string.IsNullOrEmpty(commandLine.FullFrameworkMSBuildPath))
             {
@@ -275,7 +266,7 @@ namespace Microsoft.NET.TestFramework
             {
                 ret.FullFrameworkMSBuildPath = ResolveCommand("MSBuild");
             }
-
+       
             if (repoRoot != null && ret.ShouldUseFullFrameworkMSBuild)
             {
                 //  Find path to Microsoft.NET.Build.Extensions for full framework
@@ -287,7 +278,7 @@ namespace Microsoft.NET.TestFramework
             if (ret.ShouldUseFullFrameworkMSBuild)
             {
                 // Find path to MSBuildSdkResolver for full framework
-                ret.SdkResolverPath = Path.Combine(repoArtifactsDir, "bin", "Microsoft.DotNet.MSBuildSdkResolver", configuration, "net472", "Resolver");
+                ret.SdkResolverPath = Path.Combine(repoArtifactsDir, "bin", "Microsoft.DotNet.MSBuildSdkResolver", configuration, "net472", "SdkResolvers");
             }
 
             if (repoRoot != null)
