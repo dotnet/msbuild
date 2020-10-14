@@ -121,6 +121,25 @@ namespace Microsoft.NET.TestFramework
                     }
                 }
             }
+            else if (ridOS.Equals("ubuntu", StringComparison.OrdinalIgnoreCase))
+            {
+                string restOfRid = currentRid.Substring(ridOS.Length + 1);
+                string ubuntuVersionString = restOfRid.Split('-')[0];
+                if (float.TryParse(ubuntuVersionString, out float ubuntuVersion))
+                {
+                    if (ubuntuVersion > 16.04)
+                    {
+                        if (nugetFramework.Version < new Version(2, 0, 0, 0))
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    return true;
+                }
+            }
             else if (ridOS.Equals("osx", StringComparison.OrdinalIgnoreCase))
             {
                 string restOfRid = currentRid.Substring(ridOS.Length + 1);
