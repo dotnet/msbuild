@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdCurrentRuntimeOptionDescription">
-        <source>Use host runtime to build the target.</source>
-        <target state="new">Use host runtime to build the target.</target>
+        <source>Use current runtime as the target runtime.</source>
+        <target state="new">Use current runtime as the target runtime.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOption">

@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools;

@@ -142,7 +142,7 @@
     <value>The target runtime to restore packages for.</value>
   </data>
   <data name="CmdCurrentRuntimeOptionDescription" xml:space="preserve">
-    <value>Use host runtime to build the target.</value>
+    <value>Use current runtime as the target runtime.</value>
   </data>
   <data name="CmdPackagesOption" xml:space="preserve">
     <value>PACKAGES_DIR</value>

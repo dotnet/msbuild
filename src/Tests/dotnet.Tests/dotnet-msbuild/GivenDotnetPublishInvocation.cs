@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools.Publish;

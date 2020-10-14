@@ -83,8 +83,7 @@ namespace Microsoft.NET.Publish.Tests
             }
         }
 
-        //  Run on core MSBuild only as using a local packages folder hits long path issues on full MSBuild
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void BuildWithUseCurrentRuntimeIdentifier()
         {
             var testProject = new TestProject()
@@ -103,26 +102,19 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\..\pkg";
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
-            var restoreCommand = new RestoreCommand(testAsset);
+            var buildCommand = new BuildCommand(testAsset);
 
-            restoreCommand
+            buildCommand
                 .Execute()
                 .Should()
                 .Pass();
 
-            var buildCommand = new BuildCommand(testAsset);
-
-            buildCommand
-                .ExecuteWithoutRestore()
-                .Should()
-                .Pass();
-
-            string sdkDirectory = Path.Combine(buildCommand.GetNonSDKOutputDirectory().FullName, testProject.TargetFrameworks);
-            string outputDirectoryFullName = Directory.EnumerateDirectories(sdkDirectory, "*", SearchOption.AllDirectories).FirstOrDefault();
-            outputDirectoryFullName.Should().NotBeNullOrWhiteSpace();
+            string targetFrameworkOutputDirectory = Path.Combine(buildCommand.GetNonSDKOutputDirectory().FullName, testProject.TargetFrameworks);
+            string outputDirectoryWithRuntimeIdentifier = Directory.EnumerateDirectories(targetFrameworkOutputDirectory, "*", SearchOption.AllDirectories).FirstOrDefault();
+            outputDirectoryWithRuntimeIdentifier.Should().NotBeNullOrWhiteSpace();
 
             var selfContainedExecutable = $"{testProject.Name}{Constants.ExeSuffix}";
-            string selfContainedExecutableFullPath = Path.Combine(outputDirectoryFullName, selfContainedExecutable);
+            string selfContainedExecutableFullPath = Path.Combine(outputDirectoryWithRuntimeIdentifier, selfContainedExecutable);
 
             new RunExeCommand(Log, selfContainedExecutableFullPath)
                 .Execute()
