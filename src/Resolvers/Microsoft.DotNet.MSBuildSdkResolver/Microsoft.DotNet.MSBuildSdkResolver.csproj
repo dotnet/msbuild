@@ -76,6 +76,9 @@
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="4.7.2" Condition="'$(UseSystemTextJson)'=='True'"/>
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" Condition="'$(UseSystemTextJson)'!='True'"/>
+    
+    <!-- Reference this package to avoid package downgrade errors.  See https://github.com/dotnet/sdk/issues/3044 for details -->
+    <PackageReference Include="Microsoft.NETCore.Targets" Version="2.1.0" ExcludeAssets="all" PrivateAssets="all" />
   </ItemGroup>
 
   <Target Name="ResolveHostfxrCopyLocalContent" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" DependsOnTargets="RunResolvePackageDependencies" BeforeTargets="AssignTargetPaths">
