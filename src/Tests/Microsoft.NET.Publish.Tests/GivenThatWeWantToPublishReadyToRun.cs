@@ -194,7 +194,7 @@ namespace Microsoft.NET.Publish.Tests
             TestProjectPublishing_Internal("LibraryProject2", targetFramework, isSelfContained:true, makeExeProject: false);
         }
 
-        [RequiresMSBuildVersionTheory("16.8.0", Skip = "https://github.com/dotnet/sdk/issues/13279")]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         void It_can_publish_readytorun_using_crossgen2(string targetFramework)
         {
@@ -205,7 +205,7 @@ namespace Microsoft.NET.Publish.Tests
             TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: true, useCrossgen2: true, composite: false);
         }
 
-        [RequiresMSBuildVersionTheory("16.8.0", Skip = "https://github.com/dotnet/sdk/issues/13279")]
+        [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
         void It_can_publish_readytorun_using_crossgen2_composite_mode(string targetFramework)
         {
