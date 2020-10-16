@@ -1273,10 +1273,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>
       ";
+            string errorMessage = @"There is a circular dependency in the target dependency graph involving target ""TargetA"". Since ""TargetC"" has ""DependsOn"" dependence on ""TargetA"", the circular is TargetA<-TargetC<-TargetB<-TargetA.";
+
             StringReader reader = new StringReader(projectContents);
             Project project = new Project(new XmlTextReader(reader), null, null);
             bool success = project.Build(_mockLogger);
             Assert.False(success);
+            Assert.Equal<int>(1, _mockLogger.ErrorCount);
+            Assert.Equal(errorMessage, _mockLogger.Errors[0].Message);
         }
 
         /// <summary>

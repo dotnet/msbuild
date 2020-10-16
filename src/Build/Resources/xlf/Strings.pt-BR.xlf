@@ -71,14 +71,8 @@
     </note>
       </trans-unit>
       <trans-unit id="CircularDependencyInTargetGraph">
-        <source>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}".</source>
-        <target state="new">MSB4006: There is a circular dependency in the target dependency graph involving target "{0}".</target>
-        <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
-    request a target to build itself (perhaps via a chain of other targets).</note>
-      </trans-unit>
-      <trans-unit id="CircularDependencyInTargetGraphWithVerbosity">
-        <source>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}". Target "{1}" has a "{2}" dependency on it, but it is depended upon by {3}.</source>
-        <target state="new">MSB4006: There is a circular dependency in the target dependency graph involving target "{0}". Target "{1}" has a "{2}" dependency on it, but it is depended upon by {3}.</target>
+        <source>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}". {1}</source>
+        <target state="new">MSB4006: There is a circular dependency in the target dependency graph involving target "{0}". {1}</target>
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
