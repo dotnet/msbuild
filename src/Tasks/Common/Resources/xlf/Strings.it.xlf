@@ -284,6 +284,11 @@
         <target state="translated">NETSDK1015: al token di preprocessore '{0}' è stato assegnato più di un valore. Come valore verrà scelto '{1}'.</target>
         <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
+      <trans-unit id="DuplicatePublishOutputFiles">
+        <source>NETSDK1148: Found multiple publish output files with the same relative path: {0}.</source>
+        <target state="new">NETSDK1148: Found multiple publish output files with the same relative path: {0}.</target>
+        <note>{StrBegin="NETSDK1148: "}</note>
+      </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
         <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
         <target state="translated">NETSDK1110: più di un asset nel pacchetto di runtime ha lo stesso percorso secondario di destinazione di '{0}'. Segnalare questo errore al team di .NET all'indirizzo: https://aka.ms/dotnet-sdk-issue.</target>
