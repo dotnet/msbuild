@@ -1813,6 +1813,104 @@ EndGlobal
             }
            );
         }
+
+        /// <summary>
+        /// Test some invalid cases for solution configuration parsing
+        /// Each project in the solution should end with EndProject.
+        /// If it doesn't then next project should still be parsed correctly.
+        /// Which means even if a project is missing it's EndProject, next project is still found and is parsed correctly.
+        /// </summary>
+        [Fact]
+        public void ParseNextProjectContainedInInvalidSolutionEvenWhenMissingEndProject()
+        {
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 9.00
+                # Visual Studio 2005
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary', 'ClassLibrary\ClassLibrary.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+                Project('{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}') = 'MainApp', 'MainApp\MainApp.vcxproj', '{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}'
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|x86 = Debug|x86
+                        Release|x86 = Release|x86
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|x86.ActiveCfg = Debug|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|x86.ActiveCfg = Release|Any CPU
+                        {A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Debug|x86.ActiveCfg = Debug|Any CPU
+                        {A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Release|x86.ActiveCfg = Release|Any CPU
+                   EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+
+            // What is needed to be checked is whether there were still both projects found in the invalid solution file
+            ProjectInSolution classLibraryProject = (ProjectInSolution)solution.ProjectsByGuid["{6185CC21-BE89-448A-B3C0-D1C27112E595}"];
+            ProjectInSolution mainAppProject = (ProjectInSolution)solution.ProjectsByGuid["{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}"];
+            mainAppProject.GetUniqueProjectName().ShouldNotBe(classLibraryProject.GetUniqueProjectName());
+            classLibraryProject.GetUniqueProjectName().ShouldBe("ClassLibrary");
+            mainAppProject.GetUniqueProjectName().ShouldBe("MainApp");
+        }
+
+        /// <summary>
+        /// Test some invalid cases for solution configuration parsing
+        /// Each project in the solution should end with EndProject.
+        /// If it doesn't then each next project should still be parsed correctly.
+        /// Which means even if a project is missing it's EndProject, next projects are still found and are parsed correctly.
+        /// </summary>
+        [Fact]
+        public void ParseAllProjectsContainedInInvalidSolutionEvenWhenMissingEndProject()
+        {
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 9.00
+                # Visual Studio 2005
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary', 'ClassLibrary\ClassLibrary.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+                Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'SomeLowLevelLayerProject', 'Layers\SomeLowLevelLayerProject.csproj', '{E8E75132-67E4-4D6F-9CAE-8DA4C883F419}'
+                Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'SomeHighLevelLayerProject', 'Layers\SomeHighLevelLayerProject.csproj', '{D2633E4D-46FF-4C4E-8340-4BC7CDF78615}'
+                Project('{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}') = 'MainApp', 'MainApp\MainApp.vcxproj', '{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}'
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|x86 = Debug|x86
+                        Release|x86 = Release|x86
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|x86.ActiveCfg = Debug|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|x86.ActiveCfg = Release|Any CPU
+                        {A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Debug|x86.ActiveCfg = Debug|Any CPU
+                        {A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Release|x86.ActiveCfg = Release|Any CPU
+                        {E8E75132-67E4-4D6F-9CAE-8DA4C883F419}.Debug|x86.ActiveCfg = Debug|Any CPU
+                        {E8E75132-67E4-4D6F-9CAE-8DA4C883F419}.Release|x86.ActiveCfg = Release|Any CPU
+                        {D2633E4D-46FF-4C4E-8340-4BC7CDF78615}.Debug|x86.ActiveCfg = Debug|Any CPU
+                        {D2633E4D-46FF-4C4E-8340-4BC7CDF78615}.Release|x86.ActiveCfg = Release|Any CPU
+                   EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+
+            // What is needed to be checked is whether there were still both projects found in the invalid solution file
+            ProjectInSolution classLibraryProject = (ProjectInSolution)solution.ProjectsByGuid["{6185CC21-BE89-448A-B3C0-D1C27112E595}"];
+            ProjectInSolution mainAppProject = (ProjectInSolution)solution.ProjectsByGuid["{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}"];
+            ProjectInSolution lowLevelProject = (ProjectInSolution)solution.ProjectsByGuid["{E8E75132-67E4-4D6F-9CAE-8DA4C883F419}"];
+            ProjectInSolution highLevelProject = (ProjectInSolution)solution.ProjectsByGuid["{D2633E4D-46FF-4C4E-8340-4BC7CDF78615}"];
+            mainAppProject.GetUniqueProjectName().ShouldNotBe(classLibraryProject.GetUniqueProjectName());
+            classLibraryProject.GetUniqueProjectName().ShouldBe("ClassLibrary");
+            mainAppProject.GetUniqueProjectName().ShouldBe("MainApp");
+            lowLevelProject.GetUniqueProjectName().ShouldNotBe(highLevelProject.GetUniqueProjectName());
+            lowLevelProject.GetUniqueProjectName().ShouldBe("SomeLowLevelLayerProject");
+            highLevelProject.GetUniqueProjectName().ShouldBe("SomeHighLevelLayerProject");
+        }
+
         /// <summary>
         /// Make sure the project configurations in solution configurations get parsed correctly
         /// for a simple mixed C#/VC solution
