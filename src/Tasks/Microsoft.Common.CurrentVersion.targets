@@ -616,7 +616,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!-- Users familiar with how some other repos work try to use NoWarn with MSBuild in place of MSBuildWarningsAsMessages. -->
   <PropertyGroup Condition="$([MSBuild]::AreFeaturesEnabled('16.8'))">
     <MSBuildWarningsAsMessages Condition="'$(MSBuildWarningsAsMessages)'==''">$(NoWarn)</MSBuildWarningsAsMessages>
-    <MSBuildWarningsAsErrors Condition="'$(MSBuildWarningsAsErrors)'==''">$(WarnAsError)</MSBuildWarningsAsErrors>
+    <MSBuildWarningsAsErrors Condition="'$(MSBuildWarningsAsErrors)'==''">$(WarningsAsErrors)</MSBuildWarningsAsErrors>
   </PropertyGroup>
 
   <!-- Common Project System support -->
