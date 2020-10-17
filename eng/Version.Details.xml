@@ -85,9 +85,9 @@
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>d834b9b8c4337438622cb7b7d77f1520b479cb88</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="6.0.0-alpha.1.20514.2">
+    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="6.0.0-alpha.1.20515.1">
       <Uri>https://github.com/mono/linker</Uri>
-      <Sha>7a506b2c2b95ef26c2cfffd578477e05329d618f</Sha>
+      <Sha>2b7484c51c63883f2dff04212832debbb4554b30</Sha>
     </Dependency>
     <Dependency Name="System.CodeDom" Version="6.0.0-alpha.1.20515.8">
       <Uri>https://github.com/dotnet/runtime</Uri>
