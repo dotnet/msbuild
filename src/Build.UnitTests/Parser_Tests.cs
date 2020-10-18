@@ -526,18 +526,5 @@ namespace Microsoft.Build.UnitTests
             // Make sure the log contains the correct strings.
             Assert.DoesNotContain("MSB4130:", ml.FullLog); // "No need to warn for this expression - ($(a) == 1 or $(b) == 2) and $(c) == 3."
         }
-
-        [Fact]
-        public void WhitespaceTest()
-        {
-            MockLogger ml = ObjectModelHelpers.BuildProjectExpectFailure(@"
-                    <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
-                        <Target Name=`Build`>
-                            <Warning Text=`should error on this line` Condition=`$(MSBuildProjectFullPath ) != ''`/>
-                        </Target>
-                    </Project>");
-
-            Assert.Contains("MSB4151:", ml.FullLog);
-        }
     }
 }
