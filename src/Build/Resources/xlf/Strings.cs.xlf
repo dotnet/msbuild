@@ -105,9 +105,9 @@
         <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertyWhitespaceInCondition">
-        <source>MSB4151: Unexpected whitespace at position "{1}" of condition "{0}". Did you forget to remove a whitespace?</source>
-        <target state="new">MSB4151: Unexpected whitespace at position "{1}" of condition "{0}". Did you forget to remove a whitespace?</target>
-        <note>{StrBegin="MSB4151: "}</note>
+        <source>MSB4259: Unexpected whitespace at position "{1}" of condition "{0}". Did you forget to remove a whitespace?</source>
+        <target state="new">MSB4259: Unexpected whitespace at position "{1}" of condition "{0}". Did you forget to remove a whitespace?</target>
+        <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>

@@ -491,8 +491,8 @@
     <comment>{StrBegin="MSB4110: "}</comment>
   </data>
   <data name="IllFormedPropertyWhitespaceInCondition" xml:space="preserve">
-    <value>MSB4151: Unexpected whitespace at position "{1}" of condition "{0}". Did you forget to remove a whitespace?</value>
-    <comment>{StrBegin="MSB4151: "}</comment>
+    <value>MSB4259: Unexpected whitespace at position "{1}" of condition "{0}". Did you forget to remove a whitespace?</value>
+    <comment>{StrBegin="MSB4259: "}</comment>
   </data>
   <data name="IllFormedQuotedStringInCondition" xml:space="preserve">
     <value>MSB4101: Expected a closing quote after position {1} in condition "{0}".</value>
