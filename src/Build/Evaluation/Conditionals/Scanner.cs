@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -339,7 +340,7 @@ namespace Microsoft.Build.Evaluation
                             nestLevel--;
                             whitespaceCheck = false;
                         }
-                        else if (whitespaceCheck && char.IsWhiteSpace(character))
+                        else if (whitespaceCheck && char.IsWhiteSpace(character) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
                         {
                             indexResult = index;
                             return false;
