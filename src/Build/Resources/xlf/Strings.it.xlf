@@ -64,14 +64,14 @@
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
         <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</source>
-        <target state="new">Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</target>
+        <target state="translated">La variabile di ambiente MSBUILDDISABLEFEATURESFROMVERSION è impostata su un formato non valido. Verranno abilitate tutte le versioni con flussi di modifiche. Valore immesso: {0}.</target>
         <note>
        Value should be of the format: xx.yy
     </note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
         <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}.</source>
-        <target state="new">Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}.</target>
+        <target state="translated">La variabile di ambiente MSBUILDDISABLEFEATURESFROMVERSION è impostata su una versione esclusa dalla rotazione. Per impostazione predefinita, verrà usata la versione con flussi di modifiche: {0}. Valore immesso: {1}.</target>
         <note>
        Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current Change Waves are.
     </note>
@@ -116,7 +116,7 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
-        <target state="new">"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</target>
+        <target state="translated">"Agli oggetti EvaluationContext creati con SharingPolicy.Isolated non è possibile passare un file system MSBuildFileSystemBase."</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -190,11 +190,6 @@
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Valore iniziale della proprietà: $({0})="{1}". Origine: {2}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RarControllerReflectionError">
-        <source>Couldn't create an instance of IRarController for '{0}' type</source>
-        <target state="new">Couldn't create an instance of IRarController for '{0}' type</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">

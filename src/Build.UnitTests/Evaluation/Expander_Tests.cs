@@ -3676,6 +3676,41 @@ namespace Microsoft.Build.UnitTests.Evaluation
             result.ShouldBe(metadatumValue);
         }
 
+        [Fact]
+        public void PropertyFunctionHashCodeSameOnlyIfStringSame()
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            string[] stringsToHash = {
+                "cat1s",
+                "cat1z",
+                "bat1s",
+                "cut1s",
+                "cat1so",
+                "cats1",
+                "acat1s",
+                "cat12s",
+                "cat1s"
+            };
+            int[] hashes = stringsToHash.Select(toHash =>
+                (int)expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::StableStringHash('{toHash}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance)
+                ).ToArray();
+            for (int a = 0; a < hashes.Length; a++)
+            {
+                for (int b = a; b < hashes.Length; b++)
+                {
+                    if (stringsToHash[a].Equals(stringsToHash[b]))
+                    {
+                        hashes[a].ShouldBe(hashes[b], "Identical strings should hash to the same value.");
+                    }
+                    else
+                    {
+                        hashes[a].ShouldNotBe(hashes[b], "Different strings should not hash to the same value.");
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// A whole bunch error check tests
         /// </summary>

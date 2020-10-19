@@ -64,14 +64,14 @@
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
         <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</source>
-        <target state="new">Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</target>
+        <target state="translated">Proměnná prostředí MSBUILDDISABLEFEATURESFROMVERSION je nastavená na neplatný formát. Povolují se všechny verze vlny změn. Zadaná hodnota: {0}</target>
         <note>
        Value should be of the format: xx.yy
     </note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
         <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}.</source>
-        <target state="new">Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}.</target>
+        <target state="translated">Proměnná prostředí MSBUILDDISABLEFEATURESFROMVERSION je nastavená na verzi, která je mimo rotaci. Nastavuje se výchozí verze vlny změn: {0}. Zadaná hodnota: {1}</target>
         <note>
        Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current Change Waves are.
     </note>
@@ -116,7 +116,7 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
-        <target state="new">"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</target>
+        <target state="translated">Objekty EvaluationContext vytvořené pomocí SharingPolicy.Isolated nepodporují předávání souborového systému MSBuildFileSystemBase.</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -190,11 +190,6 @@
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Počáteční hodnota vlastnosti: $({0})={1} Zdroj: {2}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RarControllerReflectionError">
-        <source>Couldn't create an instance of IRarController for '{0}' type</source>
-        <target state="new">Couldn't create an instance of IRarController for '{0}' type</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">

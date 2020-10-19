@@ -64,14 +64,14 @@
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
         <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</source>
-        <target state="new">Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</target>
+        <target state="translated">環境變數 MSBUILDDISABLEFEATURESFROMVERSION 設定的格式無效。正在啟用所有變更波浪版本。輸入的值: {0}。</target>
         <note>
        Value should be of the format: xx.yy
     </note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
         <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}.</source>
-        <target state="new">Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}.</target>
+        <target state="translated">環境變數 MSBUILDDISABLEFEATURESFROMVERSION 已設為無法旋轉的版本。預設為變更波浪版本: {0}。輸入的值: {1}。</target>
         <note>
        Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current Change Waves are.
     </note>
@@ -116,7 +116,7 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
-        <target state="new">"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</target>
+        <target state="translated">"使用 SharingPolicy.Isolated 建立的 EvaluationContext 物件不支援以 MSBuildFileSystemBase 檔案系統傳遞。"</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -190,11 +190,6 @@
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">屬性初始值: $({0})="{1}" 來源: {2}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RarControllerReflectionError">
-        <source>Couldn't create an instance of IRarController for '{0}' type</source>
-        <target state="new">Couldn't create an instance of IRarController for '{0}' type</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">

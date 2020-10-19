@@ -776,27 +776,27 @@
       </trans-unit>
       <trans-unit id="GenerateLauncher.CopyError">
         <source>MSB3961: An error occurred trying to copy '{0}' to '{1}': {2}</source>
-        <target state="new">MSB3961: An error occurred trying to copy '{0}' to '{1}': {2}</target>
+        <target state="translated">MSB3961: une erreur s'est produite durant la tentative de copie de '{0}' vers '{1}' : {2}</target>
         <note>{StrBegin="MSB3961: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.General">
         <source>MSB3962: An error occurred generating a launcher: {0}</source>
-        <target state="new">MSB3962: An error occurred generating a launcher: {0}</target>
+        <target state="translated">MSB3962: une erreur s'est produite durant la génération d'un lanceur : {0}</target>
         <note>{StrBegin="MSB3962: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.InvalidInput">
         <source>MSB3963: Not enough data was provided to generate a launcher. Please provide a value for: 'EntryPoint'.</source>
-        <target state="new">MSB3963: Not enough data was provided to generate a launcher. Please provide a value for: 'EntryPoint'.</target>
+        <target state="translated">MSB3963: les données fournies sont insuffisantes pour générer un lanceur. Fournissez une valeur pour 'EntryPoint'.</target>
         <note>{StrBegin="MSB3963: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.MissingLauncherExe">
         <source>MSB3964: Could not find required file '{0}'.</source>
-        <target state="new">MSB3964: Could not find required file '{0}'.</target>
+        <target state="translated">MSB3964: le fichier nécessaire '{0}' est introuvable.</target>
         <note>{StrBegin="MSB3964: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.NoOutputPath">
         <source>MSB3965: No output path specified in build settings.</source>
-        <target state="new">MSB3965: No output path specified in build settings.</target>
+        <target state="translated">MSB3965: aucun chemin de sortie spécifié dans les paramètres de build.</target>
         <note>{StrBegin="MSB3965: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.AllowPartiallyTrustedCallers">
@@ -1198,7 +1198,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.AdditionalInputNewerThanTLog">
         <source>Additional input "{0}" has been updated since the last build.  Forcing regeneration of all resources.</source>
-        <target state="translated">L'entrée supplémentaire "{0}" a été mise à jour depuis la dernière génération.  Régénération forcée de toutes les ressources.</target>
+        <target state="translated">L'entrée supplémentaire "{0}" a été mise à jour depuis la dernière génération.  Regénération forcée de toutes les ressources.</target>
         <note />
       </trans-unit>
       <trans-unit id="GenerateResource.SeparateAppDomainBecauseNeverLockTypeAssembliesTrue">
@@ -1437,11 +1437,6 @@
         <target state="translated">StopOnFirstFailure reste sans effet dans les conditions suivantes : 1) Le système s'exécute en mode multiprocessus. 2) La propriété BuildInParallel a la valeur true. 3) La propriété RunEachTargetSeparately a la valeur false.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
-      <trans-unit id="RarCouldntConnect">
-        <source>Couldn't connect to the RAR node, starting a new one.</source>
-        <target state="new">Couldn't connect to the RAR node, starting a new one.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
         <target state="translated">MSB3501: Impossible de lire les lignes dans le fichier "{0}". {1}</target>
@@ -1489,7 +1484,7 @@
       </trans-unit>
       <trans-unit id="RegisterAssembly.TypeLibUpToDate">
         <source>Type library "{0}" is up to date, skipping regeneration.</source>
-        <target state="translated">La bibliothèque de types "{0}" est à jour, régénération ignorée.</target>
+        <target state="translated">La bibliothèque de types "{0}" est à jour, regénération ignorée.</target>
         <note />
       </trans-unit>
       <trans-unit id="RegisterAssembly.UnauthorizedAccess">

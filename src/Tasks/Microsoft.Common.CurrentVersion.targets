@@ -613,6 +613,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ContinueOnError Condition="'$(ContinueOnError)' == ''">false</ContinueOnError>
   </PropertyGroup>
 
+  <!-- Users familiar with how some other repos work try to use NoWarn with MSBuild in place of MSBuildWarningsAsMessages. -->
+  <PropertyGroup Condition="'$(MSBuildWarningsAsMessages)'=='' And $([MSBuild]::AreFeaturesEnabled('16.8'))">
+    <MSBuildWarningsAsMessages>$(NoWarn)</MSBuildWarningsAsMessages>
+  </PropertyGroup>
+
   <!-- Common Project System support -->
   <PropertyGroup>
     <CommonXamlResourcesDirectory Condition=" '$(CommonXamlResourcesDirectory)' == '' ">$(MSBuildThisFileDirectory)$(LangName)\</CommonXamlResourcesDirectory>
@@ -2160,7 +2165,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         IgnoreTargetFrameworkAttributeVersionMismatch ="$(ResolveAssemblyReferenceIgnoreTargetFrameworkAttributeVersionMismatch)"
         FindDependenciesOfExternallyResolvedReferences="$(FindDependenciesOfExternallyResolvedReferences)"
         ContinueOnError="$(ContinueOnError)"
-        UseResolveAssemblyReferenceService="$(UseResolveAssemblyReferenceService)"
         Condition="'@(Reference)'!='' or '@(_ResolvedProjectReferencePaths)'!='' or '@(_ExplicitReference)' != ''"
         >
 
@@ -4013,6 +4017,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         TimestampUrl="$(ManifestTimestampUrl)"
         SigningTarget="@(_DeploymentManifestLauncherEntryPoint)"
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         Condition="'$(_DeploymentSignClickOnceManifests)'=='true'" />
 
     <!--
@@ -4093,7 +4098,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_SatelliteAssemblies Include="@(IntermediateSatelliteAssembliesWithTargetPath);@(ReferenceSatellitePaths)" />
       <_DeploymentReferencePaths Include="@(ReferenceCopyLocalPaths)"
-                                 Condition="'%(Extension)' == '.dll' Or '%(Extension)' == '.exe'">
+                                 Condition="'%(Extension)' == '.dll' Or '%(Extension)' == '.exe' Or '%(Extension)' == '.md'">
         <IsPrimary>true</IsPrimary>
       </_DeploymentReferencePaths>
       <_DeploymentReferencePaths Include="@(_DeploymentReferencePaths);@(_CopyLocalFalseRefPathsWithExclusion)" />
@@ -4110,9 +4115,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce)"/>
     </ItemGroup>
 
-    <!-- For single file publish, we only need to include the SF EXE in the clickonce manifest -->
+    <!-- For single file publish, we need to include the SF bundle EXE and files excluded from the bundle EXE in the clickonce manifest -->
     <ItemGroup Condition="'$(PublishSingleFile)' == 'true'">
       <ClickOnceFiles Include="$(PublishedSingleFilePath)"/>
+      <ClickOnceFiles Include="@(_FilesExcludedFromBundle)"/>
     </ItemGroup>
 
     <!-- Copy the application executable from Obj folder to app.publish folder.
@@ -4138,10 +4144,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         EntryPoint="@(_DeploymentClickOnceApplicationExecutable)"
         ExtraFiles="@(_DebugSymbolsIntermediatePath);$(IntermediateOutputPath)$(TargetName).xml;@(_ReferenceRelatedPaths)"
         Files="@(ClickOnceFiles)"
+        IsSelfContainedPublish="$(SelfContained)"
+        IsSingleFilePublish="$(PublishSingleFile)"
         LauncherBasedDeployment="$(_DeploymentLauncherBased)"
         ManagedAssemblies="@(_ManifestManagedReferences)"
         NativeAssemblies="@(NativeReferenceFile);@(_DeploymentNativePrerequisite)"
         PublishFiles="@(PublishFile)"
+        RuntimePackAssets="@(RuntimePackAsset)"
         SatelliteAssemblies="@(_SatelliteAssemblies)"
         SigningManifests="$(SignManifests)"
         TargetCulture="$(TargetCulture)"
@@ -5635,7 +5644,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             />
 
     <ItemGroup Condition="'$(PublishSingleFile)' == 'true'">
-      <PublishedSingleFileToBeCopied Include="$(PublishedSingleFilePath)" TargetPath="$(PublishedSingleFileName)"/>
+      <PublishedSingleFileToBeCopied Include="@(_DeploymentManifestFiles)"/>
     </ItemGroup>
 
     <!-- For single-file publish case, we need to only copy the clickonce manifest, manifest entry point (launcher) and the SF EXE -->
@@ -5705,6 +5714,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
         TimestampUrl="$(ManifestTimestampUrl)"
         SigningTarget="$(_DeploymentApplicationDir)$(_DeploymentTargetApplicationManifestFileName)"
+        TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
         Condition="'$(_DeploymentSignClickOnceManifests)'=='true'" />
 
@@ -5724,6 +5734,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
         TimestampUrl="$(ManifestTimestampUrl)"
         SigningTarget="$(PublishDir)$(TargetDeployManifestFileName)"
+        TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
         Condition="'$(_DeploymentSignClickOnceManifests)'=='true'" />
 
@@ -5732,11 +5743,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         TimestampUrl="$(ManifestTimestampUrl)"
         SigningTarget="$(PublishDir)\setup.exe"
         Condition="'$(BootstrapperEnabled)'=='true' and '$(_DeploymentSignClickOnceManifests)'=='true'" />
-
-
   </Target>
-
-
 
 
   <!--

@@ -15,7 +15,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Execution
 {
@@ -321,7 +320,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Indicates whether to emit a default error if a task returns false without logging an error.
         /// </summary>
-        public bool AllowFailureWithoutError { get; set; } = true;
+        public bool AllowFailureWithoutError { get; set; } = false;
 
         /// <summary>
         /// Gets the environment variables which were set when this build was created.
@@ -394,7 +393,7 @@ namespace Microsoft.Build.Execution
         public bool EnableNodeReuse
         {
             get => _enableNodeReuse;
-            set => _enableNodeReuse = Traits.Instance.DisableNodeReuse ? false : value;
+            set => _enableNodeReuse = Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1" ? false : value;
         }
 
         /// <summary>
@@ -905,7 +904,7 @@ namespace Microsoft.Build.Execution
             ResetCaches = true;
             _toolsetProvider = toolsetProvider;
 
-            if (Traits.Instance.DisableNodeReuse) // For example to disable node reuse within Visual Studio
+            if (Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1") // For example to disable node reuse within Visual Studio
             {
                 _enableNodeReuse = false;
             }
