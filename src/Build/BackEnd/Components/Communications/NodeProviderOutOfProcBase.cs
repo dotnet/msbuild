@@ -5,12 +5,20 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.IO.Pipes;
 using System.Diagnostics;
 using System.Threading;
+#if !FEATURE_APM
 using System.Threading.Tasks;
+#endif
 using System.Runtime.InteropServices;
+#if FEATURE_PIPE_SECURITY
+using System.Security.Principal;
+#endif
 
+#if FEATURE_APM
 using Microsoft.Build.Eventing;
+#endif
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
