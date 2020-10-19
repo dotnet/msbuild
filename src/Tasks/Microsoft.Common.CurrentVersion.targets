@@ -968,7 +968,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="BuildGenerateSources" DependsOnTargets="BuildGenerateSourcesTraverse;$(BuildGenerateSourcesAction)" />
 
-  <Target Name="BuildGenerateSourcesTraverse" DependsOnTargets="PrepareProjectReferences">
+  <Target Name="BuildGenerateSourcesTraverse" DependsOnTargets="PrepareProjectReferences" Condition="'$(BuildPassReferences)' == 'true'">
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildGenerateSources"
@@ -993,7 +993,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="BuildCompile" DependsOnTargets="BuildCompileTraverse;$(BuildCompileAction)" />
 
-  <Target Name="BuildCompileTraverse" DependsOnTargets="PrepareProjectReferences">
+  <Target Name="BuildCompileTraverse" DependsOnTargets="PrepareProjectReferences" Condition="'$(BuildPassReferences)' == 'true'">
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildCompile"
@@ -1018,7 +1018,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="BuildLink" DependsOnTargets="BuildLinkTraverse;$(BuildLinkAction)" />
 
-  <Target Name="BuildLinkTraverse" DependsOnTargets="PrepareProjectReferences" >
+  <Target Name="BuildLinkTraverse" DependsOnTargets="PrepareProjectReferences" Condition="'$(BuildPassReferences)' == 'true'">
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildLink"
