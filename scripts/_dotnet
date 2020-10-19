@@ -1,0 +1,3 @@
+#compdef dotnet
+local completions=("$(dotnet complete "$words")")
+[[ -n "$completions" ]] && compadd -- "${(ps:\n:)completions}"
