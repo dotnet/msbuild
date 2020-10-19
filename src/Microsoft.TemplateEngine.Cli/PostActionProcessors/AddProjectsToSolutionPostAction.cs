@@ -36,22 +36,23 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 return false;
             }
 
-            Dotnet addProjToSlnCommand = Dotnet.AddProjectsToSolution(nearestSlnFilesFould[0], projectFiles);
+            string solutionFolder = GetSolutionFolder(actionConfig);
+            Dotnet addProjToSlnCommand = Dotnet.AddProjectsToSolution(nearestSlnFilesFould[0], projectFiles, GetSolutionFolder(actionConfig));
             addProjToSlnCommand.CaptureStdOut();
             addProjToSlnCommand.CaptureStdErr();
-            environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionRunning, nearestSlnFilesFould[0], string.Join(" ", projectFiles)));
+            environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionRunning, addProjToSlnCommand.Command));
             Dotnet.Result commandResult = addProjToSlnCommand.Execute();
 
             if (commandResult.ExitCode != 0)
             {
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionFailed, string.Join(" ", projectFiles), nearestSlnFilesFould[0]));
+                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionFailed, string.Join(" ", projectFiles), nearestSlnFilesFould[0], solutionFolder));
                 environment.Host.LogMessage(string.Format(LocalizableStrings.CommandOutput, commandResult.StdOut + Environment.NewLine + Environment.NewLine + commandResult.StdErr));
                 environment.Host.LogMessage(string.Empty);
                 return false;
             }
             else
             {
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionSucceeded, string.Join(" ", projectFiles), nearestSlnFilesFould[0]));
+                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionSucceeded, string.Join(" ", projectFiles), nearestSlnFilesFould[0], solutionFolder));
                 return true;
             }
         }
@@ -168,25 +169,35 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 return Process(environment, action, templateCreationResult, outputBasePath);
             }
 
-            Dotnet addProjToSlnCommand = Dotnet.AddProjectsToSolution(nearestSlnFilesFould[0], projectFiles);
+            string solutionFolder = GetSolutionFolder(action);
+            Dotnet addProjToSlnCommand = Dotnet.AddProjectsToSolution(nearestSlnFilesFould[0], projectFiles, solutionFolder);
             addProjToSlnCommand.CaptureStdOut();
             addProjToSlnCommand.CaptureStdErr();
-            environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionRunning, nearestSlnFilesFould[0], string.Join(" ", projectFiles)));
+            environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionRunning, addProjToSlnCommand.Command));
             Dotnet.Result commandResult = addProjToSlnCommand.Execute();
 
             if (commandResult.ExitCode != 0)
             {
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionFailed, string.Join(" ", projectFiles), nearestSlnFilesFould[0]));
+                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionFailed, string.Join(" ", projectFiles), nearestSlnFilesFould[0], solutionFolder));
                 environment.Host.LogMessage(string.Format(LocalizableStrings.CommandOutput, commandResult.StdOut + Environment.NewLine + Environment.NewLine + commandResult.StdErr));
                 environment.Host.LogMessage(string.Empty);
                 return false;
             }
             else
             {
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionSucceeded, string.Join(" ", projectFiles), nearestSlnFilesFould[0]));
+                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionSucceeded, string.Join(" ", projectFiles), nearestSlnFilesFould[0], solutionFolder));
                 return true;
             }
 
+        }
+
+        private string GetSolutionFolder(IPostAction actionConfig)
+        {
+            if (actionConfig.Args != null && actionConfig.Args.TryGetValue("solutionFolder", out string solutionFolder))
+            {
+                return solutionFolder;
+            }
+            return string.Empty;
         }
     }
 }

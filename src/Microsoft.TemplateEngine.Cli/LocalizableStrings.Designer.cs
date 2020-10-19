@@ -70,7 +70,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to add project(s) {0} to solution file {1}.
+        ///   Looks up a localized string similar to Failed to add project(s) {0} to solution file {1}, solution folder {2}..
         /// </summary>
         public static string AddProjToSlnPostActionFailed {
             get {
@@ -88,7 +88,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Adding project reference(s) to solution file. Running dotnet sln {0} add {1}.
+        ///   Looks up a localized string similar to Adding project reference(s) to solution file. Running {0}.
         /// </summary>
         public static string AddProjToSlnPostActionRunning {
             get {
@@ -99,7 +99,8 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Successfully added
         ///    project(s): {0}
-        ///    to solution file: {1}.
+        ///    to solution file: {1}
+        ///    solution folder: {2}.
         /// </summary>
         public static string AddProjToSlnPostActionSucceeded {
             get {

@@ -536,18 +536,19 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
     <value>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</value>
   </data>
   <data name="AddProjToSlnPostActionFailed" xml:space="preserve">
-    <value>Failed to add project(s) {0} to solution file {1}</value>
+    <value>Failed to add project(s) {0} to solution file {1}, solution folder {2}.</value>
   </data>
   <data name="AddProjToSlnPostActionNoProjFiles" xml:space="preserve">
     <value>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</value>
   </data>
   <data name="AddProjToSlnPostActionRunning" xml:space="preserve">
-    <value>Adding project reference(s) to solution file. Running dotnet sln {0} add {1}</value>
+    <value>Adding project reference(s) to solution file. Running {0}</value>
   </data>
   <data name="AddProjToSlnPostActionSucceeded" xml:space="preserve">
     <value>Successfully added
     project(s): {0}
-    to solution file: {1}</value>
+    to solution file: {1}
+    solution folder: {2}</value>
   </data>
   <data name="AddProjToSlnPostActionUnresolvedSlnFile" xml:space="preserve">
     <value>Unable to determine which solution file to add the reference to.</value>

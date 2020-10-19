@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -14,6 +16,9 @@ namespace Microsoft.TemplateEngine.Cli
         private StringBuilder _stdout;
         private DataReceivedEventHandler _outputDataReceived;
         private bool _anyNonEmptyStderrWritten;
+
+        public string Command => string.Concat(_info.FileName, " ", _info.Arguments);
+
 
         public static Dotnet Restore(params string[] args)
         {
@@ -67,7 +72,7 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
-        public static Dotnet AddProjectsToSolution(string solutionFile, IReadOnlyList<string> projects)
+        public static Dotnet AddProjectsToSolution(string solutionFile, IReadOnlyList<string> projects, string solutionFolder = "")
         {
             List<string> allArgs = new List<string>()
             {
@@ -75,6 +80,12 @@ namespace Microsoft.TemplateEngine.Cli
                 solutionFile,
                 "add"
             };
+
+            if (!string.IsNullOrWhiteSpace(solutionFolder))
+            {
+                allArgs.Add("--solution-folder");
+                allArgs.Add(solutionFolder);
+            }
 
             allArgs.AddRange(projects);
             string argString = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(allArgs);
