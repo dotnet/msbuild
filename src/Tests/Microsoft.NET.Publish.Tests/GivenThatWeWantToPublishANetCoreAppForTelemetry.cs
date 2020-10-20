@@ -60,7 +60,7 @@ namespace Microsoft.NET.Publish.Tests
                 "\"CompileListCount\":\"[1-9]\\d?\"");  // Do not hardcode number of assemblies being compiled here, due to ILTrimmer
         }
 
-        [CoreMSBuildOnlyTheory(Skip = "https://github.com/dotnet/sdk/issues/13279")]
+        [CoreMSBuildOnlyTheory]
         [InlineData("net5.0")] 
         void It_collects_crossgen2_publishing_properties(string targetFramework)
         {
@@ -85,7 +85,7 @@ namespace Microsoft.NET.Publish.Tests
                 .And.Contain(
                     "{\"EventName\":\"ReadyToRun\",\"Properties\":{\"PublishReadyToRunUseCrossgen2\":\"True\",")
                 .And.MatchRegex(
-                    "\"Crossgen2PackVersion\":\"5.+\"")
+                    "\"Crossgen2PackVersion\":\"[5-9]\\..+\"")
                 .And.Contain(
                     "\"CompileListCount\":\"1\",\"FailedCount\":\"0\"");
         }

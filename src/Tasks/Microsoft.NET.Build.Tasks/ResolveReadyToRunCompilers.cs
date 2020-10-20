@@ -114,13 +114,8 @@ namespace Microsoft.NET.Build.Tasks
 
             if (!ExtractTargetPlatformAndArchitecture(_targetRuntimeIdentifier, out _targetPlatform, out _targetArchitecture) ||
                 !ExtractTargetPlatformAndArchitecture(_hostRuntimeIdentifier, out string hostPlatform, out Architecture hostArchitecture) ||
-                _targetPlatform != hostPlatform)
-            {
-                Log.LogError(Strings.ReadyToRunTargetNotSupportedError);
-                return false;
-            }
-
-            if (!GetCrossgenComponentsPaths())
+                _targetPlatform != hostPlatform ||
+                !GetCrossgenComponentsPaths())
             {
                 Log.LogError(Strings.ReadyToRunTargetNotSupportedError);
                 return false;
@@ -151,14 +146,10 @@ namespace Microsoft.NET.Build.Tasks
             //      linux-x64 -> linux-x64
             //      linux-musl-x64 -> linux-musl-x64
             if (!ExtractTargetPlatformAndArchitecture(_targetRuntimeIdentifier, out _targetPlatform, out _targetArchitecture) ||
-                !GetTargetSpec(out string targetSpec) ||
-                _targetRuntimeIdentifier != _hostRuntimeIdentifier)
-            {
-                Log.LogError(Strings.ReadyToRunTargetNotSupportedError);
-                return false;
-            }
-
-            if (!GetCrossgen2ComponentsPaths(targetSpec))
+                !ExtractTargetPlatformAndArchitecture(_hostRuntimeIdentifier, out string hostPlatform, out Architecture hostArchitecture) ||
+                !GetTargetSpec(hostArchitecture, out string targetSpec) ||
+                _targetRuntimeIdentifier != _hostRuntimeIdentifier ||
+                !GetCrossgen2ComponentsPaths(targetSpec))
             {
                 Log.LogError(Strings.ReadyToRunTargetNotSupportedError);
                 return false;
@@ -198,7 +189,7 @@ namespace Microsoft.NET.Build.Tasks
             architecture = default;
 
             int separator = runtimeIdentifier.LastIndexOf('-');
-            if (separator < 0 || separator >= runtimeIdentifier.Length)
+            if (separator < 0)
             {
                 return false;
             }
@@ -334,17 +325,17 @@ namespace Microsoft.NET.Build.Tasks
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 _crossgen2Tool.ToolPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "crossgen2.exe");
-                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", $"clrjit-{targetSpec}.dll");
+                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", $"clrjit_{targetSpec}.dll");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 _crossgen2Tool.ToolPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "crossgen2");
-                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", $"libclrjit-{targetSpec}.so");
+                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", $"libclrjit_{targetSpec}.so");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 _crossgen2Tool.ToolPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", "crossgen2");
-                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", $"libclrjit-{targetSpec}.dylib");
+                _crossgen2Tool.ClrJitPath = Path.Combine(_crossgen2Tool.PackagePath, "tools", $"libclrjit_{targetSpec}.dylib");
             }
             else
             {
@@ -355,11 +346,9 @@ namespace Microsoft.NET.Build.Tasks
             return File.Exists(_crossgen2Tool.ToolPath) && File.Exists(_crossgen2Tool.ClrJitPath);
         }
 
-        // Keep in sync with JitConfigProvider.GetTargetSpec
-        private bool GetTargetSpec(out string targetSpec)
+        private static string ArchitectureToString(Architecture architecture)
         {
-            string targetOSComponent = (_targetPlatform == "win" ? "win" : "unix");
-            string targetArchComponent = _targetArchitecture switch
+            return architecture switch
             {
                 Architecture.X86 => "x86",
                 Architecture.X64 => "x64",
@@ -367,14 +356,22 @@ namespace Microsoft.NET.Build.Tasks
                 Architecture.Arm64 => "arm64",
                 _ => null
             };
+        }
 
-            if (targetArchComponent == null)
+        // Keep in sync with JitConfigProvider.GetTargetSpec
+        private bool GetTargetSpec(Architecture hostArchitecture, out string targetSpec)
+        {
+            string targetOSComponent = (_targetPlatform == "win" ? "win" : "unix");
+            string targetArchComponent = ArchitectureToString(_targetArchitecture);
+            string hostArchComponent = ArchitectureToString(hostArchitecture);
+
+            if (targetArchComponent == null || hostArchComponent == null)
             {
                 targetSpec = null;
                 return false;
             }
 
-            targetSpec = targetOSComponent + '-' + targetArchComponent;
+            targetSpec = targetOSComponent + '_' + targetArchComponent + '_' + hostArchComponent;
             return true;
         }
     }
