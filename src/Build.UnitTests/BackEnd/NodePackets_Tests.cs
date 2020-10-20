@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;

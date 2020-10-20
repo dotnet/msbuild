@@ -3,10 +3,7 @@
 
 using System;
 using System.Collections;
-using System.Text;
 using System.IO;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.BuildEngine

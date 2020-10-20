@@ -3,17 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Xml;
 using System.Reflection;
-using System.Globalization;
-using System.Collections;
-using System.Diagnostics;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.BackEnd.Logging;
 
 namespace Microsoft.Build.BackEnd

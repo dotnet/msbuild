@@ -1,11 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Execution;
-using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
 

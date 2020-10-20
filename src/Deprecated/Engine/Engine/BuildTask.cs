@@ -3,12 +3,7 @@
 
 using System;
 using System.Xml;
-using System.Diagnostics;
 using System.Collections;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Globalization;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;

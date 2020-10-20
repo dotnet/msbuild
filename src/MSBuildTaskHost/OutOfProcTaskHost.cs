@@ -2,13 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
 
 // CR: We could move MSBuildApp.ExitType out of MSBuildApp
-using Microsoft.Build.CommandLine;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
