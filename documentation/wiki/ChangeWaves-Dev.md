@@ -3,19 +3,24 @@
 # What are Change Waves?
 A Change Wave is a set of risky features developed under the same opt-out flag. This flag happens to be the version of MSBuild that the features were developed for. The purpose of this is to warn developers of risky changes that will become standard functionality down the line.
 
+The reason MSBuild cannot avoid risky changes is inherent in its design. There is a single bucket for all tasks, targets, properties and files. Various MSBuild tasks can use this in any way they wish. This global space means that someone may have taken a dependency on any aspect of MSBuild.
+
+## Why Opt-Out vs Opt-In?
+Sometimes we need to understand the scope of what one of these risky changes will do. For example, if we make a change that breaks a 'hot path', we can then create a permanent escape hatch and transition that feature to opt-in.
+
 ## How do they work?
 The opt out comes in the form of setting the environment variable `MSBuildDisableFeaturesFromVersion` to the Change Wave (or version) that contains the feature you want **disabled**. All later change waves are similarly disabled.
 
-## What Are the Current Change Waves & Associated Features?
-See the mapping of change waves to features [here](ChangeWaves.md#change-waves-&-associated-features).
+## Choosing A Change Wave
+This is determined on a case by case basis and should be discussed with the MSBuild team. A safe bet would be to check our [currently active Change Waves](ChangeWaves.md#change-waves-&-associated-features) and pick the version after the latest MSBuild version. This version corresponds to the latest version of Visual Studio.
 
 # Developing With Change Waves in Mind
 For the purpose of providing an example, the rest of this document assumes we're developing a feature for MSBuild version **17.4**.
 
 The Process:
 1. Develop your feature.
-2. [Create the change wave](#creating-a-change-wave) (if necessary)
-3. [Check if your change wave is enabled](#checking-if-a-change-wave-is-enabled)
+2. [Create the Change Wave](#creating-a-change-wave) (if necessary)
+3. [Condition your feature on that Change Wave](#conditioning-your-feature-on-a-change-wave)
 4. [Test your feature](#test-your-feature)
 5. [Document it](ChangeWaves.md#change-wave-features)
 6. [Delete the wave as it cycles out](#change-wave-'end-of-lifespan'-procedure)
@@ -32,7 +37,7 @@ public const string Wave17_4 = "17.4";
 public static readonly string[] AllWaves = { Wave16_10, Wave17_0, Wave17_4 };
 ```
 
-## Checking If A Change Wave is Enabled
+## Conditioning Your Feature On A Change Wave
 Surround your feature with the following:
 ```c#
     // If you pass an incorrectly formatted change wave, this will throw.
