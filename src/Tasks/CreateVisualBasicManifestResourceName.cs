@@ -37,7 +37,8 @@ namespace Microsoft.Build.Tasks
         )
         {
             string culture = null;
-            if (fileName != null && itemSpecToTaskitem.TryGetValue(fileName, out ITaskItem item))
+            ITaskItem item = null;
+            if (fileName != null && itemSpecToTaskitem.TryGetValue(fileName, out item))
             {
                 culture = item.GetMetadata("Culture");
             }
@@ -57,7 +58,8 @@ namespace Microsoft.Build.Tasks
                 dependentUponFileName,
                 culture,
                 binaryStream,
-                Log
+                Log,
+                item
             );
         }
 
@@ -76,6 +78,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="culture">The override culture of this resource, if any</param>
         /// <param name="binaryStream">File contents binary stream, may be null</param>
         /// <param name="log">Task's TaskLoggingHelper, for logging warnings or errors</param>
+        /// <param name="item">The item itself, may be null</param>
         /// <returns>Returns the manifest name</returns>
         internal static string CreateManifestNameImpl
         (
@@ -86,7 +89,8 @@ namespace Microsoft.Build.Tasks
             string dependentUponFileName, // May be null
             string culture,
             Stream binaryStream, // File contents binary stream, may be null
-            TaskLoggingHelper log
+            TaskLoggingHelper log,
+            ITaskItem item = null
         )
         {
             // Use the link file name if there is one, otherwise, fall back to file name.
@@ -96,7 +100,7 @@ namespace Microsoft.Build.Tasks
                 embeddedFileName = fileName;
             }
 
-            Culture.ItemCultureInfo info = string.IsNullOrEmpty(culture) ? new Culture.ItemCultureInfo() : Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName);
+            Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName, item);
 
             // If the item has a culture override, respect that. 
             if (!string.IsNullOrEmpty(culture))
