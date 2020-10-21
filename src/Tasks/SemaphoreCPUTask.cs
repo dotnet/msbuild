@@ -16,7 +16,7 @@ namespace Microsoft.Build.Tasks
         {
             Log.LogMessageFromText($"Starting in {System.Diagnostics.Process.GetCurrentProcess().Id}", Framework.MessageImportance.High);
 
-            BuildEngine7.Yield();
+            BuildEngine8.Yield();
 
             //int initial = BuildEngine7.RequestCores(3123890);
             //Log.LogMessageFromText($"Got {initial} cores from {System.Diagnostics.Process.GetCurrentProcess().Id}", Framework.MessageImportance.High);
@@ -47,12 +47,12 @@ namespace Microsoft.Build.Tasks
             for (int i = 0; i < Repetitions; i++)
             {
                 int i_local = i;
-                tasks[i] = System.Threading.Tasks.Task.Run(() => LaunchAndComplete(i_local, () => BuildEngine7.ReleaseCores(1)));
+                tasks[i] = System.Threading.Tasks.Task.Run(() => LaunchAndComplete(i_local, () => BuildEngine8.ReleaseCores(1)));
             }
 
             System.Threading.Tasks.Task.WhenAll(tasks).Wait();
 
-            BuildEngine7.Reacquire();
+            BuildEngine8.Reacquire();
 
             return !Log.HasLoggedErrors;
         }
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Tasks
         {
             Stopwatch s = new Stopwatch();
             s.Start();
-            BuildEngine7.RequestCores(1);
+            BuildEngine8.RequestCores(1);
             Log.LogMessageFromText($"Action {i} started from {System.Diagnostics.Process.GetCurrentProcess().Id}, waited {s.Elapsed}", Framework.MessageImportance.High);
             Thread.Sleep(2_000);
             Log.LogMessageFromText($"Action {i} completed from {System.Diagnostics.Process.GetCurrentProcess().Id}, total {s.Elapsed}", Framework.MessageImportance.High);

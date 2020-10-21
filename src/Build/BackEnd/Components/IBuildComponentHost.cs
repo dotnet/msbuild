@@ -130,7 +130,7 @@ namespace Microsoft.Build.BackEnd
         SdkResolverService,
 
         /// <summary>
-        /// Resource manager for tasks to use via <see cref="Microsoft.Build.Framework.IBuildEngine7.RequestCores(int)"/>.
+        /// Resource manager for tasks to use via <see cref="Microsoft.Build.Framework.IBuildEngine8.RequestCores(int)"/>.
         /// </summary>
         TaskResourceManager,
     }

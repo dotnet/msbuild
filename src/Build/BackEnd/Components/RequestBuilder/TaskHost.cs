@@ -34,7 +34,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine7
+        IBuildEngine8
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set.
@@ -677,6 +677,15 @@ namespace Microsoft.Build.BackEnd
 
         #region IBuildEngine7 Members
 
+        /// <summary>
+        /// Enables or disables emitting a default error when a task fails without logging errors
+        /// </summary>
+        public bool AllowFailureWithoutError { get; set; } = false;
+
+        #endregion
+
+        #region IBuildEngine8 Members
+
         int runningTotal = 0;
 
         public int RequestCores(int requestedCores)
@@ -729,10 +738,6 @@ namespace Microsoft.Build.BackEnd
             runningTotal = 0;
         }
 
-        /// <summary>
-        /// Enables or disables emitting a default error when a task fails without logging errors
-        /// </summary>
-        public bool AllowFailureWithoutError { get; set; } = false;
         #endregion
 
         /// <summary>
