@@ -7,6 +7,11 @@
         <target state="translated">儲存為 .NET 平台所指定的組件。根據預設，會為目標執行階段與架構，最佳化這些組件。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CurrentRuntimeOptionDescription">
+        <source>Use current runtime as the target runtime.</source>
+        <target state="new">Use current runtime as the target runtime.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>

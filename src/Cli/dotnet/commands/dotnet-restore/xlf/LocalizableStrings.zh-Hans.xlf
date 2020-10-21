@@ -22,6 +22,11 @@
         <target state="translated">项目文件或 MSBuild 参数的可选路径。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdCurrentRuntimeOptionDescription">
+        <source>Use current runtime as the target runtime.</source>
+        <target state="new">Use current runtime as the target runtime.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdSourceOption">
         <source>SOURCE</source>
         <target state="translated">SOURCE</target>

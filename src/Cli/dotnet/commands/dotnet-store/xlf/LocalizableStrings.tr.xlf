@@ -7,6 +7,11 @@
         <target state="translated">.NET Platformu için belirtilen bütünleştirilmiş kodları depolar. Varsayılan olarak, bunlar hedef çalışma zamanı ve çerçeve için iyileştirilir.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CurrentRuntimeOptionDescription">
+        <source>Use current runtime as the target runtime.</source>
+        <target state="new">Use current runtime as the target runtime.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>

@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -52,13 +52,17 @@ Copyright (c) .NET Foundation. All rights reserved.
           work without user intervention. The current static evaluation
           requirement limits us.
    -->
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and 
-                            '$(HasRuntimeOutput)' == 'true' and 
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and
+                            '$(HasRuntimeOutput)' == 'true' and
                             '$(OS)' == 'Windows_NT' and
                             '$(RuntimeIdentifier)' == ''">
     <_UsingDefaultRuntimeIdentifier>true</_UsingDefaultRuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x64'">win7-x64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x86' or '$(PlatformTarget)' == ''">win7-x86</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseCurrentRuntimeIdentifier)' == 'true'">
+    <RuntimeIdentifier>$(NETCoreSdkRuntimeIdentifier)</RuntimeIdentifier>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(PlatformTarget)' == ''">
@@ -96,7 +100,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Choose>
 
   <!--
-    SelfContained was not an option in .NET Core SDK 1.0. 
+    SelfContained was not an option in .NET Core SDK 1.0.
     Default SelfContained based on the RuntimeIdentifier, so projects don't have to explicitly set SelfContained.
     This avoids a breaking change from 1.0 behavior.
 
@@ -210,9 +214,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
     Append $(RuntimeIdentifier) directory to output and intermediate paths to prevent bin clashes between
-    targets. 
+    targets.
 
-    But do not append the implicit default runtime identifier for .NET Framework apps as that would 
+    But do not append the implicit default runtime identifier for .NET Framework apps as that would
     append a RID the user never mentioned in the path and do so even in the AnyCPU case.
    -->
   <PropertyGroup Condition="'$(AppendRuntimeIdentifierToOutputPath)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(_UsingDefaultRuntimeIdentifier)' != 'true'">
@@ -224,9 +228,9 @@ Copyright (c) .NET Foundation. All rights reserved.
            AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
 
-  <!-- 
-    Switch our default .NETFramework CPU architecture choice back to AnyCPU before 
-    compiling the exe if no copy-local native dependencies were resolved from NuGet 
+  <!--
+    Switch our default .NETFramework CPU architecture choice back to AnyCPU before
+    compiling the exe if no copy-local native dependencies were resolved from NuGet
   -->
   <Target Name="AdjustDefaultPlatformTargetForNetFrameworkExeWithNoNativeCopyLocalItems"
           AfterTargets="ResolvePackageAssets"
@@ -238,7 +242,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                              NativeCopyLocalItems="@(NativeCopyLocalItems)">
 
       <Output TaskParameter="DefaultPlatformTarget" PropertyName="PlatformTarget" />
-      
+
     </GetDefaultPlatformTargetForNetFramework>
   </Target>
 

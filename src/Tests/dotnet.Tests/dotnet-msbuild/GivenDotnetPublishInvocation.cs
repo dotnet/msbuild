@@ -1,10 +1,10 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.IO;
-using FluentAssertions;
 using System.Linq;
+using FluentAssertions;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools.Publish;
 using Xunit;
@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetPublishInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
-        private static readonly string WorkingDirectory = 
+        private static readonly string WorkingDirectory =
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetPublishInvocation));
         private readonly ITestOutputHelper output;
 
@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { }, "")]
         [InlineData(new string[] { "-r", "<rid>" }, "-property:RuntimeIdentifier=<rid>")]
         [InlineData(new string[] { "--runtime", "<rid>" }, "-property:RuntimeIdentifier=<rid>")]
+        [InlineData(new string[] { "--use-current-runtime" }, "-property:UseCurrentRuntimeIdentifier=True")]
         [InlineData(new string[] { "-o", "<publishdir>" }, "-property:PublishDir=<cwd><publishdir>")]
         [InlineData(new string[] { "--output", "<publishdir>" }, "-property:PublishDir=<cwd><publishdir>")]
         [InlineData(new string[] { "-c", "<config>" }, "-property:Configuration=<config>")]
@@ -103,6 +104,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--framework", "<tfm>" }, "-property:TargetFramework=<tfm>")]
         [InlineData(new string[] { "-r", "<rid>" }, "-property:RuntimeIdentifier=<rid>")]
         [InlineData(new string[] { "--runtime", "<rid>" }, "-property:RuntimeIdentifier=<rid>")]
+        [InlineData(new string[] { "--use-current-runtime" }, "-property:UseCurrentRuntimeIdentifier=True")]
         [InlineData(new string[] { "-o", "<publishdir>" }, "-property:PublishDir=<cwd><publishdir>")]
         [InlineData(new string[] { "--output", "<publishdir>" }, "-property:PublishDir=<cwd><publishdir>")]
         [InlineData(new string[] { "-c", "<config>" }, "-property:Configuration=<config>")]

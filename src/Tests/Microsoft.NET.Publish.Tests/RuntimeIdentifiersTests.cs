@@ -1,6 +1,10 @@
-﻿using System;
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
@@ -77,6 +81,47 @@ namespace Microsoft.NET.Publish.Tests
                         .HaveStdOutContaining("Hello World!");
                 }
             }
+        }
+
+        [Fact]
+        public void BuildWithUseCurrentRuntimeIdentifier()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "BuildWithUseCurrentRuntimeIdentifier",
+                TargetFrameworks = "netcoreapp3.0",
+                IsSdkProject = true,
+                IsExe = true
+            };
+
+            var compatibleRid = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
+
+            testProject.AdditionalProperties["UseCurrentRuntimeIdentifier"] = "True";
+
+            //  Use a test-specific packages folder
+            testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\..\pkg";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var buildCommand = new BuildCommand(testAsset);
+
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            string targetFrameworkOutputDirectory = Path.Combine(buildCommand.GetNonSDKOutputDirectory().FullName, testProject.TargetFrameworks);
+            string outputDirectoryWithRuntimeIdentifier = Directory.EnumerateDirectories(targetFrameworkOutputDirectory, "*", SearchOption.AllDirectories).FirstOrDefault();
+            outputDirectoryWithRuntimeIdentifier.Should().NotBeNullOrWhiteSpace();
+
+            var selfContainedExecutable = $"{testProject.Name}{Constants.ExeSuffix}";
+            string selfContainedExecutableFullPath = Path.Combine(outputDirectoryWithRuntimeIdentifier, selfContainedExecutable);
+
+            new RunExeCommand(Log, selfContainedExecutableFullPath)
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World!");
         }
 
         //  Run on core MSBuild only as using a local packages folder hits long path issues on full MSBuild
