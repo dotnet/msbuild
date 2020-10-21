@@ -480,7 +480,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">Path of the file to sign with the certificate.</param>
         public static void SignFile(string certThumbprint, Uri timestampUrl, string path)
         {
-            SignFile(certThumbprint, timestampUrl, path, null);
+            SignFile(certThumbprint, timestampUrl, path, null, null);
         }
 
         /// <summary>
@@ -490,7 +490,27 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
-        public static void SignFile(string certThumbprint, Uri timestampUrl, string path, string targetFrameworkVersion)
+        public static void SignFile(string certThumbprint,
+                                    Uri timestampUrl,
+                                    string path,
+                                    string targetFrameworkVersion)
+        {
+            SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion, null);
+        }
+
+        /// <summary>
+        /// Signs a ClickOnce manifest or PE file.
+        /// </summary>
+        /// <param name="certThumbprint">Hexadecimal string that contains the SHA-1 hash of the certificate.</param>
+        /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
+        /// <param name="path">Path of the file to sign with the certificate.</param>
+        /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
+        /// <param name="targetFrameworkIdentifier">.NET Framework identifier for the target.</param>
+        public static void SignFile(string certThumbprint,
+                                    Uri timestampUrl,
+                                    string path,
+                                    string targetFrameworkVersion,
+                                    string targetFrameworkIdentifier)
         {
             System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
 
@@ -514,8 +534,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     throw new ArgumentException("TargetFrameworkVersion");
                 }
 
-                // SHA-256 digest can be parsed only with .NET 4.5 or higher.
-                bool isTargetFrameworkSha256Supported = targetVersion.CompareTo(s_dotNet45Version) >= 0;
+                bool isTargetFrameworkSha256Supported = false;
+                if (String.IsNullOrEmpty(targetFrameworkIdentifier) ||
+                    targetFrameworkIdentifier.Equals(Constants.DotNetFrameworkIdentifier, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    // SHA-256 digest can be parsed only with .NET 4.5 or higher.
+                    isTargetFrameworkSha256Supported = targetVersion.CompareTo(s_dotNet45Version) >= 0;
+                }
+                else if (targetFrameworkIdentifier.Equals(Constants.DotNetCoreAppIdentifier, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    // Use SHA-256 digest for .NET Core apps
+                    isTargetFrameworkSha256Supported = true;
+                }
                 SignFileInternal(cert, timestampUrl, path, isTargetFrameworkSha256Supported, resources);
             }
             else

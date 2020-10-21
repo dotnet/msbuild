@@ -3,13 +3,10 @@
 
 
 using System;
-using System.Collections;
 using System.IO;
 using Microsoft.Build.Shared;
 using System.Reflection;
 using Xunit;
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.Shared;
 
 namespace Microsoft.Build.UnitTests

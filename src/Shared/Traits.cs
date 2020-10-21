@@ -31,6 +31,8 @@ namespace Microsoft.Build.Utilities
 
         public EscapeHatches EscapeHatches { get; }
 
+        internal readonly string MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION"); 
+
         /// <summary>
         /// Do not expand wildcards that match a certain pattern
         /// </summary>
@@ -93,11 +95,6 @@ namespace Microsoft.Build.Utilities
         /// Log property tracking information.
         /// </summary>
         public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
-
-        /// <summary>
-        /// Setting this environment variable to 1 disables the node reuse feature.
-        /// </summary>
-        public readonly bool DisableNodeReuse = Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1";
 
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {

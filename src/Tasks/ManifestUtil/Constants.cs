@@ -28,5 +28,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public const string DotNetFrameworkIdentifier = ".NETFramework";
         public const string DotNetCoreIdentifier = ".NETCore";
         public const string DotNetCoreAppIdentifier = ".NETCoreApp";
+        public const string AppHostExe = "apphost.exe";
+        public const string SingleFileHostExe = "singlefilehost.exe";
     }
 }

@@ -3,7 +3,6 @@
 
 using System;
 using System.Reflection;
-using System.Text;
 using System.IO;
 
 using Microsoft.Build.Framework;

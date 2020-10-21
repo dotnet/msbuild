@@ -1378,12 +1378,6 @@ namespace Microsoft.Build.Execution
         public string TaskParameter { get { throw null; } }
         public override Microsoft.Build.Construction.ElementLocation TaskParameterLocation { get { throw null; } }
     }
-    public sealed partial class RarNode
-    {
-        public RarNode() { }
-        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool nodeReuse, bool lowPriority, out System.Exception shutdownException, System.Threading.CancellationToken cancellationToken=default(System.Threading.CancellationToken)) { shutdownException = default(System.Exception); throw null; }
-        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
-    }
     public partial class RequestedProjectState
     {
         public RequestedProjectState() { }
@@ -2047,5 +2041,22 @@ namespace Microsoft.Build.ObjectModelRemoting
         public string LocalName { get { throw null; } }
         public string NamespaceURI { get { throw null; } }
         public string Value { get { throw null; } }
+    }
+}
+namespace Microsoft.Build.Utilities
+{
+    public partial class ChangeWaves
+    {
+        public static readonly string[] AllWaves;
+        public static readonly System.Version[] AllWavesAsVersion;
+        public const string EnableAllFeatures = "999.999";
+        public const string Wave16_10 = "16.10";
+        public const string Wave16_8 = "16.8";
+        public const string Wave17_0 = "17.0";
+        public ChangeWaves() { }
+        public static string DisabledWave { get { throw null; } set { } }
+        public static bool AreFeaturesEnabled(string wave) { throw null; }
+        public static bool AreFeaturesEnabled(System.Version wave) { throw null; }
+        public static void ResetStateForTests() { }
     }
 }

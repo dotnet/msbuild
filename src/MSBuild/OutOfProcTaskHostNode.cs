@@ -5,14 +5,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Globalization;
 using System.Threading;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
@@ -268,7 +264,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Enables or disables emitting a default error when a task fails without logging errors
         /// </summary>
-        public bool AllowFailureWithoutError { get; set; } = true;
+        public bool AllowFailureWithoutError { get; set; } = false;
         #endregion
 
         #region IBuildEngine Implementation (Methods)

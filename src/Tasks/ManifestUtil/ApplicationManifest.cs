@@ -48,7 +48,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private FileAssociation[] _fileAssociations;
         private FileAssociationCollection _fileAssociationList;
         private string _targetFrameworkVersion;
-        private bool _launcherBasedDeployment = false;
 
         /// <summary>
         /// Initializes a new instance of the ApplicationManifest class.
@@ -110,17 +109,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             get => _errorReportUrl;
             set => _errorReportUrl = value;
-        }
-
-        /// <summary>
-        /// Indicates if manifest is part of Launcher-based deployment, which requires
-        /// somewhat different manifest generation and validation.
-        /// </summary>
-        [XmlIgnore]
-        public bool LauncherBasedDeployment
-        {
-            get => _launcherBasedDeployment;
-            set => _launcherBasedDeployment = value;
         }
 
         // Make sure we have a CLR dependency, add it if not...
@@ -669,7 +657,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 // Check that file is not an assembly...
                 // Unless this is a Launcher-based deployments where all files except launcher
                 // are added as regular file references and not assembly references.
-                if (!_launcherBasedDeployment &&
+                if (!LauncherBasedDeployment &&
                     !String.IsNullOrEmpty(file.ResolvedPath) && PathUtil.IsAssembly(file.ResolvedPath))
                 {
                     OutputMessages.AddWarningMessage("GenerateManifest.AssemblyAsFile", file.ToString());

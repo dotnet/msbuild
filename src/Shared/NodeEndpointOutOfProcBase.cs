@@ -15,12 +15,11 @@ using Microsoft.Build.Shared;
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
 #endif
+#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
+#endif
 #if !FEATURE_APM
 using System.Threading.Tasks;
-#endif
-#if FEATURE_SECURITY_PERMISSIONS
-using System.Security.Permissions;
 #endif
 
 namespace Microsoft.Build.BackEnd
@@ -30,11 +29,14 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
     {
-        #region Private Data
+#region Private Data
+
+#if NETCOREAPP2_1 || MONO
         /// <summary>
         /// The amount of time to wait for the client to connect to the host.
         /// </summary>
         private const int ClientConnectTimeout = 60000;
+#endif // NETCOREAPP2_1 || MONO
 
         /// <summary>
         /// The size of the buffers to use for named pipes
@@ -186,7 +188,49 @@ namespace Microsoft.Build.BackEnd
             _status = LinkStatus.Inactive;
             _asyncDataMonitor = new object();
             _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
-            _pipeServer = NamedPipeUtil.CreateNamedPipeServer(pipeName, PipeBufferSize, PipeBufferSize);
+
+#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
+            if (!NativeMethodsShared.IsMono)
+            {
+                SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
+                PipeSecurity security = new PipeSecurity();
+
+                // Restrict access to just this account.  We set the owner specifically here, and on the
+                // pipe client side they will check the owner against this one - they must have identical
+                // SIDs or the client will reject this server.  This is used to avoid attacks where a
+                // hacked server creates a less restricted pipe in an attempt to lure us into using it and 
+                // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
+                PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
+                security.AddAccessRule(rule);
+                security.SetOwner(identifier);
+
+                _pipeServer = new NamedPipeServerStream
+                    (
+                    pipeName,
+                    PipeDirection.InOut,
+                    1, // Only allow one connection at a time.
+                    PipeTransmissionMode.Byte,
+                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    PipeBufferSize, // Default input buffer
+                    PipeBufferSize,  // Default output buffer
+                    security,
+                    HandleInheritability.None
+                );
+            }
+            else
+#endif
+            {
+                _pipeServer = new NamedPipeServerStream
+                    (
+                    pipeName,
+                    PipeDirection.InOut,
+                    1, // Only allow one connection at a time.
+                    PipeTransmissionMode.Byte,
+                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    PipeBufferSize, // Default input buffer
+                    PipeBufferSize  // Default output buffer
+                );
+             }
         }
 
 #endregion
@@ -319,12 +363,81 @@ namespace Microsoft.Build.BackEnd
                     localPipeServer.EndWaitForConnection(resultForConnection);
 #endif
 
-
+                    // The handshake protocol is a series of int exchanges.  The host sends us a each component, and we
+                    // verify it. Afterwards, the host sends an "End of Handshake" signal, to which we respond in kind.
+                    // Once the handshake is complete, both sides can be assured the other is ready to accept data.
                     Handshake handshake = GetHandshake();
-                    gotValidConnection = NamedPipeUtil.ValidateHandshake(handshake, _pipeServer, ClientConnectTimeout);
+                    try
+                    {
+                        int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
+                        for (int i = 0; i < handshakeComponents.Length; i++)
+                        {
+                            int handshakePart = _pipeServer.ReadIntForHandshake(i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+#if NETCOREAPP2_1 || MONO
+                            , ClientConnectTimeout /* wait a long time for the handshake from this side */
+#endif
+                            );
+
+                            if (handshakePart != handshakeComponents[i])
+                            {
+                                CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, handshakeComponents[i]);
+                                _pipeServer.WriteIntForHandshake(i + 1);
+                                gotValidConnection = false;
+                                break;
+                            }
+                        }
+
+                        if (gotValidConnection)
+                        {
+                            // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
+#if NETCOREAPP2_1 || MONO
+                            _pipeServer.ReadEndOfHandshakeSignal(false, ClientConnectTimeout); /* wait a long time for the handshake from this side */
+#else
+                            _pipeServer.ReadEndOfHandshakeSignal(false);
+#endif
+                            CommunicationsUtilities.Trace("Successfully connected to parent.");
+                            _pipeServer.WriteEndOfHandshakeSignal();
+
+#if FEATURE_SECURITY_PERMISSIONS
+                            // We will only talk to a host that was started by the same user as us.  Even though the pipe access is set to only allow this user, we want to ensure they
+                            // haven't attempted to change those permissions out from under us.  This ensures that the only way they can truly gain access is to be impersonating the
+                            // user we were started by.
+                            WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
+                            WindowsIdentity clientIdentity = null;
+                            localPipeServer.RunAsClient(delegate () { clientIdentity = WindowsIdentity.GetCurrent(true); });
+
+                            if (clientIdentity == null || !String.Equals(clientIdentity.Name, currentIdentity.Name, StringComparison.OrdinalIgnoreCase))
+                            {
+                                CommunicationsUtilities.Trace("Handshake failed. Host user is {0} but we were created by {1}.", (clientIdentity == null) ? "<unknown>" : clientIdentity.Name, currentIdentity.Name);
+                                gotValidConnection = false;
+                                continue;
+                            }
+#endif
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        // We will get here when:
+                        // 1. The host (OOP main node) connects to us, it immediately checks for user privileges
+                        //    and if they don't match it disconnects immediately leaving us still trying to read the blank handshake
+                        // 2. The host is too old sending us bits we automatically reject in the handshake
+                        // 3. We expected to read the EndOfHandshake signal, but we received something else
+                        CommunicationsUtilities.Trace("Client connection failed but we will wait for another connection. Exception: {0}", e.Message);
+                        
+                        gotValidConnection = false;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        gotValidConnection = false;
+                    }
+
                     if (!gotValidConnection)
                     {
-                        return;
+                        if (localPipeServer.IsConnected)
+                        {
+                            localPipeServer.Disconnect();
+                        }
+                        continue;
                     }
 
                     ChangeLinkStatus(LinkStatus.Active);

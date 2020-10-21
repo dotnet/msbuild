@@ -492,6 +492,7 @@ namespace Microsoft.Build.Tasks
     public sealed partial class GenerateLauncher : Microsoft.Build.Tasks.TaskExtension
     {
         public GenerateLauncher() { }
+        public string AssemblyName { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem EntryPoint { get { throw null; } set { } }
         public string LauncherPath { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
@@ -954,7 +955,6 @@ namespace Microsoft.Build.Tasks
         public string TargetFrameworkVersion { get { throw null; } set { } }
         public string TargetProcessorArchitecture { get { throw null; } set { } }
         public bool UnresolveFrameworkAssembliesFromHigherFrameworks { get { throw null; } set { } }
-        public bool UseResolveAssemblyReferenceService { get { throw null; } set { } }
         public string WarnOrErrorOnTargetArchitectureMismatch { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
@@ -1014,10 +1014,14 @@ namespace Microsoft.Build.Tasks
     public sealed partial class ResolveManifestFiles : Microsoft.Build.Tasks.TaskExtension
     {
         public ResolveManifestFiles() { }
+        public string AssemblyName { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem DeploymentManifestEntryPoint { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem EntryPoint { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] ExtraFiles { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] Files { get { throw null; } set { } }
+        public bool IsSelfContainedPublish { get { throw null; } set { } }
+        public bool IsSingleFilePublish { get { throw null; } set { } }
+        public bool LauncherBasedDeployment { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] ManagedAssemblies { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] NativeAssemblies { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
@@ -1029,6 +1033,7 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] OutputFiles { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] PublishFiles { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] RuntimePackAssets { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] SatelliteAssemblies { get { throw null; } set { } }
         public bool SigningManifests { get { throw null; } set { } }
         public string TargetCulture { get { throw null; } set { } }
@@ -1146,6 +1151,7 @@ namespace Microsoft.Build.Tasks
         public string CertificateThumbprint { get { throw null; } set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public Microsoft.Build.Framework.ITaskItem SigningTarget { get { throw null; } set { } }
+        public string TargetFrameworkIdentifier { get { throw null; } set { } }
         public string TargetFrameworkVersion { get { throw null; } set { } }
         public string TimestampUrl { get { throw null; } set { } }
         public override bool Execute() { throw null; }
@@ -1609,8 +1615,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public string IconFile { get { throw null; } set { } }
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public bool IsClickOnceManifest { get { throw null; } set { } }
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public bool LauncherBasedDeployment { get { throw null; } set { } }
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public int MaxTargetPath { get { throw null; } set { } }
         [System.Xml.Serialization.XmlIgnoreAttribute]
@@ -2169,6 +2173,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public Microsoft.Build.Tasks.Deployment.ManifestUtilities.AssemblyIdentity AssemblyIdentity { get { throw null; } set { } }
         [System.Xml.Serialization.XmlIgnoreAttribute]
+        public string AssemblyName { get { throw null; } set { } }
+        [System.Xml.Serialization.XmlIgnoreAttribute]
         public Microsoft.Build.Tasks.Deployment.ManifestUtilities.AssemblyReferenceCollection AssemblyReferences { get { throw null; } }
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public string Description { get { throw null; } set { } }
@@ -2178,6 +2184,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public Microsoft.Build.Tasks.Deployment.ManifestUtilities.FileReferenceCollection FileReferences { get { throw null; } }
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public System.IO.Stream InputStream { get { throw null; } set { } }
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public bool LauncherBasedDeployment { get { throw null; } set { } }
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public Microsoft.Build.Tasks.Deployment.ManifestUtilities.OutputMessageCollection OutputMessages { get { throw null; } }
         [System.Xml.Serialization.XmlIgnoreAttribute]
@@ -2299,6 +2307,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static void SignFile(string certPath, System.Security.SecureString certPassword, System.Uri timestampUrl, string path) { }
         public static void SignFile(string certThumbprint, System.Uri timestampUrl, string path) { }
         public static void SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion) { }
+        public static void SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion, string targetFrameworkIdentifier) { }
         public static System.Security.PermissionSet XmlToPermissionSet(System.Xml.XmlElement element) { throw null; }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(false)]

@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Xml;
-using System.Collections;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.BuildEngine

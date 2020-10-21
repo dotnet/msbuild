@@ -2,12 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Text;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.Build.Collections;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using Microsoft.Build.Execution;
@@ -15,7 +12,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared.FileSystem;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;

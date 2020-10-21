@@ -6,8 +6,6 @@ using System.IO;
 using System.Text;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Globalization;
 
 namespace Microsoft.Build.BuildEngine.Shared
 {

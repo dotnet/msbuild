@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd

@@ -462,8 +462,6 @@ namespace Microsoft.Build.Tasks
                 {
                     applicationManifest.TargetFrameworkVersion = TargetFrameworkVersion;
                 }
-
-                applicationManifest.LauncherBasedDeployment = LauncherBasedDeployment;
             }
 
             if (!String.IsNullOrEmpty(EntryPoint?.ItemSpec))
@@ -485,6 +483,8 @@ namespace Microsoft.Build.Tasks
             {
                 _manifest.Description = Description;
             }
+            _manifest.LauncherBasedDeployment = LauncherBasedDeployment;
+            _manifest.AssemblyName = AssemblyName;
 
             return true;
         }

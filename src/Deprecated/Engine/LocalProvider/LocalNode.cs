@@ -3,12 +3,9 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 using System.Security.AccessControl;
 

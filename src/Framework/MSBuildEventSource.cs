@@ -411,18 +411,6 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(55, size);
         }
-
-        [Event(56)]
-        public void ResolveAssemblyReferenceNodeConnectStart()
-        {
-            WriteEvent(56);
-        }
-
-        [Event(57)]
-        public void ResolveAssemblyReferenceNodeConnectStop()
-        {
-            WriteEvent(57);
-        }
         #endregion
     }
 }

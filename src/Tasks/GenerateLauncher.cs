@@ -2,10 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.Bootstrapper;
@@ -32,6 +29,8 @@ namespace Microsoft.Build.Tasks
 
         public string VisualStudioVersion { get; set; }
 
+        public string AssemblyName { get; set; }
+
         [Output]
         public ITaskItem OutputEntryPoint { get; set; }
         #endregion
@@ -50,12 +49,24 @@ namespace Microsoft.Build.Tasks
 
             if (EntryPoint == null)
             {
-                Log.LogErrorWithCodeFromResources("GenerateLauncher.EmptyEntryPoint");
+                Log.LogErrorWithCodeFromResources("GenerateLauncher.InvalidInput");
                 return false;
             }
 
             var launcherBuilder = new LauncherBuilder(LauncherPath);
-            BuildResults results = launcherBuilder.Build(Path.GetFileName(EntryPoint.ItemSpec), OutputPath);
+            string entryPointFileName = Path.GetFileName(EntryPoint.ItemSpec);
+            //
+            // If the EntryPoint specified is apphost.exe or singlefilehost.exe, we need to replace the EntryPoint
+            // with the AssemblyName instead since apphost.exe/singlefilehost.exe is an intermediate file for
+            // for final published {assemblyname}.exe.
+            //
+            if ((entryPointFileName.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) || 
+                entryPointFileName.Equals(Constants.SingleFileHostExe, StringComparison.InvariantCultureIgnoreCase)) &&
+                !String.IsNullOrEmpty(AssemblyName))
+            {
+                entryPointFileName = AssemblyName;
+            }
+            BuildResults results = launcherBuilder.Build(entryPointFileName, OutputPath);
 
             BuildMessage[] messages = results.Messages;
             if (messages != null)

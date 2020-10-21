@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Text;
-using System.Threading;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;

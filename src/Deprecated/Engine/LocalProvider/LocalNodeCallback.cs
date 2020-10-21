@@ -3,13 +3,7 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Security.Permissions;
-using System.Text;
 using System.Threading;
-using System.Xml;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.BuildEngine

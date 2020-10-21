@@ -6,9 +6,6 @@ using System.Resources;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Text.RegularExpressions;
-using System.Reflection;
-using System.Text;
 using System.ComponentModel;
 
 #if BUILDINGAPPXTASKS

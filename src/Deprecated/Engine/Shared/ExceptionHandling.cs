@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Security;
-using System.Diagnostics;
 using System.Reflection;
 
 namespace Microsoft.Build.BuildEngine.Shared

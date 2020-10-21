@@ -4,8 +4,6 @@
 using System;
 using System.Collections;
 using System.Security;
-using System.Security.Permissions;
-using System.Diagnostics;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;

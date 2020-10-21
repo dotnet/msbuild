@@ -3,11 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Tasks;
 using System.Runtime.InteropServices.ComTypes;
-
-using Marshal = System.Runtime.InteropServices.Marshal;
 using COMException = System.Runtime.InteropServices.COMException;
 using Xunit;
 

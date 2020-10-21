@@ -3,9 +3,7 @@
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.UnitTests.BackEnd;
 using System;
-using System.Threading;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;

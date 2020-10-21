@@ -4,7 +4,6 @@
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using Microsoft.Build.Construction;
 
