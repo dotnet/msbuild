@@ -130,7 +130,7 @@ namespace Microsoft.Build.Tasks
                     AssignedFiles[i] = new TaskItem(Files[i]);
 
                     string dependentUpon = AssignedFiles[i].GetMetadata(ItemMetadataNames.dependentUpon);
-                    Culture.ItemCultureInfo info = Culture.GetItemCultureInfo
+                    Culture.ItemCultureInfo info = string.IsNullOrEmpty(AssignedFiles[i].GetMetadata("Culture")) ? new Culture.ItemCultureInfo() : Culture.GetItemCultureInfo
                         (
                             AssignedFiles[i].ItemSpec,
                             dependentUpon

@@ -96,7 +96,7 @@ namespace Microsoft.Build.Tasks
                 embeddedFileName = fileName;
             }
 
-            Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName);
+            Culture.ItemCultureInfo info = string.IsNullOrEmpty(culture) ? new Culture.ItemCultureInfo() : Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName);
 
             // If the item has a culture override, respect that. 
             if (!string.IsNullOrEmpty(culture))
