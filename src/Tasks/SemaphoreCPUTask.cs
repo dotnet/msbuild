@@ -61,7 +61,7 @@ namespace Microsoft.Build.Tasks
         {
             Stopwatch s = new Stopwatch();
             s.Start();
-            BuildEngine7.BlockingWaitForCore();
+            BuildEngine7.RequestCores(1);
             Log.LogMessageFromText($"Action {i} started from {System.Diagnostics.Process.GetCurrentProcess().Id}, waited {s.Elapsed}", Framework.MessageImportance.High);
             Thread.Sleep(2_000);
             Log.LogMessageFromText($"Action {i} completed from {System.Diagnostics.Process.GetCurrentProcess().Id}, total {s.Elapsed}", Framework.MessageImportance.High);

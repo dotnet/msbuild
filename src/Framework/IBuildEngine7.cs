@@ -24,11 +24,5 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="coresToRelease">Number of cores no longer in use.</param>
         void ReleaseCores(int coresToRelease);
-
-        /// <summary>
-        /// Block until a "core" from the managed pool for this build is available.
-        /// </summary>
-        void BlockingWaitForCore();
-
     }
 }

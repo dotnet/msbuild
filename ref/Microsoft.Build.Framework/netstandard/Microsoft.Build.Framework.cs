@@ -210,7 +210,6 @@ namespace Microsoft.Build.Framework
     public partial interface IBuildEngine7 : Microsoft.Build.Framework.IBuildEngine, Microsoft.Build.Framework.IBuildEngine2, Microsoft.Build.Framework.IBuildEngine3, Microsoft.Build.Framework.IBuildEngine4, Microsoft.Build.Framework.IBuildEngine5, Microsoft.Build.Framework.IBuildEngine6
     {
         bool AllowFailureWithoutError { get; set; }
-        void BlockingWaitForCore();
         void ReleaseCores(int coresToRelease);
         int RequestCores(int requestedCores);
     }
