@@ -78,8 +78,11 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
 
             int i = 0;
 
+            // First core gets a blocking wait: the user task wants to do *something*
+            s.WaitOne();
+
             // Keep requesting cores until we can't anymore, or we've gotten the number of cores we wanted.
-            for (i = 0; i < requestedCores; i++)
+            for (i = 1; i < requestedCores; i++)
             {
                 if (!s.WaitOne(0))
                 {
