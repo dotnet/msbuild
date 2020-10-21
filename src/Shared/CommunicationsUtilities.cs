@@ -124,15 +124,7 @@ namespace Microsoft.Build.Internal
                     // This is easier in .NET 4+:
                     //  var fileIdentity = typeof(CommunicationsUtilities).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
                     // but we need to be 3.5 compatible here to work in MSBuildTaskHost
-                    string fileIdentity = null;
-                    foreach (var attribute in typeof(CommunicationsUtilities).GetTypeInfo().Assembly.GetCustomAttributes(false))
-                    {
-                        if (attribute is AssemblyInformationalVersionAttribute informationalVersionAttribute)
-                        {
-                            fileIdentity = informationalVersionAttribute.InformationalVersion;
-                            break;
-                        }
-                    }
+                    string fileIdentity = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
 
                     ErrorUtilities.VerifyThrow(fileIdentity != null, "Did not successfully retrieve InformationalVersion.");
 
