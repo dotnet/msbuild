@@ -185,7 +185,7 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>074069f9c9b0dff8e52eb640b2cc998cecf50b8e</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.AspNetCore.TargetingPack.x64.5.0" Version="5.0.0-rtm.20520.6">
+    <Dependency Name="VS.Redist.Common.AspNetCore.SharedFramework.x64.5.0" Version="5.0.0-rtm.20520.6">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>074069f9c9b0dff8e52eb640b2cc998cecf50b8e</Sha>
     </Dependency>
