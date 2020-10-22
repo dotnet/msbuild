@@ -1500,7 +1500,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A canceled build
         /// </summary>
-        [Fact]
+        [Fact(Timeout = 20_000)]
         public void CancelledBuild()
         {
             string contents = CleanupFileContents(@"
