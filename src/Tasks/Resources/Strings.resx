@@ -2160,7 +2160,11 @@
     <value>MSB3645: .NET Framework v3.5 Service Pack 1 was not found. In order to target "{0}", .NET Framework v3.5 Service Pack 1 or later must be installed.</value>
     <comment>{StrBegin="MSB3645: "}</comment>
   </data>
-
+  <data name="GetReferenceAssemblyPaths.ReferenceAssemblyNotSupported">
+    <value>MSB3646: The discovered assembly "{0}" is not supported with this version of Visual Studio. To resolve this, retarget your application or update Visual Studio. You can download the latest version of Visual Studio at http://aka.ms/vsdownload</value>
+    <comment>{StrBegin="MSB3646: "}</comment>
+  </data>
+  
 
   <!--
         The WinMDExp task has the error buckets of MSB3762 - MSB3772

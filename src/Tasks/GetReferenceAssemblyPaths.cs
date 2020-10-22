@@ -246,7 +246,14 @@ namespace Microsoft.Build.Tasks
                 // 1/26/16: Note this was changed from a warning to an error (see GitHub #173).
                 if (pathsToReturn.Count == 0)
                 {
-                    Log.LogErrorWithCodeFromResources("GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound", frameworkmoniker.ToString());
+                    if (frameworkmoniker.Identifier == "net" && frameworkmoniker.Version >= new Version(5, 0))
+                    {
+                        Log.LogErrorWithCodeFromResources("GetReferenceAssemblyPaths.ReferenceAssemblyNotSupported", frameworkmoniker.ToString());
+                    }
+                    else
+                    {
+                        Log.LogErrorWithCodeFromResources("GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound", frameworkmoniker.ToString());
+                    }
                 }
             }
 

@@ -1306,6 +1306,11 @@
         <target state="translated">Microsoft Windows SDK が "{0}" にインストールされていました。</target>
         <note />
       </trans-unit>
+      <trans-unit id="GetReferenceAssemblyPaths.ReferenceAssemblyNotSupported">
+        <source>MSB3646: The discovered assembly "{0}" is not supported with this version of Visual Studio. To resolve this, retarget your application or update Visual Studio. You can download the latest version of Visual Studio at http://aka.ms/vsdownload</source>
+        <target state="new">MSB3646: The discovered assembly "{0}" is not supported with this version of Visual Studio. To resolve this, retarget your application or update Visual Studio. You can download the latest version of Visual Studio at http://aka.ms/vsdownload</target>
+        <note>{StrBegin="MSB3646: "}</note>
+      </trans-unit>
       <trans-unit id="MakeDir.Comment">
         <source>Creating directory "{0}".</source>
         <target state="translated">ディレクトリ "{0}" を作成しています。</target>
