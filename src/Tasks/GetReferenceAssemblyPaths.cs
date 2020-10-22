@@ -246,9 +246,11 @@ namespace Microsoft.Build.Tasks
                 // 1/26/16: Note this was changed from a warning to an error (see GitHub #173).
                 if (pathsToReturn.Count == 0)
                 {
-                    if (frameworkmoniker.Identifier == "net" && frameworkmoniker.Version >= new Version(5, 0))
+                    // Fixes bad error message when an old SDK assumes "net50" means ".NETFramework 5.0" instead of "netcoreapp 5.0"
+                    // https://github.com/dotnet/msbuild/issues/5820
+                    if (frameworkmoniker.Identifier == ".NETFramework" && frameworkmoniker.Version.Major >= 5)
                     {
-                        Log.LogErrorWithCodeFromResources("GetReferenceAssemblyPaths.ReferenceAssemblyNotSupported", frameworkmoniker.ToString());
+                        Log.LogErrorWithCodeFromResources("GetReferenceAssemblyPaths.OutOfDateSDK", frameworkmoniker.ToString());
                     }
                     else
                     {

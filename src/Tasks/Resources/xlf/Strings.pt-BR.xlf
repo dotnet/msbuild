@@ -1306,10 +1306,10 @@
         <target state="translated">Localizado o SDK do Microsoft Windows instalado em "{0}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="GetReferenceAssemblyPaths.ReferenceAssemblyNotSupported">
-        <source>MSB3646: The discovered assembly "{0}" is not supported with this version of Visual Studio. To resolve this, retarget your application or update Visual Studio. You can download the latest version of Visual Studio at http://aka.ms/vsdownload</source>
-        <target state="new">MSB3646: The discovered assembly "{0}" is not supported with this version of Visual Studio. To resolve this, retarget your application or update Visual Studio. You can download the latest version of Visual Studio at http://aka.ms/vsdownload</target>
-        <note>{StrBegin="MSB3646: "}</note>
+      <trans-unit id="GetReferenceAssemblyPaths.OutOfDateSDK">
+        <source>MSB3961: The reference assemblies for "{0}" were not found. You might be using an older SDK to target .NET 5.0 or higher. Update Visual Studio and/or your .NET SDK.</source>
+        <target state="new">MSB3961: The reference assemblies for "{0}" were not found. You might be using an older SDK to target .NET 5.0 or higher. Update Visual Studio and/or your .NET SDK.</target>
+        <note>{StrBegin="MSB3961: "}</note>
       </trans-unit>
       <trans-unit id="MakeDir.Comment">
         <source>Creating directory "{0}".</source>
