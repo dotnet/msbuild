@@ -80,6 +80,11 @@
         <target state="translated">MSB5026: le fichier de filtre de solution sur "{0}" spécifie l'existence d'un fichier solution sur "{1}", mais ce fichier n'existe pas.</target>
         <note>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectErrorWithNameAndGuid">
+        <source>MSB5009: Error parsing the nested project "{0}" section with GUID: "{1}" in solution file.</source>
+        <target state="new">MSB5009: Error parsing the nested project "{0}" section with GUID: "{1}" in solution file.</target>
+        <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: La version des outils "{0}" n'est pas reconnue. Les versions disponibles sont {1}.</target>
@@ -216,8 +221,8 @@
         <note>{StrBegin="MSB5008: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
       <trans-unit id="SolutionParseNestedProjectError">
-        <source>MSB5009: Error parsing the nested project section, of project: {0} with GUID: {1} in solution file.</source>
-        <target state="new">MSB5009: Error parsing the nested project section, of project: {0} with GUID: {1} in solution file.</target>
+        <source>MSB5009: Error parsing the nested project section in solution file.</source>
+        <target state="new">MSB5009: Error parsing the nested project section in solution file.</target>
         <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
       <trans-unit id="SolutionParseNestedProjectUndefinedError">

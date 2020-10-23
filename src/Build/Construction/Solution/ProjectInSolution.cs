@@ -370,7 +370,7 @@ namespace Microsoft.Build.Construction
                         if (!ParentSolution.ProjectsByGuid.TryGetValue(ParentProjectGuid, out ProjectInSolution proj))
                         {
                             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null, "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectError", ProjectName, ProjectGuid);
+                                new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectErrorWithNameAndGuid", ProjectName, ProjectGuid);
                         }
 
                         uniqueName = proj.GetUniqueProjectName() + "\\";
@@ -409,7 +409,7 @@ namespace Microsoft.Build.Construction
                         if (!ParentSolution.ProjectsByGuid.TryGetValue(ParentProjectGuid, out ProjectInSolution parent))
                         {
                             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(parent != null, "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectError");
+                                new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectErrorWithNameAndGuid", ProjectName, ProjectGuid);
                         }
 
                         projectName = parent.GetOriginalProjectName() + "\\";
