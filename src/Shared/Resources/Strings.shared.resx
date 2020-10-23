@@ -201,7 +201,7 @@
     <comment>{StrBegin="MSB5008: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
   <data name="SolutionParseNestedProjectError" Visibility="Public">
-    <value>MSB5009: Error parsing the nested project section in solution file.</value>
+    <value>MSB5009: Error parsing the nested project "{0}" section with GUID: "{1}" in solution file.</value>
     <comment>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
   <data name="SolutionParseNestedProjectUndefinedError" Visibility="Public">

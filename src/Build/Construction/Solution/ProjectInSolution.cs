@@ -370,7 +370,7 @@ namespace Microsoft.Build.Construction
                         if (!ParentSolution.ProjectsByGuid.TryGetValue(ParentProjectGuid, out ProjectInSolution proj))
                         {
                             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null, "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectError");
+                                new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectError", ProjectName, ProjectGuid);
                         }
 
                         uniqueName = proj.GetUniqueProjectName() + "\\";

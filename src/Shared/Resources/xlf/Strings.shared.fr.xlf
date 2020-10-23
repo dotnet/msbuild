@@ -216,8 +216,8 @@
         <note>{StrBegin="MSB5008: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
       <trans-unit id="SolutionParseNestedProjectError">
-        <source>MSB5009: Error parsing the nested project section in solution file.</source>
-        <target state="translated">MSB5009: Erreur pendant l'analyse de la section du projet imbriqué dans le fichier solution.</target>
+        <source>MSB5009: Error parsing the nested project section, of project: {0} with GUID: {1} in solution file.</source>
+        <target state="new">MSB5009: Error parsing the nested project section, of project: {0} with GUID: {1} in solution file.</target>
         <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
       <trans-unit id="SolutionParseNestedProjectUndefinedError">
