@@ -152,9 +152,15 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal(1, itemTemplates.Count);
             Assert.True(itemTemplates.Where(x => string.Equals(x.Info.Identity, "Template2", StringComparison.Ordinal)).Any());
 
+            //Visual Studio only supports "project" and "item", so using other types is no longer allowed, therefore "other" handling is removed.
+            //support of match on custom type still remains
             IReadOnlyCollection<ITemplateMatchInfo> otherTemplates = TemplateListResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "other");
-            Assert.Equal(1, otherTemplates.Count);
-            Assert.True(otherTemplates.Where(x => string.Equals(x.Info.Identity, "Template3", StringComparison.Ordinal)).Any());
+            Assert.Equal(0, otherTemplates.Count);
+            Assert.False(otherTemplates.Where(x => string.Equals(x.Info.Identity, "Template3", StringComparison.Ordinal)).Any());
+
+            IReadOnlyCollection<ITemplateMatchInfo> customTypeTemplates = TemplateListResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "myType");
+            Assert.Equal(1, customTypeTemplates.Count);
+            Assert.True(customTypeTemplates.Where(x => string.Equals(x.Info.Identity, "Template3", StringComparison.Ordinal)).Any());
         }
 
         [Fact(DisplayName = nameof(TestPerformCoreTemplateQuery_UniqueNameMatchesCorrectly))]

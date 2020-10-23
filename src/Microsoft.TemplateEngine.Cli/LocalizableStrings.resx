@@ -331,7 +331,7 @@
     <value>Shows all templates.</value>
   </data>
   <data name="ShowsFilteredTemplates" xml:space="preserve">
-    <value>Filters templates based on available types. Predefined values are "project", "item" or "other".</value>
+    <value>Filters templates based on available types. Predefined values are "project" and "item".</value>
   </data>
   <data name="Tags" xml:space="preserve">
     <value>Tags</value>
