@@ -7,9 +7,9 @@
 - If you haven't already, clone [MSBuild](https://github.com/dotnet/msbuild) and make the changes you want.
 - Build MSBuild with the changes you want using `build.cmd /p:CreateBootstrap=true`.
 - In an administrator powershell window, navigate to the msbuild folder.
-- Run `scripts\Deploy-MSBuild.ps1 -destination "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin" -configuration Debug`.
-  - Specify the Bin folder of MSBuild in your VS install as the destination. This is somewhere like `C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin`.
-  - Make sure the configuration you pass to the deploy script matches the one you gave to `build.cmd` (this is `Debug` by default).
+- Run `scripts\Deploy-MSBuild.ps1 -destination {destination} -configuration {configuration}`.
+  - Specify the Bin folder of MSBuild in your VS install as the destination. This is somewhere like `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin"`.
+  - Make sure the `{configuration}` you pass to the deploy script matches the one you gave to `build.cmd` (this is `Debug` by default).
 
 The Deploy-MSBuild script creates backups of the relevant MSBuild binaries, then copies the new binaries in their place.
 
