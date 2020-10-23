@@ -2,7 +2,7 @@
 
 ## Visual Studio
 
-[Deploy-MSBuild](https://github.com/Forgind/msbuild/blob/deploy-msbuild/scripts/Deploy-MSBuild.ps1) is a way to conveniently take private bits and install them into Visual Studio (VS) for testing. To use it:
+[Deploy-MSBuild](https://github.com/dotnet/msbuild/blob/deploy-msbuild/scripts/Deploy-MSBuild.ps1) is a way to conveniently take private bits and install them into Visual Studio (VS) for testing. To use it:
 
 - Build MSBuild with the changes you want using `build.cmd /p:CreateBootstrap=true`.
 - In an administrator powershell window, navigate to the msbuild folder.
