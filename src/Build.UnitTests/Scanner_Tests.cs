@@ -102,22 +102,22 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Tests the whitespace errors case
+        /// Tests the space errors case
         /// </summary>
         [Fact]
-        public void WhitespaceProperty()
+        public void SpaceProperty()
         {
             Scanner lexer = new Scanner("$(x )", ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
-            Assert.Equal("IllFormedPropertyWhitespaceInCondition", lexer.GetErrorResource());
+            Assert.Equal("IllFormedPropertySpaceInCondition", lexer.GetErrorResource());
 
             lexer = new Scanner("$( x)", ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
-            Assert.Equal("IllFormedPropertyWhitespaceInCondition", lexer.GetErrorResource());
+            Assert.Equal("IllFormedPropertySpaceInCondition", lexer.GetErrorResource());
         }
 
         [Fact]
-        public void WhitespacePropertyOptOutWave17()
+        public void SpacePropertyOptOutWave17()
         {
             using TestEnvironment env = TestEnvironment.Create();
             env.SetChangeWave(ChangeWaves.Wave17_0);

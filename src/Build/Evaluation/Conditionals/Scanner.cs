@@ -289,7 +289,7 @@ namespace Microsoft.Build.Evaluation
             {
                 _errorState = true;
                 _errorPosition = indexResult;
-                _errorResource = "IllFormedPropertyWhitespaceInCondition";
+                _errorResource = "IllFormedPropertySpaceInCondition";
                 _unexpectedlyFound = Convert.ToString(_expression[indexResult], CultureInfo.InvariantCulture);
                 return null;
             }
