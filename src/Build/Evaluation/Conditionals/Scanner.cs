@@ -340,7 +340,7 @@ namespace Microsoft.Build.Evaluation
                             nestLevel--;
                             whitespaceCheck = false;
                         }
-                        else if (whitespaceCheck && char.IsWhiteSpace(character) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+                        else if (whitespaceCheck && char.IsWhiteSpace(character) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
                         {
                             indexResult = index;
                             return false;

@@ -117,10 +117,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void SpacePropertyOptOutWave17()
+        public void SpacePropertyOptOutWave16_10()
         {
             using TestEnvironment env = TestEnvironment.Create();
-            env.SetChangeWave(ChangeWaves.Wave17_0);
+            env.SetChangeWave(ChangeWaves.Wave16_10);
 
             Scanner lexer = new Scanner("$(x )", ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
