@@ -81,6 +81,29 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
+        //  Regression test for https://github.com/dotnet/sdk/issues/13513
+        [Fact]
+        public void DesignTimeBuildSucceedsWhenTargetingNetCore21WithRuntimeIdentifier()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesignTimePackageDependencies",
+                TargetFrameworks = "netcoreapp2.1",
+                IsSdkProject = true,
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.2", privateAssets: "All"));
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.6.2"));
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            new MSBuildCommand(testAsset, "ResolvePackageDependenciesDesignTime")
+                .Execute()
+                .Should()
+                .Pass();
+       }
+
         [Theory]
         [InlineData("netcoreapp3.0")]
         [InlineData("net5.0")]
