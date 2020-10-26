@@ -1260,20 +1260,11 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 ";
 
-            try
-            {
-                ParseSolutionHelper(solutionFileContents);
-            }
-            catch (InvalidProjectFileException e)
-            {
-                Assert.Equal("MSB5009", e.ErrorCode);
-                Assert.Contains( "{1484A47E-F4C5-4700-B13F-A2BDB6ADD35E}", e.Message);
-                Assert.Contains("ConsoleApp1", e.Message);
-                return;
-            }
+            InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(() => ParseSolutionHelper(solutionFileContents));
 
-            // Should not get here
-            Assert.True(false);
+            e.ErrorCode.ShouldBe("MSB5009");
+            e.Message.ShouldContain( "{1484A47E-F4C5-4700-B13F-A2BDB6ADD35E}", e.Message);
+            e.Message.ShouldContain("ConsoleApp1", e.Message);
         }
 
         /// <summary>
