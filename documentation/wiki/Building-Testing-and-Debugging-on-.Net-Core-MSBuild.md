@@ -44,4 +44,4 @@ To build projects using the MSBuild binaries from the repository, you first need
 
 Now, just point `dotnet ./artifacts/bin/bootstrap/netcoreapp2.1/MSBuild/MSBuild.dll` at a project file.
 
-Alternatively, if you want to test the msbuild binaries in a more realistic environment, you can overwrite the dotnet CLI msbuild binaries (found under a path like `~/dotnet/sdk/3.0.100-alpha1-009428/`) with the msbuild binaries from the above bootstrap directory. You might have to kill existing `dotnet` processes before doing this. Then, (using the previous dotnet example directory) just point `~/dotnet/dotnet build` at a project file.
+Alternatively, if you want to test the msbuild binaries in a more realistic environment, you can overwrite the dotnet CLI msbuild binaries (found under a path like `~/dotnet/sdk/3.0.100-alpha1-009428/`) with the just-built MSBuild . You might have to kill existing `dotnet` processes before doing this. You can use [`Deploy-MSBuild.ps1 -runtime Core`](../Deploy-MSBuild.md#.NET-(Core)-SDK) to do the copy. Then, (using the previous dotnet example directory) just point `~/dotnet/dotnet build` at a project file.
