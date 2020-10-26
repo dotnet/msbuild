@@ -1223,6 +1223,58 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.True(false);
         }
 
+        /// <summary>
+        /// Checks whether incorrect nesting found within the solution file is reported MSB5009 error
+        /// with the incorrectly nested project's name and it's GUID
+        /// </summary>
+        [Fact]
+        public void IncorrectlyNestedProjectErrorContainsProjectNameAndGuid()
+        {
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 9.00
+                # Visual Studio 2005
+                Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'SolutionFolder', 'SolutionFolder', '{5EE89BD0-04E3-4600-9CF2-D083A77A9448}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ConsoleApp1', 'ConsoleApp1\ConsoleApp1.csproj', '{1484A47E-F4C5-4700-B13F-A2BDB6ADD35E}'
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {1484A47E-F4C5-4700-B13F-A2BDB6ADD35E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {1484A47E-F4C5-4700-B13F-A2BDB6ADD35E}.Release|Any CPU.Build.0 = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                    GlobalSection(NestedProjects) = preSolution
+                        {1484A47E-F4C5-4700-B13F-A2BDB6ADD35E} = {5EE89BD0-04E3-4600-9CF2-D083A77A9448}
+                        {1484A47E-F4C5-4700-B13F-A2BDB6ADD35E} = {5EE89BD0-04E3-4600-9CF2-D083A77A9449}
+                    EndGlobalSection
+                    GlobalSection(ExtensibilityGlobals) = postSolution
+                        SolutionGuid = {AF600A67-B616-453E-9B27-4407D654F66E}
+                    EndGlobalSection
+                EndGlobal
+                ";
+
+            try
+            {
+                ParseSolutionHelper(solutionFileContents);
+            }
+            catch (InvalidProjectFileException e)
+            {
+                Assert.Equal("MSB5009", e.ErrorCode);
+                Assert.Contains( "{1484A47E-F4C5-4700-B13F-A2BDB6ADD35E}", e.Message);
+                Assert.Contains("ConsoleApp1", e.Message);
+                return;
+            }
+
+            // Should not get here
+            Assert.True(false);
+        }
 
         /// <summary>
         /// Verifies that we correctly identify solution folders and mercury non-buildable projects both as
