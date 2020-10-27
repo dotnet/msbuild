@@ -61,7 +61,7 @@
       <Uri>https://github.com/dotnet/fsharp</Uri>
       <Sha>da6be68280c89131cdba2045525b80890401defd</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="3.9.0-2.20527.10">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="3.9.0-2.20527.12">
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>5b25faeaf92e13867b3bab5ebdb3200cd8967ab4</Sha>
     </Dependency>
