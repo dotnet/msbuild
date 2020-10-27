@@ -286,7 +286,7 @@ namespace Microsoft.Build.UnitTests
                     true // retain culture in name
                 );
 
-            Assert.Equal("RootNamespace.Subfolder.File.cs.cshtml", result);
+            result.ShouldBe("RootNamespace.Subfolder.File.cs.cshtml");
         }
 
         /// <summary>

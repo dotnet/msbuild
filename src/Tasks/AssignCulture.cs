@@ -136,7 +136,7 @@ namespace Microsoft.Build.Tasks
                             dependentUpon,
                             // If 'WithCulture' is explicitly set to false, treat as 'culture-neutral' and keep the original name of the resource.
                             // https://github.com/dotnet/msbuild/issues/3064
-                            AssignedFiles[i].GetMetadata("WithCulture") == "false"
+                            AssignedFiles[i].GetMetadata("WithCulture").Equals("false", StringComparison.OrdinalIgnoreCase)
                         );
 
                     if (!string.IsNullOrEmpty(info.culture))
