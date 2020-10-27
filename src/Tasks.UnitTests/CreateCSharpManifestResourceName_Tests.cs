@@ -267,6 +267,29 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Explicitly retain culture
+        /// </summary>
+        [Fact]
+        public void RootnamespaceWithCulture_RetainCultureInFileName()
+        {
+            string result =
+            CreateCSharpManifestResourceName.CreateManifestNameImpl
+                (
+                    @"Subfolder\File.cs.cshtml",
+                    null,
+                    true,
+                    "RootNamespace",        // Root namespace
+                    null,
+                    null,
+                    null,
+                    null,
+                    true // retain culture in name
+                );
+
+            Assert.Equal("RootNamespace.Subfolder.File.cs.cshtml", result);
+        }
+
+        /// <summary>
         /// If there is a link file name then it is preferred over the main file name.
         /// </summary>
         [Fact]
