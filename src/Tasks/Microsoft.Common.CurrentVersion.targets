@@ -2946,7 +2946,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </EmbeddedResource>
     </ItemGroup>
     
-    <!-- Only assign culture if 'WithCulture' isn't explcitly defined to false. See https://github.com/dotnet/msbuild/issues/3064 -->
     <AssignCulture Files="@(EmbeddedResource)" Condition="'%(Extension)'!='.licx'">
       <!-- Create the list of culture resx and embedded resource files -->
       <Output TaskParameter="AssignedFilesWithCulture" ItemName="_MixedResourceWithCulture"/>

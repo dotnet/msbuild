@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Framework;
 using System;
 using System.IO;
 
@@ -31,7 +30,7 @@ namespace Microsoft.Build.Tasks
         (
             string name,
             string dependentUponFilename,
-            ITaskItem item = null
+            bool retainCultureInResourceName = false
         )
         {
             ItemCultureInfo info;
@@ -41,7 +40,7 @@ namespace Microsoft.Build.Tasks
             if (String.Equals(Path.GetFileNameWithoutExtension(parentName),
                                    Path.GetFileNameWithoutExtension(name),
                                    StringComparison.OrdinalIgnoreCase) ||
-                                   item?.GetMetadata("WithCulture") == "false")
+                                   retainCultureInResourceName)
             {
                 // Dependent or explicitly using culture as part of the file name
                 // but we treat it is as not localized because they have same base filename
