@@ -37,13 +37,13 @@ namespace Microsoft.Build.Tasks
         )
         {
             string culture = null;
-            bool retainCultureInResourceName = false;
+            bool treatAsCultureNeutral = false;
             if (fileName != null && itemSpecToTaskitem.TryGetValue(fileName, out ITaskItem item))
             {
                 culture = item.GetMetadata("Culture");
-                // If 'WithCulture' is explicitly set to false, keep the name of the resource even if it has a culture as part of its name.
+                // If 'WithCulture' is explicitly set to false, treat as 'culture-neutral' and keep the original name of the resource.
                 // https://github.com/dotnet/msbuild/issues/3064
-                retainCultureInResourceName = item.GetMetadata("WithCulture") == "false";
+                treatAsCultureNeutral = item.GetMetadata("WithCulture") == "false";
             }
 
             /*
@@ -62,7 +62,7 @@ namespace Microsoft.Build.Tasks
                 culture,
                 binaryStream,
                 Log,
-                retainCultureInResourceName
+                treatAsCultureNeutral
             );
         }
 
@@ -81,7 +81,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="culture">The override culture of this resource, if any</param>
         /// <param name="binaryStream">File contents binary stream, may be null</param>
         /// <param name="log">Task's TaskLoggingHelper, for logging warnings or errors</param>
-        /// <param name="retainCultureInResourceName">Whether to treat the current file as 'culture-neutral'.</param>
+        /// <param name="treatAsCultureNeutral">Whether to treat the current file as 'culture-neutral' and retain the culture in the name.</param>
         /// <returns>Returns the manifest name</returns>
         internal static string CreateManifestNameImpl
         (
@@ -93,7 +93,7 @@ namespace Microsoft.Build.Tasks
             string culture,
             Stream binaryStream, // File contents binary stream, may be null
             TaskLoggingHelper log,
-            bool retainCultureInResourceName = false
+            bool treatAsCultureNeutral = false
         )
         {
             // Use the link file name if there is one, otherwise, fall back to file name.
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Tasks
                 embeddedFileName = fileName;
             }
 
-            Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName, retainCultureInResourceName);
+            Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName, treatAsCultureNeutral);
 
             // If the item has a culture override, respect that. 
             if (!string.IsNullOrEmpty(culture))

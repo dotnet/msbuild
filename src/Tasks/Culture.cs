@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks
         (
             string name,
             string dependentUponFilename,
-            bool retainCultureInResourceName = false
+            bool treatAsCultureNeutral = false
         )
         {
             ItemCultureInfo info;
@@ -40,10 +40,10 @@ namespace Microsoft.Build.Tasks
             if (String.Equals(Path.GetFileNameWithoutExtension(parentName),
                                    Path.GetFileNameWithoutExtension(name),
                                    StringComparison.OrdinalIgnoreCase) ||
-                                   retainCultureInResourceName)
+                                   treatAsCultureNeutral)
             {
-                // Dependent or explicitly using culture as part of the file name
-                // but we treat it is as not localized because they have same base filename
+                // Dependent but we treat it is as not localized because they have same base filename
+                // Or we want to treat this as a 'culture-neutral' file and retain the culture in the name. https://github.com/dotnet/msbuild/pull/5824
                 info.cultureNeutralFilename = name;
             }
             else
