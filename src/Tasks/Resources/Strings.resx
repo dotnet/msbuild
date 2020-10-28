@@ -2161,7 +2161,7 @@
     <comment>{StrBegin="MSB3645: "}</comment>
   </data>
   <data name="GetReferenceAssemblyPaths.OutOfDateSDK">
-    <value>MSB3971: The reference assemblies for "{0}" were not found. You might be using an older SDK to target .NET 5.0 or higher. Update Visual Studio and/or your .NET SDK.</value>
+    <value>MSB3971: The reference assemblies for "{0}" were not found. You might be using an older .NET SDK to target .NET 5.0 or higher. Update Visual Studio and/or your .NET SDK.</value>
     <comment>{StrBegin="MSB3971: "}</comment>
   </data>
 
