@@ -108,7 +108,7 @@
   <Target Name="PublishTestCli"
           BeforeTargets="Build">
     <PropertyGroup>
-      <TestCliNuGetDirectory>$(NuGetPackageRoot)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/netcoreapp2.1/</TestCliNuGetDirectory>
+      <TestCliNuGetDirectory>$(NuGetPackageRoot)/microsoft.testplatform.cli/$(MicrosoftTestPlatformCLIPackageVersion)/contentFiles/any/net6.0/</TestCliNuGetDirectory>
     </PropertyGroup>
     <ItemGroup>
       <!-- https://github.com/microsoft/vstest/issues/1886 -->
