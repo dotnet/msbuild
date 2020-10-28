@@ -967,8 +967,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="BuildGenerateSources" DependsOnTargets="BuildGenerateSourcesTraverse;$(BuildGenerateSourcesAction)" />
 
-  <Target Name="BuildGenerateSourcesTraverse" DependsOnTargets="PrepareProjectReferences;AddOutputPathToGlobalPropertiesToRemove">
-    
+  <Target Name="BuildGenerateSourcesTraverse" DependsOnTargets="PrepareProjectReferences">
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildGenerateSources"
@@ -993,8 +992,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="BuildCompile" DependsOnTargets="BuildCompileTraverse;$(BuildCompileAction)" />
 
-  <Target Name="BuildCompileTraverse" DependsOnTargets="PrepareProjectReferences;AddOutputPathToGlobalPropertiesToRemove">
-    
+  <Target Name="BuildCompileTraverse" DependsOnTargets="PrepareProjectReferences">
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildCompile"
@@ -1019,8 +1017,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="BuildLink" DependsOnTargets="BuildLinkTraverse;$(BuildLinkAction)" />
 
-  <Target Name="BuildLinkTraverse" DependsOnTargets="PrepareProjectReferences;AddOutputPathToGlobalPropertiesToRemove" >
-    
+  <Target Name="BuildLinkTraverse" DependsOnTargets="PrepareProjectReferences" >
     <MSBuild
         Projects="@(_MSBuildProjectReferenceExistent)"
         Targets="BuildLink"
@@ -2460,8 +2457,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
      </ItemGroup>
    </Target>
 
-  <Target Name="GetReferenceTargetPlatformMonikers" DependsOnTargets="PrepareProjectReferences;AddOutputPathToGlobalPropertiesToRemove">
-    
+  <Target Name="GetReferenceTargetPlatformMonikers" DependsOnTargets="PrepareProjectReferences">
     <MSBuild
       Projects="@(_MSBuildProjectReferenceExistent)"
       Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
@@ -5148,7 +5144,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <Target
       Name="CleanReferencedProjects"
-      DependsOnTargets="PrepareProjectReferences;AddOutputPathToGlobalPropertiesToRemove">
+      DependsOnTargets="PrepareProjectReferences">
 
     <!--
         When building the project directly from the command-line, clean those referenced projects
