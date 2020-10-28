@@ -16,7 +16,10 @@ namespace Microsoft.Build.Utilities
     }
 
     /// <summary>
-    /// All waves are enabled by default, meaning all features behind change wave versions are enabled.
+    /// Coupled together with the MSBUILDDISABLEFEATURESFROMVERSION environment variable,
+    /// this class acts as a way to make risky changes while giving customers an opt-out.
+    /// See docs here: https://github.com/dotnet/msbuild/blob/master/documentation/wiki/ChangeWaves.md
+    /// For dev docs: https://github.com/dotnet/msbuild/blob/master/documentation/wiki/ChangeWaves-Dev.md
     /// </summary>
     public class ChangeWaves
     {
@@ -26,10 +29,13 @@ namespace Microsoft.Build.Utilities
         public static readonly Version[] AllWaves = { Wave16_8, Wave16_10, Wave17_0 };
 
         /// <summary>
-        /// Special value indicating that all features behind change-waves should be enabled.
+        /// Special value indicating that all features behind Change Waves should be enabled.
         /// </summary>
         internal static readonly Version EnableAllFeatures = new Version(999, 999);
 
+        /// <summary>
+        /// The lowest wave in the current rotation of Change Waves.
+        /// </summary>
         internal static Version LowestWave
         {
             get
@@ -38,6 +44,9 @@ namespace Microsoft.Build.Utilities
             }
         }
 
+        /// <summary>
+        /// The highest wave in the current rotation of Change Waves.
+        /// </summary>
         internal static Version HighestWave
         {
             get
@@ -46,6 +55,9 @@ namespace Microsoft.Build.Utilities
             }
         }
 
+        /// <summary>
+        /// Checks the conditions for whether or not we want ApplyChangeWave to be called again.
+        /// </summary>
         private static bool ShouldApplyChangeWave
         {
             get
@@ -55,6 +67,12 @@ namespace Microsoft.Build.Utilities
         }
 
         private static Version _cachedWave;
+
+        /// <summary>
+        /// The current disabled wave, typically set via the MSBUILDDISABLEFEATURESFROMVERSION environment variable.
+        /// If MSBUILDDISABLEFEATURESFROMVERSION is unset, DisabledWave will default to '999.999', a special value indicating
+        /// there is no disabled wave.
+        /// </summary>
         public static Version DisabledWave
         {
             get
@@ -69,6 +87,10 @@ namespace Microsoft.Build.Utilities
         }
 
         private static ChangeWaveConversionState _state;
+
+        /// <summary>
+        /// The status of how the disabled wave was set.
+        /// </summary>
         internal static ChangeWaveConversionState ConversionState
         {
             get
@@ -86,7 +108,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Read from environment variable MSBuildDisableFeaturesFromWave is and cache the version properly.
+        /// Read from environment variable MSBUILDDISABLEFEATURESFROMVERSION, cache it, and cache the conversion state.
         /// </summary>
         internal static void ApplyChangeWave()
         {
@@ -96,7 +118,7 @@ namespace Microsoft.Build.Utilities
                 return;
             }
 
-            // Is `MSBuildDisableFeaturesFromVersion` not set?
+            // Is `MSBUILDDISABLEFEATURESFROMVERSION` not set?
             if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableFeaturesFromVersion))
             {
                 ConversionState = ChangeWaveConversionState.Valid;
@@ -110,14 +132,8 @@ namespace Microsoft.Build.Utilities
                 _cachedWave = ChangeWaves.EnableAllFeatures;
                 return;
             }
-            // Are we enabling everything?
-            else if (_cachedWave == EnableAllFeatures)
-            {
-                ConversionState = ChangeWaveConversionState.Valid;
-                return;
-            }
-            // Do we have a pre-existing wave?
-            else if (AllWaves.Contains(_cachedWave))
+            // Are we enabling everything, or do we have a valid wave?
+            else if (_cachedWave == EnableAllFeatures || AllWaves.Contains(_cachedWave))
             {
                 ConversionState = ChangeWaveConversionState.Valid;
                 return;
@@ -147,10 +163,10 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Compares the passed wave to the MSBuildDisableFeaturesFromVersion environment variable.
+        /// Determines whether features behind the given wave are enabled.
         /// </summary>
         /// <param name="wave">The version to compare.</param>
-        /// <returns>A bool indicating whether the version is enabled.</returns>
+        /// <returns>A bool indicating whether the change wave is enabled.</returns>
         public static bool AreFeaturesEnabled(Version wave)
         {
             if (ShouldApplyChangeWave)
@@ -158,7 +174,7 @@ namespace Microsoft.Build.Utilities
                 ApplyChangeWave();
             }
 
-            // This is opt out behavior, all waves are enabled by default.
+            // Check if we cached the special value to enable all features behind change waves.
             if (_cachedWave == EnableAllFeatures)
             {
                 return true;
@@ -169,6 +185,7 @@ namespace Microsoft.Build.Utilities
 
         /// <summary>
         /// Resets the state and value of the currently disabled version.
+        /// Used for testing only.
         /// </summary>
         public static void ResetStateForTests()
         {
