@@ -22,6 +22,9 @@ namespace Microsoft.DotNet.Cli
                 Create.Option("--deprecated",
                               LocalizableStrings.CmdDeprecatedDescription,
                               Accept.NoArguments().ForwardAs("--deprecated")),
+                Create.Option("--vulnerable",
+                              LocalizableStrings.CmdVulnerableDescription,
+                              Accept.NoArguments().ForwardAs("--vulnerable")),
                 Create.Option("--framework",
                               LocalizableStrings.CmdFrameworkDescription,
                               Accept.OneOrMoreArguments()
