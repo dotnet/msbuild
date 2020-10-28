@@ -70,7 +70,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/mono/linker -->
-    <MicrosoftNETILLinkTasksPackageVersion>6.0.0-alpha.1.20527.2</MicrosoftNETILLinkTasksPackageVersion>
+    <MicrosoftNETILLinkTasksPackageVersion>6.0.0-alpha.1.20516.1</MicrosoftNETILLinkTasksPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/runtime -->
@@ -113,7 +113,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn -->
-    <MicrosoftNetCompilersToolsetPackageVersion>3.9.0-2.20528.2</MicrosoftNetCompilersToolsetPackageVersion>
+    <MicrosoftNetCompilersToolsetPackageVersion>3.9.0-2.20528.8</MicrosoftNetCompilersToolsetPackageVersion>
     <MicrosoftCodeAnalysisCodeStyleVersion>3.8.0-4.20469.1</MicrosoftCodeAnalysisCodeStyleVersion>
   </PropertyGroup>
   <PropertyGroup>
