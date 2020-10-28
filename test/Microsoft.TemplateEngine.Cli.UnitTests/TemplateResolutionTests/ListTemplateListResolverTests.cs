@@ -810,5 +810,41 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.False(matchResult.HasContextMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
         }
+
+        [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_TemplateWithoutTypeShouldNotBeMatchedForContextFilter))]
+        public void TestGetTemplateResolutionResult_TemplateWithoutTypeShouldNotBeMatchedForContextFilter()
+        {
+            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
+            templatesToSearch.Add(new TemplateInfo()
+            {
+                ShortName = "console",
+                Name = "Long name for Console App",
+                Identity = "Console.App.T1",
+                GroupIdentity = "Console.App.Test",
+                CacheParameters = new Dictionary<string, ICacheParameter>(),
+                Classifications = new List<string> { "Common", "Test" },
+                Tags = new Dictionary<string, ICacheTag>()
+            });
+
+
+            INewCommandInput userInputs = new MockNewCommandInput()
+            {
+                TemplateName = "Common",
+                IsListFlagSpecified = true,
+
+                TypeFilter = "item",
+            };
+
+            ListOrHelpTemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.False(matchResult.HasExactMatches);
+            Assert.Equal(0, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
+            Assert.True(matchResult.HasPartialMatches);
+            Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
+            Assert.Equal(1, matchResult.PartiallyMatchedTemplatesGrouped.Count);
+            Assert.False(matchResult.HasLanguageMismatch);
+            Assert.True(matchResult.HasContextMismatch);
+            Assert.False(matchResult.HasBaselineMismatch);
+        }
     }
 }
