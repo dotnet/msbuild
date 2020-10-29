@@ -1035,7 +1035,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- TargetPlatformMoniker and TargetPlatformDisplayName would normally be set in Microsoft.Common.CurrentVersion.targets.  However, the
        TargetPlatformVersion may have been set later than that in evaluation by platform-specific targets.  So fix up those properties here -->
-  <PropertyGroup Condition="'$(TargetPlatformMoniker)' == '' and '$(TargetPlatformIdentifier)' != '' and '$(TargetPlatformVersion)' != ''">
+  <PropertyGroup Condition="'$(TargetPlatformMoniker)' == '' and '$(TargetPlatformIdentifier)' != ''">
+    <!-- Set TargetPlatformVersion if it isn't set.  This is so that we have a valid TargetPlatformMoniker for Restore.
+         This avoids an issue where projects with multitargeted unknown platforms would fail to restore because the platforms
+         weren't included in the TargetPlatformMoniker for restore, obscuring the errors about unknown platforms or missing
+         workloads. -->
+    <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == ''">0.0</TargetPlatformVersion>
     <TargetPlatformMoniker>$(TargetPlatformIdentifier),Version=$(TargetPlatformVersion)</TargetPlatformMoniker>
     <TargetPlatformDisplayName>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKDisplayName($(TargetPlatformIdentifier), $(TargetPlatformVersion)))</TargetPlatformDisplayName>
   </PropertyGroup>
