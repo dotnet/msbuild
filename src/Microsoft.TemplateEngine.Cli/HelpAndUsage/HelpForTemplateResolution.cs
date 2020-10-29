@@ -141,7 +141,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             {
                 IReadOnlyCollection<IGrouping<string, ITemplateMatchInfo>> groupedTemplatesForDisplay = templateResolutionResult.ExactMatchedTemplatesGrouped;
                 ShowTemplatesFoundMessage(commandInput.TemplateName, commandInput.Language, commandInput.TypeFilter, commandInput.BaselineName);
-                DisplayTemplateList(groupedTemplatesForDisplay, environmentSettings, commandInput.Language, defaultLanguage);
+                DisplayTemplateList(groupedTemplatesForDisplay, environmentSettings, commandInput, defaultLanguage);
             }
             else
             {
@@ -198,22 +198,26 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         // - Short Name: displays the first short name from the highest precedence template in the group.
         // - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
         // - Tags
-        private static void DisplayTemplateList(IReadOnlyCollection<IGrouping<string, ITemplateMatchInfo>> templates, IEngineEnvironmentSettings environmentSettings, string language, string defaultLanguage)
+        private static void DisplayTemplateList(IReadOnlyCollection<IGrouping<string, ITemplateMatchInfo>> templates, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string defaultLanguage)
         {
-            IReadOnlyCollection<TemplateGroupForListDisplay> groupsForDisplay = GetTemplateGroupsForListDisplay(templates, language, defaultLanguage);
+            IReadOnlyCollection<TemplateGroupForListDisplay> groupsForDisplay = GetTemplateGroupsForListDisplay(templates, commandInput.Language, defaultLanguage);
 
             HelpFormatter<TemplateGroupForListDisplay> formatter =
                 HelpFormatter
                     .For(
                         environmentSettings,
+                        commandInput,
                         groupsForDisplay,
                         columnPadding: 2,
                         headerSeparator: '-',
                         blankLineBetweenRows: false)
-                    .DefineColumn(t => t.Name, LocalizableStrings.Templates, shrinkIfNeeded: true, minWidth: 25)
-                    .DefineColumn(t => t.ShortName, LocalizableStrings.ShortName)
-                    .DefineColumn(t => t.Languages, out object languageColumn, LocalizableStrings.Language)
-                    .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.Tags)
+                    .DefineColumn(t => t.Name, LocalizableStrings.Templates, shrinkIfNeeded: true, minWidth:25, showAlways: true)
+                    .DefineColumn(t => t.ShortName, LocalizableStrings.ShortName, showAlways: true)
+                    .DefineColumn(t => t.Languages, out object languageColumn,  LocalizableStrings.Language, NewCommandInputCli.LanguageColumnFilter, defaultColumn: true)
+                    .DefineColumn(t => t.Type, LocalizableStrings.ColumnNameType, NewCommandInputCli.TypeColumnFilter, defaultColumn: false)
+                    .DefineColumn(t => t.Author,  LocalizableStrings.ColumnNameAuthor, NewCommandInputCli.AuthorColumnFilter, defaultColumn: false)
+                    .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.Tags, NewCommandInputCli.TagsColumnFilter, defaultColumn: true)
+
                     .OrderByDescending(languageColumn, new NullOrEmptyIsLastStringComparer())
                     .OrderBy(tagsColumn);
             Reporter.Output.WriteLine(formatter.Layout());
@@ -225,6 +229,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             public string ShortName { get; set; }
             public string Languages { get; set; }
             public string Classifications { get; set; }
+            public string Author { get; set; }
+            public string Type { get; set; }
         }
 
         private static IReadOnlyList<TemplateGroupForListDisplay> GetTemplateGroupsForListDisplay(IReadOnlyCollection<IGrouping<string, ITemplateMatchInfo>> groupedTemplateList, string language, string defaultLanguage)
@@ -275,12 +281,20 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     shortName = highestPrecedenceTemplate.Info.ShortName;
                 }
 
+                string templateType = string.Empty;
+                if (highestPrecedenceTemplate.Info.Tags != null && highestPrecedenceTemplate.Info.Tags.TryGetValue("type", out ICacheTag typeTag))
+                {
+                    templateType = typeTag.DefaultValue;
+                }
+
                 TemplateGroupForListDisplay groupDisplayInfo = new TemplateGroupForListDisplay()
                 {
                     Name = highestPrecedenceTemplate.Info.Name,
                     ShortName = shortName,
                     Languages = string.Join(",", languageForDisplay),
-                    Classifications = highestPrecedenceTemplate.Info.Classifications != null ? string.Join("/", highestPrecedenceTemplate.Info.Classifications) : null
+                    Classifications = highestPrecedenceTemplate.Info.Classifications != null ? string.Join("/", highestPrecedenceTemplate.Info.Classifications) : null,
+                    Author = highestPrecedenceTemplate.Info.Author,
+                    Type = templateType
                 };
                 templateGroupsForDisplay.Add(groupDisplayInfo);
             }
@@ -410,9 +424,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 // this code path doesn't go through the full help & usage stack, so needs it's own call to ShowUsageHelp().
                 ShowUsageHelp(commandInput, telemetryLogger);
             }
-            else
+            else if (invalidParams.Count > 0)
             {
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, commandInput.CommandName).Bold().Red());
+            }
+            if (commandInput.HasColumnsParseError)
+            {
+                Reporter.Error.WriteLine(commandInput.ColumnsParseError.Bold().Red());
             }
 
             return CreationResultStatus.InvalidParamValues;

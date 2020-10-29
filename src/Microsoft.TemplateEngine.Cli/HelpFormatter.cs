@@ -4,16 +4,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Cli.CommandParsing;
 
 namespace Microsoft.TemplateEngine.Cli
 {
     public class HelpFormatter
     {
-        public static HelpFormatter<T> For<T>(IEngineEnvironmentSettings environmentSettings, IEnumerable<T> rows, int columnPadding, char? headerSeparator = null, bool blankLineBetweenRows = false)
+        public static HelpFormatter<T> For<T>(IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IEnumerable<T> rows, int columnPadding, char? headerSeparator = null, bool blankLineBetweenRows = false)
         {
-            return new HelpFormatter<T>(environmentSettings, rows, columnPadding, headerSeparator, blankLineBetweenRows);
+            return new HelpFormatter<T>(environmentSettings, commandInput, rows, columnPadding, headerSeparator, blankLineBetweenRows);
         }
     }
 
@@ -27,27 +29,32 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly List<Tuple<int, bool, IComparer<string>>> _ordering = new List<Tuple<int, bool, IComparer<string>>>();
         private readonly IEngineEnvironmentSettings _environmentSettings;
         private const string ShrinkReplacement = "...";
+        private readonly INewCommandInput _commandInput;
 
-        public HelpFormatter(IEngineEnvironmentSettings environmentSettings, IEnumerable<T> rows, int columnPadding, char? headerSeparator, bool blankLineBetweenRows)
+        public HelpFormatter(IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IEnumerable<T> rows, int columnPadding, char? headerSeparator, bool blankLineBetweenRows)
         {
             _rowDataItems = rows ?? Enumerable.Empty<T>();
             _columnPadding = columnPadding;
             _headerSeparator = headerSeparator;
             _blankLineBetweenRows = blankLineBetweenRows;
             _environmentSettings = environmentSettings;
+            _commandInput = commandInput;
         }
 
-        public HelpFormatter<T> DefineColumn(Func<T, string> binder, string header = null, bool shrinkIfNeeded = false, int minWidth = 2)
+        public HelpFormatter<T> DefineColumn(Func<T, string> binder,  string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true)
         {
-            _columns.Add(new ColumnDefinition(_environmentSettings, header, binder, shrinkIfNeeded: shrinkIfNeeded, minWidth: minWidth));
-            return this;
+            return DefineColumn(binder, out object c,  header, columnName, shrinkIfNeeded, minWidth, showAlways, defaultColumn);
         }
 
-        public HelpFormatter<T> DefineColumn(Func<T, string> binder, out object column, string header = null, bool shrinkIfNeeded = false, int minWidth = 2)
+        public HelpFormatter<T> DefineColumn(Func<T, string> binder, out object column, string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true)
         {
-            ColumnDefinition c = new ColumnDefinition(_environmentSettings, header, binder, shrinkIfNeeded: shrinkIfNeeded, minWidth: minWidth);
-            _columns.Add(c);
-            column = c;
+            column = null;
+            if ((_commandInput.Columns.Count == 0  && defaultColumn) || showAlways || (!string.IsNullOrWhiteSpace(columnName) && _commandInput.Columns.Contains(columnName)))
+            {
+                ColumnDefinition c = new ColumnDefinition(_environmentSettings, header, binder, shrinkIfNeeded: shrinkIfNeeded, minWidth: minWidth);
+                _columns.Add(c);
+                column = c;
+            }
             return this;
         }
 

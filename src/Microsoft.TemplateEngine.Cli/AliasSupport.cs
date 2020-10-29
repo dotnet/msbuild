@@ -185,12 +185,13 @@ namespace Microsoft.TemplateEngine.Cli
             HelpFormatter<KeyValuePair<string, IReadOnlyList<string>>> formatter =
                 new HelpFormatter<KeyValuePair<string, IReadOnlyList<string>>>(
                     environment,
+                    commandInput,
                     aliasesToShow,
                     columnPadding: 2,
                     headerSeparator: '-',
                     blankLineBetweenRows: false)
-                .DefineColumn(t => t.Key, LocalizableStrings.AliasName)
-                .DefineColumn(t => string.Join(" ", t.Value), LocalizableStrings.AliasValue);
+                .DefineColumn(t => t.Key, LocalizableStrings.AliasName, showAlways: true)
+                .DefineColumn(t => string.Join(" ", t.Value), LocalizableStrings.AliasValue, showAlways: true);
 
             Reporter.Output.WriteLine(formatter.Layout());
             return CreationResultStatus.Success;

@@ -685,4 +685,22 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="ListTemplatesCommand" xml:space="preserve">
     <value>To list installed templates, run 'dotnet new --list'.</value>
   </data>
+  <data name="ColumnNameAuthor" xml:space="preserve">
+    <value>Author</value>
+  </data>
+  <data name="ColumnNamesAreNotSupported" xml:space="preserve">
+    <value>The column {0} is/are not supported, the supported columns are: {1}.</value>
+  </data>
+  <data name="ColumnNameType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="OptionDescriptionColumns" xml:space="preserve">
+    <value>Comma separated list of columns to show for --list or -l option.  The supported columns are: 
+- language - displays comma separated list of languages supported by the template
+- tags - displays the list of template tags
+- author - displays the template author
+- type - displays the template type: project or item
+The template name and short name are shown always.
+The default list of columns shown without the option: template name, short name, language, tags; equivalent to --columns=language,tags.</value>
+  </data>
 </root>

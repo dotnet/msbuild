@@ -36,7 +36,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 // get the input params valid for any param in the group              
                 IReadOnlyDictionary<string, string> inputTemplateParams = CoalesceInputParameterValuesFromTemplateGroup(templateGroup);
                 ShowTemplateDetailHeaders(templateInfoList);
-                ShowParameterHelp(inputTemplateParams, showImplicitlyHiddenParams, groupParameterDetails.Value, environmentSettings);
+                ShowParameterHelp(inputTemplateParams, showImplicitlyHiddenParams, groupParameterDetails.Value, environmentSettings, commandInput);
             }
             else
             {
@@ -84,7 +84,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
         }
 
-        private static void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, bool showImplicitlyHiddenParams, TemplateGroupParameterDetails parameterDetails, IEngineEnvironmentSettings environmentSettings)
+        private static void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, bool showImplicitlyHiddenParams, TemplateGroupParameterDetails parameterDetails, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput)
         {
 
             IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(parameterDetails.AllParams.ParameterDefinitions, parameterDetails.ExplicitlyHiddenParams,
@@ -92,7 +92,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             if (filteredParams.Any())
             {
-                HelpFormatter<ITemplateParameter> formatter = new HelpFormatter<ITemplateParameter>(environmentSettings, filteredParams, 2, null, true);
+                HelpFormatter<ITemplateParameter> formatter = new HelpFormatter<ITemplateParameter>(environmentSettings, commandInput, filteredParams, 2, null, true);
 
                 formatter.DefineColumn(
                     param =>

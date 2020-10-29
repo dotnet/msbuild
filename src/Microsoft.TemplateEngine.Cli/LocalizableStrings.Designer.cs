@@ -509,6 +509,33 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Author.
+        /// </summary>
+        public static string ColumnNameAuthor {
+            get {
+                return ResourceManager.GetString("ColumnNameAuthor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The column {0} is/are not supported, the supported columns are: {1}..
+        /// </summary>
+        public static string ColumnNamesAreNotSupported {
+            get {
+                return ResourceManager.GetString("ColumnNamesAreNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type.
+        /// </summary>
+        public static string ColumnNameType {
+            get {
+                return ResourceManager.GetString("ColumnNameType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Template Instantiation Commands for .NET Core CLI.
         /// </summary>
         public static string CommandDescription {
@@ -1125,6 +1152,21 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string OptionalWorkloadsSynchronized {
             get {
                 return ResourceManager.GetString("OptionalWorkloadsSynchronized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Comma separated list of columns to show for --list or -l option.  The supported columns are: 
+        ///- language - displays comma separated list of languages supported by the template
+        ///- tags - displays the list of template tags
+        ///- author - displays the template author
+        ///- type - displays the template type: project or item
+        ///The template name and short name are shown always.
+        ///The default list of columns shown without the option: template name, short name, language, tags; equivalent to --columns=language,tags..
+        /// </summary>
+        public static string OptionDescriptionColumns {
+            get {
+                return ResourceManager.GetString("OptionDescriptionColumns", resourceCulture);
             }
         }
         

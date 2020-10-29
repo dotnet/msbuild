@@ -25,6 +25,19 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         private readonly Command _noTemplateCommand;
         private readonly string _commandName;
 
+        internal static string[] SupportedFilterableColumnNames = new[]
+        {
+            AuthorColumnFilter,
+            TypeColumnFilter,
+            LanguageColumnFilter,
+            TagsColumnFilter
+        };
+
+        internal const string AuthorColumnFilter = "author";
+        internal const string TypeColumnFilter = "type";
+        internal const string LanguageColumnFilter = "language";
+        internal const string TagsColumnFilter = "tags";
+
         public NewCommandInputCli(string commandName)
         {
             _commandName = commandName;
@@ -37,7 +50,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         {
             get
             {
-                return _parseResult.Errors.Any();
+                return _parseResult.Errors.Any() || HasColumnsParseError;
             }
         }
 
@@ -251,6 +264,47 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         public bool CheckForUpdates => _parseResult.HasAppliedOption(new[] { _commandName, "update-check" });
 
         public bool CheckForUpdatesNoPrompt => _parseResult.HasAppliedOption(new[] { _commandName, "update-apply" });
+
+        public IReadOnlyCollection<string> Columns
+        {
+            get
+            {
+                string columnNames = _parseResult.GetArgumentValueAtPath(new[] { _commandName, "columns" });
+                if (!string.IsNullOrWhiteSpace(columnNames))
+                {
+                    return columnNames.Split(',').Select(s => s.Trim()).ToList();
+                }
+                else
+                {
+                    return new List<string>();
+                }
+            }
+        }
+
+        public bool HasColumnsParseError => Columns.Any(column => !SupportedFilterableColumnNames.Contains(column));
+
+        public string ColumnsParseError
+        {
+            get
+            {
+                List<string> invalidColumns = new List<string>(Columns.Count);
+                foreach (string columnToShow in Columns)
+                {
+                    if (!SupportedFilterableColumnNames.Contains(columnToShow))
+                    {
+                        invalidColumns.Add(columnToShow);
+                    }
+                }
+                if (invalidColumns.Any())
+                {
+                    return string.Format(
+                         LocalizableStrings.ColumnNamesAreNotSupported,
+                         string.Join(", ", invalidColumns.Select(s => $"'{s}'")),
+                         string.Join(", ", SupportedFilterableColumnNames.Select(s => $"'{s}'")));
+                }
+                return string.Empty;
+            }
+        }
 
         public string AllowScriptsToRun
         {

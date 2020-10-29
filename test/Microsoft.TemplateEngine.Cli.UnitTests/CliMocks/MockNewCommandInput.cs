@@ -197,5 +197,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         {
             throw new NotImplementedException();
         }
+
+        public IReadOnlyCollection<string> Columns { get; set; } = new List<string>();
+
+        public bool HasColumnsParseError => throw new NotImplementedException();
+
+        public string ColumnsParseError => throw new NotImplementedException();
     }
 }

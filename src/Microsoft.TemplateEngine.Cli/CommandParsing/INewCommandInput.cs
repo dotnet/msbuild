@@ -93,5 +93,11 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         void ResetArgs(params string[] args);
 
         bool ExpandedExtraArgsFiles { get; }
+
+        IReadOnlyCollection<string> Columns { get; }
+
+        bool HasColumnsParseError { get; }
+
+        string ColumnsParseError { get; }
     }
 }
