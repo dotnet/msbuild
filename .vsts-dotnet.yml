@@ -172,7 +172,7 @@ stages:
       condition: succeeded()
 
     # Archive NuGet packages to DevOps.
-    # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the 
+    # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the
     # arcade templates depend on the name.
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: packages'
