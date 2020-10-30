@@ -211,11 +211,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         columnPadding: 2,
                         headerSeparator: '-',
                         blankLineBetweenRows: false)
-                    .DefineColumn(t => t.Name, LocalizableStrings.Templates, shrinkIfNeeded: true, minWidth:25, showAlways: true)
+                    .DefineColumn(t => t.Name, LocalizableStrings.Templates, shrinkIfNeeded: true, minWidth:15, showAlways: true)
                     .DefineColumn(t => t.ShortName, LocalizableStrings.ShortName, showAlways: true)
                     .DefineColumn(t => t.Languages, out object languageColumn,  LocalizableStrings.Language, NewCommandInputCli.LanguageColumnFilter, defaultColumn: true)
                     .DefineColumn(t => t.Type, LocalizableStrings.ColumnNameType, NewCommandInputCli.TypeColumnFilter, defaultColumn: false)
-                    .DefineColumn(t => t.Author,  LocalizableStrings.ColumnNameAuthor, NewCommandInputCli.AuthorColumnFilter, defaultColumn: false)
+                    .DefineColumn(t => t.Author,  LocalizableStrings.ColumnNameAuthor, NewCommandInputCli.AuthorColumnFilter, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
                     .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.Tags, NewCommandInputCli.TagsColumnFilter, defaultColumn: true)
 
                     .OrderByDescending(languageColumn, new NullOrEmptyIsLastStringComparer())

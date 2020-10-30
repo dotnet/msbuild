@@ -99,5 +99,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         bool HasColumnsParseError { get; }
 
         string ColumnsParseError { get; }
+
+        bool ShowAllColumns { get; }
     }
 }

@@ -703,4 +703,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
 The template name and short name are shown always.
 The default list of columns shown without the option: template name, short name, language, tags; equivalent to --columns=language,tags.</value>
   </data>
+  <data name="OptionDescriptionColumnsAll" xml:space="preserve">
+    <value>Shows all available columns  for --list or -l option, equivalent to --columns=language,tags,author,type.</value>
+  </data>
 </root>

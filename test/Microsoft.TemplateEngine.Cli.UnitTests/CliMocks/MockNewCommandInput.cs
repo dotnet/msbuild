@@ -203,5 +203,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         public bool HasColumnsParseError => throw new NotImplementedException();
 
         public string ColumnsParseError => throw new NotImplementedException();
+
+        public bool ShowAllColumns { get; set; } = false;
+
     }
 }

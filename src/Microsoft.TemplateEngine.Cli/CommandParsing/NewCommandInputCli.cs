@@ -283,6 +283,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public bool HasColumnsParseError => Columns.Any(column => !SupportedFilterableColumnNames.Contains(column));
 
+        public bool ShowAllColumns => _parseResult.HasAppliedOption(new[] { _commandName, "columns-all" });
+
         public string ColumnsParseError
         {
             get

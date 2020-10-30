@@ -241,6 +241,55 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             string result = formatter.Layout();
             Assert.Equal(expectedOutput, result);
         }
+
+        [Fact(DisplayName = nameof(CanShowAllColumns))]
+        public void CanShowAllColumns()
+        {
+            ITemplateEngineHost host = new TestHost
+            {
+                HostIdentifier = "TestRunner",
+                Version = "1.0.0.0",
+                Locale = "en-US"
+            };
+
+            IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
+            {
+                Host = host,
+                Environment = new MockEnvironment()
+                {
+                    ConsoleBufferWidth = 100
+                }
+            };
+
+            INewCommandInput command = new MockNewCommandInput()
+            {
+                ShowAllColumns = true
+            };
+
+            IEnumerable<Tuple<string, string, string>> data = new List<Tuple<string, string, string>>()
+            {
+                new Tuple<string, string, string>("Column 1 data", "Column 2 data", "Column 3 data"),
+                new Tuple<string, string, string>("Column 1 data", "Column 2 data", "Column 3 data")
+            };
+
+            string expectedOutput = $"Column 1       Column 2       Column 3     {Environment.NewLine}-------------  -------------  -------------{Environment.NewLine}Column 1 data  Column 2 data  Column 3 data{Environment.NewLine}Column 1 data  Column 2 data  Column 3 data{Environment.NewLine}";
+
+            HelpFormatter<Tuple<string, string, string>> formatter =
+             HelpFormatter
+                 .For(
+                     environmentSettings,
+                     command,
+                     data,
+                     columnPadding: 2,
+                     headerSeparator: '-',
+                     blankLineBetweenRows: false)
+                 .DefineColumn(t => t.Item1, "Column 1", showAlways: true)
+                 .DefineColumn(t => t.Item2, "Column 2", columnName: "column2")  //defaultColumn: true by default
+                 .DefineColumn(t => t.Item3, "Column 3", columnName: "column3", defaultColumn: false);
+
+            string result = formatter.Layout();
+            Assert.Equal(expectedOutput, result);
+        }
     }
 
 }

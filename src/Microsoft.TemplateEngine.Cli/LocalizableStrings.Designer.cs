@@ -1169,6 +1169,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Shows all available columns  for --list or -l option, equivalent to --columns=language,tags,author,type..
+        /// </summary>
+        public static string OptionDescriptionColumnsAll {
+            get {
+                return ResourceManager.GetString("OptionDescriptionColumnsAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Options:.
         /// </summary>
         public static string Options {
