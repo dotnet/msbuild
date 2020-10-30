@@ -84,6 +84,7 @@ namespace Microsoft.DotNet.Tests.Commands
         public void GivenNewCommandItDisplaysCompletions()
         {
             var expected = new[] {
+                "--columns",
                 "--dry-run",
                 "--force",
                 "--help",
