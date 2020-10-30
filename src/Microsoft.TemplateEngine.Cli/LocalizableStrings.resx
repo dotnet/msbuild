@@ -395,13 +395,13 @@
     <value>Running command '{0}'...</value>
   </data>
   <data name="PostActionInvalidInputRePrompt" xml:space="preserve">
-    <value>Invalid input "{0}". Please enter one of (Y|N).</value>
+    <value>Invalid input "{0}". Please enter one of [{1}(yes)|{2}(no)].</value>
   </data>
   <data name="PostActionPromptHeader" xml:space="preserve">
     <value>Template is configured to run the following action:</value>
   </data>
   <data name="PostActionPromptRequest" xml:space="preserve">
-    <value>Do you want to run this action (Y|N)?</value>
+    <value>Do you want to run this action [{0}(yes)|{1}(no)]?</value>
   </data>
   <data name="ProcessingPostActions" xml:space="preserve">
     <value>Processing post-creation actions...</value>

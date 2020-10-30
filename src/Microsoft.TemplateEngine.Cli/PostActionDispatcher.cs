@@ -129,25 +129,28 @@ namespace Microsoft.TemplateEngine.Cli
 
         private bool AskUserIfActionShouldRun(IPostAction action, Func<string> inputGetter)
         {
+            const string YesAnswer = "Y";
+            const string NoAnswer = "N";
+
             Reporter.Output.WriteLine(LocalizableStrings.PostActionPromptHeader);
             DisplayInstructionsForAction(action);
 
-            Reporter.Output.WriteLine(LocalizableStrings.PostActionPromptRequest);
+            Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionPromptRequest, YesAnswer, NoAnswer));
 
             do
             {
                 string input = inputGetter();
 
-                if (input.Equals("Y", StringComparison.OrdinalIgnoreCase))
+                if (input.Equals(YesAnswer, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
-                else if (input.Equals("N", StringComparison.OrdinalIgnoreCase))
+                else if (input.Equals(NoAnswer, StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
 
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionInvalidInputRePrompt, input));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionInvalidInputRePrompt, input, YesAnswer, NoAnswer));
             } while (true);
         }
 

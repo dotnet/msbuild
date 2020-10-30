@@ -673,6 +673,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Default if option is provided without a value: {0}.
+        /// </summary>
+        public static string DefaultIfOptionWithoutValue {
+            get {
+                return ResourceManager.GetString("DefaultIfOptionWithoutValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Default: {0}.
         /// </summary>
         public static string DefaultValue {
@@ -680,18 +689,7 @@ namespace Microsoft.TemplateEngine.Cli {
                 return ResourceManager.GetString("DefaultValue", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Default if option is provided without a value: {0}.
-        /// </summary>
-        public static string DefaultIfOptionWithoutValue
-        {
-            get
-            {
-                return ResourceManager.GetString("DefaultIfOptionWithoutValue", resourceCulture);
-            }
-        }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Default: {0} / (*) {1}.
         /// </summary>
@@ -1297,7 +1295,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid input &quot;{0}&quot;. Please enter one of (Y|N)..
+        ///   Looks up a localized string similar to Invalid input &quot;{0}&quot;. Please enter one of [{1}(yes)|{2}(no)]..
         /// </summary>
         public static string PostActionInvalidInputRePrompt {
             get {
@@ -1315,7 +1313,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Do you want to run this action (Y|N)?.
+        ///   Looks up a localized string similar to Do you want to run this action [{0}(yes)|{1}(no)]?.
         /// </summary>
         public static string PostActionPromptRequest {
             get {
