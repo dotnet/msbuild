@@ -90,7 +90,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [CoreMSBuildOnlyFact]
-        public void It_should_fail_without_when_multitargeted_to_unknown_platforms()
+        public void It_should_fail_when_multitargeted_to_unknown_platforms()
         {
             var testProject = new TestProject()
             {

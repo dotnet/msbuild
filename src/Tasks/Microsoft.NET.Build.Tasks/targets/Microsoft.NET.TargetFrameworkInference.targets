@@ -217,11 +217,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Exclude files from OutputPath and IntermediateOutputPath from default item globs.  Use the value
        of these properties before the TargetFramework is appended, so that if these values are specified
-       in the project file, the specified value will be used for the exclude.
-       
-       We may be able to move this to Microsoft.NET.Sdk.DefaultItems.targets (where the other DefaultItemExcludes
-       are defined) if we fix https://github.com/dotnet/sdk/issues/550
-       -->
+       in the project file, the specified value will be used for the exclude. -->
   <PropertyGroup>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(OutputPath)/**</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(IntermediateOutputPath)/**</DefaultItemExcludes>
