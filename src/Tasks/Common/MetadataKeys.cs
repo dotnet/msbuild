@@ -80,11 +80,11 @@ namespace Microsoft.NET.Build.Tasks
         public const string TargetPath = "TargetPath";
         public const string CopyLocal = "CopyLocal";
 
-        //  Targeting packs
+        // Targeting packs
         public const string PackageConflictPreferredPackages = "PackageConflictPreferredPackages";
 
-        //  Runtime packs
-		public const string DropFromSingleFile = "DropFromSingleFile";
+        // Runtime packs
+        public const string DropFromSingleFile = "DropFromSingleFile";
         public const string RuntimePackLabels = "RuntimePackLabels";
         public const string AdditionalFrameworkReferences = "AdditionalFrameworkReferences";
 
@@ -110,5 +110,14 @@ namespace Microsoft.NET.Build.Tasks
         public const string ReferenceOnly = "ReferenceOnly";
 
         public const string Aliases = "Aliases";
+
+        // ReadyToRun
+        public const string JitPath = "JitPath";
+        public const string TargetOS = "TargetOS";
+        public const string TargetArch = "TargetArch";
+        public const string DiaSymReader = "DiaSymReader";
+        public const string CreatePDBCommand = "CreatePDBCommand";
+        public const string OutputR2RImage = "OutputR2RImage";
+        public const string OutputPDBImage = "OutputPDBImage";
     }
 }

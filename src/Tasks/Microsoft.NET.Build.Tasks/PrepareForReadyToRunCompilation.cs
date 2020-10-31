@@ -56,7 +56,7 @@ namespace Microsoft.NET.Build.Tasks
         protected override void ExecuteCore()
         {
             // Future: when crossgen2 supports generating PDBs, update this to check crossgen2 when we are using crossgen2.
-            string diaSymReaderPath = CrossgenTool?.GetMetadata("DiaSymReader");
+            string diaSymReaderPath = CrossgenTool?.GetMetadata(MetadataKeys.DiaSymReader);
             bool hasValidDiaSymReaderLib = !string.IsNullOrEmpty(diaSymReaderPath) && File.Exists(diaSymReaderPath);
 
             // Process input lists of files
@@ -103,7 +103,7 @@ namespace Microsoft.NET.Build.Tasks
                     // This TaskItem is the IL->R2R entry, for an input assembly that needs to be compiled into a R2R image. This will be used as
                     // an input to the ReadyToRunCompiler task
                     TaskItem r2rCompilationEntry = new TaskItem(file);
-                    r2rCompilationEntry.SetMetadata("OutputR2RImage", outputR2RImage);
+                    r2rCompilationEntry.SetMetadata(MetadataKeys.OutputR2RImage, outputR2RImage);
                     r2rCompilationEntry.RemoveMetadata(MetadataKeys.OriginalItemSpec);
                     imageCompilationList.Add(r2rCompilationEntry);
                 }
@@ -115,7 +115,7 @@ namespace Microsoft.NET.Build.Tasks
                     var compositeR2RImage = Path.Combine(OutputPath, compositeR2RImageRelativePath);
 
                     TaskItem r2rCompilationEntry = new TaskItem(file);
-                    r2rCompilationEntry.SetMetadata("OutputR2RImage", compositeR2RImage);
+                    r2rCompilationEntry.SetMetadata(MetadataKeys.OutputR2RImage, compositeR2RImage);
                     r2rCompilationEntry.RemoveMetadata(MetadataKeys.OriginalItemSpec);
                     imageCompilationList.Add(r2rCompilationEntry);
 
@@ -168,8 +168,8 @@ namespace Microsoft.NET.Build.Tasks
                         // an input to the ReadyToRunCompiler task
                         TaskItem pdbCompilationEntry = new TaskItem(file);
                         pdbCompilationEntry.ItemSpec = outputR2RImage;
-                        pdbCompilationEntry.SetMetadata("OutputPDBImage", outputPDBImage);
-                        pdbCompilationEntry.SetMetadata("CreatePDBCommand", createPDBCommand);
+                        pdbCompilationEntry.SetMetadata(MetadataKeys.OutputPDBImage, outputPDBImage);
+                        pdbCompilationEntry.SetMetadata(MetadataKeys.CreatePDBCommand, createPDBCommand);
                         symbolsCompilationList.Add(pdbCompilationEntry);
 
                         // This TaskItem corresponds to the output PDB image. It is equivalent to the input TaskItem, only the ItemSpec for it points to the new path
