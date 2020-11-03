@@ -151,7 +151,7 @@ namespace Microsoft.Build.Evaluation
 
         private class MemoizedOperation : IItemOperation
         {
-            public IItemOperation Operation { get; }
+            public LazyItemOperation Operation { get; }
             private Dictionary<ISet<string>, ImmutableList<ItemData>> _cache;
 
             private bool _isReferenced;
@@ -159,7 +159,7 @@ namespace Microsoft.Build.Evaluation
             private int _applyCalls;
 #endif
 
-            public MemoizedOperation(IItemOperation operation)
+            public MemoizedOperation(LazyItemOperation operation)
             {
                 Operation = operation;
             }
@@ -315,13 +315,9 @@ namespace Microsoft.Build.Evaluation
 
                     //  If this is a remove operation, then add any globs that will be removed
                     //  to a list of globs to ignore in previous operations
-                    var removeOperation = currentList._memoizedOperation.Operation as RemoveOperation;
-                    if (removeOperation != null)
+                    if (currentList._memoizedOperation.Operation is RemoveOperation removeOperation)
                     {
-                        if (globsToIgnoreStack == null)
-                        {
-                            globsToIgnoreStack = new Stack<ImmutableHashSet<string>>();
-                        }
+                        globsToIgnoreStack ??= new Stack<ImmutableHashSet<string>>();
 
                         var globsToIgnoreForPreviousOperations = removeOperation.GetRemovedGlobs();
                         foreach (var globToRemove in globsToIgnoreFromFutureOperations)
@@ -342,15 +338,64 @@ namespace Microsoft.Build.Evaluation
 
                 ImmutableHashSet<string> currentGlobsToIgnore = globsToIgnoreStack == null ? globsToIgnore : globsToIgnoreStack.Peek();
 
+                Dictionary<string, UpdateOperation> itemsWithNoWildcards = new Dictionary<string, UpdateOperation>(FileUtilities.GetIsFileSystemCaseSensitive() ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+                bool addedToBatch = false;
+
                 //  Walk back down the stack of item lists applying operations
                 while (itemListStack.Count > 0)
                 {
                     var currentList = itemListStack.Pop();
 
+                    if (currentList._memoizedOperation.Operation is UpdateOperation op)
+                    {
+                        bool addToBatch = true;
+                        int i;
+                        for (i = 0; i < op.ISpec.Fragments.Count; i++)
+                        {
+                            ItemSpecFragment frag = op.ISpec.Fragments[i];
+                            if (MSBuildConstants.CharactersForExpansion.Any(frag.TextFragment.Contains))
+                            {
+                                // Fragment contains wild cards, items, or properties. Cannot batch over it using a dictionary.
+                                addToBatch = false;
+                                break;
+                            }
+
+                            string fullPath = FileUtilities.GetFullPath(frag.TextFragment, frag.ProjectDirectory);
+                            if (itemsWithNoWildcards.ContainsKey(fullPath))
+                            {
+                                // Another update will already happen on this path. Make that happen before evaluating this one.
+                                addToBatch = false;
+                                break;
+                            }
+                            else
+                            {
+                                itemsWithNoWildcards.Add(fullPath, op);
+                            }
+                        }
+                        if (!addToBatch)
+                        {
+                            // Remove items added before realizing we couldn't skip the item list
+                            for (int j = 0; j < i; j++)
+                            {
+                                itemsWithNoWildcards.Remove(currentList._memoizedOperation.Operation.ISpec.Fragments[j].TextFragment);
+                            }
+                        }
+                        else
+                        {
+                            addedToBatch = true;
+                            continue;
+                        }
+                    }
+
+                    if (addedToBatch)
+                    {
+                        addedToBatch = false;
+                        ProcessNonWildCardItemUpdates(itemsWithNoWildcards, items);
+                    }
+
                     //  If this is a remove operation, then it could modify the globs to ignore, so pop the potentially
                     //  modified entry off the stack of globs to ignore
-                    var removeOperation = currentList._memoizedOperation.Operation as RemoveOperation;
-                    if (removeOperation != null)
+                    if (currentList._memoizedOperation.Operation is RemoveOperation)
                     {
                         globsToIgnoreStack.Pop();
                         currentGlobsToIgnore = globsToIgnoreStack.Count == 0 ? globsToIgnore : globsToIgnoreStack.Peek();
@@ -359,7 +404,24 @@ namespace Microsoft.Build.Evaluation
                     currentList._memoizedOperation.Apply(items, currentGlobsToIgnore);
                 }
 
+                ProcessNonWildCardItemUpdates(itemsWithNoWildcards, items);
+
                 return items;
+            }
+
+            private static void ProcessNonWildCardItemUpdates(Dictionary<string, UpdateOperation> itemsWithNoWildcards, ImmutableList<ItemData>.Builder items)
+            {
+                if (itemsWithNoWildcards.Count > 0)
+                {
+                    for (int i = 0; i < items.Count; i++)
+                    {
+                        if (itemsWithNoWildcards.TryGetValue(FileUtilities.GetFullPath(items[i].Item.EvaluatedInclude, items[i].Item.ProjectDirectory), out UpdateOperation op))
+                        {
+                            items[i] = op.UpdateItem(items[i]);
+                        }
+                    }
+                    itemsWithNoWildcards.Clear();
+                }
             }
 
             public void MarkAsReferenced()

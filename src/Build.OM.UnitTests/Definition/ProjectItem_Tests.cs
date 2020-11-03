@@ -16,7 +16,6 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
