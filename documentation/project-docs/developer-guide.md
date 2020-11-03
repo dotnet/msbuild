@@ -110,6 +110,16 @@ cd src\Tests\YOURTEST.Tests # cd to the test folder that contains the test cspro
 dotnet test --filter "FullyQualifiedName~TESTNAME" # run individual test
 ```
 
+## Run tests in Visual Studio
+
+Use developer command prompt for Visual Studio or put devenv on you PATH
+
+```shell
+build.cmd # to have a full build first
+.\artifacts\sdk-build-env.bat
+devenv sdk.sln
+```
+
 ## A simple test
 
 Using the `dotnet` built in the previous steps:
