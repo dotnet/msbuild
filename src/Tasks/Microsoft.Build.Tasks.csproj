@@ -81,7 +81,7 @@
     <Compile Include="..\Shared\NGen.cs">
       <Link>NGen.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs"/>
+    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs" />
     <Compile Include="..\Shared\IInternable.cs">
       <Link>IInternable.cs</Link>
     </Compile>
@@ -519,7 +519,6 @@
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCodeType.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCompilers.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryTaskInfo.cs" />
-    <Compile Include="SemaphoreCPUTask.cs" />
     <Compile Include="SGen.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
