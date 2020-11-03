@@ -29,7 +29,7 @@
     <SystemReflectionMetadataVersion>1.8.0</SystemReflectionMetadataVersion>
     <MicrosoftDotNetSignToolVersion>6.0.0-beta.20529.1</MicrosoftDotNetSignToolVersion>
     <MicrosoftWebXdtPackageVersion>3.1.0</MicrosoftWebXdtPackageVersion>
-    <SystemSecurityCryptographyProtectedDataPackageVersion>6.0.0-alpha.1.20521.2</SystemSecurityCryptographyProtectedDataPackageVersion>
+    <SystemSecurityCryptographyProtectedDataPackageVersion>6.0.0-alpha.1.20551.7</SystemSecurityCryptographyProtectedDataPackageVersion>
     <SystemCollectionsSpecializedPackageVersion>4.3.0</SystemCollectionsSpecializedPackageVersion>
     <SystemXmlXmlDocumentPackageVersion>4.3.0</SystemXmlXmlDocumentPackageVersion>
     <WebDeploymentPackageVersion>4.0.5</WebDeploymentPackageVersion>
@@ -37,13 +37,13 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/runtime -->
-    <MicrosoftNETCoreAppRefPackageVersion>6.0.0-alpha.1.20521.2</MicrosoftNETCoreAppRefPackageVersion>
-    <MicrosoftNETCoreAppInternalPackageVersion>6.0.0-alpha.1.20521.2</MicrosoftNETCoreAppInternalPackageVersion>
-    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>6.0.0-alpha.1.20521.2</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
+    <MicrosoftNETCoreAppRefPackageVersion>6.0.0-alpha.1.20551.7</MicrosoftNETCoreAppRefPackageVersion>
+    <MicrosoftNETCoreAppInternalPackageVersion>6.0.0-alpha.1.20551.7</MicrosoftNETCoreAppInternalPackageVersion>
+    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>6.0.0-alpha.1.20551.7</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
     <MicrosoftNETCoreAppRuntimePackageVersion>$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)</MicrosoftNETCoreAppRuntimePackageVersion>
-    <MicrosoftExtensionsDependencyModelPackageVersion>6.0.0-alpha.1.20521.2</MicrosoftExtensionsDependencyModelPackageVersion>
-    <MicrosoftNETCoreDotNetHostResolverPackageVersion>6.0.0-alpha.1.20521.2</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftNETHostModelVersion>6.0.0-alpha.1.20521.2</MicrosoftNETHostModelVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>6.0.0-alpha.1.20551.7</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftNETCoreDotNetHostResolverPackageVersion>6.0.0-alpha.1.20551.7</MicrosoftNETCoreDotNetHostResolverPackageVersion>
+    <MicrosoftNETHostModelVersion>6.0.0-alpha.1.20551.7</MicrosoftNETHostModelVersion>
     <MicrosoftExtensionsDependencyModelVersion>$(MicrosoftExtensionsDependencyModelPackageVersion)</MicrosoftExtensionsDependencyModelVersion>
   </PropertyGroup>
   <PropertyGroup>
@@ -70,14 +70,14 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/mono/linker -->
-    <MicrosoftNETILLinkTasksPackageVersion>6.0.0-alpha.1.20516.1</MicrosoftNETILLinkTasksPackageVersion>
+    <MicrosoftNETILLinkTasksPackageVersion>6.0.0-alpha.1.20527.2</MicrosoftNETILLinkTasksPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/runtime -->
-    <SystemCodeDomPackageVersion>6.0.0-alpha.1.20521.2</SystemCodeDomPackageVersion>
-    <SystemTextEncodingCodePagesPackageVersion>6.0.0-alpha.1.20521.2</SystemTextEncodingCodePagesPackageVersion>
+    <SystemCodeDomPackageVersion>6.0.0-alpha.1.20551.7</SystemCodeDomPackageVersion>
+    <SystemTextEncodingCodePagesPackageVersion>6.0.0-alpha.1.20551.7</SystemTextEncodingCodePagesPackageVersion>
     <SystemSecurityCryptographyProtectedDataPackageVersion>5.0.0-preview.7.20307.4</SystemSecurityCryptographyProtectedDataPackageVersion>
-    <SystemResourcesExtensionsPackageVersion>6.0.0-alpha.1.20521.2</SystemResourcesExtensionsPackageVersion>
+    <SystemResourcesExtensionsPackageVersion>6.0.0-alpha.1.20551.7</SystemResourcesExtensionsPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn-analyzers -->
