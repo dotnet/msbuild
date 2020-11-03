@@ -41,7 +41,6 @@ using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
-using System.CodeDom;
 
 namespace Microsoft.Build.CommandLine
 {
@@ -1198,7 +1197,6 @@ namespace Microsoft.Build.CommandLine
 #if MSBUILDENABLEVSPROFILING
                     DataCollection.CommentMarkProfile(8800, "Pending Build Request from MSBuild.exe");
 #endif
-
                     BuildResultCode? result = null;
 
                     var messagesToLogInBuildLoggers = Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager
@@ -1231,7 +1229,6 @@ namespace Microsoft.Build.CommandLine
                                 else
                                 {
                                     buildRequest = new BuildRequestData(projectFile, globalProperties, toolsVersion, targets, null);
-                                    
                                 }
                             }
 
