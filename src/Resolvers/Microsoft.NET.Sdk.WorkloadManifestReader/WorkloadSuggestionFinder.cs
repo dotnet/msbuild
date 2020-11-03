@@ -32,9 +32,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 }
             }
 
-            foreach (var root in partialSuggestions)
+            foreach (var suggestion in GatherCompleteSuggestions(partialSuggestions))
             {
-                GatherCompleteSuggestions(root, partialSuggestions, completeSuggestions);
+                completeSuggestions.Add(suggestion);
             }
 
             UnsortedSuggestions = completeSuggestions.Select(
@@ -48,12 +48,32 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         }
 
         /// <summary>
+        /// Finds complete suggestions by permutationally combining partial suggestions.
+        /// </summary>
+        /// <remarks>
+        internal static HashSet<WorkloadSuggestionCandidate> GatherCompleteSuggestions(List<WorkloadSuggestionCandidate> partialSuggestions)
+        {
+            var completeSuggestions = new HashSet<WorkloadSuggestionCandidate>();
+
+            foreach (var root in partialSuggestions)
+            {
+                GatherCompleteSuggestions(root, partialSuggestions, completeSuggestions);
+            }
+
+            return FilterRedundantSuggestions(completeSuggestions);
+        }
+
+        /// <summary>
         /// Recursively explores a branching tree from the root, adding branches that would reduce the number of unsatisfied packs, and recording any fully satisfied solutions found.
         /// </summary>
+        /// <remarks>
+        /// Some of these solutions may contain redundancies, i.e. workloads that are not necessary for it to be a complete solution. These should be filtered out using
+        /// <see cref="FilterRedundantSuggestions"/> before using them.
+        /// </remarks>
         /// <param name="root">A partial suggestion candidate that is the base for this permutation</param>
         /// <param name="branches">Partial suggestion candidates that can be added to the root to make it more complete</param>
         /// <param name="completeSuggestions">A collection to which to add any discovered complete solutions</param>
-        private static void GatherCompleteSuggestions(WorkloadSuggestionCandidate root, List<WorkloadSuggestionCandidate> branches, HashSet<WorkloadSuggestionCandidate> completeSuggestions)
+        static void GatherCompleteSuggestions(WorkloadSuggestionCandidate root, List<WorkloadSuggestionCandidate> branches, HashSet<WorkloadSuggestionCandidate> completeSuggestions)
         {
             foreach (var branch in branches)
             {
@@ -90,6 +110,32 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     GatherCompleteSuggestions(candidate, branches, completeSuggestions);
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns a new set with redundant suggestions removed from it, i.e. suggestions that are a superset of another of the suggestions.
+        /// </summary>
+        static HashSet<WorkloadSuggestionCandidate> FilterRedundantSuggestions(HashSet<WorkloadSuggestionCandidate> completeSuggestions)
+        {
+            var filtered = new HashSet<WorkloadSuggestionCandidate>();
+
+            foreach(var suggestion in completeSuggestions)
+            {
+                bool isSupersetOfAny = false;
+                foreach (var other in completeSuggestions)
+                {
+                    if (suggestion.Workloads.IsProperSupersetOf(other.Workloads))
+                    {
+                        isSupersetOfAny = true;
+                    }
+                }
+                if (!isSupersetOfAny)
+                {
+                    filtered.Add(suggestion);
+                }
+            }
+
+            return filtered;
         }
 
         public ICollection<WorkloadSuggestion> UnsortedSuggestions { get; }
@@ -131,7 +177,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <summary>
         /// A partial or complete suggestion for workloads to install, annotated with which requested packs it does not satisfy
         /// </summary>
-        class WorkloadSuggestionCandidate : IEquatable<WorkloadSuggestionCandidate>
+        internal class WorkloadSuggestionCandidate : IEquatable<WorkloadSuggestionCandidate>
         {
             public WorkloadSuggestionCandidate(HashSet<WorkloadDefinitionId> id, HashSet<WorkloadPackId> packs, HashSet<WorkloadPackId> unsatisfiedPacks)
             {
