@@ -1,15 +1,13 @@
 ⚠ This doc is intended for internal teams.
 
 # What are Change Waves?
-A Change Wave is a set of risky features developed under the same opt-out flag. This flag happens to be the version of MSBuild that the features were developed for. The purpose of this is to warn developers of risky changes that will become standard functionality down the line.
+A Change Wave is a set of risky features developed under the same opt-out flag. The purpose of this is to warn developers of risky changes that will become standard functionality down the line. If there's something we think is worth the risk, we found that Change Waves were a good middle ground between making necessary changes and warning customers of what will soon be permanent.
 
 ## Why Opt-Out vs. Opt-In?
-Some of what we work on are improvements that would never be considered safe because it may break some very specific scenario. If there's something we think is worth the risk, whether it be for performance or functionality improvement, we found that Change Waves were a good middle ground between making necessary changes and warning customers of these changes.
-
 Opt-out is a better approach for us because we'd likely get limited feedback when a feature impacts customer builds. When a feature does impact a customer negatively, it's a quick switch to disable and allows time to adapt. The key aspect to Change Waves is that it smooths the transition for customers adapting to risky changes that the MSBuild team feels strongly enough to take.
 
 ## How do they work?
-The opt out comes in the form of setting the environment variable `MSBuildDisableFeaturesFromVersion` to the Change Wave (or version) that contains the feature you want **disabled**. All later change waves are similarly disabled.
+The opt-out comes in the form of setting the environment variable `MSBuildDisableFeaturesFromVersion` to the Change Wave (or version) that contains the feature you want **disabled**. This version happens to be the version of MSBuild that the features were developed for. See the mapping of change waves to features below.
 
 ## Choosing A Change Wave
 This is determined on a case by case basis and should be discussed with the MSBuild team. A safe bet would be to check our [currently active Change Waves](ChangeWaves.md#change-waves-&-associated-features) and pick the version after the latest MSBuild version. This version corresponds to the latest version of Visual Studio.
