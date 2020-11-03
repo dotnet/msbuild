@@ -3,10 +3,10 @@
 # What are Change Waves?
 A Change Wave is a set of risky features developed under the same opt-out flag. This flag happens to be the version of MSBuild that the features were developed for. The purpose of this is to warn developers of risky changes that will become standard functionality down the line.
 
-The reason MSBuild cannot avoid risky changes is inherent in its design. There is a single bucket for all tasks, targets, properties and files. Various MSBuild tasks can use this in any way they wish. This global space means that someone may have taken a dependency on any aspect of MSBuild.
+## Why Opt-Out vs. Opt-In?
+Some of what we work on are improvements that would never be considered safe because it may break some very specific scenario. If there's something we think is worth the risk, whether it be for performance or functionality improvement, we found that Change Waves were a good middle ground between making necessary changes and warning customers of these changes.
 
-## Why Opt-Out vs Opt-In?
-Sometimes we need to understand the scope of what one of these risky changes will do. For example, if we make a change that breaks a 'hot path', we can then create a permanent escape hatch and transition that feature to opt-in.
+Opt-out is a better approach for us because we'd likely get limited feedback when a feature impacts customer builds. When a feature does impact a customer negatively, it's a quick switch to disable and allows time to adapt. The key aspect to Change Waves is that it smooths the transition for customers adapting to risky changes that the MSBuild team feels strongly enough to take.
 
 ## How do they work?
 The opt out comes in the form of setting the environment variable `MSBuildDisableFeaturesFromVersion` to the Change Wave (or version) that contains the feature you want **disabled**. All later change waves are similarly disabled.
@@ -20,7 +20,7 @@ For the purpose of providing an example, the rest of this document assumes we're
 The Process:
 1. Develop your feature.
 2. [Create the Change Wave](#creating-a-change-wave) (if necessary)
-3. [Condition your feature on that Change Wave](#conditioning-your-feature-on-a-change-wave)
+3. [Condition your feature on that Change Wave](#condition-your-feature-on-a-change-wave)
 4. [Test your feature](#test-your-feature)
 5. [Document it](ChangeWaves.md#change-wave-features)
 6. [Delete the wave as it cycles out](#change-wave-'end-of-lifespan'-procedure)
@@ -37,11 +37,11 @@ public const string Wave17_4 = "17.4";
 public static readonly string[] AllWaves = { Wave16_10, Wave17_0, Wave17_4 };
 ```
 
-## Conditioning Your Feature On A Change Wave
+## Condition Your Feature On A Change Wave
 Surround your feature with the following:
 ```c#
     // If you pass an incorrectly formatted change wave, this will throw.
-    // Use the const string that was created in the previous step.
+    // Use the const Version that was created in the previous step.
     if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
     {
         <your feature>
@@ -55,7 +55,13 @@ If you need to condition a Task or Target, use the built in `AreFeaturesEnabled`
 ```
 
 ## Test Your Feature
-Create tests as you normally would. Include one test with environment variable `MSBuildDisableFeaturesFromVersion` set to `ChangeWaves.Wave17_4`.
+Create tests as you normally would. Include one test with environment variable `MSBuildDisableFeaturesFromVersion` set to `ChangeWaves.Wave17_4`. Set this like so:
+```c#
+TestEnvironment env = TestEnvironment.Create()
+
+env.SetChangeWave(ChangeWaves.Wave17_4);
+```
+When the TestEnvironment is disposed, it handles special logic to properly reset Change Waves for future tests.
 
 **Important!** If you need to build a project to test your feature (say, for tasks or targets), build via `ProjectCollection` in your test.
 
