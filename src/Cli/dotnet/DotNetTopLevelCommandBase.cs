@@ -3,8 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 
@@ -18,7 +17,7 @@ namespace Microsoft.DotNet.Cli
         protected abstract string ArgumentDescriptionLocalized { get; }
         protected ParseResult ParseResult { get; private set; }
 
-        internal abstract Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands { get; }
+        internal abstract Dictionary<string, Func<ParseResult, CommandBase>> SubCommands { get; }
 
         public int RunCommand(string[] args)
         {
@@ -28,15 +27,15 @@ namespace Microsoft.DotNet.Cli
 
             ParseResult = parser.ParseFrom($"dotnet {CommandName}", args);
 
-            ShowHelpIfRequested();
+            ParseResult.ShowHelpOrErrorIfAppropriate();
 
-            var subcommandName = ParseResult.Command().Name;
+            var subcommandName = ParseResult.CommandResult.Symbol.Name;
 
             try
             {
                 var create = SubCommands[subcommandName];
 
-                var command = create(ParseResult["dotnet"][CommandName]);
+                var command = create(ParseResult);
 
                 return command.Execute();
             }
@@ -61,15 +60,6 @@ namespace Microsoft.DotNet.Cli
                 }
 
                 return 1;
-            }
-        }
-
-        private void ShowHelpIfRequested()
-        {
-            // This checks for the help option only on the top-level command
-            if (ParseResult["dotnet"][CommandName].IsHelpRequested())
-            {
-                throw new HelpException(ParseResult.Command().HelpView().TrimEnd());
             }
         }
     }

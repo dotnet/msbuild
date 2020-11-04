@@ -1,91 +1,90 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
-using System.IO;
-using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
-using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools;
+using System.CommandLine;
+using System.Linq;
+using System.IO;
+using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class CommonOptions
     {
-        public static Option HelpOption() =>
-            Create.Option(
-                "-h|--help",
-                CommonLocalizableStrings.ShowHelpDescription,
-                Accept.NoArguments());
-
         public static Option VerbosityOption() =>
-            VerbosityOption(o => $"-verbosity:{o.Arguments.Single()}");
+            VerbosityOption(o => $"-verbosity:{o}");
 
-        public static Option VerbosityOption(Func<AppliedOption, string> format) =>
-            Create.Option(
-                "-v|--verbosity",
-                CommonLocalizableStrings.VerbosityOptionDescription,
-                Accept.AnyOneOf(
-                          "q", "quiet",
-                          "m", "minimal",
-                          "n", "normal",
-                          "d", "detailed",
-                          "diag", "diagnostic")
-                      .With(name: CommonLocalizableStrings.LevelArgumentName)
-                      .ForwardAsSingle(format));
-        
+        public static Option VerbosityOption(Func<string, string> format) =>
+            new Option(
+                new string[] { "-v", "--verbosity" },
+                CommonLocalizableStrings.VerbosityOptionDescription)
+            {
+                Argument = new Argument(CommonLocalizableStrings.LevelArgumentName) { Arity = ArgumentArity.ExactlyOne }
+                    .FromAmong(new string[] {"q", "quiet",
+                                             "m", "minimal",
+                                             "n", "normal",
+                                             "d", "detailed",
+                                             "diag", "diagnostic" })
+            }.ForwardAsSingle(format);
+
         public static Option FrameworkOption(string description) =>
-            Create.Option(
-                "-f|--framework",
-                description,
-                Accept.ExactlyOneArgument()
-                    .WithSuggestionsFrom(_ => Suggest.TargetFrameworksFromProjectFile())
-                    .With(name: CommonLocalizableStrings.FrameworkArgumentName)
-                    .ForwardAsSingle(o => $"-property:TargetFramework={o.Arguments.Single()}"));
-        
+            new Option(
+                new string[] { "-f", "--framework" },
+                description)
+            {
+                Argument = new Argument(CommonLocalizableStrings.FrameworkArgumentName) { Arity = ArgumentArity.ExactlyOne }
+                    .AddSuggestions(Suggest.TargetFrameworksFromProjectFile().ToArray())
+            }.ForwardAsSingle<string>(o => $"-property:TargetFramework={o}");
+
         public static Option RuntimeOption(string description, bool withShortOption = true) =>
-            Create.Option(
-                withShortOption ? "-r|--runtime" : "--runtime",
-                description,
-                Accept.ExactlyOneArgument()
-                    .WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
-                    .With(name: CommonLocalizableStrings.RuntimeIdentifierArgumentName)
-                    .ForwardAsSingle(o => $"-property:RuntimeIdentifier={o.Arguments.Single()}"));
-                
+            new Option(
+                withShortOption ? new string[] { "-r", "--runtime" } : new string[] { "--runtime" },
+                description)
+            {
+                Argument = new Argument(CommonLocalizableStrings.RuntimeIdentifierArgumentName) { Arity = ArgumentArity.ExactlyOne }
+                    //.AddSuggestions(Suggest.RunTimesFromProjectFile().ToArray()) TODO
+            }.ForwardAsSingle<string>(o => $"-property:RuntimeIdentifier={o}");
+
         public static Option ConfigurationOption(string description) =>
-            Create.Option(
-                "-c|--configuration",
-                description,
-                Accept.ExactlyOneArgument()
-                    .With(name: CommonLocalizableStrings.ConfigurationArgumentName)
-                    .WithSuggestionsFrom(_ => Suggest.ConfigurationsFromProjectFileOrDefaults())
-                    .ForwardAsSingle(o => $"-property:Configuration={o.Arguments.Single()}"));
+            new Option(
+                new string[] { "-c", "--configuration" },
+                description)
+            {
+                Argument = new Argument(CommonLocalizableStrings.ConfigurationArgumentName) { Arity = ArgumentArity.ExactlyOne }
+                    .AddSuggestions(Suggest.ConfigurationsFromProjectFileOrDefaults().ToArray())
+            }.ForwardAsSingle<string>(o => $"-property:Configuration={o}");
 
         public static Option VersionSuffixOption() =>
-            Create.Option(
+            new Option(
                 "--version-suffix",
-                CommonLocalizableStrings.CmdVersionSuffixDescription,
-                Accept.ExactlyOneArgument()
-                    .With(name: CommonLocalizableStrings.VersionSuffixArgumentName)
-                    .ForwardAsSingle(o => $"-property:VersionSuffix={o.Arguments.Single()}"));
+                CommonLocalizableStrings.CmdVersionSuffixDescription)
+            {
+                Argument = new Argument(CommonLocalizableStrings.VersionSuffixArgumentName) { Arity = ArgumentArity.ExactlyOne }
+            }.ForwardAsSingle<string>(o => $"-property:VersionSuffix={o}");
 
-        public static ArgumentsRule DefaultToCurrentDirectory(this ArgumentsRule rule) =>
-            rule.With(defaultValue: () => PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
+        public static Argument DefaultToCurrentDirectory(this Argument arg)
+        {
+            arg.SetDefaultValue(PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
+            return arg;
+        }
 
         public static Option NoRestoreOption() =>
-            Create.Option(
+            new Option(
                 "--no-restore",
-                CommonLocalizableStrings.NoRestoreDescription,
-                Accept.NoArguments());
+                CommonLocalizableStrings.NoRestoreDescription);
 
         public static Option InteractiveMsBuildForwardOption() =>
-            Create.Option(
+            new Option(
                 "--interactive",
-                CommonLocalizableStrings.CommandInteractiveOptionDescription,
-                Accept.NoArguments()
-                    .ForwardAs(Utils.Constants.MsBuildInteractiveOption));
+                CommonLocalizableStrings.CommandInteractiveOptionDescription)
+            .ForwardAs(Utils.Constants.MsBuildInteractiveOption);
 
         public static Option InteractiveOption() =>
-            Create.Option(
+            new Option(
                 "--interactive",
-                CommonLocalizableStrings.CommandInteractiveOptionDescription,
-                Accept.NoArguments());
+                CommonLocalizableStrings.CommandInteractiveOptionDescription);
+
+        public static Option DebugOption() => new Option("--debug");
     }
 }

@@ -3,12 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Add.PackageReference.LocalizableStrings;
 
@@ -16,46 +15,71 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class AddPackageParser
     {
-        public static Command AddPackage()
+        public static readonly Argument CmdPackageArgument = new Argument(LocalizableStrings.CmdPackage)
         {
-            return Create.Command(
-                "package",
-                LocalizableStrings.AppFullName,
-                Accept.ExactlyOneArgument(errorMessage: o => LocalizableStrings.SpecifyExactlyOnePackageReference)
-                      .WithSuggestionsFrom(QueryNuGet)
-                      .With(name: LocalizableStrings.CmdPackage,
-                            description: LocalizableStrings.CmdPackageDescription),
-                CommonOptions.HelpOption(),
-                Create.Option("-v|--version",
-                              LocalizableStrings.CmdVersionDescription,
-                              Accept.ExactlyOneArgument()
-                                    .With(name: LocalizableStrings.CmdVersion)
-                                    .ForwardAsSingle(o => $"--version {o.Arguments.Single()}")),
-                Create.Option("-f|--framework",
-                              LocalizableStrings.CmdFrameworkDescription,
-                              Accept.ExactlyOneArgument()
-                                    .With(name: LocalizableStrings.CmdFramework)
-                                    .ForwardAsSingle(o => $"--framework {o.Arguments.Single()}")),
-                Create.Option("-n|--no-restore",
-                              LocalizableStrings.CmdNoRestoreDescription),
-                Create.Option("-s|--source",
-                              LocalizableStrings.CmdSourceDescription,
-                              Accept.ExactlyOneArgument()
-                                    .With(name: LocalizableStrings.CmdSource)
-                                    .ForwardAsSingle(o => $"--source {o.Arguments.Single()}")),
-                Create.Option("--package-directory",
-                              LocalizableStrings.CmdPackageDirectoryDescription,
-                              Accept.ExactlyOneArgument()
-                                    .With(name: LocalizableStrings.CmdPackageDirectory)
-                                    .ForwardAsSingle(o => $"--package-directory {o.Arguments.Single()}")),
-                Create.Option("--interactive",
-                              CommonLocalizableStrings.CommandInteractiveOptionDescription,
-                              Accept.NoArguments()
-                                    .ForwardAs("--interactive")),
-                Create.Option("--prerelease",
-                              CommonLocalizableStrings.CommandPrereleaseOptionDescription,
-                              Accept.NoArguments()
-                                    .ForwardAs("--prerelease")));
+            Description = LocalizableStrings.CmdPackageDescription,
+            Arity = ArgumentArity.ExactlyOne
+        };
+
+        public static readonly Option VersionOption = new Option(new string[] { "-v", "--version" },
+                              LocalizableStrings.CmdVersionDescription)
+        {
+            Argument = new Argument(LocalizableStrings.CmdVersion)
+            {
+                Arity = ArgumentArity.ExactlyOne
+            }
+        }.ForwardAsSingle<string>(o => $"--version {o}");
+
+        public static readonly Option FrameworkOption = new Option(new string[] { "-f", "--framework" },
+                              LocalizableStrings.CmdFrameworkDescription)
+        {
+            Argument = new Argument(LocalizableStrings.CmdFramework)
+            {
+                Arity = ArgumentArity.ExactlyOne
+            }
+        }.ForwardAsSingle<string>(o => $"--framework {o}");
+
+        public static readonly Option NoRestoreOption = new Option(new string[] { "-n", "--no-restore" }, LocalizableStrings.CmdNoRestoreDescription);
+
+        public static readonly Option SourceOption = new Option(new string[] { "-s", "--source" },
+                              LocalizableStrings.CmdSourceDescription)
+        {
+            Argument = new Argument(LocalizableStrings.CmdSource)
+            {
+                Arity = ArgumentArity.ExactlyOne
+            }
+        }.ForwardAsSingle<string>(o => $"--source {o}");
+
+
+        public static readonly Option PackageDirOption = new Option("--package-directory",
+                              LocalizableStrings.CmdPackageDirectoryDescription)
+        {
+            Argument = new Argument(LocalizableStrings.CmdPackageDirectory)
+            {
+                Arity = ArgumentArity.ExactlyOne
+            }
+        }.ForwardAsSingle<string>(o => $"--package-directory {o}");
+
+        public static readonly Option InteractiveOption = new Option("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
+            .ForwardAs("--interactive");
+
+        public static readonly Option PrereleaseOption = new Option("--prerelease", CommonLocalizableStrings.CommandPrereleaseOptionDescription)
+            .ForwardAs("--prerelease");
+
+        public static Command GetCommand()
+        {
+            var command = new Command("package", LocalizableStrings.AppFullName);
+
+            command.AddArgument(CmdPackageArgument);
+            command.AddOption(VersionOption);
+            command.AddOption(FrameworkOption);
+            command.AddOption(NoRestoreOption);
+            command.AddOption(SourceOption);
+            command.AddOption(PackageDirOption);
+            command.AddOption(InteractiveOption);
+            command.AddOption(PrereleaseOption);
+
+            return command;
         }
 
         public static IEnumerable<string> QueryNuGet(string match)
