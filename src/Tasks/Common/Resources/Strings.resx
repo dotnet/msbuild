@@ -694,4 +694,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1147: The following workload packs were not installed: {0}</value>
     <comment>{StrBegin="NETSDK1147: "}</comment>
   </data>
+  <data name="DuplicatePublishOutputFiles" xml:space="preserve">
+    <value>NETSDK1148: Found multiple publish output files with the same relative path: {0}.</value>
+    <comment>{StrBegin="NETSDK1148: "}</comment>
+  </data>
 </root>
