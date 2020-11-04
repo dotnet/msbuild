@@ -3,9 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.BuildServer.Shutdown;
 
 namespace Microsoft.DotNet.Tools.BuildServer
@@ -17,11 +16,10 @@ namespace Microsoft.DotNet.Tools.BuildServer
         protected override string ArgumentName => "";
         protected override string ArgumentDescriptionLocalized => "";
 
-        internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
-            new Dictionary<string, Func<AppliedOption, CommandBase>>
+        internal override Dictionary<string, Func<ParseResult, CommandBase>> SubCommands =>
+            new Dictionary<string, Func<ParseResult, CommandBase>>
             {
                 ["shutdown"] = appliedOption => new BuildServerShutdownCommand(
-                    appliedOption["shutdown"],
                     ParseResult),
             };
 
