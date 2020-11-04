@@ -570,6 +570,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       </ResolvedFileToPublish>
     </ItemGroup>
 
+    <!-- Remove conflicting items that appear in both _ResolvedCopyLocalPublishAssets and ResolvedFileToPublish
+         to ensure that we don't get duplicate files in the publish output. -->
     <ResolveOverlappingItemGroupConflicts ItemGroup1="@(_ResolvedCopyLocalPublishAssets->Distinct())"
                         ItemGroup2="@(ResolvedFileToPublish->Distinct())"
                         PreferredPackages="$(PackageConflictPreferredPackages)">
