@@ -3,41 +3,57 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Tool.Common
 {
     internal class ToolAppliedOption
     {
-        public const string GlobalOption = "global";
-        public const string LocalOption = "local";
-        public const string ToolPathOption = "tool-path";
-        public const string ToolManifest = "tool-manifest";
+        public static readonly Option GlobalOption = new Option(new string[] { "-g", "--global" }, Install.LocalizableStrings.GlobalOptionDescription);
+
+        public static readonly Option LocalOption = new Option($"--local", Install.LocalizableStrings.LocalOptionDescription);
+
+        public static readonly Option ToolPathOption = new Option($"--tool-path", Install.LocalizableStrings.ToolPathOptionDescription)
+        {
+            Argument = new Argument(Install.LocalizableStrings.ToolPathOptionName)
+            {
+                Arity = ArgumentArity.ExactlyOne
+            }
+        };
+
+        public static readonly Option ToolManifestOption = new Option($"--tool-manifest", Install.LocalizableStrings.ManifestPathOptionDescription)
+        {
+            Argument = new Argument(Install.LocalizableStrings.ManifestPathOptionName)
+            {
+                Arity = ArgumentArity.ZeroOrOne
+            }
+        };
 
         internal static void EnsureNoConflictGlobalLocalToolPathOption(
-            AppliedOption appliedOption,
+            ParseResult parseResult,
             string message)
         {
             List<string> options = new List<string>();
-            if (appliedOption.ValueOrDefault<bool>(GlobalOption))
+            if (parseResult.HasOption(GlobalOption))
             {
-                options.Add(GlobalOption);
+                options.Add(GlobalOption.Name);
             }
 
-            if (appliedOption.ValueOrDefault<bool>(LocalOption))
+            if (parseResult.HasOption(LocalOption))
             {
-                options.Add(LocalOption);
+                options.Add(LocalOption.Name);
             }
 
-            if (!String.IsNullOrWhiteSpace(appliedOption.SingleArgumentOrDefault(ToolPathOption)))
+            if (!String.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(ToolPathOption)))
             {
-                options.Add(ToolPathOption);
+                options.Add(ToolPathOption.Name);
             }
 
             if (options.Count > 1)
             {
+
                 throw new GracefulException(
                     string.Format(
                         message,
@@ -45,11 +61,10 @@ namespace Microsoft.DotNet.Tools.Tool.Common
             }
         }
 
-        internal static void EnsureToolManifestAndOnlyLocalFlagCombination(
-            AppliedOption appliedOption)
+        internal static void EnsureToolManifestAndOnlyLocalFlagCombination(ParseResult parseResult)
         {
-            if (GlobalOrToolPath(appliedOption) &&
-                !string.IsNullOrWhiteSpace(appliedOption.ValueOrDefault<string>(ToolManifest)))
+            if (GlobalOrToolPath(parseResult) &&
+                !string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(ToolManifestOption)))
             {
                 throw new GracefulException(
                     string.Format(
@@ -57,10 +72,10 @@ namespace Microsoft.DotNet.Tools.Tool.Common
             }
         }
 
-        private static bool GlobalOrToolPath(AppliedOption appliedOption)
+        private static bool GlobalOrToolPath(ParseResult parseResult)
         {
-            return appliedOption.ValueOrDefault<bool>(GlobalOption) ||
-                   !string.IsNullOrWhiteSpace(appliedOption.SingleArgumentOrDefault(ToolPathOption));
+            return parseResult.HasOption(GlobalOption) ||
+                   !string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(ToolPathOption));
         }
     }
 }

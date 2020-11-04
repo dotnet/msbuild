@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.DotNet.Tools.Tool.List;
@@ -23,36 +23,29 @@ namespace Microsoft.DotNet.Tools.Tool
         protected override string ArgumentName => Constants.ProjectArgumentName;
         protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ProjectArgumentDescription;
 
-        internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
-            new Dictionary<string, Func<AppliedOption, CommandBase>>
+        internal override Dictionary<string, Func<ParseResult, CommandBase>> SubCommands =>
+            new Dictionary<string, Func<ParseResult, CommandBase>>
             {
                 ["install"] =
                 appliedOption => new ToolInstallCommand(
-                    appliedOption["install"],
                     ParseResult),
                 ["uninstall"] =
                 appliedOption => new ToolUninstallCommand(
-                    appliedOption["uninstall"],
                     ParseResult),
                 ["update"] =
                 appliedOption => new ToolUpdateCommand(
-                    appliedOption["update"],
                     ParseResult),
                 ["list"] =
                 appliedOption => new ToolListCommand(
-                    appliedOption["list"],
                     ParseResult),
                 ["restore"] =
                 appliedOption => new ToolRestoreCommand(
-                    appliedOption["restore"],
                     ParseResult),
                 ["run"] =
                 appliedOption => new ToolRunCommand(
-                    appliedOption["run"],
                     ParseResult),
                 ["search"] =
                 appliedOption => new ToolSearchCommand(
-                    appliedOption["search"],
                     ParseResult)
             };
 
