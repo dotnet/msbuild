@@ -11,21 +11,18 @@ namespace Microsoft.DotNet.Tools.Tool.Common
 {
     internal class ToolAppliedOption
     {
-        public static readonly Option GlobalOption = new Option(new string[] { "-g", "--global" }, Install.LocalizableStrings.GlobalOptionDescription);
+        public static readonly Option GlobalOption = new Option<bool>(new string[] { "-g", "--global" }, Install.LocalizableStrings.GlobalOptionDescription);
 
-        public static readonly Option LocalOption = new Option($"--local", Install.LocalizableStrings.LocalOptionDescription);
+        public static readonly Option LocalOption = new Option<bool>($"--local", Install.LocalizableStrings.LocalOptionDescription);
 
-        public static readonly Option ToolPathOption = new Option($"--tool-path", Install.LocalizableStrings.ToolPathOptionDescription)
+        public static readonly Option ToolPathOption = new Option<string>($"--tool-path", Install.LocalizableStrings.ToolPathOptionDescription)
         {
-            Argument = new Argument(Install.LocalizableStrings.ToolPathOptionName)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
+            Argument = new Argument<string>(Install.LocalizableStrings.ToolPathOptionName)
         };
 
-        public static readonly Option ToolManifestOption = new Option($"--tool-manifest", Install.LocalizableStrings.ManifestPathOptionDescription)
+        public static readonly Option ToolManifestOption = new Option<string>($"--tool-manifest", Install.LocalizableStrings.ManifestPathOptionDescription)
         {
-            Argument = new Argument(Install.LocalizableStrings.ManifestPathOptionName)
+            Argument = new Argument<string>(Install.LocalizableStrings.ManifestPathOptionName)
             {
                 Arity = ArgumentArity.ZeroOrOne
             }

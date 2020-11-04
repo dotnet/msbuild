@@ -15,55 +15,41 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class AddPackageParser
     {
-        public static readonly Argument CmdPackageArgument = new Argument(LocalizableStrings.CmdPackage)
+        public static readonly Argument CmdPackageArgument = new Argument<string>(LocalizableStrings.CmdPackage)
         {
-            Description = LocalizableStrings.CmdPackageDescription,
-            Arity = ArgumentArity.ExactlyOne
+            Description = LocalizableStrings.CmdPackageDescription
         };
 
-        public static readonly Option VersionOption = new Option(new string[] { "-v", "--version" },
+        public static readonly Option VersionOption = new Option<string>(new string[] { "-v", "--version" },
                               LocalizableStrings.CmdVersionDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdVersion)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
-        }.ForwardAsSingle<string>(o => $"--version {o}");
+            Argument = new Argument<string>(LocalizableStrings.CmdVersion)
+        }.ForwardAsSingle(o => $"--version {o}");
 
-        public static readonly Option FrameworkOption = new Option(new string[] { "-f", "--framework" },
+        public static readonly Option FrameworkOption = new Option<string>(new string[] { "-f", "--framework" },
                               LocalizableStrings.CmdFrameworkDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdFramework)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
-        }.ForwardAsSingle<string>(o => $"--framework {o}");
+            Argument = new Argument<string>(LocalizableStrings.CmdFramework)
+        }.ForwardAsSingle(o => $"--framework {o}");
 
-        public static readonly Option NoRestoreOption = new Option(new string[] { "-n", "--no-restore" }, LocalizableStrings.CmdNoRestoreDescription);
+        public static readonly Option NoRestoreOption = new Option<bool>(new string[] { "-n", "--no-restore" }, LocalizableStrings.CmdNoRestoreDescription);
 
-        public static readonly Option SourceOption = new Option(new string[] { "-s", "--source" },
+        public static readonly Option SourceOption = new Option<string>(new string[] { "-s", "--source" },
                               LocalizableStrings.CmdSourceDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdSource)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
-        }.ForwardAsSingle<string>(o => $"--source {o}");
+            Argument = new Argument<string>(LocalizableStrings.CmdSource)
+        }.ForwardAsSingle(o => $"--source {o}");
 
 
-        public static readonly Option PackageDirOption = new Option("--package-directory",
-                              LocalizableStrings.CmdPackageDirectoryDescription)
+        public static readonly Option PackageDirOption = new Option<string>("--package-directory", LocalizableStrings.CmdPackageDirectoryDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdPackageDirectory)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
-        }.ForwardAsSingle<string>(o => $"--package-directory {o}");
+            Argument = new Argument<string>(LocalizableStrings.CmdPackageDirectory)
+        }.ForwardAsSingle(o => $"--package-directory {o}");
 
-        public static readonly Option InteractiveOption = new Option("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
+        public static readonly Option InteractiveOption = new Option<bool>("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
             .ForwardAs("--interactive");
 
-        public static readonly Option PrereleaseOption = new Option("--prerelease", CommonLocalizableStrings.CommandPrereleaseOptionDescription)
+        public static readonly Option PrereleaseOption = new Option<bool>("--prerelease", CommonLocalizableStrings.CommandPrereleaseOptionDescription)
             .ForwardAs("--prerelease");
 
         public static Command GetCommand()

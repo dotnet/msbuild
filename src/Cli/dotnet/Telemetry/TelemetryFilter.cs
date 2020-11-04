@@ -25,21 +25,19 @@ namespace Microsoft.DotNet.Cli.Telemetry
         {
             var result = new List<ApplicationInsightsEntryFormat>();
 
-            if (objectToFilter is ParseResult topLevelParseResult)
-            {
-                var topLevelCommandName = topLevelParseResult.RootCommandResult.Children.FirstOrDefault()?.Symbol.Name;
-                result.Add(new ApplicationInsightsEntryFormat(
-                            "toplevelparser/command",
-                            new Dictionary<string, string>()
-                        {{ "verb", topLevelCommandName }}
-                ));
-
-            }
             if (objectToFilter is ParseResult parseResult)
             {
-                var topLevelCommandName = parseResult.RootCommandResult.Children.FirstOrDefault()?.Symbol.Name;
+                var topLevelCommandName = parseResult.RootCommandResult.Children?
+                    .FirstOrDefault(c => c.Token() != null && c.Token().Type.Equals(TokenType.Command))?
+                    .Symbol.Name ?? null;
                 if (topLevelCommandName != null)
                 {
+                    result.Add(new ApplicationInsightsEntryFormat(
+                        "toplevelparser/command",
+                        new Dictionary<string, string>()
+                        {{ "verb", topLevelCommandName }}
+                        ));
+
                     LogVerbosityForAllTopLevelCommand(result, parseResult, topLevelCommandName);
 
                     foreach (IParseResultLogRule rule in ParseResultLogRules)

@@ -11,13 +11,13 @@ namespace Microsoft.DotNet.Cli
 {
     public static class OptionForwardingExtensions
     {
-        public static Option Forward(this Option option) => new ForwardedOption<string>(option).SetForwardingFunction((o) => new string[] { option.Name } );
+        public static Option Forward<T>(this Option<T> option) => new ForwardedOption<T>(option).SetForwardingFunction((o) => new string[] { option.Name } );
 
-        public static Option ForwardAs(this Option option, string value) => new ForwardedOption<string>(option).SetForwardingFunction((o) => new string[] { value });
+        public static Option ForwardAs<T>(this Option<T> option, string value) => new ForwardedOption<T>(option).SetForwardingFunction((o) => new string[] { value });
 
-        public static Option ForwardAsSingle<T>(this Option option, Func<T, string> format) => new ForwardedOption<T>(option).SetForwardingFunction(format);
+        public static Option ForwardAsSingle<T>(this Option<T> option, Func<T, string> format) => new ForwardedOption<T>(option).SetForwardingFunction(format);
 
-        public static Option ForwardAsMany<T>(this Option option, Func<T, IEnumerable<string>> format) => new ForwardedOption<T>(option).SetForwardingFunction(format);
+        public static Option ForwardAsMany<T>(this Option<T> option, Func<T, IEnumerable<string>> format) => new ForwardedOption<T>(option).SetForwardingFunction(format);
 
         public static IEnumerable<string> OptionValuesToBeForwarded(this ParseResult parseResult, Command command) => 
             command.Options
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli
             Func<ParseResult, IEnumerable<string>> GetForwardingFunction();
         }
 
-        private class ForwardedOption<T> : Option, IForwardedOption
+        private class ForwardedOption<T> : Option<T>, IForwardedOption
         {
             private Func<ParseResult, IEnumerable<string>> ForwardingFunction;
 

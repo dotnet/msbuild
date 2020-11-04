@@ -16,11 +16,11 @@ namespace Microsoft.DotNet.Cli
             VerbosityOption(o => $"-verbosity:{o}");
 
         public static Option VerbosityOption(Func<string, string> format) =>
-            new Option(
+            new Option<string>(
                 new string[] { "-v", "--verbosity" },
                 CommonLocalizableStrings.VerbosityOptionDescription)
             {
-                Argument = new Argument(CommonLocalizableStrings.LevelArgumentName) { Arity = ArgumentArity.ExactlyOne }
+                Argument = new Argument<string>(CommonLocalizableStrings.LevelArgumentName)
                     .FromAmong(new string[] {"q", "quiet",
                                              "m", "minimal",
                                              "n", "normal",
@@ -29,39 +29,39 @@ namespace Microsoft.DotNet.Cli
             }.ForwardAsSingle(format);
 
         public static Option FrameworkOption(string description) =>
-            new Option(
+            new Option<string>(
                 new string[] { "-f", "--framework" },
                 description)
             {
-                Argument = new Argument(CommonLocalizableStrings.FrameworkArgumentName) { Arity = ArgumentArity.ExactlyOne }
+                Argument = new Argument<string>(CommonLocalizableStrings.FrameworkArgumentName)
                     .AddSuggestions(Suggest.TargetFrameworksFromProjectFile().ToArray())
-            }.ForwardAsSingle<string>(o => $"-property:TargetFramework={o}");
+            }.ForwardAsSingle(o => $"-property:TargetFramework={o}");
 
         public static Option RuntimeOption(string description, bool withShortOption = true) =>
-            new Option(
+            new Option<string>(
                 withShortOption ? new string[] { "-r", "--runtime" } : new string[] { "--runtime" },
                 description)
             {
-                Argument = new Argument(CommonLocalizableStrings.RuntimeIdentifierArgumentName) { Arity = ArgumentArity.ExactlyOne }
-                    //.AddSuggestions(Suggest.RunTimesFromProjectFile().ToArray()) TODO
-            }.ForwardAsSingle<string>(o => $"-property:RuntimeIdentifier={o}");
+                Argument = new Argument<string>(CommonLocalizableStrings.RuntimeIdentifierArgumentName)
+                    .AddSuggestions(Suggest.RunTimesFromProjectFile().ToArray())
+            }.ForwardAsSingle(o => $"-property:RuntimeIdentifier={o}");
 
         public static Option ConfigurationOption(string description) =>
-            new Option(
+            new Option<string>(
                 new string[] { "-c", "--configuration" },
                 description)
             {
-                Argument = new Argument(CommonLocalizableStrings.ConfigurationArgumentName) { Arity = ArgumentArity.ExactlyOne }
+                Argument = new Argument<string>(CommonLocalizableStrings.ConfigurationArgumentName)
                     .AddSuggestions(Suggest.ConfigurationsFromProjectFileOrDefaults().ToArray())
-            }.ForwardAsSingle<string>(o => $"-property:Configuration={o}");
+            }.ForwardAsSingle(o => $"-property:Configuration={o}");
 
         public static Option VersionSuffixOption() =>
-            new Option(
+            new Option<string>(
                 "--version-suffix",
                 CommonLocalizableStrings.CmdVersionSuffixDescription)
             {
-                Argument = new Argument(CommonLocalizableStrings.VersionSuffixArgumentName) { Arity = ArgumentArity.ExactlyOne }
-            }.ForwardAsSingle<string>(o => $"-property:VersionSuffix={o}");
+                Argument = new Argument<string>(CommonLocalizableStrings.VersionSuffixArgumentName)
+            }.ForwardAsSingle(o => $"-property:VersionSuffix={o}");
 
         public static Argument DefaultToCurrentDirectory(this Argument arg)
         {
@@ -70,21 +70,21 @@ namespace Microsoft.DotNet.Cli
         }
 
         public static Option NoRestoreOption() =>
-            new Option(
+            new Option<bool>(
                 "--no-restore",
                 CommonLocalizableStrings.NoRestoreDescription);
 
         public static Option InteractiveMsBuildForwardOption() =>
-            new Option(
+            new Option<bool>(
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription)
             .ForwardAs(Utils.Constants.MsBuildInteractiveOption);
 
         public static Option InteractiveOption() =>
-            new Option(
+            new Option<bool>(
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription);
 
-        public static Option DebugOption() => new Option("--debug");
+        public static Option DebugOption() => new Option<bool>("--debug");
     }
 }

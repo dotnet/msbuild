@@ -3,53 +3,50 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.List.PackageReferences;
 using LocalizableStrings = Microsoft.DotNet.Tools.List.PackageReferences.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class ListPackageReferencesCommandParser
     {
-        public static readonly Option OutdatedOption = new Option("--outdated", LocalizableStrings.CmdOutdatedDescription)
+        public static readonly Option OutdatedOption = new Option<bool>("--outdated", LocalizableStrings.CmdOutdatedDescription)
             .ForwardAs("--outdated");
 
-        public static readonly Option DepreciatedOption = new Option("--deprecated", LocalizableStrings.CmdDeprecatedDescription)
+        public static readonly Option DepreciatedOption = new Option<bool>("--deprecated", LocalizableStrings.CmdDeprecatedDescription)
             .ForwardAs("--deprecated");
 
-        public static readonly Option VulnerableOption = new Option("--vulnerable", LocalizableStrings.CmdVulnerableDescription)
+        public static readonly Option VulnerableOption = new Option<bool>("--vulnerable", LocalizableStrings.CmdVulnerableDescription)
             .ForwardAs("--vulnerable");
 
-        public static readonly Option FrameworkOption = new Option("--framework", LocalizableStrings.CmdFrameworkDescription)
+        public static readonly Option FrameworkOption = new Option<IEnumerable<string>>("--framework", LocalizableStrings.CmdFrameworkDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdFramework) { Arity = ArgumentArity.OneOrMore }
-        }.ForwardAsMany<IEnumerable<string>>(o => ForwardedArguments("--framework", o));
+            Argument = new Argument<IEnumerable<string>>(LocalizableStrings.CmdFramework) { Arity = ArgumentArity.OneOrMore }
+        }.ForwardAsMany(o => ForwardedArguments("--framework", o));
 
-        public static readonly Option TransitiveOption = new Option("--include-transitive", LocalizableStrings.CmdTransitiveDescription)
+        public static readonly Option TransitiveOption = new Option<bool>("--include-transitive", LocalizableStrings.CmdTransitiveDescription)
             .ForwardAs("--include-transitive");
 
-        public static readonly Option PrereleaseOption = new Option("--include-prerelease", LocalizableStrings.CmdPrereleaseDescription)
+        public static readonly Option PrereleaseOption = new Option<bool>("--include-prerelease", LocalizableStrings.CmdPrereleaseDescription)
             .ForwardAs("--include-prerelease");
 
-        public static readonly Option HighestPatchOption = new Option("--highest-patch", LocalizableStrings.CmdHighestPatchDescription)
+        public static readonly Option HighestPatchOption = new Option<bool>("--highest-patch", LocalizableStrings.CmdHighestPatchDescription)
             .ForwardAs("--highest-patch");
 
-        public static readonly Option HighestMinorOption = new Option("--highest-minor", LocalizableStrings.CmdHighestMinorDescription)
+        public static readonly Option HighestMinorOption = new Option<bool>("--highest-minor", LocalizableStrings.CmdHighestMinorDescription)
             .ForwardAs("--highest-minor");
 
-        public static readonly Option ConfigOption = new Option("--config", LocalizableStrings.CmdConfigDescription)
+        public static readonly Option ConfigOption = new Option<string>("--config", LocalizableStrings.CmdConfigDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdConfig) { Arity = ArgumentArity.ExactlyOne }
-        }.ForwardAsMany<string>(o => new[] { "--config", o });
+            Argument = new Argument<string>(LocalizableStrings.CmdConfig)
+        }.ForwardAsMany(o => new[] { "--config", o });
 
-        public static readonly Option SourceOption = new Option("--source", LocalizableStrings.CmdSourceDescription)
+        public static readonly Option SourceOption = new Option<IEnumerable<string>>("--source", LocalizableStrings.CmdSourceDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdSource) { Arity = ArgumentArity.OneOrMore }
-        }.ForwardAsMany<IEnumerable<string>>(o => ForwardedArguments("--source", o));
+            Argument = new Argument<IEnumerable<string>>(LocalizableStrings.CmdSource) { Arity = ArgumentArity.OneOrMore }
+        }.ForwardAsMany(o => ForwardedArguments("--source", o));
 
-        public static readonly Option InteractiveOption = new Option("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
+        public static readonly Option InteractiveOption = new Option<bool>("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
             .ForwardAs("--interactive");
 
         public static Command GetCommand()

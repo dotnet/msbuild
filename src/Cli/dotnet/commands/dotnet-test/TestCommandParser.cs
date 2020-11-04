@@ -11,128 +11,107 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class TestCommandParser
     {
-        public static readonly Argument SlnOrProjectArgument = new Argument(CommonLocalizableStrings.SolutionOrProjectArgumentName)
+        public static readonly Argument SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
             Arity = ArgumentArity.ZeroOrMore,
         };
 
-        public static readonly Option SettingsOption = new Option(new string[] { "-s", "--settings" }, LocalizableStrings.CmdSettingsDescription)
+        public static readonly Option SettingsOption = new Option<string>(new string[] { "-s", "--settings" }, LocalizableStrings.CmdSettingsDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdSettingsFile)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
-        }.ForwardAsSingle<string>(o => $"-property:VSTestSetting={CommandDirectoryContext.GetFullPath(o)}");
+            Argument = new Argument<string>(LocalizableStrings.CmdSettingsFile)
+        }.ForwardAsSingle(o => $"-property:VSTestSetting={CommandDirectoryContext.GetFullPath(o)}");
 
-        public static readonly Option ListTestsOption = new Option(new string[] { "-t", "--list-tests" }, LocalizableStrings.CmdListTestsDescription)
+        public static readonly Option ListTestsOption = new Option<bool>(new string[] { "-t", "--list-tests" }, LocalizableStrings.CmdListTestsDescription)
               .ForwardAs("-property:VSTestListTests=true");
 
-        public static readonly Option EnvOption = new Option(new string[] { "-e", "--environment" }, LocalizableStrings.CmdEnvironmentVariableDescription)
+        public static readonly Option EnvOption = new Option<IEnumerable<string>>(new string[] { "-e", "--environment" }, LocalizableStrings.CmdEnvironmentVariableDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdEnvironmentVariableExpression)
+            Argument = new Argument<IEnumerable<string>>(LocalizableStrings.CmdEnvironmentVariableExpression)
             {
                 Arity = ArgumentArity.OneOrMore
             }
         };
 
-        public static readonly Option FilterOption = new Option("--filter", LocalizableStrings.CmdTestCaseFilterDescription)
+        public static readonly Option FilterOption = new Option<string>("--filter", LocalizableStrings.CmdTestCaseFilterDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdTestCaseFilterExpression)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
-        }.ForwardAsSingle<string>(o => $"-property:VSTestTestCaseFilter={o}");
+            Argument = new Argument<string>(LocalizableStrings.CmdTestCaseFilterExpression)
+        }.ForwardAsSingle(o => $"-property:VSTestTestCaseFilter={o}");
 
-        public static readonly Option AdapterOption = new Option(
-              new string[] { "-a", "--test-adapter-path" },
-              LocalizableStrings.CmdTestAdapterPathDescription)
+        public static readonly Option AdapterOption = new Option<IEnumerable<string>>(new string[] { "-a", "--test-adapter-path" }, LocalizableStrings.CmdTestAdapterPathDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdTestAdapterPath)
+            Argument = new Argument<IEnumerable<string>>(LocalizableStrings.CmdTestAdapterPath)
             {
                 Arity = ArgumentArity.OneOrMore
             }
-        }.ForwardAsSingle<IReadOnlyCollection<string>>(o => $"-property:VSTestTestAdapterPath=\"{string.Join(";", o.Select(CommandDirectoryContext.GetFullPath))}\"");
+        }.ForwardAsSingle(o => $"-property:VSTestTestAdapterPath=\"{string.Join(";", o.Select(CommandDirectoryContext.GetFullPath))}\"");
 
-        public static readonly Option LoggerOption = new Option(new string[] { "-l", "--logger" }, LocalizableStrings.CmdLoggerDescription)
+        public static readonly Option LoggerOption = new Option<IEnumerable<string>>(new string[] { "-l", "--logger" }, LocalizableStrings.CmdLoggerDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdLoggerOption)
+            Argument = new Argument<IEnumerable<string>>(LocalizableStrings.CmdLoggerOption)
             {
                 Arity = ArgumentArity.OneOrMore
             }
-        }.ForwardAsSingle<IReadOnlyCollection<string>>(o => {
+        }.ForwardAsSingle(o => {
             var loggersString = string.Join(";", GetSemiColonEscapedArgs(o));
 
             return $"-property:VSTestLogger=\"{loggersString}\"";
         });
 
-        public static readonly Option OutputOption = new Option(new string[] { "-o", "--output" }, LocalizableStrings.CmdOutputDescription)
+        public static readonly Option OutputOption = new Option<string>(new string[] { "-o", "--output" }, LocalizableStrings.CmdOutputDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdOutputDir)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
-        }.ForwardAsSingle<string>(o => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(o)}");
+            Argument = new Argument<string>(LocalizableStrings.CmdOutputDir)
+        }.ForwardAsSingle(o => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(o)}");
 
-        public static readonly Option DiagOption = new Option(new string[] { "-d", "--diag" }, LocalizableStrings.CmdPathTologFileDescription)
+        public static readonly Option DiagOption = new Option<string>(new string[] { "-d", "--diag" }, LocalizableStrings.CmdPathTologFileDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdPathToLogFile)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
-        }.ForwardAsSingle<string>(o => $"-property:VSTestDiag={CommandDirectoryContext.GetFullPath(o)}");
+            Argument = new Argument<string>(LocalizableStrings.CmdPathToLogFile)
+        }.ForwardAsSingle(o => $"-property:VSTestDiag={CommandDirectoryContext.GetFullPath(o)}");
 
-        public static readonly Option NoBuildOption = new Option("--no-build", LocalizableStrings.CmdNoBuildDescription)
+        public static readonly Option NoBuildOption = new Option<bool>("--no-build", LocalizableStrings.CmdNoBuildDescription)
             .ForwardAs("-property:VSTestNoBuild=true");
 
-        public static readonly Option ResultsOption = new Option(new string[] { "-r", "--results-directory" }, LocalizableStrings.CmdResultsDirectoryDescription)
+        public static readonly Option ResultsOption = new Option<string>(new string[] { "-r", "--results-directory" }, LocalizableStrings.CmdResultsDirectoryDescription)
         {
-            Argument = new Argument(LocalizableStrings.CmdPathToResultsDirectory)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
-        }.ForwardAsSingle<string>(o => $"-property:VSTestResultsDirectory={CommandDirectoryContext.GetFullPath(o)}");
+            Argument = new Argument<string>(LocalizableStrings.CmdPathToResultsDirectory)
+        }.ForwardAsSingle(o => $"-property:VSTestResultsDirectory={CommandDirectoryContext.GetFullPath(o)}");
 
-        public static readonly Option CollectOption = new Option("--collect", LocalizableStrings.cmdCollectDescription)
+        public static readonly Option CollectOption = new Option<IEnumerable<string>>("--collect", LocalizableStrings.cmdCollectDescription)
         {
-            Argument = new Argument(LocalizableStrings.cmdCollectFriendlyName)
+            Argument = new Argument<IEnumerable<string>>(LocalizableStrings.cmdCollectFriendlyName)
             {
                 Arity = ArgumentArity.OneOrMore
             }
-        }.ForwardAsSingle<IReadOnlyCollection<string>>(o => $"-property:VSTestCollect=\"{string.Join(";", o)}\"");
+        }.ForwardAsSingle(o => $"-property:VSTestCollect=\"{string.Join(";", o)}\"");
 
-        public static readonly Option BlameOption = new Option("--blame", LocalizableStrings.CmdBlameDescription)
+        public static readonly Option BlameOption = new Option<bool>("--blame", LocalizableStrings.CmdBlameDescription)
             .ForwardAs("-property:VSTestBlame=true");
 
-        public static readonly Option BlameCrashOption = new Option("--blame-crash", LocalizableStrings.CmdBlameCrashDescription)
+        public static readonly Option BlameCrashOption = new Option<bool>("--blame-crash", LocalizableStrings.CmdBlameCrashDescription)
             .ForwardAs("-property:VSTestBlameCrash=true");
 
-        public static readonly Argument BlameCrashDumpArgument = new Argument(LocalizableStrings.CrashDumpTypeArgumentName).FromAmong(new string[] { "full", "mini" });
+        public static readonly Argument BlameCrashDumpArgument = new Argument<string>(LocalizableStrings.CrashDumpTypeArgumentName).FromAmong(new string[] { "full", "mini" });
 
-        public static readonly Option BlameCrashDumpOption = new Option("--blame-crash-dump-type", LocalizableStrings.CmdBlameCrashDumpTypeDescription)
-            .ForwardAsMany<string>(o => new[] { "-property:VSTestBlameCrash=true", $"-property:VSTestBlameCrashDumpType={o}" });
+        public static readonly Option BlameCrashDumpOption = new Option<string>("--blame-crash-dump-type", LocalizableStrings.CmdBlameCrashDumpTypeDescription)
+            .ForwardAsMany(o => new[] { "-property:VSTestBlameCrash=true", $"-property:VSTestBlameCrashDumpType={o}" });
 
-        public static readonly Option BlameCrashAlwaysOption = new Option("--blame-crash-collect-always", LocalizableStrings.CmdBlameCrashCollectAlwaysDescription)
-            .ForwardAsMany<string>(o => new[] {"-property:VSTestBlameCrash=true", "-property:VSTestBlameCrashCollectAlways=true"});
+        public static readonly Option BlameCrashAlwaysOption = new Option<string>("--blame-crash-collect-always", LocalizableStrings.CmdBlameCrashCollectAlwaysDescription)
+            .ForwardAsMany(o => new[] {"-property:VSTestBlameCrash=true", "-property:VSTestBlameCrashCollectAlways=true"});
 
-        public static readonly Option BlameHangOption = new Option("--blame-hang", LocalizableStrings.CmdBlameHangDescription)
+        public static readonly Option BlameHangOption = new Option<bool>("--blame-hang", LocalizableStrings.CmdBlameHangDescription)
             .ForwardAs("-property:VSTestBlameHang=true");
 
-        public static readonly Argument BlameHangDumpArgument = new Argument(LocalizableStrings.HangDumpTypeArgumentName).FromAmong(new string[] { "full", "mini", "none" });
+        public static readonly Argument BlameHangDumpArgument = new Argument<string>(LocalizableStrings.HangDumpTypeArgumentName).FromAmong(new string[] { "full", "mini", "none" });
 
-        public static readonly Option BlameHangDumpOption = new Option("--blame-hang-dump-type", LocalizableStrings.CmdBlameHangDumpTypeDescription)
+        public static readonly Option BlameHangDumpOption = new Option<string>("--blame-hang-dump-type", LocalizableStrings.CmdBlameHangDumpTypeDescription)
+            .ForwardAsMany(o => new[] { "-property:VSTestBlameHang=true", $"-property:VSTestBlameHangDumpType={o}" });
+
+        public static readonly Option BlameHangTimeoutOption = new Option<string>("--blame-hang-timeout", LocalizableStrings.CmdBlameHangTimeoutDescription)
         {
-        }.ForwardAsMany<string>(o => new[] { "-property:VSTestBlameHang=true", $"-property:VSTestBlameHangDumpType={o}" });
+            Argument = new Argument<string>(LocalizableStrings.HangTimeoutArgumentName)
+        }.ForwardAsMany(o => new[] { "-property:VSTestBlameHang=true", $"-property:VSTestBlameHangTimeout={o}" });
 
-        public static readonly Option BlameHangTimeoutOption = new Option("--blame-hang-timeout", LocalizableStrings.CmdBlameHangTimeoutDescription)
-        {
-            Argument = new Argument(LocalizableStrings.HangTimeoutArgumentName)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
-        }.ForwardAsMany<string>(o => new[] { "-property:VSTestBlameHang=true", $"-property:VSTestBlameHangTimeout={o}" });
-
-        public static readonly Option NoLogoOption = new Option("--nologo", LocalizableStrings.CmdNoLogo)
+        public static readonly Option NoLogoOption = new Option<bool>("--nologo", LocalizableStrings.CmdNoLogo)
             .ForwardAs("-property:VSTestNoLogo=nologo");
 
         public static readonly Option NoRestoreOption = CommonOptions.NoRestoreOption();
@@ -188,10 +167,10 @@ namespace Microsoft.DotNet.Cli
             return arg;
         }
 
-        private static string[] GetSemiColonEscapedArgs(IReadOnlyCollection<string> args)
+        private static string[] GetSemiColonEscapedArgs(IEnumerable<string> args)
         {
             int counter = 0;
-            string[] array = new string[args.Count];
+            string[] array = new string[args.Count()];
 
             foreach (string arg in args)
             {

@@ -11,48 +11,32 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class PublishCommandParser
     {
-        public static readonly Argument SlnOrProjectArgument = new Argument(CommonLocalizableStrings.SolutionOrProjectArgumentName)
+        public static readonly Argument SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
             Arity = ArgumentArity.ZeroOrMore
         };
 
-        public static readonly Option OuputOption = new Option(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
+        public static readonly Option OuputOption = new Option<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
         {
-            Argument = new Argument(LocalizableStrings.OutputOption)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
-        }.ForwardAsSingle<string>(o => $"-property:PublishDir={CommandDirectoryContext.GetFullPath(o)}");
+            Argument = new Argument<string>(LocalizableStrings.OutputOption)
+        }.ForwardAsSingle(o => $"-property:PublishDir={CommandDirectoryContext.GetFullPath(o)}");
 
-        public static readonly Option ManifestOption = new Option("--manifest", LocalizableStrings.ManifestOptionDescription)
+        public static readonly Option ManifestOption = new Option<IEnumerable<string>>("--manifest", LocalizableStrings.ManifestOptionDescription)
         {
-            Argument = new Argument(LocalizableStrings.ManifestOption)
-            {
-                Arity = ArgumentArity.OneOrMore
-            }
-        }.ForwardAsSingle<IEnumerable<string>>(o => $"-property:TargetManifestFiles={string.Join("%3B", o.Select(CommandDirectoryContext.GetFullPath))}");
+            Argument = new Argument<IEnumerable<string>>(LocalizableStrings.ManifestOption)
+        }.ForwardAsSingle(o => $"-property:TargetManifestFiles={string.Join("%3B", o.Select(CommandDirectoryContext.GetFullPath))}");
 
-        public static readonly Option NoBuildOption = new Option("--no-build", LocalizableStrings.NoBuildOptionDescription)
+        public static readonly Option NoBuildOption = new Option<bool>("--no-build", LocalizableStrings.NoBuildOptionDescription)
             .ForwardAs("-property:NoBuild=true");
 
-        public static readonly Option SelfContainedOption = new Option("--self-contained", LocalizableStrings.SelfContainedOptionDescription)
-        {
-            Argument = new Argument()
-            {
-                Arity = ArgumentArity.ZeroOrOne
-            }
-        }.FromAmong(new string[] { "true", "false" })
-        .ForwardAsSingle<bool>(o =>  $"-property:SelfContained={o}");
+        public static readonly Option SelfContainedOption = new Option<bool>("--self-contained", LocalizableStrings.SelfContainedOptionDescription)
+            .ForwardAsSingle(o =>  $"-property:SelfContained={o}");
 
-        public static readonly Option NoSelfContainedOption = new Option(
-            "--no-self-contained",
-            LocalizableStrings.NoSelfContainedOptionDescription)
+        public static readonly Option NoSelfContainedOption = new Option<bool>("--no-self-contained", LocalizableStrings.NoSelfContainedOptionDescription)
             .ForwardAs("-property:SelfContained=false");
 
-        public static readonly Option NoLogoOption = new Option(
-            "--nologo",
-            LocalizableStrings.CmdNoLogo)
+        public static readonly Option NoLogoOption = new Option<bool>("--nologo", LocalizableStrings.CmdNoLogo)
             .ForwardAs("-nologo");
 
         public static readonly Option NoRestoreOption = CommonOptions.NoRestoreOption();

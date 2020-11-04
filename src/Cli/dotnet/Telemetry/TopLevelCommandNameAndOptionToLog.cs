@@ -24,7 +24,9 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult)
         {
-            var topLevelCommandName = parseResult.RootCommandResult.Children.FirstOrDefault()?.Symbol.Name;
+            var topLevelCommandName = parseResult.RootCommandResult.Children?
+                    .FirstOrDefault(c => c.Token() != null && c.Token().Type.Equals(TokenType.Command))?
+                    .Symbol.Name ?? null;
             var result = new List<ApplicationInsightsEntryFormat>();
             foreach (var option in _optionsToLog)
             {

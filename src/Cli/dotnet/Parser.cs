@@ -50,12 +50,12 @@ namespace Microsoft.DotNet.Cli
         public static readonly Command InstallSuccessCommand = InternalReportinstallsuccessCommandParser.GetCommand();
 
         // Global options
-        public static readonly Option DiagOption = new Option(new[] { "-d", "--diagnostics" }) { IsHidden = true };
+        public static readonly Option DiagOption = new Option<bool>(new[] { "-d", "--diagnostics" }) { IsHidden = true };
 
         // Informational options
-        public static readonly Option VersionOption = new Option("--version");
+        public static readonly Option VersionOption = new Option<bool>("--version");
 
-        public static readonly Option InfoOption = new Option("--info");
+        public static readonly Option InfoOption = new Option<bool>("--info");
 
         // Argument
         public static readonly Argument DotnetSubCommand = new Argument<string>() { Arity = ArgumentArity.ExactlyOne, IsHidden = true };

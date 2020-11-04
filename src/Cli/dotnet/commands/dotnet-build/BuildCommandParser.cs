@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.CommandLine;
 using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Build.LocalizableStrings;
@@ -9,23 +10,23 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class BuildCommandParser
     {
-        public static readonly Argument SlnOrProjectArgument = new Argument(CommonLocalizableStrings.SolutionOrProjectArgumentName)
+        public static readonly Argument SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
             Arity = ArgumentArity.ZeroOrMore
         };
 
-        public static readonly Option OutputOption = new Option(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
+        public static readonly Option OutputOption = new Option<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
         {
-            Argument = new Argument(LocalizableStrings.OutputOptionName) { Arity = ArgumentArity.ExactlyOne }
-        }.ForwardAsSingle<string>(arg => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(arg)}");
+            Argument = new Argument<string>(LocalizableStrings.OutputOptionName)
+        }.ForwardAsSingle(arg => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(arg)}");
 
-        public static readonly Option NoIncrementalOption = new Option("--no-incremental", LocalizableStrings.NoIncrementalOptionDescription);
+        public static readonly Option NoIncrementalOption = new Option<bool>("--no-incremental", LocalizableStrings.NoIncrementalOptionDescription);
 
-        public static readonly Option NoDependenciesOption = new Option("--no-dependencies", LocalizableStrings.NoDependenciesOptionDescription)
+        public static readonly Option NoDependenciesOption = new Option<bool>("--no-dependencies", LocalizableStrings.NoDependenciesOptionDescription)
             .ForwardAs("-property:BuildProjectReferences=false");
 
-        public static readonly Option NoLogoOption = new Option("--nologo", LocalizableStrings.CmdNoLogo)
+        public static readonly Option NoLogoOption = new Option<bool>("--nologo", LocalizableStrings.CmdNoLogo)
             .ForwardAs("-nologo");
 
         public static readonly Option NoRestoreOption = CommonOptions.NoRestoreOption();

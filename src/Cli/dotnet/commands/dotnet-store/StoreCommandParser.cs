@@ -10,24 +10,24 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class StoreCommandParser
     {
-        public static readonly Argument Argument = new Argument()
+        public static readonly Argument Argument = new Argument<IEnumerable<string>>()
         {
             Arity = ArgumentArity.ZeroOrMore,
         };
 
-        public static readonly Option ManifestOption = new Option(new string[] { "-m", "--manifest" },
+        public static readonly Option ManifestOption = new Option<IEnumerable<string>>(new string[] { "-m", "--manifest" },
                     LocalizableStrings.ProjectManifestDescription)
         {
-            Argument = new Argument(LocalizableStrings.ProjectManifest)
+            Argument = new Argument<IEnumerable<string>>(LocalizableStrings.ProjectManifest)
             {
                 Arity = ArgumentArity.OneOrMore
             }
-        }.ForwardAsMany<IReadOnlyCollection<string>>(o => {
+        }.ForwardAsMany(o => {
             // the first path doesn't need to go through CommandDirectoryContext.ExpandPath
             // since it is a direct argument to MSBuild, not a property
             var materializedString = $"{o.First()}";
 
-            if (o.Count == 1)
+            if (o.Count() == 1)
             {
                 return new[]
                 {
@@ -44,34 +44,25 @@ namespace Microsoft.DotNet.Cli
             }
         });
 
-        public static readonly Option FrameworkVersionOption = new Option("--framework-version", LocalizableStrings.FrameworkVersionOptionDescription)
+        public static readonly Option FrameworkVersionOption = new Option<string>("--framework-version", LocalizableStrings.FrameworkVersionOptionDescription)
         {
-            Argument = new Argument(LocalizableStrings.FrameworkVersionOption)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
-        }.ForwardAsSingle<string>(o => $"-property:RuntimeFrameworkVersion={o}");
+            Argument = new Argument<string>(LocalizableStrings.FrameworkVersionOption)
+        }.ForwardAsSingle(o => $"-property:RuntimeFrameworkVersion={o}");
 
-        public static readonly Option OutputOption = new Option(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
+        public static readonly Option OutputOption = new Option<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
         {
-            Argument = new Argument(LocalizableStrings.OutputOption)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
-        }.ForwardAsSingle<string>(o => $"-property:ComposeDir={CommandDirectoryContext.GetFullPath(o)}");
+            Argument = new Argument<string>(LocalizableStrings.OutputOption)
+        }.ForwardAsSingle(o => $"-property:ComposeDir={CommandDirectoryContext.GetFullPath(o)}");
 
-        public static readonly Option WorkingDirOption = new Option(new string[] { "-w", "--working-dir" }, LocalizableStrings.IntermediateWorkingDirOptionDescription)
+        public static readonly Option WorkingDirOption = new Option<string>(new string[] { "-w", "--working-dir" }, LocalizableStrings.IntermediateWorkingDirOptionDescription)
         {
-            Argument = new Argument(LocalizableStrings.IntermediateWorkingDirOption)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
-        }.ForwardAsSingle<string>(o => $"-property:ComposeWorkingDir={CommandDirectoryContext.GetFullPath(o)}");
+            Argument = new Argument<string>(LocalizableStrings.IntermediateWorkingDirOption)
+        }.ForwardAsSingle(o => $"-property:ComposeWorkingDir={CommandDirectoryContext.GetFullPath(o)}");
 
-        public static readonly Option SkipOptimizationOption = new Option("--skip-optimization", LocalizableStrings.SkipOptimizationOptionDescription)
+        public static readonly Option SkipOptimizationOption = new Option<bool>("--skip-optimization", LocalizableStrings.SkipOptimizationOptionDescription)
             .ForwardAs("-property:SkipOptimization=true");
 
-        public static readonly Option SkipSymbolsOption = new Option("--skip-symbols", LocalizableStrings.SkipSymbolsOptionDescription)
+        public static readonly Option SkipSymbolsOption = new Option<bool>("--skip-symbols", LocalizableStrings.SkipSymbolsOptionDescription)
             .ForwardAs("-property:CreateProfilingSymbols=false");
 
         public static Command GetCommand()

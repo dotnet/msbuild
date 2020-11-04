@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.CommandLine;
 using LocalizableStrings = Microsoft.DotNet.Tools.Run.LocalizableStrings;
 
@@ -8,7 +9,7 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class RunCommandParser
     {
-        public static readonly Argument Argument = new Argument() { Arity = ArgumentArity.ZeroOrMore, Description = LocalizableStrings.RunCommandAdditionalArgsHelpText };
+        public static readonly Argument Argument = new Argument<IEnumerable<string>>() { Arity = ArgumentArity.ZeroOrMore, Description = LocalizableStrings.RunCommandAdditionalArgsHelpText };
 
         public static readonly Option ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
 
@@ -16,19 +17,19 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option RuntimeOption = CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription);
 
-        public static readonly Option ProjectOption = new Option(new string[] { "-p", "--project" }, LocalizableStrings.CommandOptionProjectDescription)
+        public static readonly Option ProjectOption = new Option<string>(new string[] { "-p", "--project" }, LocalizableStrings.CommandOptionProjectDescription)
         {
-            Argument = new Argument() { Arity = ArgumentArity.ExactlyOne }
+            Argument = new Argument<string>()
         };
 
-        public static readonly Option LaunchProfileOption = new Option("--launch-profile", LocalizableStrings.CommandOptionLaunchProfileDescription)
+        public static readonly Option LaunchProfileOption = new Option<string>("--launch-profile", LocalizableStrings.CommandOptionLaunchProfileDescription)
         {
-            Argument = new Argument() { Arity = ArgumentArity.ExactlyOne }
+            Argument = new Argument<string>()
         };
 
-        public static readonly Option NoLaunchProfileOption = new Option("--no-launch-profile", LocalizableStrings.CommandOptionNoLaunchProfileDescription);
+        public static readonly Option NoLaunchProfileOption = new Option<bool>("--no-launch-profile", LocalizableStrings.CommandOptionNoLaunchProfileDescription);
 
-        public static readonly Option NoBuildOption = new Option("--no-build", LocalizableStrings.CommandOptionNoBuildDescription);
+        public static readonly Option NoBuildOption = new Option<bool>("--no-build", LocalizableStrings.CommandOptionNoBuildDescription);
 
         public static readonly Option NoRestoreOption = CommonOptions.NoRestoreOption();
 

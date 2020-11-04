@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.CommandLine;
 using Microsoft.DotNet.Tools.Tool.Common;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
@@ -9,42 +10,29 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ToolInstallCommandParser
     {
-        public static readonly Argument PackageIdArgument = new Argument(LocalizableStrings.PackageIdArgumentName)
+        public static readonly Argument PackageIdArgument = new Argument<string>(LocalizableStrings.PackageIdArgumentName)
         {
-            Description = LocalizableStrings.PackageIdArgumentDescription,
-            Arity = ArgumentArity.ExactlyOne
+            Description = LocalizableStrings.PackageIdArgumentDescription
         };
 
-        public static readonly Option VersionOption = new Option("--version", LocalizableStrings.VersionOptionDescription)
+        public static readonly Option VersionOption = new Option<string>("--version", LocalizableStrings.VersionOptionDescription)
         {
-            Argument = new Argument(LocalizableStrings.VersionOptionName)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
+            Argument = new Argument<string>(LocalizableStrings.VersionOptionName)
         };
 
-        public static readonly Option ConfigOption = new Option("--configfile", LocalizableStrings.ConfigFileOptionDescription)
+        public static readonly Option ConfigOption = new Option<string>("--configfile", LocalizableStrings.ConfigFileOptionDescription)
         {
-            Argument = new Argument(LocalizableStrings.ConfigFileOptionName)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
+            Argument = new Argument<string>(LocalizableStrings.ConfigFileOptionName)
         };
 
-        public static readonly Option AddSourceOption = new Option("--add-source", LocalizableStrings.AddSourceOptionDescription)
+        public static readonly Option AddSourceOption = new Option<IEnumerable<string>>("--add-source", LocalizableStrings.AddSourceOptionDescription)
         {
-            Argument = new Argument(LocalizableStrings.AddSourceOptionName)
-            {
-                Arity = ArgumentArity.OneOrMore
-            }
+            Argument = new Argument<IEnumerable<string>>(LocalizableStrings.AddSourceOptionName)
         };
 
-        public static readonly Option FrameworkOption = new Option("--framework", LocalizableStrings.FrameworkOptionDescription)
+        public static readonly Option FrameworkOption = new Option<string>("--framework", LocalizableStrings.FrameworkOptionDescription)
         {
-            Argument = new Argument(LocalizableStrings.FrameworkOptionName)
-            {
-                Arity = ArgumentArity.ExactlyOne
-            }
+            Argument = new Argument<string>(LocalizableStrings.FrameworkOptionName)
         };
 
         public static readonly Option VerbosityOption = CommonOptions.VerbosityOption();

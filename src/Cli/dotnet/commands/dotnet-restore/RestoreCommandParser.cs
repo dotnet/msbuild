@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class RestoreCommandParser
     {
-        public static readonly Argument SlnOrProjectArgument = new Argument(CommonLocalizableStrings.SolutionOrProjectArgumentName)
+        public static readonly Argument SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
             Arity = ArgumentArity.ZeroOrMore
@@ -22,24 +22,21 @@ namespace Microsoft.DotNet.Cli
                 new Option[] {
                     CommonOptions.VerbosityOption(),
                     CommonOptions.InteractiveMsBuildForwardOption(),
-                    new Option(
+                    new Option<bool>(
                         "--use-lock-file",
                         LocalizableStrings.CmdUseLockFileOptionDescription)
                             .ForwardAs("-property:RestorePackagesWithLockFile=true"),
-                    new Option(
+                    new Option<bool>(
                         "--locked-mode",
                         LocalizableStrings.CmdLockedModeOptionDescription)
                             .ForwardAs("-property:RestoreLockedMode=true"),
-                    new Option(
+                    new Option<string>(
                         "--lock-file-path",
                         LocalizableStrings.CmdLockFilePathOptionDescription)
                     {
-                        Argument = new Argument(LocalizableStrings.CmdLockFilePathOption)
-                        {
-                            Arity = ArgumentArity.ExactlyOne
-                        }
-                    }.ForwardAsSingle<string>(o => $"-property:NuGetLockFilePath={o}"),
-                    new Option(
+                        Argument = new Argument<string>(LocalizableStrings.CmdLockFilePathOption)
+                    }.ForwardAsSingle(o => $"-property:NuGetLockFilePath={o}"),
+                    new Option<bool>(
                         "--force-evaluate",
                         LocalizableStrings.CmdReevaluateOptionDescription)
                             .ForwardAs("-property:RestoreForceEvaluate=true") })
@@ -70,46 +67,46 @@ namespace Microsoft.DotNet.Cli
         private static Option[] ImplicitRestoreOptions(bool showHelp, bool useShortOptions, bool includeRuntimeOption, bool includeNoDependenciesOption)
         {
             var options = new Option[] {
-                new Option(
+                new Option<IEnumerable<string>>(
                     useShortOptions ? new string[] {"-s", "--source" }  : new string[] { "--source" },
                     showHelp ? LocalizableStrings.CmdSourceOptionDescription : string.Empty)
                 {
-                    Argument = new Argument(LocalizableStrings.CmdSourceOption) { Arity = ArgumentArity.OneOrMore },
+                    Argument = new Argument<IEnumerable<string>>(LocalizableStrings.CmdSourceOption) { Arity = ArgumentArity.OneOrMore },
                     IsHidden = !showHelp
-                }.ForwardAsSingle<IEnumerable<string>>(o => $"-property:RestoreSources={string.Join("%3B", o)}"),
-                new Option(
+                }.ForwardAsSingle(o => $"-property:RestoreSources={string.Join("%3B", o)}"),
+                new Option<string>(
                     "--packages",
                     showHelp ? LocalizableStrings.CmdPackagesOptionDescription : string.Empty)
                 {
-                    Argument = new Argument(LocalizableStrings.CmdPackagesOption) { Arity = ArgumentArity.ExactlyOne },
+                    Argument = new Argument<string>(LocalizableStrings.CmdPackagesOption),
                     IsHidden = !showHelp
-                }.ForwardAsSingle<string>(o => $"-property:RestorePackagesPath={CommandDirectoryContext.GetFullPath(o)}"),
-                new Option(
+                }.ForwardAsSingle(o => $"-property:RestorePackagesPath={CommandDirectoryContext.GetFullPath(o)}"),
+                new Option<bool>(
                     "--disable-parallel",
                     showHelp ? LocalizableStrings.CmdDisableParallelOptionDescription : string.Empty)
                 {
                     IsHidden = !showHelp
                 }.ForwardAs("-property:RestoreDisableParallel=true"),
-                new Option(
+                new Option<string>(
                     "--configfile",
                     showHelp ? LocalizableStrings.CmdConfigFileOptionDescription : string.Empty)
                 {
-                    Argument = new Argument(LocalizableStrings.CmdConfigFileOption) { Arity = ArgumentArity.ExactlyOne },
+                    Argument = new Argument<string>(LocalizableStrings.CmdConfigFileOption),
                     IsHidden = !showHelp
-                }.ForwardAsSingle<string>(o => $"-property:RestoreConfigFile={CommandDirectoryContext.GetFullPath(o)}"),
-                new Option(
+                }.ForwardAsSingle(o => $"-property:RestoreConfigFile={CommandDirectoryContext.GetFullPath(o)}"),
+                new Option<bool>(
                     "--no-cache",
                     showHelp ? LocalizableStrings.CmdNoCacheOptionDescription : string.Empty)
                 {
                     IsHidden = !showHelp
                 }.ForwardAs("-property:RestoreNoCache=true"),
-                new Option(
+                new Option<bool>(
                     "--ignore-failed-sources",
                     showHelp ? LocalizableStrings.CmdIgnoreFailedSourcesOptionDescription : string.Empty)
                 {
                     IsHidden = !showHelp
                 }.ForwardAs("-property:RestoreIgnoreFailedSources=true"),
-                new Option(
+                new Option<bool>(
                     useShortOptions ? new string[] {"-f", "--force" } : new string[] {"--force" },
                     LocalizableStrings.CmdForceRestoreOptionDescription)
                 {
@@ -120,13 +117,13 @@ namespace Microsoft.DotNet.Cli
             if (includeRuntimeOption)
             {
                 options = options.Append(
-                    new Option(
+                    new Option<IEnumerable<string>>(
                         useShortOptions ? new string[] { "-r", "--runtime" } : new string[] { "--runtime" },
                         LocalizableStrings.CmdRuntimeOptionDescription)
                     {
-                        Argument = new Argument(LocalizableStrings.CmdRuntimeOption) { Arity = ArgumentArity.OneOrMore },
+                        Argument = new Argument<IEnumerable<string>>(LocalizableStrings.CmdRuntimeOption) { Arity = ArgumentArity.OneOrMore },
                         IsHidden = !showHelp
-                    }.ForwardAsSingle<IEnumerable<string>>(o => $"-property:RuntimeIdentifiers={string.Join("%3B", o)}")
+                    }.ForwardAsSingle(o => $"-property:RuntimeIdentifiers={string.Join("%3B", o)}")
                     .AddSuggestions(Suggest.RunTimesFromProjectFile().ToArray())
                 ).ToArray();
             }
@@ -134,7 +131,7 @@ namespace Microsoft.DotNet.Cli
             if (includeNoDependenciesOption)
             {
                 options = options.Append(
-                    new Option(
+                    new Option<bool>(
                         "--no-dependencies",
                         LocalizableStrings.CmdNoDependenciesOptionDescription)
                     {

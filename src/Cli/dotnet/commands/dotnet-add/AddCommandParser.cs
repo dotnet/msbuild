@@ -9,10 +9,9 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class AddCommandParser
     {
-        public static readonly Argument ProjectArgument = new Argument(CommonLocalizableStrings.ProjectArgumentName)
+        public static readonly Argument ProjectArgument = new Argument<string>(CommonLocalizableStrings.ProjectArgumentName)
         {
-            Description = CommonLocalizableStrings.ProjectArgumentDescription,
-            Arity = ArgumentArity.ExactlyOne
+            Description = CommonLocalizableStrings.ProjectArgumentDescription
         }.DefaultToCurrentDirectory();
 
         public static Command GetCommand()
