@@ -82,7 +82,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             {
                 if (RuntimeInformation.OSArchitecture == Architecture.X64)
                 {
-                    return "windows-x64";
+                    return "win-x64";
                 }
             }
 

@@ -39,7 +39,7 @@
       <ManifestLines Include="&lt;/SdkResolver&gt;" />
     </ItemGroup>
 
-    <WriteLinesToFile File="$(OutputPath)\Resolver\$(AssemblyName)\$(AssemblyName).xml" Lines="@(ManifestLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <WriteLinesToFile File="$(OutputPath)\SdkResolvers\$(AssemblyName)\$(AssemblyName).xml" Lines="@(ManifestLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
   </Target>
   
   <ItemGroup>

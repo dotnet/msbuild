@@ -19,6 +19,11 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
             return new TemporaryDirectory();
         }
 
+        public IEnumerable<string> EnumerateDirectories(string path)
+        {
+            return Directory.EnumerateDirectories(path);
+        }
+
         public IEnumerable<string> EnumerateFiles(string path)
         {
             return Directory.EnumerateFiles(path);

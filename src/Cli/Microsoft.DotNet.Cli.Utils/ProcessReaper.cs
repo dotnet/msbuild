@@ -1,6 +1,8 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
+
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -96,13 +98,13 @@ namespace Microsoft.DotNet.Cli.Utils
             Console.CancelKeyPress -= HandleCancelKeyPress;
         }
 
-        private static void HandleCancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        private static void HandleCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
         {
             // Ignore SIGINT/SIGQUIT so that the process can handle the signal
             e.Cancel = true;
         }
 
-        private static SafeWaitHandle AssignProcessToJobObject(IntPtr process)
+        private static SafeWaitHandle? AssignProcessToJobObject(IntPtr process)
         {
             var job = NativeMethods.Windows.CreateJobObjectW(IntPtr.Zero, null);
             if (job == null || job.IsInvalid)
@@ -125,7 +127,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return job;
         }
 
-        private void HandleProcessExit(object sender, EventArgs args)
+        private void HandleProcessExit(object? sender, EventArgs args)
         {
             int processId;
             try
@@ -141,7 +143,7 @@ namespace Microsoft.DotNet.Cli.Utils
             // Take ownership of the shutdown mutex; this will ensure that the other
             // thread also waiting on the process to exit won't complete CLR shutdown before
             // this one does.
-            _shutdownMutex.WaitOne();
+            _shutdownMutex?.WaitOne();
 
             if (!_process.WaitForExit(0) && NativeMethods.Posix.kill(processId, NativeMethods.Posix.SIGTERM) != 0)
             {
@@ -190,7 +192,7 @@ namespace Microsoft.DotNet.Cli.Utils
         }
 
         private Process _process;
-        private SafeWaitHandle _job;
-        private Mutex _shutdownMutex;
+        private SafeWaitHandle? _job;
+        private Mutex? _shutdownMutex;
     }
 }

@@ -174,6 +174,11 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 throw new NotImplementedException();
             }
 
+            public IEnumerable<string> EnumerateDirectories(string path)
+            {
+                throw new NotImplementedException();
+            }
+
             public IEnumerable<string> EnumerateFiles(string path)
             {
                 throw new NotImplementedException();
