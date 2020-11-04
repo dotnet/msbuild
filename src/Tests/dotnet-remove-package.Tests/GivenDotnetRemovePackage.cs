@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using FluentAssertions;
 using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -16,27 +16,35 @@ namespace Microsoft.DotNet.Cli.Remove.Package.Tests
 {
     public class GivenDotnetRemovePackage : SdkTest
     {
-        private const string HelpText = @"Usage: dotnet remove <PROJECT> package [options] <PACKAGE_NAME>
+        private Func<string, string> HelpText = (defaultVal) => $@"package:
+  Remove a NuGet package reference from the project.
+
+Usage:
+  dotnet remove <PROJECT> package [options] <PACKAGE_NAME>
 
 Arguments:
-  <PROJECT>        The project file to operate on. If a file is not specified, the command will search the current directory for one.
-  <PACKAGE_NAME>   The package reference to remove.
+  <PROJECT>         The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
+  <PACKAGE_NAME>    The package reference to remove.
 
 Options:
-  -h, --help      Show command line help.
-  --interactive   Allows the command to stop and wait for user input or action (for example to complete authentication).";
+  --interactive     Allows the command to stop and wait for user input or action (for example to complete authentication).
+  -?, -h, --help    Show help and usage information";
 
-        private const string RemoveCommandHelpText = @"Usage: dotnet remove [options] <PROJECT> [command]
+        private Func<string, string> RemoveCommandHelpText = (defaultVal) => $@"remove:
+  .NET Remove Command
+
+Usage:
+  dotnet remove [options] <PROJECT> [command]
 
 Arguments:
-  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
+  <PROJECT>    The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
-  -h, --help   Show command line help.
+  -?, -h, --help    Show help and usage information
 
 Commands:
-  package <PACKAGE_NAME>     Remove a NuGet package reference from the project.
-  reference <PROJECT_PATH>   Remove a project-to-project reference from the project.";
+  package <PACKAGE_NAME>      Remove a NuGet package reference from the project.
+  reference <PROJECT_PATH>    Remove a project-to-project reference from the project";
 
         public GivenDotnetRemovePackage(ITestOutputHelper log) : base(log)
         {
@@ -49,7 +57,7 @@ Commands:
         {
             var cmd = new DotnetCommand(Log).Execute($"remove", "package", helpArg);
             cmd.Should().Pass();
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(Directory.GetCurrentDirectory()));
         }
 
         [Theory]
@@ -61,7 +69,6 @@ Commands:
                 .Execute("remove", commandName);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(RemoveCommandHelpText);
         }
 
         [Fact]

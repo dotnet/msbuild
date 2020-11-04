@@ -7,13 +7,11 @@ using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Moq;
 using Xunit;
-using Parser = Microsoft.DotNet.Cli.Parser;
 using CommandLocalizableStrings = Microsoft.DotNet.BuildServer.LocalizableStrings;
 using LocalizableStrings = Microsoft.DotNet.Tools.BuildServer.Shutdown.LocalizableStrings;
 using Microsoft.NET.TestFramework;
@@ -22,6 +20,9 @@ using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.DotNet.BuildServer;
 using Xunit.Abstractions;
+using System.CommandLine.Parsing;
+using Parser = Microsoft.DotNet.Cli.Parser;
+
 namespace Microsoft.DotNet.Tests.Commands
 {
     public class BuildServerShutdownCommandTests : SdkTest
@@ -208,9 +209,8 @@ namespace Microsoft.DotNet.Tests.Commands
             IEnumerable<IBuildServer> buildServers = null,
             ServerEnumerationFlags expectedFlags = ServerEnumerationFlags.None)
         {
-            ParseResult result = Parser.Instance.Parse("dotnet build-server shutdown " + options);
+            ParseResult result = Parser.Instance.Parse($"dotnet build-server shutdown {options}".Trim());
             return new Tools.BuildServer.Shutdown.BuildServerShutdownCommand(
-                options: result["dotnet"]["build-server"]["shutdown"],
                 result: result,
                 serverProvider: serverProvider,
                 useOrderedWait: true,

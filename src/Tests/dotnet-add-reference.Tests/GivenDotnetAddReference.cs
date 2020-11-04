@@ -2,9 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using Microsoft.Build.Construction;
+using Microsoft.DotNet.Cli.CommandLineValidation;
 using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -12,7 +12,6 @@ using Msbuild.Tests.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -20,28 +19,36 @@ namespace Microsoft.DotNet.Cli.Add.Reference.Tests
 {
     public class GivenDotnetAddReference : SdkTest
     {
-        private const string HelpText = @"Usage: dotnet add <PROJECT> reference [options] <PROJECT_PATH>
+        private Func<string, string, string> HelpText = (defaultVal, frameworkVal) => $@"reference:
+  Add a project-to-project reference to the project.
+
+Usage:
+  dotnet add <PROJECT> reference [options] <PROJECT_PATH>...
 
 Arguments:
-  <PROJECT>        The project file to operate on. If a file is not specified, the command will search the current directory for one.
-  <PROJECT_PATH>   The paths to the projects to add as references.
+  <PROJECT>         The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
+  <PROJECT_PATH>    The paths to the projects to add as references.
 
 Options:
-  -h, --help                    Show command line help.
-  -f, --framework <FRAMEWORK>   Add the reference only when targeting a specific framework.
-  --interactive                 Allows the command to stop and wait for user input or action (for example to complete authentication).";
+  -f, --framework <{frameworkVal}>    Add the reference only when targeting a specific framework.
+  --interactive                  Allows the command to stop and wait for user input or action (for example to complete authentication).
+  -?, -h, --help                 Show help and usage information";
 
-        private const string AddCommandHelpText = @"Usage: dotnet add [options] <PROJECT> [command]
+        private Func<string, string> AddCommandHelpText = (defaultVal) => $@"add:
+  .NET Add Command
+
+Usage:
+  dotnet add [options] <PROJECT> [command]
 
 Arguments:
-  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
+  <PROJECT>    The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
-  -h, --help   Show command line help.
+  -?, -h, --help    Show help and usage information
 
 Commands:
-  package <PACKAGE_NAME>     Add a NuGet package reference to the project.
-  reference <PROJECT_PATH>   Add a project-to-project reference to the project.";
+  package <PACKAGE_NAME>      Add a NuGet package reference to the project.
+  reference <PROJECT_PATH>    Add a project-to-project reference to the project.";
 
         const string FrameworkNet451 = "net451";
         const string ConditionFrameworkNet451 = "== 'net451'";
@@ -108,7 +115,7 @@ Commands:
         {
             var cmd = new DotnetCommand(Log, "add", "reference").Execute(helpArg);
             cmd.Should().Pass();
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(Directory.GetCurrentDirectory(), "FRAMEWORK"));
         }
 
         [Theory]
@@ -120,7 +127,6 @@ Commands:
                 .Execute($"add", commandName);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(AddCommandHelpText);
         }
 
         [Fact]
@@ -129,8 +135,8 @@ Commands:
             var cmd = new DotnetCommand(Log, "add", "one", "two", "three", "reference")
                     .Execute("proj.csproj");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "two")}
-{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "three")}");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(LocalizableStrings.UnrecognizedCommandOrArgument, "two")}
+{string.Format(LocalizableStrings.UnrecognizedCommandOrArgument, "three")}");
         }
 
         [Theory]
@@ -145,7 +151,7 @@ Commands:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, projName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot, "FRAMEWORK"));
         }
 
         [Fact]
@@ -159,7 +165,7 @@ Commands:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, "Broken/Broken.csproj"));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot, "FRAMEWORK"));
         }
 
         [Fact]
@@ -173,7 +179,7 @@ Commands:
                     .Execute(setup.ValidRefCsprojRelToOtherProjPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, workingDir + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(workingDir, "FRAMEWORK"));
         }
 
         [Fact]
@@ -186,7 +192,7 @@ Commands:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, setup.TestRoot + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot, "FRAMEWORK"));
         }
 
         [Fact]
@@ -700,7 +706,7 @@ Commands:
                     .Execute(reference);
 
             result.Should().Fail();
-            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot, "net451|net5.0|netcoreapp1.0"));
             result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, reference));
         }
 
@@ -716,7 +722,7 @@ Commands:
                     .Execute(reference);
 
             result.Should().Fail();
-            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot, "net451|net5.0|netcoreapp1.0"));
             result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, reference));
         }
     }

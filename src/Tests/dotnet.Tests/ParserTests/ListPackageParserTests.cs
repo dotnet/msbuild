@@ -4,8 +4,8 @@
 using System;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Xunit;
+using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tests.ParserTests
@@ -15,12 +15,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void ListPackageCanForwardInteractiveFlag()
         {
-            var command = Parser.Instance;
-            var result = command.Parse("dotnet list package --interactive");
+            var result = Parser.Instance.Parse("dotnet list package --interactive");
 
-            var appliedOptions = result["dotnet"]["list"]["package"];
-
-            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--interactive");
+            result.OptionValuesToBeForwarded(ListPackageReferencesCommandParser.GetCommand()).Should().ContainSingle("--interactive");
             result.Errors.Should().BeEmpty();
         }
 
@@ -31,11 +28,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [InlineData("-v", "")]
         public void ListPackageRejectsInvalidVerbosityFlags(string inputOption, string value)
         {
-            var command = Parser.Instance;
+            var result = Parser.Instance.Parse($"dotnet list package {inputOption} {value}");
 
-            var result = command.Parse($"dotnet list package {inputOption} {value}");
-
-            result.Errors.Should().Contain(e => e.Option != null && e.Option.Name == "verbosity");
+            result.Errors.Should().NotBeEmpty();
         }
 
         [Theory]
@@ -54,13 +49,10 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [InlineData("-v", "QUIET")]
         public void ListPackageCanForwardVerbosityFlag(string inputOption, string value)
         {
-            var command = Parser.Instance;
-            var result = command.Parse($"dotnet list package {inputOption} {value}");
+            var result = Parser.Instance.Parse($"dotnet list package {inputOption} {value}");
 
-            var appliedOptions = result["dotnet"]["list"]["package"];
-
-            appliedOptions
-                .OptionValuesToBeForwarded()
+            result
+                .OptionValuesToBeForwarded(ListPackageReferencesCommandParser.GetCommand())
                 .Should()
                 .Contain($"--verbosity:{value}");
             result.Errors.Should().BeEmpty();
@@ -69,13 +61,10 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void ListPackageDoesNotForwardVerbosityByDefault()
         {
-            var command = Parser.Instance;
-            var result = command.Parse($"dotnet list package");
+            var result = Parser.Instance.Parse($"dotnet list package");
 
-            var appliedOptions = result["dotnet"]["list"]["package"];
-
-            appliedOptions
-                .OptionValuesToBeForwarded()
+            result
+                .OptionValuesToBeForwarded(ListPackageReferencesCommandParser.GetCommand())
                 .Should()
                 .NotContain(i => i.Contains("--verbosity", StringComparison.OrdinalIgnoreCase))
                 .And.NotContain(i => i.Contains("-v", StringComparison.OrdinalIgnoreCase));

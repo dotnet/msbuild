@@ -2,9 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using Microsoft.Build.Construction;
+using Microsoft.DotNet.Cli.CommandLineValidation;
 using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -18,33 +18,45 @@ namespace Microsoft.DotNet.Cli.List.Reference.Tests
 {
     public class GivenDotnetListReference : SdkTest
     {
-        private const string ListReferenceCommandHelpText = @"Usage: dotnet list <PROJECT | SOLUTION> reference [options]
+        private Func<string, string> ListReferenceCommandHelpText = (defaultVal) => $@"reference:
+  List all project-to-project references of the project.
+
+Usage:
+  dotnet list [<PROJECT | SOLUTION>] reference [options]
 
 Arguments:
-  <PROJECT | SOLUTION>   The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.
+  <PROJECT | SOLUTION>    The project or solution file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
-  -h, --help   Show command line help.";
+  -?, -h, --help    Show help and usage information.";
 
-        private const string ListProjectReferenceCommandHelpText = @"Usage: dotnet list <PROJECT> reference [options]
+        private Func<string, string> ListProjectReferenceCommandHelpText = (defaultVal) => $@"reference:
+  List all project-to-project references of the project.
+
+Usage:
+  dotnet list [<PROJECT | SOLUTION>] reference [options]
 
 Arguments:
-  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
+  <PROJECT | SOLUTION>    The project or solution file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
-  -h, --help   Show command line help.";
+  -?, -h, --help    Show help and usage information";
 
-        private const string ListCommandHelpText = @"Usage: dotnet list [options] <PROJECT | SOLUTION> [command]
+        private Func<string, string> ListCommandHelpText = (defaultVal) => $@"list:
+  List references or packages of a .NET project.
+
+Usage:
+  dotnet list [options] [<PROJECT | SOLUTION>] [command]
 
 Arguments:
-  <PROJECT | SOLUTION>   The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.
+  <PROJECT | SOLUTION>    The project or solution file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
-  -h, --help   Show command line help.
+  -?, -h, --help    Show help and usage information
 
 Commands:
-  package     List all package references of the project or solution.
-  reference   List all project-to-project references of the project.";
+  package      List all package references of the project or solution.
+  reference    List all project-to-project references of the project.";
 
         const string FrameworkNet451Arg = "-f net451";
         const string ConditionFrameworkNet451 = "== 'net451'";
@@ -62,7 +74,7 @@ Commands:
         {
             var cmd = new ListReferenceCommand(Log).Execute(helpArg);
             cmd.Should().Pass();
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListProjectReferenceCommandHelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListProjectReferenceCommandHelpText(Directory.GetCurrentDirectory()));
         }
 
         [Theory]
@@ -74,7 +86,6 @@ Commands:
                 .Execute("list", commandName);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListCommandHelpText);
         }
 
         [Fact]
@@ -83,8 +94,8 @@ Commands:
             var cmd = new DotnetCommand(Log, "list one two three reference".Split())
                     .Execute("proj.csproj");
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "two")}
-{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "three")}");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(LocalizableStrings.UnrecognizedCommandOrArgument, "two")}
+{string.Format(LocalizableStrings.UnrecognizedCommandOrArgument, "three")}");
         }
 
         [Theory]
@@ -100,7 +111,7 @@ Commands:
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, projName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText(setup.TestRoot));
         }
 
         [Fact]
@@ -115,7 +126,7 @@ Commands:
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, "Broken/Broken.csproj"));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText(setup.TestRoot));
         }
 
         [Fact]
@@ -129,7 +140,7 @@ Commands:
                     .Execute(setup.ValidRefCsprojRelToOtherProjPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, workingDir + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText(workingDir));
         }
 
         [Fact]
@@ -142,7 +153,7 @@ Commands:
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, setup.TestRoot + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText(setup.TestRoot));
         }
 
         [Fact]

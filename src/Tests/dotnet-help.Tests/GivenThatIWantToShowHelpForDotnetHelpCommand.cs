@@ -4,7 +4,6 @@
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
-using HelpActual = Microsoft.DotNet.Tools.Help;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -15,13 +14,17 @@ namespace Microsoft.DotNet.Help.Tests
     public class GivenThatIWantToShowHelpForDotnetHelpCommand : SdkTest
     {
         private const string HelpText =
-@"Usage: dotnet help [options] <COMMAND_NAME>
+@"help:
+  .NET CLI help utility
+
+Usage:
+  dotnet help [options] [<COMMAND_NAME>]
 
 Arguments:
-  <COMMAND_NAME>   The SDK command to launch online help for.
+  <COMMAND_NAME>    The SDK command to launch online help for.
 
 Options:
-  -h, --help   Show command line help.";
+  -?, -h, --help    Show help and usage information";
 
         public GivenThatIWantToShowHelpForDotnetHelpCommand(ITestOutputHelper log) : base(log)
         {
