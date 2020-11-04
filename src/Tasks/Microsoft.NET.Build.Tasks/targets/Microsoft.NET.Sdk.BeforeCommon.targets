@@ -56,7 +56,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ImportFrameworkWinFXTargets Condition="'$(ImportFrameworkWinFXTargets)' == ''">false</ImportFrameworkWinFXTargets>
   </PropertyGroup>
 
-  <!-- For .NET Framework, reference core assemblies -->
   <PropertyGroup>
     <_TargetFrameworkVersionWithoutV>$(TargetFrameworkVersion.TrimStart('vV'))</_TargetFrameworkVersionWithoutV>
   </PropertyGroup>
@@ -67,6 +66,35 @@ Copyright (c) .NET Foundation. All rights reserved.
   -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.RuntimeIdentifierInference.targets" />
   
+  
+  <!-- Import workload targets -->
+  <Import Project="Microsoft.NET.Sdk.ImportWorkloads.targets" Condition="'$(MSBuildEnableWorkloadResolver)' == 'true'" />
+
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Windows.targets" Condition="'$(TargetPlatformIdentifier)' == 'Windows'" />
+  
+  <!-- Import WindowsDesktop targets if necessary -->
+  <PropertyGroup Condition=" '$(ImportWindowsDesktopTargets)' == ''
+                 and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                 and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '3.0'))
+                 and '$(TargetPlatformIdentifier)' == 'Windows'
+                 and ('$(UseWpf)' == 'true' Or '$(UseWindowsForms)' == 'true')">
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(ImportWindowsDesktopTargets)' == 'true'">
+    <AfterMicrosoftNETSdkTargets>$(AfterMicrosoftNETSdkTargets);$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.targets</AfterMicrosoftNETSdkTargets>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' != ''">
+    <!-- Set TargetPlatformVersion if it isn't set.  This is so that we have a valid TargetPlatformMoniker for Restore.
+         This avoids an issue where projects with multitargeted unknown platforms would fail to restore because the platforms
+         weren't included in the TargetPlatformMoniker for restore, obscuring the errors about unknown platforms or missing
+         workloads. -->
+    <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == ''">0.0</TargetPlatformVersion>
+    
+    <!-- Default SupportedOSPlatformVersion to TargetPlatformVersion -->
+    <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == ''">$(TargetPlatformVersion)</SupportedOSPlatformVersion>
+  </PropertyGroup>
+
   <!-- Checks for EOL frameworks -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.EolTargetFrameworks.targets" />
 
