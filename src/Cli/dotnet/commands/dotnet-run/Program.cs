@@ -1,11 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Cli;
 using Parser = Microsoft.DotNet.Cli.Parser;
+using System.CommandLine.Parsing;
+using System;
 
 namespace Microsoft.DotNet.Tools.Run
 {
@@ -13,15 +14,27 @@ namespace Microsoft.DotNet.Tools.Run
     {
         public static RunCommand FromArgs(string[] args)
         {
-            var result = Parser.Instance.ParseFrom("dotnet run", args);
+            var parseResult = Parser.Instance.ParseFrom("dotnet run", args);
 
-            result.ShowHelpOrErrorIfAppropriate();
+            parseResult.ShowHelpOrErrorIfAppropriate();
 
-            var command = result["dotnet"]["run"].Value<RunCommand>();
+            var command = new RunCommand(
+                configuration: parseResult.ValueForOption<string>(RunCommandParser.ConfigurationOption),
+                framework: parseResult.ValueForOption<string>(RunCommandParser.FrameworkOption),
+                runtime: parseResult.ValueForOption<string>(RunCommandParser.RuntimeOption),
+                noBuild: parseResult.HasOption(RunCommandParser.NoBuildOption),
+                project: parseResult.ValueForOption<string>(RunCommandParser.ProjectOption),
+                launchProfile: parseResult.ValueForOption<string>(RunCommandParser.LaunchProfileOption),
+                noLaunchProfile: parseResult.HasOption(RunCommandParser.NoLaunchProfileOption),
+                noRestore: parseResult.HasOption(RunCommandParser.NoRestoreOption) || parseResult.HasOption(RunCommandParser.NoBuildOption),
+                interactive: parseResult.HasOption(RunCommandParser.InteractiveOption),
+                restoreArgs: parseResult.OptionValuesToBeForwarded(RunCommandParser.GetCommand()),
+                args: parseResult.ValueForArgument<string[]>(RunCommandParser.Argument) ?? Array.Empty<string>()
+            );
 
-            if (result.UnparsedTokens != null)
+            if (parseResult.UnparsedTokens != null)
             {
-                command.Args = command.Args.Concat(result.UnparsedTokens);
+                command.Args = command.Args.Concat(parseResult.UnparsedTokens);
             }
 
             return command;
