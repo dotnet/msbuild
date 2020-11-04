@@ -2,35 +2,31 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
 
 namespace Microsoft.DotNet.Cli
 {
     public static class ParseResultExtensions
     {
-        public static void ShowHelp(this ParseResult parseResult) =>
-            Console.WriteLine(parseResult.Command().HelpView().TrimEnd());
+        public static void ShowHelp(this ParseResult parseResult)
+        {
+            Parser.Instance.Invoke(parseResult.Tokens.Select(t => t.Value).Append("-h").ToArray());
+        }
 
         public static void ShowHelpOrErrorIfAppropriate(this ParseResult parseResult)
         {
-            parseResult.ShowHelpIfRequested();
-
             if (parseResult.Errors.Any())
             {
                 throw new CommandParsingException(
                     message: string.Join(Environment.NewLine,
-                                         parseResult.Errors.Select(e => e.Message)),
-                    helpText: parseResult?.Command()?.HelpView().TrimEnd());
+                                         parseResult.Errors.Select(e => e.Message)));
             }
-        }
-
-        public static void ShowHelpIfRequested(this ParseResult parseResult)
-        {
-            if (parseResult.AppliedCommand().IsHelpRequested())
+            else if (parseResult.HasOption("--help"))
             {
-                // NOTE: this is a temporary stage in refactoring toward the ClicCommandLineParser being used at the CLI entry point. 
-                throw new HelpException(parseResult.Command().HelpView().TrimEnd());
+                parseResult.ShowHelp();
+                throw new HelpException(string.Empty);
             }
         }
     }
