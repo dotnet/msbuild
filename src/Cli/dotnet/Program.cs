@@ -16,6 +16,7 @@ using Microsoft.DotNet.ShellShim;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Frameworks;
+using Command = Microsoft.DotNet.Cli.Utils.Command;
 using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
 using RuntimeEnvironment = Microsoft.DotNet.Cli.Utils.RuntimeEnvironment;
 
@@ -29,55 +30,87 @@ namespace Microsoft.DotNet.Cli
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            new MulticoreJitActivator().TryActivateMulticoreJit();
+            // Capture the current timestamp to calculate the host overhead.
+            DateTime mainTimeStamp = DateTime.Now;
 
-            if (Env.GetEnvironmentVariableAsBool("DOTNET_CLI_CAPTURE_TIMING", false))
+            bool perfLogEnabled = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_PERF_LOG", false);
+            PerformanceLogStartupInformation startupInfo = null;
+            if (perfLogEnabled)
             {
-                PerfTrace.Enabled = true;
+                startupInfo = new PerformanceLogStartupInformation(mainTimeStamp);
+                PerformanceLogManager.InitializeAndStartCleanup(FileSystemWrapper.Default);
             }
 
-            InitializeProcess();
-
+            PerformanceLogEventListener perLogEventListener = null;
             try
             {
-                using (PerfTrace.Current.CaptureTiming())
+                if (perfLogEnabled)
                 {
-                    return ProcessArgs(args);
-                }
-            }
-            catch (HelpException e)
-            {
-                Reporter.Output.WriteLine(e.Message);
-                return 0;
-            }
-            catch (Exception e) when (e.ShouldBeDisplayedAsError())
-            {
-                Reporter.Error.WriteLine(CommandContext.IsVerbose()
-                    ? e.ToString().Red().Bold()
-                    : e.Message.Red().Bold());
-
-                var commandParsingException = e as CommandParsingException;
-                if (commandParsingException != null)
-                {
-                    Reporter.Output.WriteLine(commandParsingException.HelpText);
+                    perLogEventListener = PerformanceLogEventListener.Create(FileSystemWrapper.Default, PerformanceLogManager.Instance.CurrentLogDirectory);
                 }
 
-                return 1;
-            }
-            catch (Exception e) when (!e.ShouldBeDisplayedAsError())
-            {
-                // If telemetry object has not been initialized yet. It cannot be collected
-                TelemetryEventEntry.SendFiltered(e);
-                Reporter.Error.WriteLine(e.ToString().Red().Bold());
+                new MulticoreJitActivator().TryActivateMulticoreJit();
 
-                return 1;
+                PerformanceLogEventSource.Log.LogStartUpInformation(startupInfo);
+                PerformanceLogEventSource.Log.CLIStart();
+
+                if (Env.GetEnvironmentVariableAsBool("DOTNET_CLI_CAPTURE_TIMING", false))
+                {
+                    PerfTrace.Enabled = true;
+                }
+
+                InitializeProcess();
+
+                try
+                {
+                    using (PerfTrace.Current.CaptureTiming())
+                    {
+                        return ProcessArgs(args);
+                    }
+                }
+                catch (HelpException e)
+                {
+                    Reporter.Output.WriteLine(e.Message);
+                    return 0;
+                }
+                catch (Exception e) when (e.ShouldBeDisplayedAsError())
+                {
+                    Reporter.Error.WriteLine(CommandContext.IsVerbose()
+                        ? e.ToString().Red().Bold()
+                        : e.Message.Red().Bold());
+
+                    var commandParsingException = e as CommandParsingException;
+                    if (commandParsingException != null)
+                    {
+                        Reporter.Output.WriteLine(commandParsingException.HelpText);
+                    }
+
+                    return 1;
+                }
+                catch (Exception e) when (!e.ShouldBeDisplayedAsError())
+                {
+                    // If telemetry object has not been initialized yet. It cannot be collected
+                    TelemetryEventEntry.SendFiltered(e);
+                    Reporter.Error.WriteLine(e.ToString().Red().Bold());
+
+                    return 1;
+                }
+                finally
+                {
+                    if (PerfTrace.Enabled)
+                    {
+                        Reporter.Output.WriteLine("Performance Summary:");
+                        PerfTraceOutput.Print(Reporter.Output, PerfTrace.GetEvents());
+                    }
+
+                    PerformanceLogEventSource.Log.CLIStop();
+                }
             }
             finally
             {
-                if (PerfTrace.Enabled)
+                if(perLogEventListener != null)
                 {
-                    Reporter.Output.WriteLine("Performance Summary:");
-                    PerfTraceOutput.Print(Reporter.Output, PerfTrace.GetEvents());
+                    perLogEventListener.Dispose();
                 }
             }
         }
@@ -140,6 +173,8 @@ namespace Microsoft.DotNet.Cli
                             command = "help";
                         }
 
+                        PerformanceLogEventSource.Log.FirstTimeConfigurationStart();
+
                         var environmentProvider = new EnvironmentProvider();
 
                         bool generateAspNetCertificate =
@@ -177,6 +212,8 @@ namespace Microsoft.DotNet.Cli
                             dotnetFirstRunConfiguration,
                             environmentProvider);
 
+                        PerformanceLogEventSource.Log.FirstTimeConfigurationStop();
+
                         break;
                     }
                 }
@@ -186,12 +223,16 @@ namespace Microsoft.DotNet.Cli
                     return 1;
                 }
 
+                PerformanceLogEventSource.Log.TelemetryRegistrationStart();
+
                 if (telemetryClient == null)
                 {
                     telemetryClient = new Telemetry.Telemetry(firstTimeUseNoticeSentinel);
                 }
                 TelemetryEventEntry.Subscribe(telemetryClient.TrackEvent);
                 TelemetryEventEntry.TelemetryFilter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
+
+                PerformanceLogEventSource.Log.TelemetryRegistrationStop();
             }
 
             IEnumerable<string> appArgs =
@@ -204,18 +245,27 @@ namespace Microsoft.DotNet.Cli
                 Console.WriteLine($"Telemetry is: {(telemetryClient.Enabled ? "Enabled" : "Disabled")}");
             }
 
+            PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStart();
             TelemetryEventEntry.SendFiltered(topLevelCommandParserResult);
+            PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
 
             int exitCode;
             if (BuiltInCommandsCatalog.Commands.TryGetValue(topLevelCommandParserResult.Command, out var builtIn))
             {
+                PerformanceLogEventSource.Log.BuiltInCommandParserStart();
                 var parseResult = Parser.Instance.ParseFrom($"dotnet {topLevelCommandParserResult.Command}", appArgs.ToArray());
+                PerformanceLogEventSource.Log.BuiltInCommandParserStop();
+
                 if (!parseResult.Errors.Any())
                 {
+                    PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStart();
                     TelemetryEventEntry.SendFiltered(parseResult);
+                    PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
                 }
 
+                PerformanceLogEventSource.Log.BuiltInCommandStart();
                 exitCode = builtIn.Command(appArgs.ToArray());
+                PerformanceLogEventSource.Log.BuiltInCommandStop();
             }
             else if (string.IsNullOrEmpty(topLevelCommandParserResult.Command))
             {
@@ -223,15 +273,24 @@ namespace Microsoft.DotNet.Cli
             }
             else
             {
-                CommandResult result = CommandFactoryUsingResolver.Create(
+                PerformanceLogEventSource.Log.ExtensibleCommandResolverStart();
+                Command resolvedCommand = CommandFactoryUsingResolver.Create(
                         "dotnet-" + topLevelCommandParserResult.Command,
                         appArgs,
-                        FrameworkConstants.CommonFrameworks.NetStandardApp15)
-                    .Execute();
+                        FrameworkConstants.CommonFrameworks.NetStandardApp15);
+                PerformanceLogEventSource.Log.ExtensibleCommandResolverStop();
+
+                PerformanceLogEventSource.Log.ExtensibleCommandStart();
+                CommandResult result = resolvedCommand.Execute();
+                PerformanceLogEventSource.Log.ExtensibleCommandStop();
+                
                 exitCode = result.ExitCode;
             }
 
+            PerformanceLogEventSource.Log.TelemetryClientFlushStart();
             telemetryClient.Flush();
+            PerformanceLogEventSource.Log.TelemetryClientFlushStop();
+
             return exitCode;
         }
 

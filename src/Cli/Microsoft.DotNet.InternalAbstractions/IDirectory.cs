@@ -11,6 +11,8 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
 
         ITemporaryDirectory CreateTemporaryDirectory();
 
+        IEnumerable<string> EnumerateDirectories(string path);
+
         IEnumerable<string> EnumerateFiles(string path);
 
         IEnumerable<string> EnumerateFileSystemEntries(string path);

@@ -541,6 +541,15 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 return temporaryDirectoryMock;
             }
 
+            public IEnumerable<string> EnumerateDirectories(string path)
+            {
+                if (path == null) throw new ArgumentNullException(nameof(path));
+
+                return _files.EnumerateDirectory(path,
+                    subs => subs.Where(s => s.Value is DirectoryNode)
+                        .Select(s => Path.Combine(path, s.Key)));
+            }
+
             public IEnumerable<string> EnumerateFiles(string path)
             {
                 if (path == null) throw new ArgumentNullException(nameof(path));
