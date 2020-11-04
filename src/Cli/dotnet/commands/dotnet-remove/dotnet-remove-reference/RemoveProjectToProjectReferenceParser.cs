@@ -1,4 +1,8 @@
-using Microsoft.DotNet.Cli.CommandLine;
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.CommandLine;
+using System.Linq;
 using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Remove.ProjectToProjectReference.LocalizableStrings;
 
@@ -6,20 +10,28 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class RemoveProjectToProjectReferenceParser
     {
-        public static Command RemoveReference() =>
-            Create.Command(
-                "reference",
-                LocalizableStrings.AppFullName,
-                Accept
-                    .OneOrMoreArguments()
-                    .WithSuggestionsFrom(_ => Suggest.ProjectReferencesFromProjectFile())
-                    .With(name: LocalizableStrings.ProjectPathArgumentName,
-                          description: LocalizableStrings.ProjectPathArgumentDescription),
-                CommonOptions.HelpOption(),
-                Create.Option(
-                    "-f|--framework",
-                    LocalizableStrings.CmdFrameworkDescription,
-                    Accept.ExactlyOneArgument()
-                          .With(name: CommonLocalizableStrings.CmdFramework)));
+        public static readonly Argument ProjectPathArgument = new Argument(LocalizableStrings.ProjectPathArgumentName)
+        {
+            Description = LocalizableStrings.ProjectPathArgumentDescription,
+            Arity = ArgumentArity.OneOrMore,
+        }.AddSuggestions(Suggest.ProjectReferencesFromProjectFile().ToArray());
+
+        public static readonly Option FrameworkOption = new Option(new string[] { "-f", "--framework" }, LocalizableStrings.CmdFrameworkDescription)
+        {
+            Argument = new Argument(CommonLocalizableStrings.CmdFramework)
+            {
+                Arity = ArgumentArity.ExactlyOne
+            }
+        };
+
+        public static Command GetCommand()
+        {
+            var command = new Command("reference", LocalizableStrings.AppFullName);
+
+            command.AddArgument(ProjectPathArgument);
+            command.AddOption(FrameworkOption);
+
+            return command;
+        }
     }
 }
