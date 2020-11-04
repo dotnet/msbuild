@@ -490,6 +490,10 @@
     <value>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</value>
     <comment>{StrBegin="MSB4110: "}</comment>
   </data>
+  <data name="IllFormedPropertySpaceInCondition" xml:space="preserve">
+    <value>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</value>
+    <comment>{StrBegin="MSB4259: "}</comment>
+  </data>
   <data name="IllFormedQuotedStringInCondition" xml:space="preserve">
     <value>MSB4101: Expected a closing quote after position {1} in condition "{0}".</value>
     <comment>{StrBegin="MSB4101: "}</comment>
