@@ -5,11 +5,11 @@ using System.CommandLine;
 
 namespace Microsoft.DotNet.Cli
 {
-    internal static class ParseCommandParser
+    internal static class FsiCommandParser
     {
         public static Command GetCommand()
         {
-            var command = new Command("parse");
+            var command = new Command("fsi");
 
             return command;
         }
