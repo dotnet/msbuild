@@ -24,7 +24,7 @@ The opt-out comes in the form of setting the environment variable `MSBuildDisabl
 - [Truncate Target/Task skipped log messages to 1024 chars](https://github.com/dotnet/msbuild/pull/5553)
 - [Don't expand full drive globs with false condition](https://github.com/dotnet/msbuild/pull/5669)
 ### 16.10
-
+- [Detect whitespace in property name](https://github.com/dotnet/msbuild/pull/5672)
 ### 17.0
 
 ## Change Waves No Longer In Rotation
