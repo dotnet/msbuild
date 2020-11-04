@@ -2606,6 +2606,141 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedUpdate, items[0]);
         }
 
+        [Theory]
+        [InlineData("abc", "def", "abc")]
+        [InlineData("abc", "de*", "abc")]
+        [InlineData("a*c", "def", "abc")]
+        [InlineData("abc", "def", "*bc")]
+        [InlineData("abc", "d*f", "*bc")]
+        [InlineData("*c", "d*f", "*bc")]
+        [InlineData("a*", "d*", "abc")]
+        public void UpdatesProceedInOrder(string first, string second, string third)
+        {
+            string contents = $@"
+<i Include='abc'>
+    <m1>m1_contents</m1>
+</i>
+<j Include='def'>
+    <m1>m1_contents</m1>
+</j>
+<i Update='{first}'>
+    <m1>first</m1>
+</i>
+<j Update='{second}'>
+    <m1>second</m1>
+</j>
+<i Update='{third}'>
+    <m1>third</m1>
+</i>
+";
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(contents, allItems: true);
+            Dictionary<string, string> expectedUpdatei = new Dictionary<string, string>
+            {
+                {"m1", "third" }
+            };
+            Dictionary<string, string> expectedUpdatej = new Dictionary<string, string>
+            {
+                {"m1", "second" }
+            };
+
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdatei, items[0]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdatej, items[1]);
+        }
+
+        [Fact]
+        public void UpdatingIndividualItemsProceedsInOrder()
+        {
+            string contents = @"
+<i Include='a;b;c'>
+    <m1>m1_contents</m1>
+</i>
+<i Update='a'>
+    <m1>second</m1>
+</i>
+<i Update='b'>
+    <m1>third</m1>
+</i>
+<i Update='c'>
+    <m1>fourth</m1>
+</i>
+<afterFirst Include='@(i)' />
+<i Update='*'>
+    <m1>sixth</m1>
+</i>
+<afterSecond Include='@(i)' />
+<i Update='b'>
+    <m1>seventh</m1>
+</i>
+<afterThird Include='@(i)' />
+<i Update='c'>
+    <m1>eighth</m1>
+</i>
+<afterFourth Include='@(i)' />
+";
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(contents, allItems: true);
+            Dictionary<string, string> expectedAfterFirsta = new Dictionary<string, string>
+            {
+                {"m1", "second" }
+            };
+            Dictionary<string, string> expectedAfterFirstb = new Dictionary<string, string>
+            {
+                {"m1", "third" }
+            };
+            Dictionary<string, string> expectedAfterFirstc = new Dictionary<string, string>
+            {
+                {"m1", "fourth" }
+            };
+            Dictionary<string, string> expectedAfterSeconda = new Dictionary<string, string>
+            {
+                {"m1", "sixth" }
+            };
+            Dictionary<string, string> expectedAfterSecondb = new Dictionary<string, string>
+            {
+                {"m1", "sixth" }
+            };
+            Dictionary<string, string> expectedAfterSecondc = new Dictionary<string, string>
+            {
+                {"m1", "sixth" }
+            };
+            Dictionary<string, string> expectedAfterThirda = new Dictionary<string, string>
+            {
+                {"m1", "sixth" }
+            };
+            Dictionary<string, string> expectedAfterThirdb = new Dictionary<string, string>
+            {
+                {"m1", "seventh" }
+            };
+            Dictionary<string, string> expectedAfterThirdc = new Dictionary<string, string>
+            {
+                {"m1", "sixth" }
+            };
+            Dictionary<string, string> expectedAfterFourtha = new Dictionary<string, string>
+            {
+                {"m1", "sixth" }
+            };
+            Dictionary<string, string> expectedAfterFourthb = new Dictionary<string, string>
+            {
+                {"m1", "seventh" }
+            };
+            Dictionary<string, string> expectedAfterFourthc = new Dictionary<string, string>
+            {
+                {"m1", "eighth" }
+            };
+
+            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterFirsta, items[3]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterFirstb, items[4]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterFirstc, items[5]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterSeconda, items[6]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterSecondb, items[7]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterSecondc, items[8]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterThirda, items[9]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterThirdb, items[10]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterThirdc, items[11]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterFourtha, items[12]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterFourthb, items[13]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterFourthc, items[14]);
+        }
+
         [Fact]
         public void UpdateWithNoMetadataShouldNotAffectItems()
         {
