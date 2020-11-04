@@ -1,8 +1,10 @@
-using System.Linq;
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.TemplateEngine.Cli;
 
 namespace Microsoft.DotNet.NugetSearch
 {
@@ -25,13 +27,13 @@ namespace Microsoft.DotNet.NugetSearch
         public int? Take { get; }
         public bool Prerelease { get; }
 
-        public NugetSearchApiParameter(AppliedOption appliedOption)
+        public NugetSearchApiParameter(ParseResult parseResult)
         {
-            var searchTerm = appliedOption.Arguments.Single();
+            var searchTerm = parseResult.ValueForArgument<string>(ToolSearchCommandParser.SearchTermArgument);
 
-            var skip = GetParsedResultAsInt(appliedOption, "skip");
-            var take = GetParsedResultAsInt(appliedOption, "take");
-            var prerelease = appliedOption.ValueOrDefault<bool>("prerelease");
+            var skip = GetParsedResultAsInt(parseResult, ToolSearchCommandParser.SkipOption);
+            var take = GetParsedResultAsInt(parseResult, ToolSearchCommandParser.TakeOption);
+            var prerelease = parseResult.ValueForOption<bool>(ToolSearchCommandParser.PrereleaseOption);
 
             SearchTerm = searchTerm;
             Skip = skip;
@@ -39,9 +41,9 @@ namespace Microsoft.DotNet.NugetSearch
             Prerelease = prerelease;
         }
 
-        private static int? GetParsedResultAsInt(AppliedOption appliedOption, string alias)
+        private static int? GetParsedResultAsInt(ParseResult parseResult, Option alias)
         {
-            var valueFromParser = appliedOption.ValueOrDefault<string>(alias);
+            var valueFromParser = parseResult.ValueForOption<string>(alias);
             if (string.IsNullOrWhiteSpace(valueFromParser))
             {
                 return null;

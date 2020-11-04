@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli.Telemetry
@@ -24,23 +24,19 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult)
         {
-            var topLevelCommandName = parseResult[DotnetName]?.AppliedOptions?.FirstOrDefault()?.Name;
+            var topLevelCommandName = parseResult.RootCommandResult.Children.FirstOrDefault()?.Symbol.Name;
             var result = new List<ApplicationInsightsEntryFormat>();
             foreach (var option in _optionsToLog)
             {
                 if (_topLevelCommandName.Contains(topLevelCommandName)
-                    && parseResult[DotnetName]?[topLevelCommandName]?.AppliedOptions != null
-                    && parseResult[DotnetName][topLevelCommandName].AppliedOptions.Contains(option))
+                    && parseResult.HasOption($"--{option}"))
                 {
-                    AppliedOption appliedOptions =
-                        parseResult[DotnetName][topLevelCommandName]
-                            .AppliedOptions[option];
                     result.Add(new ApplicationInsightsEntryFormat(
                         "sublevelparser/command",
                         new Dictionary<string, string>
                         {
                             { "verb", topLevelCommandName},
-                            {option, appliedOptions.Arguments.ElementAt(0)}
+                            {option, parseResult.ValueForOption<string>($"--{option}")}
                         }));
                 }
             }

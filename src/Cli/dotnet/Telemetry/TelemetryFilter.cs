@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System;
 using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 using System.Globalization;
 
@@ -25,9 +25,19 @@ namespace Microsoft.DotNet.Cli.Telemetry
         {
             var result = new List<ApplicationInsightsEntryFormat>();
 
+            if (objectToFilter is ParseResult topLevelParseResult)
+            {
+                var topLevelCommandName = topLevelParseResult.RootCommandResult.Children.FirstOrDefault()?.Symbol.Name;
+                result.Add(new ApplicationInsightsEntryFormat(
+                            "toplevelparser/command",
+                            new Dictionary<string, string>()
+                        {{ "verb", topLevelCommandName }}
+                ));
+
+            }
             if (objectToFilter is ParseResult parseResult)
             {
-                var topLevelCommandName = parseResult[DotnetName]?.AppliedOptions?.FirstOrDefault()?.Name;
+                var topLevelCommandName = parseResult.RootCommandResult.Children.FirstOrDefault()?.Symbol.Name;
                 if (topLevelCommandName != null)
                 {
                     LogVerbosityForAllTopLevelCommand(result, parseResult, topLevelCommandName);
@@ -37,15 +47,6 @@ namespace Microsoft.DotNet.Cli.Telemetry
                         result.AddRange(rule.AllowList(parseResult));
                     }
                 }
-            }
-            else if (objectToFilter is TopLevelCommandParserResult topLevelCommandParserResult)
-            {
-                result.Add(new ApplicationInsightsEntryFormat(
-                            "toplevelparser/command",
-                            new Dictionary<string, string>()
-                        {{ "verb", topLevelCommandParserResult.Command}}
-                ));
-
             }
             else if (objectToFilter is InstallerSuccessReport installerSuccessReport)
             {
@@ -121,18 +122,14 @@ namespace Microsoft.DotNet.Cli.Telemetry
             ParseResult parseResult,
             string topLevelCommandName)
         {
-            if (parseResult[DotnetName][topLevelCommandName]?.AppliedOptions != null &&
-                parseResult[DotnetName][topLevelCommandName].AppliedOptions.Contains("verbosity"))
+            if (parseResult.HasOption("--verbosity"))
             {
-                AppliedOption appliedOptions =
-                    parseResult[DotnetName][topLevelCommandName].AppliedOptions["verbosity"];
-
                 result.Add(new ApplicationInsightsEntryFormat(
                     "sublevelparser/command",
                     new Dictionary<string, string>()
                     {
                         { "verb", topLevelCommandName},
-                        {"verbosity", appliedOptions.Arguments.ElementAt(0)}
+                        {"verbosity", parseResult.ValueForOption<string>("--verbosity")}
                     }));
             }
         }
