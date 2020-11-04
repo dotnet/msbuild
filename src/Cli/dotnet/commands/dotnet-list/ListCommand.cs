@@ -4,10 +4,10 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.List.ProjectToProjectReferences;
 using Microsoft.DotNet.Tools.List.PackageReferences;
+using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Tools.List
 {
@@ -18,16 +18,16 @@ namespace Microsoft.DotNet.Tools.List
         protected override string ArgumentName => Constants.ProjectArgumentName;
         protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ProjectArgumentDescription;
 
-        internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
-            new Dictionary<string, Func<AppliedOption, CommandBase>>
+        internal override Dictionary<string, Func<ParseResult, CommandBase>> SubCommands =>
+            new Dictionary<string, Func<ParseResult, CommandBase>>
             {
                 {
                     "reference",
-                    o => new ListProjectToProjectReferencesCommand(o, ParseResult)
+                    o => new ListProjectToProjectReferencesCommand(ParseResult)
                 },
                 {
                     "package",
-                    o => new ListPackageReferencesCommand(o, ParseResult)
+                    o => new ListPackageReferencesCommand(ParseResult)
                 }
             };
 

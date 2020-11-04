@@ -28,8 +28,7 @@ namespace Microsoft.DotNet.Cli
             var parser = Parser.Instance;
             var result = parser.ParseFrom("dotnet internal-reportinstallsuccess", args);
 
-            var internalReportinstallsuccess = result["dotnet"]["internal-reportinstallsuccess"];
-            var exeName = Path.GetFileName(internalReportinstallsuccess.Arguments.Single());
+            var exeName = Path.GetFileName(result.ValueForArgument<string>(InternalReportinstallsuccessCommandParser.Argument));
 
             var filter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
             foreach (var e in filter.Filter(new InstallerSuccessReport(exeName)))
