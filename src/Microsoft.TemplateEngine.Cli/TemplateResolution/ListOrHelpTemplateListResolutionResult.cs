@@ -128,6 +128,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         public bool HasBaselineMismatch => PartiallyMatchedTemplates.Any(t => t.HasBaselineMismatch());
 
         /// <summary>
+        /// Returns true when at least one template has mismatch in author
+        /// </summary>
+        public bool HasAuthorMismatch => PartiallyMatchedTemplates.Any(t => t.HasAuthorMismatch());
+
+        /// <summary>
         /// Returns true when one and only one template has exact match
         /// </summary>
         public bool HasUnambiguousTemplateGroup => ExactMatchedTemplatesGrouped.Count == 1;

@@ -172,15 +172,22 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
             // for list we also try to get match on template name in classification (tags). These matches only will be used if short name and name has a mismatch.
             // filter below only sets the exact or partial match if name matches the tag. If name doesn't match the tag, no match disposition is added to collection.
+
+            var listFilters = new List<Func<ITemplateInfo, MatchInfo?>>()
+            {
+                WellKnownSearchFilters.NameFilter(commandInput.TemplateName),
+                WellKnownSearchFilters.ClassificationsFilter(commandInput.TemplateName)
+            };
+            listFilters.AddRange(SupportedFilterOptions.SupportedListFilters
+                                    .OfType<TemplateFilterOption>()
+                                    .Select(filter => filter.TemplateMatchFilter(commandInput)));
+
+
             IReadOnlyList<ITemplateMatchInfo> coreMatchedTemplates = TemplateListFilter.GetTemplateMatchInfo
             (
                 filterableTemplateInfo,
                 TemplateListFilter.PartialMatchFilter,
-                WellKnownSearchFilters.NameFilter(commandInput.TemplateName),
-                WellKnownSearchFilters.ClassificationsFilter(commandInput.TemplateName),
-                WellKnownSearchFilters.LanguageFilter(commandInput.Language),
-                WellKnownSearchFilters.ContextFilter(commandInput.TypeFilter),
-                WellKnownSearchFilters.BaselineFilter(commandInput.BaselineName)
+                listFilters.ToArray()
             )
             .Where(x => !IsTemplateHiddenByHostFile(x.Info, hostDataLoader)).ToList();
 

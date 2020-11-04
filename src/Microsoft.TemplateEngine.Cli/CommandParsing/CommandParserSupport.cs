@@ -142,7 +142,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("--update-check", LocalizableStrings.UpdateCheckCommandHelp, Accept.NoArguments()),
                     Create.Option("--update-apply", LocalizableStrings.UpdateApplyCommandHelp, Accept.NoArguments()),
                     Create.Option("--columns", LocalizableStrings.OptionDescriptionColumns, Accept.ExactlyOneArgument().With(LocalizableStrings.OptionDescriptionColumns, "COLUMNS_LIST")),
-                    Create.Option("--columns-all", LocalizableStrings.OptionDescriptionColumnsAll, Accept.NoArguments())
+                    Create.Option("--columns-all", LocalizableStrings.OptionDescriptionColumnsAll, Accept.NoArguments()),
+                    Create.Option("--author", LocalizableStrings.OptionDescriptionAuthorFilter, Accept.ExactlyOneArgument().With(LocalizableStrings.OptionDescriptionColumns, "AUTHOR"))
                 };
             }
         }

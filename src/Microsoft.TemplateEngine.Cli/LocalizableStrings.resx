@@ -706,4 +706,7 @@ The default list of columns shown without the option: template name, short name,
   <data name="OptionDescriptionColumnsAll" xml:space="preserve">
     <value>Shows all available columns  for --list or -l option, equivalent to --columns=language,tags,author,type.</value>
   </data>
+  <data name="OptionDescriptionAuthorFilter" xml:space="preserve">
+    <value>Filters templates based on template author</value>
+  </data>
 </root>

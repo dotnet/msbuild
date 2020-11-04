@@ -40,6 +40,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.Baseline && x.Kind == MatchKind.Mismatch);
         }
 
+        public static bool HasAuthorMismatch(this ITemplateMatchInfo templateMatchInfo)
+        {
+            return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.Author && x.Kind == MatchKind.Mismatch);
+        }
+
         public static bool HasAmbiguousParameterValueMatch(this ITemplateMatchInfo templateMatchInfo)
         {
             return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.AmbiguousParameterValue);

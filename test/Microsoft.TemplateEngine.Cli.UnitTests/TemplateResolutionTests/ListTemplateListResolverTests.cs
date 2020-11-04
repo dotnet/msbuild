@@ -741,5 +741,74 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.True(matchResult.HasContextMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
         }
+
+        [Theory(DisplayName = nameof(TestGetTemplateResolutionResult_AuthorMatch))]
+        [InlineData("TestAuthor", "Test", true)]
+        [InlineData("TestAuthor", "Other", false)]
+        [InlineData("TestAuthor", "", true)]
+        [InlineData("TestAuthor", null, true)]
+        [InlineData("TestAuthor", "TeST", true)]
+        [InlineData("TestAuthor", "Teşt", false)]
+        [InlineData("match_middle_test", "middle", true)]
+        [InlineData("input", "İnput", false)]
+        public void TestGetTemplateResolutionResult_AuthorMatch(string templateAuthor, string commandAuthor, bool matchExpected)
+        {
+            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
+            templatesToSearch.Add(new TemplateInfo()
+            {
+                ShortName = "console",
+                Name = "Long name for Console App",
+                Identity = "Console.App.T1",
+                GroupIdentity = "Console.App.Test",
+                CacheParameters = new Dictionary<string, ICacheParameter>(),
+                Classifications = new List<string> { "Common", "Test" },
+                Author = templateAuthor,
+                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") },
+                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
+                },
+                BaselineInfo = new Dictionary<string, IBaselineInfo>()
+                {
+                    { "app", new BaselineInfo() },
+                    { "standard", new BaselineInfo() }
+                }
+            });
+
+
+            INewCommandInput userInputs = new MockNewCommandInput()
+            {
+                TemplateName = "console",
+                IsListFlagSpecified = true,
+                AuthorFilter = commandAuthor
+            };
+
+            ListOrHelpTemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+
+            if (matchExpected)
+            {
+                Assert.True(matchResult.HasExactMatches);
+                Assert.Equal(1, matchResult.ExactMatchedTemplatesGrouped.Count);
+                Assert.Equal(1, matchResult.ExactMatchedTemplates.Count);
+                Assert.False(matchResult.HasPartialMatches);
+                Assert.Equal(0, matchResult.PartiallyMatchedTemplates.Count);
+                Assert.Equal(0, matchResult.PartiallyMatchedTemplatesGrouped.Count);
+                Assert.False(matchResult.HasAuthorMismatch);
+            }
+            else
+            {
+                Assert.False(matchResult.HasExactMatches);
+                Assert.Equal(0, matchResult.ExactMatchedTemplatesGrouped.Count);
+                Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
+                Assert.True(matchResult.HasPartialMatches);
+                Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
+                Assert.Equal(1, matchResult.PartiallyMatchedTemplatesGrouped.Count);
+                Assert.True(matchResult.HasAuthorMismatch);
+            }
+
+            Assert.False(matchResult.HasLanguageMismatch);
+            Assert.False(matchResult.HasContextMismatch);
+            Assert.False(matchResult.HasBaselineMismatch);
+        }
     }
 }

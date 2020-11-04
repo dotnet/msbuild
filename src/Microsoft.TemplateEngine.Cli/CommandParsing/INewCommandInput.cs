@@ -8,98 +8,63 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
     public interface INewCommandInput
     {
-        string CommandName { get; }
-
-        string TemplateName { get; }
-
-        IReadOnlyList<string> Tokens { get; }
-
         string Alias { get; }
-
-        bool ShowAliasesSpecified { get; }
-
-        string ShowAliasesAliasName { get; }
-
-        string BaselineName { get; }
-
-        IList<string> ExtraArgsFileNames { get; }
-
-        IList<string> ToInstallList { get; }
-
-        IList<string> InstallNuGetSourceList { get; }
-
-        bool IsDryRun { get; }
-
-        IList<string> ToUninstallList { get; }
-
-        bool IsForceFlagSpecified { get; }
-
-        bool IsHelpFlagSpecified { get; }
-
-        bool IsListFlagSpecified { get; }
-
-        bool IsQuietFlagSpecified { get; }
-
-        bool IsShowAllFlagSpecified { get; }
-
-        bool IsInteractiveFlagSpecified { get; }
-
-        string TypeFilter { get; }
-
-        string Language { get; }
-
-        string Locale { get; }
-
-        string Name { get; }
-
-        string OutputPath { get; }
-
-        bool SkipUpdateCheck { get; }
-
-        bool CheckForUpdates { get; }
-
-        bool CheckForUpdatesNoPrompt { get; }
-
         string AllowScriptsToRun { get; }
-
-        bool HasDebuggingFlag(string flag);
-
-        IReadOnlyDictionary<string, string> InputTemplateParams { get; }
-
-        string TemplateParamInputFormat(string canonical);
-
-        IReadOnlyList<string> VariantsForCanonical(string canonical);
-
-        bool TryGetCanonicalNameForVariant(string variant, out string canonical);
-
-        List<string> RemainingArguments { get; }
-
-        IDictionary<string, IList<string>> RemainingParameters { get; }
-
-        bool TemplateParamHasValue(string paramName);
-
-        string TemplateParamValue(string paramName);
-
-        void ReparseForTemplate(ITemplateInfo templateInfo, HostSpecificTemplateData hostSpecificTemplateData);
-
+        string AuthorFilter { get; }
+        string BaselineName { get; }
+        bool CheckForUpdates { get; }
+        bool CheckForUpdatesNoPrompt { get; }
+        IReadOnlyCollection<string> Columns { get; }
+        string ColumnsParseError { get; }
+        string CommandName { get; }
+        bool ExpandedExtraArgsFiles { get; }
+        IList<string> ExtraArgsFileNames { get; }
+        bool HasColumnsParseError { get; }
+        bool HasParseError { get; }
         string HelpText { get; }
+        IReadOnlyDictionary<string, string> InputTemplateParams { get; }
+        IList<string> InstallNuGetSourceList { get; }
+        bool IsDryRun { get; }
+        bool IsForceFlagSpecified { get; }
+        bool IsHelpFlagSpecified { get; }
+        bool IsInteractiveFlagSpecified { get; }
+        bool IsListFlagSpecified { get; }
+        bool IsQuietFlagSpecified { get; }
+        bool IsShowAllFlagSpecified { get; }
+        string Language { get; }
+        string Locale { get; }
+        string Name { get; }
+        string OutputPath { get; }
+        List<string> RemainingArguments { get; }
+        IDictionary<string, IList<string>> RemainingParameters { get; }
+        string ShowAliasesAliasName { get; }
+        bool ShowAliasesSpecified { get; }
+        bool ShowAllColumns { get; }
+        bool SkipUpdateCheck { get; }
+        string TemplateName { get; }
+        IList<string> ToInstallList { get; }
+        IReadOnlyList<string> Tokens { get; }
+        IList<string> ToUninstallList { get; }
+        string TypeFilter { get; }
 
         int Execute(params string[] args);
 
+        bool HasDebuggingFlag(string flag);
+
         void OnExecute(Func<Task<CreationResultStatus>> invoke);
 
-        bool HasParseError { get; }
+        void ReparseForTemplate(ITemplateInfo templateInfo, HostSpecificTemplateData hostSpecificTemplateData);
 
         void ResetArgs(params string[] args);
 
-        bool ExpandedExtraArgsFiles { get; }
+        bool TemplateParamHasValue(string paramName);
 
-        IReadOnlyCollection<string> Columns { get; }
+        string TemplateParamInputFormat(string canonical);
 
-        bool HasColumnsParseError { get; }
+        string TemplateParamValue(string paramName);
 
-        string ColumnsParseError { get; }
+        bool TryGetCanonicalNameForVariant(string variant, out string canonical);
 
-        bool ShowAllColumns { get; }
+        IReadOnlyList<string> VariantsForCanonical(string canonical);
     }
 }

@@ -105,7 +105,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             else
             {
                 Reporter.Error.WriteLine(
-                    string.Format(LocalizableStrings.InvalidParameterTemplateHint,  GetTemplateHelpCommand(commandInput.CommandName, unambiguousTemplateGroup.First().Info)).Bold().Red());
+                    string.Format(LocalizableStrings.InvalidParameterTemplateHint, GetTemplateHelpCommand(commandInput.CommandName, unambiguousTemplateGroup.First().Info)).Bold().Red());
             }
 
             return invalidForAllTemplates.Count > 0 || invalidForSomeTemplates.Count > 0
@@ -140,12 +140,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             if (templateResolutionResult.HasExactMatches)
             {
                 IReadOnlyCollection<IGrouping<string, ITemplateMatchInfo>> groupedTemplatesForDisplay = templateResolutionResult.ExactMatchedTemplatesGrouped;
-                ShowTemplatesFoundMessage(commandInput.TemplateName, commandInput.Language, commandInput.TypeFilter, commandInput.BaselineName);
+                ShowTemplatesFoundMessage(commandInput);
                 DisplayTemplateList(groupedTemplatesForDisplay, environmentSettings, commandInput, defaultLanguage);
             }
             else
             {
-                ShowContextAndTemplateNameMismatchHelp(templateResolutionResult, commandInput.TemplateName, commandInput.Language, commandInput.TypeFilter, commandInput.BaselineName);
+                ShowContextAndTemplateNameMismatchHelp(templateResolutionResult, commandInput);
             }
 
             if (!commandInput.IsListFlagSpecified)
@@ -159,34 +159,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
             else if (commandInput.IsListFlagSpecified || commandInput.IsHelpFlagSpecified)
             {
-                return templateResolutionResult.HasExactMatches ? CreationResultStatus.Success :  CreationResultStatus.NotFound;
+                return templateResolutionResult.HasExactMatches ? CreationResultStatus.Success : CreationResultStatus.NotFound;
             }
             else
             {
                 return CreationResultStatus.OperationNotSpecified;
             }
-        }
-
-        // Returns true if any of the input templates has a valid parameter parse result.
-        private static bool AreAllParamsValidForAnyTemplateInList(IReadOnlyCollection<ITemplateMatchInfo> templateList)
-        {
-            bool anyValidTemplate = false;
-
-            foreach (ITemplateMatchInfo templateInfo in templateList)
-            {
-                if (templateInfo.GetInvalidParameterNames().Count == 0)
-                {
-                    anyValidTemplate = true;
-                    break;
-                }
-            }
-
-            return anyValidTemplate;
-        }
-
-        private static void DisplayHelpForAcceptedParameters(string commandName)
-        {
-            Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, commandName).Bold().Red());
         }
 
         // Displays the list of templates in a table, one row per template group.
@@ -213,7 +191,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         blankLineBetweenRows: false)
                     .DefineColumn(t => t.Name, LocalizableStrings.Templates, shrinkIfNeeded: true, minWidth:15, showAlways: true)
                     .DefineColumn(t => t.ShortName, LocalizableStrings.ShortName, showAlways: true)
-                    .DefineColumn(t => t.Languages, out object languageColumn,  LocalizableStrings.Language, NewCommandInputCli.LanguageColumnFilter, defaultColumn: true)
+                    .DefineColumn(t => t.Languages, out object languageColumn, LocalizableStrings.Language, NewCommandInputCli.LanguageColumnFilter, defaultColumn: true)
                     .DefineColumn(t => t.Type, LocalizableStrings.ColumnNameType, NewCommandInputCli.TypeColumnFilter, defaultColumn: false)
                     .DefineColumn(t => t.Author,  LocalizableStrings.ColumnNameAuthor, NewCommandInputCli.AuthorColumnFilter, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
                     .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.Tags, NewCommandInputCli.TagsColumnFilter, defaultColumn: true)
@@ -326,17 +304,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
         }
 
-        private static void ShowContextAndTemplateNameMismatchHelp(ListOrHelpTemplateListResolutionResult templateResolutionResult, string templateName, string templateLanguage, string context, string baselineName)
+        private static void ShowContextAndTemplateNameMismatchHelp(ListOrHelpTemplateListResolutionResult templateResolutionResult, INewCommandInput commandInput)
         {
-            if (string.IsNullOrEmpty(templateName) && string.IsNullOrEmpty(templateLanguage) && string.IsNullOrEmpty(context) && string.IsNullOrEmpty(baselineName))
+            if (string.IsNullOrEmpty(commandInput.TemplateName) && SupportedFilterOptions.SupportedListFilters.All(filter => !filter.IsFilterSet(commandInput)))
             {
                 return;
             }
-            DisplayPartialNameMatchLanguageAndContextProblems(templateName, templateLanguage, context, templateResolutionResult, baselineName);
-        }
-
-        private static void DisplayPartialNameMatchLanguageAndContextProblems(string templateName, string templateLanguage, string context, ListOrHelpTemplateListResolutionResult templateResolutionResult, string baselineName)
-        {
             bool anythingReported = false;
             if (templateResolutionResult.HasExactMatches)
             {
@@ -344,8 +317,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
             else
             {
-                //
-                ShowNoTemplatesFoundMessage(templateName, templateLanguage, context, baselineName);
+                ShowNoTemplatesFoundMessage(commandInput);
                 anythingReported = true;
             }
 
@@ -356,7 +328,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     string.Format(
                         LocalizableStrings.TemplatesNotValidGivenTheSpecifiedFilter,
                         templateResolutionResult.PartiallyMatchedTemplatesGrouped.Count,
-                        GetPartialMatchReason(templateResolutionResult, templateLanguage, context, baselineName))
+                        GetPartialMatchReason(templateResolutionResult, commandInput))
                     .Bold().Red());
 
                 anythingReported = true;
@@ -441,71 +413,47 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return $"dotnet {commandName} {template.ShortName} --help";
         }
 
-        private static string GetInputParametersString(string templateName, string templateLanguage, string context, string baselineName)
+        private static string GetInputParametersString(INewCommandInput commandInput)
         {
-            StringBuilder inputParametersString = new StringBuilder();
             string separator = ", ";
-
-            if (!string.IsNullOrEmpty(templateName))
-            {
-                inputParametersString.AppendFormat($"'{templateName}'");
-            }
-            if (!string.IsNullOrEmpty(templateLanguage))
-            {
-                inputParametersString.Append(separator).AppendFormat($"language='{templateLanguage}'");
-            }
-            if (!string.IsNullOrEmpty(context))
-            {
-                inputParametersString.Append(separator).AppendFormat($"type='{context}'");
-            }
-            if (!string.IsNullOrEmpty(baselineName))
-            {
-                inputParametersString.Append(separator).AppendFormat($"baseline='{baselineName}'");
-            }
-            return string.IsNullOrEmpty(templateName)
-                ? inputParametersString.ToString(separator.Length, inputParametersString.Length - separator.Length)
-                : inputParametersString.ToString();
+            string filters = string.Join(
+                separator,
+                SupportedFilterOptions.SupportedListFilters
+                    .Where(filter => filter.IsFilterSet(commandInput))
+                    .Select(filter => $"{filter.Name}='{filter.FilterValue(commandInput)}'"));
+            return string.IsNullOrEmpty(commandInput.TemplateName)
+                ? filters
+                : string.IsNullOrEmpty(filters)
+                    ? $"'{commandInput.TemplateName}'"
+                    : $"'{commandInput.TemplateName}'" + separator + filters;
         }
 
-        private static void ShowNoTemplatesFoundMessage(string templateName, string templateLanguage, string context, string baselineName)
+        private static void ShowNoTemplatesFoundMessage(INewCommandInput commandInput)
         {
             // No templates found matching the following input parameter(s): {0}.
             // To list installed templates: dotnet new --list.
-            Reporter.Error.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, GetInputParametersString(templateName, templateLanguage, context, baselineName)).Bold().Red());
+            Reporter.Error.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, GetInputParametersString(commandInput)).Bold().Red());
             Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand.Bold().Red());
         }
 
-        private static void ShowTemplatesFoundMessage(string templateName, string templateLanguage, string context, string baselineName)
+        private static void ShowTemplatesFoundMessage(INewCommandInput commandInput)
         {
-            if (!string.IsNullOrEmpty(templateName) || !string.IsNullOrEmpty(templateLanguage) || !string.IsNullOrEmpty(context) || !string.IsNullOrEmpty(baselineName))
+            if (!string.IsNullOrWhiteSpace(commandInput.TemplateName) || SupportedFilterOptions.SupportedListFilters.Any(filter => filter.IsFilterSet(commandInput)))
             {
                 // Templates found matching the following input parameter(s): {0}
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesFoundMatchingInputParameters, GetInputParametersString(templateName, templateLanguage, context, baselineName)));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesFoundMatchingInputParameters, GetInputParametersString(commandInput)));
                 Reporter.Output.WriteLine();
             }
         }
 
-        private static string GetPartialMatchReason(ListOrHelpTemplateListResolutionResult templateResolutionResult, string templateLanguage, string context, string baselineName)
+        private static string GetPartialMatchReason(ListOrHelpTemplateListResolutionResult templateResolutionResult, INewCommandInput commandInput)
         {
-            StringBuilder reason = new StringBuilder();
             string separator = ", ";
-
-            if (templateResolutionResult.HasLanguageMismatch)
-            {
-                reason.Append(separator).AppendFormat($"language='{templateLanguage}'");
-            }
-            if (templateResolutionResult.HasContextMismatch)
-            {
-                reason.Append(separator).AppendFormat($"type='{context}'");
-            }
-            if (templateResolutionResult.HasBaselineMismatch)
-            {
-                reason.Append(separator).AppendFormat($"baseline='{baselineName}'");
-            }
-
-            return reason.Length != 0
-                ? reason.ToString(separator.Length, reason.Length - separator.Length)
-                : string.Empty;
+            return string.Join(separator,
+                SupportedFilterOptions.SupportedListFilters
+                .OfType<TemplateFilterOption>()
+                .Where(filter => filter.IsFilterSet(commandInput) && filter.MismatchCriteria(templateResolutionResult))
+                .Select(filter => $"{filter.Name}='{filter.FilterValue(commandInput)}'"));
         }
     }
 }

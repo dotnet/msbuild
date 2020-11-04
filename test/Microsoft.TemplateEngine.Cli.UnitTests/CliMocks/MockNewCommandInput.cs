@@ -10,8 +10,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 {
     internal class MockNewCommandInput : INewCommandInput
     {
-        public MockNewCommandInput()
-            : this(new Dictionary<string, string>())
+        // a list of all the parameters defined by the template
+        private IReadOnlyList<string> _allParametersForTemplate;
+
+        private IReadOnlyDictionary<string, string> _rawParameterInputs;
+
+        public MockNewCommandInput() : this(new Dictionary<string, string>())
         {
         }
 
@@ -24,33 +28,39 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             RemainingArguments = new List<string>();
             _allParametersForTemplate = new List<string>();
         }
-
-        // a list of all the parameters defined by the template
-        private IReadOnlyList<string> _allParametersForTemplate;
-
-        private IReadOnlyDictionary<string, string> _rawParameterInputs;
-
-        public string CommandName => "MockNew";
-
-        public string TemplateName { get; set; }
-
-        public IReadOnlyList<string> Tokens { get; set; }
-
         public string Alias { get; set; }
 
-        public bool ShowAliasesSpecified { get; set; }
+        public string AllowScriptsToRun { get; set; }
 
-        public string ShowAliasesAliasName { get; set; }
+        public string AuthorFilter { get; set; }
 
         public string BaselineName { get; set; }
 
+        public bool CheckForUpdates { get; set; }
+
+        public bool CheckForUpdatesNoPrompt { get; set; }
+
+        public IReadOnlyCollection<string> Columns { get; set; } = new List<string>();
+
+        public string ColumnsParseError => throw new NotImplementedException();
+
+        public string CommandName => "MockNew";
+
+        public bool ExpandedExtraArgsFiles { get; set; }
+
         public IList<string> ExtraArgsFileNames { get; set; }
 
-        public IList<string> ToInstallList { get; set; }
+        public bool HasColumnsParseError => throw new NotImplementedException();
+
+        public bool HasParseError { get; set; }
+
+        public string HelpText { get; set; }
+
+        // When using this mock, set the inputs using constructor input.
+        // This property gets assigned based on the constructor input and the template being worked with.
+        public IReadOnlyDictionary<string, string> InputTemplateParams { get; private set; }
 
         public IList<string> InstallNuGetSourceList { get; set; }
-
-        public IList<string> ToUninstallList { get; set; }
 
         public bool IsDryRun { get; set; }
 
@@ -58,15 +68,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public bool IsHelpFlagSpecified { get; set; }
 
+        public bool IsInteractiveFlagSpecified { get; set; }
+
         public bool IsListFlagSpecified { get; set; }
 
         public bool IsQuietFlagSpecified { get; set; }
 
         public bool IsShowAllFlagSpecified { get; set; }
-
-        public bool IsInteractiveFlagSpecified { get; set; }
-
-        public string TypeFilter { get; set; }
 
         public string Language { get; set; }
 
@@ -76,18 +84,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public string OutputPath { get; set; }
 
-        public bool SkipUpdateCheck { get; set; }
-
-        public bool CheckForUpdates { get; set; }
-
-        public bool CheckForUpdatesNoPrompt { get; set; }
-
-        public string AllowScriptsToRun { get; set; }
-
-        // When using this mock, set the inputs using constructor input.
-        // This property gets assigned based on the constructor input and the template being worked with.
-        public IReadOnlyDictionary<string, string> InputTemplateParams { get; private set; }
-
         // When using this mock, set the inputs using constructor input.
         // This property gets assigned based on the constructor input and the template being worked with.
         public List<string> RemainingArguments { get; private set; }
@@ -96,11 +92,23 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         // This property gets assigned based on the constructor input and the template being worked with.
         public IDictionary<string, IList<string>> RemainingParameters { get; private set; }
 
-        public string HelpText { get; set; }
+        public string ShowAliasesAliasName { get; set; }
 
-        public bool HasParseError { get; set; }
+        public bool ShowAliasesSpecified { get; set; }
 
-        public bool ExpandedExtraArgsFiles { get; set; }
+        public bool ShowAllColumns { get; set; } = false;
+
+        public bool SkipUpdateCheck { get; set; }
+
+        public string TemplateName { get; set; }
+
+        public IList<string> ToInstallList { get; set; }
+
+        public IReadOnlyList<string> Tokens { get; set; }
+
+        public IList<string> ToUninstallList { get; set; }
+
+        public string TypeFilter { get; set; }
 
         public int Execute(params string[] args)
         {
@@ -197,14 +205,5 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         {
             throw new NotImplementedException();
         }
-
-        public IReadOnlyCollection<string> Columns { get; set; } = new List<string>();
-
-        public bool HasColumnsParseError => throw new NotImplementedException();
-
-        public string ColumnsParseError => throw new NotImplementedException();
-
-        public bool ShowAllColumns { get; set; } = false;
-
     }
 }
