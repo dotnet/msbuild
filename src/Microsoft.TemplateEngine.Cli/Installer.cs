@@ -233,7 +233,7 @@ namespace Microsoft.TemplateEngine.Cli
             const string packageRef = @"    <PackageReference Include=""{0}"" Version=""{1}"" />";
             const string projectFile = @"<Project ToolsVersion=""15.0"" Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
