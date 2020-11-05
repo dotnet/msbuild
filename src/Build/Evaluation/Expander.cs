@@ -4326,7 +4326,6 @@ namespace Microsoft.Build.Evaluation
                 return true;
             }
 
-
             private static bool TryConvertToInt(object value, out int arg0)
             {
                 switch (value)
