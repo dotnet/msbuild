@@ -4,7 +4,7 @@
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// This interface extends <see cref="IBuildEngine6" /> to allow tasks to set whether they want to
+    /// This interface extends <see cref="IBuildEngine7" /> to allow tasks to set whether they want to
     /// log an error when a task returns without logging an error.
     /// </summary>
     public interface IBuildEngine8 : IBuildEngine7
