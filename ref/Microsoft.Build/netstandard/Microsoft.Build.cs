@@ -2046,15 +2046,12 @@ namespace Microsoft.Build.Utilities
 {
     public partial class ChangeWaves
     {
-        public static readonly string[] AllWaves;
-        public static readonly System.Version[] AllWavesAsVersion;
-        public const string EnableAllFeatures = "999.999";
-        public const string Wave16_10 = "16.10";
-        public const string Wave16_8 = "16.8";
-        public const string Wave17_0 = "17.0";
+        public static readonly System.Version[] AllWaves;
+        public static readonly System.Version Wave16_10;
+        public static readonly System.Version Wave16_8;
+        public static readonly System.Version Wave17_0;
         public ChangeWaves() { }
-        public static string DisabledWave { get { throw null; } set { } }
-        public static bool AreFeaturesEnabled(string wave) { throw null; }
+        public static System.Version DisabledWave { get { throw null; } }
         public static bool AreFeaturesEnabled(System.Version wave) { throw null; }
         public static void ResetStateForTests() { }
     }

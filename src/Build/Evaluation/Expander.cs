@@ -4016,7 +4016,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.AreFeaturesEnabled), StringComparison.OrdinalIgnoreCase))
                         {
-                            if (TryGetArg(args, out string arg0))
+                            if (TryGetArg(args, out Version arg0))
                             {
                                 returnVal = IntrinsicFunctions.AreFeaturesEnabled(arg0);
                                 return true;
@@ -4301,6 +4301,31 @@ namespace Microsoft.Build.Evaluation
 
                 return TryConvertToInt(args[0], out arg0);
             }
+
+            private static bool TryGetArg(object[] args, out Version arg0)
+            {
+                if (args.Length != 1)
+                {
+                    arg0 = new Version();
+                    return false;
+                }
+
+                return TryConvertToVersion(args[0], out arg0);
+            }
+
+            private static bool TryConvertToVersion(object value, out Version arg0)
+            {
+                string val = value as string;
+
+                if (string.IsNullOrEmpty(val) || !Version.TryParse(val, out arg0))
+                {
+                    arg0 = new Version();
+                    return false;
+                }
+
+                return true;
+            }
+
 
             private static bool TryConvertToInt(object value, out int arg0)
             {

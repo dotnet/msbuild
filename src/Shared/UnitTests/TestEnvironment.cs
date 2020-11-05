@@ -94,11 +94,16 @@ namespace Microsoft.Build.UnitTests
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
+        public void SetChangeWave(Version wave)
+        {
+            SetChangeWave(wave.ToString());
+        }
 
         public void SetChangeWave(string wave)
         {
             ChangeWaves.ResetStateForTests();
             SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", wave);
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
         }
 
         /// <summary>
