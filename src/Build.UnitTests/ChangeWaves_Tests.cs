@@ -8,6 +8,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Xunit.Abstractions;
 using Microsoft.Build.Evaluation;
+using System;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
