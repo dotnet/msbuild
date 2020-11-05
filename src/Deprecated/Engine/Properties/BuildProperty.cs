@@ -3,9 +3,7 @@
 
 using System;
 using System.Xml;
-using System.Collections;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 
 using Microsoft.Build.BuildEngine.Shared;

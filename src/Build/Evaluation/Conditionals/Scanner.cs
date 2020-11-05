@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -283,8 +284,17 @@ namespace Microsoft.Build.Evaluation
                 return null;
             }
 
-            _parsePoint = ScanForPropertyExpressionEnd(_expression, _parsePoint++);
+            var result = ScanForPropertyExpressionEnd(_expression, _parsePoint++, out int indexResult);
+            if (!result)
+            {
+                _errorState = true;
+                _errorPosition = indexResult;
+                _errorResource = "IllFormedPropertySpaceInCondition";
+                _unexpectedlyFound = Convert.ToString(_expression[indexResult], CultureInfo.InvariantCulture);
+                return null;
+            }
 
+            _parsePoint = indexResult;
             // Maybe we need to generate an error for invalid characters in property/metadata name?
             // For now, just wait and let the property/metadata evaluation handle the error case.
             if (_parsePoint >= _expression.Length)
@@ -303,9 +313,15 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Scan for the end of the property expression
         /// </summary>
-        private static int ScanForPropertyExpressionEnd(string expression, int index)
+        /// <param name="expression">property expression to parse</param>
+        /// <param name="index">current index to start from</param>
+        /// <param name="indexResult">If successful, the index corresponds to the end of the property expression.
+        /// In case of scan failure, it is the error position index.</param>
+        /// <returns>result indicating whether or not the scan was successful.</returns>
+        private static bool ScanForPropertyExpressionEnd(string expression, int index, out int indexResult)
         {
             int nestLevel = 0;
+            bool whitespaceCheck = false;
 
             unsafe
             {
@@ -317,10 +333,17 @@ namespace Microsoft.Build.Evaluation
                         if (character == '(')
                         {
                             nestLevel++;
+                            whitespaceCheck = true;
                         }
                         else if (character == ')')
                         {
                             nestLevel--;
+                            whitespaceCheck = false;
+                        }
+                        else if (whitespaceCheck && char.IsWhiteSpace(character) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+                        {
+                            indexResult = index;
+                            return false;
                         }
 
                         // We have reached the end of the parenthesis nesting
@@ -328,7 +351,8 @@ namespace Microsoft.Build.Evaluation
                         // If it is not then the calling code will determine that
                         if (nestLevel == 0)
                         {
-                            return index;
+                            indexResult = index;
+                            return true;
                         }
                         else
                         {
@@ -337,7 +361,8 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
             }
-            return index;
+            indexResult = index;
+            return true;
         }
 
         /// <summary>

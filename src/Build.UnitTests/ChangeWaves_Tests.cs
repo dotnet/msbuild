@@ -1,12 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using Xunit;
 using Shouldly;
 using Microsoft.Build.Utilities;
-using System.Threading;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Xunit.Abstractions;

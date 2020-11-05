@@ -19,3 +19,7 @@ indent_size = 2
 # Xml config files
 [*.{props,targets,ruleset,config,nuspec,resx,vsixmanifest,vsct}]
 indent_size = 2
+
+[src/**/*.{cs,vb}]
+# IDE0005: Remove unnecessary usings/imports
+dotnet_diagnostic.IDE0005.severity = warning

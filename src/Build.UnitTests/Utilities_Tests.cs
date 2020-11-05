@@ -21,9 +21,6 @@ using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocati
 using Xunit;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.Internal;
-using Shouldly;
-using System.Linq;
 using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests

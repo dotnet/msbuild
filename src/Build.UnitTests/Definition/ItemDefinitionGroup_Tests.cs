@@ -4,21 +4,13 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Resources;
 using System.Reflection;
-using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
-using System.Text;
-using System.Globalization;
-
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Threading;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;

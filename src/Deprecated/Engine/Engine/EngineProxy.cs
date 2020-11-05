@@ -4,12 +4,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Permissions;
-using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
-using System.Globalization;
-using System.Threading;
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
 

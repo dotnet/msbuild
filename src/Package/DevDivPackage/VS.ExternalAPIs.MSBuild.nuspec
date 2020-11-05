@@ -4,8 +4,11 @@
     <id>VS.ExternalAPIs.MSBuild</id>
     <summary>CoreXT package containing MSBuild binaries for the VS build.</summary>
     <description>CoreXT package containing MSBuild binaries for the VS build. Produced from the MSBuild $branchname$ branch.</description>
-    <authors>MSBuild</authors>
+    <authors>Microsoft</authors>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
+    <projectUrl>$projectUrl$</projectUrl>
     <version>0.0</version>
+    <license type="expression">$licenseExpression$</license>
     <dependencies>
       <group targetFramework=".NETFramework4.7.2" />
     </dependencies>

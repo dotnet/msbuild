@@ -8,7 +8,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using System.Reflection;
-using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd
 {

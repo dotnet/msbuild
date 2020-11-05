@@ -2,10 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.Bootstrapper;
@@ -59,10 +56,12 @@ namespace Microsoft.Build.Tasks
             var launcherBuilder = new LauncherBuilder(LauncherPath);
             string entryPointFileName = Path.GetFileName(EntryPoint.ItemSpec);
             //
-            // If the EntryPoint specified is apphost.exe, we need to use the assemblyname instead since
-            // apphost.exe is the source file that will get copied to outdir as {assemblyname}.exe.
+            // If the EntryPoint specified is apphost.exe or singlefilehost.exe, we need to replace the EntryPoint
+            // with the AssemblyName instead since apphost.exe/singlefilehost.exe is an intermediate file for
+            // for final published {assemblyname}.exe.
             //
-            if (entryPointFileName.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) &&
+            if ((entryPointFileName.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) || 
+                entryPointFileName.Equals(Constants.SingleFileHostExe, StringComparison.InvariantCultureIgnoreCase)) &&
                 !String.IsNullOrEmpty(AssemblyName))
             {
                 entryPointFileName = AssemblyName;

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
@@ -14,7 +13,6 @@ using System.Text;
 using System.Threading;
 using System.Xml;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 

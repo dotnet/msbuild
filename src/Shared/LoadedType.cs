@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Reflection;
-using System.Collections.Generic;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared

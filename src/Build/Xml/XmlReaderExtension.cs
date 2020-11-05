@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Threading;
 using System.Xml;
 using Microsoft.Build.Shared;
 

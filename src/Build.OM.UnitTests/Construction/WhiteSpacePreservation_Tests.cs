@@ -8,7 +8,6 @@ using Microsoft.Build.Construction;
 using Xunit;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 

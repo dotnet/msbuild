@@ -776,27 +776,27 @@
       </trans-unit>
       <trans-unit id="GenerateLauncher.CopyError">
         <source>MSB3961: An error occurred trying to copy '{0}' to '{1}': {2}</source>
-        <target state="new">MSB3961: An error occurred trying to copy '{0}' to '{1}': {2}</target>
+        <target state="translated">MSB3961: Fehler beim Kopieren von "{0}" nach "{1}": {2}</target>
         <note>{StrBegin="MSB3961: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.General">
         <source>MSB3962: An error occurred generating a launcher: {0}</source>
-        <target state="new">MSB3962: An error occurred generating a launcher: {0}</target>
+        <target state="translated">MSB3962: Fehler beim Generieren eines Startprogramms: {0}</target>
         <note>{StrBegin="MSB3962: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.InvalidInput">
         <source>MSB3963: Not enough data was provided to generate a launcher. Please provide a value for: 'EntryPoint'.</source>
-        <target state="new">MSB3963: Not enough data was provided to generate a launcher. Please provide a value for: 'EntryPoint'.</target>
+        <target state="translated">MSB3963: Es wurden nicht genügend Daten zum Generieren eines Startprogramms bereitgestellt. Geben Sie einen Wert für "EntryPoint" an.</target>
         <note>{StrBegin="MSB3963: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.MissingLauncherExe">
         <source>MSB3964: Could not find required file '{0}'.</source>
-        <target state="new">MSB3964: Could not find required file '{0}'.</target>
+        <target state="translated">MSB3964: Die erforderliche Datei "{0}" wurde nicht gefunden.</target>
         <note>{StrBegin="MSB3964: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.NoOutputPath">
         <source>MSB3965: No output path specified in build settings.</source>
-        <target state="new">MSB3965: No output path specified in build settings.</target>
+        <target state="translated">MSB3965: In den Buildeinstellungen wurde kein Ausgabepfad angegeben.</target>
         <note>{StrBegin="MSB3965: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.AllowPartiallyTrustedCallers">
@@ -1436,11 +1436,6 @@
         <source>StopOnFirstFailure will have no effect when the following conditions are all present: 1) The system is running in multiple process mode 2) The BuildInParallel property is true. 3) The RunEachTargetSeparately property is false.</source>
         <target state="translated">StopOnFirstFailure hat keine Auswirkungen, wenn die folgenden Bedingungen alle gelten: 1) Das System wird im Mehrprozessmodus ausgeführt. 2) Die BuildInParallel-Eigenschaft ist TRUE. 3) Die RunEachTargetSeparately-Eigenschaft ist FALSE.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
-      </trans-unit>
-      <trans-unit id="RarCouldntConnect">
-        <source>Couldn't connect to the RAR node, starting a new one.</source>
-        <target state="new">Couldn't connect to the RAR node, starting a new one.</target>
-        <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>

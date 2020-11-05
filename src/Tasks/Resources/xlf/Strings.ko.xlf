@@ -776,27 +776,27 @@
       </trans-unit>
       <trans-unit id="GenerateLauncher.CopyError">
         <source>MSB3961: An error occurred trying to copy '{0}' to '{1}': {2}</source>
-        <target state="new">MSB3961: An error occurred trying to copy '{0}' to '{1}': {2}</target>
+        <target state="translated">MSB3961: '{0}'을(를) '{1}'에 복사하는 동안 오류가 발생했습니다. {2}</target>
         <note>{StrBegin="MSB3961: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.General">
         <source>MSB3962: An error occurred generating a launcher: {0}</source>
-        <target state="new">MSB3962: An error occurred generating a launcher: {0}</target>
+        <target state="translated">MSB3962: 시작 관리자를 생성하는 동안 오류가 발생했습니다. {0}</target>
         <note>{StrBegin="MSB3962: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.InvalidInput">
         <source>MSB3963: Not enough data was provided to generate a launcher. Please provide a value for: 'EntryPoint'.</source>
-        <target state="new">MSB3963: Not enough data was provided to generate a launcher. Please provide a value for: 'EntryPoint'.</target>
+        <target state="translated">MSB3963: 시작 관리자를 생성하는 데 충분한 데이터가 제공되지 않았습니다. 'EntryPoint'의 값을 제공하세요.</target>
         <note>{StrBegin="MSB3963: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.MissingLauncherExe">
         <source>MSB3964: Could not find required file '{0}'.</source>
-        <target state="new">MSB3964: Could not find required file '{0}'.</target>
+        <target state="translated">MSB3964: 필요한 파일 '{0}'을(를) 찾을 수 없습니다.</target>
         <note>{StrBegin="MSB3964: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.NoOutputPath">
         <source>MSB3965: No output path specified in build settings.</source>
-        <target state="new">MSB3965: No output path specified in build settings.</target>
+        <target state="translated">MSB3965: 빌드 설정에 출력 경로를 지정하지 않았습니다.</target>
         <note>{StrBegin="MSB3965: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.AllowPartiallyTrustedCallers">
@@ -1436,11 +1436,6 @@
         <source>StopOnFirstFailure will have no effect when the following conditions are all present: 1) The system is running in multiple process mode 2) The BuildInParallel property is true. 3) The RunEachTargetSeparately property is false.</source>
         <target state="translated">다음 조건이 모두 충족되면 StopOnFirstFailure가 효과가 없습니다. 1) 시스템이 다중 프로세스 모드에서 실행 중입니다. 2) BuildInParallel 속성이 true입니다. 3) RunEachTargetSeparately 속성이 false입니다.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
-      </trans-unit>
-      <trans-unit id="RarCouldntConnect">
-        <source>Couldn't connect to the RAR node, starting a new one.</source>
-        <target state="new">Couldn't connect to the RAR node, starting a new one.</target>
-        <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>

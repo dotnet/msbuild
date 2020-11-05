@@ -5,6 +5,7 @@ using System;
 
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Utilities;
 using Xunit;
 
 
@@ -98,6 +99,36 @@ namespace Microsoft.Build.UnitTests
             lexer = new Scanner("$x", ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
             Assert.Equal("IllFormedPropertyOpenParenthesisInCondition", lexer.GetErrorResource());
+        }
+
+        /// <summary>
+        /// Tests the space errors case
+        /// </summary>
+        [Fact]
+        public void SpaceProperty()
+        {
+            Scanner lexer = new Scanner("$(x )", ParserOptions.AllowProperties);
+            AdvanceToScannerError(lexer);
+            Assert.Equal("IllFormedPropertySpaceInCondition", lexer.GetErrorResource());
+
+            lexer = new Scanner("$( x)", ParserOptions.AllowProperties);
+            AdvanceToScannerError(lexer);
+            Assert.Equal("IllFormedPropertySpaceInCondition", lexer.GetErrorResource());
+        }
+
+        [Fact]
+        public void SpacePropertyOptOutWave16_10()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetChangeWave(ChangeWaves.Wave16_10);
+
+            Scanner lexer = new Scanner("$(x )", ParserOptions.AllowProperties);
+            AdvanceToScannerError(lexer);
+            Assert.Null(lexer.UnexpectedlyFound);
+
+            lexer = new Scanner("$( x)", ParserOptions.AllowProperties);
+            AdvanceToScannerError(lexer);
+            Assert.Null(lexer.UnexpectedlyFound);
         }
 
         /// <summary>

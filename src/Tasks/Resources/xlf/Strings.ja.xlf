@@ -776,27 +776,27 @@
       </trans-unit>
       <trans-unit id="GenerateLauncher.CopyError">
         <source>MSB3961: An error occurred trying to copy '{0}' to '{1}': {2}</source>
-        <target state="new">MSB3961: An error occurred trying to copy '{0}' to '{1}': {2}</target>
+        <target state="translated">MSB3961: '{0}' を '{1}' にコピーしようとしてエラーが発生しました: {2}</target>
         <note>{StrBegin="MSB3961: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.General">
         <source>MSB3962: An error occurred generating a launcher: {0}</source>
-        <target state="new">MSB3962: An error occurred generating a launcher: {0}</target>
+        <target state="translated">MSB3962: 起動ツールの生成中にエラーが発生しました: {0}</target>
         <note>{StrBegin="MSB3962: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.InvalidInput">
         <source>MSB3963: Not enough data was provided to generate a launcher. Please provide a value for: 'EntryPoint'.</source>
-        <target state="new">MSB3963: Not enough data was provided to generate a launcher. Please provide a value for: 'EntryPoint'.</target>
+        <target state="translated">MSB3963: 起動ツールを生成するために十分なデータが指定されませんでした。'EntryPoint' の値を指定してください。</target>
         <note>{StrBegin="MSB3963: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.MissingLauncherExe">
         <source>MSB3964: Could not find required file '{0}'.</source>
-        <target state="new">MSB3964: Could not find required file '{0}'.</target>
+        <target state="translated">MSB3964: 必要なファイル '{0}' が見つかりませんでした。</target>
         <note>{StrBegin="MSB3964: "}</note>
       </trans-unit>
       <trans-unit id="GenerateLauncher.NoOutputPath">
         <source>MSB3965: No output path specified in build settings.</source>
-        <target state="new">MSB3965: No output path specified in build settings.</target>
+        <target state="translated">MSB3965: 出力パスがビルド設定で指定されていません。</target>
         <note>{StrBegin="MSB3965: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.AllowPartiallyTrustedCallers">
@@ -1436,11 +1436,6 @@
         <source>StopOnFirstFailure will have no effect when the following conditions are all present: 1) The system is running in multiple process mode 2) The BuildInParallel property is true. 3) The RunEachTargetSeparately property is false.</source>
         <target state="translated">StopOnFirstFailure は、次のすべての条件に該当する場合に無効となります。1) システムがマルチプロセッサ モードで実行されている。2) BuildInParallel プロパティが true に設定されている。3) RunEachTargetSeparately プロパティが false に設定されている。</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
-      </trans-unit>
-      <trans-unit id="RarCouldntConnect">
-        <source>Couldn't connect to the RAR node, starting a new one.</source>
-        <target state="new">Couldn't connect to the RAR node, starting a new one.</target>
-        <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>

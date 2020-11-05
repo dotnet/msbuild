@@ -15,7 +15,6 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;
-using Microsoft.Build.Tasks.ResolveAssemblyReferences.Client;
 using Microsoft.Build.Utilities;
 
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
@@ -203,11 +202,6 @@ namespace Microsoft.Build.Tasks
                 _ignoreTargetFrameworkAttributeVersionMismatch = value;
             }
         }
-
-        /// <summary>
-        /// Indicates if ResolveAssemblyReference task should be run in its own node or not.
-        /// </summary>
-        public bool UseResolveAssemblyReferenceService { get; set; }
 
         /// <summary>
         /// Force dependencies to be walked even when a reference is marked with ExternallyResolved=true
@@ -2991,37 +2985,6 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
-            if (UseResolveAssemblyReferenceService && BuildEngine is IRarBuildEngine rarBuildEngine)
-            {
-                using var client = new RarClient(rarBuildEngine);
-
-                var connected = client.Connect();
-                if (!connected)
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "RarCouldntConnect");
-                    bool nodeCreated = false;
-                    try
-                    {
-                        nodeCreated = client.CreateNode();
-                    }
-                    catch (Exception e)
-                    {
-                        Log.LogWarningFromException(e);
-                    }
-
-                    if (nodeCreated)
-                    {
-                        connected = client.Connect(5000);
-                    }
-                }
-
-                if (connected)
-                {
-                    // Client is connected to the RAR node, we can execute RAR task remotely
-                    // return client.Execute(); // TODO: Let it do something.
-                }
-            }
-
             return Execute
             (
                 new FileExists(p => FileUtilities.FileExistsNoThrow(p)),

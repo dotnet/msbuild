@@ -3,7 +3,6 @@
 
 using System;
 using System.Xml;
-using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.BuildEngine.Shared
 {

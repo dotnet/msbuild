@@ -48,3 +48,7 @@ dependencies (Roslyn compilers, NuGet, etc.) from packages or from your local ma
 from Visual Studio). To produce a bootstrap build, run `.\build.cmd /p:CreateBootstrap=true` from the root of your enlistment.
 
 Now, just point `artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe` at a project file.
+
+### Patching Visual Studio
+
+Sometimes it's useful to patch your copy of Visual Studio. You can use the [Deploy-MSBuild script](../Deploy-MSBuild.md) for that.
