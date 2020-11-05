@@ -55,13 +55,13 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(perfLogDir);
                 Directory.CreateDirectory(projectDir);
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+                string content = ObjectModelHelpers.CleanupFileContents(
+                    "<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
                 File.WriteAllText(projectPath, content);
 
                 string msbuildParameters = "\"" + projectPath + "\"";
 
-                bool successfulExit;
-                RunnerUtilities.ExecMSBuild(RunnerUtilities.PathToCurrentlyRunningMsBuildExe, msbuildParameters, out successfulExit, environmentVariables: environmentVariables);
+                RunnerUtilities.ExecMSBuild(RunnerUtilities.PathToCurrentlyRunningMsBuildExe, msbuildParameters, out bool successfulExit, environmentVariables: environmentVariables);
                 successfulExit.ShouldBeTrue();
 
                 // Look for the file.
@@ -69,8 +69,8 @@ namespace Microsoft.Build.UnitTests
                 // It's most important to ensure that at least one file shows up because any others that show up will be there because MSBuild properly
                 // enabled this functionality.
                 string[] files = Directory.GetFiles(perfLogDir, "perf-*.log");
-                Assert.NotEmpty(files);
-                Assert.All(files, f => Assert.True(new FileInfo(f).Length > 0));
+                files.ShouldNotBeEmpty();
+                files.ShouldAllBe(f => new FileInfo(f).Length > 0);
             }
             finally
             {
@@ -95,18 +95,18 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.CreateDirectory(projectDir);
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+                string content = ObjectModelHelpers.CleanupFileContents(
+                    "<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
                 File.WriteAllText(projectPath, content);
 
                 string msbuildParameters = "\"" + projectPath + "\"";
 
-                Assert.False(Directory.Exists(perfLogDir));
+                Directory.Exists(perfLogDir).ShouldBeFalse();
 
-                bool successfulExit;
-                RunnerUtilities.ExecMSBuild(RunnerUtilities.PathToCurrentlyRunningMsBuildExe, msbuildParameters, out successfulExit, environmentVariables: environmentVariables);
+                RunnerUtilities.ExecMSBuild(RunnerUtilities.PathToCurrentlyRunningMsBuildExe, msbuildParameters, out bool successfulExit, environmentVariables: environmentVariables);
                 successfulExit.ShouldBeTrue();
 
-                Assert.False(Directory.Exists(perfLogDir));
+                Directory.Exists(perfLogDir).ShouldBeFalse();
             }
             finally
             {
