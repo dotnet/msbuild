@@ -49,13 +49,16 @@ namespace Microsoft.DotNet.Cli
         // Internal commands
         public static readonly Command InstallSuccessCommand = InternalReportinstallsuccessCommandParser.GetCommand();
 
-        // Global options
-        public static readonly Option DiagOption = new Option<bool>(new[] { "-d", "--diagnostics" }) { IsHidden = true };
+        // Options
+        public static readonly Option DiagOption = new Option<bool>(new[] { "-d", "--diagnostics" });
 
-        // Informational options
         public static readonly Option VersionOption = new Option<bool>("--version");
 
         public static readonly Option InfoOption = new Option<bool>("--info");
+
+        public static readonly Option ListSdksOption = new Option<bool>("--list-sdks");
+
+        public static readonly Option ListRuntimesOption = new Option<bool>("--list-runtimes");
 
         // Argument
         public static readonly Argument DotnetSubCommand = new Argument<string>() { Arity = ArgumentArity.ExactlyOne, IsHidden = true };
@@ -72,9 +75,11 @@ namespace Microsoft.DotNet.Cli
            rootCommand.AddCommand(InstallSuccessCommand);
 
             // Add options
-            rootCommand.AddGlobalOption(DiagOption);
+            rootCommand.AddOption(DiagOption);
             rootCommand.AddOption(VersionOption);
             rootCommand.AddOption(InfoOption);
+            rootCommand.AddOption(ListSdksOption);
+            rootCommand.AddOption(ListRuntimesOption);
 
             // Add argument
             rootCommand.AddArgument(DotnetSubCommand);

@@ -64,6 +64,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(PackageDirOption);
             command.AddOption(InteractiveOption);
             command.AddOption(PrereleaseOption);
+            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

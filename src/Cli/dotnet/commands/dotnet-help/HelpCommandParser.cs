@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.CommandLine;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.Help
 {
@@ -18,6 +19,7 @@ namespace Microsoft.DotNet.Tools.Help
             var command = new Command("help", LocalizableStrings.AppFullName);
 
             command.AddArgument(Argument);
+            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

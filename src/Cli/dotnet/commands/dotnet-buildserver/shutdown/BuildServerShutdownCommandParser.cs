@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(MSBuildOption);
             command.AddOption(VbcsOption);
             command.AddOption(RazorOption);
+            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

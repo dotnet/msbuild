@@ -65,6 +65,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ConfigOption);
             command.AddOption(SourceOption);
             command.AddOption(InteractiveOption);
+            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

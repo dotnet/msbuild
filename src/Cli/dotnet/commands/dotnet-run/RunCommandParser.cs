@@ -50,6 +50,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(InteractiveOption);
             command.AddOption(NoRestoreOption);
             command.AddOption(CommonOptions.VerbosityOption());
+            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

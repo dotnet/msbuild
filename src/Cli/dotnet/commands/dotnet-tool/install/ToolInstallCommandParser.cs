@@ -55,6 +55,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ToolCommandRestorePassThroughOptions.NoCacheOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.InteractiveRestoreOption);
             command.AddOption(VerbosityOption);
+            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

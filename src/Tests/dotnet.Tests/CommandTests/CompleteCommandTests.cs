@@ -1,12 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Utilities;
 using Xunit;
@@ -30,8 +27,11 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--list-runtimes",
                 "--list-sdks",
                 "--version",
+                "-?",
                 "-d",
                 "-h",
+                "/?",
+                "/h",
                 "add",
                 "build",
                 "build-server",
@@ -69,6 +69,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--list-runtimes",
                 "--list-sdks",
                 "--version",
+                "-?",
                 "-d",
                 "-h",
                 "build-server" // This should be removed when completion is based on "starts with" rather than "contains".
@@ -96,6 +97,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--output",
                 "--type",
                 "--uninstall",
+                "-?",
                 "-h",
                 "-i",
                 "-l",
@@ -103,6 +105,8 @@ namespace Microsoft.DotNet.Tests.Commands
                 "-n",
                 "-o",
                 "-u",
+                "/?",
+                "/h",
                 "--update-check",
                 "--update-apply"
             };
@@ -119,8 +123,11 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--help",
                 "--verbosity",
                 "--version",
+                "-?",
                 "-h",
                 "-v",
+                "/?",
+                "/h",
                 "delete",
                 "locals",
                 "push",
@@ -142,9 +149,12 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--non-interactive",
                 "--source",
                 "--interactive",
+                "-?",
                 "-h",
                 "-k",
                 "-s",
+                "/?",
+                "/h",
             };
 
             var reporter = new BufferedReporter();
@@ -160,9 +170,12 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--force-english-output",
                 "--help",
                 "--list",
+                "-?",
                 "-c",
                 "-h",
                 "-l",
+                "/?",
+                "/h",
                 "all",
                 "global-packages",
                 "http-cache",
@@ -191,6 +204,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 "--symbol-source",
                 "--timeout",
                 "--interactive",
+                "-?",
                 "-d",
                 "-h",
                 "-k",
@@ -198,7 +212,9 @@ namespace Microsoft.DotNet.Tests.Commands
                 "-s",
                 "-sk",
                 "-ss",
-                "-t"
+                "-t",
+                "/?",
+                "/h",
             };
 
             var reporter = new BufferedReporter();

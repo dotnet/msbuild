@@ -21,6 +21,7 @@ namespace Microsoft.DotNet.Cli
             command.AddArgument(ProjectArgument);
             command.AddCommand(AddPackageParser.GetCommand());
             command.AddCommand(AddProjectToProjectReferenceParser.GetCommand());
+            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

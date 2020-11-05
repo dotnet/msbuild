@@ -13,6 +13,7 @@ namespace Microsoft.DotNet.Cli
             var command = new Command("build-server", LocalizableStrings.CommandDescription);
 
             command.AddCommand(ServerShutdownCommandParser.GetCommand());
+            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

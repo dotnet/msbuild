@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.Cli
             var command = new Command("reference", LocalizableStrings.AppFullName);
 
             command.AddArgument(Argument);
+            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

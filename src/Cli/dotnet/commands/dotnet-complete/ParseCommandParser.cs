@@ -16,7 +16,10 @@ namespace Microsoft.DotNet.Cli
 
         public static Command GetCommand()
         {
-            var command = new Command("complete", string.Empty);
+            var command = new Command("complete")
+            {
+                IsHidden = true
+            };
 
             command.AddArgument(PathArgument);
             command.AddOption(PositionOption);

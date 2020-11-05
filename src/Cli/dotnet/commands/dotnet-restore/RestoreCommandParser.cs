@@ -53,6 +53,8 @@ namespace Microsoft.DotNet.Cli
                 command.AddOption(option);
             }
 
+            command.AddOption(CommonOptions.DiagOption());
+
             return command;
         }
 

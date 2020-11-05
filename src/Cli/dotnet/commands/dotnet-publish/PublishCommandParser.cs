@@ -59,6 +59,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.InteractiveMsBuildForwardOption());
             command.AddOption(NoRestoreOption);
             command.AddOption(CommonOptions.VerbosityOption());
+            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

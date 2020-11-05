@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Cli
                     Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, bool.TrueString);
                     CommandContext.SetVerbose(true);
                 }
-                else if (parseResult.HasOption(Parser.VersionOption))
+                if (parseResult.HasOption(Parser.VersionOption))
                 {
                     CommandLineInfo.PrintVersion();
                     return 0;
@@ -160,18 +160,19 @@ namespace Microsoft.DotNet.Cli
             TelemetryEventEntry.SendFiltered(parseResult);
 
             int exitCode;
-            if (parseResult.RootCommandResult.Children == null || parseResult.RootCommandResult.Children.Count == 0)
+            if (parseResult.CommandResult.Command.Name.Equals("dotnet") && string.IsNullOrEmpty(parseResult.ValueForArgument<string>(Parser.DotnetSubCommand)))
             {
                 exitCode = 0;
             }
-            else if (BuiltInCommandsCatalog.Commands.TryGetValue(parseResult.RootCommandResult.Children.FirstOrDefault().Symbol.Name, out var builtIn))
+            else if (BuiltInCommandsCatalog.Commands.TryGetValue(parseResult.RootCommandResult.Children?
+                .FirstOrDefault(c => c.Token() != null && c.Token().Type.Equals(TokenType.Command))?.Symbol.Name ?? string.Empty, out var builtIn))
             {
                 if (parseResult.Errors.Count <= 0)
                 {
                     TelemetryEventEntry.SendFiltered(parseResult);
                 }
 
-                var topLevelCommandParser = parseResult.RootCommandResult.Children.FirstOrDefault();
+                var topLevelCommandParser = parseResult.RootCommandResult.Children.FirstOrDefault(c => c.Token() != null && c.Token().Type.Equals(TokenType.Command));
                 var topLevelCommands = new string[] { "dotnet", topLevelCommandParser.Symbol.Name };
 
                 exitCode = builtIn.Command(parseResult.Tokens.Select(t => t.Value).Except(topLevelCommands).ToArray());

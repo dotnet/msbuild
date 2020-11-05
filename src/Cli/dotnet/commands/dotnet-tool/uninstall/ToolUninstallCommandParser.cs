@@ -28,6 +28,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(LocalOption);
             command.AddOption(ToolPathOption);
             command.AddOption(ToolManifestOption);
+            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

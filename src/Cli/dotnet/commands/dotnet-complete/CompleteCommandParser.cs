@@ -9,7 +9,10 @@ namespace Microsoft.DotNet.Cli
     {
         public static Command GetCommand()
         {
-            var command = new Command("parse");
+            var command = new Command("parse")
+            {
+                IsHidden = true
+            };
 
             return command;
         }

@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Cli
             command.AddArgument(ProjectPathArgument);
             command.AddOption(InRootOption);
             command.AddOption(SolutionFolderOption);
+            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

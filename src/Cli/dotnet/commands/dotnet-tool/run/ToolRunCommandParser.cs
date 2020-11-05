@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.Cli
             var command = new Command("run", LocalizableStrings.CommandDescription);
 
             command.AddArgument(CommandNameArgument);
+            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }
