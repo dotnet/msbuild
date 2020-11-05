@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Components.ResourceManager;
 using Microsoft.Build.BackEnd.Logging;
 using System;
 using Microsoft.Build.BackEnd.SdkResolution;
@@ -9,7 +10,6 @@ using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
-using Microsoft.Build.BackEnd.Components.ResourceManager;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
