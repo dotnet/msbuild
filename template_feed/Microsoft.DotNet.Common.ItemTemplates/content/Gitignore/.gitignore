@@ -61,6 +61,9 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
+# Tye
+.tye/
+
 # StyleCop
 StyleCopReport.xml
 
