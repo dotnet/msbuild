@@ -115,7 +115,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 p.Build().ShouldBeTrue();
 
                 log.WarningCount.ShouldBe(1);
-                log.AssertLogContains("invalid format");
+                log.AssertLogContains("MSB4271");
                 log.AssertLogContains("Hello World!");
             }
         }
@@ -151,7 +151,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     p.Build().ShouldBeTrue();
 
                     log.WarningCount.ShouldBe(1);
-                    log.AssertLogContains("out of rotation");
+                    log.AssertLogContains("MSB4272");
                     log.AssertLogContains("Hello World!");
                 }
 
@@ -188,7 +188,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     p.Build().ShouldBeTrue();
 
                     log.WarningCount.ShouldBe(1);
-                    log.AssertLogContains("out of rotation");
+                    log.AssertLogContains("MSB4272");
                     log.AssertLogContains("Hello World!");
                 }
             }

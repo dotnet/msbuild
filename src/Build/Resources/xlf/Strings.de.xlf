@@ -63,8 +63,8 @@
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
-        <source>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {2}.</source>
-        <target state="new">MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {2}.</target>
+        <source>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
+        <target state="new">MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">

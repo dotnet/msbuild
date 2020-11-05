@@ -314,7 +314,7 @@
     </comment>
   </data>
   <data name="ChangeWave_InvalidFormat" xml:space="preserve">
-    <value>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {2}.</value>
+    <value>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</value>
     <comment>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</comment>
   </data>
   <data name="ChangeWave_OutOfRotation" xml:space="preserve">

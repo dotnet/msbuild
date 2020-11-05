@@ -1081,6 +1081,20 @@ namespace Microsoft.Build.Evaluation
                 }
             }
         }
+        private void ValidateChangeWaveState()
+        {
+            ChangeWaves.ApplyChangeWave();
+
+            switch (ChangeWaves.ConversionState)
+            {
+                case ChangeWaveConversionState.InvalidFormat:
+                    _evaluationLoggingContext.LogWarning("", new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion, $"[{String.Join(", ", ChangeWaves.AllWaves.Select(x => x.ToString()))}]");
+                    break;
+                case ChangeWaveConversionState.OutOfRotation:
+                    _evaluationLoggingContext.LogWarning("", new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.DisabledWave, Traits.Instance.MSBuildDisableFeaturesFromVersion, $"[{String.Join(", ", ChangeWaves.AllWaves.Select(x => x.ToString()))}]");
+                    break;
+            }
+        }
 
         /// <summary>
         /// Set the built-in properties, most of which are read-only
@@ -1099,6 +1113,8 @@ namespace Microsoft.Build.Evaluation
             SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild);
 
             SetBuiltInProperty(ReservedPropertyNames.msbuilddisablefeaturesfromversion, ChangeWaves.DisabledWave.ToString());
+
+            ValidateChangeWaveState();
 
             // Fake OS env variables when not on Windows
             if (!NativeMethodsShared.IsWindows)

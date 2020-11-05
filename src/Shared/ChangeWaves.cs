@@ -28,7 +28,7 @@ namespace Microsoft.Build.Utilities
         public static readonly Version[] AllWaves = { Wave16_8, Wave16_10, Wave17_0 };
 
         /// <summary>
-        /// Special value indicating that all features behind Change Waves should be enabled.
+        /// Special value indicating that all features behind all Change Waves should be enabled.
         /// </summary>
         internal static readonly Version EnableAllFeatures = new Version(999, 999);
 
@@ -68,9 +68,7 @@ namespace Microsoft.Build.Utilities
         private static Version _cachedWave;
 
         /// <summary>
-        /// The current disabled wave, typically set via the MSBUILDDISABLEFEATURESFROMVERSION environment variable.
-        /// If MSBUILDDISABLEFEATURESFROMVERSION is unset, DisabledWave will default to '999.999', a special value indicating
-        /// there is no disabled wave.
+        /// The current disabled wave.
         /// </summary>
         public static Version DisabledWave
         {
@@ -107,7 +105,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Read from environment variable MSBUILDDISABLEFEATURESFROMVERSION, cache it, and cache the conversion state.
+        /// Read from environment variable `MSBuildDisableFeaturesFromVersion`, correct it if required, cache it and its ConversionState.
         /// </summary>
         internal static void ApplyChangeWave()
         {
@@ -117,27 +115,24 @@ namespace Microsoft.Build.Utilities
                 return;
             }
 
-            // Is `MSBUILDDISABLEFEATURESFROMVERSION` not set?
+            // Most common case, `MSBuildDisableFeaturesFromVersion` unset
             if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableFeaturesFromVersion))
             {
                 ConversionState = ChangeWaveConversionState.Valid;
                 _cachedWave = ChangeWaves.EnableAllFeatures;
                 return;
             }
-            // If _cachedWave hasn't been set yet, try to parse it
             else if (_cachedWave == null && !Version.TryParse(Traits.Instance.MSBuildDisableFeaturesFromVersion, out _cachedWave))
             {
                 ConversionState = ChangeWaveConversionState.InvalidFormat;
                 _cachedWave = ChangeWaves.EnableAllFeatures;
                 return;
             }
-            // Are we enabling everything, or do we have a valid wave?
             else if (_cachedWave == EnableAllFeatures || AllWaves.Contains(_cachedWave))
             {
                 ConversionState = ChangeWaveConversionState.Valid;
                 return;
             }
-            // If the version is out of rotation, log a warning and clamp the value.
             else if (_cachedWave < LowestWave)
             {
                 ConversionState = ChangeWaveConversionState.OutOfRotation;
@@ -151,12 +146,7 @@ namespace Microsoft.Build.Utilities
                 return;
             }
 
-            // What we know about _cachedWave at this point:
-            // 1. It's a valid wave
-            // 2. It's within the bounds of the lowest and highest
-            // 3. Is not a pre-existing wave
-            // Therefore:
-            // There is guaranteed to be *at least* one wave larger than whatever _cachedWave is.
+            // _cachedWave is somewhere between valid waves, find the next valid version.
             _cachedWave = AllWaves.Where((x) => x > _cachedWave).First();
             ConversionState = ChangeWaveConversionState.Valid;
         }
