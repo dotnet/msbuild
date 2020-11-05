@@ -697,15 +697,6 @@ namespace Microsoft.Build.BackEnd
             return coresAcquired;
         }
 
-        public void RequireCores(int requestedCores)
-        {
-            var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
-
-            rms.RequireCores(requestedCores);
-
-            runningTotal += requestedCores; // default reservation
-        }
-
         public void ReleaseCores(int coresToRelease)
         {
             var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
