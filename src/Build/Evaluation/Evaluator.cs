@@ -1081,6 +1081,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
         }
+
         private void ValidateChangeWaveState()
         {
             ChangeWaves.ApplyChangeWave();

@@ -63,7 +63,6 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                //TODO: Test without calling env.setchangewave and with calling it with ("");
                 Version featureAsVersion = Version.Parse(featureVersion);
                 ChangeWaves.AreFeaturesEnabled(featureAsVersion).ShouldBe(true);
 
