@@ -25,14 +25,14 @@ The Process:
 
 ## Creating a Change Wave
 1. In the `Microsoft.Build` project, open `SharedUtilities\ChangeWaves.cs`.
-2. Add a const string to identify the new wave, following the format:
+2. Add a readonly Version to identify the new wave, following the format:
 ```c#
-public const string Wave17_4 = "17.4";
+public const Version Wave17_4 = new Version(17, 4);
 ```
 3. You may need to delete the lowest wave as new waves get added.
 4. Update the AllWaves array appropriately.
 ```c#
-public static readonly string[] AllWaves = { Wave16_10, Wave17_0, Wave17_4 };
+public static readonly Version[] AllWaves = { Wave16_10, Wave17_0, Wave17_4 };
 ```
 
 ## Condition Your Feature On A Change Wave
