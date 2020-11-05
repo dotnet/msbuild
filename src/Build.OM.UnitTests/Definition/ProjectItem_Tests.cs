@@ -2977,6 +2977,25 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void UpdateFromReferencedItemShouldBeCaseInsensitive2()
+        {
+            string content = @"
+                              <to Include='a' />
+
+                              <to Update='A' m='m1_contents' />";
+
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, true);
+
+            var expectedMetadataA = new Dictionary<string, string>
+            {
+                {"m", "m1_contents"},
+            };
+
+            items[0].ItemType.ShouldBe("to");
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataA, items[0]);
+        }
+
+        [Fact]
         public void UndeclaredQualifiedMetadataReferencesInUpdateShouldResolveToEmptyStrings()
         {
             string content = @"
