@@ -719,14 +719,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        public void BlockingWaitForCore()
-        {
-            var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
-
-            rms.RequireCores(1);
-            runningTotal += 1;
-        }
-
         internal void ReleaseAllCores()
         {
             ReleaseCores(runningTotal);
