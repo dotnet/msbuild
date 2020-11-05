@@ -11,7 +11,6 @@ using System.Xml;
 
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -22,7 +21,6 @@ using Shouldly;
 using Xunit;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {

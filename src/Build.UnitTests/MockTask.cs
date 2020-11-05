@@ -7,7 +7,6 @@ using System.Collections;
 using Microsoft.Build.Framework;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {

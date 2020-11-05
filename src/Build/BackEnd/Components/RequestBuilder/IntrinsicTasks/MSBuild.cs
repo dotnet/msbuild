@@ -7,7 +7,6 @@ using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 

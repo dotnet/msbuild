@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Shouldly;

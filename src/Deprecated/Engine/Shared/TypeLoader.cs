@@ -4,8 +4,6 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Collections;
-using System.Globalization;
 using System.Collections.Generic;
 
 namespace Microsoft.Build.BuildEngine.Shared

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
 using Microsoft.Build.Logging;
 using Xunit;
 using Xunit.Abstractions;

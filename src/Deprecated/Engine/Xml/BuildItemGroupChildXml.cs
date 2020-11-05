@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.BuildEngine.Shared;
 using System.Xml;
-using System.Collections;
 
 namespace Microsoft.Build.BuildEngine
 {

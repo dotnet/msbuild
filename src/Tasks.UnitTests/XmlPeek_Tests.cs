@@ -1,20 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
-using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using System;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Reflection.Emit;
 using System.IO;
-using System.Text.RegularExpressions;
-using System.Text;
-using System.Xml;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests

@@ -47,7 +47,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Backing dictionary
         /// </summary>
-        private readonly CopyOnWriteDictionary<string, T> _properties;
+        private readonly CopyOnWriteDictionary<T> _properties;
 
         /// <summary>
         /// Creates empty dictionary
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Collections
         public CopyOnWritePropertyDictionary()
         {
             // Tracing.Record("New COWD1");
-            _properties = new CopyOnWriteDictionary<string, T>(MSBuildNameIgnoreCaseComparer.Default);
+            _properties = new CopyOnWriteDictionary<T>(MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Collections
         public CopyOnWritePropertyDictionary(int capacity)
         {
             // Tracing.Record("New COWD2");
-            _properties = new CopyOnWriteDictionary<string, T>(capacity, MSBuildNameIgnoreCaseComparer.Default);
+            _properties = new CopyOnWriteDictionary<T>(capacity, MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>

@@ -252,10 +252,10 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Set the target framework paths.
-        /// This is used to optimize IO in the case of files requested from one 
+        /// This is used to optimize IO in the case of files requested from one
         /// of the FX folders.
         /// </summary>
-        /// <param name="installedAssemblyTableInfos"></param>
+        /// <param name="installedAssemblyTableInfos">List of Assembly Table Info.</param>
         internal void SetInstalledAssemblyInformation
         (
             AssemblyTableInfo[] installedAssemblyTableInfos

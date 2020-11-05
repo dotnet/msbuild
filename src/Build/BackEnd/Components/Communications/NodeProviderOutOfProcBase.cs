@@ -8,11 +8,17 @@ using System.IO;
 using System.IO.Pipes;
 using System.Diagnostics;
 using System.Threading;
+#if !FEATURE_APM
 using System.Threading.Tasks;
+#endif
 using System.Runtime.InteropServices;
+#if FEATURE_PIPE_SECURITY
 using System.Security.Principal;
+#endif
 
+#if FEATURE_APM
 using Microsoft.Build.Eventing;
+#endif
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -349,7 +355,7 @@ namespace Microsoft.Build.BackEnd
                 int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
                 for (int i = 0; i < handshakeComponents.Length; i++)
                 {
-                    CommunicationsUtilities.Trace("Writing handshake part {0} to pipe {1}", i, pipeName);
+                    CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], pipeName);
                     nodeStream.WriteIntForHandshake(handshakeComponents[i]);
                 }
 

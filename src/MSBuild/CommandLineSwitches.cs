@@ -5,8 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using Microsoft.Win32;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.CommandLine

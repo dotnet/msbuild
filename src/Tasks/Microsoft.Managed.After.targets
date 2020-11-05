@@ -43,10 +43,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_MainReferenceTarget Condition="'$(_MainReferenceTarget)' == ''">GetTargetPath</_MainReferenceTarget>
 
     <ProjectReferenceTargetsForBuildInOuterBuild>GetTargetFrameworks;$(ProjectReferenceTargetsForBuildInOuterBuild)</ProjectReferenceTargetsForBuildInOuterBuild>
-    <ProjectReferenceTargetsForBuild>$(_MainReferenceTarget);GetNativeManifest;$(_RecursiveTargetForContentCopying);$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
+    <ProjectReferenceTargetsForBuild>$(_MainReferenceTarget);GetNativeManifest;$(_RecursiveTargetForContentCopying);GetTargetFrameworksWithPlatformForSingleTargetFramework;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
 
     <ProjectReferenceTargetsForCleanInOuterBuild>GetTargetFrameworks;$(ProjectReferenceTargetsForCleanInOuterBuild)</ProjectReferenceTargetsForCleanInOuterBuild>
-    <ProjectReferenceTargetsForClean>Clean;$(ProjectReferenceTargetsForClean)</ProjectReferenceTargetsForClean>
+    <ProjectReferenceTargetsForClean>Clean;GetTargetFrameworksWithPlatformForSingleTargetFramework;$(ProjectReferenceTargetsForClean)</ProjectReferenceTargetsForClean>
 
     <ProjectReferenceTargetsForRebuildInOuterBuild>$(ProjectReferenceTargetsForCleanInOuterBuild);$(ProjectReferenceTargetsForBuildInOuterBuild);$(ProjectReferenceTargetsForRebuildInOuterBuild)</ProjectReferenceTargetsForRebuildInOuterBuild>
     <ProjectReferenceTargetsForRebuild>$(ProjectReferenceTargetsForClean);$(ProjectReferenceTargetsForBuild);$(ProjectReferenceTargetsForRebuild)</ProjectReferenceTargetsForRebuild>

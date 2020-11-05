@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Shared;
@@ -167,7 +166,7 @@ namespace Microsoft.Build.Internal
                 // Unescape before handing it to the filesystem.
                 var directoryUnescaped = EscapingUtilities.UnescapeAll(directoryEscaped);
                 var filespecUnescaped = EscapingUtilities.UnescapeAll(filespecEscaped);
-                var excludeSpecsUnescaped = excludeSpecsEscaped.Where(IsValidExclude).Select(EscapingUtilities.UnescapeAll).ToList();
+                var excludeSpecsUnescaped = excludeSpecsEscaped.Where(IsValidExclude).Select(i => EscapingUtilities.UnescapeAll(i)).ToList();
 
                 // Get the list of actual files which match the filespec.  Put
                 // the list into a string array.  If the filespec started out

@@ -69,6 +69,19 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
+        /// Assembly name passed to the manifest generation task
+        /// </summary>
+        [XmlIgnore]
+        public string AssemblyName { get; set; }
+
+        /// <summary>
+        /// Indicates if manifest is part of Launcher-based deployment, which requires
+        /// somewhat different manifest generation and validation.
+        /// </summary>
+        [XmlIgnore]
+        public bool LauncherBasedDeployment { get; set; } = false;
+
+        /// <summary>
         /// Specifies a textual description for the manifest.
         /// </summary>
         [XmlIgnore]
@@ -466,7 +479,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-        private static void UpdateFileReference(BaseReference f, string targetFrameworkVersion)
+        private void UpdateFileReference(BaseReference f, string targetFrameworkVersion)
         {
             if (String.IsNullOrEmpty(f.ResolvedPath))
             {
@@ -485,6 +498,21 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             f.Hash = hash;
             f.Size = size;
+
+            //
+            // .NETCore Launcher.exe based Deployment: If the filereference is for apphost.exe, we need to change
+            // the ResolvedPath and TargetPath to {assemblyname}.exe before we write the manifest, so that the
+            // manifest does not have a file reference to apphost.exe
+            //
+            string fileName = Path.GetFileName(f.ResolvedPath);
+            if (LauncherBasedDeployment &&
+                fileName.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) &&
+                !String.IsNullOrEmpty(AssemblyName))
+            {
+                f.ResolvedPath = Path.Combine(Path.GetDirectoryName(f.ResolvedPath), AssemblyName);
+                f.TargetPath = BaseReference.GetDefaultTargetPath(f.ResolvedPath);
+            }
+
             if (String.IsNullOrEmpty(f.TargetPath))
             {
                 if (!String.IsNullOrEmpty(f.SourcePath))

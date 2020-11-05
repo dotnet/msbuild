@@ -4,8 +4,6 @@ using Shouldly;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
-using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
@@ -271,6 +269,73 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
+        [Fact]
+        public void SdkResolverLoaderHonorsIncludeDefaultEnvVar()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var origIncludeDefault = Environment.GetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER");
+                try
+                {
+                    var testRoot = env.CreateFolder().Path;
+                    Environment.SetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER", "false");
+                    SdkResolverLoader loader = new MockSdkResolverLoader()
+                    {
+                        LoadResolversAction = (resolverPath, loggingContext, location, resolvers) => {
+                            resolvers.Add(new MockSdkResolverWithAssemblyPath(resolverPath));
+                        }
+                    };
+                    IList<SdkResolverBase> resolvers = loader.LoadResolvers(_loggingContext, new MockElementLocation("file"));
+
+                    resolvers.Count.ShouldBe(0);
+                }
+                finally
+                {
+                    Environment.SetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER", origIncludeDefault);
+                }
+            }
+        }
+
+        [Fact]
+        public void SdkResolverLoaderHonorsAdditionalResolversFolder()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var origResolversFolder = Environment.GetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER");
+                try
+                {
+                    var testRoot = env.CreateFolder().Path;
+                    var additionalRoot = env.CreateFolder().Path;
+
+                    var resolver1 = "Resolver1";
+                    var resolver1Path = Path.Combine(additionalRoot, resolver1, $"{resolver1}.dll");
+                    Directory.CreateDirectory(Path.Combine(testRoot, resolver1));
+                    File.WriteAllText(Path.Combine(testRoot, resolver1, $"{resolver1}.dll"), string.Empty);
+                    Directory.CreateDirectory(Path.Combine(additionalRoot, resolver1));
+                    File.WriteAllText(resolver1Path, string.Empty);
+                    var resolver2 = "Resolver2";
+                    var resolver2Path = Path.Combine(testRoot, resolver2, $"{resolver2}.dll");
+                    Directory.CreateDirectory(Path.Combine(testRoot, resolver2));
+                    File.WriteAllText(resolver2Path, string.Empty);
+                    var resolver3 = "Resolver3";
+                    var resolver3Path = Path.Combine(additionalRoot, resolver3, $"{resolver3}.dll");
+                    Directory.CreateDirectory(Path.Combine(additionalRoot, resolver3));
+                    File.WriteAllText(resolver3Path, string.Empty);
+
+                    Environment.SetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER", additionalRoot);
+
+                    SdkResolverLoader loader = new SdkResolverLoader();
+                    IList<string> resolvers = loader.FindPotentialSdkResolvers(testRoot, new MockElementLocation("file"));
+
+                    resolvers.ShouldBeSameIgnoringOrder(new[] { resolver1Path, resolver2Path, resolver3Path });
+                }
+                finally
+                {
+                    Environment.SetEnvironmentVariable("MSBUILDADDITIONALSDKRESOLVERSFOLDER", origResolversFolder);
+                }
+            }
+        }
+
         private class MockSdkResolverThatDoesNotLoad : SdkResolverBase
         {
             public const string ExpectedMessage = "A8BB8B3131D3475D881ACD3AF8D75BD6";
@@ -306,6 +371,25 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
+        private class MockSdkResolverWithAssemblyPath : SdkResolverBase
+        {
+            public string AssemblyPath;
+
+            public MockSdkResolverWithAssemblyPath(string assemblyPath = "")
+            {
+                AssemblyPath = assemblyPath;
+            }
+
+            public override string Name => nameof(MockSdkResolverWithAssemblyPath);
+
+            public override int Priority => 0;
+
+            public override SdkResultBase Resolve(SdkReference sdkReference, SdkResolverContextBase resolverContext, SdkResultFactoryBase factory)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         private class MockSdkResolverLoader : SdkResolverLoader
         {
             public Func<string, LoggingContext, ElementLocation, Assembly> LoadResolverAssemblyFunc { get; set; }
@@ -313,6 +397,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             public Func<string, ElementLocation, IList<string>> FindPotentialSdkResolversFunc { get; set; }
 
             public Func<Assembly, IEnumerable<Type>> GetResolverTypesFunc { get; set; }
+
+            public Action<string, LoggingContext, ElementLocation, List<SdkResolver>> LoadResolversAction { get; set; }
 
             protected override Assembly LoadResolverAssembly(string resolverPath, LoggingContext loggingContext, ElementLocation location)
             {
@@ -342,6 +428,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 }
 
                 return base.FindPotentialSdkResolvers(rootFolder, location);
+            }
+
+            protected override void LoadResolvers(string resolverPath, LoggingContext loggingContext, ElementLocation location, List<SdkResolver> resolvers)
+            {
+                if (LoadResolversAction != null)
+                {
+                    LoadResolversAction(resolverPath, loggingContext, location, resolvers);
+                    return;
+                }
+                base.LoadResolvers(resolverPath, loggingContext, location, resolvers);
             }
         }
     }

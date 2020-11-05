@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Globalization;
 
 using Microsoft.Build.Shared;
-using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
 {

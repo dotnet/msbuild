@@ -4,8 +4,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-
-using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 using error = Microsoft.Build.BuildEngine.Shared.ErrorUtilities;
 

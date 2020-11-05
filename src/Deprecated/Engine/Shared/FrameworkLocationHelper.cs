@@ -3,9 +3,6 @@
 
 using System;
 using System.IO;
-using System.Text;
-using System.Diagnostics;
-using System.Globalization;
 
 namespace Microsoft.Build.BuildEngine.Shared
 {

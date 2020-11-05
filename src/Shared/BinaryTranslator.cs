@@ -2,19 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.IO;
-using System.Threading;
 using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using System.Globalization;
 using System.Reflection;

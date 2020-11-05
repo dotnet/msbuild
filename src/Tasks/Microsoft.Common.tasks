@@ -116,6 +116,7 @@
     <UsingTask TaskName="Microsoft.Build.Tasks.GenerateBindingRedirects"              AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.GenerateBootstrapper"                  AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.GenerateDeploymentManifest"            AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
+    <UsingTask TaskName="Microsoft.Build.Tasks.GenerateLauncher"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildAssemblyVersion)' != ''" />
 
     <UsingTask TaskName="Microsoft.Build.Tasks.GenerateResource"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="('$(MSBuildAssemblyVersion)' != '') and '$(DisableOutOfProcTaskHost)' != ''" />
     <UsingTask TaskName="Microsoft.Build.Tasks.GenerateResource"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Runtime="CLR4" Condition="('$(MSBuildAssemblyVersion)' != '') and '$(DisableOutOfProcTaskHost)' == ''" />

@@ -54,9 +54,13 @@ These targets are all defined in `Microsoft.Common.targets` and are defined in M
 If implementing a project with an “outer” (determine what properties to pass to the real build) and “inner” (fully specified) build, only `GetTargetFrameworkProperties` is required in the “outer” build. The other targets listed can be “inner” build only.
 
 * `GetTargetFrameworks` tells referencing projects what options are available to the build.
-  * It returns an item with metadata `TargetFrameworks` indicating what TargetFrameworks are available in the project, as well as boolean metadata `HasSingleTargetFramework` and `IsRidAgnostic`.
+  * It returns an item with the following metadata:
+    * `TargetFrameworks` indicating what TargetFrameworks are available in the project
+    * `TargetFrameworkMonikers` and `TargetPlatformMonikers` indicating what framework / platform the `TargetFrameworks` map to.  This is to support implicitly setting the target platform version (for example inferring that `net5.0-windows` means the same as `net5.0-windows7.0`) as well as treating the `TargetFramework` values [as aliases](https://github.com/NuGet/Home/issues/5154)
+    * Boolean metadata for `HasSingleTargetFramework` and `IsRidAgnostic`.
+  * The `GetReferenceNearestTargetFrameworkTask` (provided by NuGet) is responsible for selecting the best matching `TargetFramework` of the referenced project
   * This target is _optional_. If not present, the reference will be built with no additional properties.
-  * **New** in MSBuild 15.5.
+  * **New** in MSBuild 15.5.  (`TargetFrameworkMonikers` and `TargetPlatformMonikers` metadata is new in MSBuild 16.8)
 * `GetTargetFrameworkProperties` determines what properties should be passed to the “main” target for a given `ReferringTargetFramework`.
   * **Deprecated** in MSBuild 15.5.
   * New for MSBuild 15/Visual Studio 2017. Supports the cross-targeting feature allowing a project to have multiple `TargetFrameworks`.

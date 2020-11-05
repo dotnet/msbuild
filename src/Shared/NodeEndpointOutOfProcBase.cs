@@ -15,12 +15,11 @@ using Microsoft.Build.Shared;
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
 #endif
+#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
+#endif
 #if !FEATURE_APM
 using System.Threading.Tasks;
-#endif
-#if FEATURE_SECURITY_PERMISSIONS
-using System.Security.Permissions;
 #endif
 
 namespace Microsoft.Build.BackEnd
@@ -30,7 +29,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
     {
-        #region Private Data
+#region Private Data
 
 #if NETCOREAPP2_1 || MONO
         /// <summary>

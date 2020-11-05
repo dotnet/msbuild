@@ -5,10 +5,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
     using System.Collections.Generic;
-    using System.Runtime.CompilerServices;
-    using System.Xml;
     using Microsoft.Build.Construction;
-    using Microsoft.Build.ObjectModelRemoting;
 
 
     /// <summary>

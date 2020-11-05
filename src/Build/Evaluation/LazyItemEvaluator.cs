@@ -59,18 +59,14 @@ namespace Microsoft.Build.Evaluation
 
         private ImmutableList<I> GetItems(string itemType)
         {
-            LazyItemList itemList = GetItemList(itemType);
-            if (itemList == null)
-            {
-                return ImmutableList<I>.Empty;
-            }
-
-            return itemList.GetMatchedItems(ImmutableHashSet<string>.Empty);
+            return _itemLists.TryGetValue(itemType, out LazyItemList itemList) ?
+                itemList.GetMatchedItems(ImmutableHashSet<string>.Empty) :
+                ImmutableList<I>.Empty;
         }
 
         public bool EvaluateConditionWithCurrentState(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions)
         {
-            return EvaluateCondition(element, expanderOptions, parserOptions, _expander, this);
+            return EvaluateCondition(element.Condition, element, expanderOptions, parserOptions, _expander, this);
         }
 
         private static bool EvaluateCondition(
@@ -106,17 +102,6 @@ namespace Microsoft.Build.Evaluation
 
                 return result;
             }
-        }
-
-        private static bool EvaluateCondition(
-            ProjectElement element,
-            ExpanderOptions expanderOptions,
-            ParserOptions parserOptions,
-            Expander<P, I> expander,
-            LazyItemEvaluator<P, I, M, D> lazyEvaluator
-            )
-        {
-            return EvaluateCondition(element.Condition, element, expanderOptions, parserOptions, expander, lazyEvaluator);
         }
 
         /// <summary>
@@ -417,19 +402,11 @@ namespace Microsoft.Build.Evaluation
 
         private void AddReferencedItemList(string itemType, IDictionary<string, LazyItemList> referencedItemLists)
         {
-            var itemList = GetItemList(itemType);
-            if (itemList != null)
+            if (_itemLists.TryGetValue(itemType, out LazyItemList itemList))
             {
                 itemList.MarkAsReferenced();
                 referencedItemLists[itemType] = itemList;
             }
-        }
-
-        private LazyItemList GetItemList(string itemType)
-        {
-            LazyItemList ret;
-            _itemLists.TryGetValue(itemType, out ret);
-            return ret;
         }
 
         public IEnumerable<ItemData> GetAllItemsDeferred()
@@ -459,7 +436,7 @@ namespace Microsoft.Build.Evaluation
                 ErrorUtilities.ThrowInternalErrorUnreachable();
             }
 
-            LazyItemList previousItemList = GetItemList(itemElement.ItemType);
+            _itemLists.TryGetValue(itemElement.ItemType, out LazyItemList previousItemList);
             LazyItemList newList = new LazyItemList(previousItemList, operation);
             _itemLists[itemElement.ItemType] = newList;
         }

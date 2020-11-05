@@ -6,6 +6,7 @@ package name=Microsoft.Build
         vs.package.language=neutral
 
 vs.dependencies
+  vs.dependency id=Microsoft.Build.UnGAC
   vs.dependency id=Microsoft.VisualStudio.PackageGroup.NuGet
                 version=[15.0,17.0)
 

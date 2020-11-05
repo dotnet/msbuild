@@ -2544,6 +2544,14 @@ namespace Microsoft.Build.UnitTests
                 _mockFileSystem = mockFileSystem;
             }
 
+            public TextReader ReadFile(string path) => throw new NotImplementedException();
+
+            public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share) => throw new NotImplementedException();
+
+            public string ReadFileAllText(string path) => throw new NotImplementedException();
+
+            public byte[] ReadFileAllBytes(string path) => throw new NotImplementedException();
+
             public IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
             {
                 return FileSystems.Default.EnumerateFiles(path, searchPattern, searchOption);
@@ -2558,6 +2566,10 @@ namespace Microsoft.Build.UnitTests
             {
                 return FileSystems.Default.EnumerateFileSystemEntries(path, searchPattern, searchOption);
             }
+
+            public FileAttributes GetAttributes(string path) => throw new NotImplementedException();
+
+            public DateTime GetLastWriteTimeUtc(string path) => throw new NotImplementedException();
 
             public bool DirectoryExists(string path)
             {

@@ -62,6 +62,20 @@
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
+      <trans-unit id="ChangeWave_InvalidFormat">
+        <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</source>
+        <target state="translated">환경 변수 MSBUILDDISABLEFEATURESFROMVERSION이 잘못된 형식으로 설정되어 있습니다. 모든 변경 웨이브 버전을 사용하도록 설정합니다. 입력한 값: {0}.</target>
+        <note>
+       Value should be of the format: xx.yy
+    </note>
+      </trans-unit>
+      <trans-unit id="ChangeWave_OutOfRotation">
+        <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}.</source>
+        <target state="translated">환경 변수 MSBUILDDISABLEFEATURESFROMVERSION이 순환되지 않는 버전으로 설정되어 있습니다. 변경 웨이브 버전으로 기본값 설정: {0}. 입력한 값: {1}.</target>
+        <note>
+       Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current Change Waves are.
+    </note>
+      </trans-unit>
       <trans-unit id="CircularDependencyInProjectGraph">
         <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
         <target state="translated">MSB4251: {0} 프로젝트와 관련된 순환 종속성이 있습니다.</target>
@@ -90,6 +104,11 @@
         <target state="translated">MSB4258: "{0}" 경로에서 출력 결과 캐시 파일을 쓰는 중 오류가 발생했습니다. {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="IllFormedPropertySpaceInCondition">
+        <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
+        <target state="new">MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</target>
+        <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
         <target state="translated">MSB4255: 다음 입력 결과 캐시 파일이 존재하지 않습니다. "{0}"</target>
@@ -98,6 +117,11 @@
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">버전 문자열의 형식이 잘못되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
+        <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
+        <target state="translated">"SharingPolicy.Isolated로 만든 EvaluationContext 개체는 MSBuildFileSystemBase 파일 시스템 전달을 지원하지 않습니다."</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">

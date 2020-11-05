@@ -3,23 +3,10 @@
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Collections.Immutable;
-    using System.IO;
     using System.Linq;
-    using System.Runtime.InteropServices;
-    using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
     using Microsoft.Build.Construction;
     using Microsoft.Build.Evaluation;
-    using Microsoft.Build.ObjectModelRemoting;
-    using Microsoft.Build.Tasks;
-    using Microsoft.Build.UnitTests.OM.Construction;
     using Xunit;
-    using Xunit.Abstractions;
-    using Xunit.NetCore.Extensions;
-    using Xunit.Sdk;
 
     public class LinkedSpecialCasesScenarios : IClassFixture<LinkedSpecialCasesScenarios.MyTestCollectionGroup>
     {

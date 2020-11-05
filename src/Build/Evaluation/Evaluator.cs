@@ -397,7 +397,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-                    ProjectTaskOutputPropertyInstance outputItem = new ProjectTaskOutputPropertyInstance
+                    ProjectTaskOutputPropertyInstance outputProperty = new ProjectTaskOutputPropertyInstance
                         (
                         output.PropertyName,
                         output.TaskParameter,
@@ -408,7 +408,7 @@ namespace Microsoft.Build.Evaluation
                         output.ConditionLocation
                         );
 
-                    taskOutputs.Add(outputItem);
+                    taskOutputs.Add(outputProperty);
                 }
             }
 
@@ -456,28 +456,21 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ProjectItemElement itemElement in itemGroupElement.Items)
             {
-                List<ProjectItemGroupTaskMetadataInstance> metadata = null;
+                List<ProjectItemGroupTaskMetadataInstance> metadata = itemElement.Metadata.Count > 0 ? new List<ProjectItemGroupTaskMetadataInstance>() : null;
 
                 foreach (ProjectMetadataElement metadataElement in itemElement.Metadata)
                 {
-                    if (metadata == null)
-                    {
-                        metadata = new List<ProjectItemGroupTaskMetadataInstance>();
-                    }
-
-                    ProjectItemGroupTaskMetadataInstance metadatum = new ProjectItemGroupTaskMetadataInstance
+                    metadata.Add(new ProjectItemGroupTaskMetadataInstance
                         (
                         metadataElement.Name,
                         metadataElement.Value,
                         metadataElement.Condition,
                         metadataElement.Location,
                         metadataElement.ConditionLocation
-                        );
-
-                    metadata.Add(metadatum);
+                        ));
                 }
 
-                ProjectItemGroupTaskItemInstance item = new ProjectItemGroupTaskItemInstance
+                items.Add(new ProjectItemGroupTaskItemInstance
                     (
                     itemElement.ItemType,
                     itemElement.Include,
@@ -500,9 +493,7 @@ namespace Microsoft.Build.Evaluation
                     itemElement.KeepDuplicatesLocation,
                     itemElement.ConditionLocation,
                     metadata
-                    );
-
-                items.Add(item);
+                    ));
             }
 
             ProjectItemGroupTaskInstance itemGroup = new ProjectItemGroupTaskInstance(itemGroupElement.Condition, itemGroupElement.Location, itemGroupElement.ConditionLocation, items);
@@ -523,47 +514,24 @@ namespace Microsoft.Build.Evaluation
             {
                 using (evaluationProfiler.TrackElement(targetChildElement))
                 {
-                    ProjectTaskElement task = targetChildElement as ProjectTaskElement;
-
-                    if (task != null)
+                    switch (targetChildElement)
                     {
-                        ProjectTaskInstance taskInstance = ReadTaskElement(task);
-
-                        targetChildren.Add(taskInstance);
-                        continue;
+                        case ProjectTaskElement task:
+                            targetChildren.Add(ReadTaskElement(task));
+                            break;
+                        case ProjectPropertyGroupElement propertyGroup:
+                            targetChildren.Add(ReadPropertyGroupUnderTargetElement(propertyGroup));
+                            break;
+                        case ProjectItemGroupElement itemGroup:
+                            targetChildren.Add(ReadItemGroupUnderTargetElement(itemGroup));
+                            break;
+                        case ProjectOnErrorElement onError:
+                            targetOnErrorChildren.Add(ReadOnErrorElement(onError));
+                            break;
+                        default:
+                            ErrorUtilities.ThrowInternalError("Unexpected child");
+                            break;
                     }
-
-                    ProjectPropertyGroupElement propertyGroup = targetChildElement as ProjectPropertyGroupElement;
-
-                    if (propertyGroup != null)
-                    {
-                        ProjectPropertyGroupTaskInstance propertyGroupInstance = ReadPropertyGroupUnderTargetElement(propertyGroup);
-
-                        targetChildren.Add(propertyGroupInstance);
-                        continue;
-                    }
-
-                    ProjectItemGroupElement itemGroup = targetChildElement as ProjectItemGroupElement;
-
-                    if (itemGroup != null)
-                    {
-                        ProjectItemGroupTaskInstance itemGroupInstance = ReadItemGroupUnderTargetElement(itemGroup);
-
-                        targetChildren.Add(itemGroupInstance);
-                        continue;
-                    }
-
-                    ProjectOnErrorElement onError = targetChildElement as ProjectOnErrorElement;
-
-                    if (onError != null)
-                    {
-                        ProjectOnErrorInstance onErrorInstance = ReadOnErrorElement(onError);
-
-                        targetOnErrorChildren.Add(onErrorInstance);
-                        continue;
-                    }
-
-                    ErrorUtilities.ThrowInternalError("Unexpected child");
                 }
             }
 
@@ -616,7 +584,7 @@ namespace Microsoft.Build.Evaluation
 
                 _logProjectImportedEvents = Traits.Instance.EscapeHatches.LogProjectImports;
 
-                ICollection<P> globalProperties;
+                int globalPropertiesCount;
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.InitialProperties))
                 {
@@ -626,7 +594,7 @@ namespace Microsoft.Build.Evaluation
                     AddBuiltInProperties();
                     AddEnvironmentProperties();
                     AddToolsetProperties();
-                    globalProperties = AddGlobalProperties();
+                    globalPropertiesCount = AddGlobalProperties();
 
                     if (_interactive)
                     {
@@ -652,7 +620,7 @@ namespace Microsoft.Build.Evaluation
                 List<string> initialTargets = new List<string>(_initialTargetsList.Count);
                 foreach (var initialTarget in _initialTargetsList)
                 {
-                    initialTargets.Add(EscapingUtilities.UnescapeAll(initialTarget.Trim()));
+                    initialTargets.Add(EscapingUtilities.UnescapeAll(initialTarget, trim: true));
                 }
 
                 _data.InitialTargets = initialTargets;
@@ -789,7 +757,7 @@ namespace Microsoft.Build.Evaluation
 
                             string line = new string('#', 100) + "\n";
 
-                            string output = String.Format(CultureInfo.CurrentUICulture, "###: MSBUILD: Evaluating or reevaluating project {0} with {1} global properties and {2} tools version, child count {3}, CurrentSolutionConfigurationContents hash {4} other properties:\n{5}", _projectRootElement.FullPath, globalProperties.Count, _data.Toolset.ToolsVersion, _projectRootElement.Count, hash, propertyDump);
+                            string output = String.Format(CultureInfo.CurrentUICulture, "###: MSBUILD: Evaluating or reevaluating project {0} with {1} global properties and {2} tools version, child count {3}, CurrentSolutionConfigurationContents hash {4} other properties:\n{5}", _projectRootElement.FullPath, globalPropertiesCount, _data.Toolset.ToolsVersion, _projectRootElement.Count, hash, propertyDump);
 
                             Trace.WriteLine(line + output + line);
                         }
@@ -847,92 +815,47 @@ namespace Microsoft.Build.Evaluation
 
                 foreach (ProjectElement element in currentProjectOrImport.Children)
                 {
-                    ProjectPropertyGroupElement propertyGroup = element as ProjectPropertyGroupElement;
-
-                    if (propertyGroup != null)
+                    switch (element)
                     {
-                        EvaluatePropertyGroupElement(propertyGroup);
-                        continue;
+                        case ProjectPropertyGroupElement propertyGroup:
+                            EvaluatePropertyGroupElement(propertyGroup);
+                            break;
+                        case ProjectItemGroupElement itemGroup:
+                            _itemGroupElements.Add(itemGroup);
+                            break;
+                        case ProjectItemDefinitionGroupElement itemDefinitionGroup:
+                            _itemDefinitionGroupElements.Add(itemDefinitionGroup);
+                            break;
+                        case ProjectTargetElement target:
+                            if (_projectSupportsReturnsAttribute.ContainsKey(currentProjectOrImport))
+                            {
+                                _projectSupportsReturnsAttribute[currentProjectOrImport] |= (target.Returns != null);
+                            }
+                            else
+                            {
+                                _projectSupportsReturnsAttribute[currentProjectOrImport] = (target.Returns != null);
+                            }
+                            _targetElements.Add(target);
+                            break;
+                        case ProjectImportElement import:
+                            EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
+                            break;
+                        case ProjectImportGroupElement importGroup:
+                            EvaluateImportGroupElement(currentProjectOrImport.DirectoryPath, importGroup);
+                            break;
+                        case ProjectUsingTaskElement usingTask:
+                            _usingTaskElements.Add(new Pair<string, ProjectUsingTaskElement>(currentProjectOrImport.DirectoryPath, usingTask));
+                            break;
+                        case ProjectChooseElement choose:
+                            EvaluateChooseElement(choose);
+                            break;
+                        case ProjectExtensionsElement extension:
+                        case ProjectSdkElement sdk: // This case is handled by implicit imports.
+                            break;
+                        default:
+                            ErrorUtilities.ThrowInternalError("Unexpected child type");
+                            break;
                     }
-
-                    ProjectItemGroupElement itemGroup = element as ProjectItemGroupElement;
-
-                    if (itemGroup != null)
-                    {
-                        _itemGroupElements.Add(itemGroup);
-
-                        continue;
-                    }
-
-                    ProjectItemDefinitionGroupElement itemDefinitionGroup = element as ProjectItemDefinitionGroupElement;
-
-                    if (itemDefinitionGroup != null)
-                    {
-                        _itemDefinitionGroupElements.Add(itemDefinitionGroup);
-
-                        continue;
-                    }
-
-                    ProjectTargetElement target = element as ProjectTargetElement;
-
-                    if (target != null)
-                    {
-                        if (_projectSupportsReturnsAttribute.ContainsKey(currentProjectOrImport))
-                        {
-                            _projectSupportsReturnsAttribute[currentProjectOrImport] |= (target.Returns != null);
-                        }
-                        else
-                        {
-                            _projectSupportsReturnsAttribute[currentProjectOrImport] = (target.Returns != null);
-                        }
-
-                        _targetElements.Add(target);
-
-                        continue;
-                    }
-
-                    ProjectImportElement import = element as ProjectImportElement;
-                    if (import != null)
-                    {
-                        EvaluateImportElement(currentProjectOrImport.DirectoryPath, import);
-                        continue;
-                    }
-
-                    ProjectImportGroupElement importGroup = element as ProjectImportGroupElement;
-
-                    if (importGroup != null)
-                    {
-                        EvaluateImportGroupElement(currentProjectOrImport.DirectoryPath, importGroup);
-                        continue;
-                    }
-
-                    ProjectUsingTaskElement usingTask = element as ProjectUsingTaskElement;
-
-                    if (usingTask != null)
-                    {
-                        _usingTaskElements.Add(new Pair<string, ProjectUsingTaskElement>(currentProjectOrImport.DirectoryPath, usingTask));
-                        continue;
-                    }
-
-                    ProjectChooseElement choose = element as ProjectChooseElement;
-
-                    if (choose != null)
-                    {
-                        EvaluateChooseElement(choose);
-                        continue;
-                    }
-
-                    if (element is ProjectExtensionsElement)
-                    {
-                        continue;
-                    }
-
-                    if (element is ProjectSdkElement)
-                    {
-                        continue; // This case is handled by implicit imports.
-                    }
-
-                    ErrorUtilities.ThrowInternalError("Unexpected child type");
                 }
 
                 // Evaluate the "bottom" implicit imports as if they were the last entry in the file.
@@ -964,7 +887,7 @@ namespace Microsoft.Build.Evaluation
 
                     for (int i = 0; i < temp.Count; i++)
                     {
-                        string target = EscapingUtilities.UnescapeAll(temp[i].Trim());
+                        string target = EscapingUtilities.UnescapeAll(temp[i], trim: true);
                         if (target.Length > 0)
                         {
                             _data.DefaultTargets ??= new List<string>(temp.Count);
@@ -1127,109 +1050,112 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        private void ValidateChangeWaveState()
+        {
+            if (ChangeWaves.ConversionState == ChangeWaveConversionState.NotConvertedYet)
+            {
+                ChangeWaves.ApplyChangeWave();
+            }
+
+            switch (ChangeWaves.ConversionState)
+            {
+                case ChangeWaveConversionState.InvalidFormat:
+                    _evaluationLoggingContext.LogWarning("", new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion);
+                    break;
+                case ChangeWaveConversionState.OutOfRotation:
+                    _evaluationLoggingContext.LogWarning("", new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.DisabledWave, Traits.Instance.MSBuildDisableFeaturesFromVersion);
+                    break;
+            }
+        }
+
         /// <summary>
         /// Set the built-in properties, most of which are read-only
         /// </summary>
-        private ICollection<P> AddBuiltInProperties()
+        private void AddBuiltInProperties()
         {
             string startupDirectory = BuildParameters.StartupDirectory;
 
-            List<P> builtInProperties = new List<P>(19);
+            SetBuiltInProperty(ReservedPropertyNames.toolsVersion, _data.Toolset.ToolsVersion);
+            SetBuiltInProperty(ReservedPropertyNames.toolsPath, _data.Toolset.ToolsPath);
+            SetBuiltInProperty(ReservedPropertyNames.binPath, _data.Toolset.ToolsPath);
+            SetBuiltInProperty(ReservedPropertyNames.startupDirectory, startupDirectory);
+            SetBuiltInProperty(ReservedPropertyNames.buildNodeCount, _maxNodeCount.ToString(CultureInfo.CurrentCulture));
+            SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32);
+            SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion);
+            SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild);
 
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.toolsVersion, _data.Toolset.ToolsVersion));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.toolsPath, _data.Toolset.ToolsPath));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.binPath, _data.Toolset.ToolsPath));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.startupDirectory, startupDirectory));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.buildNodeCount, _maxNodeCount.ToString(CultureInfo.CurrentCulture)));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion));
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild));
+            ValidateChangeWaveState();
+
+            SetBuiltInProperty(ReservedPropertyNames.msbuilddisablefeaturesfromversion, ChangeWaves.DisabledWave);
 
             // Fake OS env variables when not on Windows
             if (!NativeMethodsShared.IsWindows)
             {
-                builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.osName, NativeMethodsShared.OSName));
-                builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.frameworkToolsRoot, NativeMethodsShared.FrameworkBasePath));
+                SetBuiltInProperty(ReservedPropertyNames.osName, NativeMethodsShared.OSName);
+                SetBuiltInProperty(ReservedPropertyNames.frameworkToolsRoot, NativeMethodsShared.FrameworkBasePath);
             }
 
 #if RUNTIME_TYPE_NETCORE
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType, "Core"));
+            SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType, "Core");
 #elif MONO
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType,
-                                                        NativeMethodsShared.IsMono ? "Mono" : "Full"));
+            SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType,
+                                                        NativeMethodsShared.IsMono ? "Mono" : "Full");
 #else
-            builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType, "Full"));
+            SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType, "Full");
 #endif
 
             if (String.IsNullOrEmpty(_projectRootElement.FullPath))
             {
-                // If this is an un-saved project, this is as far as we can go
-                if (String.IsNullOrEmpty(_projectRootElement.DirectoryPath))
-                {
-                    builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.projectDirectory, startupDirectory));
-                }
-                else
-                {
+                SetBuiltInProperty(ReservedPropertyNames.projectDirectory, String.IsNullOrEmpty(_projectRootElement.DirectoryPath) ?
+                    // If this is an un-saved project, this is as far as we can go
+                    startupDirectory :
                     // Solution files based on the old OM end up here.  But they do have a location, which is where the solution was loaded from.
                     // We need to set this here otherwise we can't locate any projects the solution refers to.
-                    builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.projectDirectory, _projectRootElement.DirectoryPath));
-                }
+                    _projectRootElement.DirectoryPath);
             }
             else
             {
                 // Add the MSBuildProjectXXXXX properties, but not the MSBuildFileXXXX ones. Those
                 // vary according to the file they're evaluated in, so they have to be dealt with
                 // specially in the Expander.
-                string projectFile = EscapingUtilities.Escape(Path.GetFileName(_projectRootElement.FullPath));
                 string projectFileWithoutExtension = EscapingUtilities.Escape(Path.GetFileNameWithoutExtension(_projectRootElement.FullPath));
                 string projectExtension = EscapingUtilities.Escape(Path.GetExtension(_projectRootElement.FullPath));
-                string projectFullPath = EscapingUtilities.Escape(_projectRootElement.FullPath);
+                string projectFile = projectFileWithoutExtension + projectExtension;
                 string projectDirectory = EscapingUtilities.Escape(_projectRootElement.DirectoryPath);
+                string projectFullPath = Path.Combine(projectDirectory, projectFile);
 
                 int rootLength = Path.GetPathRoot(projectDirectory).Length;
-                string projectDirectoryNoRoot = projectDirectory.Substring(rootLength);
-                projectDirectoryNoRoot = FileUtilities.EnsureNoTrailingSlash(projectDirectoryNoRoot);
-                projectDirectoryNoRoot = EscapingUtilities.Escape(FileUtilities.EnsureNoLeadingSlash(projectDirectoryNoRoot));
+                string projectDirectoryNoRoot = FileUtilities.EnsureNoLeadingOrTrailingSlash(projectDirectory, rootLength);
 
                 // ReservedPropertyNames.projectDefaultTargets is already set
-                builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.projectFile, projectFile));
-                builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.projectName, projectFileWithoutExtension));
-                builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.projectExtension, projectExtension));
-                builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.projectFullPath, projectFullPath));
-                builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.projectDirectory, projectDirectory));
-                builtInProperties.Add(SetBuiltInProperty(ReservedPropertyNames.projectDirectoryNoRoot, projectDirectoryNoRoot));
+                SetBuiltInProperty(ReservedPropertyNames.projectFile, projectFile);
+                SetBuiltInProperty(ReservedPropertyNames.projectName, projectFileWithoutExtension);
+                SetBuiltInProperty(ReservedPropertyNames.projectExtension, projectExtension);
+                SetBuiltInProperty(ReservedPropertyNames.projectFullPath, projectFullPath);
+                SetBuiltInProperty(ReservedPropertyNames.projectDirectory, projectDirectory);
+                SetBuiltInProperty(ReservedPropertyNames.projectDirectoryNoRoot, projectDirectoryNoRoot);
             }
-
-            return builtInProperties;
         }
 
         /// <summary>
         /// Pull in all the environment into our property bag
         /// </summary>
-        private ICollection<P> AddEnvironmentProperties()
+        private void AddEnvironmentProperties()
         {
-            List<P> environmentPropertiesList = new List<P>(_environmentProperties.Count);
-
             foreach (ProjectPropertyInstance environmentProperty in _environmentProperties)
             {
-                P property = _data.SetProperty(environmentProperty.Name, ((IProperty)environmentProperty).EvaluatedValueEscaped, isGlobalProperty: false, mayBeReserved: false, isEnvironmentVariable: true);
-                environmentPropertiesList.Add(property);
+                _data.SetProperty(environmentProperty.Name, ((IProperty)environmentProperty).EvaluatedValueEscaped, isGlobalProperty: false, mayBeReserved: false, isEnvironmentVariable: true);
             }
-
-            return environmentPropertiesList;
         }
 
         /// <summary>
         /// Put all the toolset's properties into our property bag
         /// </summary>
-        private ICollection<P> AddToolsetProperties()
+        private void AddToolsetProperties()
         {
-            List<P> toolsetProperties = new List<P>(_data.Toolset.Properties.Count);
-
             foreach (ProjectPropertyInstance toolsetProperty in _data.Toolset.Properties.Values)
             {
-                P property = _data.SetProperty(toolsetProperty.Name, ((IProperty)toolsetProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */);
-                toolsetProperties.Add(property);
+                _data.SetProperty(toolsetProperty.Name, ((IProperty)toolsetProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */);
             }
 
             if (_data.SubToolsetVersion == null)
@@ -1238,55 +1164,46 @@ namespace Microsoft.Build.Evaluation
                 // is most likely not a subtoolset now, we need to add VisualStudioVersion if its not already a property.
                 if (!_data.Properties.Contains(Constants.VisualStudioVersionPropertyName))
                 {
-                    P subToolsetVersionProperty = _data.SetProperty(Constants.VisualStudioVersionPropertyName, MSBuildConstants.CurrentVisualStudioVersion, false /* NOT global property */, false /* may NOT be a reserved name */);
-                    toolsetProperties.Add(subToolsetVersionProperty);
+                    _data.SetProperty(Constants.VisualStudioVersionPropertyName, MSBuildConstants.CurrentVisualStudioVersion, false /* NOT global property */, false /* may NOT be a reserved name */);
                 }
             }
             else
             {
-
                 // Make the subtoolset version itself available as a property -- but only if it's not already set. 
                 // Because some people may be depending on this value even if there isn't a matching sub-toolset,
                 // set the property even if there is no matching sub-toolset.  
                 if (!_data.Properties.Contains(Constants.SubToolsetVersionPropertyName))
                 {
-                    P subToolsetVersionProperty = _data.SetProperty(Constants.SubToolsetVersionPropertyName, _data.SubToolsetVersion, false /* NOT global property */, false /* may NOT be a reserved name */);
-                    toolsetProperties.Add(subToolsetVersionProperty);
+                     _data.SetProperty(Constants.SubToolsetVersionPropertyName, _data.SubToolsetVersion, false /* NOT global property */, false /* may NOT be a reserved name */);
                 }
 
-                SubToolset subToolset;
-                if (_data.Toolset.SubToolsets.TryGetValue(_data.SubToolsetVersion, out subToolset))
+                if (_data.Toolset.SubToolsets.TryGetValue(_data.SubToolsetVersion, out SubToolset subToolset))
                 {
                     foreach (ProjectPropertyInstance subToolsetProperty in subToolset.Properties.Values)
                     {
-                        P property = _data.SetProperty(subToolsetProperty.Name, ((IProperty)subToolsetProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */);
-                        toolsetProperties.Add(property);
+                        _data.SetProperty(subToolsetProperty.Name, ((IProperty)subToolsetProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */);
                     }
                 }
             }
 
-            return toolsetProperties;
         }
 
         /// <summary>
         /// Put all the global properties into our property bag
         /// </summary>
-        private ICollection<P> AddGlobalProperties()
+        private int AddGlobalProperties()
         {
             if (_data.GlobalPropertiesDictionary == null)
             {
-                return Array.Empty<P>();
+                return 0;
             }
-
-            List<P> globalProperties = new List<P>(_data.GlobalPropertiesDictionary.Count);
 
             foreach (ProjectPropertyInstance globalProperty in _data.GlobalPropertiesDictionary)
             {
-                P property = _data.SetProperty(globalProperty.Name, ((IProperty)globalProperty).EvaluatedValueEscaped, true /* IS global property */, false /* may NOT be a reserved name */);
-                globalProperties.Add(property);
+                _data.SetProperty(globalProperty.Name, ((IProperty)globalProperty).EvaluatedValueEscaped, true /* IS global property */, false /* may NOT be a reserved name */);
             }
 
-            return globalProperties;
+            return _data.GlobalPropertiesDictionary.Count;
         }
 
         /// <summary>
@@ -1534,31 +1451,21 @@ namespace Microsoft.Build.Evaluation
             {
                 using (_evaluationProfiler.TrackElement(element))
                 {
-                    ProjectPropertyGroupElement propertyGroup = element as ProjectPropertyGroupElement;
-
-                    if (propertyGroup != null)
+                    switch (element)
                     {
-                        EvaluatePropertyGroupElement(propertyGroup);
-                        continue;
+                        case ProjectPropertyGroupElement propertyGroup:
+                            EvaluatePropertyGroupElement(propertyGroup);
+                            break;
+                        case ProjectItemGroupElement itemGroup:
+                            _itemGroupElements.Add(itemGroup);
+                            break;
+                        case ProjectChooseElement choose:
+                            EvaluateChooseElement(choose);
+                            break;
+                        default:
+                            ErrorUtilities.ThrowInternalError("Unexpected child type");
+                            break;
                     }
-
-                    ProjectItemGroupElement itemGroup = element as ProjectItemGroupElement;
-
-                    if (itemGroup != null)
-                    {
-                        _itemGroupElements.Add(itemGroup);
-                        continue;
-                    }
-
-                    ProjectChooseElement choose = element as ProjectChooseElement;
-
-                    if (choose != null)
-                    {
-                        EvaluateChooseElement(choose);
-                        continue;
-                    }
-
-                    ErrorUtilities.ThrowInternalError("Unexpected child type");
                 }
             }
 
@@ -2565,7 +2472,7 @@ namespace Microsoft.Build.Evaluation
             {
                 P oldValue = _data.GetProperty(Constants.MSBuildAllProjectsPropertyName);
                 string streamImports = string.Join(";", _streamImports.ToArray());
-                P newValue = _data.SetProperty(
+                _data.SetProperty(
                     Constants.MSBuildAllProjectsPropertyName,
                     oldValue == null
                         ? $"{_lastModifiedProject.FullPath}{streamImports}"

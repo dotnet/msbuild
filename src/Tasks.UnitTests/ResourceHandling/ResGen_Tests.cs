@@ -7,10 +7,7 @@ using System.Text;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
-using System.Globalization;
 
 using ResGen = Microsoft.Build.Tasks.GenerateResource.ResGen;
 using Xunit;

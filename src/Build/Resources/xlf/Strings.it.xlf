@@ -62,6 +62,20 @@
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
+      <trans-unit id="ChangeWave_InvalidFormat">
+        <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</source>
+        <target state="translated">La variabile di ambiente MSBUILDDISABLEFEATURESFROMVERSION è impostata su un formato non valido. Verranno abilitate tutte le versioni con flussi di modifiche. Valore immesso: {0}.</target>
+        <note>
+       Value should be of the format: xx.yy
+    </note>
+      </trans-unit>
+      <trans-unit id="ChangeWave_OutOfRotation">
+        <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}.</source>
+        <target state="translated">La variabile di ambiente MSBUILDDISABLEFEATURESFROMVERSION è impostata su una versione esclusa dalla rotazione. Per impostazione predefinita, verrà usata la versione con flussi di modifiche: {0}. Valore immesso: {1}.</target>
+        <note>
+       Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current Change Waves are.
+    </note>
+      </trans-unit>
       <trans-unit id="CircularDependencyInProjectGraph">
         <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
         <target state="translated">MSB4251: è presente una dipendenza circolare che interessa i progetti seguenti: {0}</target>
@@ -90,6 +104,11 @@
         <target state="translated">MSB4258: durante la scrittura del file della cache dei risultati di output nel percorso "{0}" è stato rilevato un errore: {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="IllFormedPropertySpaceInCondition">
+        <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
+        <target state="new">MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</target>
+        <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
         <target state="translated">MSB4255: i file della cache dei risultati di input seguenti non esistono: "{0}"</target>
@@ -98,6 +117,11 @@
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">Il formato della stringa di versione non è corretto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
+        <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
+        <target state="translated">"Agli oggetti EvaluationContext creati con SharingPolicy.Isolated non è possibile passare un file system MSBuildFileSystemBase."</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
