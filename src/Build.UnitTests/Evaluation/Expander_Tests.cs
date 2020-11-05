@@ -1556,7 +1556,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetChangeWave(ChangeWaves.Wave16_8.ToString());
+                env.SetChangeWave(ChangeWaves.Wave16_8);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
                 ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
                 var manySpaces = "".PadLeft(2000);

@@ -95,6 +95,11 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        public void SetChangeWave(Version wave)
+        {
+            SetChangeWave(wave.ToString());
+        }
+
         public void SetChangeWave(string wave)
         {
             ChangeWaves.ResetStateForTests();

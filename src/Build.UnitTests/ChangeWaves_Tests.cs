@@ -33,7 +33,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 Version featureAsVersion = Version.Parse(featureVersion);
-                env.SetChangeWave(ChangeWaves.EnableAllFeatures.ToString());
+                env.SetChangeWave(ChangeWaves.EnableAllFeatures);
                 ChangeWaves.AreFeaturesEnabled(featureAsVersion).ShouldBe(true);
 
                 string projectFile = $"" +
@@ -84,24 +84,6 @@ namespace Microsoft.Build.Engine.UnitTests
                 log.AssertLogContains("Hello World!");
             }
         }
-
-        //[Theory]
-        //[InlineData("test")]
-        //[InlineData("    ")]
-        //[InlineData("")]
-        //[InlineData("16-7")]
-        //[InlineData("16x7")]
-        //[InlineData("16=7")]
-        //public void InvalidCallerForIsFeatureEnabledThrows(string featureWave)
-        //{
-        //    using (TestEnvironment env = TestEnvironment.Create())
-        //    {
-        //        Version featureVersion = Version.Parse(featureWave);
-        //        env.SetChangeWave(featureWave);
-        //        BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-        //        Shouldly.Should.Throw<InternalErrorException>(() => ChangeWaves.AreFeaturesEnabled(featureVersion));
-        //    }
-        //}
 
         [Theory]
         [InlineData("test", "16.8")]
@@ -246,7 +228,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetChangeWave(ChangeWaves.HighestWave.ToString());
+                env.SetChangeWave(ChangeWaves.HighestWave);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 for (int i = 0; i < ChangeWaves.AllWaves.Length - 1; i++)
@@ -281,7 +263,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetChangeWave(ChangeWaves.LowestWave.ToString());
+                env.SetChangeWave(ChangeWaves.LowestWave);
 
                 foreach (Version wave in ChangeWaves.AllWaves)
                 {

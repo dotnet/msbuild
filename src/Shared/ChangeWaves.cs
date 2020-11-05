@@ -17,9 +17,9 @@ namespace Microsoft.Build.Utilities
     /// <summary>
     /// Coupled together with the MSBUILDDISABLEFEATURESFROMVERSION environment variable,
     /// this class acts as a way to make risky changes while giving customers an opt-out.
+    /// </summary>
     /// See docs here: https://github.com/dotnet/msbuild/blob/master/documentation/wiki/ChangeWaves.md
     /// For dev docs: https://github.com/dotnet/msbuild/blob/master/documentation/wiki/ChangeWaves-Dev.md
-    /// </summary>
     public class ChangeWaves
     {
         public static readonly Version Wave16_8 = new Version(16, 8);
