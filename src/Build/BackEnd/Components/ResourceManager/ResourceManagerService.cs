@@ -62,11 +62,12 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
             {
                 if (!NativeMethodsShared.IsWindows)
                 {
-                    return 0;
+                    // Since the current implementation of the cross-process resource count uses
+                    // named semaphores, it's not usable on non-Windows, so just return the
+                    // guaranteed resource.
+                    return 1;
                 }
 
-                // TODO: ErrorUtilities should be annotated so this can just be `ErrorUtilities.VerifyThrow`
-                // https://github.com/microsoft/msbuild/issues/5163
                 throw new InternalErrorException($"{nameof(ResourceManagerService)} was called while uninitialized");
             }
 
@@ -91,8 +92,13 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
         {
             if (s is null)
             {
-                // TODO: ErrorUtilities should be annotated so this can just be `ErrorUtilities.VerifyThrow`
-                // https://github.com/microsoft/msbuild/issues/5163
+                if (!NativeMethodsShared.IsWindows)
+                {
+                    // Since the current implementation of the cross-process resource count uses
+                    // named semaphores, it's not usable on non-Windows, so just continue.
+                    return;
+                }
+
                 throw new InternalErrorException($"{nameof(ResourceManagerService)} was called while uninitialized");
             }
 
