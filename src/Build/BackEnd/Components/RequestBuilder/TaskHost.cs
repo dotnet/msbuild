@@ -347,8 +347,6 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ReleaseCores(1);
-
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
                 ErrorUtilities.VerifyThrow(_yieldThreadId == -1, "Cannot call Yield() while yielding.");
                 _yieldThreadId = Thread.CurrentThread.ManagedThreadId;
@@ -371,8 +369,6 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrow(_yieldThreadId == Thread.CurrentThread.ManagedThreadId, "Cannot call Reacquire() on thread {0} when Yield() was called on thread {1}", Thread.CurrentThread.ManagedThreadId, _yieldThreadId);
                 MSBuildEventSource.Log.ExecuteTaskYieldStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 MSBuildEventSource.Log.ExecuteTaskReacquireStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
-
-                //TODO: should this RequireCores(1)?
 
                 builderCallback.Reacquire();
                 MSBuildEventSource.Log.ExecuteTaskReacquireStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
