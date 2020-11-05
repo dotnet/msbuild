@@ -909,8 +909,6 @@ namespace Microsoft.Build.BackEnd
 
             List<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = null;
 
-            ReleaseCores(1); // TODO: all?
-
 #if FEATURE_FILE_TRACKER
             using (FullTracking.Suspend())
 #endif
