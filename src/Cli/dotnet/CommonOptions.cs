@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Cli
             new Option<bool>(
                 "--use-current-runtime",
                 description)
-                    .ForwardAs("-property:UseCurrentRuntimeIdentifier=True"));
+                    .ForwardAs("-property:UseCurrentRuntimeIdentifier=True");
 
         public static Option ConfigurationOption(string description) =>
             new Option<string>(

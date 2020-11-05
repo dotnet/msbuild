@@ -11,11 +11,11 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Command = Microsoft.DotNet.Cli.Utils.Command;
 using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
 using NuGet.Frameworks;
 using System.Linq;
 using Microsoft.DotNet.Tools.Help;
+using Microsoft.DotNet.CommandFactory;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -235,7 +235,7 @@ namespace Microsoft.DotNet.Cli
                 PerformanceLogEventSource.Log.ExtensibleCommandResolverStop();
 
                 PerformanceLogEventSource.Log.ExtensibleCommandStart();
-                CommandResult result = resolvedCommand.Execute();
+                var result = resolvedCommand.Execute();
                 PerformanceLogEventSource.Log.ExtensibleCommandStop();
                 
                 exitCode = result.ExitCode;
