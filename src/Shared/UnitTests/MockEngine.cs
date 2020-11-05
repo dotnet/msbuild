@@ -33,6 +33,7 @@ namespace Microsoft.Build.UnitTests
      **************************************************************************/
     internal sealed class MockEngine : IBuildEngine8
     {
+        private readonly string ResourceSemaphoreName = $"MSBuildTestResourceSemaphore{Guid.NewGuid().ToString()}";
         private readonly object _lockObj = new object();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
         private readonly StringBuilder _log = new StringBuilder();
@@ -491,7 +492,7 @@ namespace Microsoft.Build.UnitTests
         Semaphore cpuCount;
         public int RequestCores(int requestedCores)
         {
-            cpuCount ??= Semaphore.OpenExisting("cpuCount");
+            cpuCount ??= Semaphore.OpenExisting(ResourceSemaphoreName);
 
             int coresAcquiredBeforeMoreCoresGetAcquired = runningTotal;
 
@@ -515,7 +516,7 @@ namespace Microsoft.Build.UnitTests
 
         public void ReleaseCores(int coresToRelease)
         {
-            cpuCount ??= Semaphore.OpenExisting("cpuCount");
+            cpuCount ??= Semaphore.OpenExisting(ResourceSemaphoreName);
 
             coresToRelease = Math.Min(runningTotal, coresToRelease);
 
@@ -528,7 +529,7 @@ namespace Microsoft.Build.UnitTests
 
         public void BlockingWaitForCore()
         {
-            cpuCount ??= Semaphore.OpenExisting("cpuCount");
+            cpuCount ??= Semaphore.OpenExisting(ResourceSemaphoreName);
 
             cpuCount.WaitOne();
         }
