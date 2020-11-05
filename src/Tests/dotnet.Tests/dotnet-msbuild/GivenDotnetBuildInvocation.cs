@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.Tools.Build;
@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
     {
         const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m";
 
-        private static readonly string WorkingDirectory = 
+        private static readonly string WorkingDirectory =
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetBuildInvocation));
 
         [Theory]
@@ -23,6 +23,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--no-incremental" }, "-target:Rebuild")]
         [InlineData(new string[] { "-r", "rid" }, "-property:RuntimeIdentifier=rid")]
         [InlineData(new string[] { "--runtime", "rid" }, "-property:RuntimeIdentifier=rid")]
+        [InlineData(new string[] { "--use-current-runtime" }, "-property:UseCurrentRuntimeIdentifier=True")]
         [InlineData(new string[] { "-c", "config" }, "-property:Configuration=config")]
         [InlineData(new string[] { "--configuration", "config" }, "-property:Configuration=config")]
         [InlineData(new string[] { "--version-suffix", "mysuffix" }, "-property:VersionSuffix=mysuffix")]
@@ -57,8 +58,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                                   "-target:Restore -verbosity:diag -property:OutputPath=<cwd>myoutput /ArbitrarySwitchForMSBuild",
                                   "-property:TargetFramework=tfm -verbosity:diag -property:OutputPath=<cwd>myoutput /ArbitrarySwitchForMSBuild")]
         public void MsbuildInvocationIsCorrectForSeparateRestore(
-            string[] args, 
-            string expectedAdditionalArgsForRestore, 
+            string[] args,
+            string expectedAdditionalArgsForRestore,
             string expectedAdditionalArgs)
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>

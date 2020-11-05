@@ -83,6 +83,7 @@ namespace Microsoft.DotNet.Cli
                     Argument = new Argument<string>(LocalizableStrings.CmdPackagesOption),
                     IsHidden = !showHelp
                 }.ForwardAsSingle(o => $"-property:RestorePackagesPath={CommandDirectoryContext.GetFullPath(o)}"),
+				CommonOptions.CurrentRuntimeOption(LocalizableStrings.CmdCurrentRuntimeOptionDescription),
                 new Option<bool>(
                     "--disable-parallel",
                     showHelp ? LocalizableStrings.CmdDisableParallelOptionDescription : string.Empty)

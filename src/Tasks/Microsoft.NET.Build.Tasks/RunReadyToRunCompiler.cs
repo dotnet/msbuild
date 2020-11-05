@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -53,7 +54,7 @@ namespace Microsoft.NET.Build.Tasks
         protected override string GenerateFullPathToTool() => ToolName;
 
         // NOTE: Crossgen2 does not yet support emitting native symbols. We use crossgen instead for now.
-        private string DiaSymReader => CrossgenTool.GetMetadata("DiaSymReader");
+        private string DiaSymReader => CrossgenTool.GetMetadata(MetadataKeys.DiaSymReader);
 
         public RunReadyToRunCompiler()
         {
@@ -62,7 +63,7 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override bool ValidateParameters()
         {
-            _createPDBCommand = CompilationEntry.GetMetadata("CreatePDBCommand");
+            _createPDBCommand = CompilationEntry.GetMetadata(MetadataKeys.CreatePDBCommand);
 
             if (CrossgenTool == null && Crossgen2Tool == null)
             {
@@ -74,16 +75,22 @@ namespace Microsoft.NET.Build.Tasks
                 return false;
             }
 
-            if(CrossgenTool != null)
+            if (CrossgenTool != null)
             {
-                if (!File.Exists(CrossgenTool.ItemSpec) || !File.Exists(CrossgenTool.GetMetadata("JitPath")))
+                if (!File.Exists(CrossgenTool.ItemSpec) || !File.Exists(CrossgenTool.GetMetadata(MetadataKeys.JitPath)))
                 {
                     return false;
                 }
             }
-            if(Crossgen2Tool != null)
+            if (Crossgen2Tool != null)
             {
-                if (!File.Exists(Crossgen2Tool.ItemSpec) || !File.Exists(Crossgen2Tool.GetMetadata("JitPath")))
+                // We expect JitPath to be set for .NET 5 and {TargetOS, TargetArch} to be set for .NET 6 and later
+                string jitPath = Crossgen2Tool.GetMetadata(MetadataKeys.JitPath);
+                if (!File.Exists(Crossgen2Tool.ItemSpec) ||
+                    (!String.IsNullOrEmpty(jitPath) && !File.Exists(jitPath)) ||
+                    (String.IsNullOrEmpty(jitPath) && (
+                        String.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS)) ||
+                        String.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetArch)))))
                 {
                     return false;
                 }
@@ -92,7 +99,7 @@ namespace Microsoft.NET.Build.Tasks
             if (IsPdbCompilation)
             {
                 _outputR2RImage = CompilationEntry.ItemSpec;
-                _outputPDBImage = CompilationEntry.GetMetadata("OutputPDBImage");
+                _outputPDBImage = CompilationEntry.GetMetadata(MetadataKeys.OutputPDBImage);
 
                 if (!String.IsNullOrEmpty(DiaSymReader) && !File.Exists(DiaSymReader))
                 {
@@ -108,7 +115,7 @@ namespace Microsoft.NET.Build.Tasks
             else
             {
                 _inputAssembly = CompilationEntry.ItemSpec;
-                _outputR2RImage = CompilationEntry.GetMetadata("OutputR2RImage");
+                _outputR2RImage = CompilationEntry.GetMetadata(MetadataKeys.OutputR2RImage);
 
                 if (!File.Exists(_inputAssembly))
                 {
@@ -176,7 +183,7 @@ namespace Microsoft.NET.Build.Tasks
             else
             {
                 result.AppendLine("/MissingDependenciesOK");
-                result.AppendLine($"/JITPath \"{CrossgenTool.GetMetadata("JitPath")}\"");
+                result.AppendLine($"/JITPath \"{CrossgenTool.GetMetadata(MetadataKeys.JitPath)}\"");
                 result.Append(GetAssemblyReferencesCommands());
                 result.AppendLine($"/out \"{_outputR2RImage}\"");
                 result.AppendLine($"\"{_inputAssembly}\"");
@@ -189,8 +196,19 @@ namespace Microsoft.NET.Build.Tasks
         {
             StringBuilder result = new StringBuilder();
 
+            string jitPath = Crossgen2Tool.GetMetadata(MetadataKeys.JitPath);
+            if (!String.IsNullOrEmpty(jitPath))
+            {
+                result.AppendLine($"--jitpath:\"{jitPath}\"");
+            }
+            else
+            {
+                result.AppendLine($"--targetos:{Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS)}");
+                result.AppendLine($"--targetarch:{Crossgen2Tool.GetMetadata(MetadataKeys.TargetArch)}");
+            }
+
             result.AppendLine("-O");
-            result.AppendLine($"--jitpath:\"{Crossgen2Tool.GetMetadata("JitPath")}\"");
+
             if (Crossgen2Composite)
             {
                 result.AppendLine("--composite");

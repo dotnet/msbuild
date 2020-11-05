@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetPublishInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
-        private static readonly string WorkingDirectory = 
+        private static readonly string WorkingDirectory =
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetPublishInvocation));
         private readonly ITestOutputHelper output;
 
@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { }, "")]
         [InlineData(new string[] { "-r", "<rid>" }, "-property:RuntimeIdentifier=<rid>")]
         [InlineData(new string[] { "--runtime", "<rid>" }, "-property:RuntimeIdentifier=<rid>")]
+        [InlineData(new string[] { "--use-current-runtime" }, "-property:UseCurrentRuntimeIdentifier=True")]
         [InlineData(new string[] { "-o", "<publishdir>" }, "-property:PublishDir=<cwd><publishdir>")]
         [InlineData(new string[] { "--output", "<publishdir>" }, "-property:PublishDir=<cwd><publishdir>")]
         [InlineData(new string[] { "-c", "<config>" }, "-property:Configuration=<config>")]

@@ -284,6 +284,11 @@
         <target state="translated">NETSDK1015: Token preprocesoru {0} získal více než jednu hodnotu. Volí se hodnota {1}.</target>
         <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
+      <trans-unit id="DuplicatePublishOutputFiles">
+        <source>NETSDK1148: Found multiple publish output files with the same relative path: {0}.</source>
+        <target state="new">NETSDK1148: Found multiple publish output files with the same relative path: {0}.</target>
+        <note>{StrBegin="NETSDK1148: "}</note>
+      </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
         <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
         <target state="translated">NETSDK1110: Více než jeden prostředek v balíčku modulu runtime má stejnou cílovou dílčí cestu {0}. Tady můžete tuto chybu nahlásit týmu .NET: https://aka.ms/dotnet-sdk-issue.</target>

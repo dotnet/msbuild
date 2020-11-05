@@ -85,6 +85,7 @@ namespace Microsoft.DotNet.Tests.Commands
         public void GivenNewCommandItDisplaysCompletions()
         {
             var expected = new[] {
+                "--columns",
                 "--dry-run",
                 "--force",
                 "--help",
@@ -113,7 +114,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet new " }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
+            reporter.Lines.Should().Contain(expected.OrderBy(c => c));
         }
 
         [Fact]

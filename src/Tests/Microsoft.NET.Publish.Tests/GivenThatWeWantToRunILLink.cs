@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -280,6 +281,95 @@ namespace Microsoft.NET.Publish.Tests
 
             File.Exists(linkSemaphore).Should().BeFalse();
             File.Exists(publishedDll).Should().BeFalse();
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
+        public void ILLink_verify_analysis_warnings_hello_world_app(string targetFramework)
+        {
+            var projectName = "AnalysisWarningsOnHelloWorldApp";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            List<string> expectedOutput = new List<string> () {
+                    "ILLink : Trim analysis warning IL2059: System.Reflection.RuntimeConstructorInfo.Invoke(Object,BindingFlags,Binder,Object[],CultureInfo",
+                    "ILLink : Trim analysis warning IL2070: System.Reflection.RuntimeAssembly.AddPublicNestedTypes(Type,List<Type>,List<Exception>",
+                    "ILLink : Trim analysis warning IL2026: System.Reflection.RuntimeModule.ResolveLiteralField(Int32,Type[],Type[]",
+                    "ILLink : Trim analysis warning IL2075: System.Reflection.RuntimeModule.ResolveLiteralField(Int32,Type[],Type[]",
+                    "ILLink : Trim analysis warning IL2075: System.Reflection.RuntimeModule.ResolveLiteralField(Int32,Type[],Type[]",
+                    "ILLink : Trim analysis warning IL2075: System.Reflection.RuntimeModule.GetMethodInternal(String,BindingFlags,Binder,CallingConventions,Type[],ParameterModifier[]",
+                    "ILLink : Trim analysis warning IL2075: System.Reflection.RuntimeModule.GetMethodInternal(String,BindingFlags,Binder,CallingConventions,Type[],ParameterModifier[]",
+                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.ManifestBuilder.GetTypeName(Type",
+                    "ILLink : Trim analysis warning IL2075: System.Diagnostics.Tracing.ManifestBuilder.CreateManifestString(",
+                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.TypeAnalysis.TypeAnalysis(Type,EventDataAttribute,List<Type>",
+                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.NullableTypeInfo.NullableTypeInfo(Type,List<Type>",
+                    "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.NullableTypeInfo.WriteData(PropertyValue",
+                    "ILLink : Trim analysis warning IL2077: System.Runtime.Serialization.Formatters.Binary.ObjectReader.ParseObject(ParseRecord",
+                    "ILLink : Trim analysis warning IL2075: System.Runtime.Serialization.ObjectManager.DoValueTypeFixup(FieldInfo,ObjectHolder,Object",
+                    "ILLink : Trim analysis warning IL2070: System.Runtime.Serialization.ObjectManager.GetDeserializationConstructor(Type",
+                    "ILLink : Trim analysis warning IL2057: System.Runtime.Serialization.Formatters.Binary.ObjectReader.GetSimplyNamedTypeFromAssembly(Assembly,String,Type&",
+                    "ILLink : Trim analysis warning IL2026: System.Runtime.Serialization.FormatterServices.GetTypeFromAssembly(Assembly,String",
+                    "ILLink : Trim analysis warning IL2055: System.Reflection.Emit.TypeBuilder.DefineDefaultConstructorNoLock(MethodAttributes",
+                    "ILLink : Trim analysis warning IL2055: System.Reflection.Emit.TypeBuilder.DefineDefaultConstructorNoLock(MethodAttributes",
+                    "ILLink : Trim analysis warning IL2075: System.Reflection.Emit.TypeBuilder.DefineDefaultConstructorNoLock(MethodAttributes",
+                    "ILLink : Trim analysis warning IL2075: System.Reflection.Emit.TypeBuilder.DefineDefaultConstructorNoLock(MethodAttributes",
+                    "ILLink : Trim analysis warning IL2026: System.Runtime.Serialization.Formatters.Binary.ObjectReader.TopLevelAssemblyTypeResolver.ResolveType(Assembly,String,Boolean",
+                    "ILLink : Trim analysis warning IL2075: System.Runtime.Serialization.FormatterServices.InternalGetSerializableMembers(Type",
+                    "ILLink : Trim analysis warning IL2055: System.Reflection.Emit.TypeBuilder.GetConstructor(Type,ConstructorInfo",
+                    "ILLink : Trim analysis warning IL2070: System.Runtime.Serialization.SerializationEvents.GetMethodsWithAttribute(Type,Type",
+                    "ILLink : Trim analysis warning IL2070: System.Runtime.Serialization.FormatterServices.GetSerializableFields(Type",
+                    "ILLink : Trim analysis warning IL2082: System.Reflection.Emit.TypeBuilder.DefineConstructorNoLock(MethodAttributes,CallingConventions,Type[],Type[][],Type[][]",
+                    "ILLink : Trim analysis warning IL2026: System.TypeNameParser.ResolveType(Assembly,String[],Func<Assembly,String,Boolean,Type>,Boolean,Boolean,StackCrawlMark&",
+                    "ILLink : Trim analysis warning IL2075: System.TypeNameParser.ResolveType(Assembly,String[],Func<Assembly,String,Boolean,Type>,Boolean,Boolean,StackCrawlMark&",
+                    "ILLink : Trim analysis warning IL2026: System.Reflection.Emit.ModuleBuilder.GetTypeNoLock(String,Boolean,Boolean",
+                    "ILLink : Trim analysis warning IL2026: System.Reflection.Emit.ModuleBuilder.GetTypeNoLock(String,Boolean,Boolean",
+                    "ILLink : Trim analysis warning IL2075: System.Reflection.CustomAttributeData.Init(Object",
+                    "ILLink : Trim analysis warning IL2075: System.Diagnostics.StackTrace.TryResolveStateMachineMethod(MethodBase&,Type&",
+                    "ILLink : Trim analysis warning IL2057: System.Resources.ResourceReader.FindType(Int32",
+                    "ILLink : Trim analysis warning IL2057: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
+                    "ILLink : Trim analysis warning IL2072: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
+                    "ILLink : Trim analysis warning IL2057: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
+                    "ILLink : Trim analysis warning IL2072: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
+                    "ILLink : Trim analysis warning IL2077: System.Resources.ResourceReader.InitializeBinaryFormatter(",
+                    "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(",
+                    "ILLink : Trim analysis warning IL2026: System.Reflection.Emit.ModuleBuilder.GetGenericMethodBaseDefinition(MethodBase",
+                    "ILLink : Trim analysis warning IL2026: System.Reflection.Emit.ModuleBuilder.GetGenericMethodBaseDefinition(MethodBase",
+                    "ILLink : Trim analysis warning IL2075: System.Attribute.GetParentDefinition(PropertyInfo,Type[]",
+                    "ILLink : Trim analysis warning IL2075: System.Attribute.GetParentDefinition(EventInfo",
+                    "ILLink : Trim analysis warning IL2080: System.Resources.ResourceReader.<>c.<InitializeBinaryFormatter>b__6_1(",
+                    "ILLink : Trim analysis warning IL2060: System.Resources.ResourceReader.<>c.<InitializeBinaryFormatter>b__6_1(",
+                    "ILLink : Trim analysis warning IL2075: System.Diagnostics.Tracing.EventSource.CreateManifestAndDescriptors(Type,String,EventSource,EventManifestOptions",
+                    "ILLink : Trim analysis warning IL2055: System.RuntimeTypeHandle.GetTypeHelper(Type,Type[],IntPtr,Int32"
+            };
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var result = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name)).Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false");
+
+            result.Should().Pass();
+            //This function doesn't use an XML file like the runtime
+            //to silence warnings since will make the test to fail only
+            //with new warnings, we want the test to fail if any 
+            //missing warnings also. It doesn't use BeEquivalentTo
+            //function that warns for any new or missing warnings
+            //since the error experience is not good for a developer
+            var warnings = result.StdOut.Split('\n','\r', ')').Where(line => line.StartsWith("ILLink :"));
+            var extraWarnings = warnings.Except(expectedOutput);
+            var missingWarnings = expectedOutput.Except(warnings);
+
+            string errorMessage = $"The execution of a hello world app generated a diff in the number of warnings the app produces{Environment.NewLine}{Environment.NewLine}";
+            if (missingWarnings.Any())
+            {
+                errorMessage += $"This is a list of missing linker warnings generated with your change using a console app, if you are working on make things linker" +
+                    $" friendly please also submit a PR deleting these warnings:{Environment.NewLine}";
+                foreach (var missingWarning in missingWarnings)
+                    errorMessage += "-  " + missingWarning + Environment.NewLine;
+            }
+            if (extraWarnings.Any()) { 
+                errorMessage += $"This is a list of extra linker warnings generated with your change using a console app:{Environment.NewLine}";
+                foreach (var extraWarning in extraWarnings)
+                    errorMessage += "+  " + extraWarning + Environment.NewLine;
+            }
+            Assert.True(!missingWarnings.Any() && !extraWarnings.Any(), errorMessage);
         }
 
         [Theory]
@@ -781,7 +871,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [Fact(Skip = "https://github.com/aspnet/AspNetCore/issues/12064")]
         public void ILLink_and_crossgen_process_razor_assembly()
-        { 
+        {
             var targetFramework = "netcoreapp3.0";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 

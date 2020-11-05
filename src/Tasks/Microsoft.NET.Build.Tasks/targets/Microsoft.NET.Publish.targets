@@ -134,7 +134,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="CopyFilesToPublishDirectory"
           DependsOnTargets="_IncrementalCleanPublishDirectory;
                             _CopyResolvedFilesToPublishPreserveNewest;
-                            _CopyResolvedFilesToPublishAlways" />
+                            _CopyResolvedFilesToPublishAlways;
+                            _HandleFileConflictsForPublish" />
   
   <!--
     ============================================================
@@ -506,6 +507,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
   </PropertyGroup>
 
+  <UsingTask TaskName="ResolveOverlappingItemGroupConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
   <!--
     ============================================================
                                         ComputeResolvedFilesToPublishList
@@ -538,7 +541,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <RelativePath>$(ProjectRuntimeConfigFileName)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
-      
+
       <!-- Copy the app.config (if any) -->
       <ResolvedFileToPublish Include="@(AppConfigWithTargetPath)"
                              Condition="'$(CopyBuildOutputToPublishDirectory)' == 'true'">
@@ -565,7 +568,21 @@ Copyright (c) .NET Foundation. All rights reserved.
         <RelativePath>%(Filename)%(Extension)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
+    </ItemGroup>
 
+    <!-- Remove conflicting items that appear in both _ResolvedCopyLocalPublishAssets and ResolvedFileToPublish
+         to ensure that we don't get duplicate files in the publish output. -->
+    <ResolveOverlappingItemGroupConflicts ItemGroup1="@(_ResolvedCopyLocalPublishAssets->Distinct())"
+                        ItemGroup2="@(ResolvedFileToPublish->Distinct())"
+                        PreferredPackages="$(PackageConflictPreferredPackages)">
+      <Output TaskParameter="RemovedItemGroup1" ItemName="_ResolvedCopyLocalPublishAssetsRemoved" />
+      <Output TaskParameter="RemovedItemGroup2" ItemName="ResolvedFileToPublishRemoved" />
+    </ResolveOverlappingItemGroupConflicts>
+
+    <ItemGroup>
+      <_ResolvedCopyLocalPublishAssets Remove="@(_ResolvedCopyLocalPublishAssetsRemoved)"/>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublishRemoved)"/>
+      
       <!-- Copy the resolved copy local publish assets. -->
       <ResolvedFileToPublish Include="@(_ResolvedCopyLocalPublishAssets)">
         <RelativePath>%(_ResolvedCopyLocalPublishAssets.DestinationSubDirectory)%(Filename)%(Extension)</RelativePath>
@@ -580,7 +597,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       </ResolvedFileToPublish>
 
       <!-- Copy all PackAsTool shims (if any) -->
-      <ResolvedFileToPublish Include="@(_EmbeddedApphostPaths)">
+      <ResolvedFileToPublish Include="@(_EmbeddedApphostPaths->Distinct())">
         <RelativePath>shims/%(_EmbeddedApphostPaths.ShimRuntimeIdentifier)/%(_EmbeddedApphostPaths.Filename)%(_EmbeddedApphostPaths.Extension)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
@@ -701,7 +718,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <_ResolvedCopyLocalPublishAssets Include="@(ReferenceCopyLocalPaths)"
                                        Exclude="@(_ResolvedCopyLocalBuildAssets);@(RuntimePackAsset)"
-                                       Condition="'$(PublishReferencesDocumentationFiles)' == 'true' or '%(ReferenceCopyLocalPaths.Extension)' != '.xml'">
+                                       Condition="('$(PublishReferencesDocumentationFiles)' == 'true' or '%(ReferenceCopyLocalPaths.Extension)' != '.xml') and '%(ReferenceCopyLocalPaths.Private)' != 'false'">
         <DestinationSubPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(ReferenceCopyLocalPaths.Filename)%(ReferenceCopyLocalPaths.Extension)</DestinationSubPath>
       </_ResolvedCopyLocalPublishAssets>
 
@@ -980,6 +997,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
     -->
   <Target Name="_ComputeFilesToBundle"
+        DependsOnTargets="_HandleFileConflictsForPublish"
         Condition="'$(PublishSingleFile)' == 'true'">
 
     <ItemGroup>

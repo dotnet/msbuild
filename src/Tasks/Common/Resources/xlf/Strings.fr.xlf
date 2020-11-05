@@ -284,6 +284,11 @@
         <target state="translated">NETSDK1015: Le jeton de préprocesseur '{0}' a reçu plusieurs valeurs. La valeur choisie est '{1}'.</target>
         <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
+      <trans-unit id="DuplicatePublishOutputFiles">
+        <source>NETSDK1148: Found multiple publish output files with the same relative path: {0}.</source>
+        <target state="new">NETSDK1148: Found multiple publish output files with the same relative path: {0}.</target>
+        <note>{StrBegin="NETSDK1148: "}</note>
+      </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
         <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
         <target state="translated">NETSDK1110: Plusieurs composants du pack de runtime ont le même sous-chemin de destination que '{0}'. Signalez cette erreur à l'équipe .NET ici : https://aka.ms/dotnet-sdk-issue.</target>

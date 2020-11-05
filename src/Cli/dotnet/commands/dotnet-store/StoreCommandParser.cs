@@ -80,6 +80,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription));
             command.AddOption(CommonOptions.VerbosityOption());
             command.AddOption(CommonOptions.DiagOption());
+			command.AddOption(CommonOptions.CurrentRuntimeOption(LocalizableStrings.CurrentRuntimeOptionDescription));
 
             return command;
         }

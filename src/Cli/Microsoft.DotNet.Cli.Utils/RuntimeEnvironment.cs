@@ -176,16 +176,25 @@ namespace Microsoft.DotNet.Cli.Utils
             switch (versionDescription)
             {
                 case string version when version.StartsWith("omnios"):
-                    result.Id = "OmniOS";
-                    result.VersionId = version.Substring("omnios-r".Length, 2); // e.g. 15
+                    result = new DistroInfo
+                    {
+                        Id = "OmniOS",
+                        VersionId = version.Substring("omnios-r".Length, 2) // e.g. 15
+                    };
                     break;
                 case string version when version.StartsWith("joyent"):
-                    result.Id = "SmartOS";
-                    result.VersionId = version.Substring("joyent_".Length, 4); // e.g. 2020
+                    result = new DistroInfo
+                    {
+                        Id = "SmartOS",
+                        VersionId = version.Substring("joyent_".Length, 4) // e.g. 2020
+                    };
                     break;
                 case string version when version.StartsWith("illumos"):
-                    result.Id = "OpenIndiana";
-                    // version-less
+                    result = new DistroInfo
+                    {
+                        Id = "OpenIndiana"
+                        // version-less
+                    };
                     break;
             }
 

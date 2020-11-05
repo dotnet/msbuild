@@ -284,6 +284,11 @@
         <target state="translated">NETSDK1015: 已為前置處理器語彙基元 '{0}' 指定多個值。正在選擇 '{1}' 作為值。</target>
         <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
+      <trans-unit id="DuplicatePublishOutputFiles">
+        <source>NETSDK1148: Found multiple publish output files with the same relative path: {0}.</source>
+        <target state="new">NETSDK1148: Found multiple publish output files with the same relative path: {0}.</target>
+        <note>{StrBegin="NETSDK1148: "}</note>
+      </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
         <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
         <target state="translated">NETSDK1110: 執行階段套件中有多項資產具有相同的目的地子路徑 '{0}'。請將此錯誤回報給 .NET 小組: https://aka.ms/dotnet-sdk-issue。</target>

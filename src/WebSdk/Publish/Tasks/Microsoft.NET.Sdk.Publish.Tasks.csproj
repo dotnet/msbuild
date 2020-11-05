@@ -49,15 +49,15 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     
-    <Content Include="$(PublishRoot)\Targets\**\*.*">
+    <AdditionalContent Include="$(PublishRoot)\Targets\**\*.*">
       <Pack>true</Pack>
       <PackagePath>targets</PackagePath>
-    </Content>
+    </AdditionalContent>
 
-    <Content Include="$(PublishRoot)\Sdk\**\*.*">
+    <AdditionalContent Include="$(PublishRoot)\Sdk\**\*.*">
       <Pack>true</Pack>
       <PackagePath>Sdk</PackagePath>
-    </Content>
+    </AdditionalContent>
 
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

@@ -49,6 +49,12 @@ namespace Microsoft.DotNet.Tools.MSBuild
             _forwardingAppWithoutLogging = new MSBuildForwardingAppWithoutLogging(
                 ConcatTelemetryLogger(argsToForward),
                 msbuildPath);
+
+            // Add the performance log location to the environment of the target process.
+            if (PerformanceLogManager.Instance != null && !string.IsNullOrEmpty(PerformanceLogManager.Instance.CurrentLogDirectory))
+            {
+                EnvironmentVariable(PerformanceLogManager.PerfLogDirEnvVar, PerformanceLogManager.Instance.CurrentLogDirectory);
+            }
         }
 
         public void EnvironmentVariable(string name, string value)
@@ -69,7 +75,13 @@ namespace Microsoft.DotNet.Tools.MSBuild
             // Forwarding commands will just spawn the child process and exit
             Console.CancelKeyPress += (sender, e) => { e.Cancel = true; };
 
-            return GetProcessStartInfo().Execute();
+            ProcessStartInfo startInfo = GetProcessStartInfo();
+
+            PerformanceLogEventSource.Log.LogMSBuildStart(startInfo);
+            int exitCode = startInfo.Execute();
+            PerformanceLogEventSource.Log.MSBuildStop(exitCode);
+
+            return exitCode;
         }
     }
 }

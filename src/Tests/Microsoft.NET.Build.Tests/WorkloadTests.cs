@@ -68,6 +68,51 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [CoreMSBuildOnlyFact]
+        public void It_should_fail_without_workload_when_multitargeted()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "WorkloadTest",
+                IsSdkProject = true,
+                TargetFrameworks = "net5.0;net5.0-missingworkloadtestplatform"
+            };
+
+            var testAsset = _testAssetsManager
+                .CreateTestProject(testProject);
+
+            new BuildCommand(testAsset)
+                .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "true")
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1147");
+        }
+
+        [CoreMSBuildOnlyFact]
+        public void It_should_fail_when_multitargeted_to_unknown_platforms()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "WorkloadTest",
+                IsSdkProject = true,
+                TargetFrameworks = "net5.0-ios;net5.0-android"
+            };
+
+            var testAsset = _testAssetsManager
+                .CreateTestProject(testProject);
+
+            new BuildCommand(testAsset)
+                .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "true")
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1139");
+        }
+
+
+        [CoreMSBuildOnlyFact]
         public void It_should_fail_without_resolver_enabled()
         {
             var testProject = new TestProject()

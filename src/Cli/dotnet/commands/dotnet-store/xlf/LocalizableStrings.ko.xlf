@@ -7,6 +7,11 @@
         <target state="translated">.NET 플랫폼에 대해 지정된 어셈블리를 저장합니다. 기본적으로 대상 런타임 및 프레임워크에 대해 최적화됩니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CurrentRuntimeOptionDescription">
+        <source>Use current runtime as the target runtime.</source>
+        <target state="new">Use current runtime as the target runtime.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>
