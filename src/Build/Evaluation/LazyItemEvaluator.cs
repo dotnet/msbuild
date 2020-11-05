@@ -338,7 +338,7 @@ namespace Microsoft.Build.Evaluation
 
                 ImmutableHashSet<string> currentGlobsToIgnore = globsToIgnoreStack == null ? globsToIgnore : globsToIgnoreStack.Peek();
 
-                Dictionary<string, UpdateOperation> itemsWithNoWildcards = new Dictionary<string, UpdateOperation>(FileUtilities.GetIsFileSystemCaseSensitive() ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, UpdateOperation> itemsWithNoWildcards = new Dictionary<string, UpdateOperation>(StringComparer.OrdinalIgnoreCase);
                 bool addedToBatch = false;
 
                 //  Walk back down the stack of item lists applying operations
@@ -350,9 +350,9 @@ namespace Microsoft.Build.Evaluation
                     {
                         bool addToBatch = true;
                         int i;
-                        for (i = 0; i < op.ISpec.Fragments.Count; i++)
+                        for (i = 0; i < op.Spec.Fragments.Count; i++)
                         {
-                            ItemSpecFragment frag = op.ISpec.Fragments[i];
+                            ItemSpecFragment frag = op.Spec.Fragments[i];
                             if (MSBuildConstants.CharactersForExpansion.Any(frag.TextFragment.Contains))
                             {
                                 // Fragment contains wild cards, items, or properties. Cannot batch over it using a dictionary.
@@ -377,7 +377,7 @@ namespace Microsoft.Build.Evaluation
                             // Remove items added before realizing we couldn't skip the item list
                             for (int j = 0; j < i; j++)
                             {
-                                itemsWithNoWildcards.Remove(currentList._memoizedOperation.Operation.ISpec.Fragments[j].TextFragment);
+                                itemsWithNoWildcards.Remove(currentList._memoizedOperation.Operation.Spec.Fragments[j].TextFragment);
                             }
                         }
                         else
