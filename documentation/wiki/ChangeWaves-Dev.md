@@ -25,9 +25,9 @@ The Process:
 
 ## Creating a Change Wave
 1. In the `Microsoft.Build` project, open `SharedUtilities\ChangeWaves.cs`.
-2. Add a readonly Version to identify the new wave, following the format:
+2. Add a static readonly Version to identify the new wave, following the format:
 ```c#
-public const Version Wave17_4 = new Version(17, 4);
+public static readonly Version Wave17_4 = new Version(17, 4);
 ```
 3. You may need to delete the lowest wave as new waves get added.
 4. Update the AllWaves array appropriately.
@@ -90,7 +90,7 @@ using (TestEnvironment env = TestEnvironment.Create())
 
 ## Change Wave 'End-of-Lifespan' Procedure
 These features will eventually become standard functionality. When a change wave rotates out, do the following:
-1. Start by deleting the constant `Wave17_4` that was created in [Creating a Change Wave](#creating-a-change-wave).
+1. Start by deleting the readonly `Wave17_4` that was created in [Creating a Change Wave](#creating-a-change-wave).
 2. Remove `ChangeWave.AreFeaturesEnabled` or `[MSBuild]::AreFeaturesEnabled` conditions surrounding features that were assigned that change wave.
 3. Remove tests associated with ensuring features would not run if this wave were set.
 4. Clear all other issues that arose from deleting the constant.
