@@ -1263,8 +1263,8 @@ namespace Microsoft.Build.UnitTests.Construction
             InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(() => ParseSolutionHelper(solutionFileContents));
 
             e.ErrorCode.ShouldBe("MSB5009");
-            e.Message.ShouldContain( "{1484A47E-F4C5-4700-B13F-A2BDB6ADD35E}", e.Message);
-            e.Message.ShouldContain("ConsoleApp1", e.Message);
+            e.Message.ShouldContain("{1484A47E-F4C5-4700-B13F-A2BDB6ADD35E}");
+            e.Message.ShouldContain("ConsoleApp1");
         }
 
         /// <summary>
