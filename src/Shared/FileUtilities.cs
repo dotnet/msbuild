@@ -762,7 +762,7 @@ namespace Microsoft.Build.Shared
         internal static bool CaseInsensitiveComparePathsNoThrow(string first, string second, string currentDirectory)
         {
             // perf: try comparing the bare strings first
-            if (string.Equals(first, second, StringComparer.OrdinalIgnoreCase))
+            if (string.Equals(first, second, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -770,7 +770,7 @@ namespace Microsoft.Build.Shared
             var firstFullPath = NormalizePathForComparisonNoThrow(first, currentDirectory);
             var secondFullPath = NormalizePathForComparisonNoThrow(second, currentDirectory);
 
-            return string.Equals(firstFullPath, secondFullPath, StringComparer.OrdinalIgnoreCase);
+            return string.Equals(firstFullPath, secondFullPath, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
