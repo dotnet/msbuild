@@ -104,6 +104,8 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         [InlineData("$(x )")]
         [InlineData("$( x)")]
+        [InlineData("$([MSBuild]::DoSomething($(space ))")]
+        [InlineData("$([MSBuild]::DoSomething($(_space ))")]
         public void SpaceProperty(string pattern)
         {
             Scanner lexer = new Scanner(pattern, ParserOptions.AllowProperties);
@@ -115,8 +117,10 @@ namespace Microsoft.Build.UnitTests
         /// Tests the space not next to end so no errors case
         /// </summary>
         [Theory]
-        [InlineData("$(x x)")]
-        [InlineData("$(y d f  ( hi ) sx)")]
+        [InlineData("$(x.StartsWith( 'y' ))")]
+        [InlineData("$(x.StartsWith ('y'))")]
+        [InlineData("$( x.StartsWith( $(SpacelessProperty) ) )")]
+        [InlineData("$( x.StartsWith( $(_SpacelessProperty) ) )")]
         public void SpaceInMiddleOfProperty(string pattern)
         {
             Scanner lexer = new Scanner(pattern, ParserOptions.AllowProperties);

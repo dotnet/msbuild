@@ -321,16 +321,13 @@ namespace Microsoft.Build.Evaluation
         private static bool ScanForPropertyExpressionEnd(string expression, int index, out int indexResult)
         {
             int nestLevel = 0;
+            bool whitespaceFound = false;
+            bool nonIdentifierCharacterFound = false;
+            indexResult = -1;
             unsafe
             {
                 fixed (char* pchar = expression)
                 {
-                    if (expression.Length > index + 1 && pchar[index] == '(' && char.IsWhiteSpace(pchar[index + 1]) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
-                    {
-                        indexResult = 1;
-                        return false;
-                    }
-
                     while (index < expression.Length)
                     {
                         char character = pchar[index];
@@ -342,15 +339,32 @@ namespace Microsoft.Build.Evaluation
                         {
                             nestLevel--;
                         }
+                        else if (char.IsWhiteSpace(character))
+                        {
+                            whitespaceFound = true;
+                            indexResult = index;
+                        }
+                        else if (!char.IsLetterOrDigit(character) && character != '_')
+                        {
+                            nonIdentifierCharacterFound = true;
+                        }
+
+                        if (character == '$')
+                        {
+                            if (!ScanForPropertyExpressionEnd(expression, index + 1, out index))
+                            {
+                                indexResult = index;
+                                return false;
+                            }
+                        }
 
                         // We have reached the end of the parenthesis nesting
                         // this should be the end of the property expression
                         // If it is not then the calling code will determine that
                         if (nestLevel == 0)
                         {
-                            if (index > 0 && char.IsWhiteSpace(pchar[index - 1]) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+                            if (whitespaceFound && !nonIdentifierCharacterFound && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
                             {
-                                indexResult = index - 1;
                                 return false;
                             }
 
