@@ -212,13 +212,15 @@ namespace Microsoft.Build.CommandLine
 #endif
             )
         {
-            if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
+            using (PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create())
             {
-                DumpCounters(true /* initialize only */);
-            }
+                if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
+                {
+                    DumpCounters(true /* initialize only */);
+                }
 
-            // return 0 on success, non-zero on failure
-            int exitCode = ((s_initialized && Execute(
+                // return 0 on success, non-zero on failure
+                int exitCode = ((s_initialized && Execute(
 #if FEATURE_GET_COMMANDLINE
                 Environment.CommandLine
 #else
@@ -226,12 +228,13 @@ namespace Microsoft.Build.CommandLine
 #endif
                 ) == ExitType.Success) ? 0 : 1);
 
-            if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
-            {
-                DumpCounters(false /* log to console */);
-            }
+                if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
+                {
+                    DumpCounters(false /* log to console */);
+                }
 
-            return exitCode;
+                return exitCode;
+            }
         }
 
 #if !FEATURE_GET_COMMANDLINE
