@@ -41,76 +41,67 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "mono-osx-failing")] // Disable on Mono OSX, since Mono doesn't implement EventSource.
         public void TestPerfLogEnabledProducedLogFile()
         {
-            // Setup perf log.
-            string perfLogDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            Dictionary<string, string> environmentVariables = new Dictionary<string, string>();
-            environmentVariables["DOTNET_PERFLOG_DIR"] = perfLogDir;
-
-            // Setup project directory.
-            string projectDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(projectDir, "my.proj");
-
-            try
+            using (TestEnvironment testEnv = TestEnvironment.Create(_output))
             {
-                Directory.CreateDirectory(perfLogDir);
-                Directory.CreateDirectory(projectDir);
+                // Setup perf log.
+                TransientTestFolder perfLogFolder = testEnv.CreateFolder(createFolder: true);
+                testEnv.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", perfLogFolder.Path);
 
-                string content = ObjectModelHelpers.CleanupFileContents(
-                    "<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+                // Setup project directory.
+                TransientTestFolder projectFolder = testEnv.CreateFolder(createFolder: true);
+                TransientTestFile classLibrary = testEnv.CreateFile(projectFolder, "ClassLibrary.csproj",
+                    @"<Project>
+                  <Target Name=""ClassLibraryTarget"">
+                      <Message Text=""ClassLibraryBuilt""/>
+                  </Target>
+                  </Project>
+                    ");
 
+                string projectPath = Path.Combine(projectFolder.Path, "ClassLibrary.csproj");
                 string msbuildParameters = "\"" + projectPath + "\"";
 
-                RunnerUtilities.ExecMSBuild(RunnerUtilities.PathToCurrentlyRunningMsBuildExe, msbuildParameters, out bool successfulExit, environmentVariables: environmentVariables);
+                RunnerUtilities.ExecMSBuild(msbuildParameters, out bool successfulExit);
                 successfulExit.ShouldBeTrue();
 
                 // Look for the file.
                 // NOTE: We don't explicitly look for one file because it's possible that more components will add files that will show up here.
                 // It's most important to ensure that at least one file shows up because any others that show up will be there because MSBuild properly
                 // enabled this functionality.
-                string[] files = Directory.GetFiles(perfLogDir, "perf-*.log");
+                string[] files = Directory.GetFiles(perfLogFolder.Path, "perf-*.log");
                 files.ShouldNotBeEmpty();
                 files.ShouldAllBe(f => new FileInfo(f).Length > 0);
-            }
-            finally
-            {
-                Directory.Delete(perfLogDir, true);
-                Directory.Delete(projectDir, true);
             }
         }
 
         [Fact]
         public void TestPerfLogDirectoryDoesNotExist()
         {
-            // Setup perf log.
-            string perfLogDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            Dictionary<string, string> environmentVariables = new Dictionary<string, string>();
-            environmentVariables["DOTNET_PERFLOG_DIR"] = perfLogDir;
-
-            // Setup project directory.
-            string projectDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(projectDir, "my.proj");
-
-            try
+            using (TestEnvironment testEnv = TestEnvironment.Create(_output))
             {
-                Directory.CreateDirectory(projectDir);
+                // Setup invalid perf log directory.
+                TransientTestFolder perfLogFolder = testEnv.CreateFolder(createFolder: true);
+                string perfLogPath = Path.Combine(perfLogFolder.Path, "logs");
+                testEnv.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", perfLogPath);
 
-                string content = ObjectModelHelpers.CleanupFileContents(
-                    "<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+                // Setup project directory.
+                TransientTestFolder projectFolder = testEnv.CreateFolder(createFolder: true);
+                TransientTestFile classLibrary = testEnv.CreateFile(projectFolder, "ClassLibrary.csproj",
+                    @"<Project>
+                  <Target Name=""ClassLibraryTarget"">
+                      <Message Text=""ClassLibraryBuilt""/>
+                  </Target>
+                  </Project>
+                    ");
 
+                string projectPath = Path.Combine(projectFolder.Path, "ClassLibrary.csproj");
                 string msbuildParameters = "\"" + projectPath + "\"";
 
-                Directory.Exists(perfLogDir).ShouldBeFalse();
+                Directory.Exists(perfLogPath).ShouldBeFalse();
 
-                RunnerUtilities.ExecMSBuild(RunnerUtilities.PathToCurrentlyRunningMsBuildExe, msbuildParameters, out bool successfulExit, environmentVariables: environmentVariables);
+                RunnerUtilities.ExecMSBuild(msbuildParameters, out bool successfulExit);
                 successfulExit.ShouldBeTrue();
 
-                Directory.Exists(perfLogDir).ShouldBeFalse();
-            }
-            finally
-            {
-                Directory.Delete(projectDir, true);
+                Directory.Exists(perfLogPath).ShouldBeFalse();
             }
         }
     }

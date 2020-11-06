@@ -1,8 +1,6 @@
 ﻿using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using Xunit.Abstractions;
 
@@ -25,7 +23,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// Invoke msbuild.exe with the given parameters and return the stdout, stderr, and process exit status.
         /// This method may invoke msbuild via other runtimes.
         /// </summary>
-        public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null, IDictionary<string, string> environmentVariables = null)
+        public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
         {
 #if FEATURE_RUN_EXE_IN_TESTS
             var pathToExecutable = pathToMsBuildExe;
@@ -34,7 +32,7 @@ namespace Microsoft.Build.UnitTests.Shared
             msbuildParameters = "\"" + pathToMsBuildExe + "\"" + " " + msbuildParameters;
 #endif
 
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, environmentVariables);
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
         }
 
         private static void AdjustForShellExecution(ref string pathToExecutable, ref string arguments)
@@ -70,7 +68,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// <summary>
         /// Run the process and get stdout and stderr
         /// </summary>
-        public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null, IDictionary<string, string> environmentVariables = null)
+        public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
         {
             if (shellExecute)
             {
@@ -87,15 +85,6 @@ namespace Microsoft.Build.UnitTests.Shared
                 UseShellExecute = false,
                 Arguments = parameters
             };
-
-            if(environmentVariables != null)
-            {
-                foreach(KeyValuePair<string, string> pair in environmentVariables)
-                {
-                    psi.EnvironmentVariables[pair.Key] = pair.Value;
-                }
-            }
-
             var output = string.Empty;
 
             using (var p = new Process { EnableRaisingEvents = true, StartInfo = psi })
