@@ -344,7 +344,7 @@ namespace Microsoft.Build.Evaluation
                             whitespaceFound = true;
                             indexResult = index;
                         }
-                        else if (!char.IsLetterOrDigit(character) && character != '_')
+                        else if (!XmlUtilities.IsValidSubsequentElementNameCharacter(character))
                         {
                             nonIdentifierCharacterFound = true;
                         }
