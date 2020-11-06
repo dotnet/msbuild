@@ -349,7 +349,7 @@ namespace Microsoft.Build.Evaluation
                             nonIdentifierCharacterFound = true;
                         }
 
-                        if (character == '$')
+                        if (character == '$' && index < expression.Length - 1 && pchar[index + 1] == '(')
                         {
                             if (!ScanForPropertyExpressionEnd(expression, index + 1, out index))
                             {
