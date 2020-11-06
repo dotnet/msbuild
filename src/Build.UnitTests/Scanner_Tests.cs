@@ -6,6 +6,7 @@ using System;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 
@@ -104,16 +105,27 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests the space errors case
         /// </summary>
-        [Fact]
-        public void SpaceProperty()
+        [Theory]
+        [InlineData("$(x )")]
+        [InlineData("$( x)")]
+        public void SpaceProperty(string pattern)
         {
-            Scanner lexer = new Scanner("$(x )", ParserOptions.AllowProperties);
+            Scanner lexer = new Scanner(pattern, ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
             Assert.Equal("IllFormedPropertySpaceInCondition", lexer.GetErrorResource());
+        }
 
-            lexer = new Scanner("$( x)", ParserOptions.AllowProperties);
+        /// <summary>
+        /// Tests the space not next to end so no errors case
+        /// </summary>
+        [Theory]
+        [InlineData("$(x x)")]
+        [InlineData("$(y d f  ( hi ) sx)")]
+        public void SpaceInMiddleOfProperty(string pattern)
+        {
+            Scanner lexer = new Scanner(pattern, ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
-            Assert.Equal("IllFormedPropertySpaceInCondition", lexer.GetErrorResource());
+            lexer._errorState.ShouldBeFalse();
         }
 
         [Fact]

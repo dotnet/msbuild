@@ -27,7 +27,7 @@ namespace Microsoft.Build.Evaluation
         private string _expression;
         private int _parsePoint;
         private Token _lookahead;
-        private bool _errorState;
+        internal bool _errorState;
         private int _errorPosition;
         // What we found instead of what we were looking for
         private string _unexpectedlyFound = null;
