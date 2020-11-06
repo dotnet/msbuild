@@ -43,13 +43,13 @@ namespace Microsoft.Build.Eventing
         /// <summary>
         /// Call this method to notify listeners of information relevant to the setup for a BuildManager to receive build requests.
         /// </summary>
-        [Event(3, Keywords = Keywords.All)]
+        [Event(3, Keywords = Keywords.All | Keywords.PerformanceLog)]
         public void BuildStart()
         {
             WriteEvent(3);
         }
 
-        [Event(4, Keywords = Keywords.All)]
+        [Event(4, Keywords = Keywords.All | Keywords.PerformanceLog)]
         public void BuildStop()
         {
             WriteEvent(4);
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Eventing
         /// Call this method to notify listeners of information of how a project file built.
         /// <param name="projectPath">Filename of the project being built.</param>
         /// </summary>
-        [Event(5, Keywords = Keywords.All)]
+        [Event(5, Keywords = Keywords.All | Keywords.PerformanceLog)]
         public void BuildProjectStart(string projectPath)
         {
             WriteEvent(5, projectPath);
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Eventing
 
         /// <param name="projectPath">Filename of the project being built.</param>
         /// <param name="targets">Names of the targets that built.</param>
-        [Event(6, Keywords = Keywords.All)]
+        [Event(6, Keywords = Keywords.All | Keywords.PerformanceLog)]
         public void BuildProjectStop(string projectPath, string targets)
         {
             WriteEvent(6, projectPath, targets);
@@ -213,13 +213,13 @@ namespace Microsoft.Build.Eventing
             WriteEvent(26);
         }
 
-        [Event(27, Keywords = Keywords.All)]
+        [Event(27, Keywords = Keywords.All | Keywords.PerformanceLog)]
         public void RarOverallStart()
         {
             WriteEvent(27);
         }
 
-        [Event(28, Keywords = Keywords.All)]
+        [Event(28, Keywords = Keywords.All | Keywords.PerformanceLog)]
         public void RarOverallStop()
         {
             WriteEvent(28);
