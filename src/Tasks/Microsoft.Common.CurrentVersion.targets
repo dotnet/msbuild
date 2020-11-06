@@ -1609,6 +1609,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    <ItemGroup>
       <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' == '' and ('%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj')">
         <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+        <UndefineProperties>%(_MSBuildProjectReferenceExistent.UndefineProperties);TargetFramework</UndefineProperties>
       </_MSBuildProjectReferenceExistent>
    </ItemGroup>
 
@@ -1700,7 +1701,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          If the NearestTargetFramework property was not set or the project has a single TargetFramework, we need to Undefine
          TargetFramework to avoid another project evaluation.
       -->
-      <AnnotatedProjects Condition="('%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj') or ('@(AnnotatedProjects)' == '%(Identity)' and ('%(AnnotatedProjects.NearestTargetFramework)' == '' or '%(AnnotatedProjects.HasSingleTargetFramework)' == 'true'))">
+      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and ('%(AnnotatedProjects.NearestTargetFramework)' == '' or '%(AnnotatedProjects.HasSingleTargetFramework)' == 'true')">
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);TargetFramework</UndefineProperties>
       </AnnotatedProjects>
 
