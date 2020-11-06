@@ -325,26 +325,22 @@ namespace Microsoft.Build.Evaluation
             {
                 fixed (char* pchar = expression)
                 {
+                    if (expression.Length > 1 && pchar[0] == '(' && char.IsWhiteSpace(pchar[1]) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+                    {
+                        indexResult = 1;
+                        return false;
+                    }
+
                     while (index < expression.Length)
                     {
                         char character = pchar[index];
                         if (character == '(')
                         {
                             nestLevel++;
-                            if (index + 1 < expression.Length && char.IsWhiteSpace(pchar[index + 1]) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
-                            {
-                                indexResult = index + 1;
-                                return false;
-                            }
                         }
                         else if (character == ')')
                         {
                             nestLevel--;
-                            if (index > 0 && char.IsWhiteSpace(pchar[index - 1]) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
-                            {
-                                indexResult = index - 1;
-                                return false;
-                            }
                         }
 
                         // We have reached the end of the parenthesis nesting
@@ -352,6 +348,12 @@ namespace Microsoft.Build.Evaluation
                         // If it is not then the calling code will determine that
                         if (nestLevel == 0)
                         {
+                            if (index > 0 && char.IsWhiteSpace(pchar[index - 1]) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+                            {
+                                indexResult = index - 1;
+                                return false;
+                            }
+
                             indexResult = index;
                             return true;
                         }
