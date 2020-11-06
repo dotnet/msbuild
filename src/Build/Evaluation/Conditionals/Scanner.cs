@@ -321,8 +321,6 @@ namespace Microsoft.Build.Evaluation
         private static bool ScanForPropertyExpressionEnd(string expression, int index, out int indexResult)
         {
             int nestLevel = 0;
-            bool whitespaceCheck = false;
-
             unsafe
             {
                 fixed (char* pchar = expression)
@@ -333,17 +331,20 @@ namespace Microsoft.Build.Evaluation
                         if (character == '(')
                         {
                             nestLevel++;
-                            whitespaceCheck = true;
+                            if (index + 1 < expression.Length && char.IsWhiteSpace(pchar[index + 1]) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+                            {
+                                indexResult = index + 1;
+                                return false;
+                            }
                         }
                         else if (character == ')')
                         {
                             nestLevel--;
-                            whitespaceCheck = false;
-                        }
-                        else if (whitespaceCheck && char.IsWhiteSpace(character) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
-                        {
-                            indexResult = index;
-                            return false;
+                            if (index > 0 && char.IsWhiteSpace(pchar[index - 1]) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+                            {
+                                indexResult = index - 1;
+                                return false;
+                            }
                         }
 
                         // We have reached the end of the parenthesis nesting
