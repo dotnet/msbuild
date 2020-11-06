@@ -325,7 +325,7 @@ namespace Microsoft.Build.Evaluation
             {
                 fixed (char* pchar = expression)
                 {
-                    if (expression.Length > 1 && pchar[0] == '(' && char.IsWhiteSpace(pchar[1]) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+                    if (expression.Length > index + 1 && pchar[index] == '(' && char.IsWhiteSpace(pchar[index + 1]) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
                     {
                         indexResult = 1;
                         return false;

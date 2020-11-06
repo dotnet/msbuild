@@ -68,11 +68,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="lexer"></param>
         private void AdvanceToScannerError(Scanner lexer)
         {
-            while (true)
-            {
-                if (!lexer.Advance()) break;
-                if (lexer.IsNext(Token.TokenType.EndOfInput)) break;
-            }
+            while (lexer.Advance() && !lexer.IsNext(Token.TokenType.EndOfInput)) ;
         }
 
         /// <summary>
