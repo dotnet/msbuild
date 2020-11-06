@@ -752,6 +752,28 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Compare if two paths, relative to the given currentDirectory are equal.
+        /// Does not throw IO exceptions. See <see cref="GetFullPathNoThrow(string)"/>
+        /// </summary>
+        /// <param name="first"></param>
+        /// <param name="second"></param>
+        /// <param name="currentDirectory"></param>
+        /// <returns></returns>
+        internal static bool CaseInsensitiveComparePathsNoThrow(string first, string second, string currentDirectory)
+        {
+            // perf: try comparing the bare strings first
+            if (string.Equals(first, second, StringComparer.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            var firstFullPath = NormalizePathForComparisonNoThrow(first, currentDirectory);
+            var secondFullPath = NormalizePathForComparisonNoThrow(second, currentDirectory);
+
+            return string.Equals(firstFullPath, secondFullPath, StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
         /// Normalizes a path for path comparison
         /// Does not throw IO exceptions. See <see cref="GetFullPathNoThrow(string)"/>
         ///

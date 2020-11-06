@@ -43,7 +43,7 @@ namespace Microsoft.Build.Internal
                 return _regex.IsMatch(normalizedFileToMatch);
             }
 
-            return FileUtilities.ComparePathsNoThrow(_unescapedFileSpec, fileToMatch, _currentDirectory);
+            return FileUtilities.CaseInsensitiveComparePathsNoThrow(_unescapedFileSpec, fileToMatch, _currentDirectory);
         }
 
         // this method parses the glob and extracts the fixed directory part in order to normalize it and make it absolute
