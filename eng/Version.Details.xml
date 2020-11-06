@@ -154,9 +154,9 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>062237e054487e2e53c186660e459eda69b75e59</Sha>
     </Dependency>
-    <Dependency Name="VS.Redist.Common.AspNetCore.TargetingPack.x64.5.0" Version="5.0.0-rtm.20512.5">
+    <Dependency Name="VS.Redist.Common.AspNetCore.SharedFramework.x64.6.0" Version="6.0.0-alpha.1.20526.6">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>b866b765b3493c7943829ce830e509d61f958102</Sha>
+      <Sha>062237e054487e2e53c186660e459eda69b75e59</Sha>
     </Dependency>
     <Dependency Name="dotnet-dev-certs" Version="6.0.0-alpha.1.20526.6">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
