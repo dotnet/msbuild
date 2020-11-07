@@ -830,13 +830,8 @@ namespace Microsoft.Build.UnitTests
             File.Exists(_pathToArbitraryBogusFile).ShouldBeTrue();
 
             bool successfulExit;
-            string pathToMSBuildExe = RunnerUtilities.PathToCurrentlyRunningMsBuildExe;
-            // This @pathToMSBuildExe is used directly with Process, so don't quote it on
-            // Unix
-            if (NativeMethodsShared.IsWindows)
-            {
-                pathToMSBuildExe = "\"" + pathToMSBuildExe + "\"";
-            }
+            string pathToMSBuildExe = Path.GetFullPath(RunnerUtilities.PathToCurrentlyRunningMsBuildExe);
+            
 
             string output = RunnerUtilities.ExecMSBuild(pathToMSBuildExe, msbuildParameters, out successfulExit);
             successfulExit.ShouldBeFalse();
