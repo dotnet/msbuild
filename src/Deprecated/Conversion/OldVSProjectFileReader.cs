@@ -551,10 +551,10 @@ namespace Microsoft.Build.Conversion
                 "Caller passed in a string that doesn't have an '&' character in the specified location.");
 
             StringBuilder replacedString = new StringBuilder();
-
-            replacedString.Append(originalString, 0, indexOfAmpersand);
+            replacedString.Append(originalString, 0, indexOfAmpersand);            
             replacedString.Append("&amp;");
-            replacedString.Append(originalString, indexOfAmpersand + 1, originalString.Length - indexOfAmpersand + 1);
+
+            replacedString.Append(originalString, indexOfAmpersand + 1, originalString.Length - indexOfAmpersand - 1);
 
             return replacedString.ToString();
         }

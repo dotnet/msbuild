@@ -6,8 +6,8 @@ using System.IO;
 using System.Text;
 
 using Microsoft.Build.Conversion;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Build.Shared;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -20,7 +20,6 @@ namespace Microsoft.Build.UnitTests
      * See the comments in that class for a description of its purpose.
      * 
      **************************************************************************/
-    [TestClass]
     public class OldVSProjectFileReader_Tests
     {
         /***********************************************************************
@@ -71,7 +70,7 @@ namespace Microsoft.Build.UnitTests
          * does not contain any special characters.
          * 
          **********************************************************************/
-        [TestMethod]
+        [Fact]
         public void NoSpecialCharacters 
             (
             )
@@ -104,18 +103,18 @@ namespace Microsoft.Build.UnitTests
 
             // Read the first 20 characters into our buffer.
             charactersRead = reader.Read(characterBuffer, 0, 20);
-            Assert.AreEqual(20, charactersRead);
-            Assert.AreEqual("<VisualStudioProject", new string(characterBuffer));
+            Assert.Equal(20, charactersRead);
+            Assert.Equal("<VisualStudioProject", new string(characterBuffer));
 
             // Read the next 20 characters into our buffer.
             charactersRead = reader.Read(characterBuffer, 0, 20);
-            Assert.AreEqual(20, charactersRead);
-            Assert.AreEqual(">\r\n\r\n  <VisualBasic\r", new string(characterBuffer));
+            Assert.Equal(20, charactersRead);
+            Assert.Equal(">\r\n\r\n  <VisualBasic\r", new string(characterBuffer));
 
             // Read the next 10 characters into our buffer starting at position 5.
             charactersRead = reader.Read(characterBuffer, 5, 10);
-            Assert.AreEqual(10, charactersRead);
-            Assert.AreEqual(">\r\n\r\n\n    Projeasic\r", new string(characterBuffer));
+            Assert.Equal(10, charactersRead);
+            Assert.Equal(">\r\n\r\n\n    Projeasic\r", new string(characterBuffer));
 
             // Try reading the next 30 characters.  Since there's not enough room in our
             // buffer for 30 characters, this will fail.
@@ -129,28 +128,28 @@ namespace Microsoft.Build.UnitTests
             }
             // Confirm that the proper exception was thrown and that the buffer
             // was not touched.
-            Assert.AreEqual(1, exceptionCount);
-            Assert.AreEqual(">\r\n\r\n\n    Projeasic\r", new string(characterBuffer));
+            Assert.Equal(1, exceptionCount);
+            Assert.Equal(">\r\n\r\n\n    Projeasic\r", new string(characterBuffer));
 
             // Read to the end of the current line.
             string readLine = reader.ReadLine();
-            Assert.AreEqual("ctType = \"Local\"", readLine);
+            Assert.Equal("ctType = \"Local\"", readLine);
 
             // Read the next line.
             readLine = reader.ReadLine();
-            Assert.AreEqual("    ProductVersion = \"7.10.3022\"", readLine);
+            Assert.Equal("    ProductVersion = \"7.10.3022\"", readLine);
 
             // Read the next character.
             int character = reader.Read();
-            Assert.AreEqual(' ', character);
+            Assert.Equal(' ', character);
 
             // Read the next character.
             character = reader.Read();
-            Assert.AreEqual(' ', character);
+            Assert.Equal(' ', character);
 
             // Peek at the next character, but don't advance the read pointer.
             character = reader.Peek();
-            Assert.AreEqual('>', character);
+            Assert.Equal('>', character);
 
             // Read the next 20 characters into our buffer.
             charactersRead = reader.Read(characterBuffer, 0, 20);
@@ -161,15 +160,15 @@ namespace Microsoft.Build.UnitTests
             // we're almost at the end of the file, we expect that only 7 characters
             // will actually be read.
             charactersRead = reader.Read(characterBuffer, 0, 20);
-            Assert.AreEqual(7, charactersRead);
-            Assert.AreEqual("ject>\r\nsualStudioPro", new string(characterBuffer));
+            Assert.Equal(7, charactersRead);
+            Assert.Equal("ject>\r\nsualStudioPro", new string(characterBuffer));
 
             // Read the next 20 characters into our buffer.  Now, we're really
             // at the end of the file already, so it should come back with zero
             // characters read.
             charactersRead = reader.Read(characterBuffer, 0, 20);
-            Assert.AreEqual(0, charactersRead);
-            Assert.AreEqual("ject>\r\nsualStudioPro", new string(characterBuffer));
+            Assert.Equal(0, charactersRead);
+            Assert.Equal("ject>\r\nsualStudioPro", new string(characterBuffer));
 
             // Clean up.
             reader.Close();
@@ -186,7 +185,7 @@ namespace Microsoft.Build.UnitTests
          * contains special characters in some of the XML attribute values.
          * 
          **********************************************************************/
-        [TestMethod]
+        [Fact]
         public void XmlAttributesWithSpecialCharacters 
             (
             )
@@ -219,30 +218,30 @@ namespace Microsoft.Build.UnitTests
 
             // Read the first 30 characters into our buffer.
             charactersRead = reader.Read(characterBuffer, 0, 30);
-            Assert.AreEqual(30, charactersRead);
-            Assert.AreEqual("<VisualStudioProject>\r\n\r\n  <Vi", new string(characterBuffer));
+            Assert.Equal(30, charactersRead);
+            Assert.Equal("<VisualStudioProject>\r\n\r\n  <Vi", new string(characterBuffer));
 
             // Read the next 30 characters into our buffer.
             charactersRead = reader.Read(characterBuffer, 0, 30);
-            Assert.AreEqual(30, charactersRead);
-            Assert.AreEqual("sualBasic\r\n    ProjectType = \"", new string(characterBuffer));
+            Assert.Equal(30, charactersRead);
+            Assert.Equal("sualBasic\r\n    ProjectType = \"", new string(characterBuffer));
 
             // Read the next 20 characters into our buffer starting at position 10.
             // Confirm that the < and > characters within an attribute value got translated correctly.
             charactersRead = reader.Read(characterBuffer, 10, 20);
-            Assert.AreEqual(20, charactersRead);
-            Assert.AreEqual("sualBasic\rLo&lt;cal\"\r\n    Prod", new string(characterBuffer));
-
+            Assert.Equal(20, charactersRead);
+            Assert.Equal("sualBasic\rLo&lt;cal\"\r\n    Prod", new string(characterBuffer));
+            
             // Read the next 20 characters into our buffer.  Confirm that the < and > characters within
             // an attribute value got translated correctly.
             charactersRead = reader.Read(characterBuffer, 0, 20);
-            Assert.AreEqual(20, charactersRead);
-            Assert.AreEqual("uctVersion = \"7&lt;.\r\n    Prod", new string(characterBuffer));
+            Assert.Equal(20, charactersRead);
+            Assert.Equal("uctVersion = \"7&lt;.\r\n    Prod", new string(characterBuffer));
 
             // Read the remainder of the file.  Confirm that the < and > characters within
             // an attribute value got translated correctly.
             string restOfFile = reader.ReadToEnd();
-            Assert.AreEqual("10.&gt;3022\"\r\n    A=\"blah&gt;\" B=\"bloo&lt;\"\r\n  >\r\n  </VisualBasic>\r\n\r\n</VisualStudioProject>\r\n", 
+            Assert.Equal("10.&gt;3022\"\r\n    A=\"blah&gt;\" B=\"bloo&lt;\"\r\n  >\r\n  </VisualBasic>\r\n\r\n</VisualStudioProject>\r\n", 
                 restOfFile);
 
             // Clean up.
@@ -261,7 +260,7 @@ namespace Microsoft.Build.UnitTests
          * but it's good to test it anyway.
          * 
          **********************************************************************/
-        [TestMethod]
+        [Fact]
         public void MultipleElementsOnSameLine
             (
             )
@@ -283,7 +282,7 @@ namespace Microsoft.Build.UnitTests
             // an attribute value got translated correctly, but the < and > characters occurring
             // *outside* an attribute value are not touched.
             string wholeFile = reader.ReadToEnd();
-            Assert.AreEqual("<Elem1 Attrib1=\"bl&gt;&gt;ah\"/><Elem2 Attrib2=\"bl&lt;&lt;oo\"/>\r\n", 
+            Assert.Equal("<Elem1 Attrib1=\"bl&gt;&gt;ah\"/><Elem2 Attrib2=\"bl&lt;&lt;oo\"/>\r\n", 
                 wholeFile);
 
             // Clean up.
@@ -297,7 +296,7 @@ namespace Microsoft.Build.UnitTests
         /// we make sure we handle this case properly.
         /// </summary>
         /// <owner>RGoel</owner>
-        [TestMethod]
+        [Fact]
         public void AttributeValueUsingSingleQuotes
             (
             )
@@ -317,7 +316,7 @@ namespace Microsoft.Build.UnitTests
             // an attribute value got translated correctly, but the < and > characters occurring
             // *outside* an attribute value are not touched.
             string wholeFile = reader.ReadToEnd();
-            Assert.AreEqual("<Elem1 Attrib1 = '1234&lt;56789 is a \"true\" statement'/>\r\n", 
+            Assert.Equal("<Elem1 Attrib1 = '1234&lt;56789 is a \"true\" statement'/>\r\n", 
                 wholeFile);
 
             // Clean up.
@@ -331,68 +330,68 @@ namespace Microsoft.Build.UnitTests
         /// replaced with "&amp;" by our reader.
         /// </summary>
         /// <owner>RGoel</owner>
-        [TestMethod]
+        [Fact]
         public void AmpersandReplacement
             (
             )
         {
             // Single lonely ampersand.  This should get replaced.
-            Assert.AreEqual("blah&amp;doo",
+            Assert.Equal("blah&amp;doo",
                 OldVSProjectFileReader.ReplaceSpecialCharactersInXmlAttributeString("blah&doo"));
 
             // Single lonely ampersand again, but this time with a semicolon at some point afterwards, just
             // to try and confuse the parser.
-            Assert.AreEqual("blah&amp;doo;doo",
+            Assert.Equal("blah&amp;doo;doo",
                 OldVSProjectFileReader.ReplaceSpecialCharactersInXmlAttributeString("blah&doo;doo"));
 
             // An ampersand used to escape a legitimate special character should NOT be replaced by our function.
-            Assert.AreEqual("blah&lt;doo",
+            Assert.Equal("blah&lt;doo",
                 OldVSProjectFileReader.ReplaceSpecialCharactersInXmlAttributeString("blah&lt;doo"));
 
             // An ampersand used to escape a legitimate special character should NOT be replaced by our function.
-            Assert.AreEqual("blah&#60;doo",
+            Assert.Equal("blah&#60;doo",
                 OldVSProjectFileReader.ReplaceSpecialCharactersInXmlAttributeString("blah&#60;doo"));
 
             // If the code between the "&" and the ";" is not a legitimate number, then we SHOULD replace the "&".
-            Assert.AreEqual("blah&amp;#AB;doo",
+            Assert.Equal("blah&amp;#AB;doo",
                 OldVSProjectFileReader.ReplaceSpecialCharactersInXmlAttributeString("blah&#AB;doo"));
 
             // A valid hexadecimal number should NOT be replaced.
-            Assert.AreEqual("blah&#xAB;doo",
+            Assert.Equal("blah&#xAB;doo",
                 OldVSProjectFileReader.ReplaceSpecialCharactersInXmlAttributeString("blah&#xAB;doo"));
 
             // Check to make sure we can handle two replacements.
-            Assert.AreEqual("blah&amp;doo&amp;heehee",
+            Assert.Equal("blah&amp;doo&amp;heehee",
                 OldVSProjectFileReader.ReplaceSpecialCharactersInXmlAttributeString("blah&doo&heehee"));
 
             // Check to make sure we can handle a replacement at the end of a string.
-            Assert.AreEqual("blahdoo&amp;",
+            Assert.Equal("blahdoo&amp;",
                 OldVSProjectFileReader.ReplaceSpecialCharactersInXmlAttributeString("blahdoo&"));
 
             // Emptiness between the "&" and the ";" is not valid, and therefore the "&" should get replaced.
-            Assert.AreEqual("blah&amp;;doo",
+            Assert.Equal("blah&amp;;doo",
                 OldVSProjectFileReader.ReplaceSpecialCharactersInXmlAttributeString("blah&;doo"));
 
             // Emptiness between the "#" and the ";" is not valid, and therefore the "&" should get replaced.
-            Assert.AreEqual("blah&amp;#;doo",
+            Assert.Equal("blah&amp;#;doo",
                 OldVSProjectFileReader.ReplaceSpecialCharactersInXmlAttributeString("blah&#;doo"));
 
             // Emptiness between the "#x" and the ";" is not valid, and therefore the "&" should get replaced.
-            Assert.AreEqual("blah&amp;#x;doo",
+            Assert.Equal("blah&amp;#x;doo",
                 OldVSProjectFileReader.ReplaceSpecialCharactersInXmlAttributeString("blah&#x;doo"));
 
             // Even characters beyond 256 should be considered valid.
-            Assert.AreEqual("blah&#280;doo",
+            Assert.Equal("blah&#280;doo",
                 OldVSProjectFileReader.ReplaceSpecialCharactersInXmlAttributeString("blah&#280;doo"));
 
             // The VS.NET 2003 XML writer even persisted things like the copyright symbol as an entity.
             // So we need to be careful about not touching those.
-            Assert.AreEqual("blah&copy;doo",
+            Assert.Equal("blah&copy;doo",
                 OldVSProjectFileReader.ReplaceSpecialCharactersInXmlAttributeString("blah&copy;doo"));
 
             // The VS.NET 2003 XML writer even persisted things like the copyright symbol as an entity.
             // So we need to be careful about not touching those.
-            Assert.AreEqual("blah&amp;COPY;doo",
+            Assert.Equal("blah&amp;COPY;doo",
                 OldVSProjectFileReader.ReplaceSpecialCharactersInXmlAttributeString("blah&COPY;doo"));
         }
 
@@ -406,7 +405,7 @@ namespace Microsoft.Build.UnitTests
         /// "&"'s to "&amp;" before letting System.Xml have at it.
         /// </summary>
         /// <owner>RGoel</owner>
-        [TestMethod]
+        [Fact]
         public void Regress322573
             (
             )
@@ -425,7 +424,7 @@ namespace Microsoft.Build.UnitTests
             // Read the whole file into a string.  Confirm that the & character within
             // an attribute value got translated correctly.
             string wholeFile = reader.ReadToEnd();
-            Assert.AreEqual("<Elem1 StartArguments = \"???action=16&amp;requestid=1000036&amp;#14CA053601F66928BF0550E395A714E72C8D6066???  /HeadTraxStartversion 5.6.0.66 /RunningFromHeadTraxStart yes /HTXMutexName HTXMutex344\"/>\r\n", 
+            Assert.Equal("<Elem1 StartArguments = \"???action=16&amp;requestid=1000036&amp;#14CA053601F66928BF0550E395A714E72C8D6066???  /HeadTraxStartversion 5.6.0.66 /RunningFromHeadTraxStart yes /HTXMutexName HTXMutex344\"/>\r\n", 
                 wholeFile);
 
             // Clean up.
@@ -438,7 +437,7 @@ namespace Microsoft.Build.UnitTests
         /// VS .NET wrote out projects in ANSI format by default.
         /// We want to make sure those characters don't get stripped by our reader.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Regress184573()
         {
             // The contents of the project file that we'll be testing.  Look at the
@@ -455,7 +454,7 @@ namespace Microsoft.Build.UnitTests
 
             // Read the whole file into a string.  
             string wholeFile = reader.ReadToEnd();
-            Assert.IsTrue(wholeFile.Length > 0, "High-bit character was stripped.");
+            Assert.True(wholeFile.Length > 0, "High-bit character was stripped.");
 
            // Create two different encodings.
             Encoding defaultEncoding = Encoding.Default;
@@ -470,8 +469,8 @@ namespace Microsoft.Build.UnitTests
             char[] defaultEncodingChars = new char[defaultEncoding.GetCharCount(defaultEncodingBytes, 0, defaultEncodingBytes.Length)];
             defaultEncoding.GetChars(defaultEncodingBytes, 0, defaultEncodingBytes.Length, defaultEncodingChars, 0);
 
-            Assert.IsTrue(defaultEncodingChars.Length > 0);
-            Assert.IsTrue(wholeFile[0] == defaultEncodingChars[0], String.Format("Expected ANSI encoding of '{0}' to result in '{0}'. Instead it was '{1}'", c, defaultEncodingChars[0], wholeFile[0])
+            Assert.True(defaultEncodingChars.Length > 0);
+            Assert.True(wholeFile[0] == defaultEncodingChars[0], String.Format("Expected ANSI encoding of '{0}' to result in '{0}'. Instead it was '{1}'", c, defaultEncodingChars[0], wholeFile[0])
             );
 
             // Clean up.
@@ -483,12 +482,12 @@ namespace Microsoft.Build.UnitTests
         /// Tests that a single ampersand replacement works correctly at the beginning of 
         /// a string, middle of a string, and end of a string.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ReplaceSingleAmpersand()
         {
-            Assert.AreEqual("&amp;1234", OldVSProjectFileReader.ReplaceAmpersandWithLiteral("&1234", 0));
-            Assert.AreEqual("12&amp;34", OldVSProjectFileReader.ReplaceAmpersandWithLiteral("12&34", 2));
-            Assert.AreEqual("1234&amp;", OldVSProjectFileReader.ReplaceAmpersandWithLiteral("1234&", 4));
+            Assert.Equal("&amp;1234", OldVSProjectFileReader.ReplaceAmpersandWithLiteral("&1234", 0));
+            Assert.Equal("12&amp;34", OldVSProjectFileReader.ReplaceAmpersandWithLiteral("12&34", 2));
+            Assert.Equal("1234&amp;", OldVSProjectFileReader.ReplaceAmpersandWithLiteral("1234&", 4));
         }
     }
 }

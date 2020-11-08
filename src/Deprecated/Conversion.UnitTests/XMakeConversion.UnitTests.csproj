@@ -1,0 +1,59 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
+    <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
+    <AssemblyName>Microsoft.Build.Conversion.UnitTest</AssemblyName>
+
+    <IsPackable>false</IsPackable>
+
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <Nonshipping>true</Nonshipping>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <BuildArchitecturesAllowed>$(BuildArchitecturesAllowed);amd64;arm</BuildArchitecturesAllowed>
+    <NoWarn>$(NoWarn);0618</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\..\Shared\Constants.cs" />
+    <Compile Include="..\..\Shared\UnitTests\EngineTestEnvironment.cs" />
+    <Compile Include="..\..\Shared\UnitTests\TestEnvironment.cs" />
+    <Compile Include="..\..\Shared\UnitTests\MockLogger.cs" />
+    <Compile Include="..\..\Shared\UnitTests\ObjectModelHelpers.cs" />
+    <Compile Include="OldVSProjectFileReader_Tests.cs" />
+    <Compile Include="ProjectFileConverter_Tests.cs" />
+
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.XML" />
+
+    <ProjectReference Include="..\..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\..\Utilities\Microsoft.Build.Utilities.csproj" />
+    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\Engine\Microsoft.Build.Engine.csproj" />
+    <ProjectReference Include="..\Conversion\Microsoft.Build.Conversion.csproj" />
+    <ProjectReference Include="..\..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
+
+    <PackageReference Include="Shouldly" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\Shared\UnitTests\App.config">
+      <Link>App.config</Link>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="..\..\Shared\UnitTests\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
+
+</Project>

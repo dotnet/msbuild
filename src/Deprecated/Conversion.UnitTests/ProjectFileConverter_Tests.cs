@@ -4,10 +4,9 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Xml;
 
 using Microsoft.Build.Conversion;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 using ProjectRootElement = Microsoft.Build.Construction.ProjectRootElement;
 
@@ -90,7 +89,6 @@ namespace Microsoft.Build.UnitTests
      * See the comments in that class for a description of its purpose.
      * 
      **************************************************************************/
-    [TestClass]
     public class  ProjectFileConverter_Tests
     {
         /***********************************************************************
@@ -102,7 +100,7 @@ namespace Microsoft.Build.UnitTests
          * paths
          * 
          **********************************************************************/
-        [TestMethod]
+        [Fact]
         public void MakeRelativeWithHash()
         {
             // Intentionally making the paths not the same case, because this should be irrelevant.            
@@ -112,7 +110,7 @@ namespace Microsoft.Build.UnitTests
             string rel = ProjectFileConverter.RelativePathTo(path2, path1);
             Console.WriteLine(rel);
 
-            Assert.AreEqual(@"TileDriver\TileDriver.vcproj", rel);
+            Assert.Equal(@"TileDriver\TileDriver.vcproj", rel);
         }
         
         /***********************************************************************
@@ -124,7 +122,7 @@ namespace Microsoft.Build.UnitTests
          * it.
          * 
          **********************************************************************/
-        [TestMethod]
+        [Fact]
         public void MakeRelativeWithSpace()
         {
             string path1 = @"D:\Public\Samples\Tile Driver\Tile#Driver.vcproj";
@@ -133,7 +131,7 @@ namespace Microsoft.Build.UnitTests
             string rel = ProjectFileConverter.RelativePathTo(path2, path1);
             Console.WriteLine(rel);
 
-            Assert.AreEqual(@"..\Tile Driver\Tile#Driver.vcproj", rel);
+            Assert.Equal(@"..\Tile Driver\Tile#Driver.vcproj", rel);
         }
 
         /// <summary>
@@ -141,7 +139,7 @@ namespace Microsoft.Build.UnitTests
         /// should be removed from the project. The files should not be
         /// deleted though.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RemoveReferencesToEmptyResxPerBug248965()
         {
             string temp = Path.GetTempPath();
@@ -363,15 +361,15 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(expectedContent);
                 Console.WriteLine("==");
 
-                Assert.AreNotEqual(-1, newContent.IndexOf(expectedContent));
+                Assert.NotEqual(-1, newContent.IndexOf(expectedContent));
 
                 // shouldn't delete any
-                Assert.IsTrue(File.Exists(resxFile1));
-                Assert.IsTrue(File.Exists(resxFile2));
-                Assert.IsTrue(File.Exists(resxFile3));
-                Assert.IsTrue(File.Exists(resxFile4));
-                Assert.IsTrue(File.Exists(resxFile5));
-                Assert.IsTrue(File.Exists(resxFile6));
+                Assert.True(File.Exists(resxFile1));
+                Assert.True(File.Exists(resxFile2));
+                Assert.True(File.Exists(resxFile3));
+                Assert.True(File.Exists(resxFile4));
+                Assert.True(File.Exists(resxFile5));
+                Assert.True(File.Exists(resxFile6));
 
             }
             finally
@@ -393,7 +391,7 @@ namespace Microsoft.Build.UnitTests
         /// project already had a value for MyType that the conversion utility should not overwrite it.
         /// </summary>
         /// <owner>RGoel</owner>
-        [TestMethod]
+        [Fact]
         public void VbConversionWithMyTypeAlreadySet()
         {
             // **********************************************
@@ -599,7 +597,7 @@ namespace Microsoft.Build.UnitTests
         /// section, that we correctly add this as an item "None" in the converted project.
         /// </summary>
         /// <owner>RGoel</owner>
-        [TestMethod]
+        [Fact]
         public void ConvertTrinityWithOfficeDocumentFile()
         {
             // **********************************************
@@ -897,7 +895,7 @@ namespace Microsoft.Build.UnitTests
         /// science, but we need to cover it.
         /// </summary>
         /// <owner>RGoel</owner>
-        [TestMethod]
+        [Fact]
         public void ConvertEmptyFolders()
         {
             // **********************************************
@@ -1012,7 +1010,7 @@ namespace Microsoft.Build.UnitTests
         /// referenced project in the passed-in .SLN file.
         /// </summary>
         /// <owner>RGoel</owner>
-        [TestMethod]
+        [Fact]
         public void ConvertP2PReference()
         {
             // **********************************************
@@ -1181,7 +1179,7 @@ namespace Microsoft.Build.UnitTests
         /// This is to test that we convert Everett projects that are part of solutions including
         /// VC++ projects. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ConvertProjectWithVCInSolutionAndP2Ps()
         {
             // **********************************************
@@ -1360,7 +1358,7 @@ namespace Microsoft.Build.UnitTests
         /// have to search for the .SLN file.
         /// </summary>
         /// <owner>RGoel</owner>
-        [TestMethod]
+        [Fact]
         public void ConvertP2PReferenceSearchForSolution()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -1556,7 +1554,7 @@ namespace Microsoft.Build.UnitTests
         /// emit ErrorReport = prompt to the whidbey project file if the language is C#
         /// </summary>
         /// <owner>FaisalMo</owner>
-        [TestMethod]
+        [Fact]
         public void ConvertEverettProjectWithNoDebugInfoFlag()
         {
             // **********************************************
@@ -1768,7 +1766,7 @@ namespace Microsoft.Build.UnitTests
         /// OutputPath, config name, etc.  These characters need to be escaped when converted to MSBuild.
         /// </summary>
         /// <owner>RGoel</owner>
-        [TestMethod]
+        [Fact]
         public void ConvertEverettProjectWithSpecialCharaceters()
         {
             // **********************************************
@@ -1989,7 +1987,7 @@ namespace Microsoft.Build.UnitTests
         /// references to v3.5 and before VC projects (.vcproj), convert that reference to 
         /// instead reference a .vcxproj of the same name. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ConvertVCProjectReferenceExtensions()
         {
             string orcasProjectFileContents = @"
@@ -2016,7 +2014,7 @@ namespace Microsoft.Build.UnitTests
         /// references to v3.5 and before VC projects (.vcproj), convert that reference to 
         /// instead reference a .vcxproj of the same name. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ConvertVCProjectReferenceExtensionsWildcard()
         {
             string orcasProjectFileContents = @"
@@ -2043,7 +2041,7 @@ namespace Microsoft.Build.UnitTests
         /// references to v3.5 and before VC projects (.vcproj), convert that reference to 
         /// instead reference a .vcxproj of the same name. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ConvertVCProjectReferenceExtensionsTrimNeeded()
         {
             string orcasProjectFileContents = @"
@@ -2065,7 +2063,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.ConvertAndCompare(orcasProjectFileContents, dev10projectContents);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConvertProjectFileWithClientSubset()
         {
             string orcasProjectFileClient = @"
@@ -2163,7 +2161,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.ConvertAndCompare(orcasProjectFileClient, dev12ProjectFileClient);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConvertProjectFileWithFullSubset()
         {
             string orcasProjectFileFull = @"
@@ -2260,7 +2258,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.ConvertAndCompare(orcasProjectFileFull, dev12ProjectFileFull);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConvertFSharpOrcasProjectFile()
         {
             string fsharpOrcasProjectFile = @"
@@ -2386,7 +2384,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.ConvertAndCompare(fsharpOrcasProjectFile, fsharpDev10ProjectFile);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConvertDev11PortableLibraryProjectFile()
         {
             string sampleDev11PortableLibraryProjectFile = @"
@@ -2522,7 +2520,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.ConvertAndCompare(sampleDev11PortableLibraryProjectFile, asDev12ProjectFile);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConvertDev12PortableLibraryProjectFileShouldBeNoOp()
         { 
             string asDev12ProjectFile = ObjectModelHelpers.CleanupFileContents(@"
@@ -2590,7 +2588,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.ConvertAndCompare(asDev12ProjectFile, asDev12ProjectFile);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConvertFSharpDev10ProjectFile()
         {
             // pick standard proj from dev10, do conversion
@@ -2726,7 +2724,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.ConvertAndCompare(sampleFSharpDev10ProjectFile, asDev11ProjectFile);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConvertFSharpDev10ProjectFileWithMinVS()
         {
             // pick standard proj from dev10, do conversion
@@ -2867,7 +2865,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.ConvertAndCompare(sampleFSharpDev10ProjectFile, asDev11ProjectFile);
         }
         
-        [TestMethod]
+        [Fact]
         public void ConvertFSharpDev11ProjectFile()
         {
             string sampleDev11Project = @"
@@ -3004,7 +3002,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.ConvertAndCompare(sampleDev11Project, aDev12Project);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConvertFSharpDev11ProjectFileWithCustomFSharpCoreLocation()
         {
             string sampleDev11Project = @"
@@ -3142,7 +3140,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.ConvertAndCompare(sampleDev11Project, aDev12Project);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConvertFSharpDev12ProjectFileShouldBeNoOp()
         {
             string aDev12Project = ObjectModelHelpers.CleanupFileContents(@"
@@ -3210,7 +3208,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.ConvertAndCompare(aDev12Project, aDev12Project); // ensure no change
         }
 
-        [TestMethod]
+        [Fact]
         public void ConvertWFProjectFile()
         {
             string wfWhidbeyProjectFile = @"
@@ -3345,7 +3343,7 @@ namespace Microsoft.Build.UnitTests
             Helpers.ConvertAndCompare(wfWhidbeyProjectFile, wfDev10ProjectFile);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConvertVisualBasicVS2005Project() {
             string wfWhidbeyProjectFile = @"
                 <Project ToolsVersion=""3.5"" DefaultTargets=""Build"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
@@ -3493,7 +3491,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A VS2010 C# project file which requires Repair
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ConvertVB2008RepairRequired()
         {
             string ProjectBefore = @"
@@ -3874,7 +3872,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A VS2010 C# project file which requires Repair
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ConvertCSharp2010RepairRequired()
         {
             string ProjectBefore = @"
@@ -4203,7 +4201,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A VS2010 Deploy project file which requires is no longer supported
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void VS2010DeployProjectDeprecated()
         {
             string ProjectBefore = @"
@@ -4861,11 +4859,12 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Helpers.ConvertAndCompare(ProjectBefore, ProjectBefore);
-                Assert.Fail("There should have been a Microsoft.Build.Exceptions.InvalidProjectFileException");
+                // A workaround for the fact there is no Assert.Unreachable()
+                Assert.True(false, "There should have been a Microsoft.Build.Exceptions.InvalidProjectFileException");
             }
             catch (Exception e)
             {
-                Assert.IsInstanceOfType(e, typeof(Microsoft.Build.Exceptions.InvalidProjectFileException));
+                Assert.True(e.GetType() == typeof(Exceptions.InvalidProjectFileException));
             }
         }
 
@@ -4873,7 +4872,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A VS2010 C# project file which requires no changes Repair
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ConvertCSharp2010NoChangeRequired()
         {
             string ProjectBefore = @"
@@ -4934,7 +4933,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A VS2003 C# project file which requires conversion
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ConvertCSharp2003ConversionRequired()
         {
             string ProjectBefore = @"
@@ -5135,7 +5134,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A VS2005 VB project file which requires conversion
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ConvertVB2005ConversionRequired()
         {
             string ProjectBefore = @"
@@ -5312,7 +5311,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A VS2005 VB project file which requires conversion
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ConvertCS2005ExcelProjectConversionRequired()
         {
             string projectBefore = 
@@ -5600,7 +5599,7 @@ namespace Microsoft.Build.UnitTests
         /// reference
         /// Check also that project references to vcproj have their extensions fixed to .vcxproj
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CheckForReferencesReplacements()
         {
             string ProjectBefore = @"
@@ -5669,7 +5668,7 @@ namespace Microsoft.Build.UnitTests
         /// 
         /// Lastly, make sure that this still happens even if the ToolsVersion is > 3.5.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void CheckForReferencesReplacements_NewerToolsVersion()
         {
             string ProjectBefore = @"
@@ -5734,7 +5733,7 @@ namespace Microsoft.Build.UnitTests
         /// that we don't append the Generator and SubType properties to the source file if they 
         /// are already set.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DoNotReplacePreExistingXamlProperties()
         {
             string ProjectBefore = @"
@@ -5805,7 +5804,7 @@ namespace Microsoft.Build.UnitTests
         /// that even if there are multiple instances of the metadata, we don't eliminate them -- 
         /// we just also don't add any more. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DontEliminateDuplicateXamlProperties()
         {
             string ProjectBefore = @"
@@ -5900,7 +5899,7 @@ namespace Microsoft.Build.UnitTests
         /// that already have Generator and Subtype metadata, we don't make any changes and 
         /// don't update the ToolsVersion. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DontUpdateToolsVersionIfNothingChanged()
         {
             string ProjectBeforeAndAfter = ObjectModelHelpers.CleanupFileContents(@"
@@ -5937,7 +5936,7 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
-        [TestMethod]
+        [Fact]
         public void MinorUpgradeShouldNotUpdateToolsVersion()
         {
             string ProjectBefore = @"
