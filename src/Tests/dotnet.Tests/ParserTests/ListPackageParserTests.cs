@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             result.Errors.Should().NotBeEmpty();
         }
 
-        [Theory]
+        [Theory(Skip = "https://github.com/dotnet/sdk/issues/14461")]
         [InlineData("--verbosity", "q")]
         [InlineData("--verbosity", "quiet")]
         [InlineData("--verbosity", "m")]

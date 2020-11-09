@@ -39,6 +39,8 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option UpdateApplyOption = new Option<bool>("--update-apply");
 
+        public static readonly Option ColumnsOption = new Option<bool>("--columns");
+
         public static Command GetCommand()
         {
             var command = new Command("new");
@@ -57,6 +59,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(LanguageOption);
             command.AddOption(UpdateCheckOption);
             command.AddOption(UpdateApplyOption);
+            command.AddOption(ColumnsOption);
             command.AddOption(CommonOptions.DiagOption());
 
             return command;

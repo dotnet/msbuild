@@ -119,7 +119,7 @@ namespace Microsoft.DotNet.Cli
                         Path.Combine(
                             CliFolderPathCalculator.DotnetUserProfileFolderPath,
                             ToolPathSentinelFileName)));
-                if (parseResult.HasOption(Parser.DiagOption))
+                if (parseResult.ValueForOption<bool>(Parser.DiagOption))
                 {
                     Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, bool.TrueString);
                     CommandContext.SetVerbose(true);

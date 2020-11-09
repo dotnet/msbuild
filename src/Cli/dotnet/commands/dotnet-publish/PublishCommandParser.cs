@@ -46,6 +46,7 @@ namespace Microsoft.DotNet.Cli
             var command = new Command("publish", LocalizableStrings.AppDescription);
 
             command.AddArgument(SlnOrProjectArgument);
+            RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: false, includeNoDependenciesOption: true);
             command.AddOption(OuputOption);
             command.AddOption(ManifestOption);
             command.AddOption(NoBuildOption);

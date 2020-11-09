@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
             this.output = output;
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/14461")]
         public void RestoreCapturesArgumentsToForwardToMSBuildWhenTargetIsSpecified()
         {
             var result = Parser.Instance.Parse(@"dotnet restore .\some.csproj --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
             result.UnmatchedTokens.ShouldBeEquivalentTo(new string[] { @"/p:SkipInvalidConfigurations=true" });
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/14461")]
         public void RestoreCapturesArgumentsToForwardToMSBuildWhenTargetIsNotSpecified()
         {
             var result = Parser.Instance.Parse(@"dotnet restore --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
             result.UnmatchedTokens.ShouldBeEquivalentTo(new string[] { @"/p:SkipInvalidConfigurations=true" });
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/14461")]
         public void RestoreDistinguishesRepeatSourceArgsFromCommandArgs()
         {
             var restore =

@@ -46,11 +46,9 @@ namespace Microsoft.DotNet.Cli
                     .AddSuggestions(Suggest.RunTimesFromProjectFile().ToArray())
             }.ForwardAsSingle(o => $"-property:RuntimeIdentifier={o}");
 
-        public static Option CurrentRuntimeOption(string description, bool withShortOption = true) =>
-            new Option<bool>(
-                "--use-current-runtime",
-                description)
-                    .ForwardAs("-property:UseCurrentRuntimeIdentifier=True");
+        public static Option CurrentRuntimeOption(string description) =>
+            new Option<bool>("--use-current-runtime", description)
+                .ForwardAs("-property:UseCurrentRuntimeIdentifier=True");
 
         public static Option ConfigurationOption(string description) =>
             new Option<string>(

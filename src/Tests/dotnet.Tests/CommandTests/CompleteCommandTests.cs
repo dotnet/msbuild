@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet " }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
         }
 
         [Fact]
@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet -" }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
         }
 
         [Fact]
@@ -114,10 +114,10 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet new " }, reporter).Should().Be(0);
-            reporter.Lines.Should().Contain(expected.OrderBy(c => c));
+            reporter.Lines.OrderBy(c => c).Should().Contain(expected.OrderBy(c => c));
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/14461")]
         public void GivenNuGetCommandItDisplaysCompletions()
         {
             var expected = new[] {
@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet nuget " }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
         }
 
         [Fact]
@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet nuget delete " }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
         }
 
         [Fact]
@@ -186,7 +186,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet nuget locals " }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
         }
 
         [Fact]
@@ -220,7 +220,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet nuget push " }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
         }
     }
 }

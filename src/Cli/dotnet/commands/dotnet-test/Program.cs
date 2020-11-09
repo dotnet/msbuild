@@ -28,7 +28,6 @@ namespace Microsoft.DotNet.Tools.Test
             var parser = Parser.Instance;
             var result = parser.ParseFrom("dotnet test", args);
 
-            //UpdateRunSettingsArgumentsText();
             result.ShowHelpOrErrorIfAppropriate();
 
             var msbuildArgs = new List<string>()
@@ -137,35 +136,6 @@ namespace Microsoft.DotNet.Tools.Test
             }
             return false;
         }
-
-        private static string GetSemiColonEscapedString(string arg)
-        {
-            if (arg.IndexOf(";") != -1)
-            {
-                return arg.Replace(";", "%3b");
-            }
-
-            return arg;
-        }
-
-        private static string[] GetSemiColonEscapedArgs(List<string> args)
-        {
-            int counter = 0;
-            string[] array = new string[args.Count];
-
-            foreach (string arg in args)
-            {
-                array[counter++] = GetSemiColonEscapedString(arg);
-            }
-
-            return array;
-        }
-
-        //private static void UpdateRunSettingsArgumentsText() TODO
-        //{
-        //    DefaultHelpViewText.Synopsis.AdditionalArguments = " [[--] <RunSettings arguments>...]]";
-        //    DefaultHelpViewText.AdditionalArgumentsSection = LocalizableStrings.RunSettingsArgumentsDescription;
-        //}
 
         private static void SetEnvironmentVariablesFromParameters(TestCommand testCommand, ParseResult parseResult)
         {
