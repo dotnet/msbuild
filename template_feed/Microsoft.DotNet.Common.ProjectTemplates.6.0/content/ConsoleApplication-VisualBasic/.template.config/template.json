@@ -1,12 +1,12 @@
 {
   "$schema": "http://json.schemastore.org/template",
   "author": "Microsoft",
-  "classifications": ["Common", "Console"],
+  "classifications": [ "Common", "Console" ],
   "name": "Console Application",
   "generatorVersions": "[1.0.0.0-*)",
   "description": "A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS",
   "groupIdentity": "Microsoft.Common.Console",
-  "precedence": "7000",
+  "precedence": "8000",
   "identity": "Microsoft.Common.Console.VisualBasic.6.0",
   "shortName": "console",
   "tags": {
@@ -75,7 +75,7 @@
     {
       "condition": "(HostIdentifier != \"dotnetcli\" && HostIdentifier != \"dotnetcli-preview\")",
       "description": "Opens Program.vb in the editor",
-      "manualInstructions": [ ],
+      "manualInstructions": [],
       "actionId": "84C0DA21-51C8-4541-9940-6CA19AF04EE6",
       "args": {
         "files": "1"

@@ -6,7 +6,7 @@
   "generatorVersions": "[1.0.0.0-*)",
   "description": "A project for creating a class library that targets .NET Standard or .NET Core",
   "groupIdentity": "Microsoft.Common.Library",
-  "precedence": "7000",
+  "precedence": "8000",
   "identity": "Microsoft.Common.Library.CSharp.6.0",
   "shortName": "classlib",
   "tags": {
