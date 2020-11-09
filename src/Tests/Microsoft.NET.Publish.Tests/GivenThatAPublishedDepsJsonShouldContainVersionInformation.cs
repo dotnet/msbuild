@@ -51,7 +51,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand.Execute()
                 .Should()
@@ -122,7 +122,7 @@ namespace Microsoft.NET.Publish.Tests
             }
             else
             {
-                command = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+                command = new PublishCommand(testAsset);
             }
 
             command.Execute()
@@ -200,7 +200,7 @@ static class Program
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod: callingMethod);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand.Execute()
                 .Should()

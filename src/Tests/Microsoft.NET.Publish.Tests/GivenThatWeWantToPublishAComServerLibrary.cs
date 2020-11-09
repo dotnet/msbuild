@@ -25,7 +25,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("ComServer")
                 .WithSource();
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute()
                 .Should()
                 .Pass();

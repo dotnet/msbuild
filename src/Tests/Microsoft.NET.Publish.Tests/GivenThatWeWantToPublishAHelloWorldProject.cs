@@ -34,7 +34,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource()
                 .WithTargetFramework(targetFramework);
 
-            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(helloWorldAsset);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
@@ -78,7 +78,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource()
                 .WithTargetFramework(targetFramework);
 
-            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(helloWorldAsset);
             var publishResult = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:CopyLocalLockFileAssemblies=true");
 
             publishResult.Should().Pass();
@@ -149,7 +149,7 @@ public static class Program
 ";
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute().Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(
@@ -194,7 +194,7 @@ public static class Program
 ";
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: runtimeIdentifier);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
@@ -310,7 +310,7 @@ public static class Program
                     }
                 });
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
@@ -415,7 +415,7 @@ public static class Program
                 .CopyTestAsset("HelloWorld")
                 .WithSource();
 
-            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(helloWorldAsset);
             var publishResult = publishCommand.Execute("/p:RuntimeIdentifier=notvalid");
 
             publishResult.Should().Fail();
@@ -428,7 +428,7 @@ public static class Program
                 .CopyTestAsset("HelloWorld")
                 .WithSource();
 
-            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(helloWorldAsset);
             var publishResult = publishCommand.Execute("/p:RuntimeIdentifier=notvalid", "/p:EnsureNETCoreAppRuntime=false");
 
             publishResult.Should().Pass();
@@ -449,7 +449,7 @@ public static class Program
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand
                 .Execute("-v:n")
@@ -488,7 +488,7 @@ public static class Program
                 .Should()
                 .Pass();
 
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute("/p:NoBuild=true")
                 .Should()
                 .Fail()
@@ -552,7 +552,7 @@ public static class Program
 </Target>"));
                 });
 
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass()
@@ -602,7 +602,7 @@ public static class Program
 </Project>
 ");
 
-            var command = new PublishCommand(Log, projectDirectory);
+            var command = new PublishCommand(testProjectInstance);
             command
                 .Execute("/p:PublishProfile=test")
                 .Should()
@@ -687,7 +687,7 @@ public static class Program
 </Project>
 ");
 
-            var command = new PublishCommand(Log, projectDirectory);
+            var command = new PublishCommand(testProjectInstance);
             command
                 .Execute(
                     $"/p:WebPublishProfileFile={publishProfilePath}",

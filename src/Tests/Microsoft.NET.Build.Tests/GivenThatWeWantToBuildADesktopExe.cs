@@ -194,7 +194,7 @@ namespace Microsoft.NET.Build.Tests
                     .Should()
                     .Pass();
 
-                var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand
                     .Execute(multiTarget ? new[] { "/p:TargetFramework=net46" } : Array.Empty<string>())
                     .Should()
