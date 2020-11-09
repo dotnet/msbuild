@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
@@ -153,13 +154,6 @@ namespace Microsoft.TemplateEngine.Cli
         {
             ITemplateInfo template = templateMatchDetails.Info;
 
-            string fallbackName = new DirectoryInfo(_commandInput.OutputPath ?? Directory.GetCurrentDirectory()).Name;
-
-            if (string.IsNullOrEmpty(fallbackName) || string.Equals(fallbackName, "/", StringComparison.Ordinal))
-            {   // DirectoryInfo("/").Name on *nix returns "/", as opposed to null or "".
-                fallbackName = null;
-            }
-
             char[] invalidChars = Path.GetInvalidFileNameChars();
 
             if (_commandInput?.Name != null && _commandInput.Name.IndexOfAny(invalidChars) > -1)
@@ -168,6 +162,27 @@ namespace Microsoft.TemplateEngine.Cli
                 string nonPrintableChars = string.Join(", ", invalidChars.Where(char.IsControl).Select(x => $"char({(int)x})"));
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.InvalidNameParameter, printableChars, nonPrintableChars).Bold().Red());
                 return CreationResultStatus.CreateFailed;
+            }
+
+            string fallbackName = new DirectoryInfo(
+                !string.IsNullOrWhiteSpace(_commandInput.OutputPath)
+                    ? _commandInput.OutputPath
+                    : Directory.GetCurrentDirectory())
+                .Name;
+
+            if (string.IsNullOrEmpty(fallbackName) || string.Equals(fallbackName, "/", StringComparison.Ordinal))
+            {   // DirectoryInfo("/").Name on *nix returns "/", as opposed to null or "".
+                fallbackName = null;
+            }
+            // Name returns <disk letter>:\ for root disk folder on Windows - replace invalid chars
+            else if (fallbackName.IndexOfAny(invalidChars) > -1)
+            {
+                Regex pattern = new Regex($"[{Regex.Escape(new string(invalidChars))}]");
+                fallbackName = pattern.Replace(fallbackName, "");
+                if (string.IsNullOrWhiteSpace(fallbackName))
+                {
+                    fallbackName = null;
+                }
             }
 
             TemplateCreationResult instantiateResult;
