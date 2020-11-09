@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -55,7 +56,7 @@ namespace Microsoft.DotNet.Tools.Help
         public static Process ConfigureProcess(string docUrl)
         {
             ProcessStartInfo psInfo;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 psInfo = new ProcessStartInfo
                 {
@@ -63,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Help
                     Arguments = $"/c start {docUrl}"
                 };
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            else if (OperatingSystem.IsMacOS())
             {
                 psInfo = new ProcessStartInfo
                 {

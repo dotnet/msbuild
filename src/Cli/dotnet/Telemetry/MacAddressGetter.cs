@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         private static string GetShellOutMacAddressOutput()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 var result = new ProcessStartInfo
                 {
