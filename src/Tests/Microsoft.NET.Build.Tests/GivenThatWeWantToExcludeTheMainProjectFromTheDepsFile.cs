@@ -29,7 +29,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ExcludeMainProjectFromDeps",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp2.0",
                 IsExe = true,
             };
@@ -37,7 +36,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject referencedProject = new TestProject()
             {
                 Name = "ReferencedProject",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard2.0",
                 IsExe = false
             };

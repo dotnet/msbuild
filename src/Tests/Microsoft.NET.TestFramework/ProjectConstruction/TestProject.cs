@@ -21,22 +21,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public string Name { get; set; }
 
-        private bool? _isSdkProject;
-        public bool IsSdkProject
-        {
-            get
-            {
-                if (!_isSdkProject.HasValue)
-                {
-                    throw new InvalidOperationException("IsSdkProject not set");
-                }
-                return _isSdkProject.Value;
-            }
-            set
-            {
-                _isSdkProject = value;
-            }
-        }
+        public bool IsSdkProject { get; set; } = true;
 
         public bool IsExe { get; set; }
 

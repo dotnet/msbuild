@@ -24,7 +24,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "P2PrefernceWithTargetPlatform_App",
                 TargetFrameworks = "net5-windows",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -32,7 +31,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "P2PrefernceWithTargetPlatform_App_Library",
                 TargetFrameworks = "net5-windows",
-                IsSdkProject = true
             };
 
             appProject.ReferencedProjects.Add(libraryProject);

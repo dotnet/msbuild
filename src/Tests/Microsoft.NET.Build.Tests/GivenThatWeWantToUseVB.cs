@@ -45,7 +45,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 IsExe = isExe,
                 SourceFiles =

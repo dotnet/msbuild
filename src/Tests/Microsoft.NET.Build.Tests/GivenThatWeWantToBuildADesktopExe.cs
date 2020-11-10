@@ -65,7 +65,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "AutoRuntimeIdentifierTest",
                 TargetFrameworks = "net472",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -300,7 +299,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = "DefaultReferences",
                 //  TODO: Add net35 to the TargetFrameworks list once https://github.com/Microsoft/msbuild/issues/1333 is fixed
                 TargetFrameworks = "net40;net45;net461",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -341,7 +339,6 @@ namespace DefaultReferences
                 Name = "MissingReferenceAssemblies",
                 //  A version of .NET we don't expect to exist
                 TargetFrameworks = "net469",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -371,7 +368,6 @@ namespace DefaultReferences
             {
                 Name = "DuplicateFrameworkReferences",
                 TargetFrameworks = "net461",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -403,7 +399,6 @@ namespace DefaultReferences
             {
                 Name = "DesktopConflictsNuGet",
                 TargetFrameworks = "net461",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -442,7 +437,6 @@ namespace DefaultReferences
             {
                 Name = "DesktopConflictsHttp4_1",
                 TargetFrameworks = "net461",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -468,7 +462,6 @@ namespace DefaultReferences
             {
                 Name = "DesktopConflictsRuntimeTargets",
                 TargetFrameworks = "net461",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -528,7 +521,6 @@ namespace DefaultReferences
 
             if (useSdkProject)
             {
-                testProject.IsSdkProject = true;
                 testProject.TargetFrameworks = "net472";
             }
             else
@@ -612,7 +604,6 @@ class Program
             {
                 Name = "OverriddenAlias",
                 IsExe = true,
-                IsSdkProject = true,
                 TargetFrameworks = "net461"
             };
 
@@ -806,7 +797,6 @@ class Program
             {
                 Name = "DesktopUsingPackageWithSatellites",
                 TargetFrameworks = "net46",
-                IsSdkProject = true,
                 IsExe = true
             };
 

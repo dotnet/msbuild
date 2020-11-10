@@ -28,7 +28,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = $"Eol{targetFrameworks}",
                 TargetFrameworks = targetFrameworks,
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -53,7 +52,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = $"EolOnlyNetCore",
                 TargetFrameworks = "netcoreapp1.0;netcoreapp3.1;net472",
-                IsSdkProject = true,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -78,7 +76,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = $"EolNoWarning",
                 TargetFrameworks = "netcoreapp1.0",
 
-                IsSdkProject = true,
                 IsExe = true
             };
 

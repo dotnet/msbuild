@@ -63,7 +63,6 @@ namespace Microsoft.DotNet.Restore.Test
             {
                 Name = "RestoreToDir",
                 TargetFrameworks = "net5.0",
-                IsSdkProject = true,
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.3"));

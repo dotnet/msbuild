@@ -92,7 +92,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DesignTimePackageDependencies",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.2", privateAssets: "All"));
@@ -130,7 +129,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DesignTimePackageDependencies",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
 
             //  Downgrade will cause an error
@@ -176,7 +174,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "App",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 

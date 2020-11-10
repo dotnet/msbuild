@@ -31,7 +31,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DefaultProject",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
             AddConflictReferences(defaultProject);
             GetReferences(
@@ -44,7 +43,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DisableProject",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
             disableProject.AdditionalProperties.Add("DisableDefaultPackageConflictOverrides", "true");
             AddConflictReferences(disableProject);
@@ -111,7 +109,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NetStandard2Library",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true,
                 //  In deps file, assets are under the ".NETStandard,Version=v2.0/" target (ie with empty RID) for some reason
                 RuntimeIdentifier = string.Empty
             };
@@ -147,7 +144,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "ReferencePackageDllDirectly",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -179,7 +175,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DuplicateFrameworkAssembly",
                 TargetFrameworks = "net472",
-                IsSdkProject = true,
                 IsExe = true
             };
             testProject.References.Add("System.Runtime");
@@ -203,7 +198,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "AspNetCoreProject",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 

@@ -31,7 +31,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                IsSdkProject = true,
                 TargetFrameworks = "net5.0-workloadtestplatform"
             };
 
@@ -51,7 +50,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                IsSdkProject = true,
                 TargetFrameworks = "net5.0-missingworkloadtestplatform"
             };
 
@@ -73,7 +71,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                IsSdkProject = true,
                 TargetFrameworks = "net5.0;net5.0-missingworkloadtestplatform"
             };
 
@@ -95,7 +92,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                IsSdkProject = true,
                 TargetFrameworks = "net5.0-ios;net5.0-android"
             };
 
@@ -118,7 +114,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                IsSdkProject = true,
                 TargetFrameworks = "net5.0-workloadtestplatform"
             };
 
@@ -140,7 +135,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                IsSdkProject = true,
                 TargetFrameworks = "net5.0"
             };
 

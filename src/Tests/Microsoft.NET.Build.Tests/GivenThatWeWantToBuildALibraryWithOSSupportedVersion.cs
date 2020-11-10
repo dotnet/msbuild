@@ -220,7 +220,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "Project",
-                IsSdkProject = true,
                 IsExe = true,
                 TargetFrameworks = targetFramework,
             };
@@ -282,7 +281,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "Project",
-                IsSdkProject = true,
                 IsExe = true,
                 TargetFrameworks = targetFramework,
             };

@@ -116,7 +116,6 @@ namespace Microsoft.NET.Restore.Tests
                 {
                     Name = testProjectName,
                     TargetFrameworks = frameworks,
-                    IsSdkProject = true
                 };
 
             testProject.PackageReferences.Add(packageInNuGetFallbackFolder);
@@ -136,7 +135,6 @@ namespace Microsoft.NET.Restore.Tests
                 {
                     Name = GetUniquePackageNameForEachTestProject(testProjectName),
                     TargetFrameworks = "netstandard1.3",
-                    IsSdkProject = true
                 };
 
             var projectInNuGetFallbackFolderPackageReference =

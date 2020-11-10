@@ -40,7 +40,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject dependencyProject = new TestProject()
             {
                 Name = "Dependency",
-                IsSdkProject = true,
                 TargetFrameworks = dependencyTarget,
             };
 
@@ -66,7 +65,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -109,7 +107,6 @@ public static class Program
             TestProject dependencyProject = new TestProject()
             {
                 Name = "Dependency",
-                IsSdkProject = true,
                 TargetFrameworks = dependencyTarget,
             };
 
@@ -189,7 +186,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -233,7 +229,6 @@ public static class Program
             TestProject dllDependencyProjectDependency = new TestProject()
             {
                 Name = "DllDependencyDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
 
@@ -256,7 +251,6 @@ public class Class2
             TestProject dllDependencyProject = new TestProject()
             {
                 Name = "DllDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
             dllDependencyProject.ReferencedProjects.Add(dllDependencyProjectDependency);
@@ -277,7 +271,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -320,7 +313,6 @@ public static class Program
             TestProject dllDependencyProjectDependency = new TestProject()
             {
                 Name = "DllDependencyDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
 
@@ -397,7 +389,6 @@ public class Class2
             TestProject dllDependencyProject = new TestProject()
             {
                 Name = "DllDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
             dllDependencyProject.ReferencedProjects.Add(dllDependencyProjectDependency);
@@ -418,7 +409,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -463,7 +453,6 @@ public static class Program
             TestProject dllDependencyProject = new TestProject()
             {
                 Name = "DllDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
 
@@ -489,7 +478,6 @@ public class Class2
             TestProject dependencyProject = new TestProject()
             {
                 Name = "Dependency",
-                IsSdkProject = true,
                 TargetFrameworks = dependencyTarget,
             };
             dependencyProject.References.Add(dllDependencyAssemblyPath);
@@ -507,7 +495,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -551,7 +538,6 @@ public static class Program
             TestProject dllDependencyProject = new TestProject()
             {
                 Name = "DllDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
 
@@ -631,7 +617,6 @@ public class Class2
             TestProject dependencyProject = new TestProject()
             {
                 Name = "Dependency",
-                IsSdkProject = true,
                 TargetFrameworks = dependencyTarget,
             };
             dependencyProject.References.Add(dllDependencyAssemblyPath);
@@ -649,7 +634,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -694,7 +678,6 @@ public static class Program
             TestProject dllDependencyProjectDependency = new TestProject()
             {
                 Name = "DllDependencyDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
 
@@ -717,7 +700,6 @@ public class Class3
             TestProject dllDependencyProject = new TestProject()
             {
                 Name = "DllDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
             dllDependencyProject.ReferencedProjects.Add(dllDependencyProjectDependency);
@@ -738,7 +720,6 @@ public class Class2
             TestProject dependencyProject = new TestProject()
             {
                 Name = "Dependency",
-                IsSdkProject = true,
                 TargetFrameworks = dependencyTarget,
             };
             dependencyProject.References.Add(dllDependencyAssemblyPath);
@@ -756,7 +737,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
@@ -800,7 +780,6 @@ public static class Program
             TestProject dllDependencyProjectDependency = new TestProject()
             {
                 Name = "DllDependencyDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
 
@@ -877,7 +856,6 @@ public class Class3
             TestProject dllDependencyProject = new TestProject()
             {
                 Name = "DllDependency",
-                IsSdkProject = true,
                 TargetFrameworks = dllDependencyTarget,
             };
             dllDependencyProject.ReferencedProjects.Add(dllDependencyProjectDependency);
@@ -898,7 +876,6 @@ public class Class2
             TestProject dependencyProject = new TestProject()
             {
                 Name = "Dependency",
-                IsSdkProject = true,
                 TargetFrameworks = dependencyTarget,
             };
             dependencyProject.References.Add(dllDependencyAssemblyPath);
@@ -916,7 +893,6 @@ public class Class1
             TestProject referencerProject = new TestProject()
             {
                 Name = "Referencer",
-                IsSdkProject = true,
                 TargetFrameworks = referencerTarget,
                 IsExe = true,
             };
