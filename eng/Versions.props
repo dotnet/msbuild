@@ -10,7 +10,7 @@
   </PropertyGroup>
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionPrefix>5.0.100</VersionPrefix>
+    <VersionPrefix>5.0.101</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
   </PropertyGroup>
   <!-- Production Dependencies -->
