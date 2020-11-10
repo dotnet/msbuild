@@ -11,7 +11,7 @@
   <!-- Repo Version Information -->
   <PropertyGroup>
     <VersionPrefix>5.0.101</VersionPrefix>
-    <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
