@@ -123,23 +123,23 @@
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="5.0.1">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>daacdea75d17c5bc3a69b91b91c74d2145d6e136</Sha>
+      <Sha>e5fb89cea7019e9bdbd4536c45e97fce2a749866</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.1-servicing.20560.2">
+    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.1-servicing.20560.3">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>daacdea75d17c5bc3a69b91b91c74d2145d6e136</Sha>
+      <Sha>e5fb89cea7019e9bdbd4536c45e97fce2a749866</Sha>
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="5.0.0">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
       <Sha>5848b16d1fc803ea4892692b3b5dd9ee79955428</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="5.0.0-rtm.20559.2" CoherentParentDependency="Microsoft.WindowsDesktop.App">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="5.0.0-rtm.20560.2" CoherentParentDependency="Microsoft.WindowsDesktop.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>ddf3b347edcc5db3dca110839b334b22c2ed3bff</Sha>
+      <Sha>695ef5a1dfe78ccbdf674943bd8c8a5d5e472a16</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="5.0.0-rtm.20559.2" CoherentParentDependency="Microsoft.WindowsDesktop.App">
+    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="5.0.0-rtm.20560.2" CoherentParentDependency="Microsoft.WindowsDesktop.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>ddf3b347edcc5db3dca110839b334b22c2ed3bff</Sha>
+      <Sha>695ef5a1dfe78ccbdf674943bd8c8a5d5e472a16</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Dotnet.WinForms.ProjectTemplates" Version="5.0.1-servicing.20559.3" CoherentParentDependency="Microsoft.WindowsDesktop.App">
       <Uri>https://github.com/dotnet/winforms</Uri>
