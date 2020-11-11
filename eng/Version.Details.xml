@@ -123,23 +123,23 @@
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="5.0.1">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>31f95185b05655dda70e43968fe69a9361af8b2d</Sha>
+      <Sha>7b10b9cba738926bcb45e5ae83079bc1fde4459e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.1-servicing.20560.5">
+    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.1-servicing.20561.1">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>31f95185b05655dda70e43968fe69a9361af8b2d</Sha>
+      <Sha>7b10b9cba738926bcb45e5ae83079bc1fde4459e</Sha>
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="5.0.0">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
       <Sha>5848b16d1fc803ea4892692b3b5dd9ee79955428</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="5.0.0-rtm.20560.4" CoherentParentDependency="Microsoft.WindowsDesktop.App">
+    <Dependency Name="Microsoft.NET.Sdk.WindowsDesktop" Version="5.0.1-servicing.20561.1" CoherentParentDependency="Microsoft.WindowsDesktop.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>03b1c528d1737504ed1179e8bb2b801adcb92344</Sha>
+      <Sha>927ba87c0fbe0c825c48ff0b87dce5a9723763b5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="5.0.0-rtm.20560.4" CoherentParentDependency="Microsoft.WindowsDesktop.App">
+    <Dependency Name="Microsoft.DotNet.Wpf.ProjectTemplates" Version="5.0.1-servicing.20561.1" CoherentParentDependency="Microsoft.WindowsDesktop.App">
       <Uri>https://github.com/dotnet/wpf</Uri>
-      <Sha>03b1c528d1737504ed1179e8bb2b801adcb92344</Sha>
+      <Sha>927ba87c0fbe0c825c48ff0b87dce5a9723763b5</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Dotnet.WinForms.ProjectTemplates" Version="5.0.1-servicing.20560.2" CoherentParentDependency="Microsoft.WindowsDesktop.App">
       <Uri>https://github.com/dotnet/winforms</Uri>
