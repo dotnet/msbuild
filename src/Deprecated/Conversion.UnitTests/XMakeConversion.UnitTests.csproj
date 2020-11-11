@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
-    <AssemblyName>Microsoft.Build.Conversion.UnitTest</AssemblyName>
+    <AssemblyName>Microsoft.Build.Conversion.UnitTests</AssemblyName>
 
     <IsPackable>false</IsPackable>
 
