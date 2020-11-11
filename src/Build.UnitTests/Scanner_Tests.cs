@@ -121,6 +121,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("$(x.StartsWith ('y'))")]
         [InlineData("$( x.StartsWith( $(SpacelessProperty) ) )")]
         [InlineData("$( x.StartsWith( $(_SpacelessProperty) ) )")]
+        [InlineData("$(x.StartsWith('Foo', StringComparison.InvariantCultureIgnoreCase))")]
         public void SpaceInMiddleOfProperty(string pattern)
         {
             Scanner lexer = new Scanner(pattern, ParserOptions.AllowProperties);
