@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Cli
 
         private static string[] Suggestions(ParseResult complete)
         {
-            var input = complete.ValueForArgument<string>(CompleteCommandParser.PathArgument) ?? "";
+            var input = complete.ValueForArgument<string>(CompleteCommandParser.PathArgument) ?? string.Empty;
 
             var position = complete.ValueForOption<int>(CompleteCommandParser.PositionOption);
 

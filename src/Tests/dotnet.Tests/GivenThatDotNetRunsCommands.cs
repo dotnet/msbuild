@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Tests
                 .HaveStdErrContaining(CliFolderPathCalculator.DotnetHomeVariableName);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/14461")]
+        [Fact]
         public void GivenASpecifiedDotnetCliHomeVariableItPrintsUsageMessage()
         {
             var home = _testAssetsManager.CreateTestDirectory(identifier: "DOTNET_HOME").Path;

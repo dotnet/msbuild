@@ -2,9 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Linq;
+using static Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli
     {
         public static void ShowHelp(this ParseResult parseResult)
         {
-            Parser.Instance.Invoke(parseResult.Tokens.Select(t => t.Value).Append("-h").ToArray());
+            DotnetHelpBuilder.Instance.Value.Write(parseResult.CommandResult.Command);
         }
 
         public static void ShowHelpOrErrorIfAppropriate(this ParseResult parseResult)

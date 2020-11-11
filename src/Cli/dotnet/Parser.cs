@@ -118,9 +118,24 @@ namespace Microsoft.DotNet.Cli
             context.ResultCode = 1;
         }
 
-        public class DotnetHelpBuilder : HelpBuilder
+        internal class CommandLineConsole : IConsole
+        {
+            public IStandardStreamWriter Out => StandardStreamWriter.Create(Console.Out);
+
+            public bool IsOutputRedirected => Console.IsOutputRedirected;
+
+            public IStandardStreamWriter Error => StandardStreamWriter.Create(Console.Error);
+
+            public bool IsErrorRedirected => Console.IsErrorRedirected;
+
+            public bool IsInputRedirected => Console.IsInputRedirected;
+        }
+
+        internal class DotnetHelpBuilder : HelpBuilder
         {
             public DotnetHelpBuilder(IConsole console) : base(console) { }
+
+            public static Lazy<HelpBuilder> Instance = new Lazy<HelpBuilder>(() => new DotnetHelpBuilder(new CommandLineConsole()));
 
             public override void Write(ICommand command)
             {

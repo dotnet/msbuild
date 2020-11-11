@@ -123,6 +123,7 @@ namespace Microsoft.DotNet.Cli
                 {
                     Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, bool.TrueString);
                     CommandContext.SetVerbose(true);
+                    Reporter.Reset();
                 }
                 if (parseResult.HasOption(Parser.VersionOption))
                 {
@@ -141,7 +142,7 @@ namespace Microsoft.DotNet.Cli
                 }
                 else
                 {
-                        PerformanceLogEventSource.Log.FirstTimeConfigurationStart();
+                    PerformanceLogEventSource.Log.FirstTimeConfigurationStart();
 
                     var environmentProvider = new EnvironmentProvider();
 
