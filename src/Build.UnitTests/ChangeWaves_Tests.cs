@@ -4,7 +4,6 @@
 using Xunit;
 using Shouldly;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Xunit.Abstractions;
 using Microsoft.Build.Evaluation;
@@ -20,35 +19,58 @@ namespace Microsoft.Build.Engine.UnitTests
             _output = output;
         }
 
-        [Theory]
-        [InlineData("16.8")]
-        [InlineData("16.10")]
-        [InlineData("17.0")]
-        [InlineData("25.87")]
-        [InlineData("102.87")]
-        public void EnableAllFeaturesBehindChangeWavesEnablesAllFeaturesBehindChangeWaves(string featureVersion)
+        /// <summary>
+        /// Helper function to build a simple project based on a particular change wave being set.
+        /// Call SetChangeWave on your TestEnvironment before calling this function.
+        /// </summary>
+        private void buildSimpleProjectAndValidateChangeWave(TestEnvironment testEnvironment, Version waveToCheck, Version changeWaveShouldUltimatelyResolveTo, params string[] warningCodesLogShouldContain)
+        {
+            bool isThisWaveEnabled = waveToCheck < changeWaveShouldUltimatelyResolveTo || changeWaveShouldUltimatelyResolveTo == ChangeWaves.EnableAllFeatures;
+
+            ChangeWaves.ResetStateForTests();
+            ChangeWaves.AreFeaturesEnabled(waveToCheck).ShouldBe(isThisWaveEnabled);
+
+            string projectFile = $"" +
+                $"<Project>" +
+                    $"<Target Name='HelloWorld' Condition=\"$([MSBuild]::AreFeaturesEnabled('{waveToCheck}')) and '$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{changeWaveShouldUltimatelyResolveTo}'\">" +
+                        $"<Message Text='Hello World!'/>" +
+                    $"</Target>" +
+                $"</Project>";
+
+            TransientTestFile file = testEnvironment.CreateFile("proj.csproj", projectFile);
+
+            ProjectCollection collection = new ProjectCollection();
+            MockLogger log = new MockLogger();
+            collection.RegisterLogger(log);
+
+            Project p = collection.LoadProject(file.Path);
+            p.Build().ShouldBeTrue();
+
+            log.FullLog.Contains("Hello World!").ShouldBe(isThisWaveEnabled);
+
+            if (warningCodesLogShouldContain != null)
+            {
+                log.WarningCount.ShouldBe(warningCodesLogShouldContain.Length);
+                log.AssertLogContains(warningCodesLogShouldContain);
+            }
+        }
+
+        [Fact]
+        public void EnableAllFeaturesBehindChangeWavesEnablesAllFeaturesBehindChangeWaves()
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                Version featureAsVersion = Version.Parse(featureVersion);
                 env.SetChangeWave(ChangeWaves.EnableAllFeatures);
-                ChangeWaves.AreFeaturesEnabled(featureAsVersion).ShouldBe(true);
 
-                string projectFile = $"" +
-                    $"<Project>" +
-                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.EnableAllFeatures}' and $([MSBuild]::AreFeaturesEnabled('{featureVersion}'))\">" +
-                            $"<Message Text='Hello World!'/>" +
-                        $"</Target>" +
-                    $"</Project>";
+                for (int i = 0; i < ChangeWaves.AllWaves.Length - 1; i++)
+                {
+                    ChangeWaves.ResetStateForTests();
 
-                TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
-
-                ProjectCollection collection = new ProjectCollection();
-                MockLogger log = new MockLogger();
-                collection.RegisterLogger(log);
-
-                collection.LoadProject(file.Path).Build().ShouldBeTrue();
-                log.AssertLogContains("Hello World!");
+                    buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
+                                                            waveToCheck: ChangeWaves.AllWaves[i],
+                                                            changeWaveShouldUltimatelyResolveTo: ChangeWaves.EnableAllFeatures,
+                                                            warningCodesLogShouldContain: null);
+                }
             }
         }
 
@@ -64,56 +86,28 @@ namespace Microsoft.Build.Engine.UnitTests
                 Version featureAsVersion = Version.Parse(featureVersion);
                 ChangeWaves.AreFeaturesEnabled(featureAsVersion).ShouldBe(true);
 
-                string projectFile = $"" +
-                    $"<Project>" +
-                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.EnableAllFeatures}' and $([MSBuild]::AreFeaturesEnabled('{featureVersion}'))\">" +
-                            $"<Message Text='Hello World!'/>" +
-                        $"</Target>" +
-                    $"</Project>";
-
-                TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
-
-                ProjectCollection collection = new ProjectCollection();
-                MockLogger log = new MockLogger();
-                collection.RegisterLogger(log);
-
-                collection.LoadProject(file.Path).Build().ShouldBeTrue();
-                log.AssertLogContains("Hello World!");
+                buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
+                                                        waveToCheck: featureAsVersion,
+                                                        changeWaveShouldUltimatelyResolveTo: ChangeWaves.EnableAllFeatures,
+                                                        warningCodesLogShouldContain: null);
             }
         }
 
         [Theory]
-        [InlineData("test", "16.8")]
-        [InlineData("16_8", "5.7")]
-        [InlineData("16x8", "20.4")]
-        [InlineData("garbage", "18.20")]
-        public void InvalidFormatThrowsWarningAndLeavesFeaturesEnabled(string disableFeaturesFromVersion, string featureVersion)
+        [InlineData("test")]
+        [InlineData("16_8")]
+        [InlineData("16x8")]
+        [InlineData("garbage")]
+        public void InvalidFormatThrowsWarningAndLeavesFeaturesEnabled(string disableFeaturesFromVersion)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                Version featureAsVersion = Version.Parse(featureVersion);
                 env.SetChangeWave(disableFeaturesFromVersion);
-                ChangeWaves.AreFeaturesEnabled(featureAsVersion).ShouldBeTrue();
 
-                string projectFile = $"" +
-                    $"<Project>" +
-                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.EnableAllFeatures}' and $([MSBuild]::AreFeaturesEnabled('{featureVersion}'))\">" +
-                            $"<Message Text='Hello World!'/>" +
-                        $"</Target>" +
-                    $"</Project>";
-
-                TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
-
-                ProjectCollection collection = new ProjectCollection();
-                MockLogger log = new MockLogger();
-                collection.RegisterLogger(log);
-
-                Project p = collection.LoadProject(file.Path);
-                p.Build().ShouldBeTrue();
-
-                log.WarningCount.ShouldBe(1);
-                log.AssertLogContains("MSB4271");
-                log.AssertLogContains("Hello World!");
+                buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
+                                                        waveToCheck: ChangeWaves.HighestWave,
+                                                        changeWaveShouldUltimatelyResolveTo: ChangeWaves.EnableAllFeatures,
+                                                        warningCodesLogShouldContain: "MSB4271");
             }
         }
 
@@ -131,27 +125,12 @@ namespace Microsoft.Build.Engine.UnitTests
                 for (int i = 0; i < ChangeWaves.AllWaves.Length; i++)
                 {
                     ChangeWaves.ResetStateForTests();
-                    string projectFile = $"" +
-                        $"<Project>" +
-                            $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.LowestWave}' and $([MSBuild]::AreFeaturesEnabled('{ChangeWaves.AllWaves[i]}')) == false\">" +
-                                $"<Message Text='Hello World!'/>" +
-                            $"</Target>" +
-                        $"</Project>";
 
-                    TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
-
-                    ProjectCollection collection = new ProjectCollection();
-                    MockLogger log = new MockLogger();
-                    collection.RegisterLogger(log);
-
-                    Project p = collection.LoadProject(file.Path);
-                    p.Build().ShouldBeTrue();
-
-                    log.WarningCount.ShouldBe(1);
-                    log.AssertLogContains("MSB4272");
-                    log.AssertLogContains("Hello World!");
+                    buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
+                                                            waveToCheck: ChangeWaves.AllWaves[i],
+                                                            changeWaveShouldUltimatelyResolveTo: ChangeWaves.LowestWave,
+                                                            warningCodesLogShouldContain: "MSB4272");
                 }
-
             }
         }
 
@@ -168,26 +147,18 @@ namespace Microsoft.Build.Engine.UnitTests
                 for (int i = 0; i < ChangeWaves.AllWaves.Length - 1; i++)
                 {
                     ChangeWaves.ResetStateForTests();
-                    string projectFile = $"" +
-                        $"<Project>" +
-                            $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.HighestWave}' and $([MSBuild]::AreFeaturesEnabled('{ChangeWaves.AllWaves[i]}'))\">" +
-                                $"<Message Text='Hello World!'/>" +
-                            $"</Target>" +
-                        $"</Project>";
 
-                    TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
-
-                    ProjectCollection collection = new ProjectCollection();
-                    MockLogger log = new MockLogger();
-                    collection.RegisterLogger(log);
-
-                    Project p = collection.LoadProject(file.Path);
-                    p.Build().ShouldBeTrue();
-
-                    log.WarningCount.ShouldBe(1);
-                    log.AssertLogContains("MSB4272");
-                    log.AssertLogContains("Hello World!");
+                    buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
+                                        waveToCheck: ChangeWaves.AllWaves[i],
+                                        changeWaveShouldUltimatelyResolveTo: ChangeWaves.HighestWave,
+                                        warningCodesLogShouldContain: "MSB4272");
                 }
+
+                // Make sure the last wave is disabled.
+                buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
+                                                        waveToCheck: ChangeWaves.AllWaves[ChangeWaves.AllWaves.Length - 1],
+                                                        changeWaveShouldUltimatelyResolveTo: ChangeWaves.HighestWave,
+                                                        warningCodesLogShouldContain: "MSB4272");
             }
         }
 
@@ -198,24 +169,10 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 env.SetChangeWave($"{ChangeWaves.LowestWave.Major}.{ChangeWaves.LowestWave.Minor}.{ChangeWaves.LowestWave.Build + 1}");
 
-                // All waves should be disabled
-                string projectFile = $"" +
-                    $"<Project>" +
-                        $"<Target Name='HelloWorld' Condition=\"'$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{ChangeWaves.AllWaves[1]}' and $([MSBuild]::AreFeaturesEnabled('{ChangeWaves.LowestWave}'))\">" +
-                            $"<Message Text='Hello World!'/>" +
-                        $"</Target>" +
-                    $"</Project>";
-
-                TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
-
-                ProjectCollection collection = new ProjectCollection();
-                MockLogger log = new MockLogger();
-                collection.RegisterLogger(log);
-
-                Project p = collection.LoadProject(file.Path);
-                p.Build().ShouldBeTrue();
-
-                log.AssertLogContains("Hello World!");
+                buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
+                                                        waveToCheck: ChangeWaves.LowestWave,
+                                                        changeWaveShouldUltimatelyResolveTo: ChangeWaves.AllWaves[1],
+                                                        warningCodesLogShouldContain: null);
 
             }
         }
@@ -226,32 +183,20 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetChangeWave(ChangeWaves.HighestWave);
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 for (int i = 0; i < ChangeWaves.AllWaves.Length - 1; i++)
                 {
-                    ChangeWaves.ResetStateForTests();
-                    ChangeWaves.AreFeaturesEnabled(ChangeWaves.AllWaves[i]).ShouldBe(true);
-
-                    string projectFile = $"" +
-                        $"<Project>" +
-                            $"<Target Name='HelloWorld' Condition=\"$([MSBuild]::AreFeaturesEnabled('{ChangeWaves.AllWaves[i]}'))\">" +
-                                $"<Message Text='Hello World!'/>" +
-                            $"</Target>" +
-                        $"</Project>";
-
-                    TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
-
-                    ProjectCollection collection = new ProjectCollection();
-                    MockLogger log = new MockLogger();
-                    collection.RegisterLogger(log);
-
-                    Project p = collection.LoadProject(file.Path);
-                    p.Build().ShouldBeTrue();
-
-                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-                    log.AssertLogContains("Hello World!");
+                    buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
+                                                            waveToCheck: ChangeWaves.AllWaves[i],
+                                                            changeWaveShouldUltimatelyResolveTo: ChangeWaves.HighestWave,
+                                                            warningCodesLogShouldContain: null);
                 }
+
+                // Make sure the last wave is disabled.
+                buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
+                                                        waveToCheck: ChangeWaves.AllWaves[ChangeWaves.AllWaves.Length - 1],
+                                                        changeWaveShouldUltimatelyResolveTo: ChangeWaves.HighestWave,
+                                                        warningCodesLogShouldContain: null);
             }
         }
 
@@ -264,28 +209,11 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 foreach (Version wave in ChangeWaves.AllWaves)
                 {
-                    ChangeWaves.ResetStateForTests();
-                    ChangeWaves.AreFeaturesEnabled(wave).ShouldBeFalse();
-
-                    string projectFile = $"" +
-                        $"<Project>" +
-                            $"<Target Name='HelloWorld' Condition=\"$([MSBuild]::AreFeaturesEnabled('{wave.ToString()}')) == false\">" +
-                                $"<Message Text='Hello World!'/>" +
-                            $"</Target>" +
-                        $"</Project>";
-
-                    TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
-
-                    ProjectCollection collection = new ProjectCollection();
-                    MockLogger log = new MockLogger();
-                    collection.RegisterLogger(log);
-
-                    Project p = collection.LoadProject(file.Path);
-                    p.Build().ShouldBeTrue();
-
-                    log.AssertLogContains("Hello World!");
+                    buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
+                                                            waveToCheck: wave,
+                                                            changeWaveShouldUltimatelyResolveTo: ChangeWaves.LowestWave,
+                                                            warningCodesLogShouldContain: null);
                 }
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
     }

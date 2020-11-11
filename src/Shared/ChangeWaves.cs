@@ -147,7 +147,7 @@ namespace Microsoft.Build.Utilities
             }
 
             // _cachedWave is somewhere between valid waves, find the next valid version.
-            _cachedWave = AllWaves.Where((x) => x > _cachedWave).First();
+            _cachedWave = AllWaves.First((x) => x > _cachedWave);
             ConversionState = ChangeWaveConversionState.Valid;
         }
 
@@ -161,12 +161,6 @@ namespace Microsoft.Build.Utilities
             if (ShouldApplyChangeWave)
             {
                 ApplyChangeWave();
-            }
-
-            // Check if we cached the special value to enable all features behind change waves.
-            if (_cachedWave == EnableAllFeatures)
-            {
-                return true;
             }
 
             return wave < _cachedWave;
