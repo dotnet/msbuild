@@ -11,10 +11,8 @@ using System;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
-    public class NuGetRestoreCommand : TestCommand
+    public class NuGetExeRestoreCommand : TestCommand
     {
-        private List<string> _sources = new List<string>();
-        
         private readonly string _projectRootPath;
         public string ProjectRootPath => _projectRootPath;
 
@@ -22,29 +20,10 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public string FullPathProjectFile => Path.Combine(ProjectRootPath, ProjectFile);
 
-        public NuGetRestoreCommand(ITestOutputHelper log, string projectRootPath, string relativePathToProject = null) : base(log)
+        public NuGetExeRestoreCommand(ITestOutputHelper log, string projectRootPath, string relativePathToProject = null) : base(log)
         {
             _projectRootPath = projectRootPath;
             ProjectFile = MSBuildCommand.FindProjectFile(ref _projectRootPath, relativePathToProject);
-        }
-
-        public NuGetRestoreCommand AddSource(string source)
-        {
-            _sources.Add(source);
-            return this;
-        }
-
-        public NuGetRestoreCommand AddSourcesFromCurrentConfig()
-        {
-            var settings = Settings.LoadDefaultSettings(Directory.GetCurrentDirectory(), null, null);
-            var packageSourceProvider = new PackageSourceProvider(settings);
-
-            foreach (var packageSource in packageSourceProvider.LoadPackageSources())
-            {
-                _sources.Add(packageSource.Source);
-            }
-
-            return this;
         }
 
         protected override SdkCommandSpec CreateCommand(IEnumerable<string> args)
@@ -52,12 +31,6 @@ namespace Microsoft.NET.TestFramework.Commands
             var newArgs = new List<string>();
 
             newArgs.Add("restore");
-
-            if (_sources.Any())
-            {
-                newArgs.Add("-Source");
-                newArgs.Add(string.Join(";", _sources));
-            }
 
             newArgs.Add(FullPathProjectFile);
 
