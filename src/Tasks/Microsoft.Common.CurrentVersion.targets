@@ -1604,7 +1604,28 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       and the mechanism here for selecting the best one can be skipped as an optimization.
 
       We give this treatment to .vcxproj by default since no .vcxproj can target more
-      than one framework.
+      than one framework currently. The user must specify exactly one TargetFramework.
+
+      vcxproj files compile down to OS-specific binaries, either native or .NET. In the
+      _GetProjectReferenceTargetFrameworkProperties target of Microsoft.Common.CurrentVersion.targets,
+      SkipTargetFrameworkProperties is set to true for vcxproj to account for that.
+
+      This means we do not fill the Item _ProjectReferenceTargetFrameworkPossibilities or, by extension,
+      the AnnotatedProjects Item.
+
+      For single-targeted projects, we normally decorate the AnnotatedProjects Item with
+      UndefineProperties metadata specifying that TargetFramework should be undefined. Because it
+      isn't defined properly at that stage, however, this does not happen, and TargetFramework is
+      defined at this point in addition to having been defined globally. Currently, this is always
+      true for vcxproj.
+
+      MSBuild permits building the same project twice as long as it has different sets of global properties.
+      Because the TargetFramework global property is not being removed as expected by the multitargeting
+      part of MSBuild, the engine recognizes that there are differences and builds it twice. This can
+      become more noticeable if the projects build in parallel, since they could try to access the same
+      resources and conflict, failing the build. Note, however, that building the same project twice in
+      this way is always wrong even if it seems minor because they do not conflict, and the second build is
+      relatively fast.
    -->
    <ItemGroup>
       <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' == '' and ('%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj')">
