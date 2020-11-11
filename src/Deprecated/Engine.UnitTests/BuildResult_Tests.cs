@@ -8,13 +8,10 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.IO;
 
-using NUnit.Framework;
-
 using Microsoft.Build.BuildEngine;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class BuildResult_Tests
     {
         // A build result where the taskoutputs are null

@@ -7,7 +7,6 @@ using System.Xml;
 using System.Text;
 using System.Reflection;
 using Microsoft.Build.BuildEngine;
-using NUnit.Framework;
 using System.Collections;
 using Microsoft.Build.Framework;
 using System.Text.RegularExpressions;

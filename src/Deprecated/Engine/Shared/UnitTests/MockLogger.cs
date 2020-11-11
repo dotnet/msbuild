@@ -8,7 +8,6 @@ using System.Resources;
 using System.Globalization;
 using System.Text;
 using Microsoft.Build.BuildEngine;
-using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;

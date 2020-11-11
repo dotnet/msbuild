@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Xml;
 using System.Collections.Generic;
-using NUnit.Framework;
 
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Framework;
@@ -17,7 +16,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
     /// <summary>
     /// Test Fixture Class for the v9 Object Model Public Interface Compatibility Tests for the BuildItem Class.
     /// </summary>
-    [TestFixture]
     public sealed class BuildItem_Tests
     {
         #region Common Helpers

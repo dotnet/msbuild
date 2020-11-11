@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
@@ -19,7 +18,6 @@ namespace Microsoft.Build.UnitTests
     /// with the results from the old regexes to make sure they're identical
     /// in every case.
     /// </summary>
-    [TestFixture]
     public class ExpressionShredder_Tests
     {
         [Test]

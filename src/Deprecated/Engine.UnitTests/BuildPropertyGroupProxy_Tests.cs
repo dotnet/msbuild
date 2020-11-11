@@ -5,12 +5,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using NUnit.Framework;
 using Microsoft.Build.BuildEngine;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class BuildPropertyGroupProxy_Tests
     {
         [Test]

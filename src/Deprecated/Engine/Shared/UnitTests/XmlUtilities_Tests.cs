@@ -3,15 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-
-using NUnit.Framework;
-
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class XmlUtilities_Tests
     {
         // Various invalid names, with the first invalid character listed for each

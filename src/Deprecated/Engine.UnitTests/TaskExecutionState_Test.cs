@@ -7,9 +7,6 @@ using System.Text;
 using System.Xml;
 using System.IO;
 using System.Collections;
-
-using NUnit.Framework;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
@@ -17,7 +14,6 @@ using System.Threading;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class TaskExecutionState_Test
     {
 

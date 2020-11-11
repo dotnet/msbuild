@@ -9,9 +9,6 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-
-using NUnit.Framework;
-
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
@@ -22,7 +19,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
     /// STUB Fixture Class for the v9 OM Public Interface Compatibility Tests. RemoteErrorException class 
     /// Also see Toolset tests in the Project test class.
     /// </summary>
-    [TestFixture]
     public class InvalidToolsetDefinitionException_Tests
     {
         /// <summary>

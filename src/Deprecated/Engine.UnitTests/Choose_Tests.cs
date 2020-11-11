@@ -4,7 +4,6 @@
 using System;
 using System.Text;
 using System.IO;
-using NUnit.Framework;
 using Microsoft.Build.BuildEngine;
 using System.Threading;
 using System.Collections;
@@ -18,7 +17,6 @@ namespace Microsoft.Build.UnitTests
      *
      * 
      */
-    [TestFixture]
     sealed public class ChooseTests
     {
         /// <summary>

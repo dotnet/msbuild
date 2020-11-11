@@ -9,7 +9,6 @@ using System.Security.AccessControl;
 using System.Xml;
 using System.Xml.XPath;
 using System.Reflection;
-using NUnit.Framework;
 using Microsoft.Build;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Framework;

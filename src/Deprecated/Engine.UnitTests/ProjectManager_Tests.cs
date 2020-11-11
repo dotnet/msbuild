@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using System.Collections;
@@ -16,7 +15,6 @@ using System.Collections;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class ProjectManager_Tests
     {
         /// <summary>

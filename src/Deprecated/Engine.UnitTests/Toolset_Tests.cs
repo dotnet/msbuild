@@ -6,14 +6,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using System.Xml;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class Toolset_Tests
     {
         [Test]

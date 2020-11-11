@@ -5,7 +5,6 @@ using System;
 using System.Reflection;
 using System.Collections;
 using System.IO;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using System.Text.RegularExpressions;
@@ -13,7 +12,6 @@ using System.Xml;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class AddTargetToCollection_Tests
     {
         private Engine engine;
@@ -806,7 +804,6 @@ namespace Microsoft.Build.UnitTests
         }
     }
 
-    [TestFixture]
     public class RemoveTargetFromCollection_Tests
     {
         [Test]
@@ -859,7 +856,6 @@ namespace Microsoft.Build.UnitTests
         // Dirty project.
     }
 
-    [TestFixture]
     public class Target_Tests
     {
         [Test]

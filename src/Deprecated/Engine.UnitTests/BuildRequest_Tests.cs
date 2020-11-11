@@ -6,7 +6,6 @@ using System.Xml;
 using System.Collections;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using NUnit.Framework;
 using System.IO;
 
 using Microsoft.Build.BuildEngine;
@@ -14,7 +13,6 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class BuildRequest_Tests
     {
         /// <summary>

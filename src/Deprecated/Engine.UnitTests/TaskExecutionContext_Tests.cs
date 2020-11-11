@@ -7,16 +7,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 using System.IO;
-
-using NUnit.Framework;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class TaskExecutionContextTest
     {
         /// <summary>

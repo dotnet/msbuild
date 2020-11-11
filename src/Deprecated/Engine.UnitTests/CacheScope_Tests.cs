@@ -7,16 +7,12 @@ using System.Text;
 using System.Xml;
 using System.IO;
 using System.Collections;
-
-using NUnit.Framework;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class CacheScope_Tests
     {
         // Build result which will be added to the cache

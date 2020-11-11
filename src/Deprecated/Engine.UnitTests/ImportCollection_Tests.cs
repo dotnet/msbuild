@@ -8,13 +8,11 @@ using System.Reflection;
 using System.Text;
 using System.Xml;
 
-using NUnit.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class ImportCollection_Tests
     {
         [Test]

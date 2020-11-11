@@ -6,8 +6,6 @@ using System.IO;
 using System.Xml;
 using System.Reflection;
 using System.Collections.Generic;
-using NUnit.Framework;
-
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
@@ -17,7 +15,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
     /// <summary>
     /// Tests for TargetCollection
     /// </summary>
-    [TestFixture]
     public class TargetCollection_Tests
     {
         #region Common Helpers

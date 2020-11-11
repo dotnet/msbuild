@@ -10,9 +10,6 @@ using System.Collections;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Diagnostics;
-
-using NUnit.Framework;
-
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Framework;
 using Microsoft.VisualStudio.Internal;

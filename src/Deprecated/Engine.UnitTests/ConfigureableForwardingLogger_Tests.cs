@@ -5,13 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class ConfigureableForwardingLogger_Tests
     {
         private BuildFinishedEventArgs buildFinished = new BuildFinishedEventArgs("Message", "Keyword", true);

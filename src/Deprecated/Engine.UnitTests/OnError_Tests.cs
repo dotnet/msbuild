@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using NUnit.Framework;
 using Microsoft.Build.BuildEngine;
 using System.Threading;
 using System.Collections;
@@ -16,7 +15,6 @@ namespace Microsoft.Build.UnitTests
      *
      * Tests that exercise the <OnError> tag.
      */
-    [TestFixture]
     sealed public class OnErrorHandling
     {
         /*

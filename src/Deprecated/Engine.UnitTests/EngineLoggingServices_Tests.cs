@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Text;
 using System.Threading;
-using NUnit.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
@@ -73,7 +72,6 @@ namespace Microsoft.Build.UnitTests
     }
     #endregion
 
-    [TestFixture]
     public class EngineLoggingServices_Tests
     {
         // A simple implementation of the abstract class EngineLoggingServices

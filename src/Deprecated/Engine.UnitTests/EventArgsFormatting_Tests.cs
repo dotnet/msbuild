@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
@@ -15,7 +14,6 @@ namespace Microsoft.Build.UnitTests
     /// gets a bunch of lines of extra coverage of Engine that we weren't otherwise getting, and 
     /// in theory at least the implementation in Engine should be tested too.
     /// </summary>
-    [TestFixture]
     public class EventArgsFormattingTests
     {
         [Test]

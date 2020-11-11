@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Resources;
 using System.Reflection;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
@@ -13,7 +12,6 @@ using System.Xml;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class ProjectSchemaValidationHandlerTest
     {
         /***********************************************************************

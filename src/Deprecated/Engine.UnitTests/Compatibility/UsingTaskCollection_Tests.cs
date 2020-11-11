@@ -5,9 +5,6 @@ using System;
 using System.IO;
 using System.Xml;
 using System.Collections.Generic;
-
-using NUnit.Framework;
-
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
@@ -18,7 +15,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
     /// Fixture Class for the v9 OM Public Interface Compatibility Tests. UsingTaskCollection Class.
     /// Also see Toolset tests in the Project test class.
     /// </summary>
-    [TestFixture]
     public class UsingTaskCollection_Tests
     {
         /// <summary>

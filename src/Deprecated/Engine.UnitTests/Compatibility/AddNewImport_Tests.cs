@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Security.Principal;
 using System.Security.AccessControl;
-using NUnit.Framework;
-
 using Microsoft.Build;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Framework;

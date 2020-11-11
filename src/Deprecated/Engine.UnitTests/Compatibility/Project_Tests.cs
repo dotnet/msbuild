@@ -11,9 +11,6 @@ using System.Xml;
 using System.Xml.XPath;
 using System.Text;
 using System.Threading;
-
-using NUnit.Framework;
-
 using Microsoft.Build;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
@@ -30,7 +27,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for the Project Class Constructor
         /// </summary>
-        [TestFixture]
         public sealed class Constructor
         {
             /// <summary>
@@ -88,7 +84,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 }
                 else
                 {
-                    Assert.Ignore(".NET Framework 3.5 is required for this test, but is not installed."); 
+                    Assert.Ignore(".NET Framework 3.5 is required for this test, but is not installed.");
                 }
             }
 
@@ -187,7 +183,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for DefaultTools property
         /// </summary>
-        [TestFixture]
         public sealed class DefaultTools
         {
             // See Project constructor tests for additional interactions and tests.
@@ -243,7 +238,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for HasToolsVersionAttribute property
         /// </summary>
-        [TestFixture]
         public sealed class HasToolsVersionAttribute
         {
             /// <summary>
@@ -284,7 +278,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for the ToolsVersion property
         /// </summary>
-        [TestFixture]
         public sealed class ToolsVersion
         {
             /// <summary>
@@ -300,7 +293,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 }
                 else
                 {
-                    Assert.Ignore(".NET Framework 3.5 is required for this test, but is not installed."); 
+                    Assert.Ignore(".NET Framework 3.5 is required for this test, but is not installed.");
                 }
             }
 
@@ -339,7 +332,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 }
                 else
                 {
-                    Assert.Ignore(".NET Framework 3.5 is required for this test, but is not installed."); 
+                    Assert.Ignore(".NET Framework 3.5 is required for this test, but is not installed.");
                 }
             }
 
@@ -357,7 +350,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for the TargetCollection accessor
         /// </summary>
-        [TestFixture]
         public sealed class TargetsCollection
         {
             // More Tests in the target collection class. 
@@ -378,7 +370,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for AddNewUsingTaskFromAssemblyFile, AddNewUsingTaskFromAssemblyName and UsingTaskCollection
         /// </summary>
-        [TestFixture]
         public sealed class UsingTask
         {
             /// <summary>
@@ -441,7 +432,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for HasUnsavedChanges TimeOfLastChange 
         /// </summary>
-        [TestFixture]
         public sealed class Dirty
         {
             /// <summary>
@@ -513,7 +503,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for IsValidated, SchemaFile
         /// </summary>
-        [TestFixture]
         public sealed class Validation
         {
             /// <summary>
@@ -686,7 +675,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for  Build ResetBuildStatus BuildFlags.
         /// </summary>
-        [TestFixture]
         public sealed class Build
         {
             /// <summary>
@@ -882,7 +870,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 Assertion.AssertEquals(1, outputs.Count);
             }
 
-  /// <summary>
+            /// <summary>
             /// BuildTest, Ensure that the build skips cached targets where flag permits.
             /// </summary>
             [Test]
@@ -907,7 +895,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 Project p = ObjectModelHelpers.CreateInMemoryProject(TestData.Content3SimpleTargetsNoDefaultSpecified, logger);
                 p.Build("Target2");
                 bool buildSuccessful = p.Build(new string[] { "Target1" }, null, BuildSettings.None);
-               
+
                 Assertion.AssertEquals(true, buildSuccessful);
                 string skippedMessage = ResourceUtilities.FormatResourceString("TargetAlreadyCompleteSuccess", "Target1");
                 string skippedMessage2 = ResourceUtilities.FormatResourceString("TargetAlreadyCompleteSuccess", "Target2");
@@ -977,7 +965,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 p.Build("CreatePropertyTarget");
                 Assertion.AssertEquals("v", p.GetEvaluatedProperty("p"));
                 p.ResetBuildStatus();
-                Assertion.AssertEquals(null, p.GetEvaluatedProperty("p")); 
+                Assertion.AssertEquals(null, p.GetEvaluatedProperty("p"));
             }
 
             /// <summary>
@@ -1028,11 +1016,10 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 Assertion.AssertEquals(preCount - 1, p.EvaluatedItems.Count);
             }
         }
-      
+
         /// <summary>
         /// Tests for BuildEnabled property.
         /// </summary>
-        [TestFixture]
         public sealed class BuildEnabled
         {
             /// <summary>
@@ -1118,7 +1105,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// ParentEngine Tests.
         /// </summary>
-        [TestFixture]
         public sealed class ParentEngine
         {
             // See Engine Test class for more tests.
@@ -1139,7 +1125,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for the Encoding property
         /// </summary>
-        [TestFixture]
         public sealed class XmlEncoding
         {
             // More extensive tests of this property elsewhere in unit testing framework.
@@ -1181,7 +1166,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for Load, LoadXml, Load TextReader.
         /// </summary>
-        [TestFixture]
         public sealed class Load
         {
             /// <summary>
@@ -1601,11 +1585,10 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             }
         }
 
-         /// <summary>
+        /// <summary>
         /// Tests for Save, Save TextReader.
         /// </summary>
-        [TestFixture]
-        public sealed class Save 
+        public sealed class Save
         {
             /// <summary>
             ///  Save Test, Path is empty String
@@ -1813,7 +1796,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for the xml property.
         /// </summary>
-        [TestFixture]
         public sealed class Xml
         {
             /// <summary>
@@ -1843,7 +1825,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for the DefaultTargets Property. 
         /// </summary>
-        [TestFixture]
         public sealed class DefaultTargets
         {
             /// <summary>
@@ -1990,11 +1971,10 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 Assertion.AssertEquals(true, p.IsDirty);
             }
         }
-        
+
         /// <summary>
         /// Tests for the FullfileName Property.
         /// </summary>
-        [TestFixture]
         public sealed class FullFileName
         {
             /// <summary>
@@ -2045,7 +2025,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         ///  Tests for the Intial Targets Property.
         /// </summary>
-        [TestFixture]
         public sealed class InitialTargets
         {
             /// <summary>
@@ -2119,7 +2098,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for SetBuildProperty, GetConditionedPropertyValues, Group manipulation
         /// </summary>
-        [TestFixture]
         public sealed class Properties
         {
             /// <summary>
@@ -2160,7 +2138,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 {
                     importedProjFilename = ObjectModelHelpers.CreateTempFileOnDisk(TestData.PropertyGroup);
                     mainProjFilename = ObjectModelHelpers.CreateTempFileOnDisk(TestData.Content3SimpleTargetsDefaultSpecified);
-                    Project mainProject = new Project(new Engine());                                         
+                    Project mainProject = new Project(new Engine());
                     Project importedProject = new Project(mainProject.ParentEngine);
                     mainProject.Load(mainProjFilename);
                     importedProject.Load(importedProjFilename);
@@ -2227,9 +2205,9 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             [ExpectedException(typeof(ArgumentNullException))]
             public void RemovePropertyGroup_null()
             {
-               Project mainProject = new Project(new Engine());
-               BuildPropertyGroup groupToRemove = null;
-               mainProject.RemovePropertyGroup(groupToRemove);
+                Project mainProject = new Project(new Engine());
+                BuildPropertyGroup groupToRemove = null;
+                mainProject.RemovePropertyGroup(groupToRemove);
             }
 
             /// <summary>
@@ -2242,7 +2220,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 Project p = new Project();
                 string[] values = p.GetConditionedPropertyValues(null);
             }
-        
+
             /// <summary>
             /// Test the RemoveAllPropertyGroups method.
             /// </summary>
@@ -2528,7 +2506,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                     object o = p.EvaluatedItems;
                     Assertion.AssertEquals(true, p.Xml.IndexOf("vNew") < p.Xml.IndexOf("Import"));
                 }
-                finally 
+                finally
                 {
                     CompatibilityTestHelpers.RemoveFile(importPath);
                 }
@@ -2572,7 +2550,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                     object o = p.EvaluatedItems;
                     Assertion.AssertEquals(true, p.Xml.IndexOf("vNew") < p.Xml.IndexOf("Import"));
                 }
-                finally 
+                finally
                 {
                     CompatibilityTestHelpers.RemoveFile(importPath);
                 }
@@ -2860,7 +2838,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for AddNewImport method, RemoveImport method, Imports property, SetImportedProperty
         /// </summary>
-        [TestFixture]
         public sealed class Import : AddNewImportTests
         {
             /// <summary>
@@ -2870,7 +2847,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             {
                 InvokeAddNewImportMethod = new AddNewImportDelegate(AddNewImportOverload);
             }
-          
+
             /// <summary>
             ///  Import Test, Get Import 
             /// </summary>
@@ -2954,7 +2931,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             /// </summary>
             [Test]
             public void SetPropertySetValueLiteralFlag()
-            { 
+            {
                 string importedProjFilename = String.Empty;
                 string mainProjFilename = String.Empty;
                 try
@@ -3073,8 +3050,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for ProjectExtensions
         /// </summary>
-        [TestFixture]
-        public sealed class ProjectExtensions 
+        public sealed class ProjectExtensions
         {
             /// <summary>
             /// GetProjectExtensions Test, where item id exists
@@ -3155,8 +3131,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for EvaluatedItems EvaluatedItemsIgnoringCondition
         /// </summary>
-        [TestFixture]
-        public sealed class EvaluatedItems 
+        public sealed class EvaluatedItems
         {
             /// <summary>
             /// EvaluatedItems, add an item, check addition to OM and xml
@@ -3214,9 +3189,8 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Tests for BuildItem Collection Groups and their manipulation
         /// </summary>
-        [TestFixture]
         public sealed class BuildItems
-        { 
+        {
             /// <summary>
             /// AddNewItem Test, pass in a a null item name
             /// </summary>
@@ -3298,7 +3272,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 p.AddNewItem("i2", "d");
                 XmlDocument xmldoc = new XmlDocument();
                 xmldoc.LoadXml(p.Xml);
-                Assertion.AssertEquals(true, CompatibilityTestHelpers.GetNodesWithName(p.Xml, "ItemGroup")[1].InnerXml.Contains("Include=\"d\"")); 
+                Assertion.AssertEquals(true, CompatibilityTestHelpers.GetNodesWithName(p.Xml, "ItemGroup")[1].InnerXml.Contains("Include=\"d\""));
             }
 
             /// <summary>
@@ -3306,7 +3280,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             /// </summary>
             [Test]
             public void AddNewItemIncludePrecidece_NewGroup()
-            {       
+            {
                 Project p = ObjectModelHelpers.CreateInMemoryProject(TestData.ItemGroup2);
                 XmlDocument xmldoc = new XmlDocument();
                 xmldoc.LoadXml(p.Xml);
@@ -3391,7 +3365,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 {
                     if (!(e.GetType().ToString().Contains("InternalErrorException")))
                     {
-                         Assertion.Fail(e.Message + " was thrown");
+                        Assertion.Fail(e.Message + " was thrown");
                     }
                     else
                     {
@@ -3506,7 +3480,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             [Test]
             public void RemoveItemDirtyAfterRemove()
             {
-                string projectPath  = ObjectModelHelpers.CreateFileInTempProjectDirectory("save.proj", String.Empty);
+                string projectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("save.proj", String.Empty);
                 try
                 {
                     Project p = new Project();
@@ -3528,7 +3502,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             /// </summary>
             [Test]
             public void RemoveItemLastInGroup()
-            {    
+            {
                 Project p = new Project();
                 BuildItem buildItem = p.AddNewItem("n", "i");
                 Assertion.AssertEquals(1, p.ItemGroups.Count);
@@ -3557,7 +3531,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 p.AddNewItem("j", "virtual");
                 p.RemoveItemsByName("j");
             }
-              
+
             /// <summary>
             /// ItemGroups Test, Assert colection contains virutal an concrete items
             /// </summary>
@@ -3590,7 +3564,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 Project p = new Project();
                 string name = "notFound";
                 BuildItemGroup emptyGroup = p.GetEvaluatedItemsByName(name);
-                Assertion.AssertEquals(0, emptyGroup.Count);  
+                Assertion.AssertEquals(0, emptyGroup.Count);
             }
 
             /// <summary>
@@ -3601,7 +3575,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             {
                 Project p = new Project();
                 string name = "new";
-                p.SetProperty("condition", "false");            
+                p.SetProperty("condition", "false");
                 BuildItem buildItem = p.AddNewItem(name, "i1");
                 buildItem.Condition = "$(condition)";
                 p.AddNewItem(name, "i2");
@@ -3629,7 +3603,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             /// RemoveAllItemGroups Test, Remove all Item groups
             /// </summary>
             [Test]
-            public void RemoveAllItemGroups() 
+            public void RemoveAllItemGroups()
             {
                 Project p = new Project();
                 p.AddNewItem("item", "i");

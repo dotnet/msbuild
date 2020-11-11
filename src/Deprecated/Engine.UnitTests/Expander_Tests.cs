@@ -8,9 +8,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text.RegularExpressions;
-
-using NUnit.Framework;
-
 using Microsoft.Build.Framework;
 using BuildEngine = Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine;
@@ -20,7 +17,6 @@ using System.IO;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class Expander_Tests
     {
         [Test]
@@ -1741,7 +1737,6 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests relating to SplitSemiColonSeparatedList method
     /// </summary>
-    [TestFixture]
     public class SplitSemiColonSeparatedList_Tests
     {
         [Test]

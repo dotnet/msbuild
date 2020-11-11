@@ -7,7 +7,6 @@ using System.Text;
 using System.Collections.Generic;
 using System.Configuration;
 using Microsoft.Win32;
-using NUnit.Framework;
 using Microsoft.Build.BuildEngine;
 using System.Threading;
 

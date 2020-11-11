@@ -10,9 +10,6 @@ using System.IO;
 using System.Xml;
 using System.Threading;
 using System.Reflection;
-
-using NUnit.Framework;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
@@ -20,7 +17,6 @@ using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class Engine_Tests
     {
         [Test]

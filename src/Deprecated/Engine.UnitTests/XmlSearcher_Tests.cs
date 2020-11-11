@@ -4,12 +4,10 @@
 using System;
 using System.IO;
 using System.Xml;
-using NUnit.Framework;
 using Microsoft.Build.BuildEngine;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class XmlSearcher_Tests
     {
         /// <summary>

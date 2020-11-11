@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
-
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
@@ -14,7 +12,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
     /// <summary>
     /// Tests for BuildPropertyGroup
     /// </summary>
-    [TestFixture]
     public class BuildPropertyGroup_Tests
     {
         #region Helper Fields

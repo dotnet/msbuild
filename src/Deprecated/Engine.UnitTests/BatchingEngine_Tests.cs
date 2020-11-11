@@ -6,14 +6,11 @@ using System.Xml;
 using System.Collections;
 using System.Text.RegularExpressions;
 
-using NUnit.Framework;
-
 using Microsoft.Build.BuildEngine;
 using System.Collections.Generic;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class BatchingEngineTests
     {
         /// <summary>

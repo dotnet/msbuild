@@ -4,14 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using NUnit.Framework;
 using System.Xml;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class BuildItemGroupChildXml_Tests
     {
         [Test]

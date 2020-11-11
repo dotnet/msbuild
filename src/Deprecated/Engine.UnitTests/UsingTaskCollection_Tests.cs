@@ -6,12 +6,10 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-using NUnit.Framework;
 using Microsoft.Build.BuildEngine;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class UsingTaskCollection_Tests
     {
         [Test]

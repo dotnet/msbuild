@@ -9,9 +9,6 @@ using System.Collections;
 using System.Xml;
 using System.Text;
 using System.Globalization;
-
-using NUnit.Framework;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
@@ -21,7 +18,6 @@ using System.Diagnostics;
 
 namespace Microsoft.Build.UnitTests.Project_Tests
 {
-    [TestFixture]
     public class AddItem
     {
         /// <summary>
@@ -859,7 +855,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class RemoveItem
     {
         /// <summary>
@@ -1662,7 +1657,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class ModifyItem
     {
         /// <summary>
@@ -2334,7 +2328,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class AddProperty
     {
         /// <summary>
@@ -2610,7 +2603,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class RemoveProperty
     {
         /// <summary>
@@ -3083,7 +3075,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class ModifyProperty
     {
         /// <summary>
@@ -3556,7 +3547,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class UsingTask
     {
         /// <summary>
@@ -3758,7 +3748,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class Properties
     {
         [TearDown]
@@ -3829,7 +3818,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class QueryProjectState
     {
         /// <summary>
@@ -3960,7 +3948,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class Imports
     {
         /// <summary>
@@ -4094,7 +4081,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class Evaluation
     {
         /// <summary>
@@ -4270,7 +4256,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class EscapingAndRecursiveDir
     {
         /// <summary>
@@ -4327,7 +4312,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class ErrorCases
     {
         /// <summary>
@@ -4549,7 +4533,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class GlobalProperties
     {
         /// <summary>
@@ -5002,7 +4985,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class LoadAndSave
     {
         /// <summary>
@@ -5217,7 +5199,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class Build
     {
         /// <summary>
@@ -5328,7 +5309,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class InitialTargets
     {
         /// <summary>
@@ -5562,7 +5542,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
     }
 
-    [TestFixture]
     public class Miscellaneous
     {
         /// <summary>
@@ -5803,7 +5782,6 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 
-    [TestFixture]
     public class ToolsVersion
     {
         [Test]

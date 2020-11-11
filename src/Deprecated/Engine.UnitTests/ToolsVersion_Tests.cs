@@ -8,13 +8,11 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
 
-using NUnit.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class ToolsetState_Tests
     {
         [Test]

@@ -6,9 +6,6 @@ using System.IO;
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
-
-using NUnit.Framework;
-
 using Microsoft.Build.UnitTests;
 
 using Microsoft.Build.Utilities;
@@ -49,7 +46,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         }
     }
 
-    [TestFixture]
     public class SimpleScenarios
     {
         /// <summary>
@@ -509,7 +505,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         }
     }
 
-    [TestFixture]
     public class FullProjectsUsingMicrosoftCommonTargets
     {
         /// <summary>

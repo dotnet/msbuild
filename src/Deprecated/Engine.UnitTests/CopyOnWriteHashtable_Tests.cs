@@ -4,14 +4,12 @@
 using System;
 using System.Collections;
 using System.Text;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class CopyOnWriteHashtable_Tests
     {
         [Test]

@@ -8,12 +8,8 @@ using System.Xml;
 
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
-
-using NUnit.Framework;
-
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class TaskRegistry_Tests
     {
         [Test]

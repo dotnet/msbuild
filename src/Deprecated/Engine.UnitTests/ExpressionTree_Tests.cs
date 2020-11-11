@@ -8,7 +8,6 @@ using System.Collections;
 using System.IO;
 using System.Xml;
 using System.Collections.Specialized;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using System.Collections.Generic;
@@ -16,7 +15,6 @@ using System.Collections.Generic;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class ExpressionTreeTest
     {
         private XmlAttribute dummyAttribute; 

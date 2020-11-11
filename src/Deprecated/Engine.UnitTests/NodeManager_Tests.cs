@@ -4,7 +4,6 @@
 using System;
 using System.Reflection;
 using System.Collections;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using System.Text.RegularExpressions;
@@ -14,7 +13,6 @@ using System.Collections.Generic;
 namespace Microsoft.Build.UnitTests
 {
 
-    [TestFixture]
     public class NodeManager_Tests
     {
         private Engine engine = new Engine(@"c:\");

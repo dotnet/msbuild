@@ -4,9 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-
-using NUnit.Framework;
-
 using Microsoft.Build;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Framework;
@@ -18,7 +15,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
     /// Test Fixture Class for the v9 Object Model Public Interface Compatibility Tests for the EngineFileUtilities Class. 
     /// This is not a PRI 1 class for coverage
     /// </summary>
-    [TestFixture]
     public class EngineFileUtilities_Tests
     {
         /// <summary>

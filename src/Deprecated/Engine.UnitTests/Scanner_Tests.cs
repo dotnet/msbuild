@@ -4,14 +4,12 @@
 using System;
 using System.Globalization;
 using System.Reflection;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class ScannerTest
     {
         /// <summary>

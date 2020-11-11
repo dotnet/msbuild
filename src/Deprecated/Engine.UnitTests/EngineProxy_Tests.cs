@@ -7,9 +7,6 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Xml;
-
-using NUnit.Framework;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
@@ -17,7 +14,6 @@ using System.Collections;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class EngineProxy_Tests
     {
         EngineProxy engineProxy;

@@ -7,7 +7,6 @@ using System.Collections;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using System.Text.RegularExpressions;
@@ -15,7 +14,6 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class InternalLoggerExceptionTests
     {
         /// <summary>

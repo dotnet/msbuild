@@ -6,14 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class VCProjectParser_Tests
     {
         public void TestGetReferencedProjectGuids()

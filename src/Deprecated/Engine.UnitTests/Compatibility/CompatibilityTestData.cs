@@ -4,9 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-
-using NUnit.Framework;
-
 using Microsoft.Build;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Framework;

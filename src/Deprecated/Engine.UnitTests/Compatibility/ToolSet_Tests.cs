@@ -3,9 +3,6 @@
 
 using System;
 using System.IO;
-
-using NUnit.Framework;
-
 using Microsoft.Build;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Framework;
@@ -17,7 +14,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
     /// Fixture Class for the v9 OM Public Interface Compatibility Tests. Toolset Class.
     /// Also see Toolset tests in the Project test class.
     /// </summary>
-    [TestFixture]
     public sealed class Toolset_Tests
     {
         /// <summary>

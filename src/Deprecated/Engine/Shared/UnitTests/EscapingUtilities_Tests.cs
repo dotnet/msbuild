@@ -4,14 +4,12 @@
 #region Using directives
 
 using System;
-using NUnit.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 
 #endregion
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     sealed public class EscapingUtilities_Tests
     {
         /// <summary>

@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using NUnit.Framework;
 using System.Xml;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;

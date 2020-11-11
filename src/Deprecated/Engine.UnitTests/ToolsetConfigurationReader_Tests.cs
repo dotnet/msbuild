@@ -7,7 +7,6 @@ using System.Text;
 using System.Collections.Generic;
 using System.Configuration;
 using Microsoft.Win32;
-using NUnit.Framework;
 using Microsoft.Build.BuildEngine;
 
 namespace Microsoft.Build.UnitTests
@@ -15,7 +14,6 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Unit tests for ToolsetConfigurationReader class
     /// </summary>
-    [TestFixture]
     public class ToolsetConfigurationReaderTests
     {
         private static string msbuildToolsets = "msbuildToolsets";

@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Xml;
-using NUnit.Framework;
-
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 using Microsoft.Build.Framework;
@@ -20,7 +18,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
     /// <summary>
     /// Test Fixture Class for the v9 Object Model Public Interface Compatibility Tests for the Engine Class.
     /// </summary>
-    [TestFixture]
     public sealed class Engine_Tests
     {
         //// Note to CTI - http://msdn2.microsoft.com/en-us/library/microsoft.build.buildengine.engine.aspx is the 

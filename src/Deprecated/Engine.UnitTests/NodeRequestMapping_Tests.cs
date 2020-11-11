@@ -7,16 +7,12 @@ using System.Text;
 using System.Xml;
 using System.IO;
 using System.Collections;
-
-using NUnit.Framework;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class NodeRequestMapping_Tests
     {
         // Project to which the results will be cached to

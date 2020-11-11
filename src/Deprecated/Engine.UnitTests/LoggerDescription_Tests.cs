@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using NUnit.Framework;
 using System.IO;
 
 using Microsoft.Build.BuildEngine;
@@ -12,7 +11,6 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class LoggerDescription_Tests
     {
         [Test]

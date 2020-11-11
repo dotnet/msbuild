@@ -7,9 +7,6 @@ using System.Collections;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Threading;
-
-using NUnit.Framework;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
@@ -17,7 +14,6 @@ using System.IO;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class TaskWorkerThread_Tests
     {
         private Engine engine;

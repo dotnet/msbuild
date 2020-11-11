@@ -6,9 +6,6 @@ using System.Reflection;
 using System.Collections;
 using System.Text.RegularExpressions;
 using System.Xml;
-
-using NUnit.Framework;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
@@ -17,7 +14,6 @@ using System.IO;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class IntrinsicTask_Tests
     {
         [Test]

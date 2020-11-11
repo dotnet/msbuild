@@ -7,7 +7,6 @@ using System.Resources;
 using System.Reflection;
 using System.Collections;
 using System.Globalization;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 

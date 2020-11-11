@@ -9,12 +9,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 using System.Xml;
-
-using NUnit.Framework;
-
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class ItemBucket_Tests
     {
         /// <summary>

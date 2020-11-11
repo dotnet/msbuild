@@ -7,13 +7,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Xml;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class Item_Tests
     {
         /// <summary>

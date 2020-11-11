@@ -7,16 +7,12 @@ using System.Reflection;
 using System.Collections;
 using System.Collections.Specialized;
 using System.Text.RegularExpressions;
-
-using NUnit.Framework;
-
 using Microsoft.Build.Framework;
 using BuildEngine = Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class UtilitiesTest
     {
         private static XmlAttribute fakeAttribute = (new XmlDocument()).CreateAttribute("foo");

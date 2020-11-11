@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
-using NUnit.Framework;
 using System.Text;
 
 using Microsoft.Build.BuildEngine.Shared;
@@ -12,7 +11,6 @@ using System.IO;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class FileUtilities_Tests
     {
         /// <summary>

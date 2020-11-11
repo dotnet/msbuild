@@ -10,12 +10,10 @@ using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 using System.Xml;
 
-using NUnit.Framework;
 using System.Threading;
 
 namespace Microsoft.Build.UnitTests
 {  
-    [TestFixture]
     public class Lookup_Tests
     {
         /// <summary>

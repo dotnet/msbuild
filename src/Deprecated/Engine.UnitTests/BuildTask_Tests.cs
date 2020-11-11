@@ -4,7 +4,6 @@
 using System;
 using System.Reflection;
 using System.Collections;
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using System.Text.RegularExpressions;
@@ -16,7 +15,6 @@ namespace Microsoft.Build.UnitTests
     {
     }
 
-    [TestFixture]
     public class BuildTask_Tests
     {
         /***********************************************************************

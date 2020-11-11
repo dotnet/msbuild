@@ -10,9 +10,6 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Text;
 using System.Globalization;
-
-using NUnit.Framework;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
@@ -20,7 +17,6 @@ using System.Threading;
 
 namespace Microsoft.Build.UnitTests.TargetDependencyAnalyzer_Tests
 {
-    [TestFixture]
     public class TargetDependencyAnalyzer_Tests
     {
         /// <summary>

@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using NUnit.Framework;
-
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 using Microsoft.Win32;
@@ -15,7 +13,6 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Unit test for ToolsetRegistryReader class
     /// </summary>
-    [TestFixture]
     public class ToolsetRegistryReader_Tests
     {
         // The registry key that is passed as the baseKey parameter to the ToolsetRegistryReader class

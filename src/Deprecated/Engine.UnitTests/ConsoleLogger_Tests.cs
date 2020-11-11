@@ -7,16 +7,12 @@ using System.IO;
 using System.Reflection;
 using System.Collections;
 using System.Globalization;
-
-using NUnit.Framework;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class ConsoleLoggerTest
     {
         private class SimulatedConsole

@@ -6,13 +6,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-using NUnit.Framework;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestFixture]
     public class CacheEntry_Tests
     {
         /// <summary>
