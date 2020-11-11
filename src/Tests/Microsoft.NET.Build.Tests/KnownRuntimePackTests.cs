@@ -23,7 +23,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 TargetFrameworks = "net5.0",
-                IsSdkProject = true,
                 IsExe = true,
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
             };
@@ -48,7 +47,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 TargetFrameworks = "net5.0",
-                IsSdkProject = true,
                 IsExe = true,
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
             };
@@ -76,7 +74,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 TargetFrameworks = "net5.0",
-                IsSdkProject = true,
                 IsExe = true,
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
             };

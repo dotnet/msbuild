@@ -457,7 +457,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = "CompilationConstants",
                 TargetFrameworks = targetFramework,
                 IsExe = true,
-                IsSdkProject = true
             };
             if (targetPlatformIdentifier != null)
             {
@@ -546,7 +545,6 @@ class Program
             TestProject testProject = new TestProject()
             {
                 Name = "TargetPlatformDefaults",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework
             };
 
@@ -581,7 +579,6 @@ class Program
             TestProject testProject = new TestProject()
             {
                 Name = "WindowsVersionDefault",
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 TargetFrameworks = targetFramework
             };
@@ -603,7 +600,6 @@ class Program
             {
                 Name = testName,
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
 
             string identifier = useSolution ? "_Solution" : "";
@@ -680,7 +676,6 @@ class Program
             {
                 Name = "TargetFrameworkVersionCap",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, targetFramework);
@@ -712,7 +707,6 @@ class Program
                 Name = "CompileDoesntUseRid",
                 TargetFrameworks = "netcoreapp2.0",
                 RuntimeIdentifier = runtimeIdentifier,
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
@@ -773,7 +767,6 @@ class Program
             {
                 Name = "Library",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true,
                 // references from packages go through a different code path to be marked externally resolved.
                 PackageReferences = { new TestPackageReference("NewtonSoft.Json", "10.0.1") }
             };
@@ -825,7 +818,6 @@ class Program
             {
                 Name = "EnableDynamicLoading",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
 
             testProject.AdditionalProperties["EnableDynamicLoading"] = "true";
@@ -890,7 +882,6 @@ class Program
             {
                 Name = "Project Name With Spaces",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);

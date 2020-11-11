@@ -403,7 +403,6 @@ namespace Microsoft.NET.ToolPack.Tests
             {
                 Name = "wpfTool",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 IsWinExe = true,
             };

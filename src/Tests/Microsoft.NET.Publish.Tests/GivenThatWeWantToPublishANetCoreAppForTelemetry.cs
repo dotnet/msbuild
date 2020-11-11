@@ -97,7 +97,6 @@ namespace Microsoft.NET.Publish.Tests
                 Name = projectName,
                 TargetFrameworks = targetFramework,
                 IsExe = true,
-                IsSdkProject = true,
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework)
             };
             if (r2r)

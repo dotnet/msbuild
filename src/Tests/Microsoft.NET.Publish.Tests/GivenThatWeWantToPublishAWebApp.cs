@@ -68,7 +68,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WebTest",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.Web",
                 IsExe = true,
             };
@@ -126,7 +125,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WebTest",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.Web",
                 IsExe = true,
             };
@@ -178,7 +176,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WebWithPublishProfile",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.Web",
                 IsExe = true,
             };

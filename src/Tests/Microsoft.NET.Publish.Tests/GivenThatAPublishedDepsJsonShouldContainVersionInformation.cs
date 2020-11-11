@@ -35,7 +35,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "DepsJsonVersions",
                 TargetFrameworks = "netcoreapp2.0",
-                IsSdkProject = true,
                 IsExe = true,
             };
             testProject.PackageReferences.Add(new TestPackageReference("System.Collections.Immutable", "1.5.0-preview1-26216-02"));
@@ -250,7 +249,6 @@ static class Program
             {
                 Name = nameof(GetRollForwardNetCoreAppVersion),
                 TargetFrameworks = "netcoreapp2.2",
-                IsSdkProject = true,
                 IsExe = true
             };
             testProject.AdditionalProperties.Add("TargetLatestRuntimePatch", "true");

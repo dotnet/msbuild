@@ -117,7 +117,6 @@ namespace Microsoft.NET.Publish.Tests
                 Name = "FailingToCrossgen",
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true,
-                IsSdkProject = true,
             };
 
             if (platform.Contains("win"))
@@ -164,7 +163,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "ConsoleApp",
                 TargetFrameworks = "netcoreapp2.2",
-                IsSdkProject = true,
                 IsExe = true,
             };
 
@@ -294,7 +292,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = referenceProjectName,
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
             };
             referenceProject.SourceFiles[$"{referenceProjectName}.cs"] = @"
 using System;
@@ -311,7 +308,6 @@ public class Classlib
                 Name = mainProjectName,
                 TargetFrameworks = targetFramework,
                 IsExe = isExeProject,
-                IsSdkProject = true,
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework),
                 ReferencedProjects = { referenceProject },
             };

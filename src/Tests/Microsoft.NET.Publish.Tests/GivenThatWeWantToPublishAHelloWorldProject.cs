@@ -130,7 +130,6 @@ namespace Microsoft.NET.Publish.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "Hello.World",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 RuntimeIdentifier = rid,
                 IsExe = true,
@@ -175,7 +174,6 @@ public static class Program
             TestProject testProject = new TestProject()
             {
                 Name = "Hello",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 RuntimeIdentifier = runtimeIdentifier,
                 IsExe = true,
@@ -263,7 +261,6 @@ public static class Program
             {
                 Name = selfContained ? "SelfContainedWithConflicts" :
                     (ridSpecific ? "RidSpecificSharedConflicts" : "PortableWithConflicts"),
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 RuntimeIdentifier = rid,
                 IsExe = true,
@@ -442,7 +439,6 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "PreserveNewestFilesOnPublish",
-                IsSdkProject = true,
                 TargetFrameworks = tfm,
                 IsExe = true
             };
@@ -472,7 +468,6 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "InvokeBuildOnPublish",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true
             };
@@ -509,7 +504,6 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "NoDuplicatesInResolvedPublishAssets",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 RuntimeIdentifier = "win-x64",
                 IsExe = true
@@ -581,7 +575,6 @@ public static class Program
             {
                 Name = "ConsoleWithPublishProfile",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk;Microsoft.NET.Sdk.Publish",
                 IsExe = true,
             };
@@ -649,14 +642,12 @@ public static class Program
             {
                 Name = "LibProjectWithDifferentTFM",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true,
             };
 
             var testProject = new TestProject()
             {
                 Name = "ExeWithPublishProfile",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true,
             };
 

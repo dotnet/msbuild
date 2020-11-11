@@ -177,7 +177,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = "ResourceTest",
                 TargetFrameworks = targetFramework,
                 RuntimeIdentifier = runtimeIdentifier,
-                IsSdkProject = true,
                 IsExe = true,
             };
             testProject.AdditionalProperties.Add("AssemblyVersion", version);
@@ -239,7 +238,6 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = "netcoreapp3.0",
                 //  Use "any" as RID so that it will fail to find AppHost
                 RuntimeIdentifier = "any",
-                IsSdkProject = true,
                 IsExe = true,
             };
             testProject.AdditionalProperties["SelfContained"] = "false";
@@ -264,7 +262,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "RetryAppHost",
                 TargetFrameworks = TFM,
-                IsSdkProject = true,
                 IsExe = true,
             };
             

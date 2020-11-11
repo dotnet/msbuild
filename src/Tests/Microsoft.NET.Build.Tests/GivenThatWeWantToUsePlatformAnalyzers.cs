@@ -29,7 +29,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                IsSdkProject = true,
                 TargetFrameworks = targetFrameworkNet5,
                 IsExe = true,
                 SourceFiles =
@@ -75,7 +74,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                IsSdkProject = true,
                 TargetFrameworks = targetFrameworkNet5,
                 IsExe = true,
                 SourceFiles =
@@ -122,7 +120,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                IsSdkProject = true,
                 TargetFrameworks = targetFrameworkNetCore31,
                 IsExe = true,
                 SourceFiles =
@@ -169,7 +166,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                IsSdkProject = true,
                 TargetFrameworks = targetFrameworkNet5,
                 IsExe = true,
                 SourceFiles =
@@ -216,7 +212,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                IsSdkProject = true,
                 TargetFrameworks = targetFrameworkNetCore31,
                 IsExe = true,
                 SourceFiles =
@@ -263,7 +258,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                IsSdkProject = true,
                 TargetFrameworks = targetFrameworkNetCore31,
                 IsExe = true,
                 SourceFiles =
@@ -303,7 +297,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                IsSdkProject = true,
                 TargetFrameworks = targetFrameworkNet5,
                 IsExe = true,
                 SourceFiles =
@@ -350,7 +343,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                IsSdkProject = true,
                 TargetFrameworks = targetFrameworkNetCore31,
                 IsExe = true,
                 SourceFiles =
@@ -397,7 +389,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "HelloWorld",
-                IsSdkProject = true,
                 TargetFrameworks = targetFrameworkNetCore31,
                 IsExe = true,
                 SourceFiles =

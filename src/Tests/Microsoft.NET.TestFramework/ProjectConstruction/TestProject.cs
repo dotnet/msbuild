@@ -21,7 +21,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public string Name { get; set; }
 
-        public bool IsSdkProject { get; set; }
+        public bool IsSdkProject { get; set; } = true;
 
         public bool IsExe { get; set; }
 

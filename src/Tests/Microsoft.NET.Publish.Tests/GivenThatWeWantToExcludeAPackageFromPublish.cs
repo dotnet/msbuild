@@ -169,7 +169,6 @@ namespace Microsoft.NET.Publish.Tests
             var testLibraryProject = new TestProject()
             {
                 Name = "TestLibrary",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard2.0"
             };
 
@@ -178,7 +177,6 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "TestApp",
-                IsSdkProject = true,
                 IsExe = true,
                 TargetFrameworks = "netcoreapp3.0"
             };
@@ -200,7 +198,6 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "PrivateAssetsTransitive",
-                IsSdkProject = true,
                 IsExe = true,
                 TargetFrameworks = "net5.0"
             };

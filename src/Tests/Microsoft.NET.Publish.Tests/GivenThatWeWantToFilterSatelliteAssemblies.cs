@@ -31,7 +31,6 @@ namespace Microsoft.NET.Publish.Tests
                 Name = "PublishFilteredSatelliteAssemblies",
                 TargetFrameworks = tfm,
                 IsExe = true,
-                IsSdkProject = true
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Spatial", "5.8.3"));
@@ -71,7 +70,6 @@ namespace Microsoft.NET.Publish.Tests
                 Name = "PublishSatelliteAssemblies",
                 TargetFrameworks = "netcoreapp2.0",
                 IsExe = true,
-                IsSdkProject = true
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Spatial", "5.8.3"));

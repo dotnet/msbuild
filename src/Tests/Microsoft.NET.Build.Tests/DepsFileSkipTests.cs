@@ -32,7 +32,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "SkipRuntimeAssemblyFromPackage",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -50,7 +49,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "SkipRuntimeAssemblyFromRuntimePack",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -68,7 +66,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "SkipNativeAssetFromPackage",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -88,7 +85,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "SkipNativeAssetFromPackage",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -106,7 +102,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "SkipNativeAssetFromRuntimePack",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -124,7 +119,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "SkipResourceFromPackage",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 

@@ -162,7 +162,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WpfProjectAllResources",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 IsWinExe = true,
             };
@@ -207,7 +206,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "WpfProjectSelectResources",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 IsWinExe = true,
             };

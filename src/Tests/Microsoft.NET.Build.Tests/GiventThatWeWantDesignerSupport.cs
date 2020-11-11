@@ -40,7 +40,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "ReferencedProject",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
             };
 
             var project = new TestProject
@@ -48,7 +47,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = "DesignerTest",
                 IsExe = true,
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
                 PackageReferences = { new TestPackageReference("NewtonSoft.Json", "12.0.1") },
                 ReferencedProjects = { projectRef }
             };
