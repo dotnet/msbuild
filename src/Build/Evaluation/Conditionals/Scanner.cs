@@ -27,7 +27,7 @@ namespace Microsoft.Build.Evaluation
         private string _expression;
         private int _parsePoint;
         private Token _lookahead;
-        private bool _errorState;
+        internal bool _errorState;
         private int _errorPosition;
         // What we found instead of what we were looking for
         private string _unexpectedlyFound = null;
@@ -321,8 +321,9 @@ namespace Microsoft.Build.Evaluation
         private static bool ScanForPropertyExpressionEnd(string expression, int index, out int indexResult)
         {
             int nestLevel = 0;
-            bool whitespaceCheck = false;
-
+            bool whitespaceFound = false;
+            bool nonIdentifierCharacterFound = false;
+            indexResult = -1;
             unsafe
             {
                 fixed (char* pchar = expression)
@@ -333,17 +334,28 @@ namespace Microsoft.Build.Evaluation
                         if (character == '(')
                         {
                             nestLevel++;
-                            whitespaceCheck = true;
                         }
                         else if (character == ')')
                         {
                             nestLevel--;
-                            whitespaceCheck = false;
                         }
-                        else if (whitespaceCheck && char.IsWhiteSpace(character) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+                        else if (char.IsWhiteSpace(character))
                         {
+                            whitespaceFound = true;
                             indexResult = index;
-                            return false;
+                        }
+                        else if (!XmlUtilities.IsValidSubsequentElementNameCharacter(character))
+                        {
+                            nonIdentifierCharacterFound = true;
+                        }
+
+                        if (character == '$' && index < expression.Length - 1 && pchar[index + 1] == '(')
+                        {
+                            if (!ScanForPropertyExpressionEnd(expression, index + 1, out index))
+                            {
+                                indexResult = index;
+                                return false;
+                            }
                         }
 
                         // We have reached the end of the parenthesis nesting
@@ -351,6 +363,11 @@ namespace Microsoft.Build.Evaluation
                         // If it is not then the calling code will determine that
                         if (nestLevel == 0)
                         {
+                            if (whitespaceFound && !nonIdentifierCharacterFound && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+                            {
+                                return false;
+                            }
+
                             indexResult = index;
                             return true;
                         }
