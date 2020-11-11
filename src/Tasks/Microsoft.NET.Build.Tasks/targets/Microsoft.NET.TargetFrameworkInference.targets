@@ -140,7 +140,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <NETSdkError Condition="'$(_TargetFrameworkVersionWithoutV)' > '$(NETCoreAppMaximumVersion)'"
                  ResourceName="UnsupportedTargetFrameworkVersion"
-                 FormatArguments=".NET Core;$(_TargetFrameworkVersionWithoutV);$(NETCoreAppMaximumVersion)"
+                 FormatArguments=".NET;$(_TargetFrameworkVersionWithoutV);$(NETCoreAppMaximumVersion)"
       />
   </Target>
 
