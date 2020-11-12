@@ -18,6 +18,8 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public string ProjectFile { get; }
 
+        public string NuGetExeVersion { get; set; }
+
         public string FullPathProjectFile => Path.Combine(ProjectRootPath, ProjectFile);
 
         public NuGetExeRestoreCommand(ITestOutputHelper log, string projectRootPath, string relativePathToProject = null) : base(log)
@@ -43,18 +45,35 @@ namespace Microsoft.NET.TestFramework.Commands
             {
                 throw new InvalidOperationException("Path to nuget.exe not set");
             }
-            else if (!File.Exists(TestContext.Current.NuGetExePath))
+
+            var nugetExePath = TestContext.Current.NuGetExePath;
+            if (!string.IsNullOrEmpty(NuGetExeVersion))
             {
-                //  https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+                nugetExePath = Path.Combine(Path.GetDirectoryName(nugetExePath), NuGetExeVersion, "nuget.exe");
+            }
+
+            if (!File.Exists(nugetExePath))
+            {
+                string directory = Path.GetDirectoryName(nugetExePath);
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                string url = string.IsNullOrEmpty(NuGetExeVersion) ?
+                    "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" :
+                    $"https://dist.nuget.org/win-x86-commandline/v{NuGetExeVersion}/nuget.exe";
                 var client = new System.Net.WebClient();
-                client.DownloadFile("https://dist.nuget.org/win-x86-commandline/latest/nuget.exe", TestContext.Current.NuGetExePath);
+                client.DownloadFile(url, nugetExePath);
             }
 
             var ret = new SdkCommandSpec()
             {
-                FileName = TestContext.Current.NuGetExePath,
+                FileName = nugetExePath,
                 Arguments = newArgs
             };
+
+            TestContext.Current.AddTestEnvironmentVariables(ret);
 
             return ret;
         }
