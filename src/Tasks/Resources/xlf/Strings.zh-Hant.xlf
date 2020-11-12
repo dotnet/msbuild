@@ -510,8 +510,8 @@
         <note />
       </trans-unit>
       <trans-unit id="General.StateFileAlreadyPresent">
-        <source>MSB3667: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running RAR normally, do not set the "CacheOutputPath" parameter of the ResolveAssemblyReference task.</source>
-        <target state="new">MSB3667: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running RAR normally, do not set the "CacheOutputPath" parameter of the ResolveAssemblyReference task.</target>
+        <source>MSB3667: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running the ResolveAssemblyReference task normally, do not set the "AssemblyInformationCacheOutputPath" parameter of the ResolveAssemblyReference task.</source>
+        <target state="new">MSB3667: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running the ResolveAssemblyReference task normally, do not set the "AssemblyInformationCacheOutputPath" parameter of the ResolveAssemblyReference task.</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
       <trans-unit id="General.UndefineProperties">
