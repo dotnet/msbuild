@@ -321,6 +321,11 @@ namespace Microsoft.Build.Shared
                 CreateAssemblyName();
                 return asAssemblyName.Version;
             }
+            set
+            {
+                CreateAssemblyName();
+                asAssemblyName.Version = value;
+            }
         }
 
         /// <summary>

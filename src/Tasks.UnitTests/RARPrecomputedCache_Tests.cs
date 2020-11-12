@@ -70,14 +70,17 @@ namespace Microsoft.Build.Tasks.UnitTests
                 string dllName = Path.Combine(Path.GetDirectoryName(standardCache.Path), "randomFolder", "dll.dll");
                 t._cache.instanceLocalFileStateCache.Add(dllName,
                     new SystemState.FileState(DateTime.Now) {
-                        Assembly = null,
+                        Assembly = new Shared.AssemblyNameExtension("notDll.dll", false),
                         RuntimeVersion = "v4.0.30319",
                         FrameworkNameAttribute = new System.Runtime.Versioning.FrameworkName(".NETFramework", Version.Parse("4.7.2"), "Profile"),
                         scatterFiles = new string[] { "first", "second" } });
+                t._cache.instanceLocalFileStateCache[dllName].Assembly.Version = new Version("16.3");
                 string precomputedCachePath = standardCache.Path + ".cache";
                 t.AssemblyInformationCacheOutputPath = precomputedCachePath;
                 t._cache.IsDirty = true;
                 t.WriteStateFile(calculateMvid);
+                // The cache is already written; this change should do nothing.
+                t._cache.instanceLocalFileStateCache[dllName].Assembly = null;
 
                 ResolveAssemblyReference u = new ResolveAssemblyReference();
                 u.StateFile = standardCache.Path;
@@ -93,7 +96,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 u.ReadStateFile(File.GetLastWriteTime, Array.Empty<AssemblyTableInfo>(), calculateMvid, p => true);
                 u._cache.instanceLocalFileStateCache.ShouldContainKey(dllName);
                 SystemState.FileState a3 = u._cache.instanceLocalFileStateCache[dllName];
-                a3.Assembly.ShouldBeNull();
+                a3.Assembly.FullName.ShouldBe("notDll.dll");
+                a3.Assembly.Version.Major.ShouldBe(16);
                 a3.RuntimeVersion.ShouldBe("v4.0.30319");
                 a3.FrameworkNameAttribute.Version.ShouldBe(Version.Parse("4.7.2"));
                 a3.scatterFiles.Length.ShouldBe(2);
