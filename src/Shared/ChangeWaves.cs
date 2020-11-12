@@ -114,41 +114,37 @@ namespace Microsoft.Build.Utilities
             {
                 return;
             }
-
             // Most common case, `MSBuildDisableFeaturesFromVersion` unset
-            if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableFeaturesFromVersion))
+            else if (string.IsNullOrEmpty(Traits.Instance.MSBuildDisableFeaturesFromVersion))
             {
                 ConversionState = ChangeWaveConversionState.Valid;
                 _cachedWave = ChangeWaves.EnableAllFeatures;
-                return;
             }
             else if (_cachedWave == null && !Version.TryParse(Traits.Instance.MSBuildDisableFeaturesFromVersion, out _cachedWave))
             {
                 ConversionState = ChangeWaveConversionState.InvalidFormat;
                 _cachedWave = ChangeWaves.EnableAllFeatures;
-                return;
             }
             else if (_cachedWave == EnableAllFeatures || AllWaves.Contains(_cachedWave))
             {
                 ConversionState = ChangeWaveConversionState.Valid;
-                return;
             }
             else if (_cachedWave < LowestWave)
             {
                 ConversionState = ChangeWaveConversionState.OutOfRotation;
                 _cachedWave = LowestWave;
-                return;
             }
             else if (_cachedWave > HighestWave)
             {
                 ConversionState = ChangeWaveConversionState.OutOfRotation;
                 _cachedWave = HighestWave;
-                return;
             }
-
             // _cachedWave is somewhere between valid waves, find the next valid version.
-            _cachedWave = AllWaves.First((x) => x > _cachedWave);
-            ConversionState = ChangeWaveConversionState.Valid;
+            else
+            {
+                _cachedWave = AllWaves.First((x) => x > _cachedWave);
+                ConversionState = ChangeWaveConversionState.Valid;
+            }
         }
 
         /// <summary>
@@ -158,10 +154,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>A bool indicating whether the change wave is enabled.</returns>
         public static bool AreFeaturesEnabled(Version wave)
         {
-            if (ShouldApplyChangeWave)
-            {
-                ApplyChangeWave();
-            }
+            ApplyChangeWave();
 
             return wave < _cachedWave;
         }
