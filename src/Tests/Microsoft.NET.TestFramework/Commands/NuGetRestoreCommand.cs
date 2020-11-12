@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using NuGet.Configuration;
 using Xunit.Abstractions;
@@ -73,8 +74,12 @@ namespace Microsoft.NET.TestFramework.Commands
             else if (!File.Exists(TestContext.Current.NuGetExePath))
             {
                 //  https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
-                var client = new System.Net.WebClient();
-                client.DownloadFile("https://dist.nuget.org/win-x86-commandline/latest/nuget.exe", TestContext.Current.NuGetExePath);
+                using(var client = new System.Net.Http.HttpClient())
+                using(var response = client.GetAsync("https://dist.nuget.org/win-x86-commandline/latest/nuget.exe").ConfigureAwait(false).GetAwaiter().GetResult())
+                using(var fs = new FileStream(TestContext.Current.NuGetExePath, FileMode.CreateNew))
+                {
+                    response.Content.CopyToAsync(fs).ConfigureAwait(false).GetAwaiter().GetResult();
+                }
             }
 
             var ret = new SdkCommandSpec()

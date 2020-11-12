@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -29,6 +30,10 @@ namespace Microsoft.DotNet.Cli.Utils
             private const uint ZoneUntrusted = 4;
             private const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
             private static IInternetSecurityManager internetSecurityManager = null;
+
+#if NETCOREAPP
+            [SupportedOSPlatform("windows")]
+#endif
             public static bool IsDangerous(string filename)
             {
                 try

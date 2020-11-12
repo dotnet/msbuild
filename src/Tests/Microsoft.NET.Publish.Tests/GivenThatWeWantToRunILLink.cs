@@ -301,7 +301,6 @@ namespace Microsoft.NET.Publish.Tests
                     "ILLink : Trim analysis warning IL2075: System.Diagnostics.Tracing.ManifestBuilder.CreateManifestString(",
                     "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.TypeAnalysis.TypeAnalysis(Type,EventDataAttribute,List<Type>",
                     "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.NullableTypeInfo.NullableTypeInfo(Type,List<Type>",
-                    "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.NullableTypeInfo.WriteData(PropertyValue",
                     "ILLink : Trim analysis warning IL2077: System.Runtime.Serialization.Formatters.Binary.ObjectReader.ParseObject(ParseRecord",
                     "ILLink : Trim analysis warning IL2075: System.Runtime.Serialization.ObjectManager.DoValueTypeFixup(FieldInfo,ObjectHolder,Object",
                     "ILLink : Trim analysis warning IL2070: System.Runtime.Serialization.ObjectManager.GetDeserializationConstructor(Type",
@@ -330,14 +329,22 @@ namespace Microsoft.NET.Publish.Tests
                     "ILLink : Trim analysis warning IL2072: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
                     "ILLink : Trim analysis warning IL2077: System.Resources.ResourceReader.InitializeBinaryFormatter(",
                     "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(",
-                    "ILLink : Trim analysis warning IL2026: System.Reflection.Emit.ModuleBuilder.GetGenericMethodBaseDefinition(MethodBase",
-                    "ILLink : Trim analysis warning IL2026: System.Reflection.Emit.ModuleBuilder.GetGenericMethodBaseDefinition(MethodBase",
                     "ILLink : Trim analysis warning IL2075: System.Attribute.GetParentDefinition(PropertyInfo,Type[]",
                     "ILLink : Trim analysis warning IL2075: System.Attribute.GetParentDefinition(EventInfo",
                     "ILLink : Trim analysis warning IL2080: System.Resources.ResourceReader.<>c.<InitializeBinaryFormatter>b__6_1(",
                     "ILLink : Trim analysis warning IL2060: System.Resources.ResourceReader.<>c.<InitializeBinaryFormatter>b__6_1(",
                     "ILLink : Trim analysis warning IL2075: System.Diagnostics.Tracing.EventSource.CreateManifestAndDescriptors(Type,String,EventSource,EventManifestOptions",
-                    "ILLink : Trim analysis warning IL2055: System.RuntimeTypeHandle.GetTypeHelper(Type,Type[],IntPtr,Int32"
+                    "ILLink : Trim analysis warning IL2055: System.RuntimeTypeHandle.GetTypeHelper(Type,Type[],IntPtr,Int32",
+                    "ILLink : Trim analysis warning IL2026: System.Reflection.Associates.AssignAssociates(Int32,RuntimeType,RuntimeType",
+                    "ILLink : Trim analysis warning IL2065: System.Reflection.CustomAttribute.AddCustomAttributes(ListBuilder`1&,RuntimeModule,Int32,RuntimeType,Boolean,RuntimeType.ListBuilder<Object>",
+                    "ILLink : Trim analysis warning IL2026: System.Reflection.CustomAttribute.FilterCustomAttributeRecord(MetadataToken,MetadataImport&,RuntimeModule,MetadataToken,RuntimeType,Boolean,ListBuilder`1&,RuntimeType&,IRuntimeMethodInfo&,Boolean&",
+                    "ILLink : Trim analysis warning IL2026: System.Reflection.CustomAttribute.GetAttributeUsage(RuntimeType",
+                    "ILLink : Trim analysis warning IL2075: System.Reflection.CustomAttributeData.CustomAttributeData(RuntimeModule,MetadataToken,ConstArray&",
+                    "ILLink : Trim analysis warning IL2026: System.Reflection.Emit.ModuleBuilder.GetMemberRefToken(MethodBase,IEnumerable<Type>",
+                    "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.NullableTypeInfo.WriteData(TraceLoggingDataCollector,PropertyValue",
+                    "ILLink : Trim analysis warning IL2070: System.RuntimeType.GetMethodBase(RuntimeType,RuntimeMethodHandleInternal",
+                    "ILLink : Trim analysis warning IL2055: System.Reflection.SignatureTypeExtensions.TryMakeGenericType(Type,Type[]",
+                    "ILLink : Trim analysis warning IL2055: System.Reflection.Emit.TypeBuilderInstantiation.Substitute(Type[]"
             };
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
