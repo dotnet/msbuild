@@ -397,7 +397,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-                    ProjectTaskOutputPropertyInstance outputItem = new ProjectTaskOutputPropertyInstance
+                    ProjectTaskOutputPropertyInstance outputProperty = new ProjectTaskOutputPropertyInstance
                         (
                         output.PropertyName,
                         output.TaskParameter,
@@ -408,7 +408,7 @@ namespace Microsoft.Build.Evaluation
                         output.ConditionLocation
                         );
 
-                    taskOutputs.Add(outputItem);
+                    taskOutputs.Add(outputProperty);
                 }
             }
 
@@ -456,28 +456,21 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ProjectItemElement itemElement in itemGroupElement.Items)
             {
-                List<ProjectItemGroupTaskMetadataInstance> metadata = null;
+                List<ProjectItemGroupTaskMetadataInstance> metadata = itemElement.Metadata.Count > 0 ? new List<ProjectItemGroupTaskMetadataInstance>() : null;
 
                 foreach (ProjectMetadataElement metadataElement in itemElement.Metadata)
                 {
-                    if (metadata == null)
-                    {
-                        metadata = new List<ProjectItemGroupTaskMetadataInstance>();
-                    }
-
-                    ProjectItemGroupTaskMetadataInstance metadatum = new ProjectItemGroupTaskMetadataInstance
+                    metadata.Add(new ProjectItemGroupTaskMetadataInstance
                         (
                         metadataElement.Name,
                         metadataElement.Value,
                         metadataElement.Condition,
                         metadataElement.Location,
                         metadataElement.ConditionLocation
-                        );
-
-                    metadata.Add(metadatum);
+                        ));
                 }
 
-                ProjectItemGroupTaskItemInstance item = new ProjectItemGroupTaskItemInstance
+                items.Add(new ProjectItemGroupTaskItemInstance
                     (
                     itemElement.ItemType,
                     itemElement.Include,
@@ -500,9 +493,7 @@ namespace Microsoft.Build.Evaluation
                     itemElement.KeepDuplicatesLocation,
                     itemElement.ConditionLocation,
                     metadata
-                    );
-
-                items.Add(item);
+                    ));
             }
 
             ProjectItemGroupTaskInstance itemGroup = new ProjectItemGroupTaskInstance(itemGroupElement.Condition, itemGroupElement.Location, itemGroupElement.ConditionLocation, items);
@@ -523,47 +514,24 @@ namespace Microsoft.Build.Evaluation
             {
                 using (evaluationProfiler.TrackElement(targetChildElement))
                 {
-                    ProjectTaskElement task = targetChildElement as ProjectTaskElement;
-
-                    if (task != null)
+                    switch (targetChildElement)
                     {
-                        ProjectTaskInstance taskInstance = ReadTaskElement(task);
-
-                        targetChildren.Add(taskInstance);
-                        continue;
+                        case ProjectTaskElement task:
+                            targetChildren.Add(ReadTaskElement(task));
+                            break;
+                        case ProjectPropertyGroupElement propertyGroup:
+                            targetChildren.Add(ReadPropertyGroupUnderTargetElement(propertyGroup));
+                            break;
+                        case ProjectItemGroupElement itemGroup:
+                            targetChildren.Add(ReadItemGroupUnderTargetElement(itemGroup));
+                            break;
+                        case ProjectOnErrorElement onError:
+                            targetOnErrorChildren.Add(ReadOnErrorElement(onError));
+                            break;
+                        default:
+                            ErrorUtilities.ThrowInternalError("Unexpected child");
+                            break;
                     }
-
-                    ProjectPropertyGroupElement propertyGroup = targetChildElement as ProjectPropertyGroupElement;
-
-                    if (propertyGroup != null)
-                    {
-                        ProjectPropertyGroupTaskInstance propertyGroupInstance = ReadPropertyGroupUnderTargetElement(propertyGroup);
-
-                        targetChildren.Add(propertyGroupInstance);
-                        continue;
-                    }
-
-                    ProjectItemGroupElement itemGroup = targetChildElement as ProjectItemGroupElement;
-
-                    if (itemGroup != null)
-                    {
-                        ProjectItemGroupTaskInstance itemGroupInstance = ReadItemGroupUnderTargetElement(itemGroup);
-
-                        targetChildren.Add(itemGroupInstance);
-                        continue;
-                    }
-
-                    ProjectOnErrorElement onError = targetChildElement as ProjectOnErrorElement;
-
-                    if (onError != null)
-                    {
-                        ProjectOnErrorInstance onErrorInstance = ReadOnErrorElement(onError);
-
-                        targetOnErrorChildren.Add(onErrorInstance);
-                        continue;
-                    }
-
-                    ErrorUtilities.ThrowInternalError("Unexpected child");
                 }
             }
 
@@ -1082,6 +1050,24 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        private void ValidateChangeWaveState()
+        {
+            if (ChangeWaves.ConversionState == ChangeWaveConversionState.NotConvertedYet)
+            {
+                ChangeWaves.ApplyChangeWave();
+            }
+
+            switch (ChangeWaves.ConversionState)
+            {
+                case ChangeWaveConversionState.InvalidFormat:
+                    _evaluationLoggingContext.LogWarning("", new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion);
+                    break;
+                case ChangeWaveConversionState.OutOfRotation:
+                    _evaluationLoggingContext.LogWarning("", new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.DisabledWave, Traits.Instance.MSBuildDisableFeaturesFromVersion);
+                    break;
+            }
+        }
+
         /// <summary>
         /// Set the built-in properties, most of which are read-only
         /// </summary>
@@ -1097,6 +1083,10 @@ namespace Microsoft.Build.Evaluation
             SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32);
             SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion);
             SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild);
+
+            ValidateChangeWaveState();
+
+            SetBuiltInProperty(ReservedPropertyNames.msbuilddisablefeaturesfromversion, ChangeWaves.DisabledWave);
 
             // Fake OS env variables when not on Windows
             if (!NativeMethodsShared.IsWindows)

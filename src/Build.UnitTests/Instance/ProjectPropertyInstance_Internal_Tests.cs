@@ -1,12 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 using System;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
 using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
 using Microsoft.Build.BackEnd;

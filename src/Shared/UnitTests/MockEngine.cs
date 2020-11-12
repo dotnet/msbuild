@@ -12,7 +12,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 
 using Shouldly;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
@@ -51,7 +50,7 @@ namespace Microsoft.Build.UnitTests
 
         internal int Errors { get; set; }
 
-        public bool AllowFailureWithoutError { get; set; } = true;
+        public bool AllowFailureWithoutError { get; set; } = false;
 
         public BuildErrorEventArgs[] ErrorEvents => _errorEvents.ToArray();
 

@@ -938,7 +938,7 @@ namespace Microsoft.Build.BackEnd
                 // that is logged as an error. MSBuild tasks are an exception because
                 // errors are not logged directly from them, but the tasks spawned by them.
                 IBuildEngine be = host.TaskInstance.BuildEngine;
-                if (taskReturned && !taskResult && !taskLoggingContext.HasLoggedErrors && (be is TaskHost th ? th.BuildRequestsSucceeded : false) && (be is IBuildEngine7 be7 ? be7.AllowFailureWithoutError : true))
+                if (taskReturned && !taskResult && !taskLoggingContext.HasLoggedErrors && (be is TaskHost th ? th.BuildRequestsSucceeded : false) && (be is IBuildEngine7 be7 ? !be7.AllowFailureWithoutError : true))
                 {
                     if (_continueOnError == ContinueOnError.WarnAndContinue)
                     {

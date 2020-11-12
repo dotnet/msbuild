@@ -30,8 +30,10 @@ namespace Microsoft.Build.Tasks.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 TransientTestFile standardCache = env.CreateFile(".cache");
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
-                t._cache = new SystemState();
+                ResolveAssemblyReference t = new ResolveAssemblyReference()
+                {
+                    _cache = new SystemState()
+                };
                 t._cache.instanceLocalFileStateCache = new Dictionary<string, SystemState.FileState>() {
                     { Path.Combine(standardCache.Path, "assembly1"), new SystemState.FileState(DateTime.Now) },
                     { Path.Combine(standardCache.Path, "assembly2"), new SystemState.FileState(DateTime.Now) { Assembly = new Shared.AssemblyNameExtension("hi") } } };
@@ -58,17 +60,19 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create()) {
                 TransientTestFile standardCache = env.CreateFile(".cache");
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
-                t._cache = new SystemState();
-                t._cache.instanceLocalFileStateCache = new Dictionary<string, SystemState.FileState>() {
+                ResolveAssemblyReference rarWriterTask = new ResolveAssemblyReference()
+                {
+                    _cache = new SystemState()
+                };
+                rarWriterTask._cache.instanceLocalFileStateCache = new Dictionary<string, SystemState.FileState>() {
                     { Path.Combine(standardCache.Path, "assembly1"), new SystemState.FileState(DateTime.Now) },
                     { Path.Combine(standardCache.Path, "assembly2"), new SystemState.FileState(DateTime.Now) { Assembly = new Shared.AssemblyNameExtension("hi") } } };
-                t.StateFile = standardCache.Path;
-                t._cache.IsDirty = true;
-                t.WriteStateFile(calculateMvid);
+                rarWriterTask.StateFile = standardCache.Path;
+                rarWriterTask._cache.IsDirty = true;
+                rarWriterTask.WriteStateFile(calculateMvid);
 
                 string dllName = Path.Combine(Path.GetDirectoryName(standardCache.Path), "randomFolder", "dll.dll");
-                t._cache.instanceLocalFileStateCache.Add(dllName,
+                rarWriterTask._cache.instanceLocalFileStateCache.Add(dllName,
                     new SystemState.FileState(DateTime.Now) {
                         Assembly = new Shared.AssemblyNameExtension("notDll.dll", false),
                         RuntimeVersion = "v4.0.30319",
@@ -76,32 +80,39 @@ namespace Microsoft.Build.Tasks.UnitTests
                         scatterFiles = new string[] { "first", "second" } });
                 t._cache.instanceLocalFileStateCache[dllName].Assembly.Version = new Version("16.3");
                 string precomputedCachePath = standardCache.Path + ".cache";
-                t.AssemblyInformationCacheOutputPath = precomputedCachePath;
-                t._cache.IsDirty = true;
-                t.WriteStateFile(calculateMvid);
+                rarWriterTask.AssemblyInformationCacheOutputPath = precomputedCachePath;
+                rarWriterTask._cache.IsDirty = true;
+                rarWriterTask.WriteStateFile(calculateMvid);
                 // The cache is already written; this change should do nothing.
-                t._cache.instanceLocalFileStateCache[dllName].Assembly = null;
+                rarWriterTask._cache.instanceLocalFileStateCache[dllName].Assembly = null;
 
-                ResolveAssemblyReference u = new ResolveAssemblyReference();
-                u.StateFile = standardCache.Path;
-                u.AssemblyInformationCachePaths = new ITaskItem[]
+                ResolveAssemblyReference rarReaderTask = new ResolveAssemblyReference();
+                rarReaderTask.StateFile = standardCache.Path;
+                rarReaderTask.AssemblyInformationCachePaths = new ITaskItem[]
                 {
                     new TaskItem(precomputedCachePath)
                 };
 
-                u.ReadStateFile(File.GetLastWriteTime, Array.Empty<AssemblyTableInfo>(), calculateMvid, p => true);
-                u._cache.instanceLocalFileStateCache.ShouldNotContainKey(dllName);
+                // At this point, we should have created two cache files: one "normal" one and one "precomputed" one.
+                // When we read the state file the first time, it should read from the caches produced in a normal
+                // build, partially because we can read it faster. If that cache does not exist, as with the second
+                // time we try to read the state file, it defaults to reading the "precomputed" cache. In this case,
+                // the normal cache does not have dll.dll, whereas the precomputed cache does, so it should not be
+                // present when we read the first time but should be present the second time. Then we verify that the
+                // information contained in that cache matches what we'd expect.
+                rarReaderTask.ReadStateFile(File.GetLastWriteTime, Array.Empty<AssemblyTableInfo>(), calculateMvid, p => true);
+                rarReaderTask._cache.instanceLocalFileStateCache.ShouldNotContainKey(dllName);
                 File.Delete(standardCache.Path);
-                u._cache = null;
-                u.ReadStateFile(File.GetLastWriteTime, Array.Empty<AssemblyTableInfo>(), calculateMvid, p => true);
-                u._cache.instanceLocalFileStateCache.ShouldContainKey(dllName);
-                SystemState.FileState a3 = u._cache.instanceLocalFileStateCache[dllName];
-                a3.Assembly.FullName.ShouldBe("notDll.dll");
-                a3.Assembly.Version.Major.ShouldBe(16);
-                a3.RuntimeVersion.ShouldBe("v4.0.30319");
-                a3.FrameworkNameAttribute.Version.ShouldBe(Version.Parse("4.7.2"));
-                a3.scatterFiles.Length.ShouldBe(2);
-                a3.scatterFiles[1].ShouldBe("second");
+                rarReaderTask._cache = null;
+                rarReaderTask.ReadStateFile(File.GetLastWriteTime, Array.Empty<AssemblyTableInfo>(), calculateMvid, p => true);
+                rarReaderTask._cache.instanceLocalFileStateCache.ShouldContainKey(dllName);
+                SystemState.FileState assembly3 = rarReaderTask._cache.instanceLocalFileStateCache[dllName];
+                assembly3.Assembly.FullName.ShouldBe("notDll.dll");
+                assembly3.Assembly.Version.Major.ShouldBe(16);
+                assembly3.RuntimeVersion.ShouldBe("v4.0.30319");
+                assembly3.FrameworkNameAttribute.Version.ShouldBe(Version.Parse("4.7.2"));
+                assembly3.scatterFiles.Length.ShouldBe(2);
+                assembly3.scatterFiles[1].ShouldBe("second");
             }
         }
     }

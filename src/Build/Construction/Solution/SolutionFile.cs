@@ -830,6 +830,19 @@ namespace Microsoft.Build.Construction
                         line = ReadLine();
                     }
                 }
+                else if (line.StartsWith("Project(", StringComparison.Ordinal))
+                {
+                    // Another Project spotted instead of EndProject for the current one - solution file is malformed
+                    string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out _, out _, "Shared.InvalidProjectFile",
+                        _solutionFile, proj.ProjectName);
+                    SolutionParserWarnings.Add(warning);
+
+                    // The line with new project is already read and we can't go one line back - we have no choice but to recursively parse spotted project
+                    ParseProject(line);
+
+                    // We're not waiting for the EndProject for malformed project, so we carry on
+                    break;
+                }
             }
 
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(line != null, "SubCategoryForSolutionParsingErrors",

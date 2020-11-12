@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -115,8 +114,8 @@ namespace Microsoft.Build.Engine.UnitTests.TestData
             var stringCounter = CounterToString(counter);
 
             var readonlyParameters = parameters != null
-                ? new CopyOnWriteDictionary<string, (string, ElementLocation)>(parameters)
-                : new CopyOnWriteDictionary<string, (string, ElementLocation)>();
+                ? new CopyOnWriteDictionary<(string, ElementLocation)>(parameters)
+                : new CopyOnWriteDictionary<(string, ElementLocation)>();
 
             outputs ??= new List<ProjectTaskInstanceChild>();
 

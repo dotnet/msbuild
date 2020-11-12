@@ -555,8 +555,8 @@
         <note />
       </trans-unit>
       <trans-unit id="General.StateFileAlreadyPresent">
-        <source>MSB3667: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running RAR normally, do not set the "CacheOutputPath" parameter of the ResolveAssemblyReference task.</source>
-        <target state="new">MSB3667: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running RAR normally, do not set the "CacheOutputPath" parameter of the ResolveAssemblyReference task.</target>
+        <source>MSB3667: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running the ResolveAssemblyReference task normally, do not set the "AssemblyInformationCacheOutputPath" parameter of the ResolveAssemblyReference task.</source>
+        <target state="new">MSB3667: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running the ResolveAssemblyReference task normally, do not set the "AssemblyInformationCacheOutputPath" parameter of the ResolveAssemblyReference task.</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
       <trans-unit id="General.UndefineProperties">
@@ -1486,11 +1486,6 @@
         <source>StopOnFirstFailure will have no effect when the following conditions are all present: 1) The system is running in multiple process mode 2) The BuildInParallel property is true. 3) The RunEachTargetSeparately property is false.</source>
         <target state="new">StopOnFirstFailure will have no effect when the following conditions are all present: 1) The system is running in multiple process mode 2) The BuildInParallel property is true. 3) The RunEachTargetSeparately property is false.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
-      </trans-unit>
-      <trans-unit id="RarCouldntConnect">
-        <source>Couldn't connect to the RAR node, starting a new one.</source>
-        <target state="new">Couldn't connect to the RAR node, starting a new one.</target>
-        <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>

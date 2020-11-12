@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
@@ -50,6 +51,7 @@ namespace Microsoft.Build.Tasks
         private string _targetFrameworkVersion;
         // if signing manifests is on and not all app files are included, then the project can't be published.
         private bool _canPublish;
+        private Dictionary<string, ITaskItem> _runtimePackAssets;
         #endregion
 
         #region Properties
@@ -81,6 +83,15 @@ namespace Microsoft.Build.Tasks
             get => _nativeAssemblies;
             set => _nativeAssemblies = Util.SortItems(value);
         }
+
+        // Runtime assets for self-contained deployment from .NETCore runtime pack
+        public ITaskItem[] RuntimePackAssets { get; set; }
+
+        // True if deployment mode during publish is set to self-contained mode
+        public bool IsSelfContainedPublish { get; set; } = false;
+
+        // True if single file publish is on
+        public bool IsSingleFilePublish { get; set; } = false;
 
         [Output]
         public ITaskItem[] OutputAssemblies { get; set; }
@@ -154,6 +165,12 @@ namespace Microsoft.Build.Tasks
             bool is35Project = (CompareFrameworkVersions(TargetFrameworkVersion, Constants.TargetFrameworkVersion35) >= 0);
 
             GetPublishInfo(out List<PublishInfo> assemblyPublishInfoList, out List<PublishInfo> filePublishInfoList, out List<PublishInfo> satellitePublishInfoList, out List<PublishInfo> manifestEntryPointList);
+
+            // Create dictionary for runtimepack assets
+            if (RuntimePackAssets != null && RuntimePackAssets.Length > 0)
+            {
+                _runtimePackAssets = RuntimePackAssets.ToDictionary(p => p.ItemSpec, StringComparer.OrdinalIgnoreCase);
+            }
 
             OutputAssemblies = GetOutputAssembliesAndSatellites(assemblyPublishInfoList, satellitePublishInfoList);
 
@@ -648,6 +665,15 @@ namespace Microsoft.Build.Tasks
 
         private bool IsFiltered(ITaskItem item)
         {
+            // In the case of .NET Core apps published as self-contained with loose files (i.e. PublishSingleFile != true),
+            // .NETCore binaries that come from the .NETCore Runtime pack should not be filtered out.
+            if (IsSelfContainedPublish && !IsSingleFilePublish &&
+                _runtimePackAssets != null &&
+                _runtimePackAssets.TryGetValue(item.ItemSpec, out _))
+            {
+                return false;
+            }
+
             // If assembly is part of the FX then it should be filtered out...
             // System.Reflection.AssemblyName.GetAssemblyName throws if file is not an assembly.
             // We're using AssemblyIdentity.FromManagedAssembly here because it just does an

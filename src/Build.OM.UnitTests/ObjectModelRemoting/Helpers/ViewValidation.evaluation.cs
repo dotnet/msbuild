@@ -2,16 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Microsoft.Build.Construction;
-    using Microsoft.Build.ObjectModelRemoting;
     using Microsoft.Build.Evaluation;
     using Xunit;
-    using System.Runtime.ExceptionServices;
-    using System.Xml.Schema;
-    using System.Collections;
     using Microsoft.Build.Framework;
 
     internal class ProjectPair : LinkPair<Project>

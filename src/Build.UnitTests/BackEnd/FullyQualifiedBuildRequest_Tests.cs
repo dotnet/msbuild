@@ -3,12 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd

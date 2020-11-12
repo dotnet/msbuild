@@ -6,8 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security;
-
-using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Reflection;

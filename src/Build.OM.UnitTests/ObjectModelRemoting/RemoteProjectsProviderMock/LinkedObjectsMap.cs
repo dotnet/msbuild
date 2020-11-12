@@ -4,9 +4,8 @@
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
-    
+
     internal class LinkedObjectsMap<KeyType> : IDisposable
     {
         private static object Lock { get; } = new object();

@@ -4,7 +4,6 @@
 #if FEATURE_APPDOMAIN
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 // TYPELIBATTR clashes with the one in InteropServices.
