@@ -201,16 +201,17 @@ namespace Microsoft.NET.Build.Tests
             getValuesCommand.DependsOnTargets = "Build";
             getValuesCommand.Execute().Should().Pass();
 
-            var valuesResult = getValuesCommand.GetValuesWithMetadata().Select(pair => pair.value);
+            var valuesResult = getValuesCommand.GetValuesWithMetadata().Select(pair => Path.GetFullPath(pair.value));
             if (copyConflictingTransitiveContent)
             {
                 valuesResult.Count().Should().Be(2);
-                valuesResult.Should().BeEquivalentTo(Path.Combine(parentAsset.Path, parentProject.Name, contentName), Path.Combine(childAsset.Path, childProject.Name, contentName));
+                valuesResult.Should().BeEquivalentTo(Path.GetFullPath(Path.Combine(parentAsset.Path, parentProject.Name, contentName)),
+                                                     Path.GetFullPath(Path.Combine(childAsset.Path, childProject.Name, contentName)));
             }
             else
             {
                 valuesResult.Count().Should().Be(1);
-                valuesResult.First().Should().Contain(Path.Combine(parentAsset.Path, parentProject.Name, contentName));
+                valuesResult.First().Should().Contain(Path.GetFullPath(Path.Combine(parentAsset.Path, parentProject.Name, contentName)));
             }
         }
 
@@ -249,27 +250,27 @@ namespace Microsoft.NET.Build.Tests
             var targetFramework = "net5.0";
             var testProjectA = new TestProject()
             {
-                Name = "A",
+                Name = "ProjectA",
                 TargetFrameworks = targetFramework,
             };
 
             var testProjectB = new TestProject()
             {
-                Name = "B",
+                Name = "ProjectB",
                 TargetFrameworks = targetFramework,
             };
             testProjectB.ReferencedProjects.Add(testProjectA);
 
             var testProjectC = new TestProject()
             {
-                Name = "C",
+                Name = "ProjectC",
                 TargetFrameworks = targetFramework,
             };
             testProjectC.AdditionalProperties.Add("DisableTransitiveProjectReferences", "true");
             testProjectC.ReferencedProjects.Add(testProjectB);
             var testAsset = _testAssetsManager.CreateTestProject(testProjectC).WithProjectChanges((path, p) =>
             { 
-                if (path.Contains(testProjectA.Name))
+                if (Path.GetFileNameWithoutExtension(path) == testProjectA.Name)
                 {
                     var ns = p.Root.Name.Namespace;
                     p.Root.Add(new XElement(ns + "ItemGroup",
