@@ -1,21 +1,15 @@
-<Project>
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <EnableDefaultItems>false</EnableDefaultItems>
-    <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
-  </PropertyGroup>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <TargetFrameworks>net472;$(ToolsetTargetFramework)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">$(ToolsetTargetFramework)</TargetFrameworks>
+    <OutputType Condition="'$(TargetFramework)' == '$(ToolsetTargetFramework)'">Exe</OutputType>
 
-  <PropertyGroup>
     <AssemblyName>Microsoft.NET.Sdk.Publish.Tasks.Tests</AssemblyName>
     <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
     <EndToEndTestsDisabled>true</EndToEndTestsDisabled>
-  </PropertyGroup>
-  
-  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
-
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>$(SdkTargetFramework)</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   
   <ItemGroup>
@@ -29,36 +23,19 @@
     <Compile Remove="EndToEnd\*.cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Resources\TestPublishContents.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
-    <Reference Include="System" />
-    <Reference Include="System.IO.Compression.FileSystem" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">
     <Reference Include="System.Management" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\WebSdk\Publish\Tasks\Microsoft.NET.Sdk.Publish.Tasks.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
+    <None Include="Resources\TestPublishContents.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
-  </ItemGroup>
-  
-  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>
