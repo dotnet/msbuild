@@ -72,7 +72,7 @@
       <HelixPreCommands Condition="$(IsPosixShell)">. $HELIX_CORRELATION_PAYLOAD/t/RunTestsOnHelix.sh;$(HelixPreCommands)</HelixPreCommands>
       <TestDotnetRoot>$(RepoRoot)\artifacts\bin\redist\$(Configuration)\dotnet</TestDotnetRoot>
       <TestDotnetVersion>$(Version)</TestDotnetVersion>
-      <SdkResolverDir>$(TestDotnetRoot)\sdk\$(TestDotnetVersion)\Sdks</SdkResolverDir>
+      <MSBuildSdkResolverDir>$(RepoRoot)\artifacts\bin\Microsoft.DotNet.MSBuildSdkResolver</MSBuildSdkResolverDir>
       <HelixStage0Targz>$(RepoRoot)\artifacts\tmp\HelixStage0.tar.gz</HelixStage0Targz>
       <MicrosoftNETBuildExtensions>$(RepoRoot)\artifacts\bin\$(Configuration)\Sdks\Microsoft.NET.Build.Extensions</MicrosoftNETBuildExtensions>
     </PropertyGroup>
@@ -98,16 +98,22 @@
         <Destination>d</Destination>
       </HelixCorrelationPayload>
 
-      <HelixCorrelationPayload Include="$(SdkResolverDir)">
-        <PayloadDirectory>$(SdkResolverDir)</PayloadDirectory>
-        <Destination>s</Destination>
-      </HelixCorrelationPayload>
-
       <HelixCorrelationPayload Include="$(MicrosoftNETBuildExtensions)">
         <PayloadDirectory>$(MicrosoftNETBuildExtensions)</PayloadDirectory>
         <Destination>ex</Destination>
       </HelixCorrelationPayload>
 
+      <HelixCorrelationPayload Include="$(MSBuildSdkResolverDir)">
+        <PayloadDirectory>$(MSBuildSdkResolverDir)</PayloadDirectory>
+        <Destination>r</Destination>
+      </HelixCorrelationPayload>
+
     </ItemGroup>
+  </Target>
+
+  <Target Name="CreateLocalHelixTestLayout" DependsOnTargets="AppendHelixPreCommand">
+    <CreateLocalHelixTestLayout
+        HelixCorrelationPayload="@(HelixCorrelationPayload)"
+        TestOutputDirectory="$(RepoRoot)\artifacts\bin\localHelixTestLayout" />
   </Target>
 </Project>

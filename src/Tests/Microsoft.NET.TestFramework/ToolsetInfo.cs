@@ -266,8 +266,13 @@ namespace Microsoft.NET.TestFramework
             {
                 ret.FullFrameworkMSBuildPath = ResolveCommand("MSBuild");
             }
-       
-            if (repoRoot != null && ret.ShouldUseFullFrameworkMSBuild)
+
+            var microsoftNETBuildExtensionsTargetsFromEnvironment = Environment.GetEnvironmentVariable("MicrosoftNETBuildExtensionsTargets");
+            if (!string.IsNullOrWhiteSpace(microsoftNETBuildExtensionsTargetsFromEnvironment))
+            {
+                ret.MicrosoftNETBuildExtensionsPathOverride = Path.GetDirectoryName(microsoftNETBuildExtensionsTargetsFromEnvironment);
+            }
+            else if (repoRoot != null && ret.ShouldUseFullFrameworkMSBuild)
             {
                 //  Find path to Microsoft.NET.Build.Extensions for full framework
                 string sdksPath = Path.Combine(repoArtifactsDir, "bin", configuration, "Sdks");
@@ -277,8 +282,19 @@ namespace Microsoft.NET.TestFramework
 
             if (ret.ShouldUseFullFrameworkMSBuild)
             {
-                // Find path to MSBuildSdkResolver for full framework
-                ret.SdkResolverPath = Path.Combine(repoArtifactsDir, "bin", "Microsoft.DotNet.MSBuildSdkResolver", configuration, "net472", "SdkResolvers");
+                if (repoRoot != null)
+                {
+                    // Find path to MSBuildSdkResolver for full framework
+                    ret.SdkResolverPath = Path.Combine(repoArtifactsDir, "bin", "Microsoft.DotNet.MSBuildSdkResolver", configuration, "net472", "SdkResolvers");
+                }
+                else if (!string.IsNullOrWhiteSpace(commandLine.MsbuildAdditionalSdkRsolverFolder))
+                {
+                    ret.SdkResolverPath = Path.Combine(commandLine.MsbuildAdditionalSdkRsolverFolder, configuration, "net472", "SdkResolvers");
+                }
+                else
+                {
+                    throw new ApplicationException("Microsoft.DotNet.MSBuildSdkResolver path is not provided, set msbuildAdditionalSdkRsolverFolder on test commandline or set repoRoot");
+                }
             }
 
             if (repoRoot != null)
