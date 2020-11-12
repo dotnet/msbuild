@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 TransientTestFile standardCache = env.CreateFile(".cache");
-                ResolveAssemblyReference t = new()
+                ResolveAssemblyReference t = new ResolveAssemblyReference()
                 {
                     _cache = new SystemState()
                 };
@@ -60,7 +60,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create()) {
                 TransientTestFile standardCache = env.CreateFile(".cache");
-                ResolveAssemblyReference rarWriterTask = new()
+                ResolveAssemblyReference rarWriterTask = new ResolveAssemblyReference()
                 {
                     _cache = new SystemState()
                 };
@@ -83,7 +83,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 rarWriterTask._cache.IsDirty = true;
                 rarWriterTask.WriteStateFile(calculateMvid);
 
-                ResolveAssemblyReference rarReaderTask = new();
+                ResolveAssemblyReference rarReaderTask = new ResolveAssemblyReference();
                 rarReaderTask.StateFile = standardCache.Path;
                 rarReaderTask.AssemblyInformationCachePaths = new ITaskItem[]
                 {
