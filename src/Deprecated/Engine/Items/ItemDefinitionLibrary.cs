@@ -3,12 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml;
 using Microsoft.Build.BuildEngine.Shared;
 using MetadataDictionary = System.Collections.Generic.Dictionary<string, string>;
 using ItemDefinitionsDictionary = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, string>>;
-using System.Collections;
 
 namespace Microsoft.Build.BuildEngine
 {

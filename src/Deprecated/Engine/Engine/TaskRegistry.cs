@@ -4,11 +4,8 @@
 using System;
 using System.IO;
 using System.Xml;
-using System.Security;
 using System.Reflection;
 using System.Collections;
-using System.Diagnostics;
-using System.Globalization;
 
 using Microsoft.Build.BuildEngine.Shared;
 using Microsoft.Build.Framework;

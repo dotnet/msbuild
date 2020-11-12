@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.CommandLine

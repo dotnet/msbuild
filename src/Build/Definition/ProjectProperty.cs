@@ -5,8 +5,6 @@ using System;
 using System.Diagnostics;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
-using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;

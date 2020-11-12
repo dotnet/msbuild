@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 

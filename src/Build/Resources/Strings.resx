@@ -313,6 +313,18 @@
        t2.targets and t2.targets tries to import t1.targets, then it results in a circular dependency.
     </comment>
   </data>
+  <data name="ChangeWave_InvalidFormat" xml:space="preserve">
+    <value>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</value>
+    <comment>
+       Value should be of the format: xx.yy
+    </comment>
+  </data>
+  <data name="ChangeWave_OutOfRotation" xml:space="preserve">
+    <value>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}.</value>
+    <comment>
+       Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current Change Waves are.
+    </comment>
+  </data>
   <data name="SearchPathsForMSBuildExtensionsPath" xml:space="preserve">
     <value>Search paths being used for {0} are {1}</value>
   </data>
@@ -477,6 +489,10 @@
   <data name="IllFormedPropertyOpenParenthesisInCondition" xml:space="preserve">
     <value>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</value>
     <comment>{StrBegin="MSB4110: "}</comment>
+  </data>
+  <data name="IllFormedPropertySpaceInCondition" xml:space="preserve">
+    <value>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</value>
+    <comment>{StrBegin="MSB4259: "}</comment>
   </data>
   <data name="IllFormedQuotedStringInCondition" xml:space="preserve">
     <value>MSB4101: Expected a closing quote after position {1} in condition "{0}".</value>
@@ -1833,8 +1849,5 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="IsolatedContextDoesNotSupportFileSystem" xml:space="preserve">
     <value>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</value>
-  </data>
-  <data name="RarControllerReflectionError" xml:space="preserve">
-    <value>Couldn't create an instance of IRarController for '{0}' type</value>
   </data>
 </root>

@@ -55,6 +55,7 @@ namespace Microsoft.Build.Internal
         internal const string osName = "OS";
         internal const string frameworkToolsRoot = "MSBuildFrameworkToolsRoot";
         internal const string interactive = "MSBuildInteractive";
+        internal const string msbuilddisablefeaturesfromversion = "MSBuildDisableFeaturesFromVersion";
 
         /// <summary>
         /// Lookup for reserved property names. Intentionally do not include MSBuildExtensionsPath* or MSBuildUserExtensionsPath in this list.  We need tasks to be able to override those.
@@ -86,7 +87,8 @@ namespace Microsoft.Build.Internal
             programFiles32,
             assemblyVersion,
             version,
-            interactive
+            interactive,
+            msbuilddisablefeaturesfromversion,
         };
 
         /// <summary>
