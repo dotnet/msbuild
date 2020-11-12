@@ -78,7 +78,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                         RuntimeVersion = "v4.0.30319",
                         FrameworkNameAttribute = new System.Runtime.Versioning.FrameworkName(".NETFramework", Version.Parse("4.7.2"), "Profile"),
                         scatterFiles = new string[] { "first", "second" } });
-                t._cache.instanceLocalFileStateCache[dllName].Assembly.Version = new Version("16.3");
+                rarWriterTask._cache.instanceLocalFileStateCache[dllName].Assembly.Version = new Version("16.3");
                 string precomputedCachePath = standardCache.Path + ".cache";
                 rarWriterTask.AssemblyInformationCacheOutputPath = precomputedCachePath;
                 rarWriterTask._cache.IsDirty = true;

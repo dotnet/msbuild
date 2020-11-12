@@ -732,6 +732,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log, Func<string, Guid> calculateMvid)
         {
+            Dictionary<string, FileState> oldInstanceLocalFileStateCache = instanceLocalFileStateCache;
             Dictionary<string, FileState> newInstanceLocalFileStateCache = new Dictionary<string, FileState>(instanceLocalFileStateCache.Count);
             calculateMvid ??= CalculateMvid;
             foreach (KeyValuePair<string, FileState> kvp in instanceLocalFileStateCache)
@@ -753,6 +754,7 @@ namespace Microsoft.Build.Tasks
             JsonSerializerOptions options = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
             options.Converters.Add(new SystemState.Converter());
             File.WriteAllText(stateFile, JsonSerializer.Serialize(this, options));
+            instanceLocalFileStateCache = oldInstanceLocalFileStateCache;
         }
 
         private static Guid CalculateMvid(string path)
