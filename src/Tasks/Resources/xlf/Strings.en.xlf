@@ -1872,8 +1872,10 @@
         <note>{StrBegin="MSB3276: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
-        <target state="new">MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</target>
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="new">MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</target>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">

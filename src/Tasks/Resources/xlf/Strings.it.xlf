@@ -1827,8 +1827,10 @@
         <note>{StrBegin="MSB3276: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
-        <target state="translated">MSB3277: sono stati rilevati conflitti irrisolvibili tra versioni diverse di "{0}". Questi conflitti dei riferimenti sono elencati nel log di compilazione quando il livello di dettaglio del log è impostato su dettagliato.</target>
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="new">MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</target>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">

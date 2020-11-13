@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
+using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -196,7 +199,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool result = Execute(t);
 
             Assert.Equal(1, e.Warnings); // @"Expected one warning."
-            e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
+
+            // Check that we have a message identifying conflicts with "D"
+            string warningMessage = e.WarningEvents[0].Message;
+            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.FoundConflicts", "D", string.Empty));
+            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
+            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
 
             Assert.Empty(t.SuggestedRedirects);
             Assert.Equal(3, t.ResolvedFiles.Length);
@@ -236,7 +244,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool result = Execute(t);
 
             Assert.Equal(1, e.Warnings); // @"Expected one warning."
-            e.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "ResolveAssemblyReference.FoundConflicts", "D");
+
+            // Check that we have a message identifying conflicts with "D"
+            string warningMessage = e.WarningEvents[0].Message;
+            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.FoundConflicts", "D", string.Empty));
+            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
+            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
 
             Assert.Empty(t.SuggestedRedirects);
             Assert.Equal(3, t.ResolvedFiles.Length);
