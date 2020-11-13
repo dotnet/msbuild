@@ -22,6 +22,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_LinkSemaphore>$(IntermediateOutputPath)Link.semaphore</_LinkSemaphore>
   </PropertyGroup>
 
+  <!-- We disable startup hooks for trimmed apps here so that the feature
+       switch can flow to the runtimeconfig.json. Startup hooks are disabled
+       by default since they may require assemblies, types or members that
+       could be removed by the linker, causing a trimmed app to crash. -->
+  <PropertyGroup Condition="'$(StartupHookSupport)' == '' And
+                            '$(PublishTrimmed)' == 'true' And
+                            '$(_TargetFrameworkVersionWithoutV)' >= '6.0'">
+    <StartupHookSupport>false</StartupHookSupport>
+  </PropertyGroup>
+
   <!--
     ============================================================
                      ILLink

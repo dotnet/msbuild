@@ -18,6 +18,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -377,6 +378,40 @@ namespace Microsoft.NET.Publish.Tests
                     errorMessage += "+  " + extraWarning + Environment.NewLine;
             }
             Assert.True(!missingWarnings.Any() && !extraWarnings.Any(), errorMessage);
+        }
+
+        [Theory]
+        [InlineData("net5.0")]
+        [InlineData("net6.0")]
+        public void StartupHookSupport_is_false_by_default_on_trimmed_apps(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: projectName);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true")
+                .Should().Pass();
+
+            string outputDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            string runtimeConfigFile = Path.Combine(outputDirectory, $"{projectName}.runtimeconfig.json");
+            string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
+
+
+            if (Version.TryParse(targetFramework.TrimStart("net".ToCharArray()), out Version parsedVersion) &&
+                parsedVersion.Major >= 6)
+            {
+                JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+                runtimeConfig["runtimeOptions"]["configProperties"]
+                    ["System.StartupHookProvider.IsSupported"].Value<bool>()
+                    .Should().Be(false);
+            }
+            else
+            {
+                runtimeConfigContents.Should().NotContain("System.StartupHookProvider.IsSupported");
+            }
         }
 
         [Theory]
