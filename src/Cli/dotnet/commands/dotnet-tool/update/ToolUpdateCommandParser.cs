@@ -11,11 +11,11 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly Argument PackageIdArgument = ToolInstallCommandParser.PackageIdArgument;
 
-        public static readonly Option GlobalOption = ToolAppliedOption.GlobalOption;
+        public static readonly Option GlobalOption = ToolAppliedOption.GlobalOption(LocalizableStrings.GlobalOptionDescription);
 
-        public static readonly Option ToolPathOption = ToolAppliedOption.ToolPathOption;
+        public static readonly Option ToolPathOption = ToolAppliedOption.ToolPathOption(LocalizableStrings.ToolPathOptionDescription, LocalizableStrings.ToolPathOptionName);
 
-        public static readonly Option LocalOption = ToolAppliedOption.LocalOption;
+        public static readonly Option LocalOption = ToolAppliedOption.LocalOption(LocalizableStrings.LocalOptionDescription);
 
         public static readonly Option ConfigOption = ToolInstallCommandParser.ConfigOption;
 
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option VersionOption = ToolInstallCommandParser.VersionOption;
 
-        public static readonly Option ToolManifestOption = ToolAppliedOption.ToolManifestOption;
+        public static readonly Option ToolManifestOption = ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName);
 
         public static readonly Option VerbosityOption = ToolInstallCommandParser.VerbosityOption;
 
@@ -47,7 +47,6 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ToolCommandRestorePassThroughOptions.NoCacheOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.InteractiveRestoreOption);
             command.AddOption(VerbosityOption);
-            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

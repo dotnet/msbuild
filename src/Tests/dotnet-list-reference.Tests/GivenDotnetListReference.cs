@@ -18,26 +18,14 @@ namespace Microsoft.DotNet.Cli.List.Reference.Tests
 {
     public class GivenDotnetListReference : SdkTest
     {
-        private Func<string, string> ListReferenceCommandHelpText = (defaultVal) => $@"reference:
-  List all project-to-project references of the project.
-
-Usage:
-  dotnet list [<PROJECT | SOLUTION>] reference [options]
-
-Arguments:
-  <PROJECT | SOLUTION>    The project or solution file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
-
-Options:
-  -?, -h, --help    Show help and usage information.";
-
         private Func<string, string> ListProjectReferenceCommandHelpText = (defaultVal) => $@"reference:
   List all project-to-project references of the project.
 
 Usage:
-  dotnet list [<PROJECT | SOLUTION>] reference [options]
+  dotnet list [<PROJECT>] reference [options]
 
 Arguments:
-  <PROJECT | SOLUTION>    The project or solution file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
+  <PROJECT>    The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
   -?, -h, --help    Show help and usage information";
@@ -111,7 +99,7 @@ Commands:
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, projName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText(setup.TestRoot));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListProjectReferenceCommandHelpText(setup.TestRoot));
         }
 
         [Fact]
@@ -126,7 +114,7 @@ Commands:
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, "Broken/Broken.csproj"));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText(setup.TestRoot));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListProjectReferenceCommandHelpText(setup.TestRoot));
         }
 
         [Fact]
@@ -140,7 +128,7 @@ Commands:
                     .Execute(setup.ValidRefCsprojRelToOtherProjPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, workingDir + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText(workingDir));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListProjectReferenceCommandHelpText(workingDir));
         }
 
         [Fact]
@@ -153,7 +141,7 @@ Commands:
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, setup.TestRoot + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListReferenceCommandHelpText(setup.TestRoot));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(ListProjectReferenceCommandHelpText(setup.TestRoot));
         }
 
         [Fact]

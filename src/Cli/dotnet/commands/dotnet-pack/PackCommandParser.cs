@@ -54,7 +54,6 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(CommonOptions.VerbosityOption());
             command.AddOption(CommonOptions.VersionSuffixOption());
             command.AddOption(CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription));
-            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

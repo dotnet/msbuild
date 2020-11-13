@@ -208,8 +208,7 @@ namespace Microsoft.DotNet.Cli
             {
                 exitCode = 0;
             }
-            else if (BuiltInCommandsCatalog.Commands.TryGetValue(parseResult.RootCommandResult.Children?
-                .FirstOrDefault(c => c.Token() != null && c.Token().Type.Equals(TokenType.Command))?.Symbol.Name ?? string.Empty, out var builtIn))
+            else if (BuiltInCommandsCatalog.Commands.TryGetValue(parseResult.RootSubCommandResult(), out var builtIn))
             {
 			    PerformanceLogEventSource.Log.BuiltInCommandParserStart();
                 if (parseResult.Errors.Count <= 0)
@@ -220,8 +219,7 @@ namespace Microsoft.DotNet.Cli
                 }
 
                 PerformanceLogEventSource.Log.BuiltInCommandStart();
-                var topLevelCommandParser = parseResult.RootCommandResult.Children.FirstOrDefault(c => c.Token() != null && c.Token().Type.Equals(TokenType.Command));
-                var topLevelCommands = new string[] { "dotnet", topLevelCommandParser.Symbol.Name };
+                var topLevelCommands = new string[] { "dotnet", parseResult.RootSubCommandResult() }.Concat(Parser.DiagOption.Aliases);
 
                 exitCode = builtIn.Command(parseResult.Tokens.Select(t => t.Value).Except(topLevelCommands).ToArray());
 				PerformanceLogEventSource.Log.BuiltInCommandStop();

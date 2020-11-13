@@ -20,7 +20,6 @@ namespace Microsoft.DotNet.Cli
             var command = new Command("remove", LocalizableStrings.RemoveAppFullName);
 
             command.AddArgument(ProjectPathArgument);
-            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

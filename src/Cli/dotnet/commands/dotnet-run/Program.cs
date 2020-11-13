@@ -29,13 +29,8 @@ namespace Microsoft.DotNet.Tools.Run
                 noRestore: parseResult.HasOption(RunCommandParser.NoRestoreOption) || parseResult.HasOption(RunCommandParser.NoBuildOption),
                 interactive: parseResult.HasOption(RunCommandParser.InteractiveOption),
                 restoreArgs: parseResult.OptionValuesToBeForwarded(RunCommandParser.GetCommand()),
-                args: parseResult.ValueForArgument<string[]>(RunCommandParser.Argument) ?? Array.Empty<string>()
+                args: parseResult.UnparsedTokens ?? Array.Empty<string>()
             );
-
-            if (parseResult.UnparsedTokens != null)
-            {
-                command.Args = command.Args.Concat(parseResult.UnparsedTokens);
-            }
 
             return command;
         }

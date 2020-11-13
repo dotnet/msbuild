@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option AddSourceOption = ToolInstallCommandParser.AddSourceOption;
 
-        public static readonly Option ToolManifestOption = ToolAppliedOption.ToolManifestOption;
+        public static readonly Option ToolManifestOption = ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName);
 
         public static readonly Option VerbosityOption = ToolInstallCommandParser.VerbosityOption;
 
@@ -29,7 +29,6 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ToolCommandRestorePassThroughOptions.NoCacheOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.InteractiveRestoreOption);
             command.AddOption(VerbosityOption);
-            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

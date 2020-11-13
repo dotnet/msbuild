@@ -5,24 +5,29 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Tool.Common
 {
     internal class ToolAppliedOption
     {
-        public static readonly Option GlobalOption = new Option<bool>(new string[] { "-g", "--global" }, Install.LocalizableStrings.GlobalOptionDescription);
+        public static string[] GlobalOptionAliases = new string[] { "--global", "-g" };
+        public static Option GlobalOption(string description) => new Option<bool>(GlobalOptionAliases, description);
 
-        public static readonly Option LocalOption = new Option<bool>($"--local", Install.LocalizableStrings.LocalOptionDescription);
+        public static string LocalOptionAlias = "--local";
+        public static Option LocalOption(string description) => new Option<bool>(LocalOptionAlias, description);
 
-        public static readonly Option ToolPathOption = new Option<string>($"--tool-path", Install.LocalizableStrings.ToolPathOptionDescription)
+        public static string ToolPathOptionAlias = "--tool-path";
+        public static Option ToolPathOption(string description, string argumentName) => new Option<string>(ToolPathOptionAlias, description)
         {
-            Argument = new Argument<string>(Install.LocalizableStrings.ToolPathOptionName)
+            Argument = new Argument<string>(argumentName)
         };
 
-        public static readonly Option ToolManifestOption = new Option<string>($"--tool-manifest", Install.LocalizableStrings.ManifestPathOptionDescription)
+        public static string ToolManifestOptionAlias = "--tool-manifest";
+        public static Option ToolManifestOption(string description, string argumentName) => new Option<string>(ToolManifestOptionAlias, description)
         {
-            Argument = new Argument<string>(Install.LocalizableStrings.ManifestPathOptionName)
+            Argument = new Argument<string>(argumentName)
             {
                 Arity = ArgumentArity.ZeroOrOne
             }
@@ -33,19 +38,19 @@ namespace Microsoft.DotNet.Tools.Tool.Common
             string message)
         {
             List<string> options = new List<string>();
-            if (parseResult.HasOption(GlobalOption))
+            if (parseResult.HasOption(GlobalOptionAliases.First()))
             {
-                options.Add(GlobalOption.Name);
+                options.Add(GlobalOptionAliases.First().Trim('-'));
             }
 
-            if (parseResult.HasOption(LocalOption))
+            if (parseResult.HasOption(LocalOptionAlias))
             {
-                options.Add(LocalOption.Name);
+                options.Add(LocalOptionAlias.Trim('-'));
             }
 
-            if (!String.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(ToolPathOption)))
+            if (!String.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(ToolPathOptionAlias)))
             {
-                options.Add(ToolPathOption.Name);
+                options.Add(ToolPathOptionAlias.Trim('-'));
             }
 
             if (options.Count > 1)
@@ -61,7 +66,7 @@ namespace Microsoft.DotNet.Tools.Tool.Common
         internal static void EnsureToolManifestAndOnlyLocalFlagCombination(ParseResult parseResult)
         {
             if (GlobalOrToolPath(parseResult) &&
-                !string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(ToolManifestOption)))
+                !string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(ToolManifestOptionAlias)))
             {
                 throw new GracefulException(
                     string.Format(
@@ -71,8 +76,8 @@ namespace Microsoft.DotNet.Tools.Tool.Common
 
         private static bool GlobalOrToolPath(ParseResult parseResult)
         {
-            return parseResult.HasOption(GlobalOption) ||
-                   !string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(ToolPathOption));
+            return parseResult.HasOption(GlobalOptionAliases.First()) ||
+                   !string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(ToolPathOptionAlias));
         }
     }
 }

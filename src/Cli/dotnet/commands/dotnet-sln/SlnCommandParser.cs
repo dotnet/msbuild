@@ -22,7 +22,6 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(SlnAddParser.GetCommand());
             command.AddCommand(SlnListParser.GetCommand());
             command.AddCommand(SlnRemoveParser.GetCommand());
-            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

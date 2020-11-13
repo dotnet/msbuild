@@ -42,12 +42,12 @@ namespace Microsoft.DotNet.Cli
             var command = new Command("install", LocalizableStrings.CommandDescription);
 
             command.AddArgument(PackageIdArgument);
-            command.AddOption(ToolAppliedOption.GlobalOption);
-            command.AddOption(ToolAppliedOption.LocalOption);
-            command.AddOption(ToolAppliedOption.ToolPathOption);
+            command.AddOption(ToolAppliedOption.GlobalOption(LocalizableStrings.GlobalOptionDescription));
+            command.AddOption(ToolAppliedOption.LocalOption(LocalizableStrings.LocalOptionDescription));
+            command.AddOption(ToolAppliedOption.ToolPathOption(LocalizableStrings.ToolPathOptionDescription, LocalizableStrings.ToolPathOptionName));
             command.AddOption(VersionOption);
             command.AddOption(ConfigOption);
-            command.AddOption(ToolAppliedOption.ToolManifestOption);
+            command.AddOption(ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName));
             command.AddOption(AddSourceOption);
             command.AddOption(FrameworkOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.DisableParallelOption);
@@ -55,7 +55,6 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ToolCommandRestorePassThroughOptions.NoCacheOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.InteractiveRestoreOption);
             command.AddOption(VerbosityOption);
-            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

@@ -5,14 +5,24 @@ using System.CommandLine;
 
 namespace Microsoft.DotNet.Cli
 {
-    internal static class ParseCommandParser
+    internal static class CompleteCommandParser
     {
+        public static readonly Argument PathArgument = new Argument<string>("path");
+
+        public static readonly Option PositionOption = new Option<string>("--position")
+        {
+            Argument = new Argument<string>("command")
+        };
+
         public static Command GetCommand()
         {
-            var command = new Command("parse")
+            var command = new Command("complete")
             {
                 IsHidden = true
             };
+
+            command.AddArgument(PathArgument);
+            command.AddOption(PositionOption);
 
             return command;
         }

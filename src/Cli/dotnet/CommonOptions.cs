@@ -90,7 +90,5 @@ namespace Microsoft.DotNet.Cli
                 CommonLocalizableStrings.CommandInteractiveOptionDescription);
 
         public static Option DebugOption() => new Option<bool>("--debug");
-
-        public static Option DiagOption(bool includeShort = true) => new Option<bool>(includeShort? new[] { "--diagnostics", "-d" } : new[] { "--diagnostics" }) { IsHidden = true };
     }
 }

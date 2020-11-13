@@ -60,7 +60,6 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(UpdateCheckOption);
             command.AddOption(UpdateApplyOption);
             command.AddOption(ColumnsOption);
-            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

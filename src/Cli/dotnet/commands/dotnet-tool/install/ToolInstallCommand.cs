@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.CommandLine.Parsing;
+using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Tool.Common;
@@ -31,9 +32,9 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 toolInstallGlobalOrToolPathCommand
                 ?? new ToolInstallGlobalOrToolPathCommand(_parseResult);
 
-            _global = parseResult.ValueForOption<bool>(ToolAppliedOption.GlobalOption);
-            _local = parseResult.ValueForOption<bool>(ToolAppliedOption.LocalOption);
-            _toolPath = parseResult.ValueForOption<string>(ToolAppliedOption.ToolPathOption);
+            _global = parseResult.ValueForOption<bool>(ToolAppliedOption.GlobalOptionAliases.First());
+            _local = parseResult.ValueForOption<bool>(ToolAppliedOption.LocalOptionAlias);
+            _toolPath = parseResult.ValueForOption<string>(ToolAppliedOption.ToolPathOptionAlias);
             _framework = parseResult.ValueForOption<string>(ToolInstallCommandParser.FrameworkOption);
         }
 

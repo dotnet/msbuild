@@ -19,7 +19,6 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(ToolRunCommandParser.GetCommand());
             command.AddCommand(ToolSearchCommandParser.GetCommand());
             command.AddCommand(ToolRestoreCommandParser.GetCommand());
-            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

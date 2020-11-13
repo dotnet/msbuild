@@ -29,5 +29,12 @@ namespace Microsoft.DotNet.Cli
                 throw new HelpException(string.Empty);
             }
         }
+
+        public static string RootSubCommandResult(this ParseResult parseResult)
+        {
+            return parseResult.RootCommandResult.Children?
+                .FirstOrDefault(c => c.Token() != null && c.Token().Type.Equals(TokenType.Command))?
+                .Symbol.Name ?? string.Empty;
+        }
     }
 }

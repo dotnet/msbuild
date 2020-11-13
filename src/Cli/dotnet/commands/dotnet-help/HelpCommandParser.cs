@@ -19,7 +19,6 @@ namespace Microsoft.DotNet.Tools.Help
             var command = new Command("help", LocalizableStrings.AppFullName);
 
             command.AddArgument(Argument);
-            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

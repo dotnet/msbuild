@@ -25,7 +25,6 @@ namespace Microsoft.DotNet.Cli
 
             command.AddArgument(CmdPackageArgument);
             command.AddOption(InteractiveOption);
-            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

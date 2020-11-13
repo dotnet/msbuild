@@ -12,7 +12,6 @@ namespace Microsoft.DotNet.Cli.Telemetry
 {
     internal class TelemetryFilter : ITelemetryFilter
     {
-        private const string DotnetName = "dotnet";
         private const string ExceptionEventName = "mainCatchException/exception";
         private readonly Func<string, string> _hash;
 
@@ -27,9 +26,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
             if (objectToFilter is ParseResult parseResult)
             {
-                var topLevelCommandName = parseResult.RootCommandResult.Children?
-                    .FirstOrDefault(c => c.Token() != null && c.Token().Type.Equals(TokenType.Command))?
-                    .Symbol.Name ?? null;
+                var topLevelCommandName = parseResult.RootSubCommandResult();
                 if (topLevelCommandName != null)
                 {
                     result.Add(new ApplicationInsightsEntryFormat(

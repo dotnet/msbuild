@@ -566,7 +566,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(testInstance.Path)
-                .Execute("a", "", "c")
+                .Execute("--", "a", "", "c")
                 .Should()
                 .Pass()
                 .And

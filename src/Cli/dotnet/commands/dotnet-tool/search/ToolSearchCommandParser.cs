@@ -36,7 +36,6 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(SkipOption);
             command.AddOption(TakeOption);
             command.AddOption(PrereleaseOption);
-            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }

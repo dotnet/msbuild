@@ -8,6 +8,7 @@ using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.IO;
 using System.Reflection;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
@@ -162,6 +163,12 @@ namespace Microsoft.DotNet.Cli
                 }
                 else
                 {
+                    if (command.Name.Equals(ListProjectToProjectReferencesCommandParser.GetCommand().Name))
+                    {
+                        ListCommandParser.SlnOrProjectArgument.Name = CommonLocalizableStrings.ProjectArgumentName;
+                        ListCommandParser.SlnOrProjectArgument.Description = CommonLocalizableStrings.ProjectArgumentDescription;
+                    }
+
                     base.Write(command);
                 }
             }

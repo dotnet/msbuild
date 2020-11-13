@@ -41,8 +41,8 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
 
         public override int Execute()
         {
-            var global = _parseResult.ValueForOption<bool>(ToolAppliedOption.GlobalOption);
-            var toolPath = _parseResult.ValueForOption<string>(ToolAppliedOption.ToolPathOption);
+            var global = _parseResult.ValueForOption<bool>(ToolAppliedOption.GlobalOptionAliases.First());
+            var toolPath = _parseResult.ValueForOption<string>(ToolAppliedOption.ToolPathOptionAlias);
 
             DirectoryPath? toolDirectoryPath = null;
             if (!string.IsNullOrWhiteSpace(toolPath))

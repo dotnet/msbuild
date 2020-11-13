@@ -9,8 +9,6 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class RunCommandParser
     {
-        public static readonly Argument Argument = new Argument<IEnumerable<string>>() { Arity = ArgumentArity.ZeroOrMore, Description = LocalizableStrings.RunCommandAdditionalArgsHelpText };
-
         public static readonly Option ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
 
         public static readonly Option FrameworkOption = CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription);
@@ -39,7 +37,6 @@ namespace Microsoft.DotNet.Cli
         {
             var command = new Command("run", LocalizableStrings.AppFullName);
 
-            command.AddArgument(Argument);
             command.AddOption(ConfigurationOption);
             command.AddOption(FrameworkOption);
             command.AddOption(RuntimeOption);
@@ -50,7 +47,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(InteractiveOption);
             command.AddOption(NoRestoreOption);
             command.AddOption(CommonOptions.VerbosityOption());
-            command.AddOption(CommonOptions.DiagOption());
+            command.TreatUnmatchedTokensAsErrors = false;
 
             return command;
         }

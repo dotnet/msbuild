@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 
@@ -20,13 +19,10 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         private HashSet<string> _topLevelCommandName { get; }
         private HashSet<string> _optionsToLog { get; }
-        private const string DotnetName = "dotnet";
 
         public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult)
         {
-            var topLevelCommandName = parseResult.RootCommandResult.Children?
-                    .FirstOrDefault(c => c.Token() != null && c.Token().Type.Equals(TokenType.Command))?
-                    .Symbol.Name ?? null;
+            var topLevelCommandName = parseResult.RootSubCommandResult();
             var result = new List<ApplicationInsightsEntryFormat>();
             foreach (var option in _optionsToLog)
             {

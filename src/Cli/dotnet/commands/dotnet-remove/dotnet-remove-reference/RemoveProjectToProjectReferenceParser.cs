@@ -28,7 +28,6 @@ namespace Microsoft.DotNet.Cli
 
             command.AddArgument(ProjectPathArgument);
             command.AddOption(FrameworkOption);
-            command.AddOption(CommonOptions.DiagOption());
 
             return command;
         }
