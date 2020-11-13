@@ -83,23 +83,12 @@ jobs:
           PublishType: $(_PublishType)
           SYSTEM_ACCESSTOKEN: $(System.AccessToken)
           HelixAccessToken: ${{ parameters.HelixAccessToken }}
-      - powershell: eng\runTestsCannotRunOnHelix.ps1
-                    -configuration $(_BuildConfig)
-                    -ci
-                    $(_OfficialBuildIdArgs)
-        displayName: Run Tests Cannot Run On Helix
-        env:
-            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-      - powershell: eng\common\build.ps1
+      - powershell: eng\runHelixAndNonHelixInParallel.ps1
               -configuration $(_BuildConfig)
-              -prepareMachine
-              -ci
-              -restore
+              -buildSourcesDirectory $(Build.SourcesDirectory)
+              -customHelixTargetQueue ${{ parameters.helixTargetQueue }}
               $(_Test)
-              -projects $(Build.SourcesDirectory)/src/Tests/UnitTests.proj
-              /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TestInHelix.binlog
-              /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
-        displayName: Run Tests in Helix
+        displayName: Run Tests in Helix and non Helix in parallel
         condition: succeededOrFailed()
         env:
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
@@ -121,24 +110,12 @@ jobs:
           TestFullMSBuild: 'true'
           SYSTEM_ACCESSTOKEN: $(System.AccessToken)
           HelixAccessToken: ${{ parameters.HelixAccessToken }}
-      - powershell: eng\runTestsCannotRunOnHelix.ps1
+      - powershell: eng\runHelixAndNonHelixInParallel.ps1
               -configuration $(_BuildConfig)
-              -ci
-              $(_OfficialBuildIdArgs)
-        displayName: Run Tests Cannot Run On Helix
-        env:
-            TestFullMSBuild: 'true'
-            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-      - powershell: eng\common\build.ps1
-              -configuration $(_BuildConfig)
-              -prepareMachine
-              -ci
-              -restore
+              -buildSourcesDirectory $(Build.SourcesDirectory)
+              -customHelixTargetQueue ${{ parameters.helixTargetQueue }}
               $(_Test)
-              -projects $(Build.SourcesDirectory)\src\Tests\UnitTests.proj
-              /bl:$(Build.SourcesDirectory)\artifacts\log\$(_BuildConfig)\TestInHelix.binlog
-              /p:_CustomHelixTargetQueue=${{ parameters.helixTargetQueue }}
-        displayName: Run Tests in Helix
+        displayName: Run Tests in Helix and non Helix in parallel
         condition: succeededOrFailed()
         env:
             TestFullMSBuild: 'true'

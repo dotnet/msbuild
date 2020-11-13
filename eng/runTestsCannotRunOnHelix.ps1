@@ -1,3 +1,6 @@
+#hack to make sure build of helix run is done, so no file lock
+Start-Sleep -Seconds 90
+
 $repoRoot = (get-item $PSScriptRoot).parent
 $allTests = Get-Childitem -Path $repoRoot.GetDirectories("src").GetDirectories("Tests").FullName -Recurse '*.Tests.csproj'
 
@@ -19,7 +22,7 @@ foreach($line in ([System.IO.File]::ReadLines($testsProjectCannotRunOnHelixListP
                 Invoke-Expression "& $buildshScriptPath $passInArgs"
             }
             catch {
-                anyError = $true
+                $anyError = $true
             }
 
             if ($anyError)
