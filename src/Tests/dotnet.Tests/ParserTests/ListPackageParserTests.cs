@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             result.Errors.Should().NotBeEmpty();
         }
 
-        [Theory(Skip = "https://github.com/dotnet/sdk/issues/14461")]
+        [Theory]
         [InlineData("--verbosity", "q")]
         [InlineData("--verbosity", "quiet")]
         [InlineData("--verbosity", "m")]
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             result
                 .OptionValuesToBeForwarded(ListPackageReferencesCommandParser.GetCommand())
                 .Should()
-                .Contain($"--verbosity:{value}");
+                .Contain($"--verbosity:{value.ToLowerInvariant()}");
             result.Errors.Should().BeEmpty();
         }
 

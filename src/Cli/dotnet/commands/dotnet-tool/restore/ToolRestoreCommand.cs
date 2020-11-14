@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
 
             _configFilePath = result.ValueForOption<string>(ToolRestoreCommandParser.ConfigOption);
             _sources = result.ValueForOption<string[]>(ToolRestoreCommandParser.AddSourceOption);
-            _verbosity = result.ValueForOption<string>(ToolRestoreCommandParser.VerbosityOption);
+            _verbosity = Enum.GetName(result.ValueForOption<VerbosityOptions>(ToolRestoreCommandParser.VerbosityOption));
         }
 
         public override int Execute()

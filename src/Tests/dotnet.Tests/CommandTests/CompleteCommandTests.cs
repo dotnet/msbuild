@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Tests.Commands
             reporter.Lines.OrderBy(c => c).Should().Contain(expected.OrderBy(c => c));
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/14461")]
+        [Fact]
         public void GivenNuGetCommandItDisplaysCompletions()
         {
             var expected = new[] {

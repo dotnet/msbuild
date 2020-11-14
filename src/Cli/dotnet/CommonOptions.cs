@@ -15,17 +15,12 @@ namespace Microsoft.DotNet.Cli
         public static Option VerbosityOption() =>
             VerbosityOption(o => $"-verbosity:{o}");
 
-        public static Option VerbosityOption(Func<string, string> format) =>
-            new Option<string>(
+        public static Option VerbosityOption(Func<VerbosityOptions, string> format) =>
+            new Option<VerbosityOptions>(
                 new string[] { "-v", "--verbosity" },
-                CommonLocalizableStrings.VerbosityOptionDescription)
+                description: CommonLocalizableStrings.VerbosityOptionDescription)
             {
-                Argument = new Argument<string>(CommonLocalizableStrings.LevelArgumentName)
-                    .FromAmong(new string[] {"q", "quiet",
-                                             "m", "minimal",
-                                             "n", "normal",
-                                             "d", "detailed",
-                                             "diag", "diagnostic" })
+                Argument = new Argument<VerbosityOptions>(CommonLocalizableStrings.LevelArgumentName)
             }.ForwardAsSingle(format);
 
         public static Option FrameworkOption(string description) =>
@@ -90,5 +85,19 @@ namespace Microsoft.DotNet.Cli
                 CommonLocalizableStrings.CommandInteractiveOptionDescription);
 
         public static Option DebugOption() => new Option<bool>("--debug");
+    }
+
+    public enum VerbosityOptions
+    {
+        quiet,
+        q,
+        minimal,
+        m,
+        normal,
+        n,
+        detailed,
+        d,
+        diagnostic,
+        diag
     }
 }

@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
                     new Dictionary<string, string>()
                     {
                         { "verb", topLevelCommandName},
-                        {"verbosity", parseResult.ValueForOption<string>("--verbosity")}
+                        {"verbosity", Enum.GetName(parseResult.ValueForOption<VerbosityOptions>("--verbosity"))}
                     }));
             }
         }

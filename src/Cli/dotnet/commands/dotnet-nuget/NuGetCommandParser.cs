@@ -10,17 +10,13 @@ namespace Microsoft.DotNet.Cli
     // See https://github.com/NuGet/NuGet.Client for the actual implementation.
     internal static class NuGetCommandParser
     {
-        private static readonly string CompletionOnlyDescription = "-";
-
         public static Command GetCommand()
         {
-            var command = new Command("nuget", CompletionOnlyDescription);
+            var command = new Command("nuget");
 
-            command.AddOption(new Option<bool>("--version", CompletionOnlyDescription));
-            command.AddOption(new Option<string>(new string[] { "-v", "--verbosity" }, CompletionOnlyDescription)
-            {
-                Argument = new Argument<string>()
-            });
+            command.AddOption(new Option<bool>("--version"));
+            command.AddOption(new Option<string>(new string[] { "-v", "--verbosity" }));
+            command.AddArgument(new Argument() { IsHidden = true });
 
             command.AddCommand(GetDeleteCommand());
             command.AddCommand(GetLocalsCommand());
@@ -31,70 +27,49 @@ namespace Microsoft.DotNet.Cli
 
         private static Command GetDeleteCommand()
         {
-            var deleteCommand = new Command("delete", CompletionOnlyDescription);
+            var deleteCommand = new Command("delete");
             deleteCommand.AddArgument(new Argument<IEnumerable<string>>() { Arity = ArgumentArity.OneOrMore });
-            deleteCommand.AddOption(new Option<bool>("--force-english-output", CompletionOnlyDescription));
-            deleteCommand.AddOption(new Option<string>(new string[] { "-s", "--source" }, CompletionOnlyDescription)
-            {
-                Argument = new Argument<string>()
-            });
-            deleteCommand.AddOption(new Option<bool>("--non-interactive", CompletionOnlyDescription));
-            deleteCommand.AddOption(new Option<string>(new string[] { "-k", "--api-key" }, CompletionOnlyDescription)
-            {
-                Argument = new Argument<string>()
-            });
-            deleteCommand.AddOption(new Option<bool>("--no-service-endpoint", CompletionOnlyDescription));
-            deleteCommand.AddOption(new Option<bool>("--interactive", CompletionOnlyDescription));
+            deleteCommand.AddOption(new Option<bool>("--force-english-output"));
+            deleteCommand.AddOption(new Option<string>(new string[] { "-s", "--source" }));
+            deleteCommand.AddOption(new Option<bool>("--non-interactive"));
+            deleteCommand.AddOption(new Option<string>(new string[] { "-k", "--api-key" }));
+            deleteCommand.AddOption(new Option<bool>("--no-service-endpoint"));
+            deleteCommand.AddOption(new Option<bool>("--interactive"));
 
             return deleteCommand;
         }
 
         private static Command GetLocalsCommand()
         {
-            var localsCommand = new Command("locals", CompletionOnlyDescription);
+            var localsCommand = new Command("locals");
 
             localsCommand.AddArgument(new Argument<string>()
                 .FromAmong(new string[] { "all", "http-cache", "global-packages", "plugins-cache", "temp" }));
 
-            localsCommand.AddOption(new Option<bool>("--force-english-output", CompletionOnlyDescription));
-            localsCommand.AddOption(new Option<bool>(new string[] { "-c", "--clear" }, CompletionOnlyDescription));
-            localsCommand.AddOption(new Option<bool>(new string[] { "-l", "--list" }, CompletionOnlyDescription));
+            localsCommand.AddOption(new Option<bool>("--force-english-output"));
+            localsCommand.AddOption(new Option<bool>(new string[] { "-c", "--clear" }));
+            localsCommand.AddOption(new Option<bool>(new string[] { "-l", "--list" }));
 
             return localsCommand;
         }
 
         private static Command GetPushCommand()
         {
-            var pushCommand = new Command("push", CompletionOnlyDescription);
+            var pushCommand = new Command("push");
 
             pushCommand.AddArgument(new Argument<IEnumerable<string>>() { Arity = ArgumentArity.OneOrMore });
 
-            pushCommand.AddOption(new Option<bool>("--force-english-output", CompletionOnlyDescription));
-            pushCommand.AddOption(new Option<string>(new string[] { "-s", "--source" }, CompletionOnlyDescription)
-            {
-                Argument = new Argument<string>()
-            });
-            pushCommand.AddOption(new Option<string>(new string[] { "-ss", "--symbol-source" }, CompletionOnlyDescription)
-            {
-                Argument = new Argument<string>()
-            });
-            pushCommand.AddOption(new Option<string>(new string[] { "-t", "--timeout" }, CompletionOnlyDescription)
-            {
-                Argument = new Argument<string>()
-            });
-            pushCommand.AddOption(new Option<string>(new string[] { "-k", "--api-key" }, CompletionOnlyDescription)
-            {
-                Argument = new Argument<string>()
-            });
-            pushCommand.AddOption(new Option<string>(new string[] { "-sk", "--symbol-api-key" }, CompletionOnlyDescription)
-            {
-                Argument = new Argument<string>()
-            });
-            pushCommand.AddOption(new Option<bool>(new string[] { "-d", "--disable-buffering" }, CompletionOnlyDescription));
-            pushCommand.AddOption(new Option<bool>(new string[] { "-n", "--no-symbols" }, CompletionOnlyDescription));
-            pushCommand.AddOption(new Option<bool>("--no-service-endpoint", CompletionOnlyDescription));
-            pushCommand.AddOption(new Option<bool>("--interactive", CompletionOnlyDescription));
-            pushCommand.AddOption(new Option<bool>("--skip-duplicate", CompletionOnlyDescription));
+            pushCommand.AddOption(new Option<bool>("--force-english-output"));
+            pushCommand.AddOption(new Option<string>(new string[] { "-s", "--source" }));
+            pushCommand.AddOption(new Option<string>(new string[] { "-ss", "--symbol-source" }));
+            pushCommand.AddOption(new Option<string>(new string[] { "-t", "--timeout" }));
+            pushCommand.AddOption(new Option<string>(new string[] { "-k", "--api-key" }));
+            pushCommand.AddOption(new Option<string>(new string[] { "-sk", "--symbol-api-key" }));
+            pushCommand.AddOption(new Option<bool>(new string[] { "-d", "--disable-buffering" }));
+            pushCommand.AddOption(new Option<bool>(new string[] { "-n", "--no-symbols" }));
+            pushCommand.AddOption(new Option<bool>("--no-service-endpoint"));
+            pushCommand.AddOption(new Option<bool>("--interactive"));
+            pushCommand.AddOption(new Option<bool>("--skip-duplicate"));
 
             return pushCommand;
         }

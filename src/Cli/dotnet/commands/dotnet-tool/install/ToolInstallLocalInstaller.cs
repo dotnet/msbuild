@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _packageVersion = parseResult.ValueForOption<string>(ToolInstallCommandParser.VersionOption);
             _configFilePath = parseResult.ValueForOption<string>(ToolInstallCommandParser.ConfigOption);
             _sources = parseResult.ValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption);
-            _verbosity = parseResult.ValueForOption<string>(ToolInstallCommandParser.VerbosityOption);
+            _verbosity = Enum.GetName(parseResult.ValueForOption<VerbosityOptions>(ToolInstallCommandParser.VerbosityOption));
 
             if (toolPackageInstaller == null)
             {

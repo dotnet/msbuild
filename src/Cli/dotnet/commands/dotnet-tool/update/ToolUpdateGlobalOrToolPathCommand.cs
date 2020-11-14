@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             _additionalFeeds = parseResult.ValueForOption<string[]>(ToolUpdateCommandParser.AddSourceOption);
             _packageVersion = parseResult.ValueForOption<string>(ToolUpdateCommandParser.VersionOption);
             _global = parseResult.ValueForOption<bool>(ToolUpdateCommandParser.GlobalOption);
-            _verbosity = parseResult.ValueForOption<string>(ToolUpdateCommandParser.VerbosityOption);
+            _verbosity = Enum.GetName(parseResult.ValueForOption<VerbosityOptions>(ToolUpdateCommandParser.VerbosityOption));
             _toolPath = parseResult.ValueForOption<string>(ToolUpdateCommandParser.ToolPathOption);
             _forwardRestoreArguments = parseResult.OptionValuesToBeForwarded(ToolUpdateCommandParser.GetCommand());
 

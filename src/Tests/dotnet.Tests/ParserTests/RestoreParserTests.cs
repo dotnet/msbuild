@@ -1,7 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.CommandLine.Parsing;
+using System.IO;
+using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Xunit;
@@ -19,16 +22,16 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
             this.output = output;
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/14461")]
+        [Fact(Skip = "https://github.com/dotnet/command-line-api/issues/1078")] 
         public void RestoreCapturesArgumentsToForwardToMSBuildWhenTargetIsSpecified()
         {
             var result = Parser.Instance.Parse(@"dotnet restore .\some.csproj --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
 
-            result.ValueForArgument<string[]>(RestoreCommandParser.SlnOrProjectArgument).Should().BeEquivalentTo(@".\some.csproj");
+            result.ValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument).Should().BeEquivalentTo("some.csproj");
             result.UnmatchedTokens.ShouldBeEquivalentTo(new string[] { @"/p:SkipInvalidConfigurations=true" });
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/14461")]
+        [Fact(Skip = "https://github.com/dotnet/command-line-api/issues/1078")]
         public void RestoreCapturesArgumentsToForwardToMSBuildWhenTargetIsNotSpecified()
         {
             var result = Parser.Instance.Parse(@"dotnet restore --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
@@ -36,7 +39,7 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
             result.UnmatchedTokens.ShouldBeEquivalentTo(new string[] { @"/p:SkipInvalidConfigurations=true" });
         }
 
-        [Fact(Skip = "https://github.com/dotnet/sdk/issues/14461")]
+        [Fact(Skip = "https://github.com/dotnet/command-line-api/issues/1077")]
         public void RestoreDistinguishesRepeatSourceArgsFromCommandArgs()
         {
             var restore =

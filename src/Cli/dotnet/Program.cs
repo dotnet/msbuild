@@ -76,6 +76,12 @@ namespace Microsoft.DotNet.Cli
                         ? e.ToString().Red().Bold()
                         : e.Message.Red().Bold());
 
+                    var commandParsingException = e as CommandParsingException;
+                    if (commandParsingException != null)
+                    {
+                        Reporter.Output.WriteLine(commandParsingException.HelpText);
+                    }
+
                     return 1;
                 }
                 catch (Exception e) when (!e.ShouldBeDisplayedAsError())
@@ -158,7 +164,7 @@ namespace Microsoft.DotNet.Cli
                     ReportDotnetHomeUsage(environmentProvider);
 
                     var isDotnetBeingInvokedFromNativeInstaller = false;
-                    if (parseResult.CommandResult.Command.Equals(Parser.InstallSuccessCommand))
+                    if (parseResult.CommandResult.Command.Name.Equals(Parser.InstallSuccessCommand.Name))
                     {
                         aspNetCertificateSentinel = new NoOpAspNetCertificateSentinel();
                         firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();

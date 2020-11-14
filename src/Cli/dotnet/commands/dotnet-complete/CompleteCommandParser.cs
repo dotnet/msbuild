@@ -9,9 +9,9 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly Argument PathArgument = new Argument<string>("path");
 
-        public static readonly Option PositionOption = new Option<string>("--position")
+        public static readonly Option PositionOption = new Option<int>("--position")
         {
-            Argument = new Argument<string>("command")
+            Argument = new Argument<int>("command")
         };
 
         public static Command GetCommand()

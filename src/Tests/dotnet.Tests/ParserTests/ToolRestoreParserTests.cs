@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.CommandLine.Parsing;
 using System.Linq;
 using FluentAssertions;
@@ -72,7 +73,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             var result = Parser.Instance.Parse($"dotnet tool restore --verbosity {expectedVerbosityLevel}");
 
-            result.ValueForOption<string>(ToolRestoreCommandParser.VerbosityOption).Should().Be(expectedVerbosityLevel);
+            Enum.GetName(result.ValueForOption<VerbosityOptions>(ToolRestoreCommandParser.VerbosityOption)).Should().Be(expectedVerbosityLevel);
         }
 
         [Fact]
