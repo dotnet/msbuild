@@ -149,6 +149,7 @@ namespace Microsoft.Build.Shared
         internal const string redist = "Redist";
         internal const string resolvedFrom = "ResolvedFrom";
         internal const string destinationSubDirectory = "DestinationSubDirectory";
+        internal const string destinationSubPath = "DestinationSubPath";
         internal const string specificVersion = "SpecificVersion";
         internal const string link = "Link";
         internal const string subType = "SubType";
