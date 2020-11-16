@@ -3177,28 +3177,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
 
-            if (FileUtilities.GetIsFileSystemCaseSensitive())
+            items.ShouldHaveSingleItem();
+
+            var expectedUpdated = new Dictionary<string, string>
             {
-                var expectedUpdated = new Dictionary<string, string>
-                {
-                    {"m1", "m1_contents"},
-                    {"m2", "m2_contents"},
-                };
+                {"m1", "m1_updated"},
+                {"m2", "m2_updated"},
+            };
 
-                ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
-            }
-            else
-            {
-                items.ShouldHaveSingleItem();
-
-                var expectedUpdated = new Dictionary<string, string>
-                {
-                    {"m1", "m1_updated"},
-                    {"m2", "m2_updated"},
-                };
-
-                ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
-            }
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
         }
 
         public static IEnumerable<Object[]> UpdateAndRemoveShouldWorkWithEscapedCharactersTestData
