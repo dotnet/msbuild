@@ -31,6 +31,7 @@ namespace Microsoft.Build.Evaluation
             //  the items and then removes them
             protected readonly IItemFactory<I, I> _itemFactory;
             internal ItemSpec<P, I> Spec => _itemSpec;
+            
             protected LazyItemOperation(OperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
             {
                 _itemElement = builder.ItemElement;
