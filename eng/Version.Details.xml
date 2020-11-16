@@ -106,7 +106,7 @@
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>81d3148c7cd588c84a9e6cadbd7e04189127d4c9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="6.0.0-alpha.1.20559.3" CoherentParentDependency="Microsoft.NETCore.App.Internal">
+    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="6.0.0-alpha.1.20559.3">
       <Uri>https://github.com/mono/linker</Uri>
       <Sha>1ce464d7c9478fda885ec52c05ac6a7602a6274b</Sha>
     </Dependency>
