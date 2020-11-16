@@ -2820,7 +2820,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void UpdateFromReferencedItemShouldBeCaseInsensitive()
         {
             string content = @"
-                              <from Include='a'>
+                              <from Include='A'>
                                   <metadata>m1_contents</metadata>
                               </from>
 
