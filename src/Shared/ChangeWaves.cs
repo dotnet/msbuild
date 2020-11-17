@@ -20,12 +20,12 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     /// See docs here: https://github.com/dotnet/msbuild/blob/master/documentation/wiki/ChangeWaves.md
     /// For dev docs: https://github.com/dotnet/msbuild/blob/master/documentation/wiki/ChangeWaves-Dev.md
-    public class ChangeWaves
+    internal class ChangeWaves
     {
-        public static readonly Version Wave16_8 = new Version(16, 8);
-        public static readonly Version Wave16_10 = new Version(16, 10);
-        public static readonly Version Wave17_0 = new Version(17, 0);
-        public static readonly Version[] AllWaves = { Wave16_8, Wave16_10, Wave17_0 };
+        internal static readonly Version Wave16_8 = new Version(16, 8);
+        internal static readonly Version Wave16_10 = new Version(16, 10);
+        internal static readonly Version Wave17_0 = new Version(17, 0);
+        internal static readonly Version[] AllWaves = { Wave16_8, Wave16_10, Wave17_0 };
 
         /// <summary>
         /// Special value indicating that all features behind all Change Waves should be enabled.
@@ -70,7 +70,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// The current disabled wave.
         /// </summary>
-        public static Version DisabledWave
+        internal static Version DisabledWave
         {
             get
             {
@@ -153,7 +153,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="wave">The version to compare.</param>
         /// <returns>A bool indicating whether the change wave is enabled.</returns>
-        public static bool AreFeaturesEnabled(Version wave)
+        internal static bool AreFeaturesEnabled(Version wave)
         {
             ApplyChangeWave();
 
@@ -164,7 +164,7 @@ namespace Microsoft.Build.Utilities
         /// Resets the state and value of the currently disabled version.
         /// Used for testing only.
         /// </summary>
-        public static void ResetStateForTests()
+        internal static void ResetStateForTests()
         {
             _cachedWave = null;
             _state = ChangeWaveConversionState.NotConvertedYet;
