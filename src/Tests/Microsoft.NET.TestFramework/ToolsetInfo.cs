@@ -287,13 +287,13 @@ namespace Microsoft.NET.TestFramework
                     // Find path to MSBuildSdkResolver for full framework
                     ret.SdkResolverPath = Path.Combine(repoArtifactsDir, "bin", "Microsoft.DotNet.MSBuildSdkResolver", configuration, "net472", "SdkResolvers");
                 }
-                else if (!string.IsNullOrWhiteSpace(commandLine.MsbuildAdditionalSdkRsolverFolder))
+                else if (!string.IsNullOrWhiteSpace(commandLine.MsbuildAdditionalSdkResolverFolder))
                 {
-                    ret.SdkResolverPath = Path.Combine(commandLine.MsbuildAdditionalSdkRsolverFolder, configuration, "net472", "SdkResolvers");
+                    ret.SdkResolverPath = Path.Combine(commandLine.MsbuildAdditionalSdkResolverFolder, configuration, "net472", "SdkResolvers");
                 }
                 else
                 {
-                    throw new ApplicationException("Microsoft.DotNet.MSBuildSdkResolver path is not provided, set msbuildAdditionalSdkRsolverFolder on test commandline or set repoRoot");
+                    throw new ApplicationException("Microsoft.DotNet.MSBuildSdkResolver path is not provided, set msbuildAdditionalSdkResolverFolder on test commandline or set repoRoot");
                 }
             }
 
