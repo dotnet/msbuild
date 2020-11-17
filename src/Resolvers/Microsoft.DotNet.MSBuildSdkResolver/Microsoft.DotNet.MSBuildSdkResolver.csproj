@@ -32,6 +32,8 @@
     <EmbeddedResource Include="..\Microsoft.NET.Sdk.WorkloadManifestReader\Strings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.NET.Sdk.Localization"/>
   </ItemGroup>
 
+  <!-- We need to use relative path due to if we want to run tests in helix. Since we would need to run the tests in a different helix machine
+  and the absolute path will not work on a different machine. We also made sure the relative file structure is preserved on helix machines.-->
   <Target Name="WriteFullFrameworkResolverManifest" AfterTargets="AfterBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PropertyGroup>
       <_ResolverManifestDir>$(OutputPath)\SdkResolvers\$(AssemblyName)\</_ResolverManifestDir>
