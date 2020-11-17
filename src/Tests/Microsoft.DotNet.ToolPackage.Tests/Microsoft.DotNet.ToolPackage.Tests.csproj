@@ -95,7 +95,7 @@
     </MSBuild>
   </Target>
 
-  <Target Name="CopyAssetToPublishFolder" BeforeTargets="Publish" AfterTargets="CreateNupkgWithShimFromSource;CreateNupkgFromSource;CreateNupkgWithShimFromSource">
+  <Target Name="CopyAssetToPublishFolder" BeforeTargets="Publish" DependsOnTargets="CreateNupkgWithShimFromSource;CreateNupkgFromSource;CreateNupkgWithShimFromSource">
     <ItemGroup>
        <TestAssetFiles Include="$(BaseOutputPath)\TestAsset\**\*.*"/>
     </ItemGroup>
