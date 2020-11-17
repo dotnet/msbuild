@@ -22,21 +22,21 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
             this.output = output;
         }
 
-        [Fact(Skip = "https://github.com/dotnet/command-line-api/issues/1078")] 
+        [Fact] 
         public void RestoreCapturesArgumentsToForwardToMSBuildWhenTargetIsSpecified()
         {
             var result = Parser.Instance.Parse(@"dotnet restore .\some.csproj --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
 
-            result.ValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument).Should().BeEquivalentTo("some.csproj");
-            result.UnmatchedTokens.ShouldBeEquivalentTo(new string[] { @"/p:SkipInvalidConfigurations=true" });
+            result.ValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument).Should().BeEquivalentTo(@".\some.csproj");
+            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"-property:SkipInvalidConfigurations=true");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/command-line-api/issues/1078")]
+        [Fact]
         public void RestoreCapturesArgumentsToForwardToMSBuildWhenTargetIsNotSpecified()
         {
             var result = Parser.Instance.Parse(@"dotnet restore --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
 
-            result.UnmatchedTokens.ShouldBeEquivalentTo(new string[] { @"/p:SkipInvalidConfigurations=true" });
+            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"-property:SkipInvalidConfigurations=true");
         }
 
         [Fact(Skip = "https://github.com/dotnet/command-line-api/issues/1077")]

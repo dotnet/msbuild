@@ -112,7 +112,8 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.CmdForceRestoreOptionDescription)
                 {
                     IsHidden = !showHelp
-                }.ForwardAs("-property:RestoreForce=true")
+                }.ForwardAs("-property:RestoreForce=true"),
+                CommonOptions.PropertiesOption()
             };
 
             if (includeRuntimeOption)

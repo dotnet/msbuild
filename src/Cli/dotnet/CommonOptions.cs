@@ -12,6 +12,12 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class CommonOptions
     {
+        public static Option PropertiesOption() =>
+            new Option<string>(new string[] { "-property", "/p" })
+            {
+                IsHidden = true
+            }.ForwardAsProperty();
+
         public static Option VerbosityOption() =>
             VerbosityOption(o => $"-verbosity:{o}");
 

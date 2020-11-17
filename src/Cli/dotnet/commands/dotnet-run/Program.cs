@@ -16,7 +16,11 @@ namespace Microsoft.DotNet.Tools.Run
         {
             var parseResult = Parser.Instance.ParseFrom("dotnet run", args);
 
-            parseResult.ShowHelpOrErrorIfAppropriate();
+            if (parseResult.HasOption("--help"))
+            {
+                parseResult.ShowHelp();
+                throw new HelpException(string.Empty);
+            }
 
             var command = new RunCommand(
                 configuration: parseResult.ValueForOption<string>(RunCommandParser.ConfigurationOption),
@@ -29,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Run
                 noRestore: parseResult.HasOption(RunCommandParser.NoRestoreOption) || parseResult.HasOption(RunCommandParser.NoBuildOption),
                 interactive: parseResult.HasOption(RunCommandParser.InteractiveOption),
                 restoreArgs: parseResult.OptionValuesToBeForwarded(RunCommandParser.GetCommand()),
-                args: parseResult.UnparsedTokens ?? Array.Empty<string>()
+                args: (parseResult.UnparsedTokens ?? Array.Empty<string>()).Concat(parseResult.UnmatchedTokens ?? Array.Empty<string>())
             );
 
             return command;

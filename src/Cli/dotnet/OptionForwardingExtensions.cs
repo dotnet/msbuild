@@ -11,11 +11,14 @@ namespace Microsoft.DotNet.Cli
 {
     public static class OptionForwardingExtensions
     {
-        public static Option Forward<T>(this Option<T> option) => new ForwardedOption<T>(option).SetForwardingFunction((o) => new string[] { option.Name } );
+        public static Option Forward<T>(this Option<T> option) => new ForwardedOption<T>(option).SetForwardingFunction((o) => new string[] { option.Name });
 
         public static Option ForwardAs<T>(this Option<T> option, string value) => new ForwardedOption<T>(option).SetForwardingFunction((o) => new string[] { value });
 
         public static Option ForwardAsSingle<T>(this Option<T> option, Func<T, string> format) => new ForwardedOption<T>(option).SetForwardingFunction(format);
+
+        public static Option ForwardAsProperty(this Option<string> option) => new ForwardedOption<string>(option)
+            .SetForwardingFunction((o) => new string[] { $"{option.Aliases.FirstOrDefault()}:{o.Replace("roperty:", string.Empty)}" });
 
         public static Option ForwardAsMany<T>(this Option<T> option, Func<T, IEnumerable<string>> format) => new ForwardedOption<T>(option).SetForwardingFunction(format);
 
