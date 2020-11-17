@@ -30,9 +30,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\ChangeWaves.cs">
-      <Link>SharedUtilities\ChangeWaves.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\UnitTests\TestEnvironment.cs" />
     <Compile Include="..\Shared\FileUtilities.cs" />
     <Compile Include="..\Shared\TempFileUtilities.cs" />

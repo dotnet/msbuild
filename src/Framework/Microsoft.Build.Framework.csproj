@@ -18,6 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\ChangeWaves.cs">
+      <Link>SharedUtilities\ChangeWaves.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\Constants.cs">
       <Link>Shared\Constants.cs</Link>
     </Compile>
