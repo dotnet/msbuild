@@ -518,11 +518,65 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Language.
+        /// </summary>
+        public static string ColumnNameLanguage {
+            get {
+                return ResourceManager.GetString("ColumnNameLanguage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package.
+        /// </summary>
+        public static string ColumnNamePackage {
+            get {
+                return ResourceManager.GetString("ColumnNamePackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The column {0} is/are not supported, the supported columns are: {1}..
         /// </summary>
         public static string ColumnNamesAreNotSupported {
             get {
                 return ResourceManager.GetString("ColumnNamesAreNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Short Name.
+        /// </summary>
+        public static string ColumnNameShortName {
+            get {
+                return ResourceManager.GetString("ColumnNameShortName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tags.
+        /// </summary>
+        public static string ColumnNameTags {
+            get {
+                return ResourceManager.GetString("ColumnNameTags", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template Name.
+        /// </summary>
+        public static string ColumnNameTemplateName {
+            get {
+                return ResourceManager.GetString("ColumnNameTemplateName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Downloads.
+        /// </summary>
+        public static string ColumnNameTotalDownloads {
+            get {
+                return ResourceManager.GetString("ColumnNameTotalDownloads", resourceCulture);
             }
         }
         
@@ -956,15 +1010,6 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Language.
-        /// </summary>
-        public static string Language {
-            get {
-                return ResourceManager.GetString("Language", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Filters templates based on language and specifies the language of the template to create..
         /// </summary>
         public static string LanguageParameter {
@@ -1154,7 +1199,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filters templates based on template author.
+        ///   Looks up a localized string similar to Filters the templates based on the template author. Applicable only with --search or --list | -l option..
         /// </summary>
         public static string OptionDescriptionAuthorFilter {
             get {
@@ -1163,13 +1208,14 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Comma separated list of columns to show for --list or -l option.  The supported columns are: 
-        ///- language - displays comma separated list of languages supported by the template
-        ///- tags - displays the list of template tags
-        ///- author - displays the template author
-        ///- type - displays the template type: project or item
-        ///The template name and short name are shown always.
-        ///The default list of columns shown without the option: template name, short name, language, tags; equivalent to --columns=language,tags..
+        ///   Looks up a localized string similar to Comma separated list of columns to show for --list|-l or --search option.  The supported columns are: 
+        ///- language - comma separated list of languages supported by the template
+        ///- tags - the list of template tags
+        ///- author - the template author
+        ///- type - the template type: project or item
+        ///The template name and short name are shown always. 
+        ///For --search option additionally NuGet package ID and total downloads count are shown always.
+        ///The default list of columns shown without the option for --list | -l: tem [rest of string was truncated]&quot;;.
         /// </summary>
         public static string OptionDescriptionColumns {
             get {
@@ -1178,11 +1224,29 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Shows all available columns  for --list or -l option, equivalent to --columns=language,tags,author,type..
+        ///   Looks up a localized string similar to Shows all available columns for --list | -l or --search option, equivalent to --columns=language,tags,author,type..
         /// </summary>
         public static string OptionDescriptionColumnsAll {
             get {
                 return ResourceManager.GetString("OptionDescriptionColumnsAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Filters the templates based on NuGet package ID. Applicable only with --search option..
+        /// </summary>
+        public static string OptionDescriptionPackageFilter {
+            get {
+                return ResourceManager.GetString("OptionDescriptionPackageFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Searches for the templates in configured remote sources..
+        /// </summary>
+        public static string OptionDescriptionSearch {
+            get {
+                return ResourceManager.GetString("OptionDescriptionSearch", resourceCulture);
             }
         }
         
@@ -1412,11 +1476,52 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Couldn&apos;t find an installed template that matches the input, searching online for one that does....
+        ///   Looks up a localized string similar to Search failed: no template name is specified.
+        ///To search for the template, specify template name or use one of supported filters: {0}
+        ///Examples:
+        ///        dotnet {1} &lt;template name&gt; --search
+        ///        dotnet {1} --search --author Microsoft
+        ///        dotnet {1} &lt;template name&gt; --search --author Microsoft.
         /// </summary>
-        public static string SearchingOnlineNotification {
+        public static string SearchOnlineErrorNoTemplateNameOrFilter {
             get {
-                return ResourceManager.GetString("SearchingOnlineNotification", resourceCulture);
+                return ResourceManager.GetString("SearchOnlineErrorNoTemplateNameOrFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search failed: template name is too short, minimum 2 characters are required..
+        /// </summary>
+        public static string SearchOnlineErrorTemplateNameIsTooShort {
+            get {
+                return ResourceManager.GetString("SearchOnlineErrorTemplateNameIsTooShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No remoted sources defined to search for the templates..
+        /// </summary>
+        public static string SearchOnlineNoSources {
+            get {
+                return ResourceManager.GetString("SearchOnlineNoSources", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Searching for the templates....
+        /// </summary>
+        public static string SearchOnlineNotification {
+            get {
+                return ResourceManager.GetString("SearchOnlineNotification", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template &apos;{0}&apos; was not found..
+        /// </summary>
+        public static string SearchOnlineTemplateNotFound {
+            get {
+                return ResourceManager.GetString("SearchOnlineTemplateNotFound", resourceCulture);
             }
         }
         
@@ -1430,7 +1535,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to     To use this template, run the following command and try again:.
+        ///   Looks up a localized string similar to To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;.
         /// </summary>
         public static string SearchResultInstallHeader {
             get {
@@ -1439,7 +1544,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ...No matches found.
+        ///   Looks up a localized string similar to No matches found.
         /// </summary>
         public static string SearchResultNoMatches {
             get {
@@ -1471,15 +1576,6 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string SettingsReadError {
             get {
                 return ResourceManager.GetString("SettingsReadError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Short Name.
-        /// </summary>
-        public static string ShortName {
-            get {
-                return ResourceManager.GetString("ShortName", resourceCulture);
             }
         }
         
@@ -1525,15 +1621,6 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string SwitchWithoutValueDefaultFootnote {
             get {
                 return ResourceManager.GetString("SwitchWithoutValueDefaultFootnote", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Tags.
-        /// </summary>
-        public static string Tags {
-            get {
-                return ResourceManager.GetString("Tags", resourceCulture);
             }
         }
         

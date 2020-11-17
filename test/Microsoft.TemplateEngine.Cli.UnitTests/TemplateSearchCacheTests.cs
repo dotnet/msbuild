@@ -137,6 +137,104 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Single(searchResults.MatchesBySource[0].PacksWithMatches[_packThreeInfo].TemplateMatches.Where(t => string.Equals(t.Info.Name, _barFSharpTemplate.Name)));
         }
 
+        [Theory(DisplayName = nameof(CacheSearchAuthorFilterTest))]
+        [InlineData("", "test", 1)]
+        [InlineData("foo", "test", 1)]
+        [InlineData("", "Wrong", 0)]
+        public async Task CacheSearchAuthorFilterTest(string commandTemplate, string commandAuthor, int matchCount)
+        {
+            TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
+            MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
+            EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+
+            Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>();
+            MockNewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs)
+            {
+                TemplateName = commandTemplate,
+                AuthorFilter = commandAuthor
+            };
+
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync();
+
+            Assert.True(searchResults.AnySources);
+            if (matchCount == 0)
+            {
+                Assert.Equal(0, searchResults.MatchesBySource.Count);
+            }
+            else
+            {
+                Assert.Equal(1, searchResults.MatchesBySource.Count);
+                Assert.Equal(matchCount, searchResults.MatchesBySource[0].PacksWithMatches.Count);
+            }
+        }
+
+        [Theory(DisplayName = nameof(CacheSearchTypeFilterTest), Skip = "skipped until type fix is merged")]
+        [InlineData("", "project", 1)]
+        [InlineData("foo", "project", 1)]
+        [InlineData("", "Wrong", 0)]
+        public async Task CacheSearchTypeFilterTest(string commandTemplate, string commandType, int matchCount)
+        {
+            TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
+            MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
+            EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+
+            Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>();
+            MockNewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs)
+            {
+                TemplateName = commandTemplate,
+                TypeFilter = commandType
+            };
+
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync();
+
+            Assert.True(searchResults.AnySources);
+            if (matchCount == 0)
+            {
+                Assert.Equal(0, searchResults.MatchesBySource.Count);
+            }
+            else
+            {
+                Assert.Equal(1, searchResults.MatchesBySource.Count);
+                Assert.Equal(matchCount, searchResults.MatchesBySource[0].PacksWithMatches.Count);
+            }
+        }
+
+        [Theory(DisplayName = nameof(CacheSearchPackageFilterTest))]
+        [InlineData("", "Three", 1, 2)]
+        [InlineData("barC", "Three", 1, 1)]
+        [InlineData("foo", "Three", 0, 0)]
+        [InlineData("", "Wrong", 0, 0)]
+        public async Task CacheSearchPackageFilterTest(string commandTemplate, string commandPackage, int packMatchCount, int templateMatchCount)
+        {
+            TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
+            MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
+            EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+
+            Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>();
+            MockNewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs)
+            {
+                TemplateName = commandTemplate,
+                PackageFilter = commandPackage
+            };
+
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync();
+
+            Assert.True(searchResults.AnySources);
+            if (packMatchCount == 0)
+            {
+                Assert.Equal(0, searchResults.MatchesBySource.Count);
+            }
+            else
+            {
+                Assert.Equal(1, searchResults.MatchesBySource.Count);
+                Assert.Equal(packMatchCount, searchResults.MatchesBySource[0].PacksWithMatches.Count);
+                Assert.Equal(templateMatchCount, searchResults.MatchesBySource[0].PacksWithMatches[_packThreeInfo].TemplateMatches.Count);
+            }
+        }
+
         [Fact(DisplayName = nameof(CacheSearchLanguageMismatchFilterTest))]
         public async Task CacheSearchLanguageMismatchFilterTest()
         {
@@ -169,6 +267,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Description = "Mock Foo template one",
             Name = "MockFooTemplateOne",
             ShortName = "foo1",
+            Author = "TestAuthor",
             Tags = new Dictionary<string, ICacheTag>(StringComparer.Ordinal)
             {
                 {
@@ -176,6 +275,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 },
                 {
                     "language", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "C#" })
+                },
+                {
+                    "type", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "project" })
                 }
             },
             CacheParameters = new Dictionary<string, ICacheParameter>()

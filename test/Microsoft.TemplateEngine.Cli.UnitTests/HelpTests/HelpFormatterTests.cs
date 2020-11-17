@@ -56,8 +56,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             Assert.Equal(expectedOutput, result);
         }
 
-        [Fact(DisplayName = nameof(CanShrinkMultipleColumns))]
-        public void CanShrinkMultipleColumns()
+        [Fact(DisplayName = nameof(CanShrinkMultipleColumnsAndBalanceShrinking))]
+        public void CanShrinkMultipleColumnsAndBalanceShrinking()
         {
             ITemplateEngineHost host = new TestHost
             {
@@ -71,7 +71,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
                 Host = host,
                 Environment = new MockEnvironment()
                 {
-                    ConsoleBufferWidth = 5 + 2 + 7 + 1,
+                    ConsoleBufferWidth = 6 + 2 + 6 + 1,
                 }
             };
 
@@ -83,7 +83,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
                 new Tuple<string, string>("My test data", "My test data")
             };
 
-            string expectedOutput = $"Co...  Colu...{Environment.NewLine}-----  -------{Environment.NewLine}My...  My t...{Environment.NewLine}My...  My t...{Environment.NewLine}";
+            string expectedOutput = $"Col...  Col...{Environment.NewLine}------  ------{Environment.NewLine}My ...  My ...{Environment.NewLine}My ...  My ...{Environment.NewLine}";
 
             HelpFormatter<Tuple<string, string>> formatter =
              HelpFormatter
@@ -286,6 +286,51 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
                  .DefineColumn(t => t.Item1, "Column 1", showAlways: true)
                  .DefineColumn(t => t.Item2, "Column 2", columnName: "column2")  //defaultColumn: true by default
                  .DefineColumn(t => t.Item3, "Column 3", columnName: "column3", defaultColumn: false);
+
+            string result = formatter.Layout();
+            Assert.Equal(expectedOutput, result);
+        }
+
+        [Fact(DisplayName = nameof(CanRightAlign))]
+        public void CanRightAlign()
+        {
+            ITemplateEngineHost host = new TestHost
+            {
+                HostIdentifier = "TestRunner",
+                Version = "1.0.0.0",
+                Locale = "en-US"
+            };
+
+            IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
+            {
+                Host = host,
+                Environment = new MockEnvironment()
+                {
+                    ConsoleBufferWidth = 10, //less than need for data below
+                }
+            };
+
+            INewCommandInput command = new MockNewCommandInput();
+
+            IEnumerable<Tuple<string, string>> data = new List<Tuple<string, string>>()
+            {
+                new Tuple<string, string>("Monday", "Wednesday"),
+                new Tuple<string, string>("Tuesday", "Sunday")
+            };
+
+            string expectedOutput = $"Column 1   Column 2{Environment.NewLine}--------  ---------{Environment.NewLine}Monday    Wednesday{Environment.NewLine}Tuesday      Sunday{Environment.NewLine}";
+
+            HelpFormatter<Tuple<string, string>> formatter =
+             HelpFormatter
+                 .For(
+                     environmentSettings,
+                     command,
+                     data,
+                     columnPadding: 2,
+                     headerSeparator: '-',
+                     blankLineBetweenRows: false)
+                 .DefineColumn(t => t.Item1, "Column 1" )
+                 .DefineColumn(t => t.Item2, "Column 2", rightAlign:true);
 
             string result = formatter.Layout();
             Assert.Equal(expectedOutput, result);

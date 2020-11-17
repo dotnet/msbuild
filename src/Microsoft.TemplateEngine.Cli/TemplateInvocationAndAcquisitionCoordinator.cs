@@ -63,75 +63,9 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else
             {
-                // The command didn't resolve to an installed template. Search for something that does.
-                bool anySearchMatches = await SearchForTemplateMatchesAsync();
-
-                if (!anySearchMatches)
-                {
-                    ListOrHelpTemplateListResolutionResult listingTemplateListResolutionResult = TemplateListResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
-                    return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(listingTemplateListResolutionResult, _environment, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, false);
-                }
-                else
-                {
-                    return CreationResultStatus.Success;
-                }
+                ListOrHelpTemplateListResolutionResult listingTemplateListResolutionResult = TemplateListResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
+                return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(listingTemplateListResolutionResult, _environment, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, false);
             }
-        }
-
-        // Return true if there are any matches, false otherwise.
-        private async Task<bool> SearchForTemplateMatchesAsync()
-        {
-            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_environment, _commandInput, _defaultLanguage);
-            SearchResults searchResults = await searchCoordinator.SearchAsync();
-
-            if (searchResults.AnySources)
-            {
-                // Only show the searching online message if there are sources to search.
-                // It's a bit out of order to do the search first, then display the message.
-                // But there's no way to know whether or not there are sources without searching.
-                // ...theoretically the search source initialization is separate from the search, but the initialization is most of the work.
-                Reporter.Output.WriteLine(LocalizableStrings.SearchingOnlineNotification.Bold().Red());
-            }
-            else
-            {
-                return false;
-            }
-
-            foreach (TemplateSourceSearchResult sourceResult in searchResults.MatchesBySource)
-            {
-                string sourceHeader = string.Format(LocalizableStrings.SearchResultSourceIndicator, sourceResult.SourceDisplayName);
-
-                Reporter.Output.WriteLine(sourceHeader);
-                Reporter.Output.WriteLine(new string('-', sourceHeader.Length));
-
-                foreach (TemplatePackSearchResult matchesForPack in sourceResult.PacksWithMatches.Values)
-                {
-                    DisplayResultsForPack(matchesForPack);
-                    Reporter.Output.WriteLine();
-                }
-            }
-
-            return searchResults.MatchesBySource.Count > 0;
-        }
-
-        private void DisplayResultsForPack(TemplatePackSearchResult matchesForPack)
-        {
-            HashSet<string> seenGroupIdentities = new HashSet<string>();
-
-            foreach (ITemplateMatchInfo templateMatch in matchesForPack.TemplateMatches)
-            {
-                // only display one template in the pack for each group.
-                // if the group identity is blank, we assume it's a new template. 
-                if (string.IsNullOrEmpty(templateMatch.Info.GroupIdentity) || seenGroupIdentities.Add(templateMatch.Info.GroupIdentity))
-                {
-                    // TODO: get the Pack authoring info plumbed through - this will require changes to the scraper output
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.SearchResultTemplateInfo, templateMatch.Info.Name, templateMatch.Info.ShortName, templateMatch.Info.Author, matchesForPack.PackInfo.Name));
-                }
-            }
-
-            Reporter.Output.WriteLine(LocalizableStrings.SearchResultInstallHeader);
-            string fullyQualifiedPackName = $"{matchesForPack.PackInfo.Name}::{matchesForPack.PackInfo.Version}";
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.SearchResultInstallCommand, _commandInput.CommandName, fullyQualifiedPackName));
         }
 
         private async Task<CreationResultStatus> InvokeTemplateAsync()

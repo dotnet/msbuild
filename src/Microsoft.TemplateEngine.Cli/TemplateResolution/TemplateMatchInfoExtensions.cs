@@ -58,7 +58,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                                 ||
                                     // these locations can have partial or exact matches.
                                     x.Kind == MatchKind.Partial
-                                    && (x.Location == MatchLocation.Name || x.Location == MatchLocation.ShortName || x.Location == MatchLocation.Classification)
+                                    && (x.Location == MatchLocation.Name || x.Location == MatchLocation.ShortName || x.Location == MatchLocation.Classification || x.Location == MatchLocation.Author)
 
                                 ||
 

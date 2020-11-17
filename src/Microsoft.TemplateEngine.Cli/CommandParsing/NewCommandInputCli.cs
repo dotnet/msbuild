@@ -167,6 +167,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public string OutputPath => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "output" });
 
+        public string PackageFilter => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "package" });
+
         public List<string> RemainingArguments
         {
             get
@@ -189,6 +191,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 return remainingParameters;
             }
         }
+
+        public bool SearchOnline => _parseResult.HasAppliedOption(new[] { _commandName, "search" });
 
         public string ShowAliasesAliasName => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "show-alias" });
 

@@ -237,7 +237,7 @@
   <data name="InvalidTemplateParameterValues" xml:space="preserve">
     <value>Error: Invalid parameter(s):</value>
   </data>
-  <data name="Language" xml:space="preserve">
+  <data name="ColumnNameLanguage" xml:space="preserve">
     <value>Language</value>
   </data>
   <data name="LanguageParameter" xml:space="preserve">
@@ -324,7 +324,7 @@
   <data name="RunHelpForInformationAboutAcceptedParameters" xml:space="preserve">
     <value>Run dotnet {0} --help for usage information.</value>
   </data>
-  <data name="ShortName" xml:space="preserve">
+  <data name="ColumnNameShortName" xml:space="preserve">
     <value>Short Name</value>
   </data>
   <data name="ShowsAllTemplates" xml:space="preserve">
@@ -333,7 +333,7 @@
   <data name="ShowsFilteredTemplates" xml:space="preserve">
     <value>Filters templates based on available types. Predefined values are "project" and "item".</value>
   </data>
-  <data name="Tags" xml:space="preserve">
+  <data name="ColumnNameTags" xml:space="preserve">
     <value>Tags</value>
   </data>
   <data name="TemplateArgumentHelp" xml:space="preserve">
@@ -643,17 +643,17 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="UpdateCheck_UnknownError" xml:space="preserve">
     <value>An error occured checking for updates for template pack {0}</value>
   </data>
-  <data name="SearchingOnlineNotification" xml:space="preserve">
-    <value>Couldn't find an installed template that matches the input, searching online for one that does...</value>
+  <data name="SearchOnlineNotification" xml:space="preserve">
+    <value>Searching for the templates...</value>
   </data>
   <data name="SearchResultInstallCommand" xml:space="preserve">
     <value>        dotnet {0} -i {1}</value>
   </data>
   <data name="SearchResultInstallHeader" xml:space="preserve">
-    <value>    To use this template, run the following command and try again:</value>
+    <value>To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;</value>
   </data>
   <data name="SearchResultNoMatches" xml:space="preserve">
-    <value>...No matches found</value>
+    <value>No matches found</value>
   </data>
   <data name="SearchResultTemplateInfo" xml:space="preserve">
     <value>Template name "{0}" ({1}) from author "{2}" in pack {3}</value>
@@ -695,18 +695,52 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
     <value>Type</value>
   </data>
   <data name="OptionDescriptionColumns" xml:space="preserve">
-    <value>Comma separated list of columns to show for --list or -l option.  The supported columns are: 
-- language - displays comma separated list of languages supported by the template
-- tags - displays the list of template tags
-- author - displays the template author
-- type - displays the template type: project or item
-The template name and short name are shown always.
-The default list of columns shown without the option: template name, short name, language, tags; equivalent to --columns=language,tags.</value>
+    <value>Comma separated list of columns to show for --list|-l or --search option.  The supported columns are: 
+- language - comma separated list of languages supported by the template
+- tags - the list of template tags
+- author - the template author
+- type - the template type: project or item
+The template name and short name are shown always. 
+For --search option additionally NuGet package ID and total downloads count are shown always.
+The default list of columns shown without the option for --list | -l: template name, short name, language, tags; equivalent to --columns=language,tags.
+The default list of columns shown without the option for --search: template name, short name, author, language, package, total downloads; equivalent to --columns=author,language.</value>
   </data>
   <data name="OptionDescriptionColumnsAll" xml:space="preserve">
-    <value>Shows all available columns  for --list or -l option, equivalent to --columns=language,tags,author,type.</value>
+    <value>Shows all available columns for --list | -l or --search option, equivalent to --columns=language,tags,author,type.</value>
+  </data>
+  <data name="OptionDescriptionSearch" xml:space="preserve">
+    <value>Searches for the templates in configured remote sources.</value>
+  </data>
+  <data name="SearchOnlineErrorNoTemplateNameOrFilter" xml:space="preserve">
+    <value>Search failed: no template name is specified.
+To search for the template, specify template name or use one of supported filters: {0}
+Examples:
+        dotnet {1} &lt;template name&gt; --search
+        dotnet {1} --search --author Microsoft
+        dotnet {1} &lt;template name&gt; --search --author Microsoft</value>
+  </data>
+  <data name="SearchOnlineNoSources" xml:space="preserve">
+    <value>No remoted sources defined to search for the templates.</value>
+  </data>
+  <data name="SearchOnlineTemplateNotFound" xml:space="preserve">
+    <value>Template '{0}' was not found.</value>
   </data>
   <data name="OptionDescriptionAuthorFilter" xml:space="preserve">
-    <value>Filters templates based on template author</value>
+    <value>Filters the templates based on the template author. Applicable only with --search or --list | -l option.</value>
+  </data>
+  <data name="OptionDescriptionPackageFilter" xml:space="preserve">
+    <value>Filters the templates based on NuGet package ID. Applicable only with --search option.</value>
+  </data>
+  <data name="SearchOnlineErrorTemplateNameIsTooShort" xml:space="preserve">
+    <value>Search failed: template name is too short, minimum 2 characters are required.</value>
+  </data>
+  <data name="ColumnNamePackage" xml:space="preserve">
+    <value>Package</value>
+  </data>
+  <data name="ColumnNameTemplateName" xml:space="preserve">
+    <value>Template Name</value>
+  </data>
+  <data name="ColumnNameTotalDownloads" xml:space="preserve">
+    <value>Downloads</value>
   </data>
 </root>

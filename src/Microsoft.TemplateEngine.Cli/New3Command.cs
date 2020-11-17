@@ -16,6 +16,7 @@ using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
+using Microsoft.TemplateEngine.Cli.TemplateSearch;
 using Microsoft.TemplateEngine.Cli.TemplateUpdate;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -484,6 +485,11 @@ namespace Microsoft.TemplateEngine.Cli
                     bool updateCheckResult = await updater.CheckForUpdatesAsync(_settingsLoader.InstallUnitDescriptorCache.Descriptors.Values.ToList(), applyUpdates);
 
                     return updateCheckResult ? CreationResultStatus.Success : CreationResultStatus.CreateFailed;
+                }
+
+                if (_commandInput.SearchOnline)
+                {
+                    return await CliTemplateSearchCoordinator.SearchForTemplateMatchesAsync(EnvironmentSettings, _commandInput, _defaultLanguage).ConfigureAwait(false);
                 }
 
                 if (string.IsNullOrWhiteSpace(TemplateName))

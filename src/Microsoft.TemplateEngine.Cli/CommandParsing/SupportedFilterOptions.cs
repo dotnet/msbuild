@@ -1,12 +1,13 @@
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Edge.Template;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
     /// <summary>
-    /// Provides the collection of supported filters for different command options. At the moment only --list option is supported.
+    /// Provides the collection of supported filters for different command options. At the moment only --list and --search options are supported.
     /// </summary>
     /// <remarks>
     /// Intention of SupportedFilterOptions and FilterOption classes is to make the filters extendable. In case new filter option is implemented for dotnet new command, it should be enough to:
@@ -14,6 +15,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
     /// - add filter to required collection in SupportedFilterOptions class to apply it to certain dotnet new --option
     /// Currenty supported action options and their filter options:
     /// - --list|-l: --author, --language, --type, --baseline
+    /// - --search: --author, --language, --type, --baseline, --package
     /// Potentially the approach should be extended to --help and template instatiation actions.
     /// </remarks>
     internal static class SupportedFilterOptions
@@ -27,12 +29,26 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 LanguageFilter,
                 TypeFilter
             };
+
+            SupportedSearchFilters = new List<FilterOption>()
+            {
+                AuthorFilter,
+                BaselineFilter,
+                LanguageFilter,
+                TypeFilter,
+                PackageFilter
+            };
         }
 
         /// <summary>
         /// Supported filters for --list option
         /// </summary>
         internal static IReadOnlyCollection<FilterOption> SupportedListFilters { get; private set; }
+
+        /// <summary>
+        /// Supported filters for --search option
+        /// </summary>
+        internal static IReadOnlyCollection<FilterOption> SupportedSearchFilters { get; private set; }
 
         internal static FilterOption AuthorFilter { get; } = new TemplateFilterOption()
         {
@@ -68,6 +84,24 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             IsFilterSet = command => !string.IsNullOrWhiteSpace(command.TypeFilter),
             TemplateMatchFilter = command => WellKnownSearchFilters.ContextFilter(command.TypeFilter),
             MismatchCriteria = resolutionResult => resolutionResult.HasContextMismatch
+        };
+
+        internal static FilterOption PackageFilter { get; } = new PackageFilterOption()
+        {
+            Name = "package",
+            FilterValue = command => command.PackageFilter,
+            IsFilterSet = command => !string.IsNullOrWhiteSpace(command.PackageFilter),
+            PackageMatchFilter = command =>
+            {
+                return (pack) =>
+                { 
+                    if (string.IsNullOrWhiteSpace(command.PackageFilter))
+                    {
+                        return true;
+                    }
+                    return pack.Name.IndexOf(command.PackageFilter, StringComparison.OrdinalIgnoreCase) > -1;
+                };
+            }
         };
     }
 }

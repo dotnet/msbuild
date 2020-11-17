@@ -35,8 +35,10 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         string Locale { get; }
         string Name { get; }
         string OutputPath { get; }
+        string PackageFilter { get; }
         List<string> RemainingArguments { get; }
         IDictionary<string, IList<string>> RemainingParameters { get; }
+        bool SearchOnline { get; }
         string ShowAliasesAliasName { get; }
         bool ShowAliasesSpecified { get; }
         bool ShowAllColumns { get; }

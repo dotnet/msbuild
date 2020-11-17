@@ -11,7 +11,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             return new TemplateSearchCoordinator(environmentSettings,
                                             commandInput.TemplateName,
                                             defaultLanguage,
-                                            new CliHostSpecificDataMatchFilterFactory(commandInput, defaultLanguage).MatchFilter);
+                                            new CliHostSpecificDataMatchFilterFactory(commandInput).MatchFilter);
         }
     }
 }

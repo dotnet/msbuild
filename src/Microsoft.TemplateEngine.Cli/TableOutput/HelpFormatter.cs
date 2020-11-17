@@ -41,17 +41,17 @@ namespace Microsoft.TemplateEngine.Cli
             _commandInput = commandInput;
         }
 
-        public HelpFormatter<T> DefineColumn(Func<T, string> binder,  string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true)
+        public HelpFormatter<T> DefineColumn(Func<T, string> binder,  string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
         {
-            return DefineColumn(binder, out object c,  header, columnName, shrinkIfNeeded, minWidth, showAlways, defaultColumn);
+            return DefineColumn(binder, out object c,  header, columnName, shrinkIfNeeded, minWidth, showAlways, defaultColumn, rightAlign);
         }
 
-        public HelpFormatter<T> DefineColumn(Func<T, string> binder, out object column, string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true)
+        public HelpFormatter<T> DefineColumn(Func<T, string> binder, out object column, string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
         {
             column = null;
             if ((_commandInput.Columns.Count == 0  && defaultColumn) || showAlways || (!string.IsNullOrWhiteSpace(columnName) && _commandInput.Columns.Contains(columnName)) || _commandInput.ShowAllColumns)
             {
-                ColumnDefinition c = new ColumnDefinition(_environmentSettings, header, binder, shrinkIfNeeded: shrinkIfNeeded, minWidth: minWidth);
+                ColumnDefinition c = new ColumnDefinition(_environmentSettings, header, binder, shrinkIfNeeded: shrinkIfNeeded, minWidth: minWidth, rightAlign: rightAlign);
                 _columns.Add(c);
                 column = c;
             }
@@ -113,11 +113,11 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     for (int i = 0; i < _columns.Count - 1; ++i)
                     {
-                        b.Append(header[i].GetTextWithPadding(j, _columns[i].CalculatedWidth));
+                        b.Append(header[i].GetTextWithPadding(j, _columns[i].CalculatedWidth, _columns[i].RightAlign));
                         b.Append("".PadRight(_columnPadding));
                     }
 
-                    b.AppendLine(header[_columns.Count - 1].GetTextWithPadding(j, _columns[_columns.Count - 1].CalculatedWidth));
+                    b.AppendLine(header[_columns.Count - 1].GetTextWithPadding(j, _columns[_columns.Count - 1].CalculatedWidth, _columns[_columns.Count - 1].RightAlign));
                 }
             }
 
@@ -177,12 +177,12 @@ namespace Microsoft.TemplateEngine.Cli
                     // Render all columns except last column
                     for (int columnIndex = 0; columnIndex < _columns.Count - 1; ++columnIndex)
                     {
-                        b.Append(rowToRender[columnIndex].GetTextWithPadding(lineWithinRow, _columns[columnIndex].CalculatedWidth));
+                        b.Append(rowToRender[columnIndex].GetTextWithPadding(lineWithinRow, _columns[columnIndex].CalculatedWidth, _columns[columnIndex].RightAlign));
                         b.Append("".PadRight(_columnPadding));
                     }
 
                     // Render last column
-                    b.AppendLine(rowToRender[_columns.Count - 1].GetTextWithPadding(lineWithinRow, _columns[_columns.Count - 1].CalculatedWidth));
+                    b.AppendLine(rowToRender[_columns.Count - 1].GetTextWithPadding(lineWithinRow, _columns[_columns.Count - 1].CalculatedWidth, _columns[_columns.Count - 1].RightAlign));
                 }
 
                 if (_blankLineBetweenRows)
@@ -202,13 +202,16 @@ namespace Microsoft.TemplateEngine.Cli
             int totalPaddingWidth = _columnPadding * (_columns.Count - 1);
             int maxRowWidth = columnWidthLookup.Sum(column => column.Value) + totalPaddingWidth;
 
-            // If there is no columns to shrink or it fits, use maximum length identified when printing
+            //set identified needed width as the starting point
+            for (int i = 0; i < _columns.Count; ++i)
+            {
+                _columns[i].CalculatedWidth = columnWidthLookup[i];
+            }
+
+            // If there is no columns to shrink or it fits, use identified width
             if (!_columns.Any(col => col.ShrinkIfNeeded) || maxRowWidth < maxAllowedGridWidth)
             {
-                for (int i = 0; i < _columns.Count; ++i)
-                {
-                    _columns[i].CalculatedWidth += columnWidthLookup[i];
-                }
+                return;
             }
 
             //calculate the minimum length we could have after shrinking
@@ -225,7 +228,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
             }
 
-            //there is not enough space anyway - set all shrinkable columns to minimum width value
+            //there is not enough space anyway - set all shrinkable columns to minimum width or use actual width if it is less than mininum
             if (minimumLengthNeeded >= maxAllowedGridWidth)
             {
                 for (int i = 0; i < _columns.Count; ++i)
@@ -233,10 +236,6 @@ namespace Microsoft.TemplateEngine.Cli
                     if (_columns[i].ShrinkIfNeeded)
                     {
                         _columns[i].CalculatedWidth = Math.Min(_columns[i].MinWidth, columnWidthLookup[i]);
-                    }
-                    else
-                    {
-                        _columns[i].CalculatedWidth = columnWidthLookup[i];
                     }
                 }
                 return;
@@ -247,29 +246,31 @@ namespace Microsoft.TemplateEngine.Cli
             // the buffer width because that will cause the caret to wrap on the last character, so we
             // stop 1 short of it.
             int amountForShrinkableColumnToGiveUp = maxRowWidth - maxAllowedGridWidth + 1;
-            for (int i = 0; i < _columns.Count; ++i)
+            while (amountForShrinkableColumnToGiveUp > 0)
             {
-                if (_columns[i].ShrinkIfNeeded)
+                //picks up the widest column to shrink first
+                ColumnDefinition columnToShrink = _columns.Aggregate<ColumnDefinition, ColumnDefinition>(null, (selectedColumn, currentColumn) =>
                 {
-                    if (amountForShrinkableColumnToGiveUp > 0 && columnWidthLookup[i] > _columns[i].MinWidth)
+                    if (currentColumn.ShrinkIfNeeded && currentColumn.CalculatedWidth > currentColumn.MinWidth)
                     {
-                        int requiredColumnLength = columnWidthLookup[i];
-                        int minimumAllowedColumnLength = _columns[i].MinWidth;
-                        _columns[i].CalculatedWidth = Math.Max(minimumAllowedColumnLength, requiredColumnLength - amountForShrinkableColumnToGiveUp);
-                        int shrinkedSpace = columnWidthLookup[i] - _columns[i].CalculatedWidth;
-                        amountForShrinkableColumnToGiveUp -= shrinkedSpace;
+                        if (selectedColumn == null || currentColumn.CalculatedWidth >= selectedColumn.CalculatedWidth)
+                        {
+                            selectedColumn = currentColumn;
+                        }
                     }
-                    //we don't need to shrink this column as its width is already less or equal than minimum
-                    else
-                    {
-                        _columns[i].CalculatedWidth = columnWidthLookup[i];
-                    }
+                    return selectedColumn;
+                });
+                if (columnToShrink == null)
+                {
+                    //there is no column that can be shrinked
+                    //this should not happen as we already checked if there is enough space to fit the columns with shrinking
+                    break;
                 }
-                //we cannot shrink this column as it is not set up to be shrunken
                 else
                 {
-                    _columns[i].CalculatedWidth = columnWidthLookup[i];
-                }
+                    columnToShrink.CalculatedWidth--;
+                    amountForShrinkableColumnToGiveUp--;
+                }    
             }
 
         }
@@ -279,7 +280,7 @@ namespace Microsoft.TemplateEngine.Cli
             private readonly Func<T, string> _binder;
             private readonly IEngineEnvironmentSettings _environmentSettings;
 
-            public ColumnDefinition(IEngineEnvironmentSettings environmentSettings, string header, Func<T, string> binder, int minWidth = 2, int maxWidth = -1, bool shrinkIfNeeded = false)
+            public ColumnDefinition(IEngineEnvironmentSettings environmentSettings, string header, Func<T, string> binder, int minWidth = 2, int maxWidth = -1, bool shrinkIfNeeded = false, bool rightAlign = false)
             {
                 Header = header;
                 MaxWidth = maxWidth > 0 ? maxWidth : int.MaxValue;
@@ -287,6 +288,7 @@ namespace Microsoft.TemplateEngine.Cli
                 _environmentSettings = environmentSettings;
                 ShrinkIfNeeded = shrinkIfNeeded;
                 MinWidth = minWidth + ShrinkReplacement.Length; //we need to add required width for shrink replacement
+                RightAlign = rightAlign;
             }
 
             public string Header { get; }
@@ -298,6 +300,8 @@ namespace Microsoft.TemplateEngine.Cli
             public int MaxWidth { get; }
 
             public bool ShrinkIfNeeded { get; }
+
+            public bool RightAlign { get; }
 
             public TextWrapper GetCell(T value)
             {
@@ -315,28 +319,31 @@ namespace Microsoft.TemplateEngine.Cli
                 int position = 0;
                 int realMaxWidth = 0;
 
-                while (position < text.Length)
+                if (!string.IsNullOrWhiteSpace(text))
                 {
-                    int newline = text.IndexOf(environmentSettings.Environment.NewLine, position, StringComparison.Ordinal);
-
-                    if (newline > -1)
+                    while (position < text.Length)
                     {
-                        if (newline - position <= maxWidth)
+                        int newlineIndex = text.IndexOf(environmentSettings.Environment.NewLine, position, StringComparison.Ordinal);
+
+                        if (newlineIndex > -1)
                         {
-                            lines.Add(text.Substring(position, newline - position).TrimEnd());
-                            position = newline + environmentSettings.Environment.NewLine.Length;
+                            if (newlineIndex - position <= maxWidth)
+                            {
+                                lines.Add(text.Substring(position, newlineIndex - position).TrimEnd());
+                                position = newlineIndex + environmentSettings.Environment.NewLine.Length;
+                            }
+                            else
+                            {
+                                GetLineText(text, lines, maxWidth, newlineIndex, ref position);
+                            }
                         }
                         else
                         {
-                            GetLineText(text, lines, maxWidth, newline, ref position);
+                            GetLineText(text, lines, maxWidth, text.Length - 1, ref position);
                         }
-                    }
-                    else
-                    {
-                        GetLineText(text, lines, maxWidth, text.Length - 1, ref position);
-                    }
 
-                    realMaxWidth = Math.Max(realMaxWidth, lines[lines.Count - 1].Length);
+                        realMaxWidth = Math.Max(realMaxWidth, lines[lines.Count - 1].Length);
+                    }
                 }
 
                 _lines = lines;
@@ -348,14 +355,19 @@ namespace Microsoft.TemplateEngine.Cli
 
             public int MaxWidth { get; }
 
-            public string GetTextWithPadding(int line, int maxColumnWidth)
+            public string GetTextWithPadding(int line, int maxColumnWidth, bool rightAlign = false)
             {
                 var text = _lines.Count > line ? _lines[line] : string.Empty;
                 var abbreviatedText = ShrinkTextToLength(text, maxColumnWidth);
 
-                return
-                    abbreviatedText
-                    .PadRight(maxColumnWidth);
+                if (rightAlign)
+                {
+                    return abbreviatedText.PadLeft(maxColumnWidth);
+                }
+                else
+                {
+                    return abbreviatedText.PadRight(maxColumnWidth);
+                }
             }
 
             private static void GetLineText(string text, List<string> lines, int maxLength, int end, ref int position)
