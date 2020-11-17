@@ -293,7 +293,7 @@ namespace Microsoft.NET.TestFramework
                 }
                 else
                 {
-                    throw new ApplicationException("Microsoft.DotNet.MSBuildSdkResolver path is not provided, set msbuildAdditionalSdkResolverFolder on test commandline or set repoRoot");
+                    throw new InvalidOperationException("Microsoft.DotNet.MSBuildSdkResolver path is not provided, set msbuildAdditionalSdkResolverFolder on test commandline or set repoRoot");
                 }
             }
 
