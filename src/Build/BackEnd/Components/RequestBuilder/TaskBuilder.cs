@@ -866,7 +866,7 @@ namespace Microsoft.Build.BackEnd
                     else if (type == typeof(CircularDependencyException))
                     {
                         _continueOnError = ContinueOnError.ErrorAndStop;
-                        ProjectErrorUtilities.ThrowInvalidProject(taskLoggingContext.Task.Location, "CircularDependencyInTargetGraph", taskLoggingContext.TargetLoggingContext.Target.Name);
+                        ProjectErrorUtilities.ThrowInvalidProject(taskLoggingContext.Task.Location, "CircularDependencyInTargetGraph", taskLoggingContext.TargetLoggingContext.Target.Name, null);
                     }
                     else if (type == typeof(InvalidProjectFileException))
                     {

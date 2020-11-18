@@ -1277,10 +1277,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             StringReader reader = new StringReader(projectContents);
             Project project = new Project(new XmlTextReader(reader), null, null);
-            bool success = project.Build(_mockLogger);
-            Assert.False(success);
-            Assert.Equal<int>(1, _mockLogger.ErrorCount);
-            Assert.Equal(errorMessage, _mockLogger.Errors[0].Message);
+            project.Build(_mockLogger).ShouldBeFalse();
+            mockLogger.ErrorCount.ShouldBe(1);
+            mockLogger.Errors[0].Message.ShouldBe(errorMessage);
         }
 
         /// <summary>
