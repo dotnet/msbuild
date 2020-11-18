@@ -81,6 +81,26 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
+        //  Regression test for https://github.com/dotnet/sdk/issues/13513
+        [Fact]
+        public void DesignTimeBuildSucceedsWhenTargetingNetCore21WithRuntimeIdentifier()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "DesignTimePackageDependencies",
+                TargetFrameworks = "netcoreapp2.1",
+                IsSdkProject = true,
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            new MSBuildCommand(testAsset, "ResolvePackageDependenciesDesignTime")
+                .Execute()
+                .Should()
+                .Pass();
+       }
+
         [Theory]
         [InlineData("netcoreapp3.0")]
         [InlineData("net5.0")]
