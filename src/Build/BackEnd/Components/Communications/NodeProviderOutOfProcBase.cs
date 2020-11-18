@@ -117,7 +117,7 @@ namespace Microsoft.Build.BackEnd
             // For all processes in the list, send signal to terminate if able to connect
             foreach (Process nodeProcess in nodeProcesses)
             {
-                // A 2013 comment suggested some nodes take this long to respond, so a smaller timeout would miss nodes.
+                // A 2013 comment suggested some nodes take 30 ms to respond, so a smaller timeout would miss nodes, but more recent (2020) logs indicate it can rise into the low forties.
                 int timeout = 50;
 
                 // Attempt to connect to the process with the handshake without low priority.
@@ -197,8 +197,7 @@ namespace Microsoft.Build.BackEnd
                     _processesToIgnore.Add(nodeLookupKey);
 
                     // Attempt to connect to each process in turn.
-                    int timeout = 50; // Experimentally derived. Seems to generally be less than thirty but can rise to the low forties.
-                    Stream nodeStream = NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, timeout, hostHandshake);
+                    Stream nodeStream = NamedPipeUtil.TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
