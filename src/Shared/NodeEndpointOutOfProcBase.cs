@@ -16,6 +16,9 @@ using Microsoft.Build.Shared;
 using System.Security.AccessControl;
 #endif
 using System.Security.Principal;
+using System.Diagnostics;
+using System.Collections.Generic;
+using static Microsoft.Build.Shared.NativeMethodsShared;
 #if !FEATURE_APM
 using System.Threading.Tasks;
 #endif
@@ -206,6 +209,28 @@ namespace Microsoft.Build.BackEnd
             CommunicationsUtilities.Trace("Changing link status from {0} to {1}", _status.ToString(), newStatus.ToString());
             _status = newStatus;
             RaiseLinkStatusChanged(_status);
+
+            // We can't call KillTree directly on this process because it would start by killing itself before trying to kill
+            // its children, and the former would preempt the latter. This may leave child processes alive if they are added
+            // after it starts killing them, but that is unavoidable unless this process is killed by another.
+            Process thisProcess = Process.GetCurrentProcess();
+            List<KeyValuePair<int, SafeProcessHandle>> children = GetChildProcessIds(thisProcess.Id, thisProcess.StartTime);
+
+            try
+            {
+                foreach (KeyValuePair<int, SafeProcessHandle> childProcessInfo in children)
+                {
+                    KillTree(childProcessInfo.Key);
+                }
+            }
+            finally
+            {
+                foreach (KeyValuePair<int, SafeProcessHandle> childProcessInfo in children)
+                {
+                    childProcessInfo.Value.Dispose();
+                }
+            }
+            thisProcess.Kill();
         }
 
         /// <summary>
@@ -288,11 +313,10 @@ namespace Microsoft.Build.BackEnd
             while (!gotValidConnection)
             {
                 gotValidConnection = true;
-                DateTime restartWaitTime = DateTime.UtcNow;
 
                 // We only wait to wait the difference between now and the last original start time, in case we have multiple hosts attempting
                 // to attach.  This prevents each attempt from resetting the timer.
-                TimeSpan usedWaitTime = restartWaitTime - originalWaitStartTime;
+                TimeSpan usedWaitTime = DateTime.UtcNow - originalWaitStartTime;
                 int waitTimeRemaining = Math.Max(0, CommunicationsUtilities.NodeConnectionTimeout - (int)usedWaitTime.TotalMilliseconds);
 
                 try
