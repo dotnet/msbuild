@@ -1,7 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Cli.CommandLine;
+using System.CommandLine;
 using Microsoft.DotNet.Tools.Tool.Common;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Uninstall.LocalizableStrings;
 
@@ -9,32 +9,27 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ToolUninstallCommandParser
     {
-        public static Command ToolUninstall()
+        public static readonly Argument PackageIdArgument = ToolInstallCommandParser.PackageIdArgument;
+
+        public static readonly Option GlobalOption = ToolAppliedOption.GlobalOption(LocalizableStrings.GlobalOptionDescription);
+
+        public static readonly Option LocalOption = ToolAppliedOption.LocalOption(LocalizableStrings.LocalOptionDescription);
+
+        public static readonly Option ToolPathOption = ToolAppliedOption.ToolPathOption(LocalizableStrings.ToolPathOptionDescription, LocalizableStrings.ToolPathOptionName);
+
+        public static readonly Option ToolManifestOption = ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName);
+
+        public static Command GetCommand()
         {
-            return Create.Command("uninstall",
-                LocalizableStrings.CommandDescription,
-                Accept.ExactlyOneArgument(errorMessage: o => LocalizableStrings.SpecifyExactlyOnePackageId)
-                    .With(name: LocalizableStrings.PackageIdArgumentName,
-                          description: LocalizableStrings.PackageIdArgumentDescription),
-                Create.Option(
-                    $"-g|--{ToolAppliedOption.GlobalOption}",
-                    LocalizableStrings.GlobalOptionDescription,
-                    Accept.NoArguments()),
-                Create.Option(
-                    $"--{ToolAppliedOption.LocalOption}",
-                    LocalizableStrings.LocalOptionDescription,
-                    Accept.NoArguments()),
-                Create.Option(
-                    $"--{ToolAppliedOption.ToolPathOption}",
-                    LocalizableStrings.ToolPathOptionDescription,
-                    Accept.ExactlyOneArgument()
-                          .With(name: LocalizableStrings.ToolPathOptionName)),
-                Create.Option(
-                    $"--{ToolAppliedOption.ToolManifest}",
-                    LocalizableStrings.ManifestPathOptionDescription,
-                    Accept.ZeroOrOneArgument()
-                        .With(name: LocalizableStrings.ManifestPathOptionName)),
-                CommonOptions.HelpOption());
+            var command = new Command("uninstall", LocalizableStrings.CommandDescription);
+
+            command.AddArgument(PackageIdArgument);
+            command.AddOption(GlobalOption);
+            command.AddOption(LocalOption);
+            command.AddOption(ToolPathOption);
+            command.AddOption(ToolManifestOption);
+
+            return command;
         }
     }
 }

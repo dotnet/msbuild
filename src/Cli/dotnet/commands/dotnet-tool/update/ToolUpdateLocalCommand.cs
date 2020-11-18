@@ -2,11 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
@@ -30,7 +29,6 @@ namespace Microsoft.DotNet.Tools.Tool.Update
         private readonly string _explicitManifestFile;
 
         public ToolUpdateLocalCommand(
-            AppliedOption appliedCommand,
             ParseResult parseResult,
             IToolPackageInstaller toolPackageInstaller = null,
             IToolManifestFinder toolManifestFinder = null,
@@ -39,13 +37,8 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             IReporter reporter = null)
             : base(parseResult)
         {
-            if (appliedCommand == null)
-            {
-                throw new ArgumentNullException(nameof(appliedCommand));
-            }
-
-            _packageId = new PackageId(appliedCommand.Arguments.Single());
-            _explicitManifestFile = appliedCommand.SingleArgumentOrDefault(ToolAppliedOption.ToolManifest);
+            _packageId = new PackageId(parseResult.ValueForArgument<string>(ToolUpdateCommandParser.PackageIdArgument));
+            _explicitManifestFile = parseResult.ValueForOption<string>(ToolUpdateCommandParser.ToolManifestOption);
 
             _reporter = (reporter ?? Reporter.Output);
 
@@ -55,7 +48,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
                     IToolPackageStoreQuery,
                     IToolPackageInstaller installer) toolPackageStoresAndInstaller
                         = ToolPackageFactory.CreateToolPackageStoresAndInstaller(
-                            additionalRestoreArguments: appliedCommand.OptionValuesToBeForwarded());
+                            additionalRestoreArguments: parseResult.OptionValuesToBeForwarded(ToolUpdateCommandParser.GetCommand()));
                 _toolPackageInstaller = toolPackageStoresAndInstaller.installer;
             }
             else
@@ -67,10 +60,9 @@ namespace Microsoft.DotNet.Tools.Tool.Update
                                   new ToolManifestFinder(new DirectoryPath(Directory.GetCurrentDirectory()));
             _toolManifestEditor = toolManifestEditor ?? new ToolManifestEditor();
             _localToolsResolverCache = localToolsResolverCache ?? new LocalToolsResolverCache();
-            _toolLocalPackageInstaller = new ToolInstallLocalInstaller(appliedCommand, toolPackageInstaller);
+            _toolLocalPackageInstaller = new ToolInstallLocalInstaller(parseResult, toolPackageInstaller);
             _toolInstallLocalCommand = new Lazy<ToolInstallLocalCommand>(
                 () => new ToolInstallLocalCommand(
-                    appliedCommand,
                     parseResult,
                     _toolPackageInstaller,
                     _toolManifestFinder,

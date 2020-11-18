@@ -1,11 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
@@ -25,7 +24,6 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly string _explicitManifestFile;
 
         public ToolInstallLocalCommand(
-            AppliedOption appliedCommand,
             ParseResult parseResult,
             IToolPackageInstaller toolPackageInstaller = null,
             IToolManifestFinder toolManifestFinder = null,
@@ -34,12 +32,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             IReporter reporter = null)
             : base(parseResult)
         {
-            if (appliedCommand == null)
-            {
-                throw new ArgumentNullException(nameof(appliedCommand));
-            }
-
-            _explicitManifestFile = appliedCommand.SingleArgumentOrDefault(ToolAppliedOption.ToolManifest);
+            _explicitManifestFile = parseResult.ValueForOption<string>(ToolAppliedOption.ToolManifestOptionAlias);
 
             _reporter = (reporter ?? Reporter.Output);
 
@@ -47,7 +40,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                                   new ToolManifestFinder(new DirectoryPath(Directory.GetCurrentDirectory()));
             _toolManifestEditor = toolManifestEditor ?? new ToolManifestEditor();
             _localToolsResolverCache = localToolsResolverCache ?? new LocalToolsResolverCache();
-            _toolLocalPackageInstaller = new ToolInstallLocalInstaller(appliedCommand, toolPackageInstaller);
+            _toolLocalPackageInstaller = new ToolInstallLocalInstaller(parseResult, toolPackageInstaller);
         }
 
         public override int Execute()

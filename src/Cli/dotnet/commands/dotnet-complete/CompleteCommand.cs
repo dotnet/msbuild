@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CommandLine.Parsing;
 using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli
@@ -32,9 +32,7 @@ namespace Microsoft.DotNet.Cli
                 // parse the arguments
                 var result = parser.ParseFrom("dotnet complete", args);
 
-                var complete = result["dotnet"]["complete"];
-
-                var suggestions = Suggestions(complete);
+                var suggestions = Suggestions(result);
 
                 foreach (var suggestion in suggestions)
                 {
@@ -49,25 +47,22 @@ namespace Microsoft.DotNet.Cli
             return 0;
         }
 
-        private static string[] Suggestions(AppliedOption complete)
+        private static string[] Suggestions(ParseResult complete)
         {
-            var input = complete.Arguments.SingleOrDefault() ?? "";
+            var input = complete.ValueForArgument<string>(CompleteCommandParser.PathArgument) ?? string.Empty;
 
-            var positionOption = complete.AppliedOptions.SingleOrDefault(a => a.Name == "position");
-            if (positionOption != null)
+            var position = complete.ValueForOption<int>(CompleteCommandParser.PositionOption);
+
+            if (position > input.Length)
             {
-                var position = positionOption.Value<int>();
-
-                if (position > input.Length)
-                {
-                    input += " ";
-                }
+                input += " ";
             }
 
             var result = Parser.Instance.Parse(input);
 
-            return result.Suggestions()
-                         .ToArray();
+            return result.GetSuggestions()
+                .Distinct()
+                .ToArray();
         }
     }
 }

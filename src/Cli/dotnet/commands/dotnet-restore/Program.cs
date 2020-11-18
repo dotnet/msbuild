@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Cli;
@@ -29,8 +27,6 @@ namespace Microsoft.DotNet.Tools.Restore
 
             result.ShowHelpOrErrorIfAppropriate();
 
-            var parsedRestore = result["dotnet"]["restore"];
-
             var msbuildArgs = new List<string>();
 
             if (noLogo)
@@ -40,9 +36,9 @@ namespace Microsoft.DotNet.Tools.Restore
 
             msbuildArgs.Add("-target:Restore");
 
-            msbuildArgs.AddRange(parsedRestore.OptionValuesToBeForwarded());
+            msbuildArgs.AddRange(result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(parsedRestore.Arguments);
+            msbuildArgs.AddRange(result.ValueForArgument<string[]>(RestoreCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             return new RestoreCommand(msbuildArgs, msbuildPath);
         }

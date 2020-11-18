@@ -2,100 +2,108 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
-using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools;
+using System.CommandLine;
+using System.Linq;
+using System.IO;
+using Microsoft.DotNet.Tools.Common;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class CommonOptions
     {
-        public static Option HelpOption() =>
-            Create.Option(
-                "-h|--help",
-                CommonLocalizableStrings.ShowHelpDescription,
-                Accept.NoArguments());
+        public static Option PropertiesOption() =>
+            new Option<string>(new string[] { "-property", "/p" })
+            {
+                IsHidden = true
+            }.ForwardAsProperty();
 
         public static Option VerbosityOption() =>
-            VerbosityOption(o => $"-verbosity:{o.Arguments.Single()}");
+            VerbosityOption(o => $"-verbosity:{o}");
 
-        public static Option VerbosityOption(Func<AppliedOption, string> format) =>
-            Create.Option(
-                "-v|--verbosity",
-                CommonLocalizableStrings.VerbosityOptionDescription,
-                Accept.AnyOneOf(
-                          "q", "quiet",
-                          "m", "minimal",
-                          "n", "normal",
-                          "d", "detailed",
-                          "diag", "diagnostic")
-                      .With(name: CommonLocalizableStrings.LevelArgumentName)
-                      .ForwardAsSingle(format));
+        public static Option VerbosityOption(Func<VerbosityOptions, string> format) =>
+            new Option<VerbosityOptions>(
+                new string[] { "-v", "--verbosity" },
+                description: CommonLocalizableStrings.VerbosityOptionDescription)
+            {
+                Argument = new Argument<VerbosityOptions>(CommonLocalizableStrings.LevelArgumentName)
+            }.ForwardAsSingle(format);
 
         public static Option FrameworkOption(string description) =>
-            Create.Option(
-                "-f|--framework",
-                description,
-                Accept.ExactlyOneArgument()
-                    .WithSuggestionsFrom(_ => Suggest.TargetFrameworksFromProjectFile())
-                    .With(name: CommonLocalizableStrings.FrameworkArgumentName)
-                    .ForwardAsSingle(o => $"-property:TargetFramework={o.Arguments.Single()}"));
+            new Option<string>(
+                new string[] { "-f", "--framework" },
+                description)
+            {
+                Argument = new Argument<string>(CommonLocalizableStrings.FrameworkArgumentName)
+                    .AddSuggestions(Suggest.TargetFrameworksFromProjectFile().ToArray())
+            }.ForwardAsSingle(o => $"-property:TargetFramework={o}");
 
         public static Option RuntimeOption(string description, bool withShortOption = true) =>
-            Create.Option(
-                withShortOption ? "-r|--runtime" : "--runtime",
-                description,
-                Accept.ExactlyOneArgument()
-                    .WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
-                    .With(name: CommonLocalizableStrings.RuntimeIdentifierArgumentName)
-                    .ForwardAsSingle(o => $"-property:RuntimeIdentifier={o.Arguments.Single()}"));
+            new Option<string>(
+                withShortOption ? new string[] { "-r", "--runtime" } : new string[] { "--runtime" },
+                description)
+            {
+                Argument = new Argument<string>(CommonLocalizableStrings.RuntimeIdentifierArgumentName)
+                    .AddSuggestions(Suggest.RunTimesFromProjectFile().ToArray())
+            }.ForwardAsSingle(o => $"-property:RuntimeIdentifier={o}");
 
-        public static Option CurrentRuntimeOption(string description, bool withShortOption = true) =>
-            Create.Option(
-                "--use-current-runtime",
-                description,
-                Accept.NoArguments()
-                    .ForwardAs("-property:UseCurrentRuntimeIdentifier=True"));
+        public static Option CurrentRuntimeOption(string description) =>
+            new Option<bool>("--use-current-runtime", description)
+                .ForwardAs("-property:UseCurrentRuntimeIdentifier=True");
 
         public static Option ConfigurationOption(string description) =>
-            Create.Option(
-                "-c|--configuration",
-                description,
-                Accept.ExactlyOneArgument()
-                    .With(name: CommonLocalizableStrings.ConfigurationArgumentName)
-                    .WithSuggestionsFrom(_ => Suggest.ConfigurationsFromProjectFileOrDefaults())
-                    .ForwardAsSingle(o => $"-property:Configuration={o.Arguments.Single()}"));
+            new Option<string>(
+                new string[] { "-c", "--configuration" },
+                description)
+            {
+                Argument = new Argument<string>(CommonLocalizableStrings.ConfigurationArgumentName)
+                    .AddSuggestions(Suggest.ConfigurationsFromProjectFileOrDefaults().ToArray())
+            }.ForwardAsSingle(o => $"-property:Configuration={o}");
 
         public static Option VersionSuffixOption() =>
-            Create.Option(
+            new Option<string>(
                 "--version-suffix",
-                CommonLocalizableStrings.CmdVersionSuffixDescription,
-                Accept.ExactlyOneArgument()
-                    .With(name: CommonLocalizableStrings.VersionSuffixArgumentName)
-                    .ForwardAsSingle(o => $"-property:VersionSuffix={o.Arguments.Single()}"));
+                CommonLocalizableStrings.CmdVersionSuffixDescription)
+            {
+                Argument = new Argument<string>(CommonLocalizableStrings.VersionSuffixArgumentName)
+            }.ForwardAsSingle(o => $"-property:VersionSuffix={o}");
 
-        public static ArgumentsRule DefaultToCurrentDirectory(this ArgumentsRule rule) =>
-            rule.With(defaultValue: () => PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
+        public static Argument DefaultToCurrentDirectory(this Argument arg)
+        {
+            arg.SetDefaultValue(PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()));
+            return arg;
+        }
 
         public static Option NoRestoreOption() =>
-            Create.Option(
+            new Option<bool>(
                 "--no-restore",
-                CommonLocalizableStrings.NoRestoreDescription,
-                Accept.NoArguments());
+                CommonLocalizableStrings.NoRestoreDescription);
 
         public static Option InteractiveMsBuildForwardOption() =>
-            Create.Option(
+            new Option<bool>(
                 "--interactive",
-                CommonLocalizableStrings.CommandInteractiveOptionDescription,
-                Accept.NoArguments()
-                    .ForwardAs(Utils.Constants.MsBuildInteractiveOption));
+                CommonLocalizableStrings.CommandInteractiveOptionDescription)
+            .ForwardAs(Utils.Constants.MsBuildInteractiveOption);
 
         public static Option InteractiveOption() =>
-            Create.Option(
+            new Option<bool>(
                 "--interactive",
-                CommonLocalizableStrings.CommandInteractiveOptionDescription,
-                Accept.NoArguments());
+                CommonLocalizableStrings.CommandInteractiveOptionDescription);
+
+        public static Option DebugOption() => new Option<bool>("--debug");
+    }
+
+    public enum VerbosityOptions
+    {
+        quiet,
+        q,
+        minimal,
+        m,
+        normal,
+        n,
+        detailed,
+        d,
+        diagnostic,
+        diag
     }
 }

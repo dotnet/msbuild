@@ -1,7 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Cli.CommandLine;
+using System.CommandLine;
 using Microsoft.DotNet.Tools.Tool.Common;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.List.LocalizableStrings;
 
@@ -9,25 +9,21 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ToolListCommandParser
     {
-        public static Command ToolList()
+        public static readonly Option GlobalOption = ToolAppliedOption.GlobalOption(LocalizableStrings.GlobalOptionDescription);
+
+        public static readonly Option LocalOption = ToolAppliedOption.LocalOption(LocalizableStrings.LocalOptionDescription);
+
+        public static readonly Option ToolPathOption = ToolAppliedOption.ToolPathOption(LocalizableStrings.ToolPathOptionDescription, LocalizableStrings.ToolPathOptionName);
+
+        public static Command GetCommand()
         {
-            return Create.Command(
-                "list",
-                LocalizableStrings.CommandDescription,
-                Create.Option(
-                    $"-g|--{ToolAppliedOption.GlobalOption}",
-                    LocalizableStrings.GlobalOptionDescription,
-                    Accept.NoArguments()),
-                Create.Option(
-                    $"--{ToolAppliedOption.LocalOption}",
-                    LocalizableStrings.ToolPathOptionName,
-                    Accept.NoArguments()),
-                Create.Option(
-                    $"--{ToolAppliedOption.ToolPathOption}",
-                    LocalizableStrings.ToolPathOptionDescription,
-                    Accept.ExactlyOneArgument()
-                          .With(name: LocalizableStrings.ToolPathOptionName)),
-                CommonOptions.HelpOption());
+            var command = new Command("list", LocalizableStrings.CommandDescription);
+
+            command.AddOption(GlobalOption);
+            command.AddOption(LocalOption);
+            command.AddOption(ToolPathOption);
+
+            return command;
         }
     }
 }

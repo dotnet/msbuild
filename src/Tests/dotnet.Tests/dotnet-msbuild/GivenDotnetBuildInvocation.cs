@@ -1,8 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.IO;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Tools.Build;
 using FluentAssertions;
 using Xunit;
@@ -33,7 +31,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "-v", "diag" }, "-verbosity:diag")]
         [InlineData(new string[] { "--verbosity", "diag" }, "-verbosity:diag")]
         [InlineData(new string[] { "--no-incremental", "-o", "myoutput", "-r", "myruntime", "-v", "diag", "/ArbitrarySwitchForMSBuild" },
-                                  "-target:Rebuild -property:OutputPath=<cwd>myoutput -property:RuntimeIdentifier=myruntime -verbosity:diag /ArbitrarySwitchForMSBuild")]
+                                  "-target:Rebuild -property:RuntimeIdentifier=myruntime -verbosity:diag -property:OutputPath=<cwd>myoutput /ArbitrarySwitchForMSBuild")]
         [InlineData(new string[] { "/t:CustomTarget" }, "/t:CustomTarget")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
@@ -57,8 +55,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [Theory]
         [InlineData(new string[] { "-f", "tfm" }, "-target:Restore", "-property:TargetFramework=tfm")]
         [InlineData(new string[] { "-o", "myoutput", "-f", "tfm", "-v", "diag", "/ArbitrarySwitchForMSBuild" },
-                                  "-target:Restore -property:OutputPath=<cwd>myoutput -verbosity:diag /ArbitrarySwitchForMSBuild",
-                                  "-property:OutputPath=<cwd>myoutput -property:TargetFramework=tfm -verbosity:diag /ArbitrarySwitchForMSBuild")]
+                                  "-target:Restore -verbosity:diag -property:OutputPath=<cwd>myoutput /ArbitrarySwitchForMSBuild",
+                                  "-property:TargetFramework=tfm -verbosity:diag -property:OutputPath=<cwd>myoutput /ArbitrarySwitchForMSBuild")]
         public void MsbuildInvocationIsCorrectForSeparateRestore(
             string[] args,
             string expectedAdditionalArgsForRestore,

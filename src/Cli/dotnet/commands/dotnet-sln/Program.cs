@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Sln.Add;
 using Microsoft.DotNet.Tools.Sln.List;
@@ -19,26 +19,20 @@ namespace Microsoft.DotNet.Tools.Sln
         protected override string ArgumentName => Constants.SolutionArgumentName;
         protected override string ArgumentDescriptionLocalized => LocalizableStrings.SolutionArgumentDescription;
 
-        internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
-            new Dictionary<string, Func<AppliedOption, CommandBase>>
+        internal override Dictionary<string, Func<ParseResult, CommandBase>> SubCommands =>
+            new Dictionary<string, Func<ParseResult, CommandBase>>
             {
                 ["add"] =
                 sln => new AddProjectToSolutionCommand(
-                    sln["add"],
-                    sln.Value<string>(),
                     ParseResult),
 
                 ["list"] =
                 sln => new ListProjectsInSolutionCommand(
-                    sln["list"],
-                    sln.Value<string>(),
                     ParseResult),
 
                 ["remove"] =
                 sln =>
                     new RemoveProjectFromSolutionCommand(
-                        sln["remove"],
-                        sln.Value<string>(),
                         ParseResult)
             };
 

@@ -53,14 +53,17 @@ namespace Microsoft.DotNet.Tools
                 return null;
             }
 
-            var restoreArguments = parsedArguments
-                .Where(a => !IsExcludedFromRestore(a))
-                .Concat(trailingArguments);
+            IEnumerable<string> restoreArguments = new string[] { "-target:Restore" };
+            if (parsedArguments != null)
+            {
+                restoreArguments = restoreArguments.Concat(parsedArguments.Where(a => !IsExcludedFromRestore(a)));
+            }
+            if (trailingArguments != null)
+            {
+                restoreArguments = restoreArguments.Concat(trailingArguments);
+            }
 
-            return RestoreCommand.FromArgs(
-                restoreArguments.ToArray(), 
-                msbuildPath, 
-                noLogo: false);
+            return new RestoreCommand(restoreArguments, msbuildPath);
         }
 
         private static IEnumerable<string> Prepend(string argument, IEnumerable<string> arguments)

@@ -3,10 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
@@ -29,10 +28,7 @@ namespace Microsoft.DotNet.Tools.Test
             var parser = Parser.Instance;
             var result = parser.ParseFrom("dotnet test", args);
 
-            UpdateRunSettingsArgumentsText();
             result.ShowHelpOrErrorIfAppropriate();
-
-            var parsedTest = result["dotnet"]["test"];
 
             var msbuildArgs = new List<string>()
             {
@@ -41,9 +37,9 @@ namespace Microsoft.DotNet.Tools.Test
                 "-nologo"
             };
 
-            msbuildArgs.AddRange(parsedTest.OptionValuesToBeForwarded());
+            msbuildArgs.AddRange(result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(parsedTest.Arguments);
+            msbuildArgs.AddRange(result.ValueForArgument<IReadOnlyCollection<string>>(TestCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             if (settings.Any())
             {
@@ -54,7 +50,7 @@ namespace Microsoft.DotNet.Tools.Test
                 msbuildArgs.Add($"-property:VSTestCLIRunSettings=\"{runSettingsArg}\"");
             }
 
-            var verbosityArg = parsedTest.ForwardedOptionValues("verbosity").SingleOrDefault();
+            var verbosityArg = result.ForwardedOptionValues<IReadOnlyCollection<string>>(TestCommandParser.GetCommand(), "verbosity")?.SingleOrDefault() ?? null;
             if (verbosityArg != null)
             {
                 var verbosity = verbosityArg.Split(':', 2);
@@ -64,17 +60,17 @@ namespace Microsoft.DotNet.Tools.Test
                 }
             }
 
-            bool noRestore = parsedTest.HasOption("--no-restore") || parsedTest.HasOption("--no-build");
+            bool noRestore = result.HasOption(TestCommandParser.NoRestoreOption) || result.HasOption(TestCommandParser.NoBuildOption);
 
             TestCommand testCommand = new TestCommand(
                 msbuildArgs,
-                parsedTest.OptionValuesToBeForwarded(),
-                parsedTest.Arguments,
+                result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()),
+                result.ValueForArgument<IReadOnlyCollection<string>>(TestCommandParser.SlnOrProjectArgument),
                 noRestore,
                 msbuildPath);
 
             // Apply environment variables provided by the user via --environment (-e) parameter, if present
-            SetEnvironmentVariablesFromParameters(testCommand, parsedTest.AppliedOptions);
+            SetEnvironmentVariablesFromParameters(testCommand, result);
 
             // Set DOTNET_PATH if it isn't already set in the environment as it is required
             // by the testhost which uses the apphost feature (Windows only).
@@ -141,45 +137,16 @@ namespace Microsoft.DotNet.Tools.Test
             return false;
         }
 
-        private static string GetSemiColonEscapedString(string arg)
+        private static void SetEnvironmentVariablesFromParameters(TestCommand testCommand, ParseResult parseResult)
         {
-            if (arg.IndexOf(";") != -1)
-            {
-                return arg.Replace(";", "%3b");
-            }
+            var option = TestCommandParser.EnvOption;
 
-            return arg;
-        }
-
-        private static string[] GetSemiColonEscapedArgs(List<string> args)
-        {
-            int counter = 0;
-            string[] array = new string[args.Count];
-
-            foreach (string arg in args)
-            {
-                array[counter++] = GetSemiColonEscapedString(arg);
-            }
-
-            return array;
-        }
-
-        private static void UpdateRunSettingsArgumentsText()
-        {
-            DefaultHelpViewText.Synopsis.AdditionalArguments = " [[--] <RunSettings arguments>...]]";
-            DefaultHelpViewText.AdditionalArgumentsSection = LocalizableStrings.RunSettingsArgumentsDescription;
-        }
-
-        private static void SetEnvironmentVariablesFromParameters(TestCommand testCommand, AppliedOptionSet optionSet)
-        {
-            const string optionName = "environment";
-
-            if (!optionSet.Contains(optionName))
+            if (!parseResult.HasOption(option))
             {
                 return;
             }
 
-            foreach (var env in optionSet[optionName].Arguments)
+            foreach (var env in parseResult.ValueForOption<IReadOnlyCollection<string>>(option))
             {
                 var name = env;
                 var value = string.Empty;

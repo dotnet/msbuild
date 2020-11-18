@@ -3,10 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.NuGet;
@@ -15,38 +15,14 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 {
     internal class AddPackageReferenceCommand : CommandBase
     {
-        private readonly AppliedOption _appliedCommand;
-
         private readonly string _packageId;
         private readonly string _fileOrDirectory;
 
         public AddPackageReferenceCommand(
-            AppliedOption appliedCommand,
-            string fileOrDirectory,
             ParseResult parseResult) : base(parseResult)
         {
-            if (appliedCommand == null)
-            {
-                throw new ArgumentNullException(nameof(appliedCommand));
-            }
-            if (fileOrDirectory == null)
-            {
-                throw new ArgumentNullException(nameof(fileOrDirectory));
-            }
-
-            _appliedCommand = appliedCommand;
-            _fileOrDirectory = fileOrDirectory;
-            _packageId = appliedCommand.Value<string>();
-        }
-
-        protected override void ShowHelpOrErrorIfAppropriate(ParseResult parseResult)
-        {
-            if (parseResult.UnmatchedTokens.Any())
-            {
-                throw new GracefulException(LocalizableStrings.SpecifyExactlyOnePackageReference);
-            }
-
-            base.ShowHelpOrErrorIfAppropriate(parseResult);
+            _fileOrDirectory = parseResult.ValueForArgument<string>(AddCommandParser.ProjectArgument);
+            _packageId = parseResult.ValueForArgument<string>(AddPackageParser.CmdPackageArgument);
         }
 
         public override int Execute()
@@ -64,7 +40,7 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
 
             var tempDgFilePath = string.Empty;
 
-            if (!_appliedCommand.HasOption("no-restore"))
+            if (!_parseResult.HasOption(AddPackageParser.NoRestoreOption))
             {
                 
                 try
@@ -141,11 +117,11 @@ namespace Microsoft.DotNet.Tools.Add.PackageReference
                 projectFilePath
             };
 
-            args.AddRange(_appliedCommand
-                .OptionValuesToBeForwarded()
+            args.AddRange(_parseResult
+                .OptionValuesToBeForwarded(AddPackageParser.GetCommand())
                 .SelectMany(a => a.Split(' ', 2)));
 
-            if (_appliedCommand.HasOption("no-restore"))
+            if (_parseResult.HasOption(AddPackageParser.NoRestoreOption))
             {
                 args.Add("--no-restore");
             }

@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.List.ProjectToProjectReferences
@@ -15,35 +15,11 @@ namespace Microsoft.DotNet.Tools.List.ProjectToProjectReferences
         private readonly string _fileOrDirectory;
 
         public ListProjectToProjectReferencesCommand(
-            AppliedOption appliedCommand,
-            ParseResult parseResult) : base()
+            ParseResult parseResult) : base(parseResult)
         {
-            if (appliedCommand == null)
-            {
-                throw new ArgumentNullException(nameof(appliedCommand));
-            }
-            if (parseResult == null)
-            {
-                throw new ArgumentNullException(nameof(parseResult));
-            }
-
-            // If showing help, replace the parent's argument rule so that this command's argument
-            // only shows `PROJECT` instead of `PROJECT | SOLUTION`.
-            if (parseResult.AppliedCommand().IsHelpRequested() &&
-                (parseResult.Command().Parent is ListCommandParser.ListCommand parent))
-            {
-                parent.SetArgumentsRule(
-                    Accept.ZeroOrOneArgument()
-                        .With(
-                            name: CommonLocalizableStrings.ProjectArgumentName,
-                            description: CommonLocalizableStrings.ProjectArgumentDescription)
-                        .DefaultToCurrentDirectory()
-                );
-            }
-
             ShowHelpOrErrorIfAppropriate(parseResult);
 
-            _fileOrDirectory = appliedCommand.Arguments.Single();
+            _fileOrDirectory = parseResult.ValueForArgument<string>(ListCommandParser.SlnOrProjectArgument);
         }
 
         public override int Execute()

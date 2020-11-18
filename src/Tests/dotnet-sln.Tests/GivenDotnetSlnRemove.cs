@@ -4,7 +4,7 @@
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -19,27 +19,35 @@ namespace Microsoft.DotNet.Cli.Sln.Remove.Tests
 {
     public class GivenDotnetSlnRemove : SdkTest
     {
-        private const string HelpText = @"Usage: dotnet sln <SLN_FILE> remove [options] <PROJECT_PATH>
+        private Func<string, string> HelpText = (defaultVal) => $@"remove:
+  Remove one or more projects from a solution file.
+
+Usage:
+  dotnet sln <SLN_FILE> remove [options] <PROJECT_PATH>...
 
 Arguments:
-  <SLN_FILE>       The solution file to operate on. If not specified, the command will search the current directory for one.
-  <PROJECT_PATH>   The paths to the projects to remove from the solution.
+  <SLN_FILE>        The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
+  <PROJECT_PATH>    The paths to the projects to remove from the solution.
 
 Options:
-  -h, --help   Show command line help.";
+  -?, -h, --help    Show help and usage information";
 
-        private const string SlnCommandHelpText = @"Usage: dotnet sln [options] <SLN_FILE> [command]
+        private Func<string, string> SlnCommandHelpText = (defaultVal) => $@"sln:
+  .NET modify solution file command
+
+Usage:
+  dotnet sln [options] <SLN_FILE> [command]
 
 Arguments:
-  <SLN_FILE>   The solution file to operate on. If not specified, the command will search the current directory for one.
+  <SLN_FILE>    The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
-  -h, --help   Show command line help.
+  -?, -h, --help    Show help and usage information
 
 Commands:
-  add <PROJECT_PATH>      Add one or more projects to a solution file.
-  list                    List all projects in a solution file.
-  remove <PROJECT_PATH>   Remove one or more projects from a solution file.";
+  add <PROJECT_PATH>       Add one or more projects to a solution file.
+  list                     List all projects in a solution file.
+  remove <PROJECT_PATH>    Remove one or more projects from a solution file.";
 
         private const string ExpectedSlnContentsAfterRemove = @"
 Microsoft Visual Studio Solution File, Format Version 12.00
@@ -268,7 +276,7 @@ EndGlobal
             var cmd = new DotnetCommand(Log)
                 .Execute($"sln", "remove", helpArg);
             cmd.Should().Pass();
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(Directory.GetCurrentDirectory()));
         }
 
         [Fact]
@@ -277,9 +285,8 @@ EndGlobal
             var cmd = new DotnetCommand(Log)
                 .Execute("sln", "one.sln", "two.sln", "three.sln", "remove");
             cmd.Should().Fail();
-            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "two.sln")}
-{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "three.sln")}
-{CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove}");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLineValidation.LocalizableStrings.UnrecognizedCommandOrArgument, "two.sln")}
+{string.Format(CommandLineValidation.LocalizableStrings.UnrecognizedCommandOrArgument, "three.sln")}");
         }
 
         [Theory]
@@ -291,7 +298,6 @@ EndGlobal
                 .Execute($"sln", commandName);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(SlnCommandHelpText);
         }
 
         [Theory]
@@ -306,7 +312,7 @@ EndGlobal
                 .Execute($"sln", solutionName, "remove", "p.csproj");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindSolutionOrDirectory, solutionName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(Directory.GetCurrentDirectory()));
         }
 
         [Fact]
@@ -323,7 +329,7 @@ EndGlobal
                 .Execute($"sln", "InvalidSolution.sln", "remove", projectToRemove);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, "InvalidSolution.sln", LocalizableStrings.FileHeaderMissingError));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
         }
 
         [Fact]
@@ -341,7 +347,7 @@ EndGlobal
                 .Execute($"sln", "remove", projectToRemove);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.InvalidSolutionFormatString, solutionPath, LocalizableStrings.FileHeaderMissingError));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
         }
 
         [Fact]
@@ -357,7 +363,7 @@ EndGlobal
                 .Execute(@"sln", "App.sln", "remove");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove);
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
         }
 
         [Fact]
@@ -374,7 +380,7 @@ EndGlobal
                 .Execute(@"sln", "remove", "App.csproj");
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.SolutionDoesNotExist, solutionPath + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(solutionPath));
         }
 
         [Fact]
@@ -391,7 +397,7 @@ EndGlobal
                 .Execute($"sln", "remove", projectToRemove);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneSolutionInDirectory, projectDirectory + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
         }
 
         [Fact]
@@ -577,7 +583,7 @@ EndGlobal
                 string.Format(
                     CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory,
                     Path.Combine(projectDirectory, directoryToRemove)));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
         }
 
         [Fact]
@@ -597,7 +603,7 @@ EndGlobal
                 string.Format(
                     CommonLocalizableStrings.MoreThanOneProjectInDirectory,
                     Path.Combine(projectDirectory, directoryToRemove)));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
         }
 
         [Fact]

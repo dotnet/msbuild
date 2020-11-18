@@ -2,9 +2,54 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="CharacterNotAllowedInPath">
+        <source>Character not allowed in a path: {0}</source>
+        <target state="new">Character not allowed in a path: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandExpectsFewerArguments">
+        <source>Command '{0}' expects no more than {1} arguments, but {2} were provided.</source>
+        <target state="new">Command '{0}' expects no more than {1} arguments, but {2} were provided.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DirectoryDoesNotExist">
+        <source>Directory does not exist: {0}</source>
+        <target state="new">Directory does not exist: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ErrorReadingResponseFile">
+        <source>Error reading response file '{0}': {1}</source>
+        <target state="new">Error reading response file '{0}': {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileOrDirectoryDoesNotExist">
+        <source>File or directory does not exist: {0}</source>
+        <target state="new">File or directory does not exist: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LastArgumentMultiValueError">
         <source>The last argument '{0}' accepts multiple values. No more argument can be added.</source>
         <target state="translated">最後の引数 '{0}' は複数の値を受け入れます。さらに引数を追加することはできません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OptionExpectsFewerArguments">
+        <source>Option '{0}' expects no more than {1} arguments, but {2} were provided.</source>
+        <target state="new">Option '{0}' expects no more than {1} arguments, but {2} were provided.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredCommandArgumentMissing">
+        <source>Required argument missing for command: {0}</source>
+        <target state="new">Required argument missing for command: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RequiredOptionArgumentMissing">
+        <source>Required argument missing for option: {0}</source>
+        <target state="new">Required argument missing for option: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResponseFileNotFound">
+        <source>Response file not found '{0}'</source>
+        <target state="new">Response file not found '{0}'</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedValueForOptionError">
@@ -112,19 +157,9 @@
         <target state="translated">コマンド '{0}' は 1 つの引数のみを受け入れますが、{1} が指定されました。</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommandAcceptsOnlyOneSubcommand">
-        <source>Command '{0}' only accepts a single subcommand but multiple were provided: {1}</source>
-        <target state="translated">コマンド '{0}' は 1 つのサブコマンドのみを受け入れますが、複数指定されました: {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="FileDoesNotExist">
         <source>File does not exist: {0}</source>
         <target state="translated">ファイルが存在しません: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NoArgumentsAllowed">
-        <source>Arguments not allowed for option: {0}</source>
-        <target state="translated">引数をオプションで使用できません: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionAcceptsOnlyOneArgument">
@@ -155,11 +190,6 @@
       <trans-unit id="UnrecognizedCommandOrArgument">
         <source>Unrecognized command or argument '{0}'</source>
         <target state="translated">認識されないコマンドまたは引数 '{0}'</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UnrecognizedOption">
-        <source>Option '{0}' not recognized. Must be one of: {1}</source>
-        <target state="translated">オプション '{0}' は認識されません。次のいずれかである必要があります: {1}</target>
         <note />
       </trans-unit>
     </body>

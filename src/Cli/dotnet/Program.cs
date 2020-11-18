@@ -2,23 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using Microsoft.DotNet.Cli.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.CommandFactory;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ShellShim;
-using Microsoft.DotNet.Tools.Help;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using NuGet.Frameworks;
-using Command = Microsoft.DotNet.Cli.Utils.Command;
 using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
-using RuntimeEnvironment = Microsoft.DotNet.Cli.Utils.RuntimeEnvironment;
+using NuGet.Frameworks;
+using System.Linq;
+using Microsoft.DotNet.Tools.Help;
+using Microsoft.DotNet.CommandFactory;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -117,13 +114,7 @@ namespace Microsoft.DotNet.Cli
 
         internal static int ProcessArgs(string[] args, ITelemetry telemetryClient = null)
         {
-            // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
-
-            var success = true;
-            var command = string.Empty;
-            var lastArg = 0;
-            TopLevelCommandParserResult topLevelCommandParserResult = TopLevelCommandParserResult.Empty;
-
+            var parseResult = Parser.Instance.Parse(args);
             using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel())
             {
@@ -134,93 +125,68 @@ namespace Microsoft.DotNet.Cli
                         Path.Combine(
                             CliFolderPathCalculator.DotnetUserProfileFolderPath,
                             ToolPathSentinelFileName)));
-
-                for (; lastArg < args.Length; lastArg++)
+                if (parseResult.ValueForOption<bool>(Parser.DiagOption))
                 {
-                    if (IsArg(args[lastArg], "d", "diagnostics"))
-                    {
-                        Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, bool.TrueString);
-                        CommandContext.SetVerbose(true);
-                    }
-                    else if (IsArg(args[lastArg], "version"))
-                    {
-                        PrintVersion();
-                        return 0;
-                    }
-                    else if (IsArg(args[lastArg], "info"))
-                    {
-                        PrintInfo();
-                        return 0;
-                    }
-                    else if (IsArg(args[lastArg], "h", "help") ||
-                             args[lastArg] == "-?" ||
-                             args[lastArg] == "/?")
-                    {
-                        HelpCommand.PrintHelp();
-                        return 0;
-                    }
-                    else if (args[lastArg].StartsWith("-", StringComparison.OrdinalIgnoreCase))
-                    {
-                        Reporter.Error.WriteLine($"Unknown option: {args[lastArg]}");
-                        success = false;
-                    }
-                    else
-                    {
-                        // It's the command, and we're done!
-                        command = args[lastArg];
-                        if (string.IsNullOrEmpty(command))
-                        {
-                            command = "help";
-                        }
-
-                        PerformanceLogEventSource.Log.FirstTimeConfigurationStart();
-
-                        var environmentProvider = new EnvironmentProvider();
-
-                        bool generateAspNetCertificate =
-                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", defaultValue: true);
-                        bool telemetryOptout =
-                          environmentProvider.GetEnvironmentVariableAsBool("DOTNET_CLI_TELEMETRY_OPTOUT", defaultValue: false);
-                        bool addGlobalToolsToPath =
-                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", defaultValue: true);
-                        bool nologo =
-                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_NOLOGO", defaultValue: false);
-
-                        ReportDotnetHomeUsage(environmentProvider);
-
-                        topLevelCommandParserResult = new TopLevelCommandParserResult(command);
-                        var isDotnetBeingInvokedFromNativeInstaller = false;
-                        if (IsDotnetBeingInvokedFromNativeInstaller(topLevelCommandParserResult))
-                        {
-                            aspNetCertificateSentinel = new NoOpAspNetCertificateSentinel();
-                            firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
-                            toolPathSentinel = new NoOpFileSentinel(exists: false);
-                            isDotnetBeingInvokedFromNativeInstaller = true;
-                        }
-
-                        var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration(
-                            generateAspNetCertificate: generateAspNetCertificate,
-                            telemetryOptout: telemetryOptout,
-                            addGlobalToolsToPath: addGlobalToolsToPath,
-                            nologo: nologo);
-
-                        ConfigureDotNetForFirstTimeUse(
-                            firstTimeUseNoticeSentinel,
-                            aspNetCertificateSentinel,
-                            toolPathSentinel,
-                            isDotnetBeingInvokedFromNativeInstaller,
-                            dotnetFirstRunConfiguration,
-                            environmentProvider);
-
-                        PerformanceLogEventSource.Log.FirstTimeConfigurationStop();
-
-                        break;
-                    }
+                    Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, bool.TrueString);
+                    CommandContext.SetVerbose(true);
+                    Reporter.Reset();
                 }
-                if (!success)
+                if (parseResult.HasOption(Parser.VersionOption))
+                {
+                    CommandLineInfo.PrintVersion();
+                    return 0;
+                }
+                else if (parseResult.HasOption(Parser.InfoOption))
+                {
+                    CommandLineInfo.PrintInfo();
+                    return 0;
+                }
+                else if (parseResult.CommandResult.Command.Equals(Parser.RootCommand) && parseResult.HasOption("-h"))
                 {
                     HelpCommand.PrintHelp();
-                    return 1;
+                    return 0;
+                }
+                else
+                {
+                    PerformanceLogEventSource.Log.FirstTimeConfigurationStart();
+
+                    var environmentProvider = new EnvironmentProvider();
+
+                    bool generateAspNetCertificate =
+                        environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", defaultValue: true);
+                    bool telemetryOptout =
+                      environmentProvider.GetEnvironmentVariableAsBool("DOTNET_CLI_TELEMETRY_OPTOUT", defaultValue: false);
+                    bool addGlobalToolsToPath =
+                        environmentProvider.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", defaultValue: true);
+                    bool nologo =
+                        environmentProvider.GetEnvironmentVariableAsBool("DOTNET_NOLOGO", defaultValue: false);
+
+                    ReportDotnetHomeUsage(environmentProvider);
+
+                    var isDotnetBeingInvokedFromNativeInstaller = false;
+                    if (parseResult.CommandResult.Command.Name.Equals(Parser.InstallSuccessCommand.Name))
+                    {
+                        aspNetCertificateSentinel = new NoOpAspNetCertificateSentinel();
+                        firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
+                        toolPathSentinel = new NoOpFileSentinel(exists: false);
+                        isDotnetBeingInvokedFromNativeInstaller = true;
+                    }
+
+                    var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration(
+                        generateAspNetCertificate: generateAspNetCertificate,
+                        telemetryOptout: telemetryOptout,
+                        addGlobalToolsToPath: addGlobalToolsToPath,
+                        nologo: nologo);
+
+                    ConfigureDotNetForFirstTimeUse(
+                        firstTimeUseNoticeSentinel,
+                        aspNetCertificateSentinel,
+                        toolPathSentinel,
+                        isDotnetBeingInvokedFromNativeInstaller,
+                        dotnetFirstRunConfiguration,
+                        environmentProvider);
+                        PerformanceLogEventSource.Log.FirstTimeConfigurationStop();
+
                 }
 
                 PerformanceLogEventSource.Log.TelemetryRegistrationStart();
@@ -235,53 +201,46 @@ namespace Microsoft.DotNet.Cli
                 PerformanceLogEventSource.Log.TelemetryRegistrationStop();
             }
 
-            IEnumerable<string> appArgs =
-                (lastArg + 1) >= args.Length
-                ? Enumerable.Empty<string>()
-                : args.Skip(lastArg + 1).ToArray();
-
             if (CommandContext.IsVerbose())
             {
                 Console.WriteLine($"Telemetry is: {(telemetryClient.Enabled ? "Enabled" : "Disabled")}");
             }
-
             PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStart();
-            TelemetryEventEntry.SendFiltered(topLevelCommandParserResult);
+            TelemetryEventEntry.SendFiltered(parseResult);
             PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
 
             int exitCode;
-            if (BuiltInCommandsCatalog.Commands.TryGetValue(topLevelCommandParserResult.Command, out var builtIn))
+            if (parseResult.CommandResult.Command.Name.Equals("dotnet") && string.IsNullOrEmpty(parseResult.ValueForArgument<string>(Parser.DotnetSubCommand)))
             {
-                PerformanceLogEventSource.Log.BuiltInCommandParserStart();
-                var parseResult = Parser.Instance.ParseFrom($"dotnet {topLevelCommandParserResult.Command}", appArgs.ToArray());
-                PerformanceLogEventSource.Log.BuiltInCommandParserStop();
-
-                if (!parseResult.Errors.Any())
+                exitCode = 0;
+            }
+            else if (BuiltInCommandsCatalog.Commands.TryGetValue(parseResult.RootSubCommandResult(), out var builtIn))
+            {
+			    PerformanceLogEventSource.Log.BuiltInCommandParserStart();
+                if (parseResult.Errors.Count <= 0)
                 {
-                    PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStart();
+				    PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStart();
                     TelemetryEventEntry.SendFiltered(parseResult);
-                    PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
+					PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
                 }
 
                 PerformanceLogEventSource.Log.BuiltInCommandStart();
-                exitCode = builtIn.Command(appArgs.ToArray());
-                PerformanceLogEventSource.Log.BuiltInCommandStop();
-            }
-            else if (string.IsNullOrEmpty(topLevelCommandParserResult.Command))
-            {
-                exitCode = 0;
+                var topLevelCommands = new string[] { "dotnet", parseResult.RootSubCommandResult() }.Concat(Parser.DiagOption.Aliases);
+
+                exitCode = builtIn.Command(parseResult.Tokens.Select(t => t.Value).Except(topLevelCommands).ToArray());
+				PerformanceLogEventSource.Log.BuiltInCommandStop();
             }
             else
             {
                 PerformanceLogEventSource.Log.ExtensibleCommandResolverStart();
-                Command resolvedCommand = CommandFactoryUsingResolver.Create(
-                        "dotnet-" + topLevelCommandParserResult.Command,
-                        appArgs,
+                var resolvedCommand = CommandFactoryUsingResolver.Create(
+                        "dotnet-" + parseResult.ValueForArgument<string>(Parser.DotnetSubCommand),
+                        parseResult.UnmatchedTokens,
                         FrameworkConstants.CommonFrameworks.NetStandardApp15);
                 PerformanceLogEventSource.Log.ExtensibleCommandResolverStop();
 
                 PerformanceLogEventSource.Log.ExtensibleCommandStart();
-                CommandResult result = resolvedCommand.Execute();
+                var result = resolvedCommand.Execute();
                 PerformanceLogEventSource.Log.ExtensibleCommandStop();
                 
                 exitCode = result.ExitCode;
@@ -307,11 +266,6 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.DotnetCliHomeUsed,
                     home,
                     CliFolderPathCalculator.DotnetHomeVariableName));
-        }
-
-        private static bool IsDotnetBeingInvokedFromNativeInstaller(TopLevelCommandParserResult parseResult)
-        {
-            return parseResult.Command == "internal-reportinstallsuccess";
         }
 
         private static void ConfigureDotNetForFirstTimeUse(
@@ -358,51 +312,6 @@ namespace Microsoft.DotNet.Cli
         internal static bool TryGetBuiltInCommand(string commandName, out BuiltInCommandMetadata builtInCommand)
         {
             return BuiltInCommandsCatalog.Commands.TryGetValue(commandName, out builtInCommand);
-        }
-
-        private static void PrintVersion()
-        {
-            Reporter.Output.WriteLine(Product.Version);
-        }
-
-        private static void PrintInfo()
-        {
-            DotnetVersionFile versionFile = DotnetFiles.VersionFileObject;
-            var commitSha = versionFile.CommitSha ?? "N/A";
-            Reporter.Output.WriteLine($"{LocalizableStrings.DotNetSdkInfoLabel}");
-            Reporter.Output.WriteLine($" Version:   {Product.Version}");
-            Reporter.Output.WriteLine($" Commit:    {commitSha}");
-            Reporter.Output.WriteLine();
-            Reporter.Output.WriteLine($"{LocalizableStrings.DotNetRuntimeInfoLabel}");
-            Reporter.Output.WriteLine($" OS Name:     {RuntimeEnvironment.OperatingSystem}");
-            Reporter.Output.WriteLine($" OS Version:  {RuntimeEnvironment.OperatingSystemVersion}");
-            Reporter.Output.WriteLine($" OS Platform: {RuntimeEnvironment.OperatingSystemPlatform}");
-            Reporter.Output.WriteLine($" RID:         {GetDisplayRid(versionFile)}");
-            Reporter.Output.WriteLine($" Base Path:   {AppContext.BaseDirectory}");
-        }
-
-        private static bool IsArg(string candidate, string longName)
-        {
-            return IsArg(candidate, shortName: null, longName: longName);
-        }
-
-        private static bool IsArg(string candidate, string shortName, string longName)
-        {
-            return (shortName != null && candidate.Equals("-" + shortName, StringComparison.OrdinalIgnoreCase)) ||
-                   (longName != null && candidate.Equals("--" + longName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        private static string GetDisplayRid(DotnetVersionFile versionFile)
-        {
-            FrameworkDependencyFile fxDepsFile = new FrameworkDependencyFile();
-
-            string currentRid = RuntimeInformation.RuntimeIdentifier;
-
-            // if the current RID isn't supported by the shared framework, display the RID the CLI was
-            // built with instead, so the user knows which RID they should put in their "runtimes" section.
-            return fxDepsFile.IsRuntimeSupported(currentRid) ?
-                currentRid :
-                versionFile.BuildRid;
         }
     }
 }

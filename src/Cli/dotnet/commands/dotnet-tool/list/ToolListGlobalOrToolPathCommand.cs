@@ -3,14 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.Tools.Tool.Common;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Tool.List
@@ -20,19 +18,16 @@ namespace Microsoft.DotNet.Tools.Tool.List
     internal class ToolListGlobalOrToolPathCommand : CommandBase
     {
         public const string CommandDelimiter = ", ";
-        private readonly AppliedOption _options;
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
         private CreateToolPackageStore _createToolPackageStore;
 
         public ToolListGlobalOrToolPathCommand(
-            AppliedOption options,
             ParseResult result,
             CreateToolPackageStore createToolPackageStore = null,
             IReporter reporter = null)
             : base(result)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
             _reporter = reporter ?? Reporter.Output;
             _errorReporter = reporter ?? Reporter.Error;
             _createToolPackageStore = createToolPackageStore ?? ToolPackageFactory.CreateToolPackageStoreQuery;
@@ -40,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Tool.List
 
         public override int Execute()
         {
-            var toolPathOption = _options.ValueOrDefault<string>(ToolAppliedOption.ToolPathOption);
+            var toolPathOption = _parseResult.ValueForOption<string>(ToolListCommandParser.ToolPathOption);
 
             DirectoryPath? toolPath = null;
             if (!string.IsNullOrWhiteSpace(toolPathOption))

@@ -1,27 +1,16 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
+using System.CommandLine.Parsing;
 using System.Linq;
-using System.Transactions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.ShellShim;
-using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.Common;
-using Microsoft.Extensions.EnvironmentAbstractions;
-using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tool.Install
 {
     internal class ToolInstallCommand : CommandBase
     {
-        private readonly AppliedOption _appliedCommand;
-        private readonly ParseResult _parseResult;
         private readonly ToolInstallLocalCommand _toolInstallLocalCommand;
         private readonly ToolInstallGlobalOrToolPathCommand _toolInstallGlobalOrToolPathCommand;
         private readonly bool _global;
@@ -30,36 +19,33 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly string _framework;
 
         public ToolInstallCommand(
-            AppliedOption appliedCommand,
             ParseResult parseResult,
             ToolInstallGlobalOrToolPathCommand toolInstallGlobalOrToolPathCommand = null,
             ToolInstallLocalCommand toolInstallLocalCommand = null)
             : base(parseResult)
         {
-            _appliedCommand = appliedCommand ?? throw new ArgumentNullException(nameof(appliedCommand));
-            _parseResult = parseResult ?? throw new ArgumentNullException(nameof(parseResult));
             _toolInstallLocalCommand =
                 toolInstallLocalCommand
-                ?? new ToolInstallLocalCommand(_appliedCommand, _parseResult);
+                ?? new ToolInstallLocalCommand(_parseResult);
 
             _toolInstallGlobalOrToolPathCommand =
                 toolInstallGlobalOrToolPathCommand
-                ?? new ToolInstallGlobalOrToolPathCommand(_appliedCommand, _parseResult);
+                ?? new ToolInstallGlobalOrToolPathCommand(_parseResult);
 
-            _global = appliedCommand.ValueOrDefault<bool>(ToolAppliedOption.GlobalOption);
-            _local = appliedCommand.ValueOrDefault<bool>(ToolAppliedOption.LocalOption);
-            _toolPath = appliedCommand.SingleArgumentOrDefault(ToolAppliedOption.ToolPathOption);
-            _framework = appliedCommand.ValueOrDefault<string>("framework");
+            _global = parseResult.ValueForOption<bool>(ToolAppliedOption.GlobalOptionAliases.First());
+            _local = parseResult.ValueForOption<bool>(ToolAppliedOption.LocalOptionAlias);
+            _toolPath = parseResult.ValueForOption<string>(ToolAppliedOption.ToolPathOptionAlias);
+            _framework = parseResult.ValueForOption<string>(ToolInstallCommandParser.FrameworkOption);
         }
 
         public override int Execute()
         {
             ToolAppliedOption.EnsureNoConflictGlobalLocalToolPathOption(
-                _appliedCommand,
+                _parseResult,
                 LocalizableStrings.InstallToolCommandInvalidGlobalAndLocalAndToolPath);
 
             ToolAppliedOption.EnsureToolManifestAndOnlyLocalFlagCombination(
-                _appliedCommand);
+                _parseResult);
 
             if (_global || !string.IsNullOrWhiteSpace(_toolPath))
             {

@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli
 
         public static IEnumerable<string> RunTimesFromProjectFile() =>
             GetMSBuildProject()
-                .GetRuntimeIdentifiers() ??
+                ?.GetRuntimeIdentifiers() ??
             Empty<string>();
 
         public static IEnumerable<string> ProjectReferencesFromProjectFile() =>

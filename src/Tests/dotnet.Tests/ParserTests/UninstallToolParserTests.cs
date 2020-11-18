@@ -1,10 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Linq;
+using System.CommandLine.Parsing;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Xunit;
 using Xunit.Abstractions;
 using Parser = Microsoft.DotNet.Cli.Parser;
@@ -23,12 +22,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void UninstallToolParserCanGetPackageId()
         {
-            var command = Parser.Instance;
-            var result = command.Parse("dotnet tool uninstall -g console.test.app");
+            var result = Parser.Instance.Parse("dotnet tool uninstall -g console.test.app");
 
-            var parseResult = result["dotnet"]["tool"]["uninstall"];
-
-            var packageId = parseResult.Arguments.Single();
+            var packageId = result.ValueForArgument<string>(ToolUninstallCommandParser.PackageIdArgument);
 
             packageId.Should().Be("console.test.app");
         }
@@ -38,8 +34,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool uninstall -g console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["uninstall"];
-            appliedOptions.ValueOrDefault<bool>("global").Should().Be(true);
+            result.ValueForOption<bool>(ToolUninstallCommandParser.GlobalOption).Should().Be(true);
         }
 
         [Fact]
@@ -48,8 +43,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool uninstall --tool-path C:\Tools console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["uninstall"];
-            appliedOptions.SingleArgumentOrDefault("tool-path").Should().Be(@"C:\Tools");
+            result.ValueForOption<string>(ToolUninstallCommandParser.ToolPathOption).Should().Be(@"C:\Tools");
         }
         
         [Fact]
@@ -58,8 +52,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool uninstall --local console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["uninstall"];
-            appliedOptions.ValueOrDefault<bool>("local").Should().Be(true);
+            result.ValueForOption<bool>(ToolUninstallCommandParser.LocalOption).Should().Be(true);
         }
         
         [Fact]
@@ -68,8 +61,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool uninstall --tool-manifest folder/my-manifest.format console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["uninstall"];
-            appliedOptions.SingleArgumentOrDefault("tool-manifest").Should().Be(@"folder/my-manifest.format");
+            result.ValueForOption<string>(ToolUninstallCommandParser.ToolManifestOption).Should().Be(@"folder/my-manifest.format");
         }
     }
 }

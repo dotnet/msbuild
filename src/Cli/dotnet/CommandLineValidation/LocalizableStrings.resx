@@ -183,14 +183,8 @@
   <data name="CommandAcceptsOnlyOneArgument" xml:space="preserve">
     <value>Command '{0}' only accepts a single argument but {1} were provided.</value>
   </data>
-  <data name="CommandAcceptsOnlyOneSubcommand" xml:space="preserve">
-    <value>Command '{0}' only accepts a single subcommand but multiple were provided: {1}</value>
-  </data>
   <data name="FileDoesNotExist" xml:space="preserve">
     <value>File does not exist: {0}</value>
-  </data>
-  <data name="NoArgumentsAllowed" xml:space="preserve">
-    <value>Arguments not allowed for option: {0}</value>
   </data>
   <data name="OptionAcceptsOnlyOneArgument" xml:space="preserve">
     <value>Option '{0}' only accepts a single argument but {1} were provided.</value>
@@ -210,7 +204,31 @@
   <data name="UnrecognizedCommandOrArgument" xml:space="preserve">
     <value>Unrecognized command or argument '{0}'</value>
   </data>
-  <data name="UnrecognizedOption" xml:space="preserve">
-    <value>Option '{0}' not recognized. Must be one of: {1}</value>
+  <data name="CommandExpectsFewerArguments" xml:space="preserve">
+    <value>Command '{0}' expects no more than {1} arguments, but {2} were provided.</value>
+  </data>
+  <data name="OptionExpectsFewerArguments" xml:space="preserve">
+    <value>Option '{0}' expects no more than {1} arguments, but {2} were provided.</value>
+  </data>
+  <data name="DirectoryDoesNotExist" xml:space="preserve">
+    <value>Directory does not exist: {0}</value>
+  </data>
+  <data name="FileOrDirectoryDoesNotExist" xml:space="preserve">
+    <value>File or directory does not exist: {0}</value>
+  </data>
+  <data name="CharacterNotAllowedInPath" xml:space="preserve">
+    <value>Character not allowed in a path: {0}</value>
+  </data>
+  <data name="RequiredCommandArgumentMissing" xml:space="preserve">
+    <value>Required argument missing for command: {0}</value>
+  </data>
+  <data name="RequiredOptionArgumentMissing" xml:space="preserve">
+    <value>Required argument missing for option: {0}</value>
+  </data>
+  <data name="ResponseFileNotFound" xml:space="preserve">
+    <value>Response file not found '{0}'</value>
+  </data>
+  <data name="ErrorReadingResponseFile" xml:space="preserve">
+    <value>Error reading response file '{0}': {1}</value>
   </data>
 </root>

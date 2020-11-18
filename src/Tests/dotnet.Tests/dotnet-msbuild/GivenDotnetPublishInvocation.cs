@@ -1,11 +1,8 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.Cli.CommandLine;
+using System.Linq;
 using Microsoft.DotNet.Tools.Publish;
 using Xunit;
 using Xunit.Abstractions;
@@ -96,41 +93,6 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                    .Arguments
                    .Should()
                    .Be($"{ExpectedPrefix} -target:Publish -property:NoBuild=true");
-        }
-
-        [Theory]
-        [InlineData(new string[] { }, "")]
-        [InlineData(new string[] { "-f", "<tfm>" }, "-property:TargetFramework=<tfm>")]
-        [InlineData(new string[] { "--framework", "<tfm>" }, "-property:TargetFramework=<tfm>")]
-        [InlineData(new string[] { "-r", "<rid>" }, "-property:RuntimeIdentifier=<rid>")]
-        [InlineData(new string[] { "--runtime", "<rid>" }, "-property:RuntimeIdentifier=<rid>")]
-        [InlineData(new string[] { "--use-current-runtime" }, "-property:UseCurrentRuntimeIdentifier=True")]
-        [InlineData(new string[] { "-o", "<publishdir>" }, "-property:PublishDir=<cwd><publishdir>")]
-        [InlineData(new string[] { "--output", "<publishdir>" }, "-property:PublishDir=<cwd><publishdir>")]
-        [InlineData(new string[] { "-c", "<config>" }, "-property:Configuration=<config>")]
-        [InlineData(new string[] { "--configuration", "<config>" }, "-property:Configuration=<config>")]
-        [InlineData(new string[] { "--version-suffix", "<versionsuffix>" }, "-property:VersionSuffix=<versionsuffix>")]
-        [InlineData(new string[] { "--manifest", "<manifestfiles>" }, "-property:TargetManifestFiles=<cwd><manifestfiles>")]
-        [InlineData(new string[] { "-v", "minimal" }, "-verbosity:minimal")]
-        [InlineData(new string[] { "--verbosity", "minimal" }, "-verbosity:minimal")]
-        [InlineData(new string[] { "--no-build" }, "-property:NoBuild=true")]
-        public void OptionForwardingIsCorrect(string[] args, string expectedAdditionalArgs)
-        {
-            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
-            {
-                var expectedArgs = expectedAdditionalArgs
-                    .Replace("<cwd>", WorkingDirectory)
-                    .Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-                var parser = Parser.Instance;
-
-                var result = parser.ParseFrom("dotnet publish", args);
-
-                result["dotnet"]["publish"]
-                    .OptionValuesToBeForwarded()
-                    .Should()
-                    .BeEquivalentTo(expectedArgs);
-            });
         }
     }
 }

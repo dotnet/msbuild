@@ -1,40 +1,36 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Cli.CommandLine;
+using System.CommandLine;
+using Microsoft.DotNet.Tools.Tool.Common;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Restore.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class ToolRestoreCommandParser
     {
-        public static Command ToolRestore()
+        public static readonly Option ConfigOption = ToolInstallCommandParser.ConfigOption;
+
+        public static readonly Option AddSourceOption = ToolInstallCommandParser.AddSourceOption;
+
+        public static readonly Option ToolManifestOption = ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName);
+
+        public static readonly Option VerbosityOption = ToolInstallCommandParser.VerbosityOption;
+
+        public static Command GetCommand()
         {
-            return Create.Command(
-                "restore",
-                LocalizableStrings.CommandDescription,
-                Accept.NoArguments(),
-                Create.Option(
-                    "--configfile",
-                    LocalizableStrings.ConfigFileOptionDescription,
-                    Accept.ExactlyOneArgument()
-                        .With(name: LocalizableStrings.ConfigFileOptionName)),
-                Create.Option(
-                    "--add-source",
-                    LocalizableStrings.AddSourceOptionDescription,
-                    Accept.OneOrMoreArguments()
-                          .With(name: LocalizableStrings.AddSourceOptionName)),
-                Create.Option(
-                    "--tool-manifest",
-                    LocalizableStrings.ManifestPathOptionDescription,
-                    Accept.ZeroOrOneArgument()
-                        .With(name: LocalizableStrings.ManifestPathOptionName)),
-                ToolCommandRestorePassThroughOptions.DisableParallelOption(),
-                ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption(),
-                ToolCommandRestorePassThroughOptions.NoCacheOption(),
-                ToolCommandRestorePassThroughOptions.InteractiveRestoreOption(),
-                CommonOptions.HelpOption(),
-                CommonOptions.VerbosityOption());
+            var command = new Command("restore", LocalizableStrings.CommandDescription);
+
+            command.AddOption(ConfigOption);
+            command.AddOption(AddSourceOption);
+            command.AddOption(ToolManifestOption);
+            command.AddOption(ToolCommandRestorePassThroughOptions.DisableParallelOption);
+            command.AddOption(ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);
+            command.AddOption(ToolCommandRestorePassThroughOptions.NoCacheOption);
+            command.AddOption(ToolCommandRestorePassThroughOptions.InteractiveRestoreOption);
+            command.AddOption(VerbosityOption);
+
+            return command;
         }
     }
 }

@@ -3,13 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Transactions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.Common;
@@ -42,7 +41,6 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private IEnumerable<string> _forwardRestoreArguments;
 
         public ToolInstallGlobalOrToolPathCommand(
-            AppliedOption appliedCommand,
             ParseResult parseResult,
             CreateToolPackageStoresAndInstaller createToolPackageStoreAndInstaller = null,
             CreateShellShimRepository createShellShimRepository = null,
@@ -50,22 +48,17 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             IReporter reporter = null)
             : base(parseResult)
         {
-            if (appliedCommand == null)
-            {
-                throw new ArgumentNullException(nameof(appliedCommand));
-            }
-
-            _packageId = new PackageId(appliedCommand.Arguments.Single());
-            _packageVersion = appliedCommand.ValueOrDefault<string>("version");
-            _configFilePath = appliedCommand.ValueOrDefault<string>("configfile");
-            _framework = appliedCommand.ValueOrDefault<string>("framework");
-            _source = appliedCommand.ValueOrDefault<string[]>("add-source");
-            _global = appliedCommand.ValueOrDefault<bool>(ToolAppliedOption.GlobalOption);
-            _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
-            _toolPath = appliedCommand.SingleArgumentOrDefault(ToolAppliedOption.ToolPathOption);
+            _packageId = new PackageId(parseResult.ValueForArgument<string>(ToolInstallCommandParser.PackageIdArgument));
+            _packageVersion = parseResult.ValueForOption<string>(ToolInstallCommandParser.VersionOption);
+            _configFilePath = parseResult.ValueForOption<string>(ToolInstallCommandParser.ConfigOption);
+            _framework = parseResult.ValueForOption<string>(ToolInstallCommandParser.FrameworkOption);
+            _source = parseResult.ValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption);
+            _global = parseResult.ValueForOption<bool>(ToolAppliedOption.GlobalOptionAliases.First());
+            _verbosity = Enum.GetName(parseResult.ValueForOption<VerbosityOptions>(ToolInstallCommandParser.VerbosityOption));
+            _toolPath = parseResult.ValueForOption<string>(ToolAppliedOption.ToolPathOptionAlias);
 
             _createToolPackageStoresAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStoresAndInstaller;
-			_forwardRestoreArguments = appliedCommand.OptionValuesToBeForwarded();
+			_forwardRestoreArguments = parseResult.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand());
 
             _environmentPathInstruction = environmentPathInstruction
                 ?? EnvironmentPathFactory.CreateEnvironmentPathInstruction();
