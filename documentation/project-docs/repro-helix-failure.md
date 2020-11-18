@@ -18,7 +18,7 @@ REM use build env to have stage 0 dotnet on the PATH
 .\artifacts\sdk-build-env.bat
 
 REM run the special test target CreateLocalHelixTestLayout. To have the test layout created on disk.
-dotnet msbuild /restore /t:CreateLocalHelixTestLayout .\src\Tests\UnitTests.proj /p:creator=dotnetsdkdev  /p:_CustomHelixTargetQueue=Windows.Server.Amd64.VS2019.BT.Open /bl
+dotnet msbuild /restore /t:CreateLocalHelixTestLayout .\src\Tests\UnitTests.proj /p:creator=dotnetsdkdev  /p:_CustomHelixTargetQueue=Windows.Server.Amd64.VS2019.Pre.Open /bl
 ```
 
 Copy the result of `artifacts\bin\localHelixTestLayout` to another directory or VM. For example to `C:\helix\localHelixTestLayout`. See "Folders under localHelixTestLayout" for the content. This is _correlation_ payload in helix term.
@@ -60,6 +60,6 @@ Due to Helix long path problem. The folders under localHelixTestLayout all have 
 
 ## Other possible cause of Helix-only failure
 
-- Helix machine are not the same configuration as the host machine. Ideally the dependency should be declared by the SDK repo itself. At the same time, an [effort](https://github.com/dotnet/core-eng/issues/11406) to use the same machine configuration as the host machine is in progress.
+- Helix machine are not the same configuration as the host machine. Ideally the dependency should be declared by the SDK repo itself. At the time the document is written. The build queue and the helix queue should have the same configuration. If they are diverged, we should contact arcade team.
 
 - New test environment variable introduced has not been reflected in RunTestsOnHelix.cmd.
