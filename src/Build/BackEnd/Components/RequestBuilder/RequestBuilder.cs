@@ -265,19 +265,10 @@ namespace Microsoft.Build.BackEnd
                 {
                     taskCleanedUp = _requestTask.Wait(BuildParameters.RequestBuilderShutdownTimeout);
                 }
-                catch (AggregateException e)
+                catch (AggregateException e) when (e.Flatten().InnerExceptions.All(ex => (ex is TaskCanceledException || ex is OperationCanceledException)))
                 {
-                    AggregateException flattenedException = e.Flatten();
-
-                    if (flattenedException.InnerExceptions.All(ex => (ex is TaskCanceledException || ex is OperationCanceledException)))
-                    {
-                        // ignore -- just indicates that the task finished cancelling before we got a chance to wait on it.  
-                        taskCleanedUp = true;
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    // ignore -- just indicates that the task finished cancelling before we got a chance to wait on it.  
+                    taskCleanedUp = true;
                 }
 
                 if (!taskCleanedUp)

@@ -1312,14 +1312,11 @@ namespace Microsoft.Build.Shared
                         if (possibleChildProcess.StartTime > parentStartTime)
                         {
                             int childParentProcessId = GetParentProcessId(possibleChildProcess.Id);
-                            if (childParentProcessId != 0)
+                            if (parentProcessId == childParentProcessId)
                             {
-                                if (parentProcessId == childParentProcessId)
-                                {
-                                    // Add this one
-                                    myChildren.Add(new KeyValuePair<int, SafeProcessHandle>(possibleChildProcess.Id, childHandle));
-                                    keepHandle = true;
-                                }
+                                // Add this one
+                                myChildren.Add(new KeyValuePair<int, SafeProcessHandle>(possibleChildProcess.Id, childHandle));
+                                keepHandle = true;
                             }
                         }
                     }
