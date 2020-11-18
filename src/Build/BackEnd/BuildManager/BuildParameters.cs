@@ -49,7 +49,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The shutdown timeout for the request builder.
         /// </summary>
-        private const int DefaultRequestBuilderShutdownTimeout = Timeout.Infinite;
+        private const int DefaultRequestBuilderShutdownTimeout = 900 * 1000;
 
         /// <summary>
         /// The maximum number of idle request builders to retain before we start discarding them.
