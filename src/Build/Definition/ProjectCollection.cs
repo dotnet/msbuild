@@ -26,8 +26,6 @@ using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerExcepti
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
 using ObjectModel = System.Collections.ObjectModel;
-using System.Data.OleDb;
-using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Evaluation
 {

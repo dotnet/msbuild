@@ -6,7 +6,6 @@ using System.Xml;
 using System.Diagnostics;       // for debugger display attribute
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;

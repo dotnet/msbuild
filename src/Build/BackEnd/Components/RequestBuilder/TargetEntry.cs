@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -15,7 +14,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using MessageImportance = Microsoft.Build.Framework.MessageImportance;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;

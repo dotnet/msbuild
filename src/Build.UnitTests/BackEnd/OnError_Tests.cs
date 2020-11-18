@@ -6,8 +6,6 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using System.Threading;
-using System.Collections;
 using System.Xml;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
@@ -563,18 +561,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void ErrorWhenTaskFailsWithoutLoggingErrorEscapeHatch(bool emitError)
+        [InlineData("True")]
+        [InlineData("False")]
+        [InlineData("Default")]
+        public void ErrorWhenTaskFailsWithoutLoggingErrorEscapeHatch(string failureResponse)
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure($@"
 <Project>
     <UsingTask TaskName=""FailingTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
     <Target Name=""MyTarget"">
-        <FailingTask EnableDefaultFailure=""{emitError}"" />
+        <FailingTask AllowFailureWithoutError=""{failureResponse}"" />
     </Target>
 </Project>");
-            if (emitError)
+            if (!string.Equals(failureResponse, "True"))
             {
                 logger.ErrorCount.ShouldBe(1);
                 logger.Errors.First().Code.ShouldBe("MSB4181");

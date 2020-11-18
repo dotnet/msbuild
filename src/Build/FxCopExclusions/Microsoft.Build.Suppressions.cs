@@ -5,8 +5,6 @@
 // Add module level suppressions to this file to have them suppressed in the assembly
 //
 
-using System.Diagnostics.CodeAnalysis;
-
 #if CODE_ANALYSIS
 [module: SuppressMessage("Microsoft.Design","CA1020:AvoidNamespacesWithFewTypes", Scope="namespace", Target="Microsoft.Build.Debugging", Justification="This deserves its own namespace")]
 [module: SuppressMessage("Microsoft.Naming", "CA1703:ResourceStringsShouldBeSpelledCorrectly", Scope="resource", Target="Microsoft.Build.Strings.resources", MessageId="itemname", Justification="itemname is spelled correctly")]

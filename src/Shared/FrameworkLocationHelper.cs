@@ -10,15 +10,11 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
-
-using Microsoft.Build.Evaluation;
 using Microsoft.Win32;
 
 #if FEATURE_SYSTEM_CONFIGURATION
 using PropertyElement = Microsoft.Build.Evaluation.ToolsetElement.PropertyElement;
 #endif
-using System.Reflection;
-using System.Runtime.InteropServices;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared

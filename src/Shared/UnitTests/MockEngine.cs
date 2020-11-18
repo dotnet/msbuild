@@ -12,7 +12,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 
 using Shouldly;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
@@ -40,6 +39,7 @@ namespace Microsoft.Build.UnitTests
         private readonly bool _logToConsole;
         private readonly ConcurrentDictionary<object, object> _objectCache = new ConcurrentDictionary<object, object>();
         private readonly ConcurrentQueue<BuildErrorEventArgs> _errorEvents = new ConcurrentQueue<BuildErrorEventArgs>();
+        private readonly ConcurrentQueue<BuildWarningEventArgs> _warningEvents = new ConcurrentQueue<BuildWarningEventArgs>();
 
         internal MockEngine() : this(false)
         {
@@ -51,9 +51,10 @@ namespace Microsoft.Build.UnitTests
 
         internal int Errors { get; set; }
 
-        public bool AllowFailureWithoutError { get; set; } = true;
+        public bool AllowFailureWithoutError { get; set; } = false;
 
         public BuildErrorEventArgs[] ErrorEvents => _errorEvents.ToArray();
+        public BuildWarningEventArgs[] WarningEvents => _warningEvents.ToArray();
 
         public Dictionary<string, string> GlobalProperties { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -104,6 +105,7 @@ namespace Microsoft.Build.UnitTests
         {
             lock (_lockObj)
             {
+                _warningEvents.Enqueue(eventArgs);
                 string message = string.Empty;
 
                 if (!string.IsNullOrEmpty(eventArgs.File))

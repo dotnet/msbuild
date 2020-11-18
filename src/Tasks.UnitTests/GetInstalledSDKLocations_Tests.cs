@@ -9,9 +9,6 @@ using System.IO;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
-using System.Linq;
-using Microsoft.Build.Execution;
 using Xunit;
 using Microsoft.Build.Tasks;
 

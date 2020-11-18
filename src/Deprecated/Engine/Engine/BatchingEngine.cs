@@ -4,9 +4,6 @@
 using System;
 using System.Xml;
 using System.Collections;
-using System.Globalization;
-using System.Text;
-using System.Text.RegularExpressions;
 
 using Microsoft.Build.BuildEngine.Shared;
 using System.Collections.Generic;

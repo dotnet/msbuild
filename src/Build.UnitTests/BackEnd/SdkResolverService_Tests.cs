@@ -8,7 +8,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Build.Unittest;

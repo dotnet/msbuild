@@ -141,7 +141,6 @@
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\MSBuildLoadContext.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
     <Compile Include="..\Shared\TypeLoader.cs" />
-    <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\LoadedType.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -195,6 +194,7 @@
     <Compile Include="OutOfProcTaskHostNode.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
+    <Compile Include="PerformanceLogEventListener.cs" />
     <Compile Include="XMake.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

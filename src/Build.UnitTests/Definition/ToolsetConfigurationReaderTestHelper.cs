@@ -4,9 +4,7 @@
 using System;
 using System.Configuration;
 using System.IO;
-using System.Threading;
 using Microsoft.Build.Shared;
-using Xunit;
 
 #pragma warning disable 436
 

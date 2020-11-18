@@ -6,9 +6,7 @@ using System.Collections.Generic;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
-using System.Collections;
 using System.Threading;
-using System.Diagnostics;
 
 namespace Microsoft.Build.BuildEngine
 {

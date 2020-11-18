@@ -5,15 +5,12 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
@@ -4006,6 +4003,14 @@ namespace Microsoft.Build.Evaluation
                             if (TryGetArgs(args, out string arg1, out int arg2))
                             {
                                 returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg1, arg2);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.StableStringHash), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.StableStringHash(arg0);
                                 return true;
                             }
                         }

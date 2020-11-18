@@ -3,16 +3,9 @@
 
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Xml.Schema;
     using Microsoft.Build.Construction;
-    using Microsoft.Build.Evaluation;
     using Xunit;
-    using Xunit.Abstractions;
-    using Xunit.Sdk;
 
     /// <summary>
     /// Most importantly we want to touch implementation to all public method to catch any

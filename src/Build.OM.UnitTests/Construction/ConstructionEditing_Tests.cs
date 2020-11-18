@@ -3,17 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Construction;
-using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;

@@ -10,8 +10,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
-using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
-
 namespace Microsoft.Build.Construction
 {
     /// <summary>

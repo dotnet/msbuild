@@ -7,10 +7,6 @@ using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Security;
-using System.Globalization;
-using System.Text.RegularExpressions;
 
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;

@@ -4,9 +4,7 @@
 using System;
 using System.Text;
 using System.Xml;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests

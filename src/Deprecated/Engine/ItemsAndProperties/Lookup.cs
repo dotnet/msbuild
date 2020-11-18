@@ -4,11 +4,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.BuildEngine.Shared;
-using System.Diagnostics;
 using System.Threading;
-using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BuildEngine
 {
