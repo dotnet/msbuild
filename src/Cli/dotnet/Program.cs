@@ -339,7 +339,7 @@ namespace Microsoft.DotNet.Cli
 
                 dotnetConfigurer.Configure();
 
-                if (isDotnetBeingInvokedFromNativeInstaller && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (isDotnetBeingInvokedFromNativeInstaller && OperatingSystem.IsWindows())
                 {
                     DotDefaultPathCorrector.Correct();
                 }

@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.ShellShim
 
         private FilePath GetShimPath(ToolCommandName commandName)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 return _shimsDirectory.WithFile(commandName.Value + ".exe");
             }
