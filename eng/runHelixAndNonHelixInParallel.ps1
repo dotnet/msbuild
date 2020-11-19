@@ -6,7 +6,7 @@
         [switch] $test
     )
 
-    if (-not$test)
+    if (-not $test)
     {
         Write-Output "No '-test' switch. Skip both helix and non helix tests"
         return

@@ -2,11 +2,11 @@
 
 ## General
 
-Most of the test failure on helix should be able to repro locally. Try follow [developer-guide](developer-guide.md) _Run tests from the command line_ session first.
+Most test failures on helix should repro locally. Try following the [developer-guide](developer-guide.md) _Run tests from the command line_ section first.
 
 ## Repro test as tool layout
 
-Run test on Helix reuse "test as tool" infrastructure. All tests projects are published with xunit command line. The SDK under test, the published test project and other dependencies are copied to a helix machine. This step changed the repo structure. Most of the helix-only failures are caused by tests depending on the repo structure or having dependencies that are not carried by the test project publishing step. The following steps helps you to repro the test layout as in the helix machine. And you can run the individual test to discover the cause.
+Running tests on Helix reuses the "test as tool" infrastructure. All tests projects are published  as tools that accept xunit command line arguments. The SDK under test, the published test project, and other dependencies are copied to a helix machine. This step changes the repo structure. Most of the helix-only failures are caused by tests depending on the repo structure or having dependencies that are not carried by the test project publishing step. The following steps help you to repro the test layout that is used on the helix machine. And you can run the individual test to discover the cause.
 
 ### repro the test layout as in the helix machine
 
@@ -60,6 +60,6 @@ Due to Helix long path problem. The folders under localHelixTestLayout all have 
 
 ## Other possible cause of Helix-only failure
 
-- Helix machine are not the same configuration as the host machine. Ideally the dependency should be declared by the SDK repo itself. At the time the document is written. The build queue and the helix queue should have the same configuration. If they are diverged, we should contact arcade team.
+- Helix machine does not have the same pre-installed dependencies as the host machine. Ideally the dependencies should be declared by the SDK repo itself. At the time the document is written. The build queue and the helix queue should have the same Visual Studio version. If they are diverged, we should contact arcade team.
 
 - New test environment variable introduced has not been reflected in RunTestsOnHelix.cmd.
