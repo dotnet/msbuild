@@ -498,7 +498,9 @@ namespace Microsoft.Build.Shared
                             }
                         }
                         catch
-                        { }
+                        {
+                            // Best effort: fall back to Unknown
+                        }
                     }
 
                     ProcessorArchitectureTypeNative = ProcessorArchitectureType = processorArchitecture;
