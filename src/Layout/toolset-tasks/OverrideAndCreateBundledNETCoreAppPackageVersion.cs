@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Build.Tasks
             {
                 if (element.Value != originalBundledNETCoreAppPackageVersion)
                 {
-                    throw new ApplicationException(string.Format(
+                    throw new InvalidOperationException(string.Format(
                         _messageWhenMismatch,
                         element.ToString(), element.Value, originalBundledNETCoreAppPackageVersion));
                 }
@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Build.Tasks
             {
                 if (attribute.Value != originalBundledNETCoreAppPackageVersion)
                 {
-                    throw new ApplicationException(string.Format(
+                    throw new InvalidOperationException(string.Format(
                         _messageWhenMismatch,
                         attribute.Parent.ToString() + " --- " + attribute.ToString(), attribute.Value,
                         originalBundledNETCoreAppPackageVersion));

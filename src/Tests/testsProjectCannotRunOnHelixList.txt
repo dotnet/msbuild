@@ -1,0 +1,11 @@
+Microsoft.DotNet.MSBuildSdkResolver.Tests
+Microsoft.DotNet.ToolPackage.Tests
+Microsoft.DotNet.Cli.Sln.Internal.Tests
+dotnet-msbuild.Tests
+Microsoft.DotNet.Cli.Utils.Tests
+EndToEnd.Tests
+Microsoft.DotNet.Tools.Tests.Utilities.Tests
+dotnet.Tests
+msbuild.Integration.Tests
+dotnet-sln.Tests
+Microsoft.NET.Sdk.Publish.Tasks.Tests

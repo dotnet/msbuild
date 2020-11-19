@@ -9,14 +9,15 @@
 
     <SDKCustomXUnitArguments Condition="'$(SDKCustomXUnitArguments)' == ''">-nocolor</SDKCustomXUnitArguments>
 
-    <TaskTargetFramework>netcoreapp3.0</TaskTargetFramework>
+    <TaskTargetFramework>netcoreapp3.1</TaskTargetFramework>
     <TaskTargetFramework Condition="'$(MSBuildRuntimeType)' != 'Core'">net472</TaskTargetFramework>
 
     <SDKHelixCustomSdkTaskDll>$(ArtifactsDir)\bin\HelixTasks\$(Configuration)\$(TaskTargetFramework)\HelixTasks.dll</SDKHelixCustomSdkTaskDll>
   </PropertyGroup>
 
-  <UsingTask TaskName="SDKCustomCreateXUnitWorkItems" AssemblyFile="$(SDKHelixCustomSdkTaskDll)" />
+  <UsingTask TaskName="SDKCustomCreateXUnitWorkItemsWithTestExclusion" AssemblyFile="$(SDKHelixCustomSdkTaskDll)" />
   <UsingTask TaskName="TarGzFileCreateFromDirectory" AssemblyFile="$(SDKHelixCustomSdkTaskDll)" />
+  <UsingTask TaskName="CreateLocalHelixTestLayout" AssemblyFile="$(SDKHelixCustomSdkTaskDll)" />
 
   <Choose>
     <When Condition="$(HelixTargetQueue.ToLowerInvariant().Contains('windows'))">
@@ -74,9 +75,14 @@
           Condition="'@(SDKCustomXUnitProject)' != ''"
           BeforeTargets="CoreTest">
 
-    <SDKCustomCreateXUnitWorkItems XUnitProjects="@(SDKCustomXUnitProject)" IsPosixShell="$(IsPosixShell)" XUnitArguments="$(SDKCustomXUnitArguments)" XUnitWorkItemTimeout="$(XUnitWorkItemTimeout)">
+    <SDKCustomCreateXUnitWorkItemsWithTestExclusion
+        XUnitProjects="@(SDKCustomXUnitProject)"
+        TestProjectExclusionListPath="$(reporoot)/src/Tests/testsProjectCannotRunOnHelixList.txt"
+        IsPosixShell="$(IsPosixShell)"
+        XUnitArguments="$(SDKCustomXUnitArgument)"
+        XUnitWorkItemTimeout="$(XUnitWorkItemTimeout)">
       <Output TaskParameter="XUnitWorkItems" ItemName="HelixWorkItem"/>
-    </SDKCustomCreateXUnitWorkItems>
+    </SDKCustomCreateXUnitWorkItemsWithTestExclusion>
   </Target>
 
 </Project>

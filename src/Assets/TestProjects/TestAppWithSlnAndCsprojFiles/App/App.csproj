@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
