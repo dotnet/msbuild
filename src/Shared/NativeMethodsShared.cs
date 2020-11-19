@@ -435,7 +435,7 @@ namespace Microsoft.Build.Shared
                 {
                     ProcessorArchitectures processorArchitecture = ProcessorArchitectures.Unknown;
 #if !NET35
-                    // Get the architecture from the runtime using RuntimeInformation.ProcessArchitecture.
+                    // Get the architecture from the runtime.
                     processorArchitecture = RuntimeInformation.OSArchitecture switch
                     {
                         Architecture.Arm => ProcessorArchitectures.ARM,
