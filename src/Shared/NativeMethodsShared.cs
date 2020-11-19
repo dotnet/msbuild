@@ -433,9 +433,10 @@ namespace Microsoft.Build.Shared
                 }
                 else
                 {
+                    ProcessorArchitectures processorArchitecture = ProcessorArchitectures.Unknown;
+#if !NET35
                     // Get the architecture from the runtime using RuntimeInformation.ProcessArchitecture.
-                    ProcessorArchitectures processorArchitecture =
-                    RuntimeInformation.OSArchitecture switch
+                    processorArchitecture = RuntimeInformation.OSArchitecture switch
                     {
                         Architecture.Arm => ProcessorArchitectures.ARM,
                         Architecture.Arm64 =>  ProcessorArchitectures.ARM64,
@@ -443,7 +444,7 @@ namespace Microsoft.Build.Shared
                         Architecture.X86 => ProcessorArchitectures.X86,
                         _ => ProcessorArchitectures.Unknown,
                     };
-
+#endif
                     // Fall back to 'uname -m' to get the architecture.
                     if (processorArchitecture == ProcessorArchitectures.Unknown)
                     {
