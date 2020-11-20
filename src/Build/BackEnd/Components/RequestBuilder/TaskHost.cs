@@ -369,7 +369,6 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrow(_yieldThreadId == Thread.CurrentThread.ManagedThreadId, "Cannot call Reacquire() on thread {0} when Yield() was called on thread {1}", Thread.CurrentThread.ManagedThreadId, _yieldThreadId);
                 MSBuildEventSource.Log.ExecuteTaskYieldStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 MSBuildEventSource.Log.ExecuteTaskReacquireStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
-
                 builderCallback.Reacquire();
                 MSBuildEventSource.Log.ExecuteTaskReacquireStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 _yieldThreadId = -1;
@@ -408,8 +407,8 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                // If we are in building across process we need the events to be serializable. This method will
-                // check to see if we are building with multiple process and if the event is serializable. It will
+                // If we are in building across process we need the events to be serializable. This method will 
+                // check to see if we are building with multiple process and if the event is serializable. It will 
                 // also log a warning if the event is not serializable and drop the logging message.
                 if (IsRunningMultipleNodes && !IsEventSerializable(e))
                 {
@@ -418,7 +417,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (_convertErrorsToWarnings)
                 {
-                    // Convert the error into a warning.  We do this because the whole point of
+                    // Convert the error into a warning.  We do this because the whole point of 
                     // ContinueOnError is that a project author expects that the task might fail,
                     // but wants to ignore the failures.  This implies that we shouldn't be logging
                     // errors either, because you should never have a successful build with errors.
@@ -479,8 +478,8 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                // If we are in building across process we need the events to be serializable. This method will
-                // check to see if we are building with multiple process and if the event is serializable. It will
+                // If we are in building across process we need the events to be serializable. This method will 
+                // check to see if we are building with multiple process and if the event is serializable. It will 
                 // also log a warning if the event is not serializable and drop the logging message.
                 if (IsRunningMultipleNodes && !IsEventSerializable(e))
                 {
@@ -520,8 +519,8 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                // If we are in building across process we need the events to be serializable. This method will
-                // check to see if we are building with multiple process and if the event is serializable. It will
+                // If we are in building across process we need the events to be serializable. This method will 
+                // check to see if we are building with multiple process and if the event is serializable. It will 
                 // also log a warning if the event is not serializable and drop the logging message.
                 if (IsRunningMultipleNodes && !IsEventSerializable(e))
                 {
@@ -561,8 +560,8 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                // If we are in building across process we need the events to be serializable. This method will
-                // check to see if we are building with multiple process and if the event is serializable. It will
+                // If we are in building across process we need the events to be serializable. This method will 
+                // check to see if we are building with multiple process and if the event is serializable. It will 
                 // also log a warning if the event is not serializable and drop the logging message.
                 if (IsRunningMultipleNodes && !IsEventSerializable(e))
                 {
@@ -786,7 +785,7 @@ namespace Microsoft.Build.BackEnd
                 ILease lease = (ILease)base.InitializeLifetimeService();
 
                 // Set how long a lease should be initially. Once a lease expires
-                // the remote object will be disconnected and it will be marked as being availiable
+                // the remote object will be disconnected and it will be marked as being availiable 
                 // for garbage collection
                 int initialLeaseTime = 1;
 
@@ -808,7 +807,7 @@ namespace Microsoft.Build.BackEnd
                 // increase the lease time allowing the object to stay in memory
                 _sponsor = new ClientSponsor();
 
-                // When a new lease is requested lets make it last 1 minutes longer.
+                // When a new lease is requested lets make it last 1 minutes longer. 
                 int leaseExtensionTime = 1;
 
                 string leaseExtensionTimeFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDENGINEPROXYLEASEEXTENSIONTIME");
@@ -845,7 +844,7 @@ namespace Microsoft.Build.BackEnd
                 ReleaseAllCores();
 
                 // Since the task has a pointer to this class it may store it in a static field. Null out
-                // internal data so the leak of this object doesn't lead to a major memory leak.
+                // internal data so the leak of this object doesn't lead to a major memory leak.            
                 _host = null;
                 _requestEntry = null;
 
@@ -933,7 +932,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    // UNDONE: (Refactor) Investigate making this a ReadOnly collection of some sort.
+                    // UNDONE: (Refactor) Investigate making this a ReadOnly collection of some sort.  
                     PropertyDictionary<ProjectPropertyInstance>[] propertyDictionaries = new PropertyDictionary<ProjectPropertyInstance>[projectFileNames.Length];
 
                     for (int i = 0; i < projectFileNames.Length; i++)
