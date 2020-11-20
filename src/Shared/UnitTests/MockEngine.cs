@@ -530,12 +530,5 @@ namespace Microsoft.Build.UnitTests
                 cpuCount.Release(coresToRelease);
             }
         }
-
-        public void BlockingWaitForCore()
-        {
-            cpuCount ??= Semaphore.OpenExisting(ResourceSemaphoreName);
-
-            cpuCount.WaitOne();
-        }
     }
 }
