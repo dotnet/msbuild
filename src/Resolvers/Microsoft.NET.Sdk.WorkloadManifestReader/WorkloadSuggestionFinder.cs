@@ -12,9 +12,41 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     {
         public WorkloadSuggestionFinder(HashSet<WorkloadPackId> installedPacks, HashSet<WorkloadPackId> requestedPacks, IEnumerable<(WorkloadDefinitionId id, HashSet<WorkloadPackId> expandedPacks)> expandedWorkloads)
         {
-            var partialSuggestions = new List<WorkloadSuggestionCandidate>();
-            var completeSuggestions = new HashSet<WorkloadSuggestionCandidate>();
+            FindPartialSuggestionsAndSimpleCompleteSuggestions(
+                requestedPacks, expandedWorkloads,
+                out List<WorkloadSuggestionCandidate> partialSuggestions,
+                out HashSet<WorkloadSuggestionCandidate> completeSuggestions);
 
+            foreach (var suggestion in GatherUniqueCompletePermutedSuggestions(partialSuggestions))
+            {
+                completeSuggestions.Add(suggestion);
+            }
+
+            UnsortedSuggestions = completeSuggestions.Select(
+                c =>
+                {
+                    var installedCount = c.Packs.Count(p => installedPacks.Contains(p));
+                    var extraPacks = c.Packs.Count - installedCount - requestedPacks.Count;
+                    return new WorkloadSuggestion(c.Workloads, extraPacks);
+                })
+                .ToList();
+        }
+
+        /// <summary>
+        /// Serachest the list of expanded workloads for workloads that are "simple" complete suggestions themselves and workloads that could be part of a more complex complete suggestion.
+        /// </summary>
+        /// <param name="requestedPacks">The packs that a complete suggestion must include</param>
+        /// <param name="expandedWorkloads">The full set of workloads, flattened to include the packs in the workloads they extend</param>
+        /// <param name="partialSuggestions">Workloads that contain one or more of the required packs and could be combined with another workload to make a complete suggestion</param>
+        /// <param name="completeSuggestions">Workloads that contain all the requested packs and therefore are inherently complete suggestions</param>
+        internal static void FindPartialSuggestionsAndSimpleCompleteSuggestions(
+            HashSet<WorkloadPackId> requestedPacks,
+            IEnumerable<(WorkloadDefinitionId id, HashSet<WorkloadPackId> expandedPacks)> expandedWorkloads,
+            out List<WorkloadSuggestionCandidate> partialSuggestions,
+            out HashSet<WorkloadSuggestionCandidate> completeSuggestions)
+        {
+            partialSuggestions = new List<WorkloadSuggestionCandidate>();
+            completeSuggestions = new HashSet<WorkloadSuggestionCandidate>();
             foreach (var workload in expandedWorkloads)
             {
                 if (workload.expandedPacks.Any(e => requestedPacks.Contains(e)))
@@ -31,33 +63,19 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     }
                 }
             }
-
-            foreach (var suggestion in GatherCompleteSuggestions(partialSuggestions))
-            {
-                completeSuggestions.Add(suggestion);
-            }
-
-            UnsortedSuggestions = completeSuggestions.Select(
-                c =>
-                {
-                    var installedCount = c.Packs.Count(p => installedPacks.Contains(p));
-                    var extraPacks = c.Packs.Count - installedCount - requestedPacks.Count;
-                    return new WorkloadSuggestion(c.Workloads, extraPacks);
-                })
-                .ToList();
         }
 
         /// <summary>
         /// Finds complete suggestions by permutationally combining partial suggestions.
         /// </summary>
-        /// <remarks>
-        internal static HashSet<WorkloadSuggestionCandidate> GatherCompleteSuggestions(List<WorkloadSuggestionCandidate> partialSuggestions)
+        /// <param name="partialSuggestions">List of partial suggestions to permutationally combine</param>
+        internal static HashSet<WorkloadSuggestionCandidate> GatherUniqueCompletePermutedSuggestions(List<WorkloadSuggestionCandidate> partialSuggestions)
         {
             var completeSuggestions = new HashSet<WorkloadSuggestionCandidate>();
 
             foreach (var root in partialSuggestions)
             {
-                GatherCompleteSuggestions(root, partialSuggestions, completeSuggestions);
+                GatherCompletePermutedSuggestions(root, partialSuggestions, completeSuggestions);
             }
 
             return FilterRedundantSuggestions(completeSuggestions);
@@ -65,6 +83,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         /// <summary>
         /// Recursively explores a branching tree from the root, adding branches that would reduce the number of unsatisfied packs, and recording any fully satisfied solutions found.
+        /// This is intended to only be called by <see cref="GatherUniqueCompletePermutedSuggestions"/>.
         /// </summary>
         /// <remarks>
         /// Some of these solutions may contain redundancies, i.e. workloads that are not necessary for it to be a complete solution. These should be filtered out using
@@ -73,7 +92,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <param name="root">A partial suggestion candidate that is the base for this permutation</param>
         /// <param name="branches">Partial suggestion candidates that can be added to the root to make it more complete</param>
         /// <param name="completeSuggestions">A collection to which to add any discovered complete solutions</param>
-        static void GatherCompleteSuggestions(WorkloadSuggestionCandidate root, List<WorkloadSuggestionCandidate> branches, HashSet<WorkloadSuggestionCandidate> completeSuggestions)
+        static void GatherCompletePermutedSuggestions(WorkloadSuggestionCandidate root, List<WorkloadSuggestionCandidate> branches, HashSet<WorkloadSuggestionCandidate> completeSuggestions)
         {
             foreach (var branch in branches)
             {
@@ -107,7 +126,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 }
                 else
                 {
-                    GatherCompleteSuggestions(candidate, branches, completeSuggestions);
+                    GatherCompletePermutedSuggestions(candidate, branches, completeSuggestions);
                 }
             }
         }
@@ -115,7 +134,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <summary>
         /// Returns a new set with redundant suggestions removed from it, i.e. suggestions that are a superset of another of the suggestions.
         /// </summary>
-        static HashSet<WorkloadSuggestionCandidate> FilterRedundantSuggestions(HashSet<WorkloadSuggestionCandidate> completeSuggestions)
+        internal static HashSet<WorkloadSuggestionCandidate> FilterRedundantSuggestions(HashSet<WorkloadSuggestionCandidate> completeSuggestions)
         {
             var filtered = new HashSet<WorkloadSuggestionCandidate>();
 
@@ -143,7 +162,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <summary>
         /// Finds the best value from a list of values according to one or more custom comparators. The comparators are an ordered fallback list - the second comparator is only checked when values are equal according to the first comparator, and so on.
         /// </summary>
-        private T FindBest<T>(IEnumerable<T> values, params Comparison<T>[] comparators)
+        private static T FindBest<T>(IEnumerable<T> values, params Comparison<T>[] comparators)
         {
             T best = values.First();
 
@@ -166,13 +185,15 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return best;
         }
 
+        internal static WorkloadSuggestion GetBestSuggestion(ICollection<WorkloadSuggestion> suggestions) => FindBest(
+                suggestions,
+                (x, y) => y.ExtraPacks - x.ExtraPacks,
+                (x, y) => y.Workloads.Count - x.Workloads.Count);
+
         /// <summary>
         /// Gets the suggestion with the lowest number of extra packs and lowest number of workload IDs.
         /// </summary>
-        public WorkloadSuggestion GetBestSuggestion() => FindBest(
-                UnsortedSuggestions,
-                (x, y) => y.ExtraPacks - x.ExtraPacks,
-                (x, y) => y.Workloads.Count - x.Workloads.Count);
+        public WorkloadSuggestion GetBestSuggestion() => GetBestSuggestion(UnsortedSuggestions);
 
         /// <summary>
         /// A partial or complete suggestion for workloads to install, annotated with which requested packs it does not satisfy
