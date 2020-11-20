@@ -497,16 +497,15 @@ namespace Microsoft.Build.UnitTests
         {
             cpuCount ??= Semaphore.OpenExisting(ResourceSemaphoreName);
 
-            int coresAcquiredBeforeMoreCoresGetAcquired = runningTotal;
-
             cpuCount.WaitOne();
+            int coresAcquired = 1;
 
             // Keep requesting cores until we can't anymore, or we've gotten the number of cores we wanted.
             for (int i = 1; i < requestedCores; i++)
             {
                 if (cpuCount.WaitOne(0))
                 {
-                    runningTotal++;
+                    coresAcquired++;
                 }
                 else
                 {
@@ -514,7 +513,9 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            return runningTotal - coresAcquiredBeforeMoreCoresGetAcquired;
+            runningTotal += coresAcquired;
+
+            return coresAcquired;
         }
 
         public void ReleaseCores(int coresToRelease)
