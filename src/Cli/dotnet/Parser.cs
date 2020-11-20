@@ -93,6 +93,8 @@ namespace Microsoft.DotNet.Cli
             .UseHelp()
             .UseHelpBuilder(context => new DotnetHelpBuilder(context.Console))
             .UseValidationMessages(new CommandLineValidationMessages())
+            .UseParseDirective()
+            .UseSuggestDirective()
             .Build();
 
         private static void ExceptionHandler(Exception exception, InvocationContext context)

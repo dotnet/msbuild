@@ -146,6 +146,10 @@ namespace Microsoft.DotNet.Cli
                     HelpCommand.PrintHelp();
                     return 0;
                 }
+                else if (parseResult.Directives.Count() > 0)
+                {
+                    return parseResult.Invoke();
+                }
                 else
                 {
                     PerformanceLogEventSource.Log.FirstTimeConfigurationStart();
