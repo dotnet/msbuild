@@ -3,10 +3,10 @@
 
 using Xunit;
 using Shouldly;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.UnitTests;
 using Xunit.Abstractions;
-using Microsoft.Build.Evaluation;
 using System;
 
 namespace Microsoft.Build.Engine.UnitTests
@@ -40,7 +40,7 @@ namespace Microsoft.Build.Engine.UnitTests
             TransientTestFile file = testEnvironment.CreateFile("proj.csproj", projectFile);
 
             ProjectCollection collection = new ProjectCollection();
-            MockLogger log = new MockLogger();
+            MockLogger log = new MockLogger(_output);
             collection.RegisterLogger(log);
 
             Project p = collection.LoadProject(file.Path);
