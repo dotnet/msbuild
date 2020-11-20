@@ -351,29 +351,29 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
             foreach (ITemplateMatchInfo template in listToFilter)
             {
-                if (template.Info.Tags != null)
+                MatchKind matchKind;
+
+                string templateLanguage = template.Info.GetLanguage();
+                // only add default language disposition when there is a language specified for the template.
+                if (string.IsNullOrWhiteSpace(templateLanguage))
                 {
-                    if (template.Info.Tags.TryGetValue("language", out ICacheTag languageTag))
-                    {
-                        MatchKind matchKind;
-
-                        if (languageTag.ChoicesAndDescriptions.ContainsKey(language))
-                        {
-                            matchKind = MatchKind.Exact;
-                        }
-                        else
-                        {
-                            matchKind = MatchKind.Mismatch;
-                        }
-
-                        // only add default language disposition when there is a language specified for the template.
-                        template.AddDisposition(new MatchInfo
-                        {
-                            Location = MatchLocation.DefaultLanguage,
-                            Kind = matchKind
-                        });
-                    }
+                    continue;
                 }
+
+                if (templateLanguage.Equals(language, StringComparison.OrdinalIgnoreCase))
+                {
+                    matchKind = MatchKind.Exact;
+                }
+                else
+                {
+                    matchKind = MatchKind.Mismatch;
+                }
+
+                template.AddDisposition(new MatchInfo
+                {
+                    Location = MatchLocation.DefaultLanguage,
+                    Kind = matchKind
+                });
             }
         }
 

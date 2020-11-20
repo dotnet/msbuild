@@ -342,9 +342,10 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         string str = $"      {info.Name} ({info.ShortName})";
 
-                        if (info.Tags != null && info.Tags.TryGetValue("language", out ICacheTag languageTag))
+                        string templateLanguage = info.GetLanguage();
+                        if (!string.IsNullOrWhiteSpace(templateLanguage))
                         {
-                            str += " " + string.Join(", ", languageTag.ChoicesAndDescriptions.Select(x => x.Key));
+                            str += " " + templateLanguage;
                         }
 
                         templateDisplayStrings.Add(str);

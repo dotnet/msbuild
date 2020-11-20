@@ -53,9 +53,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             HashSet<string> languages = new HashSet<string>();
             foreach (ITemplateInfo templateInfo in templateGroup)
             {
-                if (templateInfo.Tags != null && templateInfo.Tags.TryGetValue("language", out ICacheTag languageTag))
+                string templateLanguage = templateInfo.GetLanguage();
+                if (!string.IsNullOrWhiteSpace(templateLanguage))
                 {
-                    languages.UnionWith(languageTag.ChoicesAndDescriptions.Keys.Where(x => !string.IsNullOrWhiteSpace(x)).ToList());
+                    languages.Add(templateLanguage);
                 }
             }
 

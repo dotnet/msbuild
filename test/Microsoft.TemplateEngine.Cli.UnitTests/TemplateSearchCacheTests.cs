@@ -134,7 +134,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             }
         }
 
-        [Theory(DisplayName = nameof(CacheSearchTypeFilterTest), Skip = "skipped until type fix is merged")]
+        [Theory(DisplayName = nameof(CacheSearchTypeFilterTest))]
         [InlineData("", "project", 1)]
         [InlineData("foo", "project", 1)]
         [InlineData("", "Wrong", 0)]

@@ -36,27 +36,25 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
 
                 foreach (ITemplateMatchInfo template in grouping)
                 {
-                    if (template.Info.Tags == null || !template.Info.Tags.TryGetValue("language", out ICacheTag languageTag))
+                    string lang = template.Info.GetLanguage();
+                    if (string.IsNullOrWhiteSpace(lang))
                     {
                         continue;
                     }
-                    foreach (string lang in languageTag.ChoicesAndDescriptions.Keys)
-                    {
-                        if (!uniqueLanguages.Add(lang))
-                        {
-                            continue;
-                        }
 
-                        if (string.IsNullOrEmpty(language) && string.Equals(defaultLanguage, lang, StringComparison.OrdinalIgnoreCase))
-                        {
-                            defaultLanguageDisplay = $"[{lang}]";
-                        }
-                        else
-                        {
-                            languageForDisplay.Add(lang);
-                        }
+                    if (!uniqueLanguages.Add(lang))
+                    {
+                        continue;
                     }
-                }
+                    if (string.IsNullOrEmpty(language) && string.Equals(defaultLanguage, lang, StringComparison.OrdinalIgnoreCase))
+                    {
+                        defaultLanguageDisplay = $"[{lang}]";
+                    }
+                    else
+                    {
+                        languageForDisplay.Add(lang);
+                    }
+                }                
 
                 languageForDisplay.Sort(StringComparer.OrdinalIgnoreCase);
                 if (!string.IsNullOrEmpty(defaultLanguageDisplay))
@@ -75,12 +73,6 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
                     shortName = highestPrecedenceTemplate.Info.ShortName;
                 }
 
-                string templateType = string.Empty;
-                if (highestPrecedenceTemplate.Info.Tags != null && highestPrecedenceTemplate.Info.Tags.TryGetValue("type", out ICacheTag typeTag))
-                {
-                    templateType = typeTag.DefaultValue;
-                }
-
                 TemplateGroupTableRow groupDisplayInfo = new TemplateGroupTableRow()
                 {
                     Name = highestPrecedenceTemplate.Info.Name,
@@ -88,7 +80,7 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
                     Languages = string.Join(",", languageForDisplay),
                     Classifications = highestPrecedenceTemplate.Info.Classifications != null ? string.Join("/", highestPrecedenceTemplate.Info.Classifications) : null,
                     Author = highestPrecedenceTemplate.Info.Author,
-                    Type = templateType
+                    Type = highestPrecedenceTemplate.Info.GetTemplateType() ?? string.Empty
                 };
                 templateGroupsForDisplay.Add(groupDisplayInfo);
             }

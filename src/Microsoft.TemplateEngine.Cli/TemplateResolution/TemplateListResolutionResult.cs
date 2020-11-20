@@ -163,17 +163,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                 HashSet<string> languagesFound = new HashSet<string>();
                 foreach (ITemplateMatchInfo template in UnambiguousTemplateGroup)
                 {
-                    string language;
-
-                    if (template.Info.Tags != null && template.Info.Tags.TryGetValue("language", out ICacheTag languageTag))
-                    {
-                        language = languageTag.ChoicesAndDescriptions.Keys.FirstOrDefault();
-                    }
-                    else
-                    {
-                        language = string.Empty;
-                    }
-
+                    string language = template.Info.GetLanguage();
                     if (!string.IsNullOrEmpty(language))
                     {
                         languagesFound.Add(language);
