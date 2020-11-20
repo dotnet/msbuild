@@ -26,16 +26,20 @@ In a 16-process build of a solution with 30 projects, 16 worker nodes are launch
 
 Task `Work` is called in project `A` with 25 inputs. It would like to run as many as possible in parallel. It calls
 
-TODO: what's the best calling pattern here? the thread thing I hacked up in the sample task seems bad.
-
 ```C#
-int allowedParallelism = BuildEngine7.RequestCores(Inputs.Count); // Inputs.Count == 25
+int allowedParallelism = BuildEngine8.RequestCores(Inputs.Count); // Inputs.Count == 25
 ```
 
-When `Work` returns, MSBuild automatically returns all resources reserved by the task to the pool. Before moving on with its processing, `Work2` calls `RequestCores` again, and this time receives a larger reservation.
+and gets `16`--the number of cores available to the build overall. Other tasks that do not call `RequestCores` do not affect this value.
+
+While `A` runs `Work`, projects `B` and `C` run another task `Work2` that also calls `RequestCores` with a high value. Since `Work` in `A` has reserved all cores, the calls in `B` and `C` block, waiting on `Work` to release cores (or return).
+
+When `Work` returns, MSBuild automatically returns all resources reserved by the task to the pool. At that time `Work2`'s calls to `RequestCores` unblock, and
 
 ## Implementation
 
 The initial implementation of the system will use a Win32 [named semaphore](https://docs.microsoft.com/windows/win32/sync/semaphore-objects) to track resource use. This was the implementation of `MultiToolTask` in the VC++ toolchain and is a performant implementation of a counter that can be shared across processes.
+
+There is no guarantee of fair resource allocation. If multiple tasks are blocked in `RequestCores`, one of them will be unblocked when cores are released, but the returned cores may be split evenly, unevenly, or even entirely given to one task.
 
 On platforms where named semaphores are not supported (.NET Core MSBuild running on macOS, Linux, or other UNIXes), `RequestCores` will always return `1`. That is the minimum return value when the manager is fully functional, and hopefully will not dramatically overburden the machine. We will consider implementing full support using a cross-process semaphore (or an addition to the existing MSBuild communication protocol, if it isn't prohibitively costly to do the packet exchange and processing) on these platforms in the future.
