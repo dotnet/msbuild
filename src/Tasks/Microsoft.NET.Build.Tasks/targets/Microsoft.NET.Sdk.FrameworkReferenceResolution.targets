@@ -149,13 +149,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     but were referenced transitively via a project or package reference.  NuGet writes these
     to the assets file, and the ResolvePackageAssets target adds them to the TransitiveFrameworkReference
     item.  Here, we add them to FrameworkReference if they aren't already referenced.
+    We add a transitive attribute to the FrameworkReferences so NuGet can filter them out from CollectFrameworkReferences.
     ============================================================
     -->
   <Target Name="AddTransitiveFrameworkReferences" AfterTargets="ResolvePackageAssets"
           Condition="'@(TransitiveFrameworkReference)' != ''" >
 
     <ItemGroup>
-      <FrameworkReference Include="@(TransitiveFrameworkReference)" Exclude="@(FrameworkReference)"/>
+      <FrameworkReference Include="@(TransitiveFrameworkReference)" Exclude="@(FrameworkReference)"
+                          IsTransitiveFrameworkReference="true" />
     </ItemGroup>
     
   </Target>
