@@ -123,11 +123,11 @@
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="5.0.1">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>1389efa4fa5d88ef58a2fab527886c61f53ca261</Sha>
+      <Sha>58382649c87ff15ce16c8d2743f94c5769d7d83e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.1-servicing.20567.6">
+    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.1-servicing.20568.5">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
-      <Sha>1389efa4fa5d88ef58a2fab527886c61f53ca261</Sha>
+      <Sha>58382649c87ff15ce16c8d2743f94c5769d7d83e</Sha>
     </Dependency>
     <Dependency Name="Microsoft.WindowsDesktop.App.Ref" Version="5.0.0">
       <Uri>https://github.com/dotnet/windowsdesktop</Uri>
