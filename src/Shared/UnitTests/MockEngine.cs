@@ -39,6 +39,7 @@ namespace Microsoft.Build.UnitTests
         private readonly bool _logToConsole;
         private readonly ConcurrentDictionary<object, object> _objectCache = new ConcurrentDictionary<object, object>();
         private readonly ConcurrentQueue<BuildErrorEventArgs> _errorEvents = new ConcurrentQueue<BuildErrorEventArgs>();
+        private readonly ConcurrentQueue<BuildWarningEventArgs> _warningEvents = new ConcurrentQueue<BuildWarningEventArgs>();
 
         internal MockEngine() : this(false)
         {
@@ -53,6 +54,7 @@ namespace Microsoft.Build.UnitTests
         public bool AllowFailureWithoutError { get; set; } = false;
 
         public BuildErrorEventArgs[] ErrorEvents => _errorEvents.ToArray();
+        public BuildWarningEventArgs[] WarningEvents => _warningEvents.ToArray();
 
         public Dictionary<string, string> GlobalProperties { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -103,6 +105,7 @@ namespace Microsoft.Build.UnitTests
         {
             lock (_lockObj)
             {
+                _warningEvents.Enqueue(eventArgs);
                 string message = string.Empty;
 
                 if (!string.IsNullOrEmpty(eventArgs.File))
