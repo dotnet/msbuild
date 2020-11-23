@@ -21,7 +21,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             if (actionConfig.Args != null && actionConfig.Args.TryGetValue("executable", out string executable))
             {
                 actionConfig.Args.TryGetValue("args", out string commandArgs);
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionCommand, $"{executable} {commandArgs}".Bold().Red()));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionCommand, $"{executable} {commandArgs}").Bold().Red());
             }
 
             return true;

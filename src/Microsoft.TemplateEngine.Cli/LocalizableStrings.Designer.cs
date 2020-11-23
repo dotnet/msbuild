@@ -1477,7 +1477,7 @@ namespace Microsoft.TemplateEngine.Cli {
         
         /// <summary>
         ///   Looks up a localized string similar to Search failed: no template name is specified.
-        ///To search for the template, specify template name or use one of supported filters: {0}
+        ///To search for the template, specify template name or use one of supported filters: {0}.
         ///Examples:
         ///        dotnet {1} &lt;template name&gt; --search
         ///        dotnet {1} --search --author Microsoft

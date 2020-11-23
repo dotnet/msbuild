@@ -713,7 +713,7 @@ The default list of columns shown without the option for --search: template name
   </data>
   <data name="SearchOnlineErrorNoTemplateNameOrFilter" xml:space="preserve">
     <value>Search failed: no template name is specified.
-To search for the template, specify template name or use one of supported filters: {0}
+To search for the template, specify template name or use one of supported filters: {0}.
 Examples:
         dotnet {1} &lt;template name&gt; --search
         dotnet {1} --search --author Microsoft
