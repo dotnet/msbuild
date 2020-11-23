@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 using System.Threading;
 
@@ -11,6 +12,8 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
     class ResourceManagerService : IBuildComponent
     {
         Semaphore? s = null;
+
+        ILoggingService? _loggingService;
 
 #if DEBUG
         public int TotalNumberHeld = -1;
@@ -29,6 +32,8 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
             string semaphoreName = host.BuildParameters.ResourceManagerSemaphoreName;
 
             int resourceCount = host.BuildParameters.MaxNodeCount; // TODO: tweakability
+
+            _loggingService = host.LoggingService;
 
 #if DEBUG
             TotalNumberHeld = 0;
@@ -51,12 +56,14 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
             s?.Dispose();
             s = null;
 
+            _loggingService = null;
+
 #if DEBUG
             TotalNumberHeld = -2;
 #endif
         }
 
-        public int? RequestCores(int requestedCores)
+        public int? RequestCores(int requestedCores, TaskLoggingContext _taskLoggingContext)
         {
             if (s is null)
             {
@@ -81,14 +88,18 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
             {
                 if (!s.WaitOne(0))
                 {
-                    return i;
+                    break;
                 }
             }
+
+            TotalNumberHeld += i;
+
+            _loggingService?.LogComment(_taskLoggingContext.BuildEventContext, Framework.MessageImportance.Low, "ResourceManagerRequestedCores", requestedCores, i, TotalNumberHeld);
 
             return i;
         }
 
-        public void ReleaseCores(int coresToRelease)
+        public void ReleaseCores(int coresToRelease, TaskLoggingContext _taskLoggingContext)
         {
             if (s is null)
             {
@@ -104,11 +115,16 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
 
             ErrorUtilities.VerifyThrow(coresToRelease > 0, "Tried to release {0} cores", coresToRelease);
 
+            if (coresToRelease > TotalNumberHeld)
+            {
+                _loggingService?.LogWarning(_taskLoggingContext.BuildEventContext, null, null, "ResourceManagerExcessRelease", coresToRelease);
+            }
+
             s.Release(coresToRelease);
 
-#if DEBUG
             TotalNumberHeld -= coresToRelease;
-#endif
+
+            _loggingService?.LogComment(_taskLoggingContext.BuildEventContext, Framework.MessageImportance.Low, "ResourceManagerReleasedCores", coresToRelease, TotalNumberHeld);
         }
     }
 }

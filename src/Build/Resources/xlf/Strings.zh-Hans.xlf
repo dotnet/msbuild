@@ -197,6 +197,21 @@
         <target state="translated">属性初始值: $({0})=“{1}”，源: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="ResourceManagerExcessRelease">
+        <source>MSB4270: Task attempted to release {0} cores but held only {1}.</source>
+        <target state="new">MSB4270: Task attempted to release {0} cores but held only {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResourceManagerReleasedCores">
+        <source>Task released {0} cores and now holds {1}.</source>
+        <target state="new">Task released {0} cores and now holds {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResourceManagerRequestedCores">
+        <source>Task requested {0} cores and recieved {1}. It now holds {2}.</source>
+        <target state="new">Task requested {0} cores and recieved {1}. It now holds {2}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: 项目“{0}”已跳过所引用的项目“{1}”上的图形隔离约束</target>

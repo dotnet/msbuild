@@ -1850,4 +1850,13 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="IsolatedContextDoesNotSupportFileSystem" xml:space="preserve">
     <value>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</value>
   </data>
+  <data name="ResourceManagerReleasedCores" xml:space="preserve">
+    <value>Task released {0} cores and now holds {1}.</value>
+  </data>
+  <data name="ResourceManagerRequestedCores" xml:space="preserve">
+    <value>Task requested {0} cores and recieved {1}. It now holds {2}.</value>
+  </data>
+  <data name="ResourceManagerExcessRelease" xml:space="preserve">
+    <value>MSB4270: Task attempted to release {0} cores but held only {1}.</value>
+  </data>
 </root>

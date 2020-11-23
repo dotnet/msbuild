@@ -197,6 +197,21 @@
         <target state="translated">속성 초기 값: $({0})="{1}" 소스: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="ResourceManagerExcessRelease">
+        <source>MSB4270: Task attempted to release {0} cores but held only {1}.</source>
+        <target state="new">MSB4270: Task attempted to release {0} cores but held only {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResourceManagerReleasedCores">
+        <source>Task released {0} cores and now holds {1}.</source>
+        <target state="new">Task released {0} cores and now holds {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResourceManagerRequestedCores">
+        <source>Task requested {0} cores and recieved {1}. It now holds {2}.</source>
+        <target state="new">Task requested {0} cores and recieved {1}. It now holds {2}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: 프로젝트 "{0}"에서 참조된 프로젝트 "{1}"의 그래프 격리 제약 조건을 건너뛰었습니다.</target>

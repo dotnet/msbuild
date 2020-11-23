@@ -689,7 +689,7 @@ namespace Microsoft.Build.BackEnd
 
             int coresAcquiredBeforeMoreCoresGetAcquired = runningTotal;
 
-            var coresAcquired = rms.RequestCores(requestedCores);
+            var coresAcquired = rms.RequestCores(requestedCores, _taskLoggingContext);
 
             if (coresAcquired.HasValue)
             {
@@ -703,11 +703,16 @@ namespace Microsoft.Build.BackEnd
         {
             var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
 
+            if (coresToRelease > runningTotal)
+            {
+                // TODO: log
+            }
+
             coresToRelease = Math.Min(runningTotal, coresToRelease);
 
             if (coresToRelease >= 1)
             {
-                rms.ReleaseCores(coresToRelease);
+                rms.ReleaseCores(coresToRelease, _taskLoggingContext);
                 runningTotal -= coresToRelease;
             }
         }
