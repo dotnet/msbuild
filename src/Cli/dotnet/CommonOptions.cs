@@ -13,9 +13,9 @@ namespace Microsoft.DotNet.Cli
     internal static class CommonOptions
     {
         public static Option PropertiesOption() =>
-            new Option<string>(new string[] { "-property", "/p" })
+            new Option<string[]>(new string[] { "-property", "/p" })
             {
-                IsHidden = true
+                IsHidden = true,
             }.ForwardAsProperty();
 
         public static Option VerbosityOption() =>

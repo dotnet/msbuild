@@ -94,5 +94,17 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                    .Should()
                    .Be($"{ExpectedPrefix} -target:Publish -property:NoBuild=true");
         }
+
+        [Fact]
+        public void CommandAcceptsMultipleCustomProperties()
+        {
+            var msbuildPath = "<msbuildpath>";
+            var command = PublishCommand.FromArgs(new[] { "/p:Prop1=prop1", "/p:Prop2=prop2" }, msbuildPath);
+
+            command.GetProcessStartInfo()
+               .Arguments
+               .Should()
+               .Be($"{ExpectedPrefix} -restore -target:Publish -property:Prop1=prop1 -property:Prop2=prop2");
+        }
     }
 }
