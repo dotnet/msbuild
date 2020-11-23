@@ -259,7 +259,7 @@ End Namespace
             string result =
             CreateVisualBasicManifestResourceName.CreateManifestNameImpl
                 (
-                    fileName: @"Subfolder\File.cs.cshtml",
+                    fileName: @"Subfolder\File.vb.cshtml",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
                     rootNamespace: "RootNamespace",        // Root namespace
