@@ -259,7 +259,7 @@ End Namespace
             string result =
             CreateVisualBasicManifestResourceName.CreateManifestNameImpl
                 (
-                    fileName: @"Subfolder\File.vb.cshtml",
+                    fileName: @"Subfolder\File.cs.vb",
                     linkFileName: null,
                     prependCultureAsDirectory: true,
                     rootNamespace: "RootNamespace",        // Root namespace
@@ -272,7 +272,7 @@ End Namespace
 
             // Visual basic does not carry subfolder.
             // See https://github.com/dotnet/msbuild/pull/5477
-            result.ShouldBe("RootNamespace.File.cs.cshtml");
+            result.ShouldBe("RootNamespace.File.cs.vb");
         }
 
         /// <summary>
