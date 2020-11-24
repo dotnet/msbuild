@@ -9,5 +9,9 @@
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
       <Sha />
     </Dependency>
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha />
+    </Dependency>
   </ToolsetDependencies>
 </Dependencies>
