@@ -218,7 +218,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
-        public void It_only_supports_selfcontained_when_using_crossgen2(string targetFramework)
+        public void It_supports_libraries_when_using_crossgen2(string targetFramework)
         {
             // Crossgen2 only supported for Linux/Windows x64 scenarios for now
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64)
@@ -238,10 +238,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
-            publishCommand.Execute()
-                .Should()
-                .Fail()
-                .And.HaveStdOutContainingIgnoreCase("NETSDK1126");
+            publishCommand.Execute().Should().Pass();
         }
 
         private void TestProjectPublishing_Internal(string projectName, string targetFramework, bool makeExeProject = true, bool isSelfContained = true, bool emitNativeSymbols = false, bool useCrossgen2 = false, bool composite = true)
