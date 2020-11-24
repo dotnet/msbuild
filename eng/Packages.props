@@ -20,7 +20,7 @@
     <PackageReference Update="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="PdbGit" Version="3.0.41" />
     <PackageReference Update="Shouldly" Version="3.0.0" />
-    <PackageReference Update="SourceLink.Create.CommandLine" Version="2.1.2" />
+    <PackageReference Update="SourceLink.Create.CommandLine" Version="2.8.3" />
     <PackageReference Update="System.CodeDom" Version="5.0.0" />
     <PackageReference Update="System.Collections.Immutable" Version="5.0.0" />
     <PackageReference Update="System.Configuration.ConfigurationManager" Version="4.7.0" />
