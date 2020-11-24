@@ -5,5 +5,9 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>6afe5f93699b6512ee07362fa451317a2ce34f7b</Sha>
     </Dependency>
+    <Dependency Name="NuGet.Build.Tasks" Version="">
+      <Uri>https://github.com/NuGet/NuGet.Client</Uri>
+      <Sha />
+    </Dependency>
   </ToolsetDependencies>
 </Dependencies>
