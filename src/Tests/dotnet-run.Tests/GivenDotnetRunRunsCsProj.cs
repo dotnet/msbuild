@@ -3,10 +3,8 @@
 
 using System;
 using System.IO;
-using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -526,6 +524,21 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             result.Should().Pass()
                 .And.HaveStdOutContaining("Important text");
+        }
+
+        [Fact]
+        public void ItPrintsDuplicateArguments()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var result = new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute("a", "b", "c", "a", "c");
+
+            result.Should().Pass()
+                .And.HaveStdOutContaining("echo args:a;b;c;a;c");
         }
 
         [Fact]
