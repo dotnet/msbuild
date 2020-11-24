@@ -41,6 +41,7 @@
 
   <ItemGroup Condition="'$(MonoBuild)' != 'true'">
     <!-- Include DependencyModel libraries. -->
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" />
   </ItemGroup>
 
