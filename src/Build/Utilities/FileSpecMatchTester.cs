@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Shared;
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -43,7 +42,7 @@ namespace Microsoft.Build.Internal
                 return _regex.IsMatch(normalizedFileToMatch);
             }
 
-            return FileUtilities.CaseInsensitiveComparePathsNoThrow(_unescapedFileSpec, fileToMatch, _currentDirectory);
+            return FileUtilities.ComparePathsNoThrow(_unescapedFileSpec, fileToMatch, _currentDirectory, alwaysIgnoreCase: true);
         }
 
         // this method parses the glob and extracts the fixed directory part in order to normalize it and make it absolute
