@@ -61,7 +61,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// Returns list of exact or partially matched templates by name and exact match by language, filter, baseline (if specified in command paramaters) grouped by group identity
         /// </summary>
         public IReadOnlyCollection<IGrouping<string, ITemplateMatchInfo>> ExactMatchedTemplatesGrouped =>
-            ExactMatchedTemplates.GroupBy(x => x.Info.GroupIdentity, x => !string.IsNullOrEmpty(x.Info.GroupIdentity)).ToList();
+            ExactMatchedTemplates.GroupBy(x => x.Info.GroupIdentity, x => !string.IsNullOrEmpty(x.Info.GroupIdentity), StringComparer.OrdinalIgnoreCase).ToList();
 
         /// <summary>
         /// Returns list of exact or partially matched templates by name and mismatch in any of the following: language, filter, baseline (if specified in command paramaters)
@@ -86,7 +86,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         ///  Returns list of exact or partially matched templates by name and mismatch in any of the following: language, filter, baseline (if specified in command paramaters); grouped by group identity
         /// </summary>
         public IReadOnlyCollection<IGrouping<string, ITemplateMatchInfo>> PartiallyMatchedTemplatesGrouped =>
-            PartiallyMatchedTemplates.GroupBy(x => x.Info.GroupIdentity, x => !string.IsNullOrEmpty(x.Info.GroupIdentity)).ToList();
+            PartiallyMatchedTemplates.GroupBy(x => x.Info.GroupIdentity, x => !string.IsNullOrEmpty(x.Info.GroupIdentity), StringComparer.OrdinalIgnoreCase).ToList();
 
 
         /// <summary>

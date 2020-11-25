@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
         internal static IReadOnlyList<TemplateGroupTableRow> GetTemplateGroupsForListDisplay(IReadOnlyCollection<ITemplateMatchInfo> templateList, string language, string defaultLanguage)
         {
             List<TemplateGroupTableRow> templateGroupsForDisplay = new List<TemplateGroupTableRow>();
-            IEnumerable<IGrouping<string, ITemplateMatchInfo>> groupedTemplateList = templateList.GroupBy(x => x.Info.GroupIdentity, x => !string.IsNullOrEmpty(x.Info.GroupIdentity));
+            IEnumerable<IGrouping<string, ITemplateMatchInfo>> groupedTemplateList = templateList.GroupBy(x => x.Info.GroupIdentity, x => !string.IsNullOrEmpty(x.Info.GroupIdentity), StringComparer.OrdinalIgnoreCase);
             foreach (IGrouping<string, ITemplateMatchInfo> grouping in groupedTemplateList)
             {
                 List<string> languageForDisplay = new List<string>();
