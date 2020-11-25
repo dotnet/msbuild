@@ -65,6 +65,11 @@ namespace Microsoft.Build.Evaluation
                 DecorateItemsWithMetadata(_itemsToUpdate.ToImmutableList(), _metadata, _needToExpandMetadataForEachItem);
             }
 
+            /// <summary>
+            /// Apply the Update operation to the item if it matches.
+            /// </summary>
+            /// <param name="item">The item to check for a match.</param>
+            /// <returns>The updated item.</returns>
             internal ItemData UpdateItem(ItemData item)
             {
                 if (_conditionResult)
@@ -93,6 +98,9 @@ namespace Microsoft.Build.Evaluation
                 return clonedData;
             }
 
+            /// <summary>
+            /// This sets the function used to determine whether an item matches an item spec.
+            /// </summary>
             private void SetMatchItemSpec()
             {
                 if (ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType))

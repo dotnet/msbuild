@@ -291,6 +291,9 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
+            /// <summary>
+            /// Applies uncached item operations (include, remove, update) in order.
+            /// </summary>
             private static ImmutableList<ItemData>.Builder ComputeItems(LazyItemList lazyItemList, ImmutableHashSet<string> globsToIgnore)
             {
                 // Stack of operations up to the first one that's cached (exclusive)
@@ -374,7 +377,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         if (!addToBatch)
                         {
-                            // Remove items added before realizing we couldn't skip the item list
+                            // Remove items added before realizing we couldn't skip the current item list
                             for (int j = 0; j < i; j++)
                             {
                                 itemsWithNoWildcards.Remove(currentList._memoizedOperation.Operation.Spec.Fragments[j].TextFragment);
@@ -411,6 +414,9 @@ namespace Microsoft.Build.Evaluation
 
             private static void ProcessNonWildCardItemUpdates(Dictionary<string, UpdateOperation> itemsWithNoWildcards, ImmutableList<ItemData>.Builder items)
             {
+#if DEBUG
+                ErrorUtilities.VerifyThrow(itemsWithNoWildcards.All(fragment => !MSBuildConstants.CharactersForExpansion.Any(fragment.Key.Contains)), $"{nameof(itemsWithNoWildcards)} should not contain any text fragments with wildcards.");
+#endif
                 if (itemsWithNoWildcards.Count > 0)
                 {
                     for (int i = 0; i < items.Count; i++)
