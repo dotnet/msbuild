@@ -20,8 +20,6 @@ variables:
     value: .NETCore
   - name: _PublishToAzure
     value: false
-  - name: PostBuildSign
-    value: true
   - ${{ if ne(variables['System.TeamProject'], 'public') }}:
     - name: PB_PublishBlobFeedUrl
       value: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
