@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option AddSourceOption = new Option<IEnumerable<string>>("--add-source", LocalizableStrings.AddSourceOptionDescription)
         {
             Argument = new Argument<IEnumerable<string>>(LocalizableStrings.AddSourceOptionName)
-        };
+        }.AllowSingleArgPerToken();
 
         public static readonly Option FrameworkOption = new Option<string>("--framework", LocalizableStrings.FrameworkOptionDescription)
         {

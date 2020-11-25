@@ -36,6 +36,12 @@ namespace Microsoft.DotNet.Cli
                 .GetForwardingFunction()(parseResult)
             ?? Array.Empty<string>();
 
+        public static Option AllowSingleArgPerToken(this Option option)
+        {
+            option.AllowMultipleArgumentsPerToken = false;
+            return option;
+        }
+
         private interface IForwardedOption
         {
             Func<ParseResult, IEnumerable<string>> GetForwardingFunction();

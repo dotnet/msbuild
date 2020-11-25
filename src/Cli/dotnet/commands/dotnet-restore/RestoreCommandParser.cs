@@ -73,7 +73,8 @@ namespace Microsoft.DotNet.Cli
                 {
                     Argument = new Argument<IEnumerable<string>>(LocalizableStrings.CmdSourceOption) { Arity = ArgumentArity.OneOrMore },
                     IsHidden = !showHelp
-                }.ForwardAsSingle(o => $"-property:RestoreSources={string.Join("%3B", o)}"),
+                }.ForwardAsSingle(o => $"-property:RestoreSources={string.Join("%3B", o)}")
+                .AllowSingleArgPerToken(),
                 new Option<string>(
                     "--packages",
                     showHelp ? LocalizableStrings.CmdPackagesOptionDescription : string.Empty)
@@ -127,6 +128,7 @@ namespace Microsoft.DotNet.Cli
                         IsHidden = !showHelp
                     }.ForwardAsSingle(o => $"-property:RuntimeIdentifiers={string.Join("%3B", o)}")
                     .AddSuggestions(Suggest.RunTimesFromProjectFile().ToArray())
+                    .AllowSingleArgPerToken()
                 ).ToArray();
             }
 

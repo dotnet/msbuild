@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(0);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/command-line-api/issues/1077")]
+        [Fact]
         public void ItPassesEnvironmentVariablesFromCommandLineParametersWhenRunningViaDll()
         {
             var testAsset = _testAssetsManager.CopyTestAsset(TestAppName)

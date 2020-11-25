@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Cli
                     $"-property:AdditionalProjects={string.Join("%3B", o.Skip(1).Select(CommandDirectoryContext.GetFullPath))}"
                 };
             }
-        });
+        }).AllowSingleArgPerToken();
 
         public static readonly Option FrameworkVersionOption = new Option<string>("--framework-version", LocalizableStrings.FrameworkVersionOptionDescription)
         {

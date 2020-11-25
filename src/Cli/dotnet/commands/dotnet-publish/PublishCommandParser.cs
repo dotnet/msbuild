@@ -25,7 +25,8 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option ManifestOption = new Option<IEnumerable<string>>("--manifest", LocalizableStrings.ManifestOptionDescription)
         {
             Argument = new Argument<IEnumerable<string>>(LocalizableStrings.ManifestOption)
-        }.ForwardAsSingle(o => $"-property:TargetManifestFiles={string.Join("%3B", o.Select(CommandDirectoryContext.GetFullPath))}");
+        }.ForwardAsSingle(o => $"-property:TargetManifestFiles={string.Join("%3B", o.Select(CommandDirectoryContext.GetFullPath))}")
+        .AllowSingleArgPerToken();
 
         public static readonly Option NoBuildOption = new Option<bool>("--no-build", LocalizableStrings.NoBuildOptionDescription)
             .ForwardAs("-property:NoBuild=true");

@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli
             {
                 Arity = ArgumentArity.OneOrMore
             }
-        };
+        }.AllowSingleArgPerToken();
 
         public static readonly Option FilterOption = new Option<string>("--filter", LocalizableStrings.CmdTestCaseFilterDescription)
         {
@@ -44,7 +44,8 @@ namespace Microsoft.DotNet.Cli
             {
                 Arity = ArgumentArity.OneOrMore
             }
-        }.ForwardAsSingle(o => $"-property:VSTestTestAdapterPath=\"{string.Join(";", o.Select(CommandDirectoryContext.GetFullPath))}\"");
+        }.ForwardAsSingle(o => $"-property:VSTestTestAdapterPath=\"{string.Join(";", o.Select(CommandDirectoryContext.GetFullPath))}\"")
+        .AllowSingleArgPerToken();
 
         public static readonly Option LoggerOption = new Option<IEnumerable<string>>(new string[] { "-l", "--logger" }, LocalizableStrings.CmdLoggerDescription)
         {
@@ -56,7 +57,8 @@ namespace Microsoft.DotNet.Cli
             var loggersString = string.Join(";", GetSemiColonEscapedArgs(o));
 
             return $"-property:VSTestLogger=\"{loggersString}\"";
-        });
+        })
+        .AllowSingleArgPerToken();
 
         public static readonly Option OutputOption = new Option<string>(new string[] { "-o", "--output" }, LocalizableStrings.CmdOutputDescription)
         {
@@ -82,7 +84,8 @@ namespace Microsoft.DotNet.Cli
             {
                 Arity = ArgumentArity.OneOrMore
             }
-        }.ForwardAsSingle(o => $"-property:VSTestCollect=\"{string.Join(";", o)}\"");
+        }.ForwardAsSingle(o => $"-property:VSTestCollect=\"{string.Join(";", o)}\"")
+        .AllowSingleArgPerToken();
 
         public static readonly Option BlameOption = new Option<bool>("--blame", LocalizableStrings.CmdBlameDescription)
             .ForwardAs("-property:VSTestBlame=true");
