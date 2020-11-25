@@ -231,7 +231,7 @@ namespace Microsoft.DotNet.Cli
                 PerformanceLogEventSource.Log.BuiltInCommandStart();
                 var topLevelCommands = new string[] { "dotnet", parseResult.RootSubCommandResult() }.Concat(Parser.DiagOption.Aliases);
 
-                exitCode = builtIn.Command(parseResult.Tokens.Select(t => t.Value).Where(t => !topLevelCommands.Contains(t)).ToArray());
+                exitCode = builtIn.Command(args.Where(t => !topLevelCommands.Contains(t)).ToArray());
 				PerformanceLogEventSource.Log.BuiltInCommandStop();
             }
             else
