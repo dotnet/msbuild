@@ -809,11 +809,11 @@ namespace InlineCode {{
             }
         }
 
-        private static readonly Regex RuntimeVersionLine = new Regex("Runtime Version:.*");
+        private static readonly Regex RuntimeVersionLine = new Regex(@"^.*Runtime Version:.*\r?\n", RegexOptions.Multiline);
 
         private static string NormalizeRuntime(string input)
         {
-            return RuntimeVersionLine.Replace(input, "Runtime Version:SOMETHING");
+            return RuntimeVersionLine.Replace(input, string.Empty);
         }
     }
 }
