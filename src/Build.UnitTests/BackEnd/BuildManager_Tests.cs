@@ -4094,6 +4094,32 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
+        public void BuildWithZeroConnectionTimeout()
+        {
+            string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='test'>
+    <Message Text='Text'/>
+ </Target>
+</Project>
+");
+            _env.SetEnvironmentVariable("MSBUILDNODECONNECTIONTIMEOUT", "0");
+
+            BuildRequestData data = GetBuildRequestData(contents);
+            try
+            {
+                BuildResult result = _buildManager.Build(_parameters, data);
+
+                // The build should either finish successfully (very unlikely).
+                result.OverallResult.ShouldBe(BuildResultCode.Success);
+            }
+            catch (InternalErrorException)
+            {
+                // Or it should throw InternalErrorException because the node didn't get connected within 0ms.
+            }
+        }
+
+        [Fact]
         [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4368")]
         public void GraphBuildValid()
         {
