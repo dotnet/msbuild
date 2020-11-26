@@ -2184,20 +2184,13 @@ namespace Microsoft.Build.Execution
                             continue;
                         }
 
-                        submission.CompleteLogging(false);
-
                         // Attach the exception to this submission if it does not already have an exception associated with it
-                        if (submission.BuildResult?.Exception == null)
+                        if (!submission.IsCompleted && submission.BuildResult != null && submission.BuildResult.Exception == null)
                         {
-                            if (submission.BuildResult == null)
-                            {
-                                submission.BuildResult = new BuildResult(submission.BuildRequest, e);
-                            }
-                            else
-                            {
-                                submission.BuildResult.Exception = _threadException.SourceException;
-                            }
+                            submission.BuildResult.Exception = e;
                         }
+                        submission.CompleteLogging(false);
+                        submission.CompleteResults(new BuildResult(submission.BuildRequest, e));
 
                         CheckSubmissionCompletenessAndRemove(submission);
                     }
@@ -2211,17 +2204,11 @@ namespace Microsoft.Build.Execution
                         }
 
                         // Attach the exception to this submission if it does not already have an exception associated with it
-                        if (submission.BuildResult?.Exception == null)
+                        if (!submission.IsCompleted && submission.BuildResult != null && submission.BuildResult.Exception == null)
                         {
-                            if (submission.BuildResult == null)
-                            {
-                                submission.BuildResult = new GraphBuildResult(submission.SubmissionId, e);
-                            }
-                            else
-                            {
-                                submission.BuildResult.Exception = _threadException.SourceException;
-                            }
+                            submission.BuildResult.Exception = e;
                         }
+                        submission.CompleteResults(submission.BuildResult ?? new GraphBuildResult(submission.SubmissionId, e));
 
                         CheckSubmissionCompletenessAndRemove(submission);
                     }
