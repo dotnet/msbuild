@@ -80,9 +80,9 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(8, Keywords = Keywords.All)]
-        public void RarComputeClosureStop()
+        public void RarComputeClosureStop(int referencesResolved)
         {
-            WriteEvent(8);
+            WriteEvent(8, referencesResolved);
         }
 
         /// <param name="condition">The condition being evaluated.</param>
