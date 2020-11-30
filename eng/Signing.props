@@ -53,8 +53,4 @@
     <FileSignInfo Include="xunit.performance.execution.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="xunit.performance.metrics.dll" CertificateName="3PartySHA2" />
   </ItemGroup>
-  
-  <ItemGroup Condition="'$(PostBuildSign)' == 'true'">
-    <ItemsToSignPostBuild Include="$(ArtifactsNonShippingPackagesDir)*.zip" />
-  </ItemGroup>
 </Project>

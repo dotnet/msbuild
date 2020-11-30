@@ -65,6 +65,11 @@
         <ManifestArtifactData>NonShipping=true</ManifestArtifactData>
       </ToolsetAssetsToPushToBlobFeed>
     </ItemGroup>
+    
+    <ItemGroup Condition="'$(PostBuildSign)' == 'true'">
+      <ItemsToSignPostBuild Remove="@(ItemsToSignPostBuild)" />
+      <ItemsToSignPostBuild Include="@(ToolsetAssetsToPublish->'%(Filename)%(Extension)')" />
+    </ItemGroup>
 
     <MakeDir Directories="$(TempWorkingDirectory)"/>
 
