@@ -180,7 +180,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            OutputFiles = GetOutputFiles(filePublishInfoList);
+            OutputFiles = GetOutputFiles(filePublishInfoList, OutputAssemblies);
 
             if (!_canPublish && is35Project)
             {
@@ -466,16 +466,49 @@ namespace Microsoft.Build.Tasks
             return assemblyList.ToArray();
         }
 
-        private ITaskItem[] GetOutputFiles(List<PublishInfo> publishInfos)
+        private ITaskItem[] GetOutputFiles(List<PublishInfo> publishInfos, IEnumerable<ITaskItem> outputAssemblies)
         {
             var fileList = new List<ITaskItem>();
             var fileMap = new FileMap();
+
+            // Dictionary used to look up any content output files that are also in References
+            var outputAssembliesMap = outputAssemblies.ToDictionary(p => Path.GetFullPath(p.ItemSpec), StringComparer.OrdinalIgnoreCase);
 
             // Add all input Files to the FileMap, flagging them to be published by default...
             if (Files != null)
             {
                 foreach (ITaskItem item in Files)
                 {
+                    //
+                    // Files already included in References as copylocal should be skipped.
+                    // Lookup full path of the File in outputAssembliesMap and skip the
+                    // file if the target/destination path is the same.
+                    //
+                    string key = Path.GetFullPath(item.ItemSpec);
+                    outputAssembliesMap.TryGetValue(key, out var assembly);
+                    if (assembly != null)
+                    {
+                        if (GetItemCopyLocal(assembly))
+                        {
+                            // Get target path for the item
+                            string itemDestPath = item.GetMetadata(ItemMetadataNames.targetPath);
+                            if (String.IsNullOrEmpty(itemDestPath))
+                            {
+                                itemDestPath = item.GetMetadata(ItemMetadataNames.destinationSubPath);
+                            }
+                            // Get target path for the assembly
+                            string assemblyDestPath = assembly.GetMetadata(ItemMetadataNames.targetPath);
+                            if (String.IsNullOrEmpty(assemblyDestPath))
+                            {
+                                assemblyDestPath = assembly.GetMetadata(ItemMetadataNames.destinationSubPath);
+                            }
+                            // Skip item if target paths are the same for both
+                            if (String.Equals(itemDestPath, assemblyDestPath, StringComparison.OrdinalIgnoreCase))
+                            {
+                                continue;
+                            }
+                        }
+                    }
                     fileMap.Add(item, true);
                 }
             }
