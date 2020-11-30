@@ -1765,7 +1765,12 @@ namespace Microsoft.Build.Tasks
                             // If something was found, then break out and start fresh.
                             if (newEntries.Count > 0)
                             {
-                                break;
+                                // Add each new dependency found.
+                                foreach (KeyValuePair<AssemblyNameExtension, Reference> newEntry in newEntries)
+                                {
+                                    AddReference(newEntry.Key, newEntry.Value);
+                                }
+                                return true;
                             }
                         }
                     }
@@ -1777,13 +1782,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            // Add each new dependency found.
-            foreach (KeyValuePair<AssemblyNameExtension, Reference> newEntry in newEntries)
-            {
-                AddReference(newEntry.Key, newEntry.Value);
-            }
-
-            return newEntries.Count > 0;
+            return false;
         }
 
         /// <summary>
