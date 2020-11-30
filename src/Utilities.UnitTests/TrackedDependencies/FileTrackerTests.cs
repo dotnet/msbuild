@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if FEATURE_FILE_TRACKER
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,7 +19,6 @@ using Xunit;
 using BackEndNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 
 // PLEASE NOTE: This is a UNICODE file as it contains UNICODE characters!
-#if FEATURE_FILE_TRACKER
 
 namespace Microsoft.Build.UnitTests.FileTracking
 {
