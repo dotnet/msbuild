@@ -5,5 +5,13 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>1ceac96c54fcf33eb745649c4e7b8d7507a9b730</Sha>
     </Dependency>
+    <Dependency Name="NuGet.Build.Tasks" Version="">
+      <Uri>https://github.com/NuGet/NuGet.Client</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha />
+    </Dependency>
   </ToolsetDependencies>
 </Dependencies>

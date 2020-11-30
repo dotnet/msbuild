@@ -37,6 +37,8 @@
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <DotNetCliVersion>3.1.100</DotNetCliVersion>
+    <MicrosoftNetCompilersToolsetVersion>3.3.1-beta3-final</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>5.7.0-rtm.6710</NuGetBuildTasksVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
