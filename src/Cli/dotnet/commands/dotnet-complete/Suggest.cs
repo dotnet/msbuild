@@ -13,37 +13,55 @@ namespace Microsoft.DotNet.Cli
     {
         public static IEnumerable<string> TargetFrameworksFromProjectFile()
         {
-            var msBuildProject = GetMSBuildProject();
-
-            if (msBuildProject == null)
+            try
             {
-                yield break;
+                return GetMSBuildProject()?.GetTargetFrameworks().Select(tf => tf.GetShortFolderName()) ?? Empty<string>();
             }
-
-            foreach (var tfm in msBuildProject.GetTargetFrameworks())
+            catch (Exception)
             {
-                yield return tfm.GetShortFolderName();
+                return Empty<string>();
             }
         }
 
         private static void Report(Exception e) =>
             Reporter.Verbose.WriteLine($"Exception occurred while getting suggestions: {e}");
 
-        public static IEnumerable<string> RunTimesFromProjectFile() =>
-            GetMSBuildProject()
-                ?.GetRuntimeIdentifiers() ??
-            Empty<string>();
+        public static IEnumerable<string> RunTimesFromProjectFile()
+        {
+            try
+            {
+                return GetMSBuildProject()?.GetRuntimeIdentifiers() ?? Empty<string>();
+            }
+            catch (Exception)
+            {
+                return Empty<string>();
+            }
+        }
+            
 
-        public static IEnumerable<string> ProjectReferencesFromProjectFile() =>
-            GetMSBuildProject()
-                ?.GetProjectToProjectReferences()
-                .Select(r => r.Include) ??
-            Empty<string>();
+        public static IEnumerable<string> ProjectReferencesFromProjectFile()
+        {
+            try
+            {
+                return GetMSBuildProject()?.GetProjectToProjectReferences().Select(r => r.Include) ?? Empty<string>();
+            }
+            catch (Exception)
+            {
+                return Empty<string>();
+            }
+        }
 
-        public static IEnumerable<string> ConfigurationsFromProjectFileOrDefaults() =>
-            GetMSBuildProject()
-                ?.GetConfigurations() ??
-            new[] { "Debug", "Release" };
+        public static IEnumerable<string> ConfigurationsFromProjectFileOrDefaults()
+        {
+            try
+            {
+                return GetMSBuildProject()?.GetConfigurations() ?? new[] { "Debug", "Release" };
+            }
+            catch (Exception)
+            {
+                return Empty<string>();
+            }
+        }
 
         private static MsbuildProject GetMSBuildProject()
         {
