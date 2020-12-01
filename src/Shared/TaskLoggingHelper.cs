@@ -199,14 +199,7 @@ namespace Microsoft.Build.Utilities
         /// <exception cref="InvalidOperationException">Thrown when the <c>TaskResources</c> property of the owner task is not set.</exception>
         public virtual string FormatResourceString(string resourceName, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(resourceName, nameof(resourceName));
-            ErrorUtilities.VerifyThrowInvalidOperation(TaskResources != null, "Shared.TaskResourcesNotRegistered", TaskName);
-
-            string resourceString = TaskResources.GetString(resourceName, CultureInfo.CurrentUICulture);
-
-            ErrorUtilities.VerifyThrowArgument(resourceString != null, "Shared.TaskResourceNotFound", resourceName, TaskName);
-
-            return FormatString(resourceString, args);
+            return FormatString(GetResourceMessage(resourceName), args);
         }
 
         /// <summary>
@@ -232,7 +225,13 @@ namespace Microsoft.Build.Utilities
         /// <returns>The message from resource.</returns>
         public virtual string GetResourceMessage(string resourceName)
         {
-            string resourceString = FormatResourceString(resourceName, null);
+            ErrorUtilities.VerifyThrowArgumentNull(resourceName, nameof(resourceName));
+            ErrorUtilities.VerifyThrowInvalidOperation(TaskResources != null, "Shared.TaskResourcesNotRegistered", TaskName);
+
+            string resourceString = TaskResources.GetString(resourceName, CultureInfo.CurrentUICulture);
+
+            ErrorUtilities.VerifyThrowArgument(resourceString != null, "Shared.TaskResourceNotFound", resourceName, TaskName);
+
             return resourceString;
         }
 #endregion
@@ -272,6 +271,13 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
             ErrorUtilities.VerifyThrowArgumentNull(message, nameof(message));
+#if DEBUG
+            if (messageArgs?.Length > 0)
+            {
+                // Verify that message can be formated using given arguments
+                ResourceUtilities.FormatString(message, messageArgs);
+            }
+#endif
 
             BuildMessageEventArgs e = new BuildMessageEventArgs
                 (
@@ -463,7 +469,7 @@ namespace Microsoft.Build.Utilities
             // global state.
             ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, nameof(messageResourceName));
 
-            LogMessage(importance, FormatResourceString(messageResourceName, messageArgs));
+            LogMessage(importance, GetResourceMessage(messageResourceName), messageArgs);
 #if DEBUG
             // Assert that the message does not contain an error code.  Only errors and warnings
             // should have error codes.
