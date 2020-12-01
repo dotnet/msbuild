@@ -308,7 +308,6 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .WithVersionVariables()
                 .Path;
 
-
             string pkgDir;
             //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             //{
@@ -317,7 +316,8 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             //}
             //else
             {
-                pkgDir = Path.Combine(rootPath, "pkgs");
+                pkgDir = _testAssetsManager.CreateTestDirectory(identifier: "pkgs").Path;
+                Log.WriteLine("pkgDir, package restored path is: " + pkgDir);
             }
 
             new DotnetRestoreCommand(Log)
