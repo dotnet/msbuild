@@ -196,6 +196,29 @@ Commands:
         }
 
         [Fact]
+        public void ItFailsToAddInvalidRefWithProperlyFormattedError()
+        {
+            var invalidProjDirectory = Path.Combine(_testAssetsManager.CreateTestDirectory().Path, "InvalidProj");
+            var invalidProjPath = Path.Combine(invalidProjDirectory, "InvalidProj.csproj");
+            Directory.CreateDirectory(invalidProjDirectory);
+            File.WriteAllText(invalidProjPath, @"<Project Sdk=""Microsoft.NET.Sdk"">
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+  <Import Project=""fake.props"" />
+</Project>");
+
+            var cmd = new DotnetCommand(Log, "add", "reference", invalidProjPath)
+                .WithWorkingDirectory(invalidProjDirectory)
+                .Execute();
+            cmd.Should().Fail();
+            cmd.StdErr.Should().Contain(string.Format(
+                CommonLocalizableStrings.ProjectCouldNotBeEvaluated.Substring(0, CommonLocalizableStrings.ProjectCouldNotBeEvaluated.Length - 4), // Remove the '{0}.' from the end
+                invalidProjPath));
+            cmd.StdErr.Should().NotContain("Microsoft.DotNet.Cli.Utils.GracefulException");
+        }
+
+        [Fact]
         public void ItAddsRefWithoutCondAndPrintsStatus()
         {
             var setup = Setup();
