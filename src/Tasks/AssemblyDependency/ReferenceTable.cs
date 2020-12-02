@@ -2591,7 +2591,7 @@ namespace Microsoft.Build.Tasks
         private ITaskItem SetItemMetadata(List<ITaskItem> relatedItems, List<ITaskItem> satelliteItems, List<ITaskItem> serializationAssemblyItems, List<ITaskItem> scatterItems, string fusionName, Reference reference, AssemblyNameExtension assemblyName)
         {
             // Set up the main item.
-            ITaskItem referenceItem = new TaskItem();
+            TaskItem referenceItem = new TaskItem();
             referenceItem.ItemSpec = reference.FullPath;
             referenceItem.SetMetadata(ItemMetadataNames.resolvedFrom, reference.ResolvedSearchPath);
 
