@@ -2506,14 +2506,6 @@ namespace Microsoft.Build.Tasks
             out ITaskItem[] copyLocalFiles
         )
         {
-            primaryFiles = Array.Empty<ITaskItem>();
-            dependencyFiles = Array.Empty<ITaskItem>();
-            relatedFiles = Array.Empty<ITaskItem>();
-            satelliteFiles = Array.Empty<ITaskItem>();
-            serializationAssemblyFiles = Array.Empty<ITaskItem>();
-            scatterFiles = Array.Empty<ITaskItem>();
-            copyLocalFiles = Array.Empty<ITaskItem>();
-
             var primaryItems = new List<ITaskItem>();
             var dependencyItems = new List<ITaskItem>();
             var relatedItems = new List<ITaskItem>();
@@ -2573,9 +2565,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            primaryFiles = new ITaskItem[primaryItems.Count];
-            primaryItems.CopyTo(primaryFiles, 0);
-
+            primaryFiles = primaryItems.ToArray();
             dependencyFiles = dependencyItems.ToArray();
             relatedFiles = relatedItems.ToArray();
             satelliteFiles = satelliteItems.ToArray();
