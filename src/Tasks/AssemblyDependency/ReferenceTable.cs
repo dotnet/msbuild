@@ -2632,8 +2632,6 @@ namespace Microsoft.Build.Tasks
                         ITaskItem item = new TaskItem(reference.ImplementationAssembly);
                         // Clone metadata.
                         referenceItem.CopyMetadataTo(item);
-                        // Related files don't have a fusion name.
-                        item.SetMetadata(ItemMetadataNames.fusionName, "");
                         RemoveNonForwardableMetadata(item);
 
                         // Add the related item.
