@@ -162,16 +162,10 @@ namespace Microsoft.NET.Build.Tests
             RunTest(true);
         }
 
-        //  Test cases that are currently failing
+        //  Having a self-contained and a framework-dependent app in the same folder is not supported (due to the way the host works).
+        //  The referenced app will fail to run.  See here for more details: https://github.com/dotnet/sdk/pull/14488#issuecomment-725406998
         [Theory]
-        //  Fails because runtime pack artifacts are not transitively copied
         [InlineData(true, false)]
-        //  Fails with the following error (is the self-contained copy of hostfxr or something interfering with the framework dependent app?):
-        //  It was not possible to find any compatible framework version
-        //  The framework 'Microsoft.NETCore.App', version '5.0.0' was not found.
-        //    - No frameworks were found.
-        //
-        //  You can resolve the problem by installing the specified framework and/or SDK.
         [InlineData(false, true)]
         public void ReferencedExeFailsToRun(bool mainSelfContained, bool referencedSelfContained)
         {
@@ -184,14 +178,12 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData(false, false)]
-        //[InlineData(true, false, Skip = "Currently not supported (see ReferencedExeFailsToRun)")]
-        //[InlineData(false, true, Skip = "Currently not supported (see ReferencedExeFailsToRun)")]
-        [InlineData(true, true)]
-        public void ReferencedExeCanRunWhenPublished(bool mainSelfContained, bool referencedSelfContained)
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ReferencedExeCanRunWhenPublished(bool selfContained)
         {
-            MainSelfContained = mainSelfContained;
-            ReferencedSelfContained = referencedSelfContained;
+            MainSelfContained = selfContained;
+            ReferencedSelfContained = selfContained;
 
             TestWithPublish = true;
             
@@ -200,15 +192,11 @@ namespace Microsoft.NET.Build.Tests
             RunTest(referencedExeShouldRun: true);
         }
 
-        [Theory]
-        //[InlineData(true, false, Skip = "Currently not supported (see ReferencedExeFailsToRun)")]
-        //[InlineData(false, true, Skip = "Currently not supported (see ReferencedExeFailsToRun)")]
-        [InlineData(true, true)]
-
-        public void ReferencedExeCanRunWhenPublishedWithTrimming(bool mainSelfContained, bool referencedSelfContained)
+        [Fact]
+        public void ReferencedExeCanRunWhenPublishedWithTrimming()
         {
-            MainSelfContained = mainSelfContained;
-            ReferencedSelfContained = referencedSelfContained;
+            MainSelfContained = true;
+            ReferencedSelfContained = true;
 
             TestWithPublish = true;
 
