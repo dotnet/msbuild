@@ -2684,14 +2684,14 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // If the item originally did not have the implementation file metadata then we do not want to get it from the set of primary source items
-                // since the implementation file is something specific to the source item and not supposed to be propigated.
+                // since the implementation file is something specific to the source item and not supposed to be propagated.
                 if (!hasImplementationFile)
                 {
                     referenceItem.RemoveMetadata(ItemMetadataNames.winmdImplmentationFile);
                 }
 
                 // If the item originally did not have the ImageRuntime metadata then we do not want to get it from the set of primary source items
-                // since the ImageRuntime is something specific to the source item and not supposed to be propigated.
+                // since the ImageRuntime is something specific to the source item and not supposed to be propagated.
                 if (!hasImageRuntime)
                 {
                     referenceItem.RemoveMetadata(ItemMetadataNames.imageRuntime);
