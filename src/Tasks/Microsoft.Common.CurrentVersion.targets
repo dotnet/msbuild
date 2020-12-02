@@ -119,8 +119,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     This is the full Output Path, and is derived from BaseOutputPath, if none specified
     (eg. bin\Debug). If this property is overridden, then setting BaseOutputPath has no effect.
 
-    For projects loaded with MPFProj (Legacy project system):
-    This property is usually specified in the project file and is used to initialize OutDir.
+    For Legacy projects using only Common targets, this property is usually specified in the project file
+    and is used to initialize OutDir. Some SDKs including the .NET SDK derive this automatically.
     OutDir and OutputPath are distinguished for legacy reasons, and OutDir should be used if at all possible.
 
     BaseIntermediateOutputPath:
@@ -189,16 +189,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <!--
-    For projects loaded with MPFProj (Legacy project system) that defines the properties per Configuration/Platform
-    combination by the IDE itself, the validation of an invalid Configuration/Platform is determined by the non-empty
-    value of the 'OutputPath' property specified under the IDE generated Configuration/Platform 'PropertyGroup' section.
+    For Legacy projects that define properties per Configuration/Platform combination, the validity of an
+    invalid combination is determined by the non-empty value of the 'OutputPath' property specified under
+    the IDE generated Configuration/Platform specific 'PropertyGroup' section.
 
-    If 'BaseOutputPath' is not specified, then, we should fallback to the existing behavior, as described above.
+    If 'BaseOutputPath' is specified, we can skip the validation, since, we assume the 'OutputPath' property
+    will be derived (e.g.: from the 'BaseOutputPath' property).
   -->
   <PropertyGroup Condition="'$(BaseOutputPathWasSpecified)' != 'true' and '$(_OutputPathWasMissing)' == 'true'">
     <!--
-        When 'OutputPath' is missing or empty (along with non-existent 'BaseOutputPath') at this point means that
-        we're in legacy mode and we should assume the current Configuration/Platform combination as invalid.
+        When 'OutputPath' is missing or empty (along with non-existent 'BaseOutputPath') at this point means,
+        we're in legacy mode and we shall assume the current Configuration/Platform combination as invalid.
         Whether this is considered an error or a warning depends on the value of $(SkipInvalidConfigurations).
     -->
     <_InvalidConfigurationError Condition=" '$(SkipInvalidConfigurations)' != 'true' ">true</_InvalidConfigurationError>
