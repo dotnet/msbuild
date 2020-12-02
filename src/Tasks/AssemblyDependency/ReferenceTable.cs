@@ -2598,9 +2598,6 @@ namespace Microsoft.Build.Tasks
             // Set the CopyLocal metadata.
             referenceItem.SetMetadata(ItemMetadataNames.copyLocal, reference.IsCopyLocal.ToString());
 
-            // Set the FusionName metadata.
-            referenceItem.SetMetadata(ItemMetadataNames.fusionName, fusionName);
-
             // Set the Redist name metadata.
             if (!String.IsNullOrEmpty(reference.RedistName))
             {
@@ -2654,20 +2651,11 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            // Set the IsRedistRoot metadata
-            if (reference.IsRedistRoot == true)
+            // The redist root is "null" when there was no IsRedistRoot flag in the Redist XML
+            // (or there was no redist XML at all for this item).
+            if (reference.IsRedistRoot != null)
             {
-                referenceItem.SetMetadata(ItemMetadataNames.isRedistRoot, "true");
-            }
-            else if (reference.IsRedistRoot == false)
-            {
-                referenceItem.SetMetadata(ItemMetadataNames.isRedistRoot, "false");
-            }
-            else
-            {
-                // This happens when the redist root is "null". This means there
-                // was no IsRedistRoot flag in the Redist XML (or there was no 
-                // redist XML at all for this item).
+                referenceItem.SetMetadata(ItemMetadataNames.isRedistRoot, reference.IsRedistRoot.ToString());
             }
 
             // If there was a primary source item, then forward metadata from it.
@@ -2726,6 +2714,9 @@ namespace Microsoft.Build.Tasks
                 referenceItem.SetMetadata(ItemMetadataNames.version, String.Empty);
             }
 
+            // Unset fusionName so we don't have to unset it later.
+            referenceItem.RemoveMetadata(ItemMetadataNames.fusionName);
+
             // Now clone all properties onto the related files.
             foreach (string relatedFileExtension in reference.GetRelatedFileExtensions())
             {
@@ -2733,7 +2724,6 @@ namespace Microsoft.Build.Tasks
                 // Clone metadata.
                 referenceItem.CopyMetadataTo(item);
                 // Related files don't have a fusion name.
-                item.SetMetadata(ItemMetadataNames.fusionName, "");
                 RemoveNonForwardableMetadata(item);
 
                 // Add the related item.
@@ -2749,7 +2739,6 @@ namespace Microsoft.Build.Tasks
                 // Set the destination directory.
                 item.SetMetadata(ItemMetadataNames.destinationSubDirectory, FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(satelliteFile)));
                 // Satellite files don't have a fusion name.
-                item.SetMetadata(ItemMetadataNames.fusionName, "");
                 RemoveNonForwardableMetadata(item);
 
                 // Add the satellite item.
@@ -2763,7 +2752,6 @@ namespace Microsoft.Build.Tasks
                 // Clone metadata.
                 referenceItem.CopyMetadataTo(item);
                 // serialization assemblies files don't have a fusion name.
-                item.SetMetadata(ItemMetadataNames.fusionName, "");
                 RemoveNonForwardableMetadata(item);
 
                 // Add the serialization assembly item.
@@ -2777,7 +2765,6 @@ namespace Microsoft.Build.Tasks
                 // Clone metadata.
                 referenceItem.CopyMetadataTo(item);
                 // We don't have a fusion name for scatter files.
-                item.SetMetadata(ItemMetadataNames.fusionName, "");
                 RemoveNonForwardableMetadata(item);
 
                 // Add the satellite item.
@@ -2797,6 +2784,9 @@ namespace Microsoft.Build.Tasks
                     referenceItem.SetMetadata(ItemMetadataNames.projectReferenceOriginalItemSpec, reference.PrimarySourceItem.GetMetadata("OriginalItemSpec"));
                 }
             }
+
+            // Set the FusionName metadata properly.
+            referenceItem.SetMetadata(ItemMetadataNames.fusionName, fusionName);
 
             return referenceItem;
         }
