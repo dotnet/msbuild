@@ -231,16 +231,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             {
                 return;
             }
-            bool anythingReported = false;
             if (templateResolutionResult.HasExactMatches)
             {
                 return;
             }
-            else
-            {
-                ShowNoTemplatesFoundMessage(commandInput);
-                anythingReported = true;
-            }
+
+            // No templates found matching the following input parameter(s): {0}.
+            Reporter.Error.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, GetInputParametersString(commandInput)).Bold().Red());
 
             if (templateResolutionResult.HasPartialMatches)
             {
@@ -251,14 +248,17 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         templateResolutionResult.PartiallyMatchedTemplatesGrouped.Count,
                         GetPartialMatchReason(templateResolutionResult, commandInput))
                     .Bold().Red());
-
-                anythingReported = true;
             }
 
-            if (anythingReported)
+            if (!commandInput.IsListFlagSpecified)
             {
-                Reporter.Error.WriteLine();
+                // To list installed templates, run 'dotnet {0} --list'.
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.ListTemplatesCommand, commandInput.CommandName).Bold().Red());
             }
+
+            // To search for the templates on NuGet.org, run 'dotnet {0} <template name> --search'.
+            Reporter.Error.WriteLine(string.Format(LocalizableStrings.SearchTemplatesCommand, commandInput.CommandName, commandInput.TemplateName).Bold().Red());
+            Reporter.Error.WriteLine();
         }
 
         // Returns a list of the parameter names that are invalid for every template in the input group.
@@ -347,14 +347,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 : string.IsNullOrEmpty(filters)
                     ? $"'{commandInput.TemplateName}'"
                     : $"'{commandInput.TemplateName}'" + separator + filters;
-        }
-
-        private static void ShowNoTemplatesFoundMessage(INewCommandInput commandInput)
-        {
-            // No templates found matching the following input parameter(s): {0}.
-            // To list installed templates: dotnet new --list.
-            Reporter.Error.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, GetInputParametersString(commandInput)).Bold().Red());
-            Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand.Bold().Red());
         }
 
         private static void ShowTemplatesFoundMessage(INewCommandInput commandInput)

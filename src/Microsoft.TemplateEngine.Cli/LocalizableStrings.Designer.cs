@@ -1028,7 +1028,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To list installed templates, run &apos;dotnet new --list&apos;..
+        ///   Looks up a localized string similar to To list installed templates, run &apos;dotnet {0} --list&apos;..
         /// </summary>
         public static string ListTemplatesCommand {
             get {
@@ -1567,6 +1567,15 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string SearchResultTemplateInfo {
             get {
                 return ResourceManager.GetString("SearchResultTemplateInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To search for the templates on NuGet.org, run &apos;dotnet {0} {1} --search&apos;..
+        /// </summary>
+        public static string SearchTemplatesCommand {
+            get {
+                return ResourceManager.GetString("SearchTemplatesCommand", resourceCulture);
             }
         }
         
