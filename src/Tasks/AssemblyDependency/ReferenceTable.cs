@@ -2596,14 +2596,7 @@ namespace Microsoft.Build.Tasks
             referenceItem.SetMetadata(ItemMetadataNames.resolvedFrom, reference.ResolvedSearchPath);
 
             // Set the CopyLocal metadata.
-            if (reference.IsCopyLocal)
-            {
-                referenceItem.SetMetadata(ItemMetadataNames.copyLocal, "true");
-            }
-            else
-            {
-                referenceItem.SetMetadata(ItemMetadataNames.copyLocal, "false");
-            }
+            referenceItem.SetMetadata(ItemMetadataNames.copyLocal, reference.IsCopyLocal.ToString());
 
             // Set the FusionName metadata.
             referenceItem.SetMetadata(ItemMetadataNames.fusionName, fusionName);
