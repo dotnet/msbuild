@@ -2522,10 +2522,10 @@ namespace Microsoft.Build.Tasks
             var scatterItems = new List<ITaskItem>();
             var copyLocalItems = new List<ITaskItem>();
 
-            foreach (AssemblyNameExtension assemblyName in References.Keys)
+            foreach (KeyValuePair<AssemblyNameExtension, Reference> kvp in References)
             {
-                string fusionName = assemblyName.FullName;
-                Reference reference = GetReference(assemblyName);
+                AssemblyNameExtension assemblyName = kvp.Key;
+                Reference reference = kvp.Value;
 
                 // Conflict victims and badimages are filtered out.
                 if (!reference.IsBadImage)
@@ -2554,7 +2554,7 @@ namespace Microsoft.Build.Tasks
 
                     if (reference.IsResolved)
                     {
-                        ITaskItem referenceItem = SetItemMetadata(relatedItems, satelliteItems, serializationAssemblyItems, scatterItems, fusionName, reference, assemblyName);
+                        ITaskItem referenceItem = SetItemMetadata(relatedItems, satelliteItems, serializationAssemblyItems, scatterItems, assemblyName.FullName, reference, assemblyName);
 
                         if (reference.IsPrimary)
                         {
