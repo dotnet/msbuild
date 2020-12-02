@@ -2629,10 +2629,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if (VerifyArchitectureOfImplementationDll(reference.ImplementationAssembly, reference.FullPath))
                     {
-                        if (string.IsNullOrEmpty(referenceItem.GetMetadata(ItemMetadataNames.winmdImplmentationFile)))
-                        {
-                            referenceItem.SetMetadata(ItemMetadataNames.winmdImplmentationFile, Path.GetFileName(reference.ImplementationAssembly));
-                        }
+                        referenceItem.SetMetadata(ItemMetadataNames.winmdImplmentationFile, Path.GetFileName(reference.ImplementationAssembly));
 
                         // Add the implementation item as a related file
                         ITaskItem item = new TaskItem(reference.ImplementationAssembly);
