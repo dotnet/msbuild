@@ -1,0 +1,48 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithJoinAndFolderRename",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithJoinAndFolderRename",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithJoinAndFolderRename",
+  "shortName": "TestAssets.TemplateWithJoinAndFolderRename",
+  "symbols": {
+    "company": {
+      "type": "parameter",
+      "dataType": "string",
+      "defaultValue": "Microsoft"
+    },
+    "product": {
+      "type": "parameter",
+      "dataType": "string",
+      "defaultValue": "Visual Studio"
+    },
+    "joinedRename": {
+      "type": "generated",
+      "generator": "join",
+      "fileRename": "Api",
+      "parameters": {
+        "symbols": [
+          {
+            "type": "const",
+            "value": "Source"
+          },
+          {
+            "type": "const",
+            "value": "Api"
+          },
+          {
+            "type": "ref",
+            "value": "company"
+          },
+          {
+            "type": "ref",
+            "value": "product"
+          }
+        ],
+        "separator": "/"
+      }
+    }
+  }
+}
