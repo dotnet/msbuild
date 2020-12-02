@@ -2774,6 +2774,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataC, items[4]);
         }
 
+        [Fact]
+        public void OptimizedRemoveOperationRespectsCondition()
+        {
+            string content = @"<TheItem Include=""InitialValue"" />
+                               <TheItem Remove=""@(TheItem)"" Condition=""false"" />
+                               <TheItem Include=""ReplacedValue"" Condition=""false"" /> ";
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, true);
+
+            items[0].EvaluatedInclude.ShouldBe("InitialValue");
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
