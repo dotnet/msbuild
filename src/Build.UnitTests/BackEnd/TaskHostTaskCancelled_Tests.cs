@@ -1,13 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-
 using Microsoft.Build.BackEnd;
 using Xunit;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -35,8 +31,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ((ITranslatable)cancelled).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostTaskCancelled.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
-
-            TaskHostTaskCancelled deserializedCancelled = packet as TaskHostTaskCancelled;
+            packet.ShouldBeOfType<TaskHostTaskCancelled>();
         }
     }
 }

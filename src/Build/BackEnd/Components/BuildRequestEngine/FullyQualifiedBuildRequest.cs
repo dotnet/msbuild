@@ -74,12 +74,12 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the objects are equivalent, false otherwise.</returns>
         public static bool operator ==(FullyQualifiedBuildRequest left, FullyQualifiedBuildRequest right)
         {
-            if (ReferenceEquals(left, null))
+            if (left is null)
             {
-                return ReferenceEquals(right, null);
+                return right is null;
             }
 
-            return !ReferenceEquals(right, null) && left.InternalEquals(right);
+            return !(right is null) && left.InternalEquals(right);
         }
 
         /// <summary>

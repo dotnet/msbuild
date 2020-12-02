@@ -2,15 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Xml;
 using System.Runtime.Serialization;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
 
 using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.Exceptions
 {
@@ -196,7 +193,7 @@ namespace Microsoft.Build.Exceptions
             {
                 string fullPath = FileUtilities.GetFullPathNoThrow(projectFile);
 
-                projectFile = (fullPath == null) ? projectFile : fullPath;
+                projectFile = fullPath ?? projectFile;
             }
 
             file = projectFile;

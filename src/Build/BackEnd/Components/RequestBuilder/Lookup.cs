@@ -1140,7 +1140,7 @@ namespace Microsoft.Build.BackEnd
             {
                 get
                 {
-                    MetadataModification modification = null;
+                    MetadataModification modification;
                     if (!_modifications.TryGetValue(metadataName, out modification))
                     {
                         if (_keepOnlySpecified)

@@ -248,8 +248,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void GetAndValidateStrongNameKey(out StrongNameKeyPair keyPair, out byte[] publicKey)
         {
-            keyPair = null;
-            publicKey = null;
 
             // get key pair/public key
             StrongNameUtils.GetStrongNameKey(Log, KeyFile, KeyContainer, out keyPair, out publicKey);

@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -10,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -18,7 +16,6 @@ using Microsoft.Build.Shared;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
-using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -162,8 +159,6 @@ namespace Microsoft.Build.BackEnd
             _forceAffinityOutOfProc = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
             _debugDumpPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
             _schedulingUnlimitedVariable = Environment.GetEnvironmentVariable("MSBUILDSCHEDULINGUNLIMITED");
-            string strNodeLimitOffset = null;
-
             _nodeLimitOffset = 0;
 
             if (!String.IsNullOrEmpty(_schedulingUnlimitedVariable))
@@ -174,8 +169,7 @@ namespace Microsoft.Build.BackEnd
             {
                 _schedulingUnlimited = false;
 
-                strNodeLimitOffset = Environment.GetEnvironmentVariable("MSBUILDNODELIMITOFFSET");
-
+                string strNodeLimitOffset = Environment.GetEnvironmentVariable("MSBUILDNODELIMITOFFSET");
                 if (!String.IsNullOrEmpty(strNodeLimitOffset))
                 {
                     _nodeLimitOffset = Int16.Parse(strNodeLimitOffset, CultureInfo.InvariantCulture);
@@ -603,8 +597,6 @@ namespace Microsoft.Build.BackEnd
 
             // Resume any work available which has already been assigned to specific nodes.
             ResumeRequiredWork(responses);
-
-            int nodesFreeToDoWorkPriorToScheduling = 0;
             HashSet<int> idleNodes = new HashSet<int>();
             foreach (int availableNodeId in _availableNodes.Keys)
             {
@@ -614,7 +606,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            nodesFreeToDoWorkPriorToScheduling = idleNodes.Count;
+            int nodesFreeToDoWorkPriorToScheduling = idleNodes.Count;
 
             // Assign requests to any nodes which are currently idle.
             if (idleNodes.Count > 0 && _schedulingData.UnscheduledRequestsCount > 0)
@@ -1557,7 +1549,7 @@ namespace Microsoft.Build.BackEnd
                 // directly here.  We COULD simply report these as blocking the parent request and let the scheduler pick them up later when the parent
                 // comes back up as schedulable, but we prefer to send the results back immediately so this request can (potentially) continue uninterrupted.
                 ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
-                if (null != response)
+                if (response != null)
                 {
                     TraceScheduler("Request {0} (node request {1}) satisfied from the cache.", request.GlobalRequestId, request.NodeRequestId);
 
@@ -2080,7 +2072,7 @@ namespace Microsoft.Build.BackEnd
                 currentWork[i] = invalidWorkId;
                 previousWork[i] = invalidWorkId;
                 runningRequests[i] = new HashSet<int>();
-                nodeIndices.Append(String.Format(CultureInfo.InvariantCulture, "{0,-5}   ", indexToAvailableNodeId[i]));
+                nodeIndices.AppendFormat(CultureInfo.InvariantCulture, "{0,-5}   ", indexToAvailableNodeId[i]);
             }
 
             loggingService.LogComment(context, MessageImportance.Normal, "NodeUtilizationHeader", nodeIndices.ToString());
@@ -2205,7 +2197,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    stringBuilder.Append(String.Format(CultureInfo.InvariantCulture, "{0,-5}   ", currentWork[i]));
+                    stringBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0,-5}   ", currentWork[i]);
                     haveNonIdleNode = true;
                 }
             }

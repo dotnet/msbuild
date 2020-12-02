@@ -10,15 +10,11 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
-
-using Microsoft.Build.Evaluation;
 using Microsoft.Win32;
 
 #if FEATURE_SYSTEM_CONFIGURATION
 using PropertyElement = Microsoft.Build.Evaluation.ToolsetElement.PropertyElement;
 #endif
-using System.Reflection;
-using System.Runtime.InteropServices;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
@@ -849,7 +845,7 @@ namespace Microsoft.Build.Shared
                 return Path.Combine(NativeMethodsShared.FrameworkBasePath, "xbuild");
             }
 
-            string programFilesX64 = null;
+            string programFilesX64;
             if (string.Equals(programFiles, programFiles32))
             {
                 // either we're in a 32-bit window, or we're on a 32-bit machine.  
@@ -944,8 +940,7 @@ namespace Microsoft.Build.Shared
                     path = Path.Combine(path, frameworkName.Profile);
                 }
 
-                path = Path.GetFullPath(path);
-                return path;
+                return Path.GetFullPath(path);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
@@ -1661,8 +1656,7 @@ namespace Microsoft.Build.Shared
             public override string GetPathToDotNetFrameworkSdk(VisualStudioSpec visualStudioSpec)
             {
                 string pathToBinRoot = this.GetPathToDotNetFrameworkSdkTools(visualStudioSpec);
-                pathToBinRoot = RemoveDirectories(pathToBinRoot, 1);
-                return pathToBinRoot;
+                return RemoveDirectories(pathToBinRoot, 1);
             }
 
             /// <summary>

@@ -3,9 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -73,7 +70,7 @@ namespace Microsoft.Build.Evaluation
                 key = itemType + "." + name;
             }
 
-            string value = null;
+            string value;
             _metadata.TryGetValue(key, out value);
 
             return value;

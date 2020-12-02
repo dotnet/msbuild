@@ -236,7 +236,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static bool GetTypeLibNameForITypeLib(TaskLoggingHelper log, bool silent, ITypeLib typeLib, string typeLibId, out string typeLibName)
         {
-            typeLibName = "";
 
             // see if the type library supports ITypeLib2
             if (!(typeLib is ITypeLib2 typeLib2))

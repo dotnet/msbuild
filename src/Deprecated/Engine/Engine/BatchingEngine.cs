@@ -4,9 +4,6 @@
 using System;
 using System.Xml;
 using System.Collections;
-using System.Globalization;
-using System.Text;
-using System.Text.RegularExpressions;
 
 using Microsoft.Build.BuildEngine.Shared;
 using System.Collections.Generic;
@@ -337,7 +334,7 @@ namespace Microsoft.Build.BuildEngine
 
                         // If we didn't find a bucket that matches this item, create a new one, adding
                         // this item to the bucket.
-                        if (null == matchingBucket)
+                        if (matchingBucket == null)
                         {
                             matchingBucket = new ItemBucket(itemListsToBeBatched.Keys, itemMetadataValues, lookup, buckets.Count);
 

@@ -3,9 +3,7 @@
 
 using System;
 using System.Xml;
-using System.Collections;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 
 using Microsoft.Build.BuildEngine.Shared;
@@ -129,7 +127,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private static string Intern(string stringToIntern)
         {
-            string value = stringToIntern;
+            string value;
             if (!customInternTable.TryGetValue(stringToIntern, out value))
             {
                 customInternTable.Add(stringToIntern, stringToIntern);

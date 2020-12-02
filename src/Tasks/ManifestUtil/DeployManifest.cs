@@ -177,9 +177,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static string GetRedistListFilePath(string referenceAssemblyPath)
         {
             string redistListPath = Path.Combine(referenceAssemblyPath, _redistListFolder);
-            redistListPath = Path.Combine(redistListPath, _redistListFile);
-
-            return redistListPath;
+            return Path.Combine(redistListPath, _redistListFile);
         }
 
         private static IList<string> GetPathToReferenceAssemblies(FrameworkNameVersioning targetFrameworkMoniker)

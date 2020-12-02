@@ -334,7 +334,7 @@ namespace Microsoft.Build.Execution
         {
             get
             {
-                if (null != _requestException || _circularDependency || !_baseOverallResult)
+                if (_requestException != null || _circularDependency || !_baseOverallResult)
                 {
                     return BuildResultCode.Failure;
                 }

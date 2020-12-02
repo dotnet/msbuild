@@ -6,8 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security;
-
-using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Reflection;
@@ -274,11 +272,9 @@ namespace Microsoft.Build.BackEnd
         private ITaskItem CreateNewTaskItemFrom(ITaskItem copyFrom)
         {
             ITaskItem2 copyFromAsITaskItem2 = copyFrom as ITaskItem2;
-
-            string escapedItemSpec = null;
-            string escapedDefiningProject = null;
-            Dictionary<string, string> escapedMetadata = null;
-
+            string escapedItemSpec;
+            string escapedDefiningProject;
+            Dictionary<string, string> escapedMetadata;
             if (copyFromAsITaskItem2 != null)
             {
                 escapedItemSpec = copyFromAsITaskItem2.EvaluatedIncludeEscaped;
@@ -736,7 +732,7 @@ namespace Microsoft.Build.BackEnd
                     _customEscapedMetadata.TryGetValue(metadataName, out metadataValue);
                 }
 
-                return (metadataValue == null) ? String.Empty : metadataValue;
+                return metadataValue ?? String.Empty;
             }
 
             /// <summary>

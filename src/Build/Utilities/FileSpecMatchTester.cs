@@ -2,15 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.EscapingStringExtensions;
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Internal
 {
-    internal struct FileSpecMatcherTester
+    internal readonly struct FileSpecMatcherTester
     {
         private readonly string _currentDirectory;
         private readonly string _unescapedFileSpec;
@@ -27,7 +25,7 @@ namespace Microsoft.Build.Internal
 
         public static FileSpecMatcherTester Parse(string currentDirectory, string fileSpec)
         {
-            string unescapedFileSpec = fileSpec.Unescape();
+            string unescapedFileSpec = EscapingUtilities.UnescapeAll(fileSpec);
             Regex regex = EngineFileUtilities.FilespecHasWildcards(fileSpec) ? CreateRegex(unescapedFileSpec, currentDirectory) : null;
 
             return new FileSpecMatcherTester(currentDirectory, unescapedFileSpec, regex);
@@ -53,16 +51,11 @@ namespace Microsoft.Build.Internal
         // todo: glob rooting knowledge partially duplicated with MSBuildGlob.Parse and FileMatcher.ComputeFileEnumerationCacheKey
         private static Regex CreateRegex(string unescapedFileSpec, string currentDirectory)
         {
-            Regex regex = null;
-            string fixedDirPart = null;
-            string wildcardDirectoryPart = null;
-            string filenamePart = null;
-
             FileMatcher.Default.SplitFileSpec(
-                unescapedFileSpec,
-                out fixedDirPart,
-                out wildcardDirectoryPart,
-                out filenamePart);
+            unescapedFileSpec,
+            out string fixedDirPart,
+            out string wildcardDirectoryPart,
+            out string filenamePart);
 
             if (FileUtilities.PathIsInvalid(fixedDirPart))
             {
@@ -77,16 +70,13 @@ namespace Microsoft.Build.Internal
 
             normalizedFixedDirPart = FileUtilities.EnsureTrailingSlash(normalizedFixedDirPart);
 
-            var recombinedFileSpec = string.Join("", normalizedFixedDirPart, wildcardDirectoryPart, filenamePart);
-
-            bool isRecursive;
-            bool isLegal;
+            var recombinedFileSpec = string.Concat(normalizedFixedDirPart, wildcardDirectoryPart, filenamePart);
 
             FileMatcher.Default.GetFileSpecInfoWithRegexObject(
                 recombinedFileSpec,
-                out regex,
-                out isRecursive,
-                out isLegal);
+                out Regex regex,
+                out bool _,
+                out bool isLegal);
 
             return isLegal ? regex : null;
         }

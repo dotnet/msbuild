@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.IO;
-using System.Globalization;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
@@ -157,9 +155,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (this.Parameters != null)
             {
-                string[] parameterComponents;
-
-                parameterComponents = this.Parameters.Split(fileLoggerParameterDelimiters);
+                string[] parameterComponents = this.Parameters.Split(fileLoggerParameterDelimiters);
                 for (int param = 0; param < parameterComponents.Length; param++)
                 {
                     if (parameterComponents[param].Length > 0)

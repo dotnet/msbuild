@@ -4,11 +4,6 @@
 using System;
 using System.IO;
 using System.Text;
-using System.Resources;
-using System.Reflection;
-using System.Collections;
-using System.Globalization;
-using System.Diagnostics;
 
 namespace Microsoft.Build.Shared.LanguageParser
 {
@@ -378,7 +373,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         {
             StringBuilder result = new StringBuilder(length);
 
-            int charactersExtracted = 0;
+            int charactersExtracted;
             for (int i = 0; i < length; i += charactersExtracted)
             {
                 char[] page = GetPage(startPosition + i);

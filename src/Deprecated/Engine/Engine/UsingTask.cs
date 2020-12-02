@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml;
 
 using Microsoft.Build.BuildEngine.Shared;
@@ -37,7 +35,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>LukaszG</owner>
         public string TaskName
         {
-            get { return (this.taskNameAttribute != null) ? this.taskNameAttribute.Value : null; }
+            get { return this.taskNameAttribute?.Value; }
         }
 
         /// <summary>
@@ -56,7 +54,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>LukaszG</owner>
         public string AssemblyName
         {
-            get { return (this.assemblyNameAttribute != null) ? this.assemblyNameAttribute.Value : null; }
+            get { return this.assemblyNameAttribute?.Value; }
         }
 
         /// <summary>
@@ -75,7 +73,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>LukaszG</owner>
         public string AssemblyFile
         {
-            get { return (this.assemblyFileAttribute != null) ? this.assemblyFileAttribute.Value : null; }
+            get { return this.assemblyFileAttribute?.Value; }
         }
 
         /// <summary>
@@ -94,7 +92,7 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>LukaszG</owner>
         public string Condition
         {
-            get { return (this.conditionAttribute != null) ? this.conditionAttribute.Value : null; }
+            get { return this.conditionAttribute?.Value; }
         }
 
         /// <summary>

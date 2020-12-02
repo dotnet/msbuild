@@ -4,8 +4,6 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
-using System.Globalization;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests

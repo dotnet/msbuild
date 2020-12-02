@@ -3,11 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -76,8 +73,7 @@ namespace Microsoft.Build.Evaluation
             // This is an assert, not a VerifyThrow, because the caller should already have done this check, and it's slow/hot.
             Debug.Assert(FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name));
 
-            string value = null;
-
+            string value;
             if (String.Equals(name, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase))
             {
                 value = GetRecursiveDirValue(evaluatedIncludeBeforeWildcardExpansionEscaped, evaluatedIncludeEscaped);

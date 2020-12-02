@@ -208,14 +208,13 @@ namespace Microsoft.Build.Conversion
         )
         {
             // Trivial case
-            if (null == additionalOptionsValue)
+            if (additionalOptionsValue == null)
             {
                 return;
             }
 
             // Tokenize the additional options first
-            string[] compSwitchList;
-            compSwitchList = TokenizeAdditionalOptionsValue(additionalOptionsValue);
+            string[] compSwitchList = TokenizeAdditionalOptionsValue(additionalOptionsValue);
 
             // Extract the switch arguments
             foreach (string compSwitch in compSwitchList)
@@ -301,7 +300,7 @@ namespace Microsoft.Build.Conversion
                 }
             }
             // No no... we arent dealing with the correct switchInfo
-            if (null == matchedID)
+            if (matchedID == null)
             {
                 return false;
             }
@@ -326,7 +325,7 @@ namespace Microsoft.Build.Conversion
                             switchVal = false;
                         }
                     }
-                    if (null != switchVal)
+                    if (switchVal != null)
                     {
                         compSwitchInfo.SwitchValue = switchVal;
                     }
@@ -341,7 +340,7 @@ namespace Microsoft.Build.Conversion
                     {
                         switchVal = compSwitch.Substring(matchedID.Length);
                     }
-                    if (null != switchVal)
+                    if (switchVal != null)
                     {
                         compSwitchInfo.SwitchValue = switchVal;
                     }
@@ -353,7 +352,7 @@ namespace Microsoft.Build.Conversion
 
                 case SwitchValueType.SVT_MultiString:
                     Debug.Assert(
-                        null != compSwitchInfo.SwitchValue,
+                        compSwitchInfo.SwitchValue != null,
                         "Non null switch value expected for a multistring switch: " + matchedID
                     );
 
@@ -361,7 +360,7 @@ namespace Microsoft.Build.Conversion
                     {
                         switchVal = compSwitch.Substring(matchedID.Length);
                     }
-                    if (null != switchVal)
+                    if (switchVal != null)
                     {
                         ((StringBuilder)(compSwitchInfo.SwitchValue)).Append(switchVal);
                         ((StringBuilder)(compSwitchInfo.SwitchValue)).Append(";");
@@ -399,7 +398,7 @@ namespace Microsoft.Build.Conversion
                 switch (compSwitchInfo.SwitchValueType)
                 {
                     case SwitchValueType.SVT_Boolean:
-                        if (null != compSwitchInfo.SwitchValue)
+                        if (compSwitchInfo.SwitchValue != null)
                         {
                             configPropertyGroup.AddProperty(
                                 propertyName,
@@ -409,7 +408,7 @@ namespace Microsoft.Build.Conversion
                     break;
 
                     case SwitchValueType.SVT_String:
-                        if (null != compSwitchInfo.SwitchValue)
+                        if (compSwitchInfo.SwitchValue != null)
                         {
                             configPropertyGroup.AddProperty(
                                 propertyName,
@@ -419,7 +418,7 @@ namespace Microsoft.Build.Conversion
                     break;
 
                     case SwitchValueType.SVT_MultiString:
-                        Debug.Assert(null != compSwitchInfo.SwitchValue, "Expected non null value for multistring switch");
+                        Debug.Assert(compSwitchInfo.SwitchValue != null, "Expected non null value for multistring switch");
                         if (0 != ((StringBuilder)(compSwitchInfo.SwitchValue)).Length)
                         {
                             configPropertyGroup.AddProperty(

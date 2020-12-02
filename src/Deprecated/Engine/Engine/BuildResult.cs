@@ -3,10 +3,7 @@
 
 using System;
 using System.Collections;
-using System.Text;
 using System.IO;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.BuildEngine
@@ -232,7 +229,7 @@ namespace Microsoft.Build.BuildEngine
         internal void ConvertToTaskItems()
         {
             // If outputsByTarget was null then we dont have to re-create anything as nothing was passed over
-            if (null != outputsByTarget)
+            if (outputsByTarget != null)
             {
                 string[] keys = new string[outputsByTarget.Count];
                 outputsByTarget.Keys.CopyTo(keys, 0);

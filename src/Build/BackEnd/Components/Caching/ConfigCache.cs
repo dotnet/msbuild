@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
@@ -207,8 +205,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>Set if configurations which have been cleared.</returns>
         public List<int> ClearNonExplicitlyLoadedConfigurations()
         {
-            List<int> configurationIdsCleared = null;
-            configurationIdsCleared = new List<int>();
+            List<int> configurationIdsCleared = new List<int>();
 
             Dictionary<int, BuildRequestConfiguration> configurationsToKeep = new Dictionary<int, BuildRequestConfiguration>();
             Dictionary<ConfigurationMetadata, int> configurationIdsByMetadataToKeep = new Dictionary<ConfigurationMetadata, int>();

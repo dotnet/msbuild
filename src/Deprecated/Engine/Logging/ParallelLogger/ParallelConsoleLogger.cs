@@ -6,7 +6,6 @@ using System.Text;
 using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Collections.Generic;
 
 using Microsoft.Build.Framework;
@@ -499,12 +498,12 @@ namespace Microsoft.Build.BuildEngine
                 {
                     DisplayDeferredProjectStartedEvent(e.BuildEventContext);
                 }
-                if (null != e.Properties)
+                if (e.Properties != null)
                 {
                     WriteProperties(e, e.Properties);          
                 }
 
-                if (null != e.Items)
+                if (e.Items != null)
                 {
                     WriteItems(e, e.Items);
                 }
@@ -547,10 +546,8 @@ namespace Microsoft.Build.BuildEngine
                         // In the project finished message the targets which were built and the project which was built
                         // should be shown
                         string targets = startedEvent.TargetNames;
-
-                        string projectName = string.Empty;
-
-                        projectName = startedEvent.ProjectFile == null ? string.Empty : startedEvent.ProjectFile;
+                        string projectName = startedEvent.ProjectFile ?? string.Empty;
+                        
                         // Show which targets were built as part of this project
                         if (string.IsNullOrEmpty(targets))
                         {
@@ -966,7 +963,7 @@ namespace Microsoft.Build.BuildEngine
                        && IsVerbosityAtLeast(LoggerVerbosity.Normal)
                     )
                 {
-                    List<BuildMessageEventArgs> messageList = null;
+                    List<BuildMessageEventArgs> messageList;
                     if (deferredMessages.ContainsKey(e.BuildEventContext))
                     {
                         messageList = deferredMessages[e.BuildEventContext];
@@ -1012,7 +1009,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void PrintMessage(BuildMessageEventArgs e, bool lightenText)
         {
-            string nonNullMessage = (e.Message == null) ? String.Empty : e.Message;
+            string nonNullMessage = e.Message ?? String.Empty;
             int prefixAdjustment = 0;
 
             if (e.BuildEventContext.TaskId != BuildEventContext.InvalidTaskId)
@@ -1063,7 +1060,7 @@ namespace Microsoft.Build.BuildEngine
                 string targetName = string.Empty;
 
                 // Does the context (Project, Node, Context, Target, NOT task) of the previous event match the current message
-                bool contextAreEqual = compareContextNodeIdTargetId.Equals(currentBuildEventContext, lastDisplayedBuildEventContext == null ? null : lastDisplayedBuildEventContext);
+                bool contextAreEqual = compareContextNodeIdTargetId.Equals(currentBuildEventContext, lastDisplayedBuildEventContext ?? null);
 
                 TargetStartedEventMinimumFields targetStartedEvent = null;
                 // If the previous event does not have the same target context information, the target name needs to be printed to the console
@@ -1231,9 +1228,9 @@ namespace Microsoft.Build.BuildEngine
                
                 ProjectStartedEventMinimumFields startedEvent = buildEventManager.GetProjectStartedEvent(e);
                 ErrorUtilities.VerifyThrow(startedEvent != null, "Project Started should not be null in deferred target started");
-                string currentProjectFile = startedEvent.ProjectFile == null ? string.Empty : startedEvent.ProjectFile;
+                string currentProjectFile = startedEvent.ProjectFile ?? string.Empty;
 
-                string targetName = null;
+                string targetName;
                 if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic) || showEventId)
                 {
                    targetName = ResourceUtilities.FormatResourceString("TargetMessageWithId", targetStartedEvent.TargetName, targetStartedEvent.ProjectBuildEventContext.TargetId);
@@ -1281,8 +1278,8 @@ namespace Microsoft.Build.BuildEngine
                         DisplayDeferredStartedEvents(parentStartedEvent.ProjectBuildEventContext);
                     }
 
-                    string current = projectStartedEvent.ProjectFile == null ? string.Empty : projectStartedEvent.ProjectFile;
-                    string previous = parentStartedEvent == null ? null : parentStartedEvent.ProjectFile;
+                    string current = projectStartedEvent.ProjectFile ?? string.Empty;
+                    string previous = parentStartedEvent?.ProjectFile;
                     string targetNames = projectStartedEvent.TargetNames;
 
                     // Log 0-based node id's, where 0 is the parent. This is a little unnatural for the reader,
@@ -1292,7 +1289,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         WriteLinePrefix(projectStartedEvent.FullProjectKey, projectStartedEvent.TimeStamp, false);
                         setColor(ConsoleColor.Cyan);
-                        string message = string.Empty;
+                        string message;
                         if (string.IsNullOrEmpty(targetNames))
                         {
                             message = ResourceUtilities.FormatResourceString("ProjectStartedTopLevelProjectWithDefaultTargets", current, currentProjectNodeId);
@@ -1371,8 +1368,7 @@ namespace Microsoft.Build.BuildEngine
                 context = LogFormatter.FormatLogTimeStamp(eventTimeStamp);
             }
 
-            string prefixString = string.Empty;
-
+            string prefixString;
             if (!isMessagePrefix || IsVerbosityAtLeast(LoggerVerbosity.Detailed))
             {
                 prefixString = ResourceUtilities.FormatResourceString("BuildEventContext", context, key) + ">";

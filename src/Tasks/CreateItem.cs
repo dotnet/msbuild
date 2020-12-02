@@ -99,7 +99,7 @@ namespace Microsoft.Build.Tasks
                 )
                 {
                     ITaskItem newItem = i;
-                    if (null != metadataTable)
+                    if (metadataTable != null)
                     {
                         foreach (KeyValuePair<string, string> nameAndValue in metadataTable)
                         {

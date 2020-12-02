@@ -1313,7 +1313,7 @@ namespace Microsoft.Build.Utilities
             bool isError = false;
             CanonicalError.Parts messageParts = CanonicalError.Parse(lineOfText);
 
-            if (null == messageParts)
+            if (messageParts == null)
             {
                 // Line was not recognized as a canonical error. Log it as a message.
                 LogMessage(messageImportance, lineOfText);

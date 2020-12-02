@@ -4,12 +4,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
-using System.Xml;
 using System.Text.RegularExpressions;
 using Xunit;
 
@@ -442,7 +438,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var actual = ExpressionShredder.SplitSemiColonSeparatedList(input);
             Console.WriteLine(input);
 
-            if (null == expected)
+            if (expected == null)
             {
                 // passing "null" means you expect an empty array back
                 expected = new string[] { };

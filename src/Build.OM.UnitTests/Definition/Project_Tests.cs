@@ -4,14 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Construction;
-using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -2866,7 +2864,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var sb = new StringBuilder();
             for (int i = 0; i < itemElements; i++)
             {
-                sb.AppendLine($"<i_{i} Include=\"a\"/>");
+                sb.Append("<i_").Append(i).AppendLine(" Include=\"a\"/>");
                 expected.Add(($"i_{i}", Operation.Include, Provenance.StringLiteral, 1));
             }
 

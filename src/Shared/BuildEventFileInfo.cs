@@ -3,7 +3,6 @@
 
 using System;
 using System.Xml;
-using System.Xml.Schema;
 using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Shared
@@ -70,7 +69,7 @@ namespace Microsoft.Build.Shared
         internal BuildEventFileInfo(string file, int line, int column, int endLine, int endColumn)
         {
             // Projects that don't have a filename when the are built should use an empty string instead.
-            _file = (file == null) ? String.Empty : file;
+            _file = file ?? String.Empty;
             _line = line;
             _column = column;
             _endLine = endLine;

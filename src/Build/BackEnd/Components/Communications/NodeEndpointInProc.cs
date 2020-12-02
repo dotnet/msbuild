@@ -2,11 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Text;
 using System.Threading;
-using System.Diagnostics;
 using Microsoft.Build.Shared;
 
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
@@ -252,7 +249,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newStatus">The new status of the endpoint link.</param>
         private void RaiseLinkStatusChanged(LinkStatus newStatus)
         {
-            if (null != OnLinkStatusChanged)
+            if (OnLinkStatusChanged != null)
             {
                 LinkStatusChangedDelegate linkStatusDelegate = OnLinkStatusChanged;
                 linkStatusDelegate(this, newStatus);
@@ -326,8 +323,8 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
             ErrorUtilities.VerifyThrow(_mode == EndpointMode.Asynchronous, "EndPoint mode is synchronous, should be asynchronous");
-            ErrorUtilities.VerifyThrow(null != _packetQueue, "packetQueue is null");
-            ErrorUtilities.VerifyThrow(null != _packetAvailable, "packetAvailable is null");
+            ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue is null");
+            ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable is null");
 
             _packetQueue.Enqueue(packet);
             _packetAvailable.Set();
@@ -340,10 +337,10 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_asyncDataMonitor)
             {
-                ErrorUtilities.VerifyThrow(null == _packetPump, "packetPump != null");
-                ErrorUtilities.VerifyThrow(null == _packetAvailable, "packetAvailable != null");
-                ErrorUtilities.VerifyThrow(null == _terminatePacketPump, "terminatePacketPump != null");
-                ErrorUtilities.VerifyThrow(null == _packetQueue, "packetQueue != null");
+                ErrorUtilities.VerifyThrow(_packetPump == null, "packetPump != null");
+                ErrorUtilities.VerifyThrow(_packetAvailable == null, "packetAvailable != null");
+                ErrorUtilities.VerifyThrow(_terminatePacketPump == null, "terminatePacketPump != null");
+                ErrorUtilities.VerifyThrow(_packetQueue == null, "packetQueue != null");
 
 #if FEATURE_THREAD_CULTURE
                 _packetPump = new Thread(PacketPumpProc);
@@ -377,10 +374,10 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_asyncDataMonitor)
             {
-                ErrorUtilities.VerifyThrow(null != _packetPump, "packetPump == null");
-                ErrorUtilities.VerifyThrow(null != _packetAvailable, "packetAvailable == null");
-                ErrorUtilities.VerifyThrow(null != _terminatePacketPump, "terminatePacketPump == null");
-                ErrorUtilities.VerifyThrow(null != _packetQueue, "packetQueue == null");
+                ErrorUtilities.VerifyThrow(_packetPump != null, "packetPump == null");
+                ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable == null");
+                ErrorUtilities.VerifyThrow(_terminatePacketPump != null, "terminatePacketPump == null");
+                ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue == null");
 
                 _terminatePacketPump.Set();
                 if (!_packetPump.Join((int)new TimeSpan(0, 0, BuildParameters.EndpointShutdownTimeout).TotalMilliseconds))

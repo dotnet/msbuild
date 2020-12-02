@@ -7,10 +7,6 @@ using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Security;
-using System.Globalization;
-using System.Text.RegularExpressions;
 
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
@@ -953,9 +949,7 @@ namespace Microsoft.Build.BuildEngine
         internal IDictionary CloneCustomMetadata() 
         {
             IDictionary result = (IDictionary)this.evaluatedCustomMetadata.Clone();
-            result = MergeDefaultMetadata(result);
-
-            return result; 
+            return MergeDefaultMetadata(result);
         }
 
         /// <summary>
@@ -1248,8 +1242,7 @@ namespace Microsoft.Build.BuildEngine
         /// <exception cref="InvalidOperationException">Thrown when the requested metadata is not applicable to the item.</exception>
         public string GetMetadata(string metadataName)
         {
-            string metadataValue = null;
-
+            string metadataValue;
             if (FileUtilities.IsItemSpecModifier(metadataName))
             {
                 // BUGBUG VSWhidbey 377466.  If this method is being called directly by an OM
@@ -1274,7 +1267,7 @@ namespace Microsoft.Build.BuildEngine
                 metadataValue = GetDefaultMetadataValue(metadataName);
             } 
 
-            return (metadataValue == null) ? String.Empty : metadataValue;
+            return metadataValue ?? String.Empty;
         }
 
         /// <summary>
@@ -1299,8 +1292,7 @@ namespace Microsoft.Build.BuildEngine
         /// <exception cref="InvalidOperationException">Thrown when the requested attribute is not applicable to the item.</exception>
         internal string GetEvaluatedMetadataEscaped(string metadataName)
         {
-            string metadataValue = null;
-
+            string metadataValue;
             if (FileUtilities.IsItemSpecModifier(metadataName))
             {
                 // BUGBUG VSWhidbey 377466.  If this method is being called directly by an OM
@@ -1325,7 +1317,7 @@ namespace Microsoft.Build.BuildEngine
                 metadataValue = GetDefaultMetadataValue(metadataName);
             }              
 
-            return (metadataValue == null) ? String.Empty : metadataValue;
+            return metadataValue ?? String.Empty;
         }
 
         /// <summary>

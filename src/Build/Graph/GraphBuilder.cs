@@ -575,8 +575,7 @@ namespace Microsoft.Build.Graph
                 if (i != 0)
                 {
                     errorMessage.Append(projectsInCycle[i])
-                        .Append(" ->")
-                        .AppendLine();
+                        .AppendLine(" ->");
                 }
                 else
                 {

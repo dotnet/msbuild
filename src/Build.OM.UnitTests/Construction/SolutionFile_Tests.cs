@@ -9,6 +9,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
 using Shouldly;
 using Xunit;
+using System.Text;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
@@ -1065,6 +1066,59 @@ namespace Microsoft.Build.UnitTests.Construction
 
             Assert.Equal("Debug", solution.GetDefaultConfigurationName()); // "Default solution configuration"
             Assert.Equal(".NET", solution.GetDefaultPlatformName()); // "Default solution platform"
+        }
+
+        /// <summary>
+        /// Parse solution file with comments
+        /// </summary>
+        [Fact]
+        public void ParseSolutionWithComments()
+        {
+            const string solutionFileContent = @"
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 16
+                    VisualStudioVersion = 16.0.29123.89
+                    MinimumVisualStudioVersion = 10.0.40219.1
+                    Project('{9A19103F-16F7-4668-BE54-9A1E7A4F7556}') = 'SlnCommentTest', 'SlnCommentTest.csproj', '{00000000-0000-0000-FFFF-FFFFFFFFFFFF}'
+                    EndProject
+                    Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'Solution Items', 'Solution Items', '{054DED3B-B890-4652-B449-839F581E5D86}'
+	                    ProjectSection(SolutionItems) = preProject
+		                    SlnFile.txt = SlnFile.txt
+	                    EndProjectSection
+                    EndProject
+                    Global
+	                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                    Debug|Any CPU = Debug|Any CPU
+		                    Release|Any CPU = Release|Any CPU
+	                    EndGlobalSection
+	                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                    {00000000-0000-0000-FFFF-FFFFFFFFFFFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		                    {00000000-0000-0000-FFFF-FFFFFFFFFFFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		                    {00000000-0000-0000-FFFF-FFFFFFFFFFFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                    {00000000-0000-0000-FFFF-FFFFFFFFFFFF}.Release|Any CPU.Build.0 = Release|Any CPU
+	                    EndGlobalSection
+	                    GlobalSection(SolutionProperties) = preSolution
+		                    HideSolutionNode = FALSE
+	                    EndGlobalSection
+	                    GlobalSection(ExtensibilityGlobals) = postSolution
+		                    SolutionGuid = {FFFFFFFF-FFFF-FFFF-0000-000000000000}
+	                    EndGlobalSection
+                    EndGlobal
+                    ";
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            // Put comment between all lines
+            const string comment = "\t# comment";
+            string[] lines = solutionFileContent.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < lines.Length; i++)
+            {
+                stringBuilder.AppendLine(comment);
+                stringBuilder.AppendLine(lines[i]);
+            }
+            stringBuilder.AppendLine(comment);
+
+            Should.NotThrow(() => ParseSolutionHelper(stringBuilder.ToString()));
         }
 
         /// <summary>

@@ -2,11 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Collections;
-using System.IO;
-using System.Globalization;
 using System.Diagnostics;
 
 using Microsoft.Build.Framework;
@@ -267,13 +263,13 @@ namespace Microsoft.Build.BuildEngine
 
             if (Verbosity == LoggerVerbosity.Diagnostic && showItemAndPropertyList)
             {
-                if (null != e.Properties)
+                if (e.Properties != null)
                 {
                     ArrayList propertyList = ExtractPropertyList(e.Properties);
                     WriteProperties(propertyList);
                 }
 
-                if (null != e.Items)
+                if (e.Items != null)
                 {
                     SortedList itemList = ExtractItemList(e.Items);
                     WriteItems(itemList);
@@ -529,7 +525,7 @@ namespace Microsoft.Build.BuildEngine
                 }
 
                 // null messages are ok -- treat as blank line
-                string nonNullMessage = (e.Message == null) ? String.Empty : e.Message;
+                string nonNullMessage = e.Message ?? String.Empty;
 
                 WriteLinePretty(nonNullMessage);
 

@@ -3,13 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
-using System.IO;
-using System.Diagnostics;
-using System.Threading;
 using System.Globalization;
 
 namespace Microsoft.Build.BuildEngine
@@ -50,7 +45,7 @@ namespace Microsoft.Build.BuildEngine
                 if (!projectStartedEvents.ContainsKey(e.BuildEventContext))
                 {
                     int projectTargetKeyLocal = 1;
-                    int projectIncrementKeyLocal = 1;
+                    int projectIncrementKeyLocal;
                     // If we haven't seen this project before (by full path) then
                     // allocate a new key for it and save it away
                     if (!projectKey.ContainsKey(e.ProjectFile))
@@ -533,7 +528,7 @@ namespace Microsoft.Build.BuildEngine
         internal ErrorWarningSummaryDictionaryKey(BuildEventContext entryPoint, string targetName)
         {
             this.entryPointContext = entryPoint;
-            this.targetName = targetName == null ? string.Empty : targetName;
+            this.targetName = targetName ?? string.Empty;
         }
         #endregion
 

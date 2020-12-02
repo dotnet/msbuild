@@ -48,16 +48,13 @@ namespace System.Security.Cryptography
             typeof(object).Assembly.GetType(RSAEncryptionPaddingTypeName, false);
 
         private static readonly object s_pkcs1SignaturePadding =
-            s_rsaSignaturePaddingType == null ? null :
-            s_rsaSignaturePaddingType.GetProperty("Pkcs1", BindingFlags.Static | BindingFlags.Public).GetValue(null);
+            s_rsaSignaturePaddingType?.GetProperty("Pkcs1", BindingFlags.Static | BindingFlags.Public).GetValue(null);
 
         private static readonly object s_pkcs1EncryptionPadding =
-            s_rsaEncryptionPaddingType == null ? null :
-            s_rsaEncryptionPaddingType.GetProperty("Pkcs1", BindingFlags.Static | BindingFlags.Public).GetValue(null);
+            s_rsaEncryptionPaddingType?.GetProperty("Pkcs1", BindingFlags.Static | BindingFlags.Public).GetValue(null);
 
         private static readonly object s_oaepSha1EncryptionPadding =
-            s_rsaEncryptionPaddingType == null ? null :
-            s_rsaEncryptionPaddingType.GetProperty("OaepSHA1", BindingFlags.Static | BindingFlags.Public).GetValue(null);
+            s_rsaEncryptionPaddingType?.GetProperty("OaepSHA1", BindingFlags.Static | BindingFlags.Public).GetValue(null);
 
         private static readonly Lazy<bool> s_preferRsaCng = new Lazy<bool>(DetectRsaCngSupport);
 

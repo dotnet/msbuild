@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
@@ -113,9 +112,7 @@ namespace Microsoft.Build.BuildEngine
         {
             if (loggerParameters != null)
             {
-                string[] parameterComponents;
-
-                parameterComponents = loggerParameters.Split(parameterDelimiters);
+                string[] parameterComponents = loggerParameters.Split(parameterDelimiters);
                 for (int param = 0; param < parameterComponents.Length; param++)
                 {
                     if (parameterComponents[param].Length > 0)
@@ -175,7 +172,7 @@ namespace Microsoft.Build.BuildEngine
         internal string IndentString(string s, int indent)
         {
             // It's possible the event has a null message
-            if (null == s)
+            if (s == null)
             {
                 s = String.Empty;
             }

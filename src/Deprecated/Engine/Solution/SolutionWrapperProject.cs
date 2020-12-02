@@ -6,8 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
-using System.Security;
 using System.Text;
 using System.Xml;
 
@@ -351,7 +349,7 @@ namespace Microsoft.Build.BuildEngine
             // Add a <target> element for each project we have
             foreach (ProjectInSolution proj in solution.ProjectsInOrder)
             {
-                string errorMessage = null;
+                string errorMessage;
 
                 // is it a solution folder?
                 if (proj.ProjectType == SolutionProjectType.SolutionFolder)
@@ -576,7 +574,6 @@ namespace Microsoft.Build.BuildEngine
 
             foreach (ConfigurationInSolution solutionConfiguration in solution.SolutionConfigurations)
             {
-                ProjectConfigurationInSolution projectConfiguration = null;
                 string condition = GetConditionStringForConfiguration(solutionConfiguration);
 
                 // Create the build item group for this configuration if we haven't already
@@ -586,6 +583,7 @@ namespace Microsoft.Build.BuildEngine
                     solutionConfiguration.ProjectBuildItems.Condition = condition;
                 }
 
+                ProjectConfigurationInSolution projectConfiguration;
                 if (proj.ProjectConfigurations.TryGetValue(solutionConfiguration.FullName, out projectConfiguration))
                 {
                     if (projectConfiguration.IncludeInBuild)
@@ -702,8 +700,6 @@ namespace Microsoft.Build.BuildEngine
         {
             StringBuilder referenceGuids = new StringBuilder();
 
-            string message = null;
-
             // Suffix for the reference item name. Since we need to attach additional (different) metadata to every
             // reference item, we need to have helper item lists each with only one item
             int outputReferenceItemNameSuffix = 0;
@@ -723,6 +719,7 @@ namespace Microsoft.Build.BuildEngine
 
                     bool addCreateItem = false;
 
+                    string message;
                     if ((referencedProject.ProjectType == SolutionProjectType.ManagedProject) ||
                         ((referencedProject.ProjectType == SolutionProjectType.Unknown) && (referencedProject.CanBeMSBuildProjectFile(out message))))
                     {
@@ -752,11 +749,8 @@ namespace Microsoft.Build.BuildEngine
                             vcbuildTask = AddResolveVCProjectOutputTaskElement(target, Path.Combine(solution.SolutionFileDirectory, Path.GetFileName(solution.SolutionFile)),
                                 referencedProject.AbsolutePath, referencedProjectConfiguration.FullName);
                         }
-                        catch (Exception e)
+                        catch (Exception e) when (!ExceptionHandling.NotExpectedException(e))
                         {
-                            if (ExceptionHandling.NotExpectedException(e))
-                               throw;
-
                             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(false,
                                 "SubCategoryForSolutionParsingErrors",
                                 new BuildEventFileInfo(solution.SolutionFile),
@@ -835,8 +829,7 @@ namespace Microsoft.Build.BuildEngine
                 importLibraryItemName.Append(subTargetName);
             }
 
-            string referenceGuidsToRemove = null;
-
+            string referenceGuidsToRemove;
             AddResolveProjectReferenceTasks(solution, msbuildProject, target, proj, solutionConfiguration,
                 referenceItemName.ToString(), importLibraryItemName.ToString(), out referenceGuidsToRemove);
 
@@ -844,13 +837,12 @@ namespace Microsoft.Build.BuildEngine
                 referenceGuidsToRemove = string.Empty;
 
             string fullProjectPath = null;
-            string tmpExtension = null;
             string projectPath = null;
 
             try
             {
                 fullProjectPath = proj.AbsolutePath;
-                tmpExtension = string.Format(CultureInfo.InvariantCulture, ".tmp_{0}_{1}.vcproj", solutionConfiguration.ConfigurationName, solutionConfiguration.PlatformName);
+                string tmpExtension = string.Format(CultureInfo.InvariantCulture, ".tmp_{0}_{1}.vcproj", solutionConfiguration.ConfigurationName, solutionConfiguration.PlatformName);
                 projectPath = Path.ChangeExtension(fullProjectPath, tmpExtension);
             }
             catch (Exception e)
@@ -1292,7 +1284,7 @@ namespace Microsoft.Build.BuildEngine
                 // Find out if the web project has a project configuration for this solution configuration.
                 // (Actually, web projects only have one project configuration, so the TryGetValue should
                 // pretty much always return "true".
-                ProjectConfigurationInSolution projectConfiguration = null;
+                ProjectConfigurationInSolution projectConfiguration;
                 if (proj.ProjectConfigurations.TryGetValue(solutionConfiguration.FullName, out projectConfiguration))
                 {
                     // See if the web project is marked as active for this solution configuration.  If so,
@@ -1398,9 +1390,8 @@ namespace Microsoft.Build.BuildEngine
 
                     // Update our big condition string to include this configuration.
                     conditionDescribingValidConfigurations.Append(" or ");
-                    conditionDescribingValidConfigurations.Append(
-                        String.Format(CultureInfo.InvariantCulture, "('$(AspNetConfiguration)' == '{0}')",
-                        EscapingUtilities.Escape(configurationName)));
+                    conditionDescribingValidConfigurations.AppendFormat(CultureInfo.InvariantCulture, "('$(AspNetConfiguration)' == '{0}')",
+                        EscapingUtilities.Escape(configurationName));
                 }
 
                 StringBuilder referenceItemName = new StringBuilder(GenerateSafePropertyName(proj, "References"));
@@ -1418,8 +1409,7 @@ namespace Microsoft.Build.BuildEngine
                     // of referenced projects.
                     foreach (ConfigurationInSolution solutionConfiguration in solution.SolutionConfigurations)
                     {
-                        string referenceProjectGuids = null;
-
+                        string referenceProjectGuids;
                         AddResolveProjectReferenceTasks(solution, msbuildProject, newTarget, proj, solutionConfiguration,
                             referenceItemName.ToString(), null /* don't care about native references */, out referenceProjectGuids);
                     }
@@ -1499,8 +1489,8 @@ namespace Microsoft.Build.BuildEngine
         static internal BuildTask AddErrorWarningMessageElement(Target target, string elementType,
             bool treatAsLiteral, string textResourceName, params object[] args)
         {
-            string code = null;
-            string helpKeyword = null;
+            string code;
+            string helpKeyword;
             string text = ResourceUtilities.FormatResourceString(out code, out helpKeyword, textResourceName, args);
 
             BuildTask task = target.AddNewTask(elementType);
@@ -1549,9 +1539,8 @@ namespace Microsoft.Build.BuildEngine
 
             foreach (ConfigurationInSolution solutionConfiguration in solution.SolutionConfigurations)
             {
-                ProjectConfigurationInSolution projectConfiguration = null;
-                BuildTask newTask = null;
-
+                ProjectConfigurationInSolution projectConfiguration;
+                BuildTask newTask;
                 if (proj.ProjectConfigurations.TryGetValue(solutionConfiguration.FullName, out projectConfiguration))
                 {
                     if (projectConfiguration.IncludeInBuild)
@@ -1806,8 +1795,7 @@ namespace Microsoft.Build.BuildEngine
             // add a project configuration entry for each project in the solution
             foreach (ProjectInSolution project in solution.ProjectsInOrder)
             {
-                ProjectConfigurationInSolution projectConfiguration = null;
-
+                ProjectConfigurationInSolution projectConfiguration;
                 if (project.ProjectConfigurations.TryGetValue(solutionConfiguration.FullName, out projectConfiguration))
                 {
                     solutionConfigurationContents.AppendFormat(
@@ -2013,8 +2001,6 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>LukaszG</owner>
         static private void ScanProjectDependencies(SolutionParser solution, Engine parentEngine, string childProjectToolsVersion, string fullSolutionConfigurationName, BuildEventContext projectBuildEventContext)
         {
-            string message = null;
-
             // Don't bother with all this if the solution configuration doesn't even exist.
             if (fullSolutionConfigurationName == null)
             {
@@ -2029,6 +2015,7 @@ namespace Microsoft.Build.BuildEngine
                     continue;
                 }
 
+                string message;
                 if ((project.ProjectType == SolutionProjectType.ManagedProject) ||
                     ((project.ProjectType == SolutionProjectType.Unknown) && (project.CanBeMSBuildProjectFile(out message))))
                 {

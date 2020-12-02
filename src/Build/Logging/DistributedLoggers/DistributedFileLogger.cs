@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Text;
 using System.IO;
 
 using Microsoft.Build.Framework;
@@ -43,9 +41,7 @@ namespace Microsoft.Build.Logging
         {
             if (this.Parameters != null)
             {
-                string[] parameterComponents;
-
-                parameterComponents = this.Parameters.Split(s_fileLoggerParameterDelimiters);
+                string[] parameterComponents = this.Parameters.Split(s_fileLoggerParameterDelimiters);
                 for (int param = 0; param < parameterComponents.Length; param++)
                 {
                     if (parameterComponents[param].Length > 0)

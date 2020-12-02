@@ -53,9 +53,7 @@ namespace Microsoft.Build.Logging
                         return;
                     }
 
-                    BuildEventArgs instance = null;
-
-                    instance = reader.Read();
+                    BuildEventArgs instance = reader.Read();
                     if (instance == null)
                     {
                         break;

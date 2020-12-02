@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Shared;
 using System;
 using System.Xml;
 using System.Diagnostics;
@@ -151,7 +150,7 @@ namespace Microsoft.Build.Construction
         {
             XmlAttributeWithLocation attributeWithLocation = GetAttributeWithLocation(name);
 
-            return (attributeWithLocation != null) ? attributeWithLocation.Location : null;
+            return attributeWithLocation?.Location;
         }
     }
 }

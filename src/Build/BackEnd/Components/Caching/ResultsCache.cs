@@ -5,8 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.IO;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
@@ -312,7 +310,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (!result.HasResultsForTarget(target) || (result[target].ResultCode == TargetResultCode.Skipped && !skippedResultsAreOK))
                 {
-                    if (null != targetsMissingResults)
+                    if (targetsMissingResults != null)
                     {
                         targetsMissingResults.Add(target);
                         returnValue = false;

@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
@@ -63,7 +62,7 @@ namespace Microsoft.Build.Shared
                 string itemMetadataName
             )
         {
-            bool metadataFound = false;
+            bool metadataFound;
             return TryConvertItemMetadataToBool(item, itemMetadataName, out metadataFound);
         }
     }

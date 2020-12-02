@@ -12,8 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -348,9 +346,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void SdkResolverCanReturnTheSamePropertiesAndItemsMultipleTimes()
         {
-            Dictionary<string, string> propertiesToAdd = null;
-            Dictionary<string, SdkResultItem> itemsToAdd = null;
-
+            Dictionary<string, string> propertiesToAdd;
+            Dictionary<string, SdkResultItem> itemsToAdd;
             CreateMockSdkResultPropertiesAndItems(out propertiesToAdd, out itemsToAdd);
 
             var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(

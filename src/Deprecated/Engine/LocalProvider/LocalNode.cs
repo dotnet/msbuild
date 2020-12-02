@@ -3,12 +3,9 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 using System.Security.AccessControl;
 
@@ -170,7 +167,7 @@ namespace Microsoft.Build.BuildEngine
         /// <returns>True if events created successfully and false otherwise</returns>
         private static bool CreateGlobalEvents(int nodeNumber)
         {
-            bool createdNew = false;
+            bool createdNew;
             if (NativeMethods.IsUserAdministrator())
             {
                 EventWaitHandleSecurity mSec = new EventWaitHandleSecurity();

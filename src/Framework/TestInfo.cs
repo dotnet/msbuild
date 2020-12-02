@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Microsoft.Build.Framework
+﻿namespace Microsoft.Build.Framework
 {
     //  This is a central place to keep track of whether tests are running or not.  Test startup code
     //  will set this to true.  It is consumed in BuildEnvironmentHelper.  However, since that class

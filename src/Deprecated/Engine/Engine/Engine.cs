@@ -4,13 +4,10 @@
 using System;
 using System.IO;
 using System.Xml;
-using System.Security;
 using System.Diagnostics;
-using System.Resources;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Threading;
 
@@ -357,7 +354,7 @@ namespace Microsoft.Build.BuildEngine
             // is null, because it is a value type
 
             this.startupDirectory = Environment.CurrentDirectory;
-            this.engineGlobalProperties = globalProperties == null ? new BuildPropertyGroup() : globalProperties;
+            this.engineGlobalProperties = globalProperties ?? new BuildPropertyGroup();
             this.environmentProperties = new BuildPropertyGroup();
             this.toolsetStateMap = new Dictionary<string, ToolsetState>(StringComparer.OrdinalIgnoreCase);
             this.toolsets = new ToolsetCollection(this);
@@ -452,7 +449,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 LocalNodeProvider localNodeProvider = new LocalNodeProvider();
 
-                string configuration = string.Empty;
+                string configuration;
                 if (localNodeProviderParameters.EndsWith(";", StringComparison.OrdinalIgnoreCase))
                 {
                     configuration = localNodeProviderParameters + "maxcpucount=" + Convert.ToString(numberOfCpus, CultureInfo.InvariantCulture);
@@ -581,8 +578,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 if (engineVersion == null)
                 {
-                    string msbuildPath = null;
-
+                    string msbuildPath;
                     try
                     {
                         // Get the file version from the currently executing assembly.
@@ -1421,8 +1417,8 @@ namespace Microsoft.Build.BuildEngine
         {
             ErrorUtilities.VerifyThrow(project.IsLoadedByHost, "This method can only be called for projects loaded by the host.");
 
-            oldFullFileName = (oldFullFileName == null) ? String.Empty : oldFullFileName;
-            newFullFileName = (newFullFileName == null) ? String.Empty : newFullFileName;
+            oldFullFileName = oldFullFileName ?? String.Empty;
+            newFullFileName = newFullFileName ?? String.Empty;
             if (oldFullFileName == newFullFileName)
             {
                 // Nothing to do, since this really isn't a rename.
@@ -1634,7 +1630,7 @@ namespace Microsoft.Build.BuildEngine
                     (terminatingBuildRequest == null || !terminatingBuildRequest.BuildCompleted)
                   )
             {
-                int eventType = 0;
+                int eventType;
 
                 // See if we have anything to do without waiting on the handles which is expensive 
                 // for kernel mode objects.
@@ -2081,7 +2077,7 @@ namespace Microsoft.Build.BuildEngine
                 // There should be no projects in the ProjectManager with the same full path, global properties and tools version
                 // as any of the loaded projects.  If there are, something went badly awry, because
                 // we were supposed to have deleted them after the last build.
-                ErrorUtilities.VerifyThrow(null == this.cacheOfBuildingProjects.GetProject(loadedProject.FullFileName, loadedProject.GlobalProperties, loadedProject.ToolsVersion),
+                ErrorUtilities.VerifyThrow(this.cacheOfBuildingProjects.GetProject(loadedProject.FullFileName, loadedProject.GlobalProperties, loadedProject.ToolsVersion) == null,
                     "Project shouldn't be in ProjectManager already.");
 
                 // Add the loaded project to the list of projects being built, just
@@ -2525,11 +2521,10 @@ namespace Microsoft.Build.BuildEngine
                 {
                     // There's no cached result: we have to build it. Figure out which node to build it on.
                     Project matchingProjectCurrentlyLoaded = null;
-                    Project projectCurrentlyLoaded = null;
-
+                    
                     // See if we have a project loaded by the host already that matches the full path, in the
                     // list of projects which were loaded at the beginning of the build.
-                    projectCurrentlyLoaded = (Project)this.projectsLoadedByHost[projectFileInfo.FullName];
+                    Project projectCurrentlyLoaded = (Project)this.projectsLoadedByHost[projectFileInfo.FullName];
 
                     if (projectCurrentlyLoaded != null)
                     {
@@ -2548,7 +2543,7 @@ namespace Microsoft.Build.BuildEngine
                     }
 
                     // Decide to build the project on either the current node or remote node
-                    string toolsVersionToUse = buildRequest.ToolsetVersion == null ? DefaultToolsVersion : buildRequest.ToolsetVersion;
+                    string toolsVersionToUse = buildRequest.ToolsetVersion ?? DefaultToolsVersion;
 
                     // If a matching project is currently loaded, we will build locally.
                     bool isLocal = (matchingProjectCurrentlyLoaded != null);
@@ -2790,7 +2785,7 @@ namespace Microsoft.Build.BuildEngine
                 // Check if the project has been previously unloaded due to a user request during the current build
                 // In this case reloaded a project is an error because we can't ensure a consistent state of the reloaded project
                 // and the cached resulted of the original
-                string toolsVersionToUse = toolsVersion == null ? DefaultToolsVersion : toolsVersion;
+                string toolsVersionToUse = toolsVersion ?? DefaultToolsVersion;
                 if (this.cacheOfBuildingProjects.HasProjectBeenLoaded(projectFullPath, globalPropertiesToUse, toolsVersionToUse))
                 {
                     string joinedNames = ResourceUtilities.FormatResourceString("DefaultTargets");

@@ -25,61 +25,51 @@ namespace Microsoft.Build.UnitTests
             messageOnly.ShouldBe("This is a message.");
 
             // whitespace before code and after colon is ok
-            messageOnly = null;
             code = t.Log.ExtractMessageCode("  AL001:   This is a message.", out messageOnly);
             code.ShouldBe("AL001");
             messageOnly.ShouldBe("This is a message.");
 
             // whitespace after colon is not ok
-            messageOnly = null;
             code = t.Log.ExtractMessageCode("AL001 : This is a message.", out messageOnly);
             code.ShouldBeNull();
             messageOnly.ShouldBe("AL001 : This is a message.");
 
             // big code is ok
-            messageOnly = null;
             code = t.Log.ExtractMessageCode("  RESGEN7905001:   This is a message.", out messageOnly);
             code.ShouldBe("RESGEN7905001");
             messageOnly.ShouldBe("This is a message.");
 
             // small code is ok
-            messageOnly = null;
             code = t.Log.ExtractMessageCode("R7: This is a message.", out messageOnly);
             code.ShouldBe("R7");
             messageOnly.ShouldBe("This is a message.");
 
             // lowercase code is ok
-            messageOnly = null;
             code = t.Log.ExtractMessageCode("alink3456: This is a message.", out messageOnly);
             code.ShouldBe("alink3456");
             messageOnly.ShouldBe("This is a message.");
 
             // whitespace in code is not ok
-            messageOnly = null;
             code = t.Log.ExtractMessageCode("  RES 7905:   This is a message.", out messageOnly);
             code.ShouldBeNull();
             messageOnly.ShouldBe("  RES 7905:   This is a message.");
 
             // only digits in code is not ok
-            messageOnly = null;
             code = t.Log.ExtractMessageCode("7905: This is a message.", out messageOnly);
             code.ShouldBeNull();
             messageOnly.ShouldBe("7905: This is a message.");
 
             // only letters in code is not ok
-            messageOnly = null;
             code = t.Log.ExtractMessageCode("ALINK: This is a message.", out messageOnly);
             code.ShouldBeNull();
             messageOnly.ShouldBe("ALINK: This is a message.");
 
             // digits before letters in code is not ok
-            messageOnly = null;
             code = t.Log.ExtractMessageCode("6780ALINK: This is a message.", out messageOnly);
             code.ShouldBeNull();
             messageOnly.ShouldBe("6780ALINK: This is a message.");
 
             // mixing digits and letters in code is not ok
-            messageOnly = null;
             code = t.Log.ExtractMessageCode("LNK658A: This is a message.", out messageOnly);
             code.ShouldBeNull();
             messageOnly.ShouldBe("LNK658A: This is a message.");
@@ -210,7 +200,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (null != file) File.Delete(file);
+                if (file != null) File.Delete(file);
             }
         }
 

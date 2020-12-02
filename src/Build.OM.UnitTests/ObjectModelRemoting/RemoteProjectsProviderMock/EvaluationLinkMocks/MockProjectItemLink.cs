@@ -3,16 +3,10 @@
 
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
-    using System;
     using System.Collections.Generic;
-    using System.IO;
     using Microsoft.Build.Construction;
     using Microsoft.Build.Evaluation;
-    using Microsoft.Build.Evaluation.Context;
-    using Microsoft.Build.Execution;
     using Microsoft.Build.ObjectModelRemoting;
-    using Microsoft.Build.Framework;
-    using Microsoft.Build.Logging;
 
     internal class MockProjectItemLinkRemoter : MockLinkRemoter<ProjectItem>
     {

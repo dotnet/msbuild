@@ -4,11 +4,8 @@
 using System;
 using System.Text;
 using System.Collections;
-using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -530,12 +527,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     DisplayDeferredProjectStartedEvent(e.BuildEventContext);
                 }
-                if (null != e.Properties)
+                if (e.Properties != null)
                 {
                     WriteProperties(e, e.Properties);
                 }
 
-                if (null != e.Items)
+                if (e.Items != null)
                 {
                     WriteItems(e, e.Items);
                 }
@@ -602,10 +599,8 @@ namespace Microsoft.Build.BackEnd.Logging
                         // In the project finished message the targets which were built and the project which was built
                         // should be shown
                         string targets = startedEvent.TargetNames;
-
-                        string projectName = string.Empty;
-
-                        projectName = startedEvent.ProjectFile == null ? string.Empty : startedEvent.ProjectFile;
+                        string projectName = startedEvent.ProjectFile ?? string.Empty;
+                        
                         // Show which targets were built as part of this project
                         if (string.IsNullOrEmpty(targets))
                         {
@@ -1103,7 +1098,7 @@ namespace Microsoft.Build.BackEnd.Logging
                        && IsVerbosityAtLeast(LoggerVerbosity.Normal)
                     )
                 {
-                    List<BuildMessageEventArgs> messageList = null;
+                    List<BuildMessageEventArgs> messageList;
                     if (_deferredMessages.ContainsKey(e.BuildEventContext))
                     {
                         messageList = _deferredMessages[e.BuildEventContext];
@@ -1239,7 +1234,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 string targetName = string.Empty;
 
                 // Does the context (Project, Node, Context, Target, NOT task) of the previous event match the current message
-                bool contextAreEqual = s_compareContextNodeIdTargetId.Equals(currentBuildEventContext, _lastDisplayedBuildEventContext == null ? null : _lastDisplayedBuildEventContext);
+                bool contextAreEqual = s_compareContextNodeIdTargetId.Equals(currentBuildEventContext, _lastDisplayedBuildEventContext);
 
                 TargetStartedEventMinimumFields targetStartedEvent = null;
                 // If the previous event does not have the same target context information, the target name needs to be printed to the console

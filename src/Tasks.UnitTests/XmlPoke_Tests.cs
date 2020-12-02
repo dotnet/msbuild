@@ -1,20 +1,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks;
-using Microsoft.Build.UnitTests;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Reflection.Emit;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -23,16 +17,16 @@ namespace Microsoft.Build.UnitTests
     {
         private const string XmlNamespaceUsedByTests = "http://nsurl";
 
-        private string _xmlFileWithNs = $@"<?xml version='1.0' encoding='utf-8'?>
+        private const string _xmlFileWithNs = @"<?xml version='1.0' encoding='utf-8'?>
         
-<class AccessModifier='public' Name='test' xmlns:s='{XmlNamespaceUsedByTests}'>
+<class AccessModifier='public' Name='test' xmlns:s='" + XmlNamespaceUsedByTests + @"'>
   <s:variable Type='String' Name='a'></s:variable>
   <s:variable Type='String' Name='b'></s:variable>
   <s:variable Type='String' Name='c'></s:variable>
   <method AccessModifier='public static' Name='GetVal' />
 </class>";
 
-        private string _xmlFileNoNs = @"<?xml version='1.0' encoding='utf-8'?>
+        private const string _xmlFileNoNs = @"<?xml version='1.0' encoding='utf-8'?>
         
 <class AccessModifier='public' Name='test'>
   <variable Type='String' Name='a'></variable>
@@ -56,9 +50,11 @@ namespace Microsoft.Build.UnitTests
 
             List<XmlAttribute> nodes = xmlDocument.SelectNodes(query, ns)?.Cast<XmlAttribute>().ToList();
 
-            Assert.True(nodes?.Count == 3, $"There should be 3 <variable /> elements with a Name attribute {Environment.NewLine}{xmlDocument.OuterXml}");
+            nodes.ShouldNotBeNull($"There should be <variable /> elements with a Name attribute {Environment.NewLine}{xmlDocument.OuterXml}");
 
-            Assert.True(nodes?.All(i => i.Value.Equals("Mert")), $"All <variable /> elements should have Name=\"Mert\" {Environment.NewLine}{xmlDocument.OuterXml}");
+            nodes.Count.ShouldBe(3, $"There should be 3 <variable /> elements with a Name attribute {Environment.NewLine}{xmlDocument.OuterXml}");
+
+            nodes.ShouldAllBe(i => i.Value.Equals("Mert"), $"All <variable /> elements should have Name=\"Mert\" {Environment.NewLine}{xmlDocument.OuterXml}");
         }
 
         [Fact]
@@ -72,9 +68,11 @@ namespace Microsoft.Build.UnitTests
 
             List<XmlAttribute> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlAttribute>().ToList();
 
-            Assert.True(nodes?.Count == 3, $"There should be 3 <variable /> elements with a Name attribute {Environment.NewLine}{xmlDocument.OuterXml}");
+            nodes.ShouldNotBeNull($"There should be <variable /> elements with a Name attribute {Environment.NewLine}{xmlDocument.OuterXml}");
 
-            Assert.True(nodes?.All(i => i.Value.Equals(value)), $"All <variable /> elements should have Name=\"{value}\" {Environment.NewLine}{xmlDocument.OuterXml}");
+            nodes.Count.ShouldBe(3, $"There should be 3 <variable /> elements with a Name attribute {Environment.NewLine}{xmlDocument.OuterXml}");
+
+            nodes.ShouldAllBe(i => i.Value.Equals(value), $"All <variable /> elements should have Name=\"{value}\" {Environment.NewLine}{xmlDocument.OuterXml}");
         }
 
         [Fact]
@@ -87,9 +85,11 @@ namespace Microsoft.Build.UnitTests
 
             List<XmlAttribute> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlAttribute>().ToList();
 
-            Assert.True(nodes?.Count == 1, $"There should be 1 <class /> element with an AccessModifier attribute {Environment.NewLine}{xmlDocument.OuterXml}");
+            nodes.ShouldNotBeNull($"There should be <class /> elements with an AccessModifier attribute {Environment.NewLine}{xmlDocument.OuterXml}");
 
-            Assert.Equal(value, nodes?.First().Value);
+            nodes.Count.ShouldBe(1, $"There should be 1 <class /> element with an AccessModifier attribute {Environment.NewLine}{xmlDocument.OuterXml}");
+
+            nodes[0].Value.ShouldBe(value);
         }
 
         [Fact]
@@ -102,13 +102,35 @@ namespace Microsoft.Build.UnitTests
 
             List<XmlElement> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlElement>().ToList();
 
-            Assert.True(nodes?.Count == 1, $"There should be 1 <class /> element {Environment.NewLine}{xmlDocument.OuterXml}");
+            nodes.ShouldNotBeNull($"There should be <class /> elements {Environment.NewLine}{xmlDocument.OuterXml}");
+
+            nodes.Count.ShouldBe(1, $"There should be 1 <class /> element {Environment.NewLine}{xmlDocument.OuterXml}");
 
             var testNodes = nodes?.First().ChildNodes.Cast<XmlElement>().ToList();
 
-            Assert.True(testNodes?.Count == 1, $"There should be 1 <class /> element with one child Test element {Environment.NewLine}{xmlDocument.OuterXml}");
+            testNodes.ShouldNotBeNull($"There should be <class /> elements with one child Test element {Environment.NewLine}{xmlDocument.OuterXml}");
 
-            Assert.Equal("Testing", testNodes?.First().InnerText);
+            testNodes.Count.ShouldBe(1, $"There should be 1 <class /> element with one child Test element {Environment.NewLine}{xmlDocument.OuterXml}");
+
+            testNodes[0].InnerText.ShouldBe("Testing");
+        }
+
+        [Fact]
+        public void PokeAttributeWithCondition()
+        {
+            const string original = "b";
+            const string value = "x";
+            const string queryTemplate = "/class/variable[@Name='{0}']/@Name";
+
+            XmlDocument xmlDocument = ExecuteXmlPoke(query: string.Format(queryTemplate, original), value: value);
+
+            List<XmlAttribute> nodes = xmlDocument.SelectNodes(string.Format(queryTemplate, value))?.Cast<XmlAttribute>().ToList();
+
+            nodes.ShouldNotBeNull($"There should be <class /> element with an AccessModifier attribute {Environment.NewLine}{xmlDocument.OuterXml}");
+
+            nodes.Count.ShouldBe(1, $"There should be 1 <class /> element with an AccessModifier attribute {Environment.NewLine}{xmlDocument.OuterXml}");
+
+            nodes[0].Value.ShouldBe(value);
         }
 
         [Fact]
@@ -138,23 +160,14 @@ namespace Microsoft.Build.UnitTests
                     p.Value = new TaskItem("Mert");
                 }
 
-                bool exceptionThrown = false;
-                try
-                {
-                    p.Execute();
-                }
-                catch (ArgumentNullException)
-                {
-                    exceptionThrown = true;
-                }
-
+                // "Expecting argumentnullexception for the first 7 tests"
                 if (i < 7)
                 {
-                    Assert.True(exceptionThrown); // "Expecting argumentnullexception for the first 7 tests"
+                    Should.Throw<ArgumentNullException>(() => p.Execute());
                 }
                 else
                 {
-                    Assert.False(exceptionThrown); // "Expecting argumentnullexception for the first 7 tests"
+                    Should.NotThrow(() => p.Execute());
                 }
             }
         }
@@ -171,12 +184,11 @@ namespace Microsoft.Build.UnitTests
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//s:variable/@Name";
             p.Namespaces = "<!THIS IS ERROR Namespace Prefix=\"s\" Uri=\"http://nsurl\" />";
-            Assert.Equal("<!THIS IS ERROR Namespace Prefix=\"s\" Uri=\"http://nsurl\" />", p.Namespaces);
+            p.Namespaces.ShouldBe("<!THIS IS ERROR Namespace Prefix=\"s\" Uri=\"http://nsurl\" />");
             p.Value = new TaskItem("Nur");
 
-            bool executeResult = p.Execute();
-            Assert.Contains("MSB3731", engine.Log);
-            Assert.False(executeResult); // "Execution should've failed"
+            p.Execute().ShouldBeFalse(); // "Execution should've failed"
+            engine.AssertLogContains("MSB3731");
         }
 
         [Fact]
@@ -192,8 +204,8 @@ namespace Microsoft.Build.UnitTests
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//s:variable/@Name";
             p.Value = new TaskItem("Nur");
-            Assert.False(p.Execute()); // "Test should've failed"
-            Assert.True(engine.Log.Contains("MSB3732"), "Engine log should contain error code MSB3732 " + engine.Log);
+            p.Execute().ShouldBeFalse(); // "Test should've failed"
+            engine.AssertLogContains("MSB3732");
         }
 
         [Fact]
@@ -225,11 +237,11 @@ namespace Microsoft.Build.UnitTests
 
                 if (i == 3)
                 {
-                    Assert.True(result); // "Only 3rd value should pass."
+                    result.ShouldBeTrue(); // "Only 3rd value should pass."
                 }
                 else
                 {
-                    Assert.False(result); // "Only 3rd value should pass."
+                    result.ShouldBeFalse(); // "Only 3rd value should pass."
                 }
             }
         }
@@ -245,11 +257,13 @@ namespace Microsoft.Build.UnitTests
 
             List<XmlElement> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlElement>().ToList();
 
-            Assert.True(nodes?.Count == 3, $"There should be 3 <variable/> elements {Environment.NewLine}{xmlDocument.OuterXml}");
+            nodes.ShouldNotBeNull($"There should be <variable/> elements {Environment.NewLine}{xmlDocument.OuterXml}");
+
+            nodes.Count.ShouldBe(3, $"There should be 3 <variable/> elements {Environment.NewLine}{xmlDocument.OuterXml}");
 
             foreach (var node in nodes)
             {
-                Assert.Equal(value, node.InnerXml);
+                node.InnerXml.ShouldBe(value);
             }
         }
 
@@ -270,7 +284,7 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogDoesntContain("MSB4036");
         }
 
-        private void Prepare(string xmlFile, out string xmlInputPath)
+        private static void Prepare(string xmlFile, out string xmlInputPath)
         {
             string dir = Path.Combine(Path.GetTempPath(), DateTime.Now.Ticks.ToString());
             Directory.CreateDirectory(dir);
@@ -285,7 +299,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="useNamespace"><code>true</code> to use namespaces, otherwise <code>false</code> (Default).</param>
         /// <param name="value">The value to use.</param>
         /// <returns>An <see cref="XmlDocument"/> containing the resulting XML after the XmlPoke task has executed.</returns>
-        private XmlDocument ExecuteXmlPoke(string query, bool useNamespace = false, string value = null)
+        private static XmlDocument ExecuteXmlPoke(string query, bool useNamespace = false, string value = null)
         {
             MockEngine engine = new MockEngine(true);
 

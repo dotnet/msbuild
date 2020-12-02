@@ -11,7 +11,6 @@ using System.Xml;
 
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -22,7 +21,6 @@ using Shouldly;
 using Xunit;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -4914,7 +4912,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         private void VerifyImportTargetRelativePath(string directory, string directory2, string[] imports)
         {
-            string file0 = null;
             string file1 = null;
             string file2 = null;
             string file3 = null;
@@ -4927,7 +4924,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     FileUtilities.DeleteWithoutTrailingBackslash(directory);
                 }
 
-                file0 = Path.Combine(directory, "my.proj");
+                string file0 = Path.Combine(directory, "my.proj");
                 file1 = Path.Combine(directory, "1.targets");
                 file2 = Path.Combine(directory2, "2.targets");
                 file3 = Path.Combine(directory2, "3.cpp.targets");

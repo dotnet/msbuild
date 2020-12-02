@@ -252,7 +252,7 @@ namespace Microsoft.Build.Tasks
                         // contains the .resx file as the path from which it should resolve
                         // relative paths. So we should base our timestamp/existence checking
                         // on the same switch & resolve in the same manner as ResGen.
-                        resxReader.BasePath = (baseLinkedFileDirectory == null) ? Path.GetDirectoryName(filename) : baseLinkedFileDirectory;
+                        resxReader.BasePath = baseLinkedFileDirectory ?? Path.GetDirectoryName(filename);
 
                         foreach (DictionaryEntry dictEntry in resxReader)
                         {

@@ -253,7 +253,7 @@ namespace Microsoft.Build.Evaluation
             : this(toolsVersion, toolsPath, null, projectCollection.EnvironmentProperties, projectCollection.GlobalPropertiesCollection, subToolsets, msbuildOverrideTasksPath, defaultOverrideToolsVersion: null)
         {
             _properties = new PropertyDictionary<ProjectPropertyInstance>();
-            if (null != buildProperties)
+            if (buildProperties != null)
             {
                 foreach (KeyValuePair<string, string> keyValuePair in buildProperties)
                 {
@@ -701,7 +701,7 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                if (null != getFiles)
+                if (getFiles != null)
                 {
                     defaultTasksFiles = getFiles(searchPath, taskPattern);
                 }
@@ -764,21 +764,18 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal string GenerateSubToolsetVersion(PropertyDictionary<ProjectPropertyInstance> overrideGlobalProperties)
         {
-            ProjectPropertyInstance subToolsetProperty = null;
-            string visualStudioVersion = null;
             if (overrideGlobalProperties != null)
             {
-                subToolsetProperty = overrideGlobalProperties[Constants.SubToolsetVersionPropertyName];
+                ProjectPropertyInstance subToolsetProperty = overrideGlobalProperties[Constants.SubToolsetVersionPropertyName];
 
                 if (subToolsetProperty != null)
                 {
-                    visualStudioVersion = subToolsetProperty.EvaluatedValue;
-                    return visualStudioVersion;
+                    return subToolsetProperty.EvaluatedValue;
                 }
             }
 
-            visualStudioVersion = GenerateSubToolsetVersion(0 /* don't care about solution version */);
-            return visualStudioVersion;
+            /* don't care about solution version */
+            return GenerateSubToolsetVersion(0);
         }
 
         /// <summary>
@@ -851,14 +848,13 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal string GenerateSubToolsetVersionUsingVisualStudioVersion(IDictionary<string, string> overrideGlobalProperties, int visualStudioVersionFromSolution)
         {
-            string visualStudioVersion = null;
+            string visualStudioVersion;
             if (overrideGlobalProperties != null && overrideGlobalProperties.TryGetValue(Constants.SubToolsetVersionPropertyName, out visualStudioVersion))
             {
                 return visualStudioVersion;
             }
 
-            visualStudioVersion = GenerateSubToolsetVersion(visualStudioVersionFromSolution);
-            return visualStudioVersion;
+            return GenerateSubToolsetVersion(visualStudioVersionFromSolution);
         }
 
         /// <summary>
@@ -1001,7 +997,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (Path.IsPathRooted(_overrideTasksPath))
                             {
-                                if (null != _directoryExists)
+                                if (_directoryExists != null)
                                 {
                                     overrideDirectoryExists = _directoryExists(_overrideTasksPath);
                                 }
@@ -1067,7 +1063,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         ProjectUsingTaskElement usingTask = elementXml as ProjectUsingTaskElement;
 
-                        if (null == usingTask)
+                        if (usingTask == null)
                         {
                             ProjectErrorUtilities.ThrowInvalidProject
                                 (

@@ -19,8 +19,6 @@ using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
-using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
-using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -859,7 +857,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             MockLogger logger = new MockLogger();
             logger.AllowTaskCrashes = throwException;
 
-            string taskAssemblyName = null;
+            string taskAssemblyName;
             Project project = CreateSTATestProject(requireSTA, failTask, throwException, out taskAssemblyName);
 
             List<ILogger> loggers = new List<ILogger>();

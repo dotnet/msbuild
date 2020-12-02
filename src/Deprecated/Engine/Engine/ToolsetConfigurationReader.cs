@@ -4,11 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.IO;
-using System.Text;
 using error = Microsoft.Build.BuildEngine.Shared.ErrorUtilities;
-using System.Globalization;
-using System.Reflection;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.BuildEngine
@@ -77,7 +73,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                return ConfigurationSection == null ? null : ConfigurationSection.Default;
+                return ConfigurationSection?.Default;
             }
         }
 
@@ -131,7 +127,7 @@ namespace Microsoft.Build.BuildEngine
         {
             get
             {
-                if (null == configurationSection && !configurationReadAttempted)
+                if (configurationSection == null && !configurationReadAttempted)
                 {
                     try
                     {
@@ -148,7 +144,7 @@ namespace Microsoft.Build.BuildEngine
                         // If section definition is not present and section is also not present, this value is null
                         // If the section definition is not present and section is present, then this value is null
 
-                        if (null != configuration)
+                        if (configuration != null)
                         {
                             configurationSection = configuration.GetSection("msbuildToolsets") as ToolsetConfigurationSection;
                         }

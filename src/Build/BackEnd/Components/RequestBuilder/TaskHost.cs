@@ -10,7 +10,6 @@ using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
 #endif
 using System.Threading;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
@@ -674,7 +673,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Enables or disables emitting a default error when a task fails without logging errors
         /// </summary>
-        public bool AllowFailureWithoutError { get; set; } = true;
+        public bool AllowFailureWithoutError { get; set; } = false;
         #endregion
 
         /// <summary>

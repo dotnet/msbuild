@@ -121,14 +121,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return;
             }
 
-            XmlAttribute idrefAttribute = null;
             XmlElement defaultAssemblyRequestElement = (XmlElement)permissionSetElement.ParentNode.SelectSingleNode(XPaths.defaultAssemblyRequestElement, nsmgr);
             if (defaultAssemblyRequestElement == null)
             {
                 defaultAssemblyRequestElement = document.CreateElement(XmlUtil.TrimPrefix(XPaths.defaultAssemblyRequestElement), XmlNamespaces.asmv2);
                 permissionSetElement.ParentNode.AppendChild(defaultAssemblyRequestElement);
             }
-            idrefAttribute = (XmlAttribute)permissionSetElement.Attributes.GetNamedItem(XmlUtil.TrimPrefix(XPaths.permissionSetReferenceAttribute));
+            XmlAttribute idrefAttribute = (XmlAttribute)permissionSetElement.Attributes.GetNamedItem(XmlUtil.TrimPrefix(XPaths.permissionSetReferenceAttribute));
             if (idrefAttribute == null)
             {
                 idrefAttribute = document.CreateAttribute(XmlUtil.TrimPrefix(XPaths.permissionSetReferenceAttribute));

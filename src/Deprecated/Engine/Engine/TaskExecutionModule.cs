@@ -203,8 +203,7 @@ namespace Microsoft.Build.BuildEngine
                 bool remoteNode = false;
                 for (int r = 0; r < projectFileNames.Length; r++)
                 {
-                    string fullProjectName = projectFileNames[r] != null ?
-                       projectFileNames[r] : "null";
+                    string fullProjectName = projectFileNames[r] ?? "null";
                     Console.WriteLine("RemoteNode: " + remoteNode + " Project " + fullProjectName + " T:" + targetName + " NodeProdyId# " + handleId + " Time " + DateTime.Now.ToLongTimeString());
                     if (globalPropertiesPerProject[r] != null)
                     {
@@ -318,7 +317,6 @@ namespace Microsoft.Build.BuildEngine
             else
             {
                 int currentRequestIndex = 0; // Which build request is being processed
-                int numberOfRequestsToSend = 0; // How many buildRequests are going to be sent based on the number of buildRequests remaining and the build request batch size.
 
                 // Arrays that will be used to partion the buildRequests array when sending batches of builds requests at a time.
                 BuildRequest[] wrapperArrayBreadthFirst = new BuildRequest[batchRequestSize];
@@ -335,7 +333,7 @@ namespace Microsoft.Build.BuildEngine
                     if (breadthFirstTraversal)
                     {
                         // Figure out how many requests to send, either the full batch size or only part of a batch
-                        numberOfRequestsToSend = (buildRequests.Length - currentRequestIndex) <batchRequestSize ? (buildRequests.Length - currentRequestIndex) : batchRequestSize;
+                        int numberOfRequestsToSend = (buildRequests.Length - currentRequestIndex) < batchRequestSize ? (buildRequests.Length - currentRequestIndex) : batchRequestSize;
 
                         // Initialize the wrapper array to how many requests are going to be sent
                         if (numberOfRequestsToSend != wrapperArrayBreadthFirst.Length)

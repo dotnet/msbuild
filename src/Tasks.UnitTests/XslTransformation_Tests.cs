@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
-using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using System;
@@ -13,7 +11,6 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Text;
 using System.Xml.Xsl;
 using System.Xml;
 using Xunit;
@@ -1126,16 +1123,12 @@ namespace Microsoft.Build.UnitTests
 
             // Create TypeBuilder and compile the stylesheet into it
             TypeBuilder typeBldr = modBldr.DefineType(CompiledQueryName, TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit);
-
-            CompilerErrorCollection errors = null;
             try
             {
-                using (XmlReader reader = XmlReader.Create(sourceUri, readerSettings))
-                {
-                    errors = XslCompiledTransform.CompileToType(
-                        reader, xsltSettings, xmlResolver, false, typeBldr, scriptAsmPath
-                    );
-                }
+                using XmlReader reader = XmlReader.Create(sourceUri, readerSettings);
+                CompilerErrorCollection errors = XslCompiledTransform.CompileToType(reader, xsltSettings,
+                                                                                    xmlResolver, false, typeBldr,
+                                                                                    scriptAsmPath);
             }
             catch (Exception e)
             {

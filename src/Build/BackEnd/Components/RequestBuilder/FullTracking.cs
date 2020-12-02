@@ -6,7 +6,6 @@ using System.IO;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 
 #if FEATURE_FILE_TRACKER
 

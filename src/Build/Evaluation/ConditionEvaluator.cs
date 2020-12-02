@@ -13,7 +13,6 @@ namespace Microsoft.Build.Evaluation
     using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
     using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
     using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-    using Microsoft.Build.Execution;
     using Microsoft.Build.Shared;
     using Microsoft.Build.Shared.FileSystem;
 

@@ -43,7 +43,7 @@ stages:
     - name: VisualStudio.MajorVersion
       value: 16
     - name: VisualStudio.ChannelName
-      value: 'int.master'
+      value: 'int.main'
     - name: VisualStudio.DropName
       value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
@@ -76,7 +76,6 @@ stages:
     - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
       inputs:
         dropName: $(VisualStudio.DropName)
-        feedSource: 'https://devdiv-test.pkgs.visualstudio.com/_packaging/MicroBuildToolset/nuget/v3/index.json'
 
     - script: eng/CIBuild.cmd
                 -configuration $(BuildConfiguration)
@@ -172,7 +171,7 @@ stages:
       condition: succeeded()
 
     # Archive NuGet packages to DevOps.
-    # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the 
+    # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the
     # arcade templates depend on the name.
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: packages'

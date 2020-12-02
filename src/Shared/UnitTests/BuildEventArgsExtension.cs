@@ -5,7 +5,6 @@ using System;
 using Microsoft.Build.Framework;
 using System.Collections.Generic;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -29,7 +28,7 @@ namespace Microsoft.Build.UnitTests
                 return true;
             }
 
-            if (Object.ReferenceEquals(other, null) || Object.ReferenceEquals(args, null))
+            if (other is null || args is null)
             {
                 return false;
             }

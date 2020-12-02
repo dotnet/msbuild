@@ -287,7 +287,7 @@ namespace Microsoft.Build.BackEnd
             try
             {
                 // Clean up the engine
-                if (null != _buildRequestEngine && _buildRequestEngine.Status != BuildRequestEngineStatus.Uninitialized)
+                if (_buildRequestEngine != null && _buildRequestEngine.Status != BuildRequestEngineStatus.Uninitialized)
                 {
                     _buildRequestEngine.CleanupForBuild();
                 }
@@ -338,7 +338,7 @@ namespace Microsoft.Build.BackEnd
 
             exception = _shutdownException;
 
-            if (null != _loggingContext)
+            if (_loggingContext != null)
             {
                 _loggingContext.LoggingService.OnLoggingThreadException -= OnLoggingThreadException;
                 _loggingContext = null;

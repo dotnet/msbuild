@@ -2,11 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Xml;
-using System.Text;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.IO;
 using Microsoft.Build.Framework;
@@ -15,7 +11,6 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Unittest;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
@@ -261,8 +256,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string projectFile = GetTestProjectFile(configId);
             File.WriteAllText(projectFile, projectFileContents.Replace('`', '"'));
 
-            string defaultToolsVersion = null;
-            defaultToolsVersion = FrameworkLocationHelper.PathToDotNetFrameworkV20 == null
+            string defaultToolsVersion = FrameworkLocationHelper.PathToDotNetFrameworkV20 == null
                                       ? ObjectModelHelpers.MSBuildDefaultToolsVersion
                                       : "2.0";
 
@@ -374,7 +368,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 return Task<BuildResult>.FromResult(result);
             }
 
-            if (null != _newRequests)
+            if (_newRequests != null)
             {
                 string[] projectFiles = new string[_newRequests.Length];
                 PropertyDictionary<ProjectPropertyInstance>[] properties = new PropertyDictionary<ProjectPropertyInstance>[_newRequests.Length];

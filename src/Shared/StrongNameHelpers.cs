@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Security;
-using System.Text;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
@@ -143,7 +141,7 @@ namespace Microsoft.Runtime.Hosting
         public static bool StrongNameSignatureGeneration(string pwzFilePath, string pwzKeyContainer, IntPtr pbKeyBlob, int cbKeyBlob)
         {
             IntPtr ppbSignatureBlob = IntPtr.Zero;
-            int cbSignatureBlob = 0;
+            int cbSignatureBlob;
             return StrongNameSignatureGeneration(pwzFilePath, pwzKeyContainer, pbKeyBlob, cbKeyBlob, ref ppbSignatureBlob, out cbSignatureBlob);
         }
 
@@ -280,7 +278,7 @@ namespace Microsoft.Runtime.Hosting
         public static bool StrongNameSignatureGeneration(string pwzFilePath, string pwzKeyContainer, byte[] bKeyBlob, int cbKeyBlob)
         {
             IntPtr ppbSignatureBlob = IntPtr.Zero;
-            int cbSignatureBlob = 0;
+            int cbSignatureBlob;
             return StrongNameSignatureGeneration(pwzFilePath, pwzKeyContainer, bKeyBlob, cbKeyBlob, ref ppbSignatureBlob, out cbSignatureBlob);
         }
 

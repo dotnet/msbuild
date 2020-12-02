@@ -526,8 +526,8 @@ namespace Microsoft.Build.Graph.UnitTests
                         </MSBuild>
                     </Target>");
 
-            sb.Append($@"<ItemGroup>
-                            <i Include='{projectNumber}'/>
+            sb.Append(@"<ItemGroup>
+                            <i Include='").Append(projectNumber).Append(@"'/>
                         </ItemGroup>");
 
             return CreateProjectFile(

@@ -3,12 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml;
 using Microsoft.Build.BuildEngine.Shared;
 using MetadataDictionary = System.Collections.Generic.Dictionary<string, string>;
 using ItemDefinitionsDictionary = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, string>>;
-using System.Collections;
 
 namespace Microsoft.Build.BuildEngine
 {
@@ -241,9 +239,9 @@ namespace Microsoft.Build.BuildEngine
 
                 XmlAttribute conditionAttribute = ProjectXmlUtilities.GetConditionAttribute(itemDefinitionElement, /* sole attribute */ true);
                 string condition = ProjectXmlUtilities.GetAttributeValue(conditionAttribute);
-
-                MetadataDictionary metadataDictionary = null;
                 string itemType = itemDefinitionElement.Name;
+
+                MetadataDictionary metadataDictionary;
                 itemDefinitionsDictionary.TryGetValue(itemType, out metadataDictionary);
 
                 Expander expander = new Expander(properties, itemType, metadataDictionary);
@@ -274,9 +272,9 @@ namespace Microsoft.Build.BuildEngine
 
                 XmlAttribute conditionAttribute = ProjectXmlUtilities.GetConditionAttribute(itemDefinitionChildElement, /* sole attribute */ true);
                 string condition = ProjectXmlUtilities.GetAttributeValue(conditionAttribute);
-
-                MetadataDictionary metadataDictionary = null;
                 string itemType = itemDefinitionChildElement.ParentNode.Name;
+
+                MetadataDictionary metadataDictionary;
                 itemDefinitionsDictionary.TryGetValue(itemType, out metadataDictionary);
 
                 Expander expander = new Expander(properties, itemType, metadataDictionary);

@@ -2,14 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Diagnostics;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.BackEnd
@@ -73,7 +66,6 @@ namespace Microsoft.Build.BackEnd
         public void ShutdownConnectedNodes(bool enableReuse)
         {
             ErrorUtilities.VerifyThrow(!_componentShutdown, "We should never be calling ShutdownNodes after ShutdownComponent has been called");
-
             _outOfProcTaskHostNodeProvider?.ShutdownConnectedNodes(enableReuse);
         }
 

@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Security;
 
@@ -179,7 +177,7 @@ namespace Microsoft.Build.BuildEngine
         /// <returns></returns>
         public virtual bool Exists()
         {
-            return null != WrappedKey;
+            return WrappedKey != null;
         }
 
         /// <summary>

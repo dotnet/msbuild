@@ -30,6 +30,8 @@ namespace Microsoft.Build.Tasks
         [Required]
         public ITaskItem SigningTarget { get; set; }
 
+        public string TargetFrameworkIdentifier { get; set; } = Constants.DotNetFrameworkIdentifier;
+
         public String TargetFrameworkVersion { get; set; }
 
         public string TimestampUrl { get; set; }
@@ -40,7 +42,7 @@ namespace Microsoft.Build.Tasks
             {
                 SecurityUtilities.SignFile(CertificateThumbprint,
                 TimestampUrl == null ? null : new Uri(TimestampUrl),
-                SigningTarget.ItemSpec, TargetFrameworkVersion);
+                SigningTarget.ItemSpec, TargetFrameworkVersion, TargetFrameworkIdentifier);
                 return true;
             }
             catch (ArgumentException ex) when (ex.ParamName.Equals("certThumbprint"))

@@ -5,6 +5,8 @@ using System;
 
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 
@@ -66,11 +68,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="lexer"></param>
         private void AdvanceToScannerError(Scanner lexer)
         {
-            while (true)
-            {
-                if (!lexer.Advance()) break;
-                if (lexer.IsNext(Token.TokenType.EndOfInput)) break;
-            }
+            while (lexer.Advance() && !lexer.IsNext(Token.TokenType.EndOfInput));
         }
 
         /// <summary>
@@ -79,9 +77,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void SingleEquals()
         {
-            Scanner lexer;
-
-            lexer = new Scanner("a=b", ParserOptions.AllowProperties);
+            Scanner lexer = new Scanner("a=b", ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
             Assert.Equal("IllFormedEqualsInCondition", lexer.GetErrorResource());
             Assert.Equal("b", lexer.UnexpectedlyFound);
@@ -93,9 +89,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void IllFormedProperty()
         {
-            Scanner lexer;
-
-            lexer = new Scanner("$(", ParserOptions.AllowProperties);
+            Scanner lexer = new Scanner("$(", ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
             Assert.Equal("IllFormedPropertyCloseParenthesisInCondition", lexer.GetErrorResource());
 
@@ -105,14 +99,58 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Tests the space errors case
+        /// </summary>
+        [Theory]
+        [InlineData("$(x )")]
+        [InlineData("$( x)")]
+        [InlineData("$([MSBuild]::DoSomething($(space ))")]
+        [InlineData("$([MSBuild]::DoSomething($(_space ))")]
+        public void SpaceProperty(string pattern)
+        {
+            Scanner lexer = new Scanner(pattern, ParserOptions.AllowProperties);
+            AdvanceToScannerError(lexer);
+            Assert.Equal("IllFormedPropertySpaceInCondition", lexer.GetErrorResource());
+        }
+
+        /// <summary>
+        /// Tests the space not next to end so no errors case
+        /// </summary>
+        [Theory]
+        [InlineData("$(x.StartsWith( 'y' ))")]
+        [InlineData("$(x.StartsWith ('y'))")]
+        [InlineData("$( x.StartsWith( $(SpacelessProperty) ) )")]
+        [InlineData("$( x.StartsWith( $(_SpacelessProperty) ) )")]
+        [InlineData("$(x.StartsWith('Foo', StringComparison.InvariantCultureIgnoreCase))")]
+        public void SpaceInMiddleOfProperty(string pattern)
+        {
+            Scanner lexer = new Scanner(pattern, ParserOptions.AllowProperties);
+            AdvanceToScannerError(lexer);
+            lexer._errorState.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void SpacePropertyOptOutWave16_10()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetChangeWave(ChangeWaves.Wave16_10);
+
+            Scanner lexer = new Scanner("$(x )", ParserOptions.AllowProperties);
+            AdvanceToScannerError(lexer);
+            Assert.Null(lexer.UnexpectedlyFound);
+
+            lexer = new Scanner("$( x)", ParserOptions.AllowProperties);
+            AdvanceToScannerError(lexer);
+            Assert.Null(lexer.UnexpectedlyFound);
+        }
+
+        /// <summary>
         /// Tests the special errors for "@(" and "@x" and similar cases.
         /// </summary>
         [Fact]
         public void IllFormedItemList()
         {
-            Scanner lexer;
-
-            lexer = new Scanner("@(", ParserOptions.AllowAll);
+            Scanner lexer = new Scanner("@(", ParserOptions.AllowAll);
             AdvanceToScannerError(lexer);
             Assert.Equal("IllFormedItemListCloseParenthesisInCondition", lexer.GetErrorResource());
             Assert.Null(lexer.UnexpectedlyFound);
@@ -150,9 +188,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void IllFormedQuotedString()
         {
-            Scanner lexer;
-
-            lexer = new Scanner("false or 'abc", ParserOptions.AllowAll);
+            Scanner lexer = new Scanner("false or 'abc", ParserOptions.AllowAll);
             AdvanceToScannerError(lexer);
             Assert.Equal("IllFormedQuotedStringInCondition", lexer.GetErrorResource());
             Assert.Null(lexer.UnexpectedlyFound);
@@ -168,9 +204,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NumericSingleTokenTests()
         {
-            Scanner lexer;
-
-            lexer = new Scanner("1234", ParserOptions.AllowAll);
+            Scanner lexer = new Scanner("1234", ParserOptions.AllowAll);
             Assert.True(lexer.Advance());
             Assert.True(lexer.IsNext(Token.TokenType.Numeric));
             Assert.Equal(0, String.Compare("1234", lexer.IsNextString()));
@@ -295,9 +329,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void StringEdgeTests()
         {
-            Scanner lexer;
-
-            lexer = new Scanner("@(Foo, ' ')", ParserOptions.AllowAll);
+            Scanner lexer = new Scanner("@(Foo, ' ')", ParserOptions.AllowAll);
             Assert.True(lexer.Advance() && lexer.IsNext(Token.TokenType.ItemList));
             Assert.True(lexer.Advance() && lexer.IsNext(Token.TokenType.EndOfInput));
 
@@ -321,9 +353,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void FunctionTests()
         {
-            Scanner lexer;
-
-            lexer = new Scanner("Foo()", ParserOptions.AllowAll);
+            Scanner lexer = new Scanner("Foo()", ParserOptions.AllowAll);
             Assert.True(lexer.Advance() && lexer.IsNext(Token.TokenType.Function));
             Assert.Equal(0, String.Compare("Foo", lexer.IsNextString()));
             Assert.True(lexer.Advance() && lexer.IsNext(Token.TokenType.LeftParenthesis));
@@ -405,9 +435,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ComplexTests1()
         {
-            Scanner lexer;
-
-            lexer = new Scanner("'String with a $(Property) inside'", ParserOptions.AllowAll);
+            Scanner lexer = new Scanner("'String with a $(Property) inside'", ParserOptions.AllowAll);
             Assert.True(lexer.Advance() && lexer.IsNext(Token.TokenType.String));
             Assert.Equal(0, String.Compare("String with a $(Property) inside", lexer.IsNextString()));
 
@@ -523,9 +551,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ItemListTests()
         {
-            Scanner lexer;
-
-            lexer = new Scanner("@(foo)", ParserOptions.AllowProperties);
+            Scanner lexer = new Scanner("@(foo)", ParserOptions.AllowProperties);
             Assert.False(lexer.Advance());
             Assert.Equal(0, String.Compare(lexer.GetErrorResource(), "ItemListNotAllowedInThisConditional"));
 
@@ -545,9 +571,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NegativeTests()
         {
-            Scanner lexer;
-
-            lexer = new Scanner("'$(DEBUG) == true", ParserOptions.AllowAll);
+            Scanner lexer = new Scanner("'$(DEBUG) == true", ParserOptions.AllowAll);
             Assert.False(lexer.Advance());
         }
     }

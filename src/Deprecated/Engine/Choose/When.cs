@@ -4,8 +4,6 @@
 using System;
 using System.Collections;
 using System.Xml;
-using System.IO;
-using System.Globalization;
 
 using Microsoft.Build.BuildEngine.Shared;
 

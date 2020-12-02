@@ -6,10 +6,7 @@ using System.Collections;
 using System.IO;
 using System.Globalization;
 using System.Reflection;
-using System.Resources;
 using System.Xml;
-using System.Text;
-using System.Security;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
@@ -1156,7 +1153,7 @@ namespace Microsoft.Build.Conversion
             ProjectItemElement newFSharpCoreItem = null;
             string targetFSharpCoreVersionValue = null;
 
-            var hintPathValue = fsharpCoreItem != null ? fsharpCoreItem.Metadata.FirstOrDefault(metadata => metadata.Name == HintPath) : null;
+            var hintPathValue = fsharpCoreItem?.Metadata.FirstOrDefault(metadata => metadata.Name == HintPath);
             if (hintPathValue != null)
             {
                 if (equals(hintPathValue.Value, Dev11PortableFSharpCoreLocation))
@@ -2582,7 +2579,6 @@ namespace Microsoft.Build.Conversion
         /// <returns></returns>
         private static ProjectItemElement ConvertClassicComReference(XmlElementWithLocation referenceElement, ProjectItemGroupElement referencesItemGroup, string referenceName)
         {
-            ProjectItemElement newReferenceItem;
             // This is a classic COM reference.
 
             // This gets added as a new XMake item of type "COMReference".
@@ -2615,8 +2611,7 @@ namespace Microsoft.Build.Conversion
             referenceElement.RemoveAttribute(VSProjectAttributes.name);
 
             // Add a new item to XMake of type "COMReference".
-            newReferenceItem = referencesItemGroup.AddItem(XMakeProjectStrings.comReference, ProjectCollection.Escape(referenceName));
-            return newReferenceItem;
+            return referencesItemGroup.AddItem(XMakeProjectStrings.comReference, ProjectCollection.Escape(referenceName));
         }
 
         /// <summary>
@@ -2629,9 +2624,7 @@ namespace Microsoft.Build.Conversion
         /// <returns></returns>
         private ProjectItemElement ConvertProjectToProjectReference(XmlElementWithLocation referenceElement, ProjectItemGroupElement referencesItemGroup, string referenceName, ref string referencedProjectGuid)
         {
-            ProjectItemElement newReferenceItem;
             // This is a project-to-project reference.
-
             // This gets added as a new XMake item of type "ProjectReference".
             // The "Include" attribute should be the relative path from the
             // current project to the referenced project file.  For example,
@@ -2687,9 +2680,8 @@ namespace Microsoft.Build.Conversion
             // Add a new item to XMake of type "ProjectReference".  If we were able to find
             // the relative path to the project, use it for the "Include", otherwise just use
             // the project name.
-            string value = (pathToReferencedProject != null) ? pathToReferencedProject : referenceName;
-            newReferenceItem = referencesItemGroup.AddItem(XMakeProjectStrings.projectReference, ProjectCollection.Escape(value));
-            return newReferenceItem;
+            string value = pathToReferencedProject ?? referenceName;
+            return referencesItemGroup.AddItem(XMakeProjectStrings.projectReference, ProjectCollection.Escape(value));
         }
 
         /// <summary>
@@ -2701,7 +2693,6 @@ namespace Microsoft.Build.Conversion
         /// <returns></returns>
         private ProjectItemElement ConvertAssemblyReference(XmlElementWithLocation referenceElement, ProjectItemGroupElement referencesItemGroup, string referenceName)
         {
-            ProjectItemElement newReferenceItem;
             // This is a regular .NET assembly reference.
 
             // This gets added as a new XMake item of type "Reference".  The "Include"
@@ -2758,8 +2749,7 @@ namespace Microsoft.Build.Conversion
                 }
             }
 
-            newReferenceItem = referencesItemGroup.AddItem(XMakeProjectStrings.reference, ProjectCollection.Escape(assemblyName));
-            return newReferenceItem;
+            return referencesItemGroup.AddItem(XMakeProjectStrings.reference, ProjectCollection.Escape(assemblyName));
         }
 
         /// <summary>
@@ -2850,9 +2840,7 @@ namespace Microsoft.Build.Conversion
 
             // The URI class returns forward slashes instead of backslashes.  Replace
             // them now, and return the final path.
-            result = result.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-
-            return result;
+            return result.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
         }
 
         /// <summary>
@@ -3345,8 +3333,7 @@ namespace Microsoft.Build.Conversion
                 return false;
             }
 
-            long length = 0;
-
+            long length;
             try
             {
                 FileInfo fi = new FileInfo(path);

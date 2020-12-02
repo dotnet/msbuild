@@ -13,7 +13,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Utilities;
@@ -187,7 +186,7 @@ namespace Microsoft.Build.Shared
         internal static string EnsureTrailingSlash(string fileSpec)
         {
             fileSpec = FixFilePath(fileSpec);
-            if (fileSpec.Length > 0 && !EndsWithSlash(fileSpec))
+            if (fileSpec.Length > 0 && !IsSlash(fileSpec[fileSpec.Length - 1]))
             {
                 fileSpec += Path.DirectorySeparatorChar;
             }
@@ -196,17 +195,37 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Ensures the path does not have a leading slash.
+        /// Ensures the path does not have a leading or trailing slash after removing the first 'start' characters.
         /// </summary>
-        internal static string EnsureNoLeadingSlash(string path)
+        internal static string EnsureNoLeadingOrTrailingSlash(string path, int start)
         {
-            path = FixFilePath(path);
-            if (path.Length > 0 && IsSlash(path[0]))
+            int stop = path.Length;
+            while (start < stop && IsSlash(path[start]))
             {
-                path = path.Substring(1);
+                start++;
+            }
+            while (start < stop && IsSlash(path[stop - 1]))
+            {
+                stop--;
             }
 
-            return path;
+            return FixFilePath(path.Substring(start, stop - start));
+        }
+
+        /// <summary>
+        /// Ensures the path does not have a leading slash after removing the first 'start' characters but does end in a slash.
+        /// </summary>
+        internal static string EnsureTrailingNoLeadingSlash(string path, int start)
+        {
+            int stop = path.Length;
+            while (start < stop && IsSlash(path[start]))
+            {
+                start++;
+            }
+
+            return FixFilePath(start < stop && IsSlash(path[stop - 1]) ?
+                path.Substring(start) :
+                path.Substring(start) + Path.DirectorySeparatorChar);
         }
 
         /// <summary>
@@ -1072,7 +1091,7 @@ namespace Microsoft.Build.Shared
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
 
-            Uri pathUri = null;
+            Uri pathUri;
 
             // Try absolute first, then fall back on relative, otherwise it
             // makes some absolute UNC paths like (\\foo\bar) relative ...

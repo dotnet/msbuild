@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
@@ -509,7 +508,7 @@ namespace Microsoft.Build.Evaluation
             try
             {
                 var importSearchPathsTable = GetProjectImportSearchPathsTable(toolsVersion.Name, NativeMethodsShared.GetOSNameForExtensionsPath());
-                toolset = new Toolset(toolsVersion.Name, toolsPath == null ? binPath : toolsPath, properties, _environmentProperties, globalProperties, subToolsets, MSBuildOverrideTasksPath, DefaultOverrideToolsVersion, importSearchPathsTable);
+                toolset = new Toolset(toolsVersion.Name, toolsPath ?? binPath, properties, _environmentProperties, globalProperties, subToolsets, MSBuildOverrideTasksPath, DefaultOverrideToolsVersion, importSearchPathsTable);
             }
             catch (ArgumentException e)
             {

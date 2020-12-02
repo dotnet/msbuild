@@ -4,9 +4,7 @@
 // mansign.cs
 //
 
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Xml;
@@ -14,8 +12,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.Pkcs;
-using Microsoft.Win32;
 
 using _FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
@@ -329,9 +325,7 @@ namespace System.Deployment.Internal.CodeSigning
 
         internal SignedCmiManifest2(XmlDocument manifestDom, bool useSha256)
         {
-            if (manifestDom == null)
-                throw new ArgumentNullException(nameof(manifestDom));
-            _manifestDom = manifestDom;
+            _manifestDom = manifestDom ?? throw new ArgumentNullException(nameof(manifestDom));
             _useSha256 = useSha256;
         }
 
@@ -687,8 +681,8 @@ namespace System.Deployment.Internal.CodeSigning
             XmlElement manifestInformationNode = licenseDom.SelectSingleNode("r:license/r:grant/as:ManifestInformation", nsm) as XmlElement;
 
             manifestInformationNode.SetAttribute("Hash", hash.Length == 0 ? "" : BytesToHexString(hash, 0, hash.Length));
-            manifestInformationNode.SetAttribute("Description", signer.Description == null ? "" : signer.Description);
-            manifestInformationNode.SetAttribute("Url", signer.DescriptionUrl == null ? "" : signer.DescriptionUrl);
+            manifestInformationNode.SetAttribute("Description", signer.Description ?? "");
+            manifestInformationNode.SetAttribute("Url", signer.DescriptionUrl ?? "");
 
             XmlElement authenticodePublisherNode = licenseDom.SelectSingleNode("r:license/r:grant/as:AuthenticodePublisher/as:X509SubjectName", nsm) as XmlElement;
             authenticodePublisherNode.InnerText = signer.Certificate.SubjectName.Name;

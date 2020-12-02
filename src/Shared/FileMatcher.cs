@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
@@ -444,9 +443,8 @@ namespace Microsoft.Build.Shared
 
             string[] parts = path.Split(directorySeparatorCharacters);
             string pathRoot;
-            int startingElement = 0;
-
             bool isUnc = path.StartsWith(s_directorySeparator + s_directorySeparator, StringComparison.Ordinal);
+            int startingElement;
             if (isUnc)
             {
                 pathRoot = s_directorySeparator + s_directorySeparator;

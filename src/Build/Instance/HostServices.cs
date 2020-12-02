@@ -5,9 +5,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
 using System.Collections.Generic;
 using System;
-using System.Collections;
 using System.Diagnostics;
-using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.InteropServices;
 using System.Linq;
 using Microsoft.Build.BackEnd;
@@ -283,8 +281,7 @@ After:
             // Now see if a specific affinity has been provided.
             if (_projectAffinities != null)
             {
-                NodeAffinity affinity = NodeAffinity.Any;
-
+                NodeAffinity affinity;
                 if (_projectAffinities.TryGetValue(projectFile, out affinity))
                 {
                     isExplicit = true;

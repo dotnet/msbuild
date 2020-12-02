@@ -264,7 +264,7 @@ namespace Microsoft.Build.Collections
         /// <returns>True if they are equivalent, false otherwise.</returns>
         public bool Equals(PropertyDictionary<T> other)
         {
-            if (null == other)
+            if (other == null)
             {
                 return false;
             }

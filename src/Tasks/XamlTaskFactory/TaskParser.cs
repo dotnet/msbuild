@@ -177,7 +177,7 @@ namespace Microsoft.Build.Tasks.Xaml
             ErrorUtilities.VerifyThrowArgumentLength(desiredRule, nameof(desiredRule));
 
             object rootObject = XamlServices.Load(reader);
-            if (null != rootObject)
+            if (rootObject != null)
             {
                 XamlTypes.ProjectSchemaDefinitions schemas = rootObject as XamlTypes.ProjectSchemaDefinitions;
                 if (schemas != null)
@@ -473,8 +473,8 @@ namespace Microsoft.Build.Tasks.Xaml
 
             if (intProperty != null)
             {
-                parameter.Max = intProperty.MaxValue != null ? intProperty.MaxValue.ToString() : null;
-                parameter.Min = intProperty.MinValue != null ? intProperty.MinValue.ToString() : null;
+                parameter.Max = intProperty.MaxValue?.ToString();
+                parameter.Min = intProperty.MinValue?.ToString();
             }
 
             if (boolProperty != null)

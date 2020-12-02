@@ -700,7 +700,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(@"WindowsRuntime 1.0", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
             Assert.True(bool.Parse(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile)));
 
-            string fullMessage = null;
+            string fullMessage;
             if (implementationFileArch.Equals("Unknown"))
             {
                 fullMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.UnknownProcessorArchitecture", @"C:\WinMDArchVerification\" + winmdName + ".dll", @"C:\WinMDArchVerification\" + winmdName + ".winmd", NativeMethods.IMAGE_FILE_MACHINE_R4000.ToString("X", CultureInfo.InvariantCulture));

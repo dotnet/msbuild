@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
@@ -119,7 +118,7 @@ namespace Microsoft.Build.Evaluation
         [DebuggerStepThrough]
         public ProjectMetadata GetMetadata(string name)
         {
-            return Link != null ? Link.GetMetadata(name) : (_metadata == null) ? null : _metadata[name];
+            return Link != null ? Link.GetMetadata(name) : _metadata?[name];
         }
 
         /// <summary>

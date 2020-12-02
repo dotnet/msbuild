@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.Win32;
 using System.Collections;
-using System.Globalization;
 using System.Collections.Generic;
 
 namespace Microsoft.Build.Shared
@@ -67,8 +65,6 @@ namespace Microsoft.Build.Shared
         /// <param name="throwException">Should we use Parse to TryParse (parse means we throw an exception, tryparse means we will not).</param>
         internal static Version ConvertToVersion(string version, bool throwException)
         {
-            Version result = null;
-
             if (version.Length > 0 && (version[0] == 'v' || version[0] == 'V'))
             {
                 version = version.Substring(1);
@@ -82,6 +78,7 @@ namespace Microsoft.Build.Shared
                 version += ".0";
             }
 
+            Version result;
             if (throwException)
             {
                 result = Version.Parse(version);

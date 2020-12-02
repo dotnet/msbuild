@@ -294,7 +294,7 @@ namespace Microsoft.Build.BackEnd
             // here. Instead, NDP will try to Load (not LoadFrom!) the task assembly into our AppDomain, and since
             // we originally used LoadFrom, it will fail miserably not knowing where to find it.
             // We need to temporarily subscribe to the AppDomain.AssemblyResolve event to fix it.
-            if (null == _resolver)
+            if (_resolver == null)
             {
                 _resolver = new TaskEngineAssemblyResolver();
                 _resolver.Initialize(_taskFactoryWrapper.TaskFactoryLoadedType.Assembly.AssemblyFile);
@@ -865,19 +865,19 @@ namespace Microsoft.Build.BackEnd
             if (!_intrinsicTasks.TryGetValue(_taskName, out TaskFactoryWrapper returnClass))
             {
                 returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, taskIdentityParameters, true /* exact match */, _targetLoggingContext, _taskLocation);
-                if (null == returnClass)
+                if (returnClass == null)
                 {
                     returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, taskIdentityParameters, false /* fuzzy match */, _targetLoggingContext, _taskLocation);
 
-                    if (null == returnClass)
+                    if (returnClass == null)
                     {
                         returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, null, true /* exact match */, _targetLoggingContext, _taskLocation);
 
-                        if (null == returnClass)
+                        if (returnClass == null)
                         {
                             returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, null, false /* fuzzy match */, _targetLoggingContext, _taskLocation);
 
-                            if (null == returnClass)
+                            if (returnClass == null)
                             {
                                 _targetLoggingContext.LogError
                                     (

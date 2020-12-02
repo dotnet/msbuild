@@ -79,7 +79,7 @@ namespace Microsoft.Build.Tasks.InteropUtilities
         {
             get
             {
-                if (null == _rcwForCurrentCtx)
+                if (_rcwForCurrentCtx == null)
                 {
                     throw new ObjectDisposedException("RCWForCurrentCtx");
                 }
@@ -108,7 +108,7 @@ namespace Microsoft.Build.Tasks.InteropUtilities
         {
             try
             {
-                if (null != _rcwForCurrentCtx &&
+                if (_rcwForCurrentCtx != null &&
                     _shouldReleaseRCW &&
                     Marshal.IsComObject(_rcwForCurrentCtx))
                 {

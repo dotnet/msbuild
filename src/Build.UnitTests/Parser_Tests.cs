@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
 
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
@@ -26,9 +25,7 @@ namespace Microsoft.Build.UnitTests
         {
             Console.WriteLine("SimpleParseTest()");
             Parser p = new Parser();
-            GenericExpressionNode tree;
-
-            tree = p.Parse("$(foo)", ParserOptions.AllowAll, _elementLocation);
+            GenericExpressionNode tree = p.Parse("$(foo)", ParserOptions.AllowAll, _elementLocation);
 
 
             tree = p.Parse("$(foo)=='hello'", ParserOptions.AllowAll, _elementLocation);
@@ -77,9 +74,7 @@ namespace Microsoft.Build.UnitTests
         {
             Console.WriteLine("ComplexParseTest()");
             Parser p = new Parser();
-            GenericExpressionNode tree;
-
-            tree = p.Parse("$(foo)", ParserOptions.AllowAll, _elementLocation);
+            GenericExpressionNode tree = p.Parse("$(foo)", ParserOptions.AllowAll, _elementLocation);
 
 
             tree = p.Parse("($(foo) or $(bar)) and $(baz)", ParserOptions.AllowAll, _elementLocation);
@@ -107,8 +102,7 @@ namespace Microsoft.Build.UnitTests
         {
             Console.WriteLine("NegationParseTest()");
             Parser p = new Parser();
-            GenericExpressionNode tree;
-            tree = p.Parse("!true", ParserOptions.AllowAll, _elementLocation);
+            GenericExpressionNode tree = p.Parse("!true", ParserOptions.AllowAll, _elementLocation);
 
             tree = p.Parse("!(true)", ParserOptions.AllowAll, _elementLocation);
 
@@ -125,8 +119,7 @@ namespace Microsoft.Build.UnitTests
         {
             Console.WriteLine("FunctionCallParseTest()");
             Parser p = new Parser();
-            GenericExpressionNode tree;
-            tree = p.Parse("SimpleFunctionCall()", ParserOptions.AllowAll, _elementLocation);
+            GenericExpressionNode tree = p.Parse("SimpleFunctionCall()", ParserOptions.AllowAll, _elementLocation);
 
             tree = p.Parse("SimpleFunctionCall( 1234 )", ParserOptions.AllowAll, _elementLocation);
             tree = p.Parse("SimpleFunctionCall( true )", ParserOptions.AllowAll, _elementLocation);
@@ -141,9 +134,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("FunctionCallParseTest()");
             Parser p = new Parser();
             GenericExpressionNode tree;
-            bool fExceptionCaught;
-
-            fExceptionCaught = false;
+            bool fExceptionCaught = false;
             try
             {
                 tree = p.Parse("@(foo) == 'a.cs;b.cs'", ParserOptions.AllowProperties, _elementLocation);
@@ -222,9 +213,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("ItemFuncParseTest()");
 
             Parser p = new Parser();
-            GenericExpressionNode tree;
-
-            tree = p.Parse("@(item->foo('ab'))", 
+            GenericExpressionNode tree = p.Parse("@(item->foo('ab'))", 
                 ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
             Assert.IsType<StringExpressionNode>(tree);
             Assert.Equal("@(item->foo('ab'))", tree.GetUnexpandedValue(null));
@@ -244,9 +233,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("FunctionCallParseTest()");
             Parser p = new Parser();
             GenericExpressionNode tree;
-            bool fExceptionCaught;
-
-            fExceptionCaught = false;
+            bool fExceptionCaught = false;
             try
             {
                 tree = p.Parse("%(foo) == 'a.cs;b.cs'", ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);

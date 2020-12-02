@@ -4,12 +4,10 @@
 using System.Diagnostics;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System;
-using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.Shared.FileSystem;
@@ -321,7 +319,7 @@ namespace Microsoft.Build.Evaluation
                 RetrievableEntryHashSet<ProjectMetadata> allMetadata = new RetrievableEntryHashSet<ProjectMetadata>(MSBuildNameIgnoreCaseComparer.Default);
 
                 // Lowest priority: regular item definitions
-                ProjectItemDefinition itemDefinition = null;
+                ProjectItemDefinition itemDefinition;
                 if (_project.ItemDefinitions.TryGetValue(ItemType, out itemDefinition))
                 {
                     foreach (ProjectMetadata metadataFromDefinition in itemDefinition.Metadata)
@@ -344,7 +342,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // Finally any direct metadata win.
-                if (null != _directMetadata)
+                if (_directMetadata != null)
                 {
                     foreach (ProjectMetadata metadatum in _directMetadata)
                     {
@@ -452,7 +450,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             ProjectMetadata metadatum = GetItemDefinitionMetadata(name);
-            if (null != metadatum)
+            if (metadatum != null)
             {
                 return true;
             }
@@ -488,13 +486,13 @@ namespace Microsoft.Build.Evaluation
             {
                 ProjectMetadata metadatum = GetItemDefinitionMetadata(name);
 
-                if (null != metadatum && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
+                if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
                 {
                     Expander<ProjectProperty, ProjectItem> expander = new Expander<ProjectProperty, ProjectItem>(null, null, new BuiltInMetadataTable(this), FileSystems.Default);
 
                     value = expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, metadatum.Location);
                 }
-                else if (null != metadatum)
+                else if (metadatum != null)
                 {
                     return metadatum.EvaluatedValueEscaped;
                 }
@@ -633,7 +631,7 @@ namespace Microsoft.Build.Evaluation
             Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
             ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
 
-            ProjectMetadata metadatum = (_directMetadata == null) ? null : _directMetadata[name];
+            ProjectMetadata metadatum = _directMetadata?[name];
 
             if (metadatum == null)
             {

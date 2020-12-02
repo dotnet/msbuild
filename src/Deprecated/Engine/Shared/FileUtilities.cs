@@ -3,14 +3,11 @@
 
 using System;
 using System.IO;
-using System.Security;
 using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Text;
-using System.Threading;
-using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.BuildEngine.Shared
 {
@@ -828,7 +825,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
 
-            Uri pathUri = null;
+            Uri pathUri;
 
             // Try absolute first, then fall back on relative, otherwise it
             // makes some absolute UNC paths like (\\foo\bar) relative ...

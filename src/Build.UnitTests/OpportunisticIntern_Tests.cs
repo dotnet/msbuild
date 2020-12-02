@@ -3,8 +3,6 @@
 
 using System;
 using System.Text;
-using System.IO;
-using Microsoft.Build;
 using Microsoft.Build.Shared;
 using Xunit;
 using Xunit.Abstractions;

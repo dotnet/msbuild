@@ -891,7 +891,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void ShutdownAllNodes()
         {
-            if (null == _nodeManager)
+            if (_nodeManager == null)
             {
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
             }
@@ -1971,7 +1971,7 @@ namespace Microsoft.Build.Execution
                         {
                             NodeInfo createdNode = _nodeManager.CreateNode(GetNodeConfiguration(), response.RequiredNodeType);
 
-                            if (null != createdNode)
+                            if (createdNode != null)
                             {
                                 _noNodesActiveEvent.Reset();
                                 _activeNodes.Add(createdNode.NodeId);
@@ -2142,7 +2142,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private NodeConfiguration GetNodeConfiguration()
         {
-            if (null == _nodeConfiguration)
+            if (_nodeConfiguration == null)
             {
                 // Get the remote loggers
                 ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent(BuildComponentType.LoggingService) as ILoggingService;

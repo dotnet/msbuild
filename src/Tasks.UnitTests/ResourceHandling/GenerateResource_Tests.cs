@@ -1162,15 +1162,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             string resxFile = null;
             string resourcesFile = null;
             string strFile = null;
-            string stateFile = null;
-
             try
             {
                 GenerateResource t = Utilities.CreateTask(_output);
                 resxFile = Utilities.WriteTestResX(false, null, null);
                 resourcesFile = Utilities.GetTempFileName(".resources");
                 strFile = Path.ChangeExtension(resourcesFile, ".cs"); // STR filename should be generated from output not input filename
-                stateFile = Utilities.GetTempFileName(".cache");
+                string stateFile = Utilities.GetTempFileName(".cache");
 
                 // Make sure the .cs file isn't already there.
                 File.Delete(strFile);
@@ -1539,10 +1537,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // another invalid escape, this one more serious, "unsupported or invalid escape character"
                 new string[] {   @"foo=\ujjjjbar", "MSB3569"},
             };
-
-            GenerateResource t = null;
-            string textFile = null;
-
+            GenerateResource t;
+            string textFile;
             foreach (string[] test in tests)
             {
                 t = Utilities.CreateTask(_output);
@@ -1619,10 +1615,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (null != resxFile1) File.Delete(resxFile1);
-                if (null != resxFile2) File.Delete(resxFile2);
-                if (null != resourcesFile1) File.Delete(resourcesFile1);
-                if (null != resourcesFile2) File.Delete(resourcesFile2);
+                if (resxFile1 != null) File.Delete(resxFile1);
+                if (resxFile2 != null) File.Delete(resxFile2);
+                if (resourcesFile1 != null) File.Delete(resourcesFile1);
+                if (resourcesFile2 != null) File.Delete(resourcesFile2);
             }
         }
 
@@ -1676,10 +1672,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (null != resxFile1) File.Delete(resxFile1);
-                if (null != resxFile2) File.Delete(resxFile2);
-                if (null != resourcesFile1) File.Delete(resourcesFile1);
-                if (null != resourcesFile2) File.Delete(resourcesFile2);
+                if (resxFile1 != null) File.Delete(resxFile1);
+                if (resxFile2 != null) File.Delete(resxFile2);
+                if (resourcesFile1 != null) File.Delete(resourcesFile1);
+                if (resourcesFile2 != null) File.Delete(resourcesFile2);
             }
         }
 
@@ -1760,8 +1756,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (null != resxFile) File.Delete(resxFile);
-                if (null != resourcesFile) File.Delete(resourcesFile);
+                if (resxFile != null) File.Delete(resxFile);
+                if (resourcesFile != null) File.Delete(resourcesFile);
             }
         }
 
@@ -2016,7 +2012,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             Utilities.ExecuteTask(t);
 
-            int i = 0;
+            int i;
 
             // should be four files written, not including the tlogs
             for (i = 0; i < 4; i++)
@@ -2490,10 +2486,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (null != resxFile) File.Delete(resxFile);
-                if (null != resxFile2) File.Delete(resxFile2);
-                if (null != resxFile) File.Delete(Path.ChangeExtension(resxFile, ".resources"));
-                if (null != resxFile2) File.Delete(Path.ChangeExtension(resxFile2, ".resources"));
+                if (resxFile != null) File.Delete(resxFile);
+                if (resxFile2 != null) File.Delete(resxFile2);
+                if (resxFile != null) File.Delete(Path.ChangeExtension(resxFile, ".resources"));
+                if (resxFile2 != null) File.Delete(Path.ChangeExtension(resxFile2, ".resources"));
             }
         }
 
@@ -2632,7 +2628,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (null != txtFile) File.Delete(txtFile);
+                if (txtFile != null) File.Delete(txtFile);
             }
         }
 
@@ -3275,16 +3271,12 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             string resxDataName = "DataWithNewline";
             string data = "<data name=\"" + resxDataName + "\">" + newline +
                 "<value>" + resxValue + "</value>" + newline + "</data>";
-
-            string resxFile = null;
-
             GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
 
             try
             {
-                resxFile = Utilities.WriteTestResX(false, null, data);
-
+                string resxFile = Utilities.WriteTestResX(false, null, data);
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
                 Utilities.ExecuteTask(t);
@@ -3462,7 +3454,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         {
             GenerateResource t = CreateTask(output);
 
-            string sourceFile = null;
+            string sourceFile;
             if (useResX)
                 sourceFile = WriteTestResX(false, null, null);
             else
@@ -3888,7 +3880,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", textFile, resourcesFile);
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ReadResourceMessage", 4, textFile);
 
-                string typeName = null;
+                string typeName;
                 if (t.StronglyTypedNamespace != null)
                     typeName = t.StronglyTypedNamespace + ".";
                 else

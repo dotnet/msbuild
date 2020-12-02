@@ -5,14 +5,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Globalization;
 using System.Threading;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
@@ -268,7 +264,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Enables or disables emitting a default error when a task fails without logging errors
         /// </summary>
-        public bool AllowFailureWithoutError { get; set; } = true;
+        public bool AllowFailureWithoutError { get; set; } = false;
         #endregion
 
         #region IBuildEngine Implementation (Methods)
@@ -1044,8 +1040,8 @@ namespace Microsoft.Build.CommandLine
 
                 foreach (string variable in _savedEnvironment.Keys)
                 {
-                    string newValue = null;
                     string oldValue = _savedEnvironment[variable];
+                    string newValue;
                     if (!environment.TryGetValue(variable, out newValue))
                     {
                         s_mismatchedEnvironmentValues[variable] = new KeyValuePair<string, string>(null, oldValue);
@@ -1062,7 +1058,7 @@ namespace Microsoft.Build.CommandLine
                 foreach (string variable in environment.Keys)
                 {
                     string newValue = environment[variable];
-                    string oldValue = null;
+                    string oldValue;
                     if (!_savedEnvironment.TryGetValue(variable, out oldValue))
                     {
                         s_mismatchedEnvironmentValues[variable] = new KeyValuePair<string, string>(newValue, null);

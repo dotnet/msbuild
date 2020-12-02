@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -463,10 +461,8 @@ namespace Microsoft.Build.UnitTests.Definition
                 Toolset source = p.GetToolset("Current");
                 Toolset potato = new Toolset("potato", source.ToolsPath, ProjectCollection.GlobalProjectCollection, source.ToolsPath);
                 p.AddToolset(potato);
-
-                bool success = false;
                 Project project = p.LoadProject(projectPath, "potato");
-                success = project.Build(mockLogger);
+                bool success = project.Build(mockLogger);
 
                 Assert.True(success);
                 mockLogger.AssertLogContains("[potato]");
@@ -489,15 +485,13 @@ namespace Microsoft.Build.UnitTests.Definition
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
-
-            bool success = false;
             Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <Target Name='Foo'>
                     </Target>
                    </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
             Assert.Equal("4.0", project.ToolsVersion);
-            success = project.Build(mockLogger);
+            bool success = project.Build(mockLogger);
 
             Assert.True(success);
             mockLogger.AssertLogContains("\"4.0\"");
@@ -636,8 +630,6 @@ namespace Microsoft.Build.UnitTests.Definition
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
-
-            bool success = false;
             Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <Target Name='Foo'>
                     </Target>
@@ -645,7 +637,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             ProjectInstance pi = project.CreateProjectInstance();
             Assert.Equal("4.0", pi.ToolsVersion);
-            success = pi.Build(new ILogger[] { mockLogger });
+            bool success = pi.Build(new ILogger[] { mockLogger });
 
             Assert.True(success);
             mockLogger.AssertLogContains("\"4.0\"");
@@ -790,8 +782,6 @@ namespace Microsoft.Build.UnitTests.Definition
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
-
-            bool success = false;
             Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <Target Name='Foo'>
                     </Target>
@@ -799,7 +789,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             ProjectInstance pi = new ProjectInstance(project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
             Assert.Equal("4.0", pi.ToolsVersion);
-            success = pi.Build(new ILogger[] { mockLogger });
+            bool success = pi.Build(new ILogger[] { mockLogger });
 
             Assert.True(success);
             mockLogger.AssertLogContains("\"4.0\"");

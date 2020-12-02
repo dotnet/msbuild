@@ -1,17 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Reflection;
-
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Threading;
-
-using Microsoft.Build.Framework;
-using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.BuildEngine
 {
@@ -150,12 +140,9 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         static private void InitializeGlobalNamePostFixValues()
         {
-            string engineVersion = null;
-            string accountTypePostfix = null;
-            string usernamePostFix = null;
             AssemblyName name = new AssemblyName(Assembly.GetExecutingAssembly().FullName);
-            engineVersion = name.Version.ToString();
-
+            string engineVersion = name.Version.ToString();
+            string accountTypePostfix;
             if (NativeMethods.IsUserAdministrator())
             {
                 accountTypePostfix = "Admin";
@@ -165,7 +152,7 @@ namespace Microsoft.Build.BuildEngine
                 accountTypePostfix = "NotAdmin";
             }
             // As per the msdn docs for WindowsIdentity.Name Property The logon name is in the form DOMAIN\USERNAME. so replace the \ so it is not confused as a path
-            usernamePostFix = System.Security.Principal.WindowsIdentity.GetCurrent().Name.Replace("\\", "_");
+            string usernamePostFix = System.Security.Principal.WindowsIdentity.GetCurrent().Name.Replace("\\", "_");
 
             nodePostfix = engineVersion + accountTypePostfix + usernamePostFix;
         }

@@ -17,7 +17,6 @@ using Microsoft.Win32;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
-using System.Collections.ObjectModel;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
 
@@ -2297,7 +2296,7 @@ namespace Microsoft.Build.Utilities
 
             displayNameBuilder.Append(frameworkName.Identifier);
             displayNameBuilder.Append(" ");
-            displayNameBuilder.Append("v" + frameworkName.Version.ToString());
+            displayNameBuilder.Append('v').Append(frameworkName.Version.ToString());
 
             if (!string.IsNullOrEmpty(frameworkName.Profile))
             {
@@ -2993,7 +2992,7 @@ namespace Microsoft.Build.Utilities
         /// <returns></returns>
         private static string GetTargetPlatformMonikerRegistryRoots(string registryRootLocation)
         {
-            ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerRegistryRoots", "RegistryRoot passed in '{0}'", registryRootLocation != null ? registryRootLocation : string.Empty);
+            ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerRegistryRoots", "RegistryRoot passed in '{0}'", registryRootLocation ?? string.Empty);
 
             string disableRegistryForSDKLookup = Environment.GetEnvironmentVariable("MSBUILDDISABLEREGISTRYFORSDKLOOKUP");
             // If we are not disabling the registry for platform sdk lookups then lets look in the default location.
@@ -3882,7 +3881,7 @@ namespace Microsoft.Build.Utilities
                     //only add if the version folder name is of the right format
                     if (folder.Name.Length >= 4 && folder.Name.StartsWith("v", StringComparison.OrdinalIgnoreCase))
                     {
-                        Version ver = null;
+                        Version ver;
                         if (Version.TryParse(folder.Name.Substring(1), out ver))
                         {
                             frameworkVersions.Add(folder.Name);
@@ -3924,8 +3923,7 @@ namespace Microsoft.Build.Utilities
 
             var frameworkProfiles = new List<string>();
 
-            string frameworkProfilePath = null;
-            frameworkProfilePath = Path.Combine(frameworkReferenceRoot, frameworkIdentifier);
+            string frameworkProfilePath = Path.Combine(frameworkReferenceRoot, frameworkIdentifier);
             frameworkProfilePath = Path.Combine(frameworkProfilePath, frameworkVersion);
             frameworkProfilePath = Path.Combine(frameworkProfilePath, "Profiles");
 
@@ -3958,8 +3956,7 @@ namespace Microsoft.Build.Utilities
             IList<string> versions = new List<string>();
 
             // only return v35 and earlier versions if .NetFx35 is installed
-            string dotNetFx35Path = null;
-            dotNetFx35Path = GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35);
+            string dotNetFx35Path = GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35);
 
             if (dotNetFx35Path != null)
             {

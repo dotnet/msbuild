@@ -5,8 +5,6 @@ using System;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml;
-using System.Globalization;
 
 using error = Microsoft.Build.Shared.ErrorUtilities;
 
@@ -554,9 +552,9 @@ namespace Microsoft.Build.Conversion
 
             StringBuilder replacedString = new StringBuilder();
 
-            replacedString.Append(originalString.Substring(0, indexOfAmpersand));
+            replacedString.Append(originalString, 0, indexOfAmpersand);
             replacedString.Append("&amp;");
-            replacedString.Append(originalString.Substring(indexOfAmpersand + 1));
+            replacedString.Append(originalString, indexOfAmpersand + 1, originalString.Length - indexOfAmpersand + 1);
 
             return replacedString.ToString();
         }

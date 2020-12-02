@@ -26,5 +26,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public const int MaxFileAssociationExtensionLength = 24;
         public const string ClientFrameworkSubset = "Client";
         public const string DotNetFrameworkIdentifier = ".NETFramework";
+        public const string DotNetCoreIdentifier = ".NETCore";
+        public const string DotNetCoreAppIdentifier = ".NETCoreApp";
+        public const string AppHostExe = "apphost.exe";
+        public const string SingleFileHostExe = "singlefilehost.exe";
     }
 }

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml;
 
 namespace Microsoft.Build.BuildEngine
@@ -44,8 +43,6 @@ namespace Microsoft.Build.BuildEngine
         internal static bool IsStaticLibrary(XmlDocument project, string configurationName)
         {
             XmlNodeList configurationsElements = project.DocumentElement.GetElementsByTagName("Configurations");
-            XmlElement configurationElement = null;
-
             bool isStaticLibrary = false;
 
             // There should be only one configurations element
@@ -61,8 +58,7 @@ namespace Microsoft.Build.BuildEngine
                         if ((string.Equals(element.Name, "Configuration", StringComparison.OrdinalIgnoreCase)) &&
                             (string.Equals(element.GetAttribute("Name"), configurationName, StringComparison.OrdinalIgnoreCase)))
                         {
-                            configurationElement = element;
-
+                            XmlElement configurationElement = element;
                             string configurationType = configurationElement.GetAttribute("ConfigurationType");
                             isStaticLibrary = (configurationType == "4");
 

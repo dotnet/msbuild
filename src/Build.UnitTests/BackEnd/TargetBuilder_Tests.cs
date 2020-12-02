@@ -3,12 +3,8 @@
 
 using System;
 using System.Xml;
-using System.Text;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
@@ -921,6 +917,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.ResultsByTarget["Build"].ResultCode.ShouldBe(TargetResultCode.Success);
             result.ResultsByTarget["Build"].AfterTargetsHaveFailed.ShouldBe(true);
         }
+
+        /// <summary>
+        /// Test a project that has a cycle in AfterTargets
+        /// </summary>
+        [Fact]
+        public void TestAfterTargetsWithCycleDoesNotHang()
+        {
+            string projectBody = @"
+<Target Name='Build' AfterTargets='After2' />
+
+<Target Name='After1' AfterTargets='Build' />
+
+<Target Name='After2' AfterTargets='After1' />
+";
+
+            BuildResult result = BuildSimpleProject(projectBody, new string[] { "Build" }, failTaskNumber: int.MaxValue /* no task failure needed here */);
+            result.ResultsByTarget["Build"].ResultCode.ShouldBe(TargetResultCode.Success);
+            result.ResultsByTarget["Build"].AfterTargetsHaveFailed.ShouldBe(false);
+        }
+
 
         /// <summary>
         /// Test after target on a skipped target

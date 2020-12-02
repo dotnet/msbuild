@@ -41,7 +41,7 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc cref="IEquatable{T}.Equals(T)"/>
         public bool Equals(RoslynCodeTaskFactoryTaskInfo other)
         {
-            if (ReferenceEquals(null, other))
+            if (other is null)
             {
                 return false;
             }

@@ -1569,7 +1569,8 @@
     <comment>{StrBegin="MSB3276: "}</comment>
   </data>
   <data name="ResolveAssemblyReference.FoundConflicts">
-    <value>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</value>
+    <value>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</value>
     <comment>{StrBegin="MSB3277: "}</comment>
   </data>
   <data name="ResolveAssemblyReference.LogAttributeFormat">
@@ -2160,7 +2161,10 @@
     <value>MSB3645: .NET Framework v3.5 Service Pack 1 was not found. In order to target "{0}", .NET Framework v3.5 Service Pack 1 or later must be installed.</value>
     <comment>{StrBegin="MSB3645: "}</comment>
   </data>
-
+  <data name="GetReferenceAssemblyPaths.OutOfDateSDK">
+    <value>MSB3971: The reference assemblies for "{0}" were not found. You might be using an older .NET SDK to target .NET 5.0 or higher. Update Visual Studio and/or your .NET SDK.</value>
+    <comment>{StrBegin="MSB3971: "}</comment>
+  </data>
 
   <!--
         The WinMDExp task has the error buckets of MSB3762 - MSB3772
@@ -2832,6 +2836,31 @@
     <value>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</value>
     <comment>{StrBegin="MSB3954: "}</comment>
   </data>
+
+  <!--
+        MSB3961 - MSB3970   Task: GenerateLauncher
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="GenerateLauncher.CopyError">
+    <value>MSB3961: An error occurred trying to copy '{0}' to '{1}': {2}</value>
+    <comment>{StrBegin="MSB3961: "}</comment>
+  </data>
+  <data name="GenerateLauncher.General">
+    <value>MSB3962: An error occurred generating a launcher: {0}</value>
+    <comment>{StrBegin="MSB3962: "}</comment>
+  </data>
+  <data name="GenerateLauncher.InvalidInput">
+    <value>MSB3963: Not enough data was provided to generate a launcher. Please provide a value for: 'EntryPoint'.</value>
+    <comment>{StrBegin="MSB3963: "}</comment>
+  </data>
+  <data name="GenerateLauncher.MissingLauncherExe">
+    <value>MSB3964: Could not find required file '{0}'.</value>
+    <comment>{StrBegin="MSB3964: "}</comment>
+  </data>
+  <data name="GenerateLauncher.NoOutputPath">
+    <value>MSB3965: No output path specified in build settings.</value>
+    <comment>{StrBegin="MSB3965: "}</comment>
+  </data>
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 
@@ -2915,6 +2944,8 @@
             MSB3931 - MSB3940   Task: Unzip
             MSB3941 - MSB3950   Task: ZipDirectory
             MSB3951 - MSB3960   Task: VerifyFileHash
+            MSB3961 - MSB3970   Task: GenerateLauncher
+            MSB3971 - MSB3980   Task: GetReferenceAssemblyPaths overflow
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)

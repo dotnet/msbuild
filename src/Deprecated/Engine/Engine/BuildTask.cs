@@ -3,12 +3,7 @@
 
 using System;
 using System.Xml;
-using System.Diagnostics;
 using System.Collections;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Globalization;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
@@ -365,13 +360,9 @@ namespace Microsoft.Build.BuildEngine
             error.VerifyThrowInvalidOperation(this.taskElement != null,
                 "CannotUseParameters");
 
-            string attributeValue;
-
             // If this is a persisted Task, grab the attribute directly from the
             // task element.
-            attributeValue = taskElement.GetAttribute(attributeName);
-
-            return (attributeValue == null) ? String.Empty : attributeValue;
+            return taskElement.GetAttribute(attributeName) ?? string.Empty;
         }
 
         /// <summary>

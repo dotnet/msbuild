@@ -5,12 +5,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Threading;
 using System.Globalization;
 using System.IO;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 using System.Runtime.InteropServices;
 
@@ -41,8 +38,7 @@ namespace Microsoft.Build.BuildEngine
             if (configuration != null)
             {
                 // Split out the parameter sets based on ;
-                string[] parameters;
-                parameters = configuration.Split(parameterDelimiters);
+                string[] parameters = configuration.Split(parameterDelimiters);
                 // Go through each of the parameter name value pairs and split them appart
                 for (int param = 0; param < parameters.Length; param++)
                 {

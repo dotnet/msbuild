@@ -36,9 +36,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             // Swap tabs for spaces, so we don't mess up the TSV format
-            text = text.Replace(Separator, " ");
-
-            return text;
+            return text.Replace(Separator, " ");
         }
     }
 }

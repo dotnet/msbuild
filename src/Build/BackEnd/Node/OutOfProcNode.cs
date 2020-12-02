@@ -424,7 +424,7 @@ namespace Microsoft.Build.Execution
             CommunicationsUtilities.Trace("Shutting down with reason: {0}, and exception: {1}.", _shutdownReason, _shutdownException);
 
             // Clean up the engine
-            if (null != _buildRequestEngine && _buildRequestEngine.Status != BuildRequestEngineStatus.Uninitialized)
+            if (_buildRequestEngine != null && _buildRequestEngine.Status != BuildRequestEngineStatus.Uninitialized)
             {
                 _buildRequestEngine.CleanupForBuild();
 
@@ -475,7 +475,7 @@ namespace Microsoft.Build.Execution
             try
             {
                 // Shut down logging, which will cause all queued logging messages to be sent.
-                if (null != _loggingContext && null != _loggingService)
+                if (_loggingContext != null && _loggingService != null)
                 {
                     _loggingContext.LogBuildFinished(true);
                     ((IBuildComponent)_loggingService).ShutdownComponent();
@@ -484,7 +484,7 @@ namespace Microsoft.Build.Execution
             finally
             {
                 // Shut down logging, which will cause all queued logging messages to be sent.
-                if (null != _loggingContext && null != _loggingService)
+                if (_loggingContext != null && _loggingService != null)
                 {
                     _loggingContext.LoggingService.OnLoggingThreadException -= OnLoggingThreadException;
                     _loggingContext = null;

@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Xunit;
 
@@ -60,8 +58,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestMergeRuntimeValues()
         {
-            string mergedRuntime = null;
-
+            string mergedRuntime;
             Assert.True(XMakeAttributes.TryMergeRuntimeValues(XMakeAttributes.MSBuildRuntimeValues.any, XMakeAttributes.MSBuildRuntimeValues.currentRuntime, out mergedRuntime));
             Assert.Equal(XMakeAttributes.MSBuildRuntimeValues.clr4, mergedRuntime);
 
@@ -99,11 +96,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestMergeArchitectureValues()
         {
-            string mergedArchitecture = null;
-
             string currentArchitecture = EnvironmentUtilities.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x64 : XMakeAttributes.MSBuildArchitectureValues.x86;
             string notCurrentArchitecture = EnvironmentUtilities.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x86 : XMakeAttributes.MSBuildArchitectureValues.x64;
 
+            string mergedArchitecture;
             Assert.True(XMakeAttributes.TryMergeArchitectureValues(XMakeAttributes.MSBuildArchitectureValues.any, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture, out mergedArchitecture));
             Assert.Equal(currentArchitecture, mergedArchitecture);
 

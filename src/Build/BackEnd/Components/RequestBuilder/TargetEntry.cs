@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -15,7 +14,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using MessageImportance = Microsoft.Build.Framework.MessageImportance;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -362,7 +360,7 @@ namespace Microsoft.Build.BackEnd
                 if (!projectLoggingContext.LoggingService.OnlyLogCriticalEvents)
                 {
                     // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
-                    string expanded = _expander.ExpandIntoStringAndUnescape(_target.Condition, ExpanderOptions.ExpandPropertiesAndItems | ExpanderOptions.LeavePropertiesUnexpandedOnError, _target.ConditionLocation);
+                    string expanded = _expander.ExpandIntoStringAndUnescape(_target.Condition, ExpanderOptions.ExpandPropertiesAndItems | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _target.ConditionLocation);
 
                     // By design: Not building dependencies. This is what NAnt does too.
                     // NOTE: In the original code, this was logged from the target logging context.  However, the target
@@ -546,11 +544,8 @@ namespace Microsoft.Build.BackEnd
                         // Make sure the Invalid Project error gets logged *before* TargetFinished.  Otherwise,
                         // the log is confusing.
                         targetLoggingContext.LogInvalidProjectFileError(e);
-
                         entryForInference?.LeaveScope();
-
                         entryForExecution?.LeaveScope();
-
                         aggregateResult = aggregateResult.AggregateResult(new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
                     }
                     finally
@@ -718,7 +713,7 @@ namespace Microsoft.Build.BackEnd
 
             // If this target never executed (for instance, because one of its dependencies errored) then we need to
             // create a result for this target to report when it gets to the Completed state.
-            if (null == _targetResult)
+            if (_targetResult == null)
             {
                 _targetResult = new TargetResult(Array.Empty<TaskItem>(), new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
             }
@@ -747,7 +742,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="lookup">The lookup to enter with.</param>
         internal void EnterLegacyCallTargetScope(Lookup lookup)
         {
-            if (null == _legacyCallTargetScopes)
+            if (_legacyCallTargetScopes == null)
             {
                 _legacyCallTargetScopes = new Stack<Lookup.Scope>();
             }
@@ -783,7 +778,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void LeaveLegacyCallTargetScopes()
         {
-            if (null != _legacyCallTargetScopes)
+            if (_legacyCallTargetScopes != null)
             {
                 while (_legacyCallTargetScopes.Count != 0)
                 {

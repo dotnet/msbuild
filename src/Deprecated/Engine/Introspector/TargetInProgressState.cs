@@ -2,12 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.BuildEngine
@@ -59,7 +55,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void ProcessBuildContext(EngineCallback engineCallback, ProjectBuildState buildContext, Target target)
         {
-            BuildRequest parentRequest = null;
+            BuildRequest parentRequest;
             TargetIdWrapper parentName = FindParentTarget(engineCallback, buildContext, target, out parentRequest);
 
             if (parentName != null)
@@ -266,7 +262,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectBuildState projectBuildState
         )
         {
-            BuildRequest parentRequest = null;
+            BuildRequest parentRequest;
             TargetInProgessState.TargetIdWrapper parentName =
                 FindParentTarget(engineCallback, projectBuildState, target, out parentRequest);
 

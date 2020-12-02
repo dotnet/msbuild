@@ -5,7 +5,6 @@ using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Versioning;
 using SdkReference = Microsoft.Build.Framework.SdkReference;
 using SdkResultBase = Microsoft.Build.Framework.SdkResult;
 

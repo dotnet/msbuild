@@ -233,7 +233,6 @@ namespace Microsoft.Build.Tasks
                 if (fileHandle != NativeMethods.InvalidIntPtr)
                 {
                     NativeMethods.CloseHandle(fileHandle);
-                    fileHandle = NativeMethods.InvalidIntPtr;
                 }
             }
 

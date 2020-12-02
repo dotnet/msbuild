@@ -17,6 +17,7 @@ using Xunit.Abstractions;
 
 using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -87,7 +88,17 @@ namespace Microsoft.Build.UnitTests
                 // Assert invariants
                 foreach (var item in _invariants)
                     item.AssertInvariant(Output);
+
+                // Reset change waves
+                SetChangeWave(string.Empty);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
+        }
+
+        public void SetChangeWave(string wave)
+        {
+            ChangeWaves.ResetStateForTests();
+            SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", wave);
         }
 
         /// <summary>

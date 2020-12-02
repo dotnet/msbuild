@@ -510,7 +510,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 StringBuilder productsOrder = new StringBuilder();
                 foreach (Product p in Products)
                 {
-                    productsOrder.Append(p.ProductCode + Environment.NewLine);
+                    productsOrder.Append(p.ProductCode).Append(Environment.NewLine);
                 }
                 DumpStringToFile(productsOrder.ToString(), "BootstrapperInstallOrder.txt", false);
             }
@@ -1945,8 +1945,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         {
                             // HACKHACK
                             string str = r.ReadToEnd();
-                            str = str.Replace("%NEWLINE%", Environment.NewLine);
-                            return str;
+                            return str.Replace("%NEWLINE%", Environment.NewLine);
                         }
                     }
                 }

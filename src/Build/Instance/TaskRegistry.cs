@@ -198,7 +198,7 @@ namespace Microsoft.Build.Execution
         {
             get
             {
-                if (null == _taskRegistrations)
+                if (_taskRegistrations == null)
                 {
                     _taskRegistrations = CreateRegisteredTaskDictionary();
                 }
@@ -409,7 +409,7 @@ namespace Microsoft.Build.Execution
         )
         {
             TaskFactoryWrapper taskFactory = null;
-            bool retrievedFromCache = false;
+            bool retrievedFromCache;
 
             // If there are no usingtask tags in the project don't bother caching or looking for tasks locally
             RegisteredTaskRecord record = GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
@@ -851,7 +851,6 @@ namespace Microsoft.Build.Execution
                     }
 
                     int nameHash = String.IsNullOrEmpty(obj.Name) ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Name);
-                    int paramHash = 0;
 
                     // Since equality for the exact comparer depends on the exact values of the parameters, 
                     // we need our hash code to depend on them as well. However, for fuzzy matches, we just 
@@ -865,6 +864,7 @@ namespace Microsoft.Build.Execution
                         obj.TaskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out architecture);
                     }
 
+                    int paramHash;
                     if (_exactMatchRequired)
                     {
                         int runtimeHash = runtime == null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(runtime);
@@ -913,8 +913,7 @@ namespace Microsoft.Build.Execution
                         // make sure that each parameter value matches as well 
                         foreach (KeyValuePair<string, string> param in x)
                         {
-                            string value = null;
-
+                            string value;
                             if (y.TryGetValue(param.Key, out value))
                             {
                                 if (!String.Equals(param.Value, value, StringComparison.OrdinalIgnoreCase))

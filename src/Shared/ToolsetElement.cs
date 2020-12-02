@@ -7,9 +7,6 @@ using System.Collections.Generic;
 using System.Configuration;
 #endif
 using System.IO;
-using System.Text;
-using System.Globalization;
-using System.Reflection;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
@@ -36,7 +33,7 @@ namespace Microsoft.Build.Evaluation
             // If section definition is present and section is not present, this value is not null
             // If section definition is not present and section is also not present, this value is null
             // If the section definition is not present and section is present, then this value is null
-            if (null != configuration)
+            if (configuration != null)
             {
                 ConfigurationSection msbuildSection = configuration.GetSection("msbuildToolsets");
                 configurationSection = msbuildSection as ToolsetConfigurationSection;

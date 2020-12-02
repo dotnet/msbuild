@@ -2,12 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Text;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.Build.Collections;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using Microsoft.Build.Execution;
@@ -15,7 +12,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared.FileSystem;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
@@ -159,7 +155,7 @@ namespace Microsoft.Build.BackEnd
         {
             // First, collect up the appropriate metadata collections.  We need the one from the item definition, if any, and
             // the one we are using for this batching bucket.
-            ProjectItemDefinitionInstance itemDefinition = null;
+            ProjectItemDefinitionInstance itemDefinition;
             Project.ItemDefinitions.TryGetValue(child.ItemType, out itemDefinition);
 
             // The NestedMetadataTable will handle the aggregation of the different metadata collections
@@ -246,8 +242,7 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            List<ProjectItemInstance> itemsToRemove = null;
-
+            List<ProjectItemInstance> itemsToRemove;
             if (matchOnMetadata == null)
             {
                 itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, bucket.Expander);
@@ -681,7 +676,7 @@ namespace Microsoft.Build.BackEnd
             public string GetEscapedValueIfPresent(string specifiedItemType, string name)
             {
                 string value = null;
-                if (null == specifiedItemType || specifiedItemType == _itemType)
+                if (specifiedItemType == null || specifiedItemType == _itemType)
                 {
                     // Look in the addTable
                     if (_addTable.TryGetValue(name, out value))
@@ -691,17 +686,17 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Look in the bucket table
-                if (null != _bucketTable)
+                if (_bucketTable != null)
                 {
                     value = _bucketTable.GetEscapedValueIfPresent(specifiedItemType, name);
-                    if (null != value)
+                    if (value != null)
                     {
                         return value;
                     }
                 }
 
                 // Look in the item definition table
-                if (null != _itemDefinitionTable)
+                if (_itemDefinitionTable != null)
                 {
                     value = _itemDefinitionTable.GetEscapedValueIfPresent(specifiedItemType, name);
                 }

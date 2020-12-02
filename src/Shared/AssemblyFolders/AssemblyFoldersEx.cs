@@ -261,7 +261,7 @@ namespace Microsoft.Build.Shared
 
                     string directoryName = getRegistrySubKeyDefaultValue(baseKey, directoryKey.RegistryKey);
 
-                    if (null != directoryName)
+                    if (directoryName != null)
                     {
                         _uniqueDirectoryPaths.Add(directoryName);
                         _directoryNames.Add(new AssemblyFoldersExInfo(hive, view, directoryKey.RegistryKey, directoryName, directoryKey.TargetFrameworkVersion));
@@ -387,7 +387,7 @@ namespace Microsoft.Build.Shared
                         // To be added to our dictionary our candidate version from the registry must be a valid target framework version which is less than or equal 
                         // to the target version. Therefore if the candidate version is not a valid target framework version we will pretend it is and sort it in its correct form.
 
-                        Version replacementVersion = null;
+                        Version replacementVersion;
                         if (candidateVersion.Build > 255)
                         {
                             // Pretend the candidate version is really Maj.Minor ignore the build and revision
@@ -457,7 +457,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static void AddCandidateVersion(SortedDictionary<Version, List<string>> targetFrameworkVersionToRegistryVersions, string version, Version candidateVersion)
         {
-            List<string> listOfFrameworks = null;
+            List<string> listOfFrameworks;
             if (targetFrameworkVersionToRegistryVersions.TryGetValue(candidateVersion, out listOfFrameworks))
             {
                 listOfFrameworks.Add(version);

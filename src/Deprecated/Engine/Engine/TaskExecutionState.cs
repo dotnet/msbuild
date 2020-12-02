@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -158,14 +156,10 @@ namespace Microsoft.Build.BuildEngine
                 // been built by the task
                 if ((howToExecuteTask & TaskExecutionMode.InferOutputsOnly) != TaskExecutionMode.Invalid)
                 {
-                    bool targetInferenceSuccessful = false;
-
-                    targetInferenceSuccessful =
-                       TaskEngineExecuteTask
-                        (   taskEngine,
-                            TaskExecutionMode.InferOutputsOnly,
-                            lookupForInference
-                        );
+                    bool targetInferenceSuccessful = TaskEngineExecuteTask
+                        (taskEngine,
+                         TaskExecutionMode.InferOutputsOnly,
+                         lookupForInference);
 
                     ErrorUtilities.VerifyThrow(targetInferenceSuccessful, "A task engine should never fail to infer its task's up-to-date outputs.");
                 }

@@ -2,13 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
-using System.Diagnostics;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
@@ -127,10 +123,8 @@ namespace Microsoft.Build.Evaluation
                 if (Sink(expression, ref i, end, '@', '('))
                 {
                     List<ItemExpressionCapture> transformExpressions = null;
-                    string itemName = null;
                     string separator = null;
                     int separatorStart = -1;
-                    int separatorLength = -1;
 
                     // Start of a possible item list expression
 
@@ -164,7 +158,7 @@ namespace Microsoft.Build.Evaluation
                     string name = expression.Substring(startOfName, i - startOfName);
 
                     // return the item that we're working with
-                    itemName = name;
+                    string itemName = name;
 
                     SinkWhitespace(expression, ref i);
                     bool transformOrFunctionFound = true;
@@ -235,8 +229,7 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         separatorStart = i - startPoint;
-                        separatorLength = closingQuote - i;
-                        separator = expression.Substring(i, separatorLength);
+                        separator = expression.Substring(i, closingQuote - i);
 
                         i = closingQuote + 1;
                     }

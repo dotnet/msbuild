@@ -10,7 +10,6 @@ using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.ComponentModel;
 
 namespace Microsoft.Build.Tasks
 {

@@ -3,17 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Construction;
-using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -3190,9 +3186,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>";
             expectedItem = AdjustSpacesForItem(expectedItem);
 
-            expected = ObjectModelHelpers.CleanupFileContents(string.Format(expected, expectedItem));
-
-            return expected;
+            return ObjectModelHelpers.CleanupFileContents(string.Format(expected, expectedItem));
         }
 
         /// <summary>
@@ -3259,18 +3253,17 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
             else
             {
-                sb.AppendLine(itemSpace + splits[0]);
+                sb.Append(itemSpace).AppendLine(splits[0]);
 
                 for (var i = 1; i < splits.Length - 1; i++)
                 {
-                    sb.AppendLine(metadataSpace + splits[i]);
+                    sb.Append(metadataSpace).AppendLine(splits[i]);
                 }
 
-                sb.Append(itemSpace + splits[splits.Length -1]);
+                sb.Append(itemSpace).Append(splits[splits.Length - 1]);
             }
 
-            expectedItem = sb.ToString();
-            return expectedItem;
+            return sb.ToString();
         }
     }
 }

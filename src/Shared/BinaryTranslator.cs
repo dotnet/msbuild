@@ -2,19 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.IO;
-using System.Threading;
 using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using System.Globalization;
 using System.Reflection;
@@ -199,6 +191,17 @@ namespace Microsoft.Build.BackEnd
                 {
                     byteArray = new byte[0];
                 }
+            }
+
+            /// <summary>
+            /// Translates a byte array
+            /// </summary>
+            /// <param name="byteArray">The array to be translated.</param>
+            /// <param name="length">The length of array which will be used in translation. This parameter is not used when reading</param>
+            public void Translate(ref byte[] byteArray, ref int length) 
+            {
+                Translate(ref byteArray);
+                length = byteArray.Length;
             }
 
             /// <summary>
@@ -786,8 +789,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                int count = 0;
-                count = array.Length;
+                int count = array.Length;
                 _writer.Write(count);
 
                 for (int i = 0; i < count; i++)
@@ -998,16 +1000,26 @@ namespace Microsoft.Build.BackEnd
             /// <param name="byteArray">The byte array to be translated</param>
             public void Translate(ref byte[] byteArray)
             {
+                var length = byteArray?.Length ?? 0;
+                Translate(ref byteArray, ref length);
+            }
+
+            /// <summary>
+            /// Translates a byte array
+            /// </summary>
+            /// <param name="byteArray">The array to be translated.</param>
+            /// <param name="length">The length of array which will be used in translation</param>
+            public void Translate(ref byte[] byteArray, ref int length) 
+            {
                 if (!TranslateNullable(byteArray))
                 {
                     return;
                 }
 
-                int count = byteArray.Length;
-                _writer.Write(count);
-                if (count > 0)
+                _writer.Write(length);
+                if (length > 0)
                 {
-                    _writer.Write(byteArray);
+                    _writer.Write(byteArray, 0, length);
                 }
             }
 

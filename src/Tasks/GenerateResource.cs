@@ -834,7 +834,7 @@ namespace Microsoft.Build.Tasks
                             this.StronglyTypedClassName = process.StronglyTypedClassName; // in case a default was chosen
                             this.StronglyTypedFileName = process.StronglyTypedFilename;   // in case a default was chosen
                             _stronglyTypedResourceSuccessfullyCreated = process.StronglyTypedResourceSuccessfullyCreated;
-                            if (null != process.UnsuccessfullyCreatedOutFiles)
+                            if (process.UnsuccessfullyCreatedOutFiles != null)
                             {
                                 foreach (string item in process.UnsuccessfullyCreatedOutFiles)
                                 {
@@ -955,7 +955,7 @@ namespace Microsoft.Build.Tasks
                 internetSecurityManager = (IInternetSecurityManager)Activator.CreateInstance(iismType);
             }
 
-            Int32 zone = 0;
+            int zone;
             internetSecurityManager.MapUrlToZone(Path.GetFullPath(filename), out zone, 0);
             if (zone < ZoneInternet)
             {
@@ -1067,7 +1067,7 @@ namespace Microsoft.Build.Tasks
             {
                 _resgenPath = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version35);
 
-                if (null == _resgenPath && ExecuteAsTool)
+                if (_resgenPath == null && ExecuteAsTool)
                 {
                     Log.LogErrorWithCodeFromResources("General.PlatformSDKFileNotFound", "resgen.exe",
                         ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version35),
@@ -1085,7 +1085,7 @@ namespace Microsoft.Build.Tasks
                     ExecuteAsTool);
             }
 
-            if (null == _resgenPath && !ExecuteAsTool)
+            if (_resgenPath == null && !ExecuteAsTool)
             {
                 // if Resgen.exe is not installed, just use the filename
                 _resgenPath = String.Empty;
@@ -1175,7 +1175,6 @@ namespace Microsoft.Build.Tasks
             else
             {
                 int initialResourceIndex = 0;
-                int numberOfResourcesToAdd = 0;
                 bool doneProcessingResources = false;
                 CommandLineBuilderExtension resourcelessCommandBuilder = new CommandLineBuilderExtension();
                 string resourcelessCommand = null;
@@ -1189,7 +1188,7 @@ namespace Microsoft.Build.Tasks
 
                 while (!doneProcessingResources)
                 {
-                    numberOfResourcesToAdd = CalculateResourceBatchSize(inputsToProcess, outputsToProcess, resourcelessCommand, initialResourceIndex);
+                    int numberOfResourcesToAdd = CalculateResourceBatchSize(inputsToProcess, outputsToProcess, resourcelessCommand, initialResourceIndex);
                     ResGen resGen = CreateResGenTaskWithDefaultParameters();
 
                     resGen.InputFiles = inputsToProcess.GetRange(initialResourceIndex, numberOfResourcesToAdd).ToArray();
@@ -1244,7 +1243,7 @@ namespace Microsoft.Build.Tasks
                 i++;
             }
 
-            int numberOfResourcesToAdd = 0;
+            int numberOfResourcesToAdd;
             if (currentCommand.Length <= s_maximumCommandLength)
             {
                 // We've successfully added all the rest.
@@ -1833,7 +1832,7 @@ namespace Microsoft.Build.Tasks
                                             (
                                                 MessageImportance.Low,
                                                 "GenerateResource.SeparateAppDomainBecauseOfType",
-                                                (name == null) ? String.Empty : name,
+                                                name ?? String.Empty,
                                                 typeName,
                                                 source.ItemSpec,
                                                 ((IXmlLineInfo)reader).LineNumber
@@ -1879,7 +1878,7 @@ namespace Microsoft.Build.Tasks
                                             (
                                                 MessageImportance.Low,
                                                 "GenerateResource.SeparateAppDomainBecauseOfMimeType",
-                                                (name == null) ? String.Empty : name,
+                                                name ?? String.Empty,
                                                 mimeType,
                                                 source.ItemSpec,
                                                 ((IXmlLineInfo)reader).LineNumber
@@ -1925,7 +1924,7 @@ namespace Microsoft.Build.Tasks
                                         MessageImportance.Low,
                                         "GenerateResource.SeparateAppDomainBecauseOfErrorDeserializingLineNumber",
                                         source.ItemSpec,
-                                        (name == null) ? String.Empty : name,
+                                        name ?? String.Empty,
                                         ((IXmlLineInfo)reader).LineNumber,
                                         e.Message
                                     );
@@ -2170,8 +2169,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (StronglyTypedFileName == null)
                 {
-                    CodeDomProvider provider = null;
-
+                    CodeDomProvider provider;
                     if (ProcessResourceFiles.TryCreateCodeDomProvider(Log, StronglyTypedLanguage, out provider))
                     {
                         StronglyTypedFileName = ProcessResourceFiles.GenerateDefaultStronglyTypedFilename(
@@ -2193,7 +2191,7 @@ namespace Microsoft.Build.Tasks
             // just doesn't exist, then this method will return a brand new cache object.
 
             // This method eats IO Exceptions
-            _cache = ResGenDependencies.DeserializeCache((StateFile == null) ? null : StateFile.ItemSpec, UseSourcePath, Log);
+            _cache = ResGenDependencies.DeserializeCache(StateFile?.ItemSpec, UseSourcePath, Log);
             ErrorUtilities.VerifyThrow(_cache != null, "We did not create a cache!");
         }
 
@@ -2205,7 +2203,7 @@ namespace Microsoft.Build.Tasks
             if (_cache.IsDirty)
             {
                 // And now we serialize the cache to save our resgen linked file resolution for later use.
-                _cache.SerializeCache((StateFile == null) ? null : StateFile.ItemSpec, Log);
+                _cache.SerializeCache(StateFile?.ItemSpec, Log);
             }
         }
     }
@@ -2358,7 +2356,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                if (null == _unsuccessfullyCreatedOutFiles)
+                if (_unsuccessfullyCreatedOutFiles == null)
                 {
                     _unsuccessfullyCreatedOutFiles = new ArrayList();
                 }
@@ -2846,7 +2844,7 @@ namespace Microsoft.Build.Tasks
             // reliably with cmd's dir command either (depending on whether you use absolute or relative paths
             // and whether there are quotes around the name).
             const int EffectiveMaxPath = 258;   // Everything <= EffectiveMaxPath should work well.
-            bool success = false;
+            bool success;
             try
             {
                 currentOutputFile = Path.GetFullPath(currentOutputFile);
@@ -2917,8 +2915,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Resources format</returns>
         private Format GetFormat(string filename)
         {
-            string extension = String.Empty;
-
+            string extension;
             try
             {
                 extension = Path.GetExtension(filename);
@@ -3416,8 +3413,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="sourceFile">The generated strongly typed filename</param>
         private void CreateStronglyTypedResources(ReaderInfo reader, String outFile, String inputFileName, out String sourceFile)
         {
-            CodeDomProvider provider = null;
-
+            CodeDomProvider provider;
             if (!TryCreateCodeDomProvider(_logger, _stronglyTypedLanguage, out provider))
             {
                 sourceFile = null;
@@ -3829,10 +3825,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Add a resource from an XML or binary format file to the internal data structures
         /// </summary>
-        /// <param name="reader">Reader info</param>
-        /// <param name="name">Resource name</param>
-        /// <param name="value">Resource value</param>
-        /// <param name="inputFileName">Input file for messages</param>
+        /// <param name="reader">Reader information.</param>
+        /// <param name="name">Resource name.</param>
+        /// <param name="value">Resource value.</param>
+        /// <param name="inputFileName">Input file for messages.</param>
         private void AddResource(ReaderInfo reader, string name, object value, String inputFileName)
         {
             AddResource(reader, name, value, inputFileName, 0, 0);

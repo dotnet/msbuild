@@ -4,21 +4,13 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Resources;
 using System.Reflection;
-using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
-using System.Text;
-using System.Globalization;
-
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Threading;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -587,13 +579,12 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.True(p.ItemDefinitions.ContainsKey("ItemA"));
 
             ProjectInstance pi = p.CreateProjectInstance();
-            ITaskItem noMetaItem = null;
             ITaskItem withMetaItem;
 
             List<ProjectItemDefinitionInstance> itemdefs = new List<ProjectItemDefinitionInstance>();
             itemdefs.Add(pi.ItemDefinitions["ItemA"]);
 
-            noMetaItem = new TaskItem("NoMetaItem", pi.FullPath);
+            ITaskItem noMetaItem = new TaskItem("NoMetaItem", pi.FullPath);
             withMetaItem = new TaskItem("WithMetaItem", "WithMetaItem", null, itemdefs, ".", false, pi.FullPath);
 
             // Copy the metadata on the item with no metadata onto the item with metadata
@@ -623,13 +614,12 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.True(p.ItemDefinitions.ContainsKey("ItemA"));
 
             ProjectInstance pi = p.CreateProjectInstance();
-            ITaskItem noMetaItem = null;
             ITaskItem withMetaItem;
 
             List<ProjectItemDefinitionInstance> itemdefs = new List<ProjectItemDefinitionInstance>();
             itemdefs.Add(pi.ItemDefinitions["ItemA"]);
 
-            noMetaItem = new TaskItem("NoMetaItem", pi.FullPath);
+            ITaskItem noMetaItem = new TaskItem("NoMetaItem", pi.FullPath);
             noMetaItem.SetMetadata("MetaA", "NEWMETA_A");
 
             withMetaItem = new TaskItem("WithMetaItem", "WithMetaItem", null, itemdefs, ".", false, pi.FullPath);
@@ -665,13 +655,12 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.True(p.ItemDefinitions.ContainsKey("ItemA"));
 
             ProjectInstance pi = p.CreateProjectInstance();
-            ITaskItem noMetaItem = null;
             ITaskItem withMetaItem = null;
 
             List<ProjectItemDefinitionInstance> itemdefs = new List<ProjectItemDefinitionInstance>();
             itemdefs.Add(pi.ItemDefinitions["ItemA"]);
 
-            noMetaItem = new TaskItem("NoMetaItem", pi.FullPath);
+            ITaskItem noMetaItem = new TaskItem("NoMetaItem", pi.FullPath);
 
             // No the ideal way to get the first item, but there is no other way since GetItems returns an IEnumerable :(
             foreach (ProjectItemInstance item in pi.GetItems("ItemA"))

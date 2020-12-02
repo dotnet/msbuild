@@ -2,20 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
-using System.Text;
 using System.IO;
-using System.Xml;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Unittest;
 
 using LoggingService = Microsoft.Build.BackEnd.Logging.LoggingService;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
@@ -114,15 +108,17 @@ namespace Microsoft.Build.UnitTests.Construction
                   </Target>
                   </Project>
                     ");
+
+                // Slashes here (and in the .slnf) are hardcoded as backslashes intentionally to support the common case.
                 TransientTestFile solutionFile = testEnvironment.CreateFile(simpleProjectFolder, "SimpleProject.sln",
                     @"
                     Microsoft Visual Studio Solution File, Format Version 12.00
                     # Visual Studio Version 16
                     VisualStudioVersion = 16.0.29326.124
                     MinimumVisualStudioVersion = 10.0.40219.1
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""SimpleProject"", """ + Path.Combine("SimpleProject", "SimpleProject.csproj") + @""", ""{79B5EBA6-5D27-4976-BC31-14422245A59A}""
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""SimpleProject"", ""SimpleProject\SimpleProject.csproj"", ""{79B5EBA6-5D27-4976-BC31-14422245A59A}""
                     EndProject
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""ClassLibrary"", """ + Path.Combine("..", "ClassLibrary", "ClassLibrary", "ClassLibrary.csproj") + @""", ""{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}""
+                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""ClassLibrary"", ""..\ClassLibrary\ClassLibrary\ClassLibrary.csproj"", ""{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}""
                     EndProject
                     Global
                         GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -155,9 +151,9 @@ namespace Microsoft.Build.UnitTests.Construction
                     @"
                 {
                   ""solution"": {
-                    ""path"": """ + Path.Combine(".", "SimpleProject", "SimpleProject.sln").Replace("\\", "\\\\") + @""",
+                    ""path"": "".\\SimpleProject\\SimpleProject.sln"",
                     ""projects"": [
-                      """ + Path.Combine("SimpleProject", "SimpleProject.csproj").Replace("\\", "\\\\") + @"""
+                      ""SimpleProject\\SimpleProject.csproj""
                     ]
                     }
                 }
@@ -203,9 +199,8 @@ namespace Microsoft.Build.UnitTests.Construction
             Project project = new Project(projectXml);
 
             project.Build(logger);
-
-            string code = null;
-            string keyword = null;
+            string code;
+            string keyword;
             string text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionParseUnknownProjectType", "proj1.csproj");
 
             // check the error event
@@ -215,9 +210,6 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal(text, warning.Message);
             Assert.Equal(code, warning.Code);
             Assert.Equal(keyword, warning.HelpKeyword);
-
-            code = null;
-            keyword = null;
             text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionInvalidSolutionConfiguration");
 
             // check the warning event
@@ -227,9 +219,6 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal(text, error.Message);
             Assert.Equal(code, error.Code);
             Assert.Equal(keyword, error.HelpKeyword);
-
-            code = null;
-            keyword = null;
             text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionVenusProjectNoClean");
 
             // check the message event
@@ -1317,8 +1306,6 @@ EndGlobal
                     EndGlobalSection
                 EndGlobal
                 ";
-
-            ProjectInstance[] instances = null;
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
             bool caughtException = false;
 
@@ -1326,7 +1313,7 @@ EndGlobal
             {
                 // SolutionProjectGenerator.Generate() is used at build-time, and creates evaluation- and 
                 // execution-model projects; as such it will throw if fed an explicitly invalid toolsversion
-                instances = SolutionProjectGenerator.Generate(solution, null, "invalid", _buildEventContext, CreateMockLoggingService());
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "invalid", _buildEventContext, CreateMockLoggingService());
             }
             catch (InvalidProjectFileException)
             {
@@ -1730,9 +1717,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = null;
-
-            solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
             // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
             Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);

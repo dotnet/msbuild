@@ -6,6 +6,7 @@ package name=Microsoft.Build
         vs.package.language=neutral
 
 vs.dependencies
+  vs.dependency id=Microsoft.Build.UnGAC
   vs.dependency id=Microsoft.VisualStudio.PackageGroup.NuGet
                 version=[15.0,17.0)
 
@@ -47,7 +48,7 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)System.Resources.Extensions.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Runtime.CompilerServices.Unsafe.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all vs.file.ngenPriority=1
-  file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all vs.file.ngenPriority=1
+  file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks

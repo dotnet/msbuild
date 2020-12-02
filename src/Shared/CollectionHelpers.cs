@@ -3,9 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Collections;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Shared
 {
@@ -40,7 +37,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool ContainsValueAndIsEqual(this Dictionary<string, string> dictionary, string key, string value, StringComparison comparer)
         {
-            string valueFromDictionary = null;
+            string valueFromDictionary;
             if (dictionary.TryGetValue(key, out valueFromDictionary))
             {
                 return String.Equals(value, valueFromDictionary, comparer);

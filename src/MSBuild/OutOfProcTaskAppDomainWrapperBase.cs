@@ -2,22 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Globalization;
 using System.Threading;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
@@ -360,7 +351,7 @@ namespace Microsoft.Build.CommandLine
                 try
                 {
                     PropertyInfo paramInfo = wrappedTask.GetType().GetProperty(param.Key, BindingFlags.Instance | BindingFlags.Public);
-                    paramInfo.SetValue(wrappedTask, param.Value == null ? null : param.Value.WrappedParameter, null);
+                    paramInfo.SetValue(wrappedTask, param.Value?.WrappedParameter, null);
                 }
                 catch (Exception e)
                 {

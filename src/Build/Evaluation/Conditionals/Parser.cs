@@ -174,7 +174,7 @@ namespace Microsoft.Build.Evaluation
         private GenericExpressionNode BooleanTerm(string expression)
         {
             GenericExpressionNode node = RelationalExpr(expression);
-            if (null == node)
+            if (node == null)
             {
                 errorPosition = _lexer.GetErrorPosition();
                 ProjectErrorUtilities.VerifyThrowInvalidProject(false, _elementLocation, "UnexpectedTokenInCondition", expression, _lexer.IsNextString(), errorPosition);
@@ -196,7 +196,7 @@ namespace Microsoft.Build.Evaluation
             else if (Same(expression, Token.TokenType.And))
             {
                 GenericExpressionNode rhs = RelationalExpr(expression);
-                if (null == rhs)
+                if (rhs == null)
                 {
                     errorPosition = _lexer.GetErrorPosition();
                     ProjectErrorUtilities.VerifyThrowInvalidProject(false, _elementLocation, "UnexpectedTokenInCondition", expression, _lexer.IsNextString(), errorPosition);
@@ -218,7 +218,7 @@ namespace Microsoft.Build.Evaluation
         {
             {
                 GenericExpressionNode lhs = Factor(expression);
-                if (null == lhs)
+                if (lhs == null)
                 {
                     errorPosition = _lexer.GetErrorPosition();
                     ProjectErrorUtilities.VerifyThrowInvalidProject(false, _elementLocation, "UnexpectedTokenInCondition", expression, _lexer.IsNextString(), errorPosition);
@@ -382,7 +382,7 @@ namespace Microsoft.Build.Evaluation
                 if (!_lexer.Advance())
                 {
                     errorPosition = _lexer.GetErrorPosition();
-                    if (null != _lexer.UnexpectedlyFound)
+                    if (_lexer.UnexpectedlyFound != null)
                     {
                         ProjectErrorUtilities.VerifyThrowInvalidProject(false, _elementLocation, _lexer.GetErrorResource(), expression, errorPosition, _lexer.UnexpectedlyFound);
                     }

@@ -1,5 +1,5 @@
 <Project>
     <ItemGroup>
-		<ItemsToSign Include="$(VisualStudioSetupOutputPath)DevDivPackages\*.nupkg" />
+		<ItemsToSign Include="$(VisualStudioSetupInsertionPath)Microsoft.Build.UnGAC.exe" />
 	</ItemGroup>
 </Project>

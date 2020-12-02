@@ -1,7 +1,5 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.Serialization;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Shared.AssemblyFoldersFromConfig
 {

@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.AssemblyFoldersFromConfig;
