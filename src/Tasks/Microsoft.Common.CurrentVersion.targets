@@ -326,7 +326,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' ">$([MSBuild]::NormalizePath($(TargetDir), 'ref', $(TargetFileName)))</TargetRefPath>
 
     <!-- Example, C:\MyProjects\MyProject\ -->
-    <ProjectDir Condition=" '$(ProjectDir)' == '' ">$([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory))</ProjectDir>
+    <ProjectDir Condition=" '$(ProjectDir)' == '' ">$([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory)))</ProjectDir>
 
     <!-- Example, C:\MyProjects\MyProject\MyProject.csproj -->
     <ProjectPath Condition=" '$(ProjectPath)' == '' ">$(ProjectDir)$(ProjectFileName)</ProjectPath>
@@ -1718,7 +1718,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Pass the CurrentProjectTargetPlatform parameter to the task only if GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter is true.  This means
          that we are using a version of NuGet which supports that parameter on this task. -->
-    
+
     <GetReferenceNearestTargetFrameworkTask AnnotatedProjectReferences="@(_ProjectReferenceTargetFrameworkPossibilities)"
                                             CurrentProjectTargetFramework="$(ReferringTargetFrameworkForProjectReferences)"
                                             CurrentProjectTargetPlatform="$(TargetPlatformMoniker)"
@@ -1787,7 +1787,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
 
         <HasSingleTargetFramework>true</HasSingleTargetFramework>
-        
+
         <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
         <IsRidAgnostic>false</IsRidAgnostic>
         <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
@@ -4029,7 +4029,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="_DeploymentGenerateLauncher"
       Condition="'$(GenerateClickOnceManifests)'=='true' and '$(_DeploymentLauncherBased)' == 'true'">
 
-    <!-- 
+    <!--
       If apphost based built EXE is found, use that as the Launcher.exe's entry point otherwise
       use the built DLL as the entry point
     -->
