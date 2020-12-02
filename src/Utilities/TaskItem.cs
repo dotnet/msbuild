@@ -30,7 +30,7 @@ namespace Microsoft.Build.Utilities
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        ITaskItem, ITaskItem2
+        ITaskItem2
     {
         #region Member Data
 
@@ -298,9 +298,14 @@ namespace Microsoft.Build.Utilities
             if (_metadata != null)
             {
                 // Avoid a copy if we can
-                if (destinationItem is TaskItem destinationAsTaskItem && destinationAsTaskItem.Metadata == null)
+                if (destinationItem is TaskItem destinationAsTaskItem && destinationAsTaskItem.Metadata?.Count < _metadata?.Count)
                 {
-                    destinationAsTaskItem.Metadata = _metadata.Clone(); // Copy on write!
+                    CopyOnWriteDictionary<string> copiedMetadata = _metadata.Clone(); // Copy on write!
+                    foreach (KeyValuePair<string, string> entry in destinationAsTaskItem.Metadata)
+                    {
+                        copiedMetadata[entry.Key] = entry.Value;
+                    }
+                    destinationAsTaskItem.Metadata = copiedMetadata;
                 }
                 else
                 {
