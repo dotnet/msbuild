@@ -199,7 +199,14 @@ namespace Microsoft.Build.Utilities
         /// <exception cref="InvalidOperationException">Thrown when the <c>TaskResources</c> property of the owner task is not set.</exception>
         public virtual string FormatResourceString(string resourceName, params object[] args)
         {
-            return FormatString(GetResourceMessage(resourceName), args);
+            ErrorUtilities.VerifyThrowArgumentNull(resourceName, nameof(resourceName));
+            ErrorUtilities.VerifyThrowInvalidOperation(TaskResources != null, "Shared.TaskResourcesNotRegistered", TaskName);
+
+            string resourceString = TaskResources.GetString(resourceName, CultureInfo.CurrentUICulture);
+
+            ErrorUtilities.VerifyThrowArgument(resourceString != null, "Shared.TaskResourceNotFound", resourceName, TaskName);
+
+            return FormatString(resourceString, args);
         }
 
         /// <summary>
@@ -225,13 +232,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>The message from resource.</returns>
         public virtual string GetResourceMessage(string resourceName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(resourceName, nameof(resourceName));
-            ErrorUtilities.VerifyThrowInvalidOperation(TaskResources != null, "Shared.TaskResourcesNotRegistered", TaskName);
-
-            string resourceString = TaskResources.GetString(resourceName, CultureInfo.CurrentUICulture);
-
-            ErrorUtilities.VerifyThrowArgument(resourceString != null, "Shared.TaskResourceNotFound", resourceName, TaskName);
-
+            string resourceString = FormatResourceString(resourceName, null);
             return resourceString;
         }
 #endregion
@@ -274,7 +275,7 @@ namespace Microsoft.Build.Utilities
 #if DEBUG
             if (messageArgs?.Length > 0)
             {
-                // Verify that message can be formated using given arguments
+                // Verify that message can be formatted using given arguments
                 ResourceUtilities.FormatString(message, messageArgs);
             }
 #endif
