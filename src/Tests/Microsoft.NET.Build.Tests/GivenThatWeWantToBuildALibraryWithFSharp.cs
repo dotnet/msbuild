@@ -144,7 +144,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [Theory(Skip = "https://github.com/dotnet/coreclr/issues/27275")]
+        [Theory]
         [InlineData("Debug", "DEBUG")]
         [InlineData("Release", "RELEASE")]
         [InlineData("CustomConfiguration", "CUSTOMCONFIGURATION")]
@@ -173,7 +173,7 @@ namespace Microsoft.NET.Build.Tests
             definedConstants.Should().BeEquivalentTo(new[] { expectedDefine, "TRACE", "NETSTANDARD", "NETSTANDARD1_6" });
         }
 
-        [Theory(Skip = "https://github.com/dotnet/coreclr/issues/27275")]
+        [Theory]
         [InlineData("netstandard1.6", new[] { "NETSTANDARD", "NETSTANDARD1_6" })]
         [InlineData("net45", new[] { "NETFRAMEWORK", "NET45", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER" })]
         [InlineData("net461", new[] { "NETFRAMEWORK", "NET461", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER", "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER" })]
@@ -197,7 +197,6 @@ namespace Microsoft.NET.Build.Tests
 
                     if (targetFramework.Contains(",Version="))
                     {
-                        //  We use the full TFM for frameworks we don't have built-in support for targeting, so we don't want to run the Compile target
                         var frameworkName = new FrameworkName(targetFramework);
 
                         var targetFrameworkProperty = targetFrameworkProperties.Single();

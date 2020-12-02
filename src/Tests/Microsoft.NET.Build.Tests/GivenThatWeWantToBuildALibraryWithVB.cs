@@ -214,7 +214,6 @@ namespace Microsoft.NET.Build.Tests
 
                     if (targetFramework.Contains(",Version="))
                     {
-                        //  We use the full TFM for frameworks we don't have built-in support for targeting, so we don't want to run the Compile target
                         var frameworkName = new FrameworkName(targetFramework);
 
                         var targetFrameworkProperty = targetFrameworkProperties.Single();

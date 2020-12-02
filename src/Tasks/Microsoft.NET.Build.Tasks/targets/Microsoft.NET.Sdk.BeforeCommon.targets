@@ -238,8 +238,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_CompatibleFrameworkVersions Include="@(_SupportedFrameworkVersions)" Condition=" $([MSBuild]::VersionLessThanOrEquals(%(Identity), $(TargetFrameworkVersion))) " />
       <_FormattedCompatibleFrameworkVersions Include="@(_CompatibleFrameworkVersions)" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " />
       <_FormattedCompatibleFrameworkVersions Include="@(_CompatibleFrameworkVersions->'%(Identity)'->Replace('.', ''))" Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' " />
-      <_ImplicitDefineConstant Include="@(_FormattedCompatibleFrameworkVersions->'$(_FrameworkIdentifierForImplicitDefine)%(Identity)_OR_GREATER'->Replace('.', '_'))" Condition=" !$([System.String]::Copy('%(_FormattedCompatibleFrameworkVersions.DisplayName)').Contains('.NET Core')) " />
-      <_ImplicitDefineConstant Include="@(_FormattedCompatibleFrameworkVersions->'NETCOREAPP%(Identity)_OR_GREATER'->Replace('.', '_'))" Condition=" $([System.String]::Copy('%(_FormattedCompatibleFrameworkVersions.DisplayName)').Contains('.NET Core')) " />
+      <_ImplicitDefineConstant Include="@(_FormattedCompatibleFrameworkVersions->'$(_FrameworkIdentifierForImplicitDefine)%(Identity)_OR_GREATER'->Replace('.', '_'))" 
+                               Condition=" '$(TargetFrameworkIdentifier)' != '.NETCoreApp' or $([MSBuild]::VersionGreaterThanOrEquals(%(_FormattedCompatibleFrameworkVersions.Identity), 5.0)) " />
+      <_ImplicitDefineConstant Include="@(_FormattedCompatibleFrameworkVersions->'NETCOREAPP%(Identity)_OR_GREATER'->Replace('.', '_'))" 
+                               Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionLessThan(%(_FormattedCompatibleFrameworkVersions.Identity), 5.0)) " />
     </ItemGroup>
   </Target>
 
