@@ -13,6 +13,9 @@
     <PackageId>microsoft.dotnet.templateLocator</PackageId>
     <Nullable>Enable</Nullable>
 
+    <!-- https://github.com/dotnet/sdk/issues/14801 -->
+    <AssemblyVersion Condition="'$(TargetFramework)'=='net472'">5.0.100.0</AssemblyVersion>
+
     <UseSystemTextJson Condition="'$(TargetFramework)'!='netstandard2.0' And '$(TargetFramework)'!='net472'">True</UseSystemTextJson>
     <DefineConstants Condition="'$(UseSystemTextJson)'=='True'">$(DefineConstants);USE_SYSTEM_TEXT_JSON</DefineConstants>
 
