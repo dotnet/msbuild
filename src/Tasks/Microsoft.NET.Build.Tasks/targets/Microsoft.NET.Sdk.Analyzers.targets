@@ -20,13 +20,26 @@ Copyright (c) .NET Foundation. All rights reserved.
                               '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
                               $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">latest</AnalysisLevel>
 
+    <!-- AnalysisLevel can also contain compound values with a prefix and suffix separated by a '-' character.
+         The prefix indicates the core AnalysisLevel and the suffix indicates the bucket of
+         rules to enable by default. For example, some valid compound values for AnalysisLevel are:
+           1. '5-all' - Indicates core AnalysisLevel = '5' with 'all' the rules enabled by default.
+           2. 'latest-none' - Indicates core AnalysisLevel = 'latest' with 'none' of the rules enabled by default.
+         AnalysisLevelPrefix is used to set the EffectiveAnalysisLevel below.
+         AnalysisLevelSuffix is processed further in Microsoft.CodeAnalysis.NetAnalyzers.targets imported below.
+    -->
+    <AnalysisLevelPrefix Condition="$(AnalysisLevel.Contains('-'))">$([System.Text.RegularExpressions.Regex]::Replace($(AnalysisLevel), '-(.)*', ''))</AnalysisLevelPrefix>
+    <AnalysisLevelSuffix Condition="'$(AnalysisLevelPrefix)' != ''">$([System.Text.RegularExpressions.Regex]::Replace($(AnalysisLevel), '$(AnalysisLevelPrefix)-', ''))</AnalysisLevelSuffix>
+
     <!-- EffectiveAnalysisLevel is used to differentiate from user specified strings (such as 'none')
          and an implied numerical option (such as '4')-->
-    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'none'">4.0</EffectiveAnalysisLevel>
-    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'latest'">5.0</EffectiveAnalysisLevel>
-    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview'">6.0</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'none' or '$(AnalysisLevelPrefix)' == 'none'">4.0</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'latest' or '$(AnalysisLevelPrefix)' == 'latest'">5.0</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview' or '$(AnalysisLevelPrefix)' == 'preview'">6.0</EffectiveAnalysisLevel>
 
     <!-- Set EffectiveAnalysisLevel to the value of AnalysisLevel if it is a version number -->
+    <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And 
+                                       '$(AnalysisLevelPrefix)' != ''">$(AnalysisLevelPrefix)</EffectiveAnalysisLevel>
     <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And 
                                        '$(AnalysisLevel)' != ''">$(AnalysisLevel)</EffectiveAnalysisLevel>
 
