@@ -3455,7 +3455,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Single(t.ResolvedFiles);
             Assert.Equal(Path.Combine(s_myVersion20Path, "System.Data.dll"), t.ResolvedFiles[0].ItemSpec);
-            Assert.Equal("false", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
+            Assert.Equal("false", t.ResolvedFiles[0].GetMetadata("CopyLocal"), StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -3491,7 +3491,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
             t.SearchPaths = DefaultPaths;
             Execute(t);
-            Assert.Equal(@"true", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
+            Assert.Equal("true", t.ResolvedFiles[0].GetMetadata("CopyLocal"), StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -3517,7 +3517,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.TargetFrameworkDirectories = new string[] { };
             t.SearchPaths = new string[] { "{RawFileName}" };
             Execute(t);
-            Assert.Equal(@"true", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
+            Assert.Equal("true", t.ResolvedFiles[0].GetMetadata("CopyLocal"), StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -4350,7 +4350,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 if (String.Equals(item.ItemSpec, s_myLibraries_V1_E_EDllPath, StringComparison.OrdinalIgnoreCase))
                 {
-                    Assert.Equal("false", item.GetMetadata("CopyLocal"));
+                    Assert.Equal("false", item.GetMetadata("CopyLocal"), StringComparer.OrdinalIgnoreCase);
                 }
             }
         }
@@ -4413,12 +4413,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 if (String.Equals(item.ItemSpec, s_myLibraries_V1_DDllPath, StringComparison.OrdinalIgnoreCase))
                 {
-                    Assert.Equal("false", item.GetMetadata("CopyLocal"));
+                    Assert.Equal("false", item.GetMetadata("CopyLocal"), StringComparer.OrdinalIgnoreCase);
                 }
 
                 if (String.Equals(item.ItemSpec, s_myLibraries_V1_E_EDllPath, StringComparison.OrdinalIgnoreCase))
                 {
-                    Assert.Equal("true", item.GetMetadata("CopyLocal"));
+                    Assert.Equal("true", item.GetMetadata("CopyLocal"), StringComparer.OrdinalIgnoreCase);
                 }
             }
         }
@@ -5350,7 +5350,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 File.Delete(redistFile);
             }
 
-            Assert.Equal("true", t.ResolvedFiles[0].GetMetadata("CopyLocal")); // "Expected CopyLocal==true."
+            Assert.Equal("true", t.ResolvedFiles[0].GetMetadata("CopyLocal"), StringComparer.OrdinalIgnoreCase); // "Expected CopyLocal==true."
         }
 
         /// <summary>
@@ -7940,9 +7940,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
             Assert.Equal(3, t.ResolvedFiles.Length); // "Expected three assemblies to be found."
-            Assert.Equal("true", t.ResolvedFiles[1].GetMetadata("IsRedistRoot"));
-            Assert.Equal("false", t.ResolvedFiles[0].GetMetadata("IsRedistRoot"));
-            Assert.Equal("", t.ResolvedFiles[2].GetMetadata("IsRedistRoot"));
+            Assert.Equal("true", t.ResolvedFiles[1].GetMetadata("IsRedistRoot"), StringComparer.OrdinalIgnoreCase);
+            Assert.Equal("false", t.ResolvedFiles[0].GetMetadata("IsRedistRoot"), StringComparer.OrdinalIgnoreCase);
+            Assert.Equal("", t.ResolvedFiles[2].GetMetadata("IsRedistRoot"), StringComparer.OrdinalIgnoreCase);
 
             Assert.Equal("Microsoft-Windows-CLRCoreComp", t.ResolvedFiles[0].GetMetadata("Redist"));
             Assert.Equal("Microsoft-Windows-CLRCoreComp", t.ResolvedFiles[1].GetMetadata("Redist"));
