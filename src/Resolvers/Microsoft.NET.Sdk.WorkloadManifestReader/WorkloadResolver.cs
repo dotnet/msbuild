@@ -17,27 +17,17 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     {
         private readonly Dictionary<WorkloadDefinitionId, WorkloadDefinition> _workloads = new Dictionary<WorkloadDefinitionId, WorkloadDefinition>();
         private readonly Dictionary<WorkloadPackId, WorkloadPack> _packs = new Dictionary<WorkloadPackId, WorkloadPack>();
-        private string[] _platformIds;
+        private string[] _currentRuntimeIdentifiers;
         private readonly string _dotNetRootPath;
 
         private Func<string, bool>? _fileExistOverride;
         private Func<string, bool>? _directoryExistOverride;
 
-        public WorkloadResolver(IWorkloadManifestProvider manifestProvider, string dotNetRootPath)
+        public WorkloadResolver(IWorkloadManifestProvider manifestProvider, string dotNetRootPath, string [] currentRuntimeIdentifiers)
         {
             this._dotNetRootPath = dotNetRootPath;
 
-            // eventually we may want a series of fallbacks here, as rids have in general
-            // but for now, keep it simple
-            var platformId = GetHostPlatformId();
-            if (platformId != null)
-            {
-                _platformIds = new[] { platformId, "*" };
-            }
-            else
-            {
-                _platformIds = new[] { "*" };
-            }
+            _currentRuntimeIdentifiers = currentRuntimeIdentifiers;
 
             var manifests = new List<WorkloadManifest>();
 
@@ -61,32 +51,6 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     _packs.Add(pack.Key, pack.Value);
                 }
             }
-        }
-
-
-        // rather that forcing all consumers to depend on and parse the RID catalog, or doing that here, for now just bake in a small
-        // subset of dev host platform rids for now for the workloads that are likely to need this functionality soonest
-        private string? GetHostPlatformId()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                return RuntimeInformation.OSArchitecture switch
-                {
-                    Architecture.X64 => "osx-x64",
-                    Architecture.Arm64 => "osx-arm64",
-                    _ => null
-                };
-            }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                if (RuntimeInformation.OSArchitecture == Architecture.X64)
-                {
-                    return "win-x64";
-                }
-            }
-
-            return null;
         }
 
         /// <summary>
@@ -119,14 +83,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _directoryExistOverride = directoryExists;
         }
 
-        internal void ReplacePlatformIdsForTest(string[] platformIds)
-        {
-            this._platformIds = platformIds;
-        }
-
         private PackInfo CreatePackInfo(WorkloadPack pack)
         {
-            var aliasedId = pack.TryGetAliasForPlatformIds(_platformIds) ?? pack.Id;
+            var aliasedId = pack.TryGetAliasForRuntimeIdentifiers(_currentRuntimeIdentifiers) ?? pack.Id;
             var packPath = GetPackPath(_dotNetRootPath, aliasedId, pack.Version, pack.Kind);
 
             return new PackInfo(

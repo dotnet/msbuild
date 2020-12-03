@@ -14,6 +14,7 @@
       <OverlaySDK Include="$(_DotNetHiveRoot)/**/*" Exclude="$(_DotNetHiveRoot)sdk/**/*"/>
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/Microsoft.NETCoreSdk.BundledCliTools.props" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/RuntimeIdentifierGraph.json" />
+      <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/NETCoreSdkRuntimeIdentifierChain.txt" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/**/*" RelativeDestination="DotnetTools"/>
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/AppHostTemplate/**/*" RelativeDestination="AppHostTemplate"/>
       <ToolsetToOverlay Include="$(OutputPath)/**/*" />

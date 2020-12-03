@@ -50,8 +50,11 @@ namespace Microsoft.DotNet.TemplateLocator
                     nameof(dotnetRootPath));
             }
 
+            string runtimeIdentifierChainPath = Path.Combine(dotnetRootPath, "sdk", sdkVersion, "NETCoreSdkRuntimeIdentifierChain.txt");
+            string[] currentRuntimeIdentifiers = File.ReadAllLines(runtimeIdentifierChainPath).Where(l => !string.IsNullOrEmpty(l)).ToArray();
+
             _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion);
-            _workloadResolver ??= new WorkloadResolver(_workloadManifestProvider, dotnetRootPath);
+            _workloadResolver ??= new WorkloadResolver(_workloadManifestProvider, dotnetRootPath, currentRuntimeIdentifiers);
 
             return _workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template)
                 .Select(pack => new OptionalSdkTemplatePackageInfo(pack.Id, pack.Version, pack.Path)).ToList();

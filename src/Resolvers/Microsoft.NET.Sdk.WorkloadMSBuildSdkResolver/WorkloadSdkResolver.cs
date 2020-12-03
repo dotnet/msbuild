@@ -71,9 +71,12 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             //  The SDK version is the name of the SDK directory (ie dotnet\sdk\5.0.100)
             var sdkVersion = Path.GetFileName(sdkDirectory);
 
+            string runtimeIdentifierChainPath = Path.Combine(sdkDirectory, "NETCoreSdkRuntimeIdentifierChain.txt");
+            string[] currentRuntimeIdentifiers = File.ReadAllLines(runtimeIdentifierChainPath).Where(l => !string.IsNullOrEmpty(l)).ToArray();
+
             _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion);
             
-            _workloadResolver ??= new WorkloadResolver(_workloadManifestProvider, dotnetRootPath);
+            _workloadResolver ??= new WorkloadResolver(_workloadManifestProvider, dotnetRootPath, currentRuntimeIdentifiers);
         }
 
         public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext, SdkResultFactory factory)

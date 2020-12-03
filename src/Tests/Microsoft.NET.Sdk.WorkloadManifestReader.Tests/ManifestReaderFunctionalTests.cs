@@ -43,7 +43,7 @@ namespace ManifestReaderTests
         {
             var workloadResolver =
                 new WorkloadResolver(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
-                    "fakepath");
+                    "fakepath", ManifestTests.TEST_RUNTIME_IDENTIFIER_CHAIN);
 
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => true);
             return workloadResolver;
@@ -54,7 +54,7 @@ namespace ManifestReaderTests
         {
             var workloadResolver =
                 new WorkloadResolver(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
-                    "fakepath");
+                    "fakepath", ManifestTests.TEST_RUNTIME_IDENTIFIER_CHAIN);
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => false, directoryExists: (_) => true);
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template);
             result.Should().HaveCount(0);
@@ -65,7 +65,7 @@ namespace ManifestReaderTests
         {
             var workloadResolver =
                 new WorkloadResolver(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
-                    "fakepath");
+                    "fakepath", ManifestTests.TEST_RUNTIME_IDENTIFIER_CHAIN);
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => false);
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk);
             result.Should().HaveCount(0);
