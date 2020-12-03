@@ -4097,7 +4097,7 @@ $@"<Project InitialTargets=`Sleep`>
         public void BuildWithZeroConnectionTimeout()
         {
             string contents = CleanupFileContents(@"
-<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+<Project>
  <Target Name='test'>
     <Message Text='Text'/>
  </Target>

@@ -2189,7 +2189,7 @@ namespace Microsoft.Build.Execution
                         {
                             submission.BuildResult.Exception = e;
                         }
-                        submission.CompleteLogging(false);
+                        submission.CompleteLogging(waitForLoggingThread: false);
                         submission.CompleteResults(new BuildResult(submission.BuildRequest, e));
 
                         CheckSubmissionCompletenessAndRemove(submission);
