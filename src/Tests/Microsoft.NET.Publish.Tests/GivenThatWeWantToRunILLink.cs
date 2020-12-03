@@ -245,7 +245,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should().Pass()
                 .And.HaveStdOutMatching("warning IL2075.*Program.IL_2075")
                 .And.HaveStdOutMatching("warning IL2026.*Program.IL_2026.*Testing analysis warning IL2026")
-                .And.HaveStdOutMatching("warning IL2043.*Program.get_IL_2043")
+                .And.HaveStdOutMatching("warning IL2043.*Program.IL_2043.get")
                 .And.HaveStdOutMatching("warning IL2046.*Program.Derived.IL_2046")
                 .And.HaveStdOutMatching("warning IL2093.*Program.Derived.IL_2093");
         }
