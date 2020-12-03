@@ -35,7 +35,7 @@ namespace ManifestReaderTests
         public void AliasedPackPath()
         {
             var manifestProvider = new FakeManifestProvider(Path.Combine("Manifests", "Sample.json"));
-            var resolver = new WorkloadResolver(manifestProvider, fakeRootPath, TEST_RUNTIME_IDENTIFIER_CHAIN);
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, fakeRootPath, TEST_RUNTIME_IDENTIFIER_CHAIN);
 
             resolver.ReplaceFilesystemChecksForTest(_ => true, _ => true);
 

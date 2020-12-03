@@ -23,8 +23,16 @@ namespace Microsoft.DotNet.TemplateLocator.Tests
             _resolver = new TemplateLocator(Environment.GetEnvironmentVariable, VSSettings.Ambient, null, null);
             _fakeDotnetRootDirectory =
                 Path.Combine(TestContext.Current.TestExecutionDirectory, Path.GetRandomFileName());
+
+            var fakeSdkDirectory = Path.Combine(_fakeDotnetRootDirectory, "sdk", "5.0.102");
+            Directory.CreateDirectory(fakeSdkDirectory);
+            var fakeRuntimeIdentifierChainPath = Path.Combine(fakeSdkDirectory, "NETCoreSdkRuntimeIdentifierChain.txt");
+            File.WriteAllLines(fakeRuntimeIdentifierChainPath,
+                               new[] { "win-x64", "win", "any", "base" });
+
             _manifestDirectory = Path.Combine(_fakeDotnetRootDirectory, "sdk-manifests", "5.0.100");
             Directory.CreateDirectory(_manifestDirectory);
+            
         }
 
         [Fact]
@@ -64,7 +72,7 @@ namespace Microsoft.DotNet.TemplateLocator.Tests
         {
             var fakeDotnetRootDirectory =
                 Path.Combine(TestContext.Current.TestExecutionDirectory, Path.GetRandomFileName());
-            var result = _resolver.GetDotnetSdkTemplatePackages("5.1.102", fakeDotnetRootDirectory);
+            var result = _resolver.GetDotnetSdkTemplatePackages("5.0.102", fakeDotnetRootDirectory);
             result.Should().BeEmpty();
         }
     }
