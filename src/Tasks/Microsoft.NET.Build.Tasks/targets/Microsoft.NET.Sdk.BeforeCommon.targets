@@ -221,16 +221,43 @@ Copyright (c) .NET Foundation. All rights reserved.
         Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) " >
     <PropertyGroup>
       <_PlatformIdentifierForImplicitDefine>$(TargetPlatformIdentifier.ToUpperInvariant())</_PlatformIdentifierForImplicitDefine>
+      <_PlatformVersionForImplicitDefine>$(TargetPlatformVersion.Replace('.', '_'))</_PlatformVersionForImplicitDefine>
     </PropertyGroup>
     <ItemGroup>
       <_ImplicitDefineConstant Include="$(_PlatformIdentifierForImplicitDefine)" />
+      <_ImplicitDefineConstant Include="$(_PlatformIdentifierForImplicitDefine)$(_PlatformVersionForImplicitDefine)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Add OR_GREATER compilation symbols for target frameworks with .NET Framework, .NET Core, and .NET -->
+  <Target Name="GenerateNETCompatibleDefineConstants"
+          Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and ('$(TargetFrameworkIdentifier)' == '.NETCoreApp' or '$(TargetFrameworkIdentifier)' == '.NETFramework')" >
+    <ItemGroup>
+      <_SupportedFrameworkVersions Include="@(SupportedNETCoreAppTargetFramework->'%(Identity)'->TrimStart('.NETCoreApp,Version=v'))" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " />
+      <_SupportedFrameworkVersions Include="@(SupportedNETFrameworkTargetFramework->'%(Identity)'->TrimStart('.NETFramework,Version=v'))" Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' " />
+      <_CompatibleFrameworkVersions Include="@(_SupportedFrameworkVersions)" Condition=" $([MSBuild]::VersionLessThanOrEquals(%(Identity), $(TargetFrameworkVersion))) " />
+      <_FormattedCompatibleFrameworkVersions Include="@(_CompatibleFrameworkVersions)" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' " />
+      <_FormattedCompatibleFrameworkVersions Include="@(_CompatibleFrameworkVersions->'%(Identity)'->Replace('.', ''))" Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' " />
+      <_ImplicitDefineConstant Include="@(_FormattedCompatibleFrameworkVersions->'$(_FrameworkIdentifierForImplicitDefine)%(Identity)_OR_GREATER'->Replace('.', '_'))" 
+                               Condition=" '$(TargetFrameworkIdentifier)' != '.NETCoreApp' or $([MSBuild]::VersionGreaterThanOrEquals(%(_FormattedCompatibleFrameworkVersions.Identity), 5.0)) " />
+      <_ImplicitDefineConstant Include="@(_FormattedCompatibleFrameworkVersions->'NETCOREAPP%(Identity)_OR_GREATER'->Replace('.', '_'))" 
+                               Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionLessThan(%(_FormattedCompatibleFrameworkVersions.Identity), 5.0)) " />
+    </ItemGroup>
+  </Target>
+
+  <!-- Add OR_GREATER compilation symbols for target platforms. -->
+  <Target Name="GeneratePlatformCompatibleDefineConstants"
+          Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' and '$(TargetPlatformIdentifier)' != '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 5.0)) " >
+    <ItemGroup>
+      <_SupportedPlatformCompatibleVersions Include="@(SdkSupportedTargetPlatformVersion)" Condition=" %(Identity) != '' and $([MSBuild]::VersionLessThanOrEquals(%(Identity), $(TargetPlatformVersion))) " />
+      <_ImplicitDefineConstant Include="@(_SupportedPlatformCompatibleVersions->'$(TargetPlatformIdentifier.ToUpper())%(Identity)_OR_GREATER'->Replace('.', '_'))" />
     </ItemGroup>
   </Target>
 
   <!-- Add implicitly defined preprocessor symbols to DefineConstants -->
   <Target Name="AddImplicitDefineConstants"
           Condition=" '$(DisableImplicitFrameworkDefines)' != 'true' "
-          DependsOnTargets="GenerateTargetPlatformDefineConstants"
+          DependsOnTargets="GenerateTargetPlatformDefineConstants;GenerateNETCompatibleDefineConstants;GeneratePlatformCompatibleDefineConstants"
           BeforeTargets="CoreCompile" >
     <PropertyGroup>
       <DefineConstants Condition=" '@(_ImplicitDefineConstant)' != '' " >$(DefineConstants);@(_ImplicitDefineConstant)</DefineConstants>

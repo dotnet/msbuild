@@ -115,7 +115,7 @@ namespace Microsoft.NET.Publish.Tests
                     expectedDefines = new[] { "DEBUG", "TRACE", "NETCOREAPP", appTargetFramework.ToUpperInvariant().Replace('.', '_') };
                 }
 
-                dependencyContext.CompilationOptions.Defines.Should().BeEquivalentTo(expectedDefines);
+                dependencyContext.CompilationOptions.Defines.Should().Contain(expectedDefines);
                 dependencyContext.CompilationOptions.LanguageVersion.Should().Be(langVersion);
                 dependencyContext.CompilationOptions.Platform.Should().Be("x86");
                 dependencyContext.CompilationOptions.Optimize.Should().Be(false);
