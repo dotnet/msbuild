@@ -58,6 +58,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private readonly ITestOutputHelper _output;
 
         /// <summary>
+        /// The transient state corresponding to setting MSBUILDINPROCENVCHECK to 1.
+        /// </summary>
+        private readonly TransientTestState _inProcEnvCheckTransientEnvironmentVariable;
+
+        /// <summary>
         /// SetUp
         /// </summary>
         public BuildManager_Tests(ITestOutputHelper output)
@@ -77,7 +82,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _projectCollection = new ProjectCollection();
 
             _env = TestEnvironment.Create(output);
-            _env.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");
+            _inProcEnvCheckTransientEnvironmentVariable = _env.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");
         }
 
         /// <summary>
@@ -4103,6 +4108,8 @@ $@"<Project InitialTargets=`Sleep`>
  </Target>
 </Project>
 ");
+            // Do not use MSBUILDINPROCENVCHECK because this test case is expected to leave a defunct in-proc node behind.
+            _inProcEnvCheckTransientEnvironmentVariable.Revert();
             _env.SetEnvironmentVariable("MSBUILDNODECONNECTIONTIMEOUT", "0");
 
             BuildRequestData data = GetBuildRequestData(contents);
