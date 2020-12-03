@@ -4113,9 +4113,10 @@ $@"<Project InitialTargets=`Sleep`>
                 // The build should either finish successfully (very unlikely).
                 result.OverallResult.ShouldBe(BuildResultCode.Success);
             }
-            catch (InternalErrorException)
+            catch (Exception e)
             {
                 // Or it should throw InternalErrorException because the node didn't get connected within 0ms.
+                e.ShouldBeOfType<InternalErrorException>();
             }
         }
 
