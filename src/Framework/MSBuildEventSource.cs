@@ -79,6 +79,7 @@ namespace Microsoft.Build.Eventing
             WriteEvent(7);
         }
 
+        // If there are failures in ComputeClosure, this count may be inaccurate.
         [Event(8, Keywords = Keywords.All | Keywords.PerformanceLog)]
         public void RarComputeClosureStop(int referencesResolved)
         {
