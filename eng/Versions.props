@@ -36,7 +36,7 @@
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>3.1.100</DotNetCliVersion>
+    <DotNetCliVersion>5.0.100</DotNetCliVersion>
     <MicrosoftNetCompilersToolsetVersion>3.3.1-beta3-final</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>5.9.0-preview.2.6979</NuGetBuildTasksVersion>
   </PropertyGroup>
