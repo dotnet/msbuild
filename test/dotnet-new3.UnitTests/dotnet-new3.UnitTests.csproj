@@ -4,6 +4,7 @@
         <TestProject>true</TestProject>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="FluentAssertions" Version="5.10.3" />
         <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="2.0.0" />
     </ItemGroup>
 

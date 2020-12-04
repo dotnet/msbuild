@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
@@ -48,29 +49,35 @@ namespace dotnet_new3.UnitTests
                 relTo = Path.Combine(relTo, @"..\..\..\..\..\dev");
                 Environment.SetEnvironmentVariable("DN3", relTo);
             }
-
-            CommandResult result = Command.Create("dotnet-new3", args, outputPath: Environment.GetEnvironmentVariable("DN3"))
+            Command.Create("dotnet-new3", args, outputPath: Environment.GetEnvironmentVariable("DN3"))
                 .WorkingDirectory(workingDir)
                 .CaptureStdErr()
                 .CaptureStdOut()
-                .Execute();
-            Assert.Equal(0, result.ExitCode);
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr();
 
-            result = Command.CreateDotNet("restore", new string[0])
+            Command.CreateDotNet("restore", new string[0])
                 .WorkingDirectory(workingDir)
                 .CaptureStdErr()
                 .CaptureStdOut()
-                .Execute();
-            Assert.Equal(string.Empty, result.StdErr);
-            Assert.Equal(0, result.ExitCode);
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr();
 
-            result = Command.CreateDotNet("build", new string[0])
+            Command.CreateDotNet("build", new string[0])
                 .WorkingDirectory(workingDir)
                 .CaptureStdErr()
                 .CaptureStdOut()
-                .Execute();
-            Assert.Equal(string.Empty, result.StdErr);
-            Assert.Equal(0, result.ExitCode);
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr();
 
             Directory.Delete(workingDir, true);
         }
