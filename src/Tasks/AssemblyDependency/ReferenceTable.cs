@@ -2596,7 +2596,7 @@ namespace Microsoft.Build.Tasks
             referenceItem.SetMetadata(ItemMetadataNames.resolvedFrom, reference.ResolvedSearchPath);
 
             // Set the CopyLocal metadata.
-            referenceItem.SetMetadata(ItemMetadataNames.copyLocal, reference.IsCopyLocal.ToString());
+            referenceItem.SetMetadata(ItemMetadataNames.copyLocal, reference.IsCopyLocal ? "true" : "false");
 
             // Set the Redist name metadata.
             if (!String.IsNullOrEmpty(reference.RedistName))
@@ -2621,7 +2621,7 @@ namespace Microsoft.Build.Tasks
             // (or there was no redist XML at all for this item).
             if (reference.IsRedistRoot != null)
             {
-                referenceItem.SetMetadata(ItemMetadataNames.isRedistRoot, reference.IsRedistRoot.ToString());
+                referenceItem.SetMetadata(ItemMetadataNames.isRedistRoot, (bool)reference.IsRedistRoot ? "true" : "false");
             }
 
             // If there was a primary source item, then forward metadata from it.
@@ -2671,14 +2671,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            if (reference.ReferenceVersion != null)
-            {
-                referenceItem.SetMetadata(ItemMetadataNames.version, reference.ReferenceVersion.ToString());
-            }
-            else
-            {
-                referenceItem.SetMetadata(ItemMetadataNames.version, String.Empty);
-            }
+            referenceItem.SetMetadata(ItemMetadataNames.version, reference.ReferenceVersion == null ? string.Empty : reference.ReferenceVersion.ToString());
 
             // Unset fusionName so we don't have to unset it later.
             referenceItem.RemoveMetadata(ItemMetadataNames.fusionName);
