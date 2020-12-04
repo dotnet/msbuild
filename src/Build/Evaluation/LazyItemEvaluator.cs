@@ -292,7 +292,12 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// Applies uncached item operations (include, remove, update) in order.
+            /// Applies uncached item operations (include, remove, update) in order. Since Remove effectively overwrites Include or Update,
+            /// Remove operations are preprocessed (adding to globsToIgnore) to create a longer list of globs we don't need to process
+            /// properly because we know they will be removed. Update operations are batched as much as possible, meaning rather
+            /// than being applied immediately, they are combined into a dictionary of UpdateOperations that need to be applied. This
+            /// is to optimize the case in which as series of UpdateOperations, each of which affects a single ItemSpec, are applied to all
+            /// items in the list, leading to a quadratic-time operation.
             /// </summary>
             private static ImmutableList<ItemData>.Builder ComputeItems(LazyItemList lazyItemList, ImmutableHashSet<string> globsToIgnore)
             {
@@ -353,6 +358,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         bool addToBatch = true;
                         int i;
+                        // The TextFragments are things like abc.def or x*y.*z.
                         for (i = 0; i < op.Spec.Fragments.Count; i++)
                         {
                             ItemSpecFragment frag = op.Spec.Fragments[i];
@@ -377,7 +383,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         if (!addToBatch)
                         {
-                            // Remove items added before realizing we couldn't skip the current item list
+                            // We found a wildcard. Remove any fragments associated with the current operation and process them later.
                             for (int j = 0; j < i; j++)
                             {
                                 itemsWithNoWildcards.Remove(currentList._memoizedOperation.Operation.Spec.Fragments[j].TextFragment);
@@ -407,6 +413,7 @@ namespace Microsoft.Build.Evaluation
                     currentList._memoizedOperation.Apply(items, currentGlobsToIgnore);
                 }
 
+                // We finished looping through the operations. Now process the final batch if necessary.
                 ProcessNonWildCardItemUpdates(itemsWithNoWildcards, items);
 
                 return items;
