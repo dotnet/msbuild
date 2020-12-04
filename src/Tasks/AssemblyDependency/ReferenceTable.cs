@@ -2763,10 +2763,16 @@ namespace Microsoft.Build.Tasks
                         relatedItems.Add(item);
 
                         referenceItem.SetMetadata(ItemMetadataNames.winmdImplmentationFile, Path.GetFileName(reference.ImplementationAssembly));
+                        // This may have been set previously (before it was removed so we could more efficiently set metadata on the various related files).
+                        // This version should take priority, so we remove it from nonForwardableMetadata if it's there to prevent the correct value from
+                        // being overwritten.
                         nonForwardableMetadata?.Remove(ItemMetadataNames.winmdImplmentationFile);
                     }
                 }
 
+                // This may have been set previously (before it was removed so we could more efficiently set metadata on the various related files).
+                // This version should take priority, so we remove it from nonForwardableMetadata if it's there to prevent the correct value from
+                // being overwritten.
                 nonForwardableMetadata?.Remove(ItemMetadataNames.winMDFileType);
                 if (reference.IsManagedWinMDFile)
                 {
@@ -2776,6 +2782,10 @@ namespace Microsoft.Build.Tasks
                 {
                     referenceItem.SetMetadata(ItemMetadataNames.winMDFileType, "Native");
                 }
+
+                // This may have been set previously (before it was removed so we could more efficiently set metadata on the various related files).
+                // This version should take priority, so we remove it from nonForwardableMetadata if it's there to prevent the correct value from
+                // being overwritten.
                 nonForwardableMetadata?.Remove(ItemMetadataNames.winMDFile);
                 referenceItem.SetMetadata(ItemMetadataNames.winMDFile, "true");
             }
@@ -2783,6 +2793,7 @@ namespace Microsoft.Build.Tasks
             // Set the FusionName metadata properly.
             referenceItem.SetMetadata(ItemMetadataNames.fusionName, fusionName);
 
+            // nonForwardableMetadata should be null here if relatedFileExtensions, satellites, serializationAssemblyFiles, and scatterFiles were all empty.
             if (nonForwardableMetadata != null)
             {
                 foreach (KeyValuePair<string, string> kvp in nonForwardableMetadata)
@@ -2926,35 +2937,35 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static Dictionary<string, string> RemoveNonForwardableMetadata(ITaskItem item)
         {
-            Dictionary<string, string> metadata = new Dictionary<string, string>();
+            Dictionary<string, string> removedMetadata = new Dictionary<string, string>();
             string meta = item.GetMetadata(ItemMetadataNames.winmdImplmentationFile);
             if (!String.IsNullOrEmpty(meta))
             {
-                metadata.Add(ItemMetadataNames.winmdImplmentationFile, meta);
+                removedMetadata.Add(ItemMetadataNames.winmdImplmentationFile, meta);
             }
+            item.RemoveMetadata(ItemMetadataNames.winmdImplmentationFile);
             meta = item.GetMetadata(ItemMetadataNames.imageRuntime);
             if (!String.IsNullOrEmpty(meta))
             {
-                metadata.Add(ItemMetadataNames.imageRuntime, meta);
+                removedMetadata.Add(ItemMetadataNames.imageRuntime, meta);
             }
+            item.RemoveMetadata(ItemMetadataNames.imageRuntime);
             meta = item.GetMetadata(ItemMetadataNames.winMDFile);
             if (!String.IsNullOrEmpty(meta))
             {
-                metadata.Add(ItemMetadataNames.winMDFile, meta);
+                removedMetadata.Add(ItemMetadataNames.winMDFile, meta);
             }
+            item.RemoveMetadata(ItemMetadataNames.winMDFile);
             if (!Traits.Instance.EscapeHatches.TargetPathForRelatedFiles)
             {
                 meta = item.GetMetadata(ItemMetadataNames.targetPath);
                 if (!String.IsNullOrEmpty(meta))
                 {
-                    metadata.Add(ItemMetadataNames.targetPath, meta);
+                    removedMetadata.Add(ItemMetadataNames.targetPath, meta);
                 }
                 item.RemoveMetadata(ItemMetadataNames.targetPath);
             }
-            item.RemoveMetadata(ItemMetadataNames.winmdImplmentationFile);
-            item.RemoveMetadata(ItemMetadataNames.imageRuntime);
-            item.RemoveMetadata(ItemMetadataNames.winMDFile);
-            return metadata;
+            return removedMetadata;
         }
 
         /// <summary>

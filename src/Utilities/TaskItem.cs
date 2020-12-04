@@ -297,17 +297,18 @@ namespace Microsoft.Build.Utilities
 
             if (_metadata != null)
             {
-                // Avoid a copy if we can
                 if (destinationItem is TaskItem destinationAsTaskItem)
                 {
                     CopyOnWriteDictionary<string> copiedMetadata;
-                    if (destinationAsTaskItem.Metadata == null || destinationAsTaskItem.Metadata.Count < _metadata.Count)
+                    // Avoid a copy if we can, and if not, minimize the number of items we have to set.
+                    if (destinationAsTaskItem.Metadata == null)
                     {
                         copiedMetadata = _metadata.Clone(); // Copy on write!
-                        if (destinationAsTaskItem.Metadata != null)
-                        {
-                            copiedMetadata.SetItems(destinationAsTaskItem.Metadata);
-                        }
+                    }
+                    else if (destinationAsTaskItem.Metadata.Count < _metadata.Count)
+                    {
+                        copiedMetadata = _metadata.Clone(); // Copy on write!
+                        copiedMetadata.SetItems(destinationAsTaskItem.Metadata);
                     }
                     else
                     {
