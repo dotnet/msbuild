@@ -1643,6 +1643,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Implementation of ComputeClosure.
+        /// <returns>The number of references computed in this call.</returns>
         /// </summary>
         private int ComputeClosure()
         {
