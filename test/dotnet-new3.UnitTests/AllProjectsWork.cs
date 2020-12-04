@@ -23,17 +23,17 @@ namespace dotnet_new3.UnitTests
         }
 
         [Theory]
-        [InlineData("emptyweb_cs-10", "web")]
-        [InlineData("mvc_cs-10", "mvc")]
-        [InlineData("mvc_fs-10", "mvc", "-lang", "F#")]
-        [InlineData("api_cs-10", "api")]
-        [InlineData("emptyweb_cs-11", "web", "-f", "1.1")]
-        [InlineData("mvc_cs-11", "mvc", "-f", "1.1")]
-        [InlineData("mvc_fs-11", "mvc", "-lang", "F#", "-f", "1.1")]
-        [InlineData("api_cs-11", "api", "-f", "1.1")]
-        [InlineData("console_cs-10", "console")]
-        [InlineData("library_cs-10", "library")]
-        public void AllWebProjectsRestoreAndBuild(string testName, params string[] args)
+        [InlineData("emptyweb_cs-50", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "web")]
+        [InlineData("mvc_cs-50", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "mvc")]
+        [InlineData("mvc_fs-50", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "mvc", "-lang", "F#")]
+        [InlineData("api_cs-50", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "api")]
+        [InlineData("emptyweb_cs-31", "Microsoft.DotNet.Web.ProjectTemplates.3.1", "web", "-f", "netcoreapp3.1")]
+        [InlineData("mvc_cs-31", "Microsoft.DotNet.Web.ProjectTemplates.3.1", "mvc", "-f", "netcoreapp3.1")]
+        [InlineData("mvc_fs-31", "Microsoft.DotNet.Web.ProjectTemplates.3.1", "mvc", "-lang", "F#", "-f", "netcoreapp3.1")]
+        [InlineData("api_cs-31", "Microsoft.DotNet.Web.ProjectTemplates.3.1", "api", "-f", "netcoreapp3.1")]
+        [InlineData("console_cs-31", null, "console", "-f", "netcoreapp3.1")]
+        [InlineData("library_cs-50", null, "library", "-f", "net5.0")]
+        public void AllWebProjectsRestoreAndBuild(string testName, string installNuget, params string[] args)
         {
             string workingDir = GetWorkingDirectoryName(testName);
             Directory.CreateDirectory(workingDir);
@@ -47,6 +47,18 @@ namespace dotnet_new3.UnitTests
                 relTo = Path.Combine(relTo, @"..\..\..\..\..\dev");
                 Environment.SetEnvironmentVariable("DN3", relTo);
             }
+
+            if (!string.IsNullOrEmpty(installNuget))
+                Command.Create("dotnet-new3", new[] { "-i", installNuget }, outputPath: Environment.GetEnvironmentVariable("DN3"))
+                    .WorkingDirectory(workingDir)
+                    .CaptureStdErr()
+                    .CaptureStdOut()
+                    .Execute()
+                    .Should()
+                    .ExitWith(0)
+                    .And
+                    .NotHaveStdErr();
+
             Command.Create("dotnet-new3", args, outputPath: Environment.GetEnvironmentVariable("DN3"))
                 .WorkingDirectory(workingDir)
                 .CaptureStdErr()
