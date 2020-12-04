@@ -19,9 +19,7 @@ namespace dotnet_new3.UnitTests
 
         private static string GetWorkingDirectoryName(string suffix, [CallerMemberName] string callerName = "")
         {
-            string relTo = new Uri(typeof(AllProjectsWork).GetTypeInfo().Assembly.CodeBase, UriKind.Absolute).LocalPath;
-            relTo = Path.GetDirectoryName(relTo);
-            return Path.Combine(relTo, callerName, _tempDirParent.ToString(), suffix);
+            return Path.Combine(Path.GetTempPath(), _tempDirParent.ToString(), callerName, suffix);
         }
 
         [Theory]
