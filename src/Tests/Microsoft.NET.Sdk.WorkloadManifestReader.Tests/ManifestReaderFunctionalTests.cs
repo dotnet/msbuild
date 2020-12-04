@@ -42,8 +42,8 @@ namespace ManifestReaderTests
         private static WorkloadResolver SetUp()
         {
             var workloadResolver =
-                new WorkloadResolver(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
-                    "fakepath");
+                WorkloadResolver.CreateForTests(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
+                    "fakepath", ManifestTests.TEST_RUNTIME_IDENTIFIER_CHAIN);
 
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => true);
             return workloadResolver;
@@ -53,8 +53,8 @@ namespace ManifestReaderTests
         public void GivenTemplateNupkgDoesNotExistOnDiskItShouldReturnEmpty()
         {
             var workloadResolver =
-                new WorkloadResolver(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
-                    "fakepath");
+                WorkloadResolver.CreateForTests(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
+                    "fakepath", ManifestTests.TEST_RUNTIME_IDENTIFIER_CHAIN);
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => false, directoryExists: (_) => true);
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template);
             result.Should().HaveCount(0);
@@ -64,8 +64,8 @@ namespace ManifestReaderTests
         public void GivenWorkloadSDKsDirectoryNotExistOnDiskItShouldReturnEmpty()
         {
             var workloadResolver =
-                new WorkloadResolver(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
-                    "fakepath");
+                WorkloadResolver.CreateForTests(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
+                    "fakepath", ManifestTests.TEST_RUNTIME_IDENTIFIER_CHAIN);
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => false);
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk);
             result.Should().HaveCount(0);

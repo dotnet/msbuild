@@ -21,16 +21,16 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         public bool IsAlias => AliasTo != null && AliasTo.Count > 0;
         public Dictionary<string, WorkloadPackId>? AliasTo { get; }
 
-        public WorkloadPackId? TryGetAliasForPlatformIds (IEnumerable<string> platformIds)
+        public WorkloadPackId? TryGetAliasForRuntimeIdentifiers(IEnumerable<string> runtimeIdentifiers)
         {
             if (AliasTo == null || AliasTo.Count == 0)
             {
                 return null;
             }
 
-            foreach (var platformId in platformIds)
+            foreach (var runtimeIdentifier in runtimeIdentifiers)
             {
-                if (AliasTo.TryGetValue(platformId, out WorkloadPackId alias))
+                if (AliasTo.TryGetValue(runtimeIdentifier, out WorkloadPackId alias))
                 {
                     return alias;
                 }
