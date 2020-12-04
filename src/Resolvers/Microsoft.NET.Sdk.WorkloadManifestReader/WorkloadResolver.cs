@@ -18,7 +18,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private readonly Dictionary<WorkloadDefinitionId, WorkloadDefinition> _workloads = new Dictionary<WorkloadDefinitionId, WorkloadDefinition>();
         private readonly Dictionary<WorkloadPackId, WorkloadPack> _packs = new Dictionary<WorkloadPackId, WorkloadPack>();
         private string[] _currentRuntimeIdentifiers;
-        private readonly string _dotnetRootPath;
+        private readonly string [] _dotnetRootPaths;
 
         private Func<string, bool>? _fileExistOverride;
         private Func<string, bool>? _directoryExistOverride;
@@ -30,18 +30,33 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 File.ReadAllLines(runtimeIdentifierChainPath).Where(l => !string.IsNullOrEmpty(l)).ToArray() :
                 new string[] { };
 
-            return new WorkloadResolver(manifestProvider, dotnetRootPath, currentRuntimeIdentifiers);
+            var packRootEnvironmentVariable = Environment.GetEnvironmentVariable("DOTNETSDK_WORKLOAD_PACK_ROOTS");
+
+            string[] dotnetRootPaths;
+            if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
+            {
+                dotnetRootPaths = packRootEnvironmentVariable.Split(';').Concat(new[] { dotnetRootPath }).ToArray();
+            }
+            else
+            {
+                dotnetRootPaths = new[] { dotnetRootPath };
+            }
+
+            return new WorkloadResolver(manifestProvider, dotnetRootPaths, currentRuntimeIdentifiers);
         }
 
-        public static WorkloadResolver CreateForTests(IWorkloadManifestProvider manifestProvider, string dotNetRootPath, string[] currentRuntimeIdentifiers)
+        public static WorkloadResolver CreateForTests(IWorkloadManifestProvider manifestProvider, string[] dotNetRootPaths, string[]? currentRuntimeIdentifiers = null)
         {
-            return new WorkloadResolver(manifestProvider, dotNetRootPath, currentRuntimeIdentifiers);
+            if (currentRuntimeIdentifiers == null)
+            {
+                currentRuntimeIdentifiers = new[] { "win-x64", "win", "any", "base" };
+            }
+            return new WorkloadResolver(manifestProvider, dotNetRootPaths, currentRuntimeIdentifiers);
         }
 
-        private WorkloadResolver(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string [] currentRuntimeIdentifiers)
+        private WorkloadResolver(IWorkloadManifestProvider manifestProvider, string [] dotnetRootPaths, string [] currentRuntimeIdentifiers)
         {
-            this._dotnetRootPath = dotnetRootPath;
-
+            _dotnetRootPaths = dotnetRootPaths;
             _currentRuntimeIdentifiers = currentRuntimeIdentifiers;
 
             var manifests = new List<WorkloadManifest>();
@@ -101,7 +116,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private PackInfo CreatePackInfo(WorkloadPack pack)
         {
             var aliasedId = pack.TryGetAliasForRuntimeIdentifiers(_currentRuntimeIdentifiers) ?? pack.Id;
-            var packPath = GetPackPath(_dotnetRootPath, aliasedId, pack.Version, pack.Kind);
+            var packPath = GetPackPath(_dotnetRootPaths, aliasedId, pack.Version, pack.Kind);
 
             return new PackInfo(
                 pack.Id.ToString(),
@@ -129,22 +144,46 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
         }
 
-        private static string GetPackPath (string dotnetRootPath, WorkloadPackId packageId, string packageVersion, WorkloadPackKind kind)
+        private string GetPackPath(string [] dotnetRootPaths, WorkloadPackId packageId, string packageVersion, WorkloadPackKind kind)
         {
-            switch (kind)
+            string packPath = "";
+            bool isFile;
+            foreach (var rootPath in dotnetRootPaths)
             {
-                case WorkloadPackKind.Framework:
-                case WorkloadPackKind.Sdk:
-                    return Path.Combine(dotnetRootPath, "packs", packageId.ToString(), packageVersion);
-                case WorkloadPackKind.Template:
-                    return Path.Combine(dotnetRootPath, "template-packs", packageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
-                case WorkloadPackKind.Library:
-                    return Path.Combine(dotnetRootPath, "library-packs", packageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
-                case WorkloadPackKind.Tool:
-                    return Path.Combine(dotnetRootPath, "tool-packs", packageId.ToString(), packageVersion);
-                default:
-                    throw new ArgumentException($"The package kind '{kind}' is not known", nameof(kind));
+                switch (kind)
+                {
+                    case WorkloadPackKind.Framework:
+                    case WorkloadPackKind.Sdk:
+                        packPath = Path.Combine(rootPath, "packs", packageId.ToString(), packageVersion);
+                        isFile = false;
+                        break;
+                    case WorkloadPackKind.Template:
+                        packPath = Path.Combine(rootPath, "template-packs", packageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
+                        isFile = true;
+                        break;
+                    case WorkloadPackKind.Library:
+                        packPath = Path.Combine(rootPath, "library-packs", packageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
+                        isFile = true;
+                        break;
+                    case WorkloadPackKind.Tool:
+                        packPath = Path.Combine(rootPath, "tool-packs", packageId.ToString(), packageVersion);
+                        isFile = false;
+                        break;
+                    default:
+                        throw new ArgumentException($"The package kind '{kind}' is not known", nameof(kind));
+                }
+
+                bool packFound = isFile ?
+                    _fileExistOverride?.Invoke(packPath) ?? File.Exists(packPath) :
+                    _directoryExistOverride?.Invoke(packPath) ?? Directory.Exists(packPath); ;
+
+                if (packFound)
+                {
+                    break;
+                }
+                
             }
+            return packPath;
         }
 
         public IEnumerable<string> GetPacksInWorkload(string workloadId)

@@ -13,8 +13,6 @@ namespace ManifestReaderTests
     {
         private const string fakeRootPath = "fakeRootPath";
 
-        public static readonly string[] TEST_RUNTIME_IDENTIFIER_CHAIN = new[] { "win-x64", "win", "any", "base" };
-
         [Fact]
         public void ItCanDeserialize()
         {
@@ -35,7 +33,7 @@ namespace ManifestReaderTests
         public void AliasedPackPath()
         {
             var manifestProvider = new FakeManifestProvider(Path.Combine("Manifests", "Sample.json"));
-            var resolver = WorkloadResolver.CreateForTests(manifestProvider, fakeRootPath, TEST_RUNTIME_IDENTIFIER_CHAIN);
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { fakeRootPath });
 
             resolver.ReplaceFilesystemChecksForTest(_ => true, _ => true);
 
