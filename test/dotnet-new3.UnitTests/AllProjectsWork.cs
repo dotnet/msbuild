@@ -10,7 +10,7 @@ using Microsoft.TemplateEngine.TestHelper;
 using Microsoft.TemplateEngine.Utils;
 using Xunit;
 
-namespace DotnetNew3.UnitTests
+namespace dotnet_new3.UnitTests
 {
     public class AllProjectsWork
     {
