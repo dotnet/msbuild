@@ -13,17 +13,6 @@ namespace Microsoft.Build.Tasks.UnitTests
 {
     public class RARPrecomputedCache_Tests
     {
-        private Dictionary<string, Guid> guidStore = new Dictionary<string, Guid>();
-
-        private Guid calculateMvid(string path)
-        {
-            if (!guidStore.ContainsKey(path))
-            {
-                guidStore.Add(path, Guid.NewGuid());
-            }
-            return guidStore[path];
-        }
-
         [Fact]
         public void TestPrecomputedCacheOutput()
         {
@@ -39,7 +28,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     { Path.Combine(standardCache.Path, "assembly2"), new SystemState.FileState(DateTime.Now) { Assembly = new Shared.AssemblyNameExtension("hi") } } };
                 t._cache.IsDirty = true;
                 t.StateFile = standardCache.Path;
-                t.WriteStateFile(calculateMvid);
+                t.WriteStateFile();
                 int standardLen = File.ReadAllText(standardCache.Path).Length;
                 File.Delete(standardCache.Path);
                 standardLen.ShouldBeGreaterThan(0);
@@ -47,7 +36,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 string precomputedPath = standardCache.Path + ".cache";
                 t._cache.IsDirty = true;
                 t.AssemblyInformationCacheOutputPath = precomputedPath;
-                t.WriteStateFile(calculateMvid);
+                t.WriteStateFile();
                 File.Exists(standardCache.Path).ShouldBeFalse();
                 int preLen = File.ReadAllText(precomputedPath).Length;
                 preLen.ShouldBeGreaterThan(0);
@@ -69,7 +58,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     { Path.Combine(standardCache.Path, "assembly2"), new SystemState.FileState(DateTime.Now) { Assembly = new Shared.AssemblyNameExtension("hi") } } };
                 rarWriterTask.StateFile = standardCache.Path;
                 rarWriterTask._cache.IsDirty = true;
-                rarWriterTask.WriteStateFile(calculateMvid);
+                rarWriterTask.WriteStateFile();
 
                 string dllName = Path.Combine(Path.GetDirectoryName(standardCache.Path), "randomFolder", "dll.dll");
                 rarWriterTask._cache.instanceLocalFileStateCache.Add(dllName,
@@ -82,7 +71,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 string precomputedCachePath = standardCache.Path + ".cache";
                 rarWriterTask.AssemblyInformationCacheOutputPath = precomputedCachePath;
                 rarWriterTask._cache.IsDirty = true;
-                rarWriterTask.WriteStateFile(calculateMvid);
+                rarWriterTask.WriteStateFile();
                 // The cache is already written; this change should do nothing.
                 rarWriterTask._cache.instanceLocalFileStateCache[dllName].Assembly = null;
 
@@ -100,11 +89,11 @@ namespace Microsoft.Build.Tasks.UnitTests
                 // the normal cache does not have dll.dll, whereas the precomputed cache does, so it should not be
                 // present when we read the first time but should be present the second time. Then we verify that the
                 // information contained in that cache matches what we'd expect.
-                rarReaderTask.ReadStateFile(File.GetLastWriteTime, Array.Empty<AssemblyTableInfo>(), calculateMvid, p => true);
+                rarReaderTask.ReadStateFile(File.GetLastWriteTime, Array.Empty<AssemblyTableInfo>(), p => true);
                 rarReaderTask._cache.instanceLocalFileStateCache.ShouldNotContainKey(dllName);
                 File.Delete(standardCache.Path);
                 rarReaderTask._cache = null;
-                rarReaderTask.ReadStateFile(File.GetLastWriteTime, Array.Empty<AssemblyTableInfo>(), calculateMvid, p => true);
+                rarReaderTask.ReadStateFile(File.GetLastWriteTime, Array.Empty<AssemblyTableInfo>(), p => true);
                 rarReaderTask._cache.instanceLocalFileStateCache.ShouldContainKey(dllName);
                 SystemState.FileState assembly3 = rarReaderTask._cache.instanceLocalFileStateCache[dllName];
                 assembly3.Assembly.FullName.ShouldBe("notDll.dll");

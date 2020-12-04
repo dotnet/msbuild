@@ -1859,7 +1859,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the state file (if present) into the cache. If not present, attempts to read from CacheInputPaths, then creates a new cache if necessary.
         /// </summary>
-        internal void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo, Func<string, Guid> calculateMvid = null, Func<string, bool> fileExists = null)
+        internal void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo, Func<string, bool> fileExists = null)
         {
             var deserializeOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
             deserializeOptions.Converters.Add(new SystemState.Converter());
@@ -1874,7 +1874,7 @@ namespace Microsoft.Build.Tasks
 
             if (_cache == null)
             {
-                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths ?? Array.Empty<ITaskItem>(), Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo, calculateMvid, fileExists);
+                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths ?? Array.Empty<ITaskItem>(), Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo, fileExists);
             }
             else
             {
@@ -1886,11 +1886,11 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// If CacheOutputPath is non-null, writes out a cache to that location. Otherwise, writes out the state file if a state name was supplied and the cache is dirty.
         /// </summary>
-        internal void WriteStateFile(Func<string, Guid> calculateMvid = null)
+        internal void WriteStateFile()
         {
             if (!string.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
             {
-                _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log, calculateMvid);
+                _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log);
             }
             else if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
