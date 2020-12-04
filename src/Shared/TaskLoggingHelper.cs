@@ -272,6 +272,13 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
             ErrorUtilities.VerifyThrowArgumentNull(message, nameof(message));
+#if DEBUG
+            if (messageArgs?.Length > 0)
+            {
+                // Verify that message can be formatted using given arguments
+                ResourceUtilities.FormatString(message, messageArgs);
+            }
+#endif
 
             BuildMessageEventArgs e = new BuildMessageEventArgs
                 (
@@ -463,7 +470,7 @@ namespace Microsoft.Build.Utilities
             // global state.
             ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, nameof(messageResourceName));
 
-            LogMessage(importance, FormatResourceString(messageResourceName, messageArgs));
+            LogMessage(importance, GetResourceMessage(messageResourceName), messageArgs);
 #if DEBUG
             // Assert that the message does not contain an error code.  Only errors and warnings
             // should have error codes.
