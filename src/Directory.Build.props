@@ -32,7 +32,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <!-- Target frameworks for Exe and unit test projects (ie projects with runtime output) -->
-    <RuntimeOutputTargetFrameworks>netcoreapp2.1</RuntimeOutputTargetFrameworks>
+    <RuntimeOutputTargetFrameworks>net5.0</RuntimeOutputTargetFrameworks>
     <RuntimeOutputTargetFrameworks Condition="'$(OsEnvironment)'=='windows' and '$(DotNetBuildFromSource)' != 'true'">$(FullFrameworkTFM);$(RuntimeOutputTargetFrameworks)</RuntimeOutputTargetFrameworks>
     <RuntimeOutputTargetFrameworks Condition="'$(MonoBuild)' == 'true'">$(FullFrameworkTFM)</RuntimeOutputTargetFrameworks>
 
