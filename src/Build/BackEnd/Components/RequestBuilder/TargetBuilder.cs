@@ -677,7 +677,7 @@ namespace Microsoft.Build.BackEnd
                         // continue so we could throw the exception.
                         if (_requestEntry.RequestConfiguration.ActivelyBuildingTargets.ContainsKey(targetSpecification.TargetName))
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(targetLocation, "CircularDependencyInTargetGraph", targetSpecification.TargetName, null);
+                            ProjectErrorUtilities.ThrowInvalidProject(targetLocation, "CircularDependency", targetSpecification.TargetName);
                         }
                     }
                     else
@@ -689,7 +689,7 @@ namespace Microsoft.Build.BackEnd
                         }
 
                         // We are already building this target on this request. That's a circular dependency.
-                        ProjectErrorUtilities.ThrowInvalidProject(targetLocation, "CircularDependencyInTargetGraph", targetSpecification.TargetName, null);
+                        ProjectErrorUtilities.ThrowInvalidProject(targetLocation, "CircularDependency", targetSpecification.TargetName);
                     }
                 }
                 else
@@ -697,19 +697,10 @@ namespace Microsoft.Build.BackEnd
                     // Does this target exist in our direct parent chain, if it is a before target (since these can cause circular dependency issues)
                     if (buildReason == TargetBuiltReason.BeforeTargets || buildReason == TargetBuiltReason.DependsOn || buildReason == TargetBuiltReason.None)
                     {
-                        TargetEntry currentParent = parentTargetEntry;
-                        List<string> parentChain = new List<string>() { targetSpecification.TargetName };
-                        while (currentParent != null)
+                        List<string> targetDependenceChain;
+                        if (HasCircularDependenceInTargets(parentTargetEntry, targetSpecification, out targetDependenceChain))
                         {
-                            parentChain.Add(currentParent.Name);
-                            if (String.Equals(currentParent.Name, targetSpecification.TargetName, StringComparison.OrdinalIgnoreCase))
-                            {
-                                // We are already building this target on this request. That's a circular dependency.
-                                string errorMessage = $"Since \"{parentTargetEntry.Name}\" has \"{buildReason}\" dependence on \"{targetSpecification.TargetName}\", the circular is {string.Join("<-", parentChain)}.";
-                                ProjectErrorUtilities.ThrowInvalidProject(targetLocation, "CircularDependencyInTargetGraph", targetSpecification.TargetName, errorMessage);
-                            }
-
-                            currentParent = currentParent.ParentEntry;
+                            ProjectErrorUtilities.ThrowInvalidProject(targetLocation, "CircularDependencyInTargetGraph", targetSpecification.TargetName, parentTargetEntry.Name, buildReason, targetSpecification.TargetName, string.Join("<-", targetDependenceChain));
                         }
                     }
                     else
@@ -814,6 +805,38 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
             }
+        }
+
+        private bool HasCircularDependenceInTargets(TargetEntry parentTargetEntry, TargetSpecification targetSpecification, out List<string> circularDependenceChain)
+        {
+            TargetEntry currentParent = parentTargetEntry;
+            circularDependenceChain = new List<string>();
+            bool hasCircularDependence = false;
+
+            while (currentParent != null)
+            {
+                if (String.Equals(currentParent.Name, targetSpecification.TargetName, StringComparison.OrdinalIgnoreCase))
+                {
+                    // We are already building this target on this request. That's a circular dependency.
+                    hasCircularDependence = true;
+
+                    // Cache the circular dependence chain only when circular dependency occurs.
+                    currentParent = parentTargetEntry;
+                    circularDependenceChain.Add(targetSpecification.TargetName);
+                    while (!String.Equals(currentParent.Name, targetSpecification.TargetName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        circularDependenceChain.Add(currentParent.Name);
+                        currentParent = currentParent.ParentEntry;
+                    }
+
+                    circularDependenceChain.Add(currentParent.Name);
+                    break;
+                }
+
+                currentParent = currentParent.ParentEntry;
+            }
+
+            return hasCircularDependence;
         }
     }
 }
