@@ -23,6 +23,10 @@ namespace Microsoft.Build.Engine.UnitTests
         /// Helper function to build a simple project based on a particular change wave being set.
         /// Call SetChangeWave on your TestEnvironment before calling this function.
         /// </summary>
+        /// <param name="testEnvironment">The TestEnvironment being used for this test.</param>
+        /// <param name="waveToCheck">The version to be checked against what was set as the current Change Wave.</param>
+        /// <param name="changeWaveShouldUltimatelyResolveTo">What the current Change Wave should resolve to after `SetChangeWave` has been called.</param>
+        /// <param name="warningCodesLogShouldContain">An array of warning codes that should exist in the resulting log. Ex: "MSB4271".</param>
         private void buildSimpleProjectAndValidateChangeWave(TestEnvironment testEnvironment, Version waveToCheck, Version changeWaveShouldUltimatelyResolveTo, params string[] warningCodesLogShouldContain)
         {
             bool isThisWaveEnabled = waveToCheck < changeWaveShouldUltimatelyResolveTo || changeWaveShouldUltimatelyResolveTo == ChangeWaves.EnableAllFeatures;
