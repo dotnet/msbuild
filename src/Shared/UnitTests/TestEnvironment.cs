@@ -94,6 +94,7 @@ namespace Microsoft.Build.UnitTests
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
+
         public void SetChangeWave(Version wave)
         {
             SetChangeWave(wave.ToString());

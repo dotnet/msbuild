@@ -4306,7 +4306,7 @@ namespace Microsoft.Build.Evaluation
             {
                 if (args.Length != 1)
                 {
-                    arg0 = new Version();
+                    arg0 = default;
                     return false;
                 }
 
@@ -4319,7 +4319,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (string.IsNullOrEmpty(val) || !Version.TryParse(val, out arg0))
                 {
-                    arg0 = new Version();
+                    arg0 = default;
                     return false;
                 }
 

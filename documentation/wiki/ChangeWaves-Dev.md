@@ -24,10 +24,10 @@ The Process:
 6. [Delete the wave as it cycles out](#change-wave-'end-of-lifespan'-procedure)
 
 ## Creating a Change Wave
-1. In the `Microsoft.Build` project, open `SharedUtilities\ChangeWaves.cs`.
+1. In the `Microsoft.Build.Framework` project, open `ChangeWaves.cs`.
 2. Add a static readonly Version to identify the new wave, following the format:
 ```c#
-public static readonly Version Wave17_4 = "17.4";
+public static readonly Version Wave17_4 = new Version(17, 4);
 ```
 3. You may need to delete the lowest wave as new waves get added.
 4. Update the AllWaves array appropriately.
