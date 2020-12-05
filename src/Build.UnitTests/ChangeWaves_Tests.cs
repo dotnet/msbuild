@@ -24,19 +24,20 @@ namespace Microsoft.Build.Engine.UnitTests
         /// Call SetChangeWave on your TestEnvironment before calling this function.
         /// </summary>
         /// <param name="testEnvironment">The TestEnvironment being used for this test.</param>
-        /// <param name="waveToCheck">The version to be checked against what was set as the current Change Wave.</param>
-        /// <param name="changeWaveShouldUltimatelyResolveTo">What the current Change Wave should resolve to after `SetChangeWave` has been called.</param>
+        /// <param name="versionToCheckAgainstCurrentChangeWave">The version to compare to the current set Change Wave.</param>
+        /// <param name="currentChangeWaveShouldUltimatelyResolveTo">What the project property for the environment variable MSBuildDisableFeaturesFromVersion ultimately resolves to.</param>
         /// <param name="warningCodesLogShouldContain">An array of warning codes that should exist in the resulting log. Ex: "MSB4271".</param>
-        private void buildSimpleProjectAndValidateChangeWave(TestEnvironment testEnvironment, Version waveToCheck, Version changeWaveShouldUltimatelyResolveTo, params string[] warningCodesLogShouldContain)
+        private void buildSimpleProjectAndValidateChangeWave(TestEnvironment testEnvironment, Version versionToCheckAgainstCurrentChangeWave, Version currentChangeWaveShouldUltimatelyResolveTo, params string[] warningCodesLogShouldContain)
         {
-            bool isThisWaveEnabled = waveToCheck < changeWaveShouldUltimatelyResolveTo || changeWaveShouldUltimatelyResolveTo == ChangeWaves.EnableAllFeatures;
+            bool isThisWaveEnabled = versionToCheckAgainstCurrentChangeWave < currentChangeWaveShouldUltimatelyResolveTo || currentChangeWaveShouldUltimatelyResolveTo == ChangeWaves.EnableAllFeatures;
 
+            // This is required because ChangeWaves is static and the value of a previous test can carry over.
             ChangeWaves.ResetStateForTests();
-            ChangeWaves.AreFeaturesEnabled(waveToCheck).ShouldBe(isThisWaveEnabled);
+            ChangeWaves.AreFeaturesEnabled(versionToCheckAgainstCurrentChangeWave).ShouldBe(isThisWaveEnabled);
 
             string projectFile = $"" +
                 $"<Project>" +
-                    $"<Target Name='HelloWorld' Condition=\"$([MSBuild]::AreFeaturesEnabled('{waveToCheck}')) and '$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{changeWaveShouldUltimatelyResolveTo}'\">" +
+                    $"<Target Name='HelloWorld' Condition=\"$([MSBuild]::AreFeaturesEnabled('{versionToCheckAgainstCurrentChangeWave}')) and '$(MSBUILDDISABLEFEATURESFROMVERSION)' == '{currentChangeWaveShouldUltimatelyResolveTo}'\">" +
                         $"<Message Text='Hello World!'/>" +
                     $"</Target>" +
                 $"</Project>";
@@ -68,11 +69,9 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 for (int i = 0; i < ChangeWaves.AllWaves.Length - 1; i++)
                 {
-                    ChangeWaves.ResetStateForTests();
-
                     buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
-                                                            waveToCheck: ChangeWaves.AllWaves[i],
-                                                            changeWaveShouldUltimatelyResolveTo: ChangeWaves.EnableAllFeatures,
+                                                            versionToCheckAgainstCurrentChangeWave: ChangeWaves.AllWaves[i],
+                                                            currentChangeWaveShouldUltimatelyResolveTo: ChangeWaves.EnableAllFeatures,
                                                             warningCodesLogShouldContain: null);
                 }
             }
@@ -91,8 +90,8 @@ namespace Microsoft.Build.Engine.UnitTests
                 ChangeWaves.AreFeaturesEnabled(featureAsVersion).ShouldBe(true);
 
                 buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
-                                                        waveToCheck: featureAsVersion,
-                                                        changeWaveShouldUltimatelyResolveTo: ChangeWaves.EnableAllFeatures,
+                                                        versionToCheckAgainstCurrentChangeWave: featureAsVersion,
+                                                        currentChangeWaveShouldUltimatelyResolveTo: ChangeWaves.EnableAllFeatures,
                                                         warningCodesLogShouldContain: null);
             }
         }
@@ -109,8 +108,8 @@ namespace Microsoft.Build.Engine.UnitTests
                 env.SetChangeWave(disableFeaturesFromVersion);
 
                 buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
-                                                        waveToCheck: ChangeWaves.HighestWave,
-                                                        changeWaveShouldUltimatelyResolveTo: ChangeWaves.EnableAllFeatures,
+                                                        versionToCheckAgainstCurrentChangeWave: ChangeWaves.HighestWave,
+                                                        currentChangeWaveShouldUltimatelyResolveTo: ChangeWaves.EnableAllFeatures,
                                                         warningCodesLogShouldContain: "MSB4271");
             }
         }
@@ -128,11 +127,9 @@ namespace Microsoft.Build.Engine.UnitTests
                 // All waves should be disabled
                 for (int i = 0; i < ChangeWaves.AllWaves.Length; i++)
                 {
-                    ChangeWaves.ResetStateForTests();
-
                     buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
-                                                            waveToCheck: ChangeWaves.AllWaves[i],
-                                                            changeWaveShouldUltimatelyResolveTo: ChangeWaves.LowestWave,
+                                                            versionToCheckAgainstCurrentChangeWave: ChangeWaves.AllWaves[i],
+                                                            currentChangeWaveShouldUltimatelyResolveTo: ChangeWaves.LowestWave,
                                                             warningCodesLogShouldContain: "MSB4272");
                 }
             }
@@ -150,18 +147,16 @@ namespace Microsoft.Build.Engine.UnitTests
                 // all waves but the highest should pass
                 for (int i = 0; i < ChangeWaves.AllWaves.Length - 1; i++)
                 {
-                    ChangeWaves.ResetStateForTests();
-
                     buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
-                                        waveToCheck: ChangeWaves.AllWaves[i],
-                                        changeWaveShouldUltimatelyResolveTo: ChangeWaves.HighestWave,
+                                        versionToCheckAgainstCurrentChangeWave: ChangeWaves.AllWaves[i],
+                                        currentChangeWaveShouldUltimatelyResolveTo: ChangeWaves.HighestWave,
                                         warningCodesLogShouldContain: "MSB4272");
                 }
 
                 // Make sure the last wave is disabled.
                 buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
-                                                        waveToCheck: ChangeWaves.AllWaves[ChangeWaves.AllWaves.Length - 1],
-                                                        changeWaveShouldUltimatelyResolveTo: ChangeWaves.HighestWave,
+                                                        versionToCheckAgainstCurrentChangeWave: ChangeWaves.AllWaves[ChangeWaves.AllWaves.Length - 1],
+                                                        currentChangeWaveShouldUltimatelyResolveTo: ChangeWaves.HighestWave,
                                                         warningCodesLogShouldContain: "MSB4272");
             }
         }
@@ -174,10 +169,9 @@ namespace Microsoft.Build.Engine.UnitTests
                 env.SetChangeWave($"{ChangeWaves.LowestWave.Major}.{ChangeWaves.LowestWave.Minor}.{ChangeWaves.LowestWave.Build + 1}");
 
                 buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
-                                                        waveToCheck: ChangeWaves.LowestWave,
-                                                        changeWaveShouldUltimatelyResolveTo: ChangeWaves.AllWaves[1],
+                                                        versionToCheckAgainstCurrentChangeWave: ChangeWaves.LowestWave,
+                                                        currentChangeWaveShouldUltimatelyResolveTo: ChangeWaves.AllWaves[1],
                                                         warningCodesLogShouldContain: null);
-
             }
         }
 
@@ -191,15 +185,15 @@ namespace Microsoft.Build.Engine.UnitTests
                 for (int i = 0; i < ChangeWaves.AllWaves.Length - 1; i++)
                 {
                     buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
-                                                            waveToCheck: ChangeWaves.AllWaves[i],
-                                                            changeWaveShouldUltimatelyResolveTo: ChangeWaves.HighestWave,
+                                                            versionToCheckAgainstCurrentChangeWave: ChangeWaves.AllWaves[i],
+                                                            currentChangeWaveShouldUltimatelyResolveTo: ChangeWaves.HighestWave,
                                                             warningCodesLogShouldContain: null);
                 }
 
                 // Make sure the last wave is disabled.
                 buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
-                                                        waveToCheck: ChangeWaves.AllWaves[ChangeWaves.AllWaves.Length - 1],
-                                                        changeWaveShouldUltimatelyResolveTo: ChangeWaves.HighestWave,
+                                                        versionToCheckAgainstCurrentChangeWave: ChangeWaves.AllWaves[ChangeWaves.AllWaves.Length - 1],
+                                                        currentChangeWaveShouldUltimatelyResolveTo: ChangeWaves.HighestWave,
                                                         warningCodesLogShouldContain: null);
             }
         }
@@ -214,8 +208,8 @@ namespace Microsoft.Build.Engine.UnitTests
                 foreach (Version wave in ChangeWaves.AllWaves)
                 {
                     buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
-                                                            waveToCheck: wave,
-                                                            changeWaveShouldUltimatelyResolveTo: ChangeWaves.LowestWave,
+                                                            versionToCheckAgainstCurrentChangeWave: wave,
+                                                            currentChangeWaveShouldUltimatelyResolveTo: ChangeWaves.LowestWave,
                                                             warningCodesLogShouldContain: null);
                 }
             }
