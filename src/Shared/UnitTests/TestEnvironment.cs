@@ -95,11 +95,21 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        /// <summary>
+        /// Performs necessary operations for setting the MSBuildDisableFeaturesFromVersion environment variable.
+        /// This is required because Change Waves is static and stale values can be seen between tests in the same assembly.
+        /// </summary>
+        /// <param name="wave">The version to set as the current Change Wave.</param>
         public void SetChangeWave(Version wave)
         {
             SetChangeWave(wave.ToString());
         }
 
+        /// <summary>
+        /// Performs necessary operations for setting the MSBuildDisableFeaturesFromVersion environment variable.
+        /// This is required because Change Waves is static and stale values can be seen between tests in the same assembly.
+        /// </summary>
+        /// <param name="wave">The version to set as the current Change Wave.</param>
         public void SetChangeWave(string wave)
         {
             ChangeWaves.ResetStateForTests();
