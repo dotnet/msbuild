@@ -2790,7 +2790,7 @@ namespace Microsoft.Build.Tasks
                 referenceItem.SetMetadata(ItemMetadataNames.winMDFile, "true");
             }
 
-            // Set the FusionName metadata properly.
+            // Set the FusionName late, so we don't copy it to the derived items, but it's still available on referenceItem.
             referenceItem.SetMetadata(ItemMetadataNames.fusionName, fusionName);
 
             // nonForwardableMetadata should be null here if relatedFileExtensions, satellites, serializationAssemblyFiles, and scatterFiles were all empty.
