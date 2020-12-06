@@ -4,16 +4,12 @@
 using System;
 using System.IO;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.InteropServices;
 using System.Threading;
 
 using Microsoft.Win32.SafeHandles;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.BuildEngine

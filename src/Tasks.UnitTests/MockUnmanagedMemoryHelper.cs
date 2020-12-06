@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Runtime.InteropServices.ComTypes;
 
 using Marshal = System.Runtime.InteropServices.Marshal;
 using Xunit;

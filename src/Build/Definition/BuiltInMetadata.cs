@@ -3,11 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.Evaluation
 {

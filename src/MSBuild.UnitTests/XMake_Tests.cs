@@ -437,15 +437,35 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void Help()
+        public void GetLengthOfSwitchIndicatorTest()
         {
-                MSBuildApp.Execute(
+            var commandLineSwitchWithSlash = "/Switch";
+            var commandLineSwitchWithSingleDash = "-Switch";
+            var commandLineSwitchWithDoubleDash = "--Switch";
+
+            var commandLineSwitchWithNoneOrIncorrectIndicator = "zSwitch";
+
+            MSBuildApp.GetLengthOfSwitchIndicator(commandLineSwitchWithSlash).ShouldBe(1);
+            MSBuildApp.GetLengthOfSwitchIndicator(commandLineSwitchWithSingleDash).ShouldBe(1);
+            MSBuildApp.GetLengthOfSwitchIndicator(commandLineSwitchWithDoubleDash).ShouldBe(2);
+
+            MSBuildApp.GetLengthOfSwitchIndicator(commandLineSwitchWithNoneOrIncorrectIndicator).ShouldBe(0);
+        }
+
+        [Theory]
+        [InlineData("-?")]
+        [InlineData("-h")]
+        [InlineData("--help")]
+        [InlineData(@"/h")]
+        public void Help(string indicator)
+        {
+            MSBuildApp.Execute(
 #if FEATURE_GET_COMMANDLINE
-                    @"c:\bin\msbuild.exe -? "
+                @$"c:\bin\msbuild.exe {indicator} "
 #else
-                    new [] {@"c:\bin\msbuild.exe", "-?"}
+                new [] {@"c:\bin\msbuild.exe", indicator}
 #endif
-                ).ShouldBe(MSBuildApp.ExitType.Success);
+            ).ShouldBe(MSBuildApp.ExitType.Success);
         }
 
         [Fact]
@@ -1259,7 +1279,23 @@ namespace Microsoft.Build.UnitTests
             logContents.ShouldContain(expected, () => logContents);
         }
 
-#region IgnoreProjectExtensionTests
+        /// <summary>
+        /// Test the default file to build in cases involving at least one solution filter file.
+        /// </summary>
+        [Theory]
+        [InlineData(new string[] { "my.proj", "my.sln", "my.slnf" }, "my.sln")]
+        [InlineData(new string[] { "abc.proj", "bcd.csproj", "slnf.slnf", "other.slnf" }, "abc.proj")]
+        [InlineData(new string[] { "abc.sln", "slnf.slnf", "abc.slnf" }, "abc.sln")]
+        [InlineData(new string[] { "abc.csproj", "abc.slnf", "not.slnf" }, "abc.csproj")]
+        [InlineData(new string[] { "abc.slnf" }, "abc.slnf")]
+        public void TestDefaultBuildWithSolutionFilter(string[] projects, string answer)
+        {
+            string[] extensionsToIgnore = Array.Empty<string>();
+            IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
+            MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe(answer, StringCompareShould.IgnoreCase);
+        }
+
+        #region IgnoreProjectExtensionTests
 
         /// <summary>
         /// Test the case where the extension is a valid extension but is not a project
@@ -1285,6 +1321,7 @@ namespace Microsoft.Build.UnitTests
             IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
         }
+
         /// <summary>
         /// Pass a null and an empty list of project extensions to ignore, this simulates the switch not being set on the commandline
         /// </summary>
@@ -1315,6 +1352,7 @@ namespace Microsoft.Build.UnitTests
             }
            );
         }
+
         /// <summary>
         /// Pass in one extension and an empty string
         /// </summary>
@@ -1582,7 +1620,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     if (String.Equals(searchPattern, "*.sln", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (String.Equals(Path.GetExtension(file), ".sln", StringComparison.OrdinalIgnoreCase))
+                        if (FileUtilities.IsSolutionFilename(file))
                         {
                             fileNamesToReturn.Add(file);
                         }

@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-
-using Microsoft.Build.Framework;
 using Microsoft.Build.BuildEngine.Shared;
 using System.Threading;
 

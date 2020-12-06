@@ -9,8 +9,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.ObjectModelRemoting;
     using Microsoft.Build.Evaluation;
     using Xunit;
-    using System.Runtime.ExceptionServices;
-    using System.Xml.Schema;
     using System.Collections;
 
     internal class ElementLinkPair<T> : LinkPair<T>

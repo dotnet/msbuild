@@ -2018,26 +2018,6 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        internal bool CreateRarNode()
-        {
-            // If the _buildParametrs is not set, we are in OutOfProc mode, so continue
-            // Else check if users specified that he want to use multiple nodes, if so use RARaaS
-            if (_buildParameters?.MaxNodeCount == 1)
-                return false;
-
-            string nodeLocation = _buildParameters?.NodeExeLocation ?? BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-            if (string.IsNullOrEmpty(nodeLocation))
-            {
-                // Couldn't find a path to MSBuild.exe; can't create a new node.
-                return false;
-            }
-
-            bool nodeReuse = _buildParameters?.EnableNodeReuse ?? true;
-            bool lowPriority = _buildParameters?.LowPriority ?? false;
-            string commandLineArgs = $"/nologo /nodemode:3 /nodeReuse:{nodeReuse} /low:{lowPriority}";
-            return NodeProviderOutOfProcBase.LaunchNode(nodeLocation, commandLineArgs) != -1;
-        }
-
         /// <summary>
         /// Completes a submission using the specified overall results.
         /// </summary>
@@ -2204,20 +2184,13 @@ namespace Microsoft.Build.Execution
                             continue;
                         }
 
-                        submission.CompleteLogging(false);
-
                         // Attach the exception to this submission if it does not already have an exception associated with it
-                        if (submission.BuildResult?.Exception == null)
+                        if (!submission.IsCompleted && submission.BuildResult != null && submission.BuildResult.Exception == null)
                         {
-                            if (submission.BuildResult == null)
-                            {
-                                submission.BuildResult = new BuildResult(submission.BuildRequest, e);
-                            }
-                            else
-                            {
-                                submission.BuildResult.Exception = _threadException.SourceException;
-                            }
+                            submission.BuildResult.Exception = e;
                         }
+                        submission.CompleteLogging(waitForLoggingThread: false);
+                        submission.CompleteResults(new BuildResult(submission.BuildRequest, e));
 
                         CheckSubmissionCompletenessAndRemove(submission);
                     }
@@ -2231,17 +2204,11 @@ namespace Microsoft.Build.Execution
                         }
 
                         // Attach the exception to this submission if it does not already have an exception associated with it
-                        if (submission.BuildResult?.Exception == null)
+                        if (!submission.IsCompleted && submission.BuildResult != null && submission.BuildResult.Exception == null)
                         {
-                            if (submission.BuildResult == null)
-                            {
-                                submission.BuildResult = new GraphBuildResult(submission.SubmissionId, e);
-                            }
-                            else
-                            {
-                                submission.BuildResult.Exception = _threadException.SourceException;
-                            }
+                            submission.BuildResult.Exception = e;
                         }
+                        submission.CompleteResults(submission.BuildResult ?? new GraphBuildResult(submission.SubmissionId, e));
 
                         CheckSubmissionCompletenessAndRemove(submission);
                     }

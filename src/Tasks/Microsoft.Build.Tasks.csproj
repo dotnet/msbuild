@@ -81,6 +81,7 @@
     <Compile Include="..\Shared\NGen.cs">
       <Link>NGen.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs"/>
     <Compile Include="..\Shared\IInternable.cs">
       <Link>IInternable.cs</Link>
     </Compile>
@@ -149,6 +150,7 @@
       <Link>Modifiers.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="..\Shared\ReadOnlyCollection.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Shared\Tracing.cs" />
@@ -213,12 +215,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\LanguageParser\VisualBasictokenizer.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\CommunicationsUtilities.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\XMakeAttributes.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AppConfig\*.cs">
@@ -348,12 +344,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="ResourceHandling\*.cs" />
-    <Compile Include="ResolveAssemblyReferences\Client\RarClient.cs" />
-    <Compile Include="ResolveAssemblyReferences\Contract\IResolveAssemblyReferenceTaskHandler.cs" />
-    <Compile Include="ResolveAssemblyReferences\RpcUtils.cs" />
-    <Compile Include="ResolveAssemblyReferences\Server\RarController.cs" />
-    <Compile Include="ResolveAssemblyReferences\Services\RarTaskHandler.cs" />
-    <Compile Include="ResolveAssemblyReferences\Server\ServerMutex.cs" />
     <Compile Include="ResolveComReference.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />
@@ -416,6 +406,9 @@
     <Compile Include="FindInList.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="FormatUrl.cs" Condition="'$(MonoBuild)' != 'true'">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="FormatVersion.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -426,6 +419,9 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="GenerateDeploymentManifest.cs" Condition="'$(MonoBuild)' != 'true'">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="GenerateLauncher.cs" Condition="'$(MonoBuild)' != 'true'">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="GenerateManifestBase.cs" Condition="'$(MonoBuild)' != 'true'">
@@ -609,9 +605,6 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="FindInvalidProjectReferences.cs" />
-    <Compile Include="FormatUrl.cs" Condition="'$(MonoBuild)' != 'true'">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="GenerateBootstrapper.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -994,8 +987,6 @@
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Resources.Extensions" />
-    <PackageReference Include="StreamJsonRpc" />
-    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
   <!-- Tasks need to mimic redistributing the compilers, so add references to both full framework and .net core -->
@@ -1019,7 +1010,6 @@
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="System.Security.Cryptography.Xml" />
     <PackageReference Include="System.Security.Permissions" />
-    <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
     <!-- Need Win32 API on .NET Core to ping registry to determine long path support -->

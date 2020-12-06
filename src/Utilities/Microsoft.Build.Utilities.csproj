@@ -88,9 +88,6 @@
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <Link>Shared\ExceptionHandling.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\EscapingStringExtensions\EscapingStringExtensions.cs">
-      <Link>Shared\EscapingStringExtensions\EscapingStringExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\FileUtilities.cs">
       <Link>Shared\FileUtilities.cs</Link>
     </Compile>

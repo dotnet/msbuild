@@ -92,7 +92,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // If this item is behind a false condition and represents a full drive/filesystem scan, expanding it is
                         // almost certainly undesired. It should be skipped to avoid evaluation taking an excessive amount of time.
-                        bool skipGlob = !_conditionResult && globFragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs;
+                        bool skipGlob = !_conditionResult && globFragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_8);
                         if (!skipGlob)
                         {
                             string glob = globFragment.TextFragment;

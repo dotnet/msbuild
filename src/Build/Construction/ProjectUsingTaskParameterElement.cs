@@ -6,8 +6,6 @@ using System.Diagnostics;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
-using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
-
 namespace Microsoft.Build.Construction
 {
     /// <summary>

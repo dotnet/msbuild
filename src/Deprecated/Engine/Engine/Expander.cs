@@ -13,7 +13,6 @@ using Microsoft.Win32;
 using System.IO;
 using System.Security;
 using System.Globalization;
-using System.Diagnostics;
 using System.Reflection;
 
 namespace Microsoft.Build.BuildEngine

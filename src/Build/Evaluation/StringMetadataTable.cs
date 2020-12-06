@@ -3,9 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
 {

@@ -9,7 +9,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Threading;
-using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
 {

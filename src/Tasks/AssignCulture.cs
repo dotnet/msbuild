@@ -133,7 +133,10 @@ namespace Microsoft.Build.Tasks
                     Culture.ItemCultureInfo info = Culture.GetItemCultureInfo
                         (
                             AssignedFiles[i].ItemSpec,
-                            dependentUpon
+                            dependentUpon,
+                            // If 'WithCulture' is explicitly set to false, treat as 'culture-neutral' and keep the original name of the resource.
+                            // https://github.com/dotnet/msbuild/issues/3064
+                            AssignedFiles[i].GetMetadata("WithCulture").Equals("false", StringComparison.OrdinalIgnoreCase)
                         );
 
                     if (!string.IsNullOrEmpty(info.culture))

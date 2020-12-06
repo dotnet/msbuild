@@ -8,7 +8,6 @@ using System.Linq;
 using System.Xml;
 
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Definition

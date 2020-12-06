@@ -5,8 +5,6 @@
 // Add module level suppressions to this file to have them suppressed in the assembly
 //
 
-using System.Diagnostics.CodeAnalysis;
-
 #if CODE_ANALYSIS
 [module: SuppressMessage("Microsoft.Naming","CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId="wrn", Scope="resource", Target="MSBuild.Strings.resources", Justification="These are correct for the help text, they are file paths extensions and switches")]
 [module: SuppressMessage("Microsoft.Naming","CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId="warningsonly", Scope="resource", Target="MSBuild.Strings.resources", Justification="These are correct for the help text, they are file paths extensions and switches")]
