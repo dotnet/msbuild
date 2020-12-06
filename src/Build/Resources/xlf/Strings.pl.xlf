@@ -78,7 +78,7 @@
       </trans-unit>
       <trans-unit id="CircularDependency">
         <source>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}".</source>
-        <target state="new">MSB4006: There is a circular dependency in the target dependency graph involving target "{0}".</target>
+        <target state="translated">MSB4006: Istnieje zależność cykliczna na wykresie zależności elementu docelowego, obejmująca element docelowy „{0}”.</target>
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
