@@ -143,7 +143,7 @@ namespace System.Collections.Immutable
             var clone = new ImmutableDictionary<K, V>(_backing);
             foreach (KeyValuePair<K, V> item in items)
             {
-                clone[item.Key] = item.Value;
+                clone._backing[item.Key] = item.Value;
             }
 
             return clone;
