@@ -412,6 +412,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             Parser parser = new Parser(parseConfig);
             _parseResult = parser.Parse(argsWithCommand.ToArray());
             _templateParamCanonicalToVariantMap = null;
+            _templateParamVariantToCanonicalMap = null;
 
             IReadOnlyList<string> templateNameList = _parseResult.GetArgumentListAtPath(new[] { _commandName })?.ToList() ?? Empty<string>.List.Value;
             if ((templateNameList.Count > 0) &&
