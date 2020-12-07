@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Build.Shared
 {
@@ -45,5 +46,35 @@ namespace Microsoft.Build.Shared
 
             return false;
         }
+
+#if !CLR2COMPATIBILITY
+        internal static bool SetEquivalent<T>(IEnumerable<T> a, IEnumerable<T> b)
+        {
+            return a.ToHashSet().SetEquals(b);
+        }
+
+        internal static bool DictionaryEquals<K, V>(IReadOnlyDictionary<K, V> a, IReadOnlyDictionary<K, V> b)
+        {
+            if (a.Count != b.Count)
+            {
+                return false;
+            }
+
+            foreach (var aKvp in a)
+            {
+                if (!b.TryGetValue(aKvp.Key, out var bValue))
+                {
+                    return false;
+                }
+
+                if (!aKvp.Value.Equals(bValue))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+#endif
     }
 }

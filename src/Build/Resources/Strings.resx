@@ -1851,4 +1851,23 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="IsolatedContextDoesNotSupportFileSystem" xml:space="preserve">
     <value>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</value>
   </data>
+  <data name="LoadingProjectCachePlugin" xml:space="preserve">
+    <value>"Loading the following project cache plugin: {0}"</value>
+  </data>
+  <data name="SolutionPathPropertyMustBeSetOnVSSubmissions" xml:space="preserve">
+    <value>"MSB4264: Invalid $(SolutionPath) property: {0}"</value>
+  </data>
+  <data name="OnlyOneCachePluginMustBeSpecified" xml:space="preserve">
+    <value>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</value>
+  </data>
+  <data name="ProjectCacheInitializationFailed" xml:space="preserve">
+    <value>MSB4266: The project cache failed during initialization.</value>
+  </data>
+  <data name="ProjectCacheQueryFailed" xml:space="preserve">
+    <value>MSB4267: The project cache failed while being queried for the following project (keep in mind that the cache is queried in parallel so this specific project might not be the cause):
+    {0}</value>
+  </data>
+  <data name="ProjectCacheShutdownFailed" xml:space="preserve">
+    <value>MSB4268:The project cache failed during shutdown.</value>
+  </data>
 </root>

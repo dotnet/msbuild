@@ -993,6 +993,7 @@ namespace Microsoft.Build.Execution
         public string NodeExeLocation { get { throw null; } set { } }
         public bool OnlyLogCriticalEvents { get { throw null; } set { } }
         public string OutputResultsCacheFile { get { throw null; } set { } }
+        public Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor ProjectCacheDescriptor { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.ProjectLoadSettings ProjectLoadSettings { get { throw null; } set { } }
         public bool ResetCaches { get { throw null; } set { } }
         public bool SaveOperatingEnvironment { get { throw null; } set { } }
@@ -1399,6 +1400,70 @@ namespace Microsoft.Build.Execution
         Failure = (byte)2,
         Skipped = (byte)0,
         Success = (byte)1,
+    }
+}
+namespace Microsoft.Build.Experimental.ProjectCache
+{
+    public partial class CacheContext
+    {
+        public CacheContext(System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings, Microsoft.Build.FileSystem.MSBuildFileSystemBase fileSystem, Microsoft.Build.Graph.ProjectGraph graph=null, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> graphEntryPoints=null) { }
+        public Microsoft.Build.FileSystem.MSBuildFileSystemBase FileSystem { get { throw null; } }
+        public Microsoft.Build.Graph.ProjectGraph Graph { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> GraphEntryPoints { get { throw null; } }
+        public string MSBuildExePath { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyDictionary<string, string> PluginSettings { get { throw null; } }
+    }
+    public partial class CacheResult
+    {
+        internal CacheResult() { }
+        public static Microsoft.Build.Experimental.ProjectCache.CacheResult IndicateCacheHit(Microsoft.Build.Execution.BuildResult buildResult) { throw null; }
+        public static Microsoft.Build.Experimental.ProjectCache.CacheResult IndicateCacheHit(Microsoft.Build.Experimental.ProjectCache.ProxyTargets proxyTargets) { throw null; }
+        public static Microsoft.Build.Experimental.ProjectCache.CacheResult IndicateCacheHit(System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.ProjectCache.PluginTargetResult> targetResults) { throw null; }
+        public static Microsoft.Build.Experimental.ProjectCache.CacheResult IndicateNonCacheHit(Microsoft.Build.Experimental.ProjectCache.CacheResultType resultType) { throw null; }
+    }
+    public enum CacheResultType
+    {
+        CacheError = 3,
+        CacheHit = 0,
+        CacheMiss = 1,
+        CacheNotApplicable = 2,
+    }
+    public abstract partial class PluginLoggerBase
+    {
+        public PluginLoggerBase(Microsoft.Build.Framework.LoggerVerbosity verbosity) { }
+        public abstract bool HasLoggedErrors { get; protected set; }
+        public abstract void LogError(string error);
+        public abstract void LogMessage(string message, System.Nullable<Microsoft.Build.Framework.MessageImportance> messageImportance=default(System.Nullable<Microsoft.Build.Framework.MessageImportance>));
+        public abstract void LogWarning(string warning);
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct PluginTargetResult
+    {
+        public PluginTargetResult(string targetName, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Framework.ITaskItem2> taskItems, Microsoft.Build.Execution.BuildResultCode resultCode) { throw null;}
+        public Microsoft.Build.Execution.BuildResultCode ResultCode { get { throw null; } }
+        public string TargetName { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Framework.ITaskItem2> TaskItems { get { throw null; } }
+    }
+    public abstract partial class ProjectCacheBase
+    {
+        protected ProjectCacheBase() { }
+        public abstract System.Threading.Tasks.Task BeginBuildAsync(Microsoft.Build.Experimental.ProjectCache.CacheContext context, Microsoft.Build.Experimental.ProjectCache.PluginLoggerBase logger, System.Threading.CancellationToken cancellationToken);
+        public abstract System.Threading.Tasks.Task EndBuildAsync(Microsoft.Build.Experimental.ProjectCache.PluginLoggerBase logger, System.Threading.CancellationToken cancellationToken);
+        public abstract System.Threading.Tasks.Task<Microsoft.Build.Experimental.ProjectCache.CacheResult> GetCacheResultAsync(Microsoft.Build.Execution.BuildRequestData buildRequest, Microsoft.Build.Experimental.ProjectCache.PluginLoggerBase logger, System.Threading.CancellationToken cancellationToken);
+    }
+    public partial class ProjectCacheDescriptor
+    {
+        public ProjectCacheDescriptor(string pluginPath, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings=null) { }
+        public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> EntryPoints { get { throw null; } }
+        public string PluginPath { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyDictionary<string, string> PluginSettings { get { throw null; } }
+        public Microsoft.Build.Graph.ProjectGraph ProjectGraph { get { throw null; } }
+        public override string ToString() { throw null; }
+    }
+    public partial class ProxyTargets
+    {
+        public ProxyTargets(System.Collections.Generic.IReadOnlyDictionary<string, string> proxyTargetToRealTargetMap) { }
+        public System.Collections.Generic.IReadOnlyDictionary<string, string> ProxyTargetToRealTargetMap { get { throw null; } }
     }
 }
 namespace Microsoft.Build.FileSystem

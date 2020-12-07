@@ -6,6 +6,9 @@ using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using System.Globalization;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Definition;
 
 namespace Microsoft.Build.Execution
 {

@@ -118,6 +118,13 @@ namespace Microsoft.Build.Shared
         internal const string InnerBuildPropertyValues = nameof(InnerBuildPropertyValues);
     }
 
+    // TODO: Remove these when VS gets updated to setup project cache plugins.
+    internal static class DesignTimeProperties
+    {
+        internal const string DesignTimeBuild = nameof(DesignTimeBuild);
+        internal const string BuildingProject = nameof(BuildingProject);
+    }
+
     internal static class ItemTypeNames
     {
         /// <summary>
@@ -131,6 +138,11 @@ namespace Microsoft.Build.Shared
         internal const string ProjectReferenceTargets = nameof(ProjectReferenceTargets);
 
         internal const string GraphIsolationExemptReference = nameof(GraphIsolationExemptReference);
+
+        /// <summary>
+        /// Declares a project cache plugin and its configuration.
+        /// </summary>
+        internal const string ProjectCachePlugin = nameof(ProjectCachePlugin);
     }
 
     /// <summary>

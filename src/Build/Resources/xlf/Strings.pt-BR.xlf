@@ -132,6 +132,11 @@
         <target state="translated">"Os objetos EvaluationContext criados com SharingPolicy.Isolable não são compatíveis com o recebimento de um sistema de arquivos MSBuildFileSystemBase."</target>
         <note />
       </trans-unit>
+      <trans-unit id="LoadingProjectCachePlugin">
+        <source>"Loading the following project cache plugin: {0}"</source>
+        <target state="new">"Loading the following project cache plugin: {0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">O detalhamento do log está definido como: {0}.</target>
@@ -192,6 +197,28 @@
         <target state="translated">O método {0} não pode ser chamado com uma coleção que contém nomes de destino nulos ou vazios.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OnlyOneCachePluginMustBeSpecified">
+        <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
+        <target state="new">MSB4265: A single project cache plugin must be specified but multiple where found: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheInitializationFailed">
+        <source>MSB4266: The project cache failed during initialization.</source>
+        <target state="new">MSB4266: The project cache failed during initialization.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryFailed">
+        <source>MSB4267: The project cache failed while being queried for the following project (keep in mind that the cache is queried in parallel so this specific project might not be the cause):
+    {0}</source>
+        <target state="new">MSB4267: The project cache failed while being queried for the following project (keep in mind that the cache is queried in parallel so this specific project might not be the cause):
+    {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheShutdownFailed">
+        <source>MSB4268:The project cache failed during shutdown.</source>
+        <target state="new">MSB4268:The project cache failed during shutdown.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: O ProjectGraph não tem suporte para os itens ProjectReference com o conjunto de metadados ToolsVersion. O ProjectReference "{0}" foi encontrado com ToolsVersion no arquivo "{1}"</target>
@@ -211,6 +238,11 @@
         <note>
       LOCALIZATION: {0} and {1} are file paths
     </note>
+      </trans-unit>
+      <trans-unit id="SolutionPathPropertyMustBeSetOnVSSubmissions">
+        <source>"MSB4264: Invalid $(SolutionPath) property: {0}"</source>
+        <target state="new">"MSB4264: Invalid $(SolutionPath) property: {0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
         <source>MSB4261: Multiple entry points with solutions detected: {0}. If static graph is loaded from a solution, that that solution must be the only entry point.</source>

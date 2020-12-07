@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Globalization;
@@ -743,6 +744,24 @@ namespace Microsoft.Build.Shared
                 throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
             }
         }
+
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// Throws an ArgumentNullException if the given string parameter is null
+        /// and ArgumentException if it has zero length.
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="parameterName"></param>
+        internal static void VerifyThrowArgumentLength<T>(IReadOnlyCollection<T> parameter, string parameterName)
+        {
+            VerifyThrowArgumentNull(parameter, parameterName);
+
+            if (parameter.Count == 0 && s_throwExceptions)
+            {
+                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
+            }
+        }
+#endif
         
         /// <summary>
         /// Throws an ArgumentNullException if the given string parameter is null

@@ -1,0 +1,104 @@
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#nullable enable
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+
+namespace Microsoft.Build.Experimental.ProjectCache
+{
+    public enum CacheResultType
+    {
+        CacheHit,
+        CacheMiss,
+        CacheNotApplicable,
+        CacheError
+    }
+
+    /// <summary>
+    ///     Only cache hits have non null build result information.
+    /// </summary>
+    public class CacheResult
+    {
+        private CacheResult(
+            CacheResultType resultType,
+            BuildResult? buildResult = null,
+            ProxyTargets? proxyTargets = null)
+        {
+            if (resultType == CacheResultType.CacheHit)
+            {
+                ErrorUtilities.VerifyThrow(
+                    buildResult != null ^ proxyTargets != null,
+                    "Either buildResult is specified, or proxyTargets is specified. Not both.");
+            }
+
+            ResultType = resultType;
+            BuildResult = buildResult;
+            ProxyTargets = proxyTargets;
+        }
+
+        internal CacheResultType ResultType { get; }
+        internal BuildResult? BuildResult { get; }
+        internal ProxyTargets? ProxyTargets { get; }
+
+        public static CacheResult IndicateCacheHit(BuildResult buildResult)
+        {
+            return new CacheResult(CacheResultType.CacheHit, buildResult);
+        }
+
+        public static CacheResult IndicateCacheHit(ProxyTargets proxyTargets)
+        {
+            return new CacheResult(CacheResultType.CacheHit, proxyTargets: proxyTargets);
+        }
+
+        public static CacheResult IndicateCacheHit(IReadOnlyCollection<PluginTargetResult> targetResults)
+        {
+            return new CacheResult(CacheResultType.CacheHit, ConstructBuildResult(targetResults));
+        }
+
+        public static CacheResult IndicateNonCacheHit(CacheResultType resultType)
+        {
+            ErrorUtilities.VerifyThrowInvalidOperation(resultType != CacheResultType.CacheHit, "CantBeCacheHit");
+            return new CacheResult(resultType);
+        }
+
+        private static BuildResult ConstructBuildResult(IReadOnlyCollection<PluginTargetResult> targetResults)
+        {
+            var buildResult = new BuildResult();
+
+            foreach (var pluginTargetResult in targetResults)
+            {
+                buildResult.AddResultsForTarget(
+                    pluginTargetResult.TargetName,
+                    new TargetResult(
+                        pluginTargetResult.TaskItems.Select(ti => CreateTaskItem(ti)).ToArray(),
+                        CreateWorkUnitResult(pluginTargetResult.ResultCode)));
+            }
+
+            return buildResult;
+        }
+
+        private static WorkUnitResult CreateWorkUnitResult(BuildResultCode resultCode)
+        {
+            return resultCode == BuildResultCode.Success
+                ? new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null)
+                : new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
+        }
+
+        private static ProjectItemInstance.TaskItem CreateTaskItem(ITaskItem2 taskItemInterface)
+        {
+            var taskItem = new ProjectItemInstance.TaskItem(taskItemInterface.EvaluatedIncludeEscaped, null);
+
+            foreach (string metadataName in taskItemInterface.MetadataNames)
+            {
+                taskItem.SetMetadata(metadataName, taskItemInterface.GetMetadataValueEscaped(metadataName));
+            }
+
+            return taskItem;
+        }
+    }
+}

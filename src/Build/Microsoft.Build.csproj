@@ -40,6 +40,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="Microsoft.Bcl.HashCode" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.IO.Compression" />
@@ -156,8 +157,9 @@
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
+    <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
-    <Compile Include="FileSystem\MSBuildFileSystemBase.cs" />
+    <Compile Include="FileSystem\*.cs" />
     <Compile Include="Utilities\NuGetFrameworkWrapper.cs" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectUsingTaskParameterElementLink.cs" />
     <Compile Include="ObjectModelRemoting\ExternalProjectsProvider.cs" />
@@ -264,7 +266,6 @@
     <Compile Include="Evaluation\LazyItemEvaluator.ItemFactoryWrapper.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperation.cs" />
     <Compile Include="Evaluation\MetadataReference.cs" />
-    <Compile Include="FileSystem\MSBuildFileSystemAdapter.cs" />
     <Compile Include="Graph\ProjectGraphEntryPoint.cs" />
     <Compile Include="Graph\ProjectGraph.cs" />
     <Compile Include="Graph\ProjectGraphNode.cs" />
