@@ -145,6 +145,8 @@ namespace System.Collections.Immutable
             {
                 clone[item.Key] = item.Value;
             }
+
+            return clone;
         }
 
         internal ImmutableDictionary<K, V> Remove(K key)
