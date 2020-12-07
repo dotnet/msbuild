@@ -577,8 +577,7 @@ namespace Microsoft.Build.Tasks
                         string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stateFile.ToString()), relativePath));
                         if (fileExists(fullPath))
                         {
-                            // Correct file path and timestamp
-                            fileState.LastModified = retVal.getLastWriteTime(fullPath);
+                            // Correct file path
                             retVal.instanceLocalFileStateCache[fullPath] = fileState;
                             assembliesFound.Add(relativePath);
                         }
@@ -609,13 +608,13 @@ namespace Microsoft.Build.Tasks
             SerializeCache(stateFile, log);
         }
 
-            /// <summary>
-            /// Cached implementation of GetDirectories.
-            /// </summary>
-            /// <param name="path"></param>
-            /// <param name="pattern"></param>
-            /// <returns></returns>
-            private string[] GetDirectories(string path, string pattern)
+        /// <summary>
+        /// Cached implementation of GetDirectories.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
+        private string[] GetDirectories(string path, string pattern)
         {
             // Only cache the *. pattern. This is by far the most common pattern
             // and generalized caching would require a call to Path.Combine which
