@@ -1103,7 +1103,8 @@ namespace Microsoft.Build.BackEnd
                         new BuildEventFileInfo(parameterLocation),
                         "UnexpectedTaskAttribute",
                         parameterName,
-                        _taskName
+                        _taskName,
+                        _taskFactoryWrapper.TaskFactoryLoadedType.Assembly.AssemblyName
                         );
                 }
             }
