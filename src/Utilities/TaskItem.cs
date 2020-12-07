@@ -313,7 +313,7 @@ namespace Microsoft.Build.Utilities
                     else
                     {
                         copiedMetadata = destinationAsTaskItem.Metadata.Clone();
-                        copiedMetadata.SetItems(Metadata.Where(entry => !destinationAsTaskItem.Metadata.ContainsKey(entry.Key)));
+                        copiedMetadata.SetItems(Metadata.Where(entry => !destinationAsTaskItem.Metadata.TryGetValue(entry.Key, out string val) || string.IsNullOrEmpty(val)));
                     }
                     destinationAsTaskItem.Metadata = copiedMetadata;
                 }

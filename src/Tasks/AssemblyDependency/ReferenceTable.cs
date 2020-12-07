@@ -2935,37 +2935,28 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Some metadata should not be forwarded between the parent and child items.
         /// </summary>
+        /// <returns>The metadata that were removed.</returns>
         private static Dictionary<string, string> RemoveNonForwardableMetadata(ITaskItem item)
         {
             Dictionary<string, string> removedMetadata = new Dictionary<string, string>();
-            string meta = item.GetMetadata(ItemMetadataNames.winmdImplmentationFile);
-            if (!String.IsNullOrEmpty(meta))
-            {
-                removedMetadata.Add(ItemMetadataNames.winmdImplmentationFile, meta);
-            }
-            item.RemoveMetadata(ItemMetadataNames.winmdImplmentationFile);
-            meta = item.GetMetadata(ItemMetadataNames.imageRuntime);
-            if (!String.IsNullOrEmpty(meta))
-            {
-                removedMetadata.Add(ItemMetadataNames.imageRuntime, meta);
-            }
-            item.RemoveMetadata(ItemMetadataNames.imageRuntime);
-            meta = item.GetMetadata(ItemMetadataNames.winMDFile);
-            if (!String.IsNullOrEmpty(meta))
-            {
-                removedMetadata.Add(ItemMetadataNames.winMDFile, meta);
-            }
-            item.RemoveMetadata(ItemMetadataNames.winMDFile);
+            RemoveMetadatum(ItemMetadataNames.winmdImplmentationFile, item, removedMetadata);
+            RemoveMetadatum(ItemMetadataNames.imageRuntime, item, removedMetadata);
+            RemoveMetadatum(ItemMetadataNames.winMDFile, item, removedMetadata);
             if (!Traits.Instance.EscapeHatches.TargetPathForRelatedFiles)
             {
-                meta = item.GetMetadata(ItemMetadataNames.targetPath);
-                if (!String.IsNullOrEmpty(meta))
-                {
-                    removedMetadata.Add(ItemMetadataNames.targetPath, meta);
-                }
-                item.RemoveMetadata(ItemMetadataNames.targetPath);
+                RemoveMetadatum(ItemMetadataNames.targetPath, item, removedMetadata);
             }
             return removedMetadata;
+        }
+
+        private static void RemoveMetadatum(string key, ITaskItem item, Dictionary<string, string> removedMetadata)
+        {
+            string meta = item.GetMetadata(key);
+            if (!String.IsNullOrEmpty(meta))
+            {
+                removedMetadata.Add(key, meta);
+            }
+            item.RemoveMetadata(key);
         }
 
         /// <summary>
