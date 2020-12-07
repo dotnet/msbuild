@@ -1172,10 +1172,5 @@ namespace Microsoft.Build.CommandLine
         {
             // Do nothing: no resource management in OOP nodes
         }
-
-        public void BlockingWaitForCore()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
