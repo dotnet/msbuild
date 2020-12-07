@@ -73,17 +73,16 @@ namespace Microsoft.Build.Eventing
             WriteEvent(6, projectPath, targets);
         }
 
-        [Event(7, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        [Event(7, Keywords = Keywords.All)]
         public void RarComputeClosureStart()
         {
             WriteEvent(7);
         }
 
-        // If there are failures in ComputeClosure, this count may be inaccurate.
-        [Event(8, Keywords = Keywords.All | Keywords.PerformanceLog)]
-        public void RarComputeClosureStop(int referencesResolved)
+        [Event(8, Keywords = Keywords.All)]
+        public void RarComputeClosureStop()
         {
-            WriteEvent(8, referencesResolved);
+            WriteEvent(8);
         }
 
         /// <param name="condition">The condition being evaluated.</param>

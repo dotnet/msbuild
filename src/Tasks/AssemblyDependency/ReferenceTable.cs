@@ -406,8 +406,9 @@ namespace Microsoft.Build.Tasks
         internal void AddReference(AssemblyNameExtension assemblyName, Reference reference)
         {
             ErrorUtilities.VerifyThrow(assemblyName.Name != null, "Got an empty assembly name.");
-            if (References.TryGetValue(assemblyName, out Reference referenceGoingToBeReplaced))
+            if (References.ContainsKey(assemblyName))
             {
+                Reference referenceGoingToBeReplaced = References[assemblyName];
                 foreach (AssemblyRemapping pair in referenceGoingToBeReplaced.RemappedAssemblyNames())
                 {
                     reference.AddRemapping(pair.From, pair.To);
@@ -1285,7 +1286,7 @@ namespace Microsoft.Build.Tasks
             var assembliesConsideredAndRejected = new List<ResolutionSearchLocation>();
 
             // First, look for the dependency in the parents' directories. Unless they are resolved from the GAC or assemblyFoldersEx then 
-            // we should make sure we use the GAC and assemblyFolders resolvers themselves rather than a directory resolver to find the reference.
+            // we should make sure we use the GAC and assemblyFolders resolvers themserves rather than a directory resolver to find the reference.
             // This way we dont get assemblies pulled from the GAC or AssemblyFolders but dont have the marking that they were pulled form there.
             var parentReferenceFolders = new List<string>();
             foreach (Reference parentReference in reference.GetDependees())
@@ -1631,26 +1632,27 @@ namespace Microsoft.Build.Tasks
         )
         {
             MSBuildEventSource.Log.RarComputeClosureStart();
-            References.Clear();
-            _externallyResolvedPrimaryReferences.Clear();
-            SkippedFindingExternallyResolvedDependencies = false;
+            {
+                References.Clear();
+                _externallyResolvedPrimaryReferences.Clear();
+                SkippedFindingExternallyResolvedDependencies = false;
 
-            _remappedAssemblies = remappedAssembliesValue;
-            SetPrimaryItems(referenceAssemblyFiles, referenceAssemblyNames, exceptions);
+                _remappedAssemblies = remappedAssembliesValue;
+                SetPrimaryItems(referenceAssemblyFiles, referenceAssemblyNames, exceptions);
 
-            MSBuildEventSource.Log.RarComputeClosureStop(ComputeClosure());
+                ComputeClosure();
+            }
+            MSBuildEventSource.Log.RarComputeClosureStop();
         }
 
         /// <summary>
         /// Implementation of ComputeClosure.
-        /// <returns>The number of references computed in this call.</returns>
         /// </summary>
-        private int ComputeClosure()
+        private void ComputeClosure()
         {
             bool moreResolvable;
             int moreResolvableIterations = 0;
             const int maxIterations = 100000; // Wait for a ridiculously large number of iterations before bailing out.
-            int filesResolved = 0;
 
             do
             {
@@ -1660,7 +1662,7 @@ namespace Microsoft.Build.Tasks
                 do
                 {
                     // Resolve all references.
-                    filesResolved += ResolveAssemblyFilenames();
+                    ResolveAssemblyFilenames();
 
                     // Find prerequisites.
                     moreDependencies = FindAssociatedFiles();
@@ -1687,7 +1689,6 @@ namespace Microsoft.Build.Tasks
                 ++moreResolvableIterations;
                 ErrorUtilities.VerifyThrow(moreResolvableIterations < maxIterations, "Maximum iterations exceeded while looking for resolvable references.");
             } while (moreResolvable);
-            return filesResolved;
         }
 
         /// <summary>
@@ -1696,6 +1697,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool FindAssociatedFiles()
         {
+            bool newDependencies = false;
+
             var newEntries = new List<KeyValuePair<AssemblyNameExtension, Reference>>();
 
             foreach (Reference reference in References.Values)
@@ -1766,12 +1769,7 @@ namespace Microsoft.Build.Tasks
                             // If something was found, then break out and start fresh.
                             if (newEntries.Count > 0)
                             {
-                                // Add each new dependency found.
-                                foreach (KeyValuePair<AssemblyNameExtension, Reference> newEntry in newEntries)
-                                {
-                                    AddReference(newEntry.Key, newEntry.Value);
-                                }
-                                return true;
+                                break;
                             }
                         }
                     }
@@ -1783,26 +1781,31 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return false;
+            // Add each new dependency found.
+            foreach (KeyValuePair<AssemblyNameExtension, Reference> newEntry in newEntries)
+            {
+                newDependencies = true;
+                AddReference(newEntry.Key, newEntry.Value);
+            }
+
+            return newDependencies;
         }
 
         /// <summary>
         /// Resolve all references that have not been resolved yet to real files on disk.
         /// </summary>
-        private int ResolveAssemblyFilenames()
+        private void ResolveAssemblyFilenames()
         {
-            int referencesResolved = 0;
-            foreach (KeyValuePair<AssemblyNameExtension, Reference> kvp in References)
+            foreach (AssemblyNameExtension assemblyName in References.Keys)
             {
-                Reference reference = kvp.Value;
+                Reference reference = GetReference(assemblyName);
+
                 // Has this reference been resolved to a file name?
                 if (!reference.IsResolved && !reference.IsUnresolvable)
                 {
-                    ResolveReference(kvp.Key, null, reference);
-                    referencesResolved++;
+                    ResolveReference(assemblyName, null, reference);
                 }
             }
-            return referencesResolved;
         }
 
         /// <summary>
