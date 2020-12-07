@@ -200,6 +200,10 @@
     <value>MSB5008: Error parsing the solution configuration section in solution file. The entry "{0}" is invalid.</value>
     <comment>{StrBegin="MSB5008: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
+  <data name="SolutionParseNestedProjectErrorWithNameAndGuid" Visibility="Public">
+    <value>MSB5009: Error parsing the project "{0}" section with GUID: "{1}". It is nested under "{2}" but that project is not found in the solution.</value>
+    <comment>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
   <data name="SolutionParseNestedProjectError" Visibility="Public">
     <value>MSB5009: Error parsing the nested project section in solution file.</value>
     <comment>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</comment>

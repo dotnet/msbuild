@@ -3,7 +3,6 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using System;
 using System.Diagnostics;
 namespace Microsoft.Build.UnitTests
 {

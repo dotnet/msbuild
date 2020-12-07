@@ -4,8 +4,11 @@
     <id>MsBuild.Engine.Corext</id>
     <summary>Aggregate of MsBuild.Corext with the latest MSBuild team deliverables</summary>
     <description>Use this package to update your existing MsBuild.Corext package to the latest MSBuild binaries and core build files.</description>
+    <projectUrl>$projectUrl$</projectUrl>
+    <license type="expression">$licenseExpression$</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <authors>msbtm@microsoft.com</authors>
+    <authors>Microsoft</authors>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <version>$version$</version>
   </metadata>
 
@@ -40,13 +43,6 @@
     <file src="$X86BinPath$/System.Resources.Extensions.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/System.Runtime.CompilerServices.Unsafe.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/System.Threading.Tasks.Dataflow.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$/StreamJsonRpc.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$/Nerdbank.Streams.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$/System.IO.Pipelines.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$/Microsoft.VisualStudio.Threading.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$/Microsoft.VisualStudio.Validation.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$/MessagePack.dll" target="v15.0/bin" />
-    <file src="$X86BinPath$/MessagePack.Annotations.dll" target="v15.0/bin" />
 
     <file src="$X86BinPath$/MSBuild/Microsoft.Build.Core.xsd" target="v15.0/bin/MSBuild" />
     <file src="$X86BinPath$/MSBuild/Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/MSBuild" />
@@ -101,13 +97,6 @@
     <file src="$X86BinPath$/System.Resources.Extensions.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/System.Runtime.CompilerServices.Unsafe.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/System.Threading.Tasks.Dataflow.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$/StreamJsonRpc.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$/Nerdbank.Streams.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$/System.IO.Pipelines.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$/Microsoft.VisualStudio.Threading.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$/Microsoft.VisualStudio.Validation.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$/MessagePack.dll" target="v15.0/bin/amd64" />
-    <file src="$X86BinPath$/MessagePack.Annotations.dll" target="v15.0/bin/amd64" />
 
     <file src="$X86BinPath$/MSBuild/Microsoft.Build.Core.xsd" target="v15.0/bin/amd64/MSBuild" />
     <file src="$X86BinPath$/MSBuild/Microsoft.Build.CommonTypes.xsd" target="v15.0/bin/amd64/MSBuild" />

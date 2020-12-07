@@ -8,9 +8,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Reflection;
 using Microsoft.Win32;
@@ -435,57 +433,77 @@ namespace Microsoft.Build.Shared
                 }
                 else
                 {
-                    try
+                    ProcessorArchitectures processorArchitecture = ProcessorArchitectures.Unknown;
+#if !NET35
+                    // Get the architecture from the runtime.
+                    processorArchitecture = RuntimeInformation.OSArchitecture switch
                     {
-                        // On Unix run 'uname -m' to get the architecture. It's common for Linux and Mac
-                        using (
-                            var proc =
-                                Process.Start(
-                                    new ProcessStartInfo("uname")
-                                    {
-                                        Arguments = "-m",
-                                        UseShellExecute = false,
-                                        RedirectStandardOutput = true,
-                                        CreateNoWindow = true
-                                    }))
+                        Architecture.Arm => ProcessorArchitectures.ARM,
+                        Architecture.Arm64 =>  ProcessorArchitectures.ARM64,
+                        Architecture.X64 => ProcessorArchitectures.X64,
+                        Architecture.X86 => ProcessorArchitectures.X86,
+                        _ => ProcessorArchitectures.Unknown,
+                    };
+#endif
+                    // Fall back to 'uname -m' to get the architecture.
+                    if (processorArchitecture == ProcessorArchitectures.Unknown)
+                    {
+                        try
                         {
-                            string arch = null;
-                            if (proc != null)
+                            // On Unix run 'uname -m' to get the architecture. It's common for Linux and Mac
+                            using (
+                                var proc =
+                                    Process.Start(
+                                        new ProcessStartInfo("uname")
+                                        {
+                                            Arguments = "-m",
+                                            UseShellExecute = false,
+                                            RedirectStandardOutput = true,
+                                            CreateNoWindow = true
+                                        }))
                             {
-                                // Since uname -m simply returns kernel property, it should be quick.
-                                // 1 second is the best guess for a safe timeout.
-                                proc.WaitForExit(1000);
-                                arch = proc.StandardOutput.ReadLine();
-                            }
+                                string arch = null;
+                                if (proc != null)
+                                {
+                                    // Since uname -m simply returns kernel property, it should be quick.
+                                    // 1 second is the best guess for a safe timeout.
+                                    proc.WaitForExit(1000);
+                                    arch = proc.StandardOutput.ReadLine();
+                                }
 
-                            if (!string.IsNullOrEmpty(arch))
-                            {
-                                if (arch.StartsWith("x86_64", StringComparison.OrdinalIgnoreCase))
+                                if (!string.IsNullOrEmpty(arch))
                                 {
-                                    ProcessorArchitectureType = ProcessorArchitectures.X64;
-                                }
-                                else if (arch.StartsWith("ia64", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    ProcessorArchitectureType = ProcessorArchitectures.IA64;
-                                }
-                                else if (arch.StartsWith("arm", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    ProcessorArchitectureType = ProcessorArchitectures.ARM;
-                                }
-                                else if (arch.StartsWith("i", StringComparison.OrdinalIgnoreCase)
-                                         && arch.EndsWith("86", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    ProcessorArchitectureType = ProcessorArchitectures.X86;
+                                    if (arch.StartsWith("x86_64", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        ProcessorArchitectureType = ProcessorArchitectures.X64;
+                                    }
+                                    else if (arch.StartsWith("ia64", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        ProcessorArchitectureType = ProcessorArchitectures.IA64;
+                                    }
+                                    else if (arch.StartsWith("arm", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        ProcessorArchitectureType = ProcessorArchitectures.ARM;
+                                    }
+                                    else if (arch.StartsWith("aarch64", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        ProcessorArchitectureType = ProcessorArchitectures.ARM64;
+                                    }
+                                    else if (arch.StartsWith("i", StringComparison.OrdinalIgnoreCase)
+                                            && arch.EndsWith("86", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        ProcessorArchitectureType = ProcessorArchitectures.X86;
+                                    }
                                 }
                             }
                         }
-                    }
-                    catch
-                    {
-                        ProcessorArchitectureType = ProcessorArchitectures.Unknown;
+                        catch
+                        {
+                            // Best effort: fall back to Unknown
+                        }
                     }
 
-                    ProcessorArchitectureTypeNative = ProcessorArchitectureType;
+                    ProcessorArchitectureTypeNative = ProcessorArchitectureType = processorArchitecture;
                 }
             }
         }

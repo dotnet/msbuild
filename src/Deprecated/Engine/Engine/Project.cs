@@ -3,19 +3,12 @@
 
 using System;
 using System.Xml;
-using System.Xml.Schema;
 using System.Security;
-using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.Reflection;
-using System.Security.Permissions;
-using System.Resources;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Globalization;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;

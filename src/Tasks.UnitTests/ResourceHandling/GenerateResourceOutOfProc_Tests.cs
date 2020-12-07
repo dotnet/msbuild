@@ -7,8 +7,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Text.RegularExpressions;
-using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 using System.IO;

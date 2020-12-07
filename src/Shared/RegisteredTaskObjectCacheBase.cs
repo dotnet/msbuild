@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using Microsoft.Build.Framework;
 
 #if BUILD_ENGINE

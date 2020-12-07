@@ -48,14 +48,7 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)System.Resources.Extensions.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Runtime.CompilerServices.Unsafe.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all vs.file.ngenPriority=1
-  file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all vs.file.ngenPriority=1
-  file source=$(X86BinPath)StreamJsonRpc.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)Nerdbank.Streams.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.IO.Pipelines.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)Microsoft.VisualStudio.Threading.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)Microsoft.VisualStudio.Validation.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)MessagePack.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)MessagePack.Annotations.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks
@@ -205,13 +198,6 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X86BinPath)System.Runtime.CompilerServices.Unsafe.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)StreamJsonRpc.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)Nerdbank.Streams.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.IO.Pipelines.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)Microsoft.VisualStudio.Threading.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)Microsoft.VisualStudio.Validation.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)MessagePack.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)MessagePack.Annotations.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks

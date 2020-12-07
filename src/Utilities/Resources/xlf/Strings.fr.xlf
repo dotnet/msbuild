@@ -99,12 +99,12 @@
       </trans-unit>
       <trans-unit id="Tracking_LogFilesNotAvailable">
         <source>Tracking logs are not available, minimal rebuild will be disabled.</source>
-        <target state="translated">Les journaux de suivi ne sont pas disponibles, la régénération minimale sera désactivée.</target>
+        <target state="translated">Les journaux de suivi ne sont pas disponibles, la regénération minimale sera désactivée.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_MissingInputs">
         <source>Missing input files detected, minimal rebuild will be disabled.</source>
-        <target state="translated">Fichiers d'entrée manquants détectés, la régénération minimale sera désactivée.</target>
+        <target state="translated">Fichiers d'entrée manquants détectés, la regénération minimale sera désactivée.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_MissingOutputs">
@@ -119,7 +119,7 @@
       </trans-unit>
       <trans-unit id="Tracking_TrackingLogNotAvailable">
         <source>Write Tracking log not available, minimal rebuild will be disabled.</source>
-        <target state="translated">Journal de suivi d'écriture non disponible, la régénération minimale sera désactivée.</target>
+        <target state="translated">Journal de suivi d'écriture non disponible, la regénération minimale sera désactivée.</target>
         <note />
       </trans-unit>
       <trans-unit id="Tracking_WriteTrackingLogs">
@@ -259,12 +259,12 @@
       </trans-unit>
       <trans-unit id="Tracking_RebuildingDueToInvalidTLog">
         <source>MSB6008: Forcing a rebuild of all sources due to an error with the tracking logs. {0}</source>
-        <target state="translated">MSB6008: régénération forcée de toutes les sources en raison d'une erreur avec les journaux de suivi. {0}</target>
+        <target state="translated">MSB6008: regénération forcée de toutes les sources en raison d'une erreur avec les journaux de suivi. {0}</target>
         <note>{StrBegin="MSB6008: "}</note>
       </trans-unit>
       <trans-unit id="Tracking_RebuildingDueToInvalidTLogContents">
         <source>MSB6009: Forcing a rebuild of all source files due to the contents of "{0}" being invalid.</source>
-        <target state="translated">MSB6009: régénération forcée de tous les fichiers sources en raison d'un contenu de "{0}" non valide.</target>
+        <target state="translated">MSB6009: regénération forcée de tous les fichiers sources en raison d'un contenu de "{0}" non valide.</target>
         <note>{StrBegin="MSB6009: "}</note>
       </trans-unit>
       <trans-unit id="MuxLogger_BuildFinishedFailure">

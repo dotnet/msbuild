@@ -64,14 +64,14 @@
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
         <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</source>
-        <target state="new">Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</target>
+        <target state="translated">Для переменной среды MSBUILDDISABLEFEATURESFROMVERSION задан недопустимый формат. Все версии наборов рискованных изменений будут включены. Введенное значение: {0}.</target>
         <note>
        Value should be of the format: xx.yy
     </note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
         <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}.</source>
-        <target state="new">Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}.</target>
+        <target state="translated">Для переменной среды MSBUILDDISABLEFEATURESFROMVERSION задана версия, которая исключена из ротации. Будет использована версия набора рискованных изменений по умолчанию: {0}. Введенное значение: {1}.</target>
         <note>
        Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current Change Waves are.
     </note>
@@ -104,6 +104,11 @@
         <target state="translated">MSB4258: произошла ошибка при записи выходного файла кэша результатов в пути "{0}": {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="IllFormedPropertySpaceInCondition">
+        <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
+        <target state="new">MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</target>
+        <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
         <target state="translated">MSB4255: следующие входные файлы кэша результатов не существуют: "{0}"</target>
@@ -116,7 +121,7 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
-        <target state="new">"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</target>
+        <target state="translated">"Объекты EvaluationContext, созданные с помощью SharingPolicy.Isolated, не поддерживают передачу в файловую систему MSBuildFileSystemBase."</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -190,11 +195,6 @@
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Начальное значение свойства: $({0})="{1}" Источник: {2}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RarControllerReflectionError">
-        <source>Couldn't create an instance of IRarController for '{0}' type</source>
-        <target state="new">Couldn't create an instance of IRarController for '{0}' type</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">

@@ -4,8 +4,6 @@
 using System;
 using System.IO;
 using System.Xml;
-using System.Collections;
-using System.Text.RegularExpressions;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;

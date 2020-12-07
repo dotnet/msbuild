@@ -103,6 +103,12 @@ jobs:
     inputs:
       filename: 'eng/cibuild.cmd'
       arguments: '-configuration Release -test'
+  - task: RichCodeNavIndexer@0
+    displayName: RichCodeNav Upload
+    inputs:
+      languages: 'csharp'
+    continueOnError: true
+    condition: succeeded()
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:

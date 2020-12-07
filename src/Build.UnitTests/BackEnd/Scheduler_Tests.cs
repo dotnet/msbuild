@@ -3,16 +3,11 @@
 
 using System;
 using System.Xml;
-using System.Text;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -20,8 +15,6 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-    using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
     using Microsoft.Build.Unittest;
 
     /// <summary>

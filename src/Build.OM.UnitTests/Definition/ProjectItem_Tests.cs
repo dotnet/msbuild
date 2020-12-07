@@ -3,12 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -2911,6 +2909,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataC, items[4]);
         }
 
+        [Fact]
+        public void OptimizedRemoveOperationRespectsCondition()
+        {
+            string content = @"<TheItem Include=""InitialValue"" />
+                               <TheItem Remove=""@(TheItem)"" Condition=""false"" />
+                               <TheItem Include=""ReplacedValue"" Condition=""false"" /> ";
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, true);
+
+            items[0].EvaluatedInclude.ShouldBe("InitialValue");
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -2957,7 +2966,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void UpdateFromReferencedItemShouldBeCaseInsensitive()
         {
             string content = @"
-                              <from Include='a'>
+                              <from Include='A'>
                                   <metadata>m1_contents</metadata>
                               </from>
 

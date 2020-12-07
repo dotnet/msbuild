@@ -7,9 +7,6 @@ using System.Collections.Generic;
 using System.Configuration;
 #endif
 using System.IO;
-using System.Text;
-using System.Globalization;
-using System.Reflection;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 

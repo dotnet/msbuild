@@ -3,13 +3,8 @@
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
-    using System.Collections.Generic;
-    using System.Collections.Immutable;
     using System.Linq;
-    using System.Text.RegularExpressions;
-    using Microsoft.Build.Evaluation;
     using Xunit;
-    using Xunit.Abstractions;
 
     public class LinkedProjectCollection_Tests : IClassFixture<LinkedProjectCollection_Tests.MyTestCollectionGroup>
     {

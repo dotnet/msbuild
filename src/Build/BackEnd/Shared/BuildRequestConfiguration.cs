@@ -10,8 +10,6 @@ using Microsoft.Build.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared.FileSystem;
