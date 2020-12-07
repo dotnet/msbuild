@@ -14,7 +14,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     public static class TemplateUsageHelp
     {
-        public static void ShowInvocationExamples(ListOrHelpTemplateListResolutionResult templateResolutionResult, IHostSpecificDataLoader hostDataLoader, string commandName)
+        public static void ShowInvocationExamples(TemplateListResolutionResult templateResolutionResult, IHostSpecificDataLoader hostDataLoader, string commandName)
         {
             const int ExamplesToShow = 2;
             IReadOnlyList<string> preferredNameList = new List<string>() { "mvc" };
@@ -136,7 +136,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 return null;
             }
 
-            TemplateListResolver.ParseTemplateArgs(templateInfo, hostDataLoader, commandInput);
+            TemplateResolver.ParseTemplateArgs(templateInfo, hostDataLoader, commandInput);
             allParams = templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IReadOnlyList<string> defaultParamsWithInvalidValues);
             templateCreator.ResolveUserParameters(template, allParams, commandInput.InputTemplateParams, out userParamsWithInvalidValues);
             hasPostActionScriptRunner = CheckIfTemplateHasScriptRunningPostActions(template, environmentSettings, commandInput, templateCreator);

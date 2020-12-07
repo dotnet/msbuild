@@ -17,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
     {
         public static void ShowTemplateGroupHelp(IReadOnlyCollection<ITemplateMatchInfo> templateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, bool showImplicitlyHiddenParams = false)
         {
-            if (templateGroup.Count == 0 || !TemplateListResolver.AreAllTemplatesSameGroupIdentity(templateGroup))
+            if (templateGroup.Count == 0 || !TemplateResolver.AreAllTemplatesSameGroupIdentity(templateGroup))
             {
                 return;
             }

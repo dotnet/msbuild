@@ -253,7 +253,7 @@ namespace Microsoft.TemplateEngine.Cli
         // TODO: make sure help / usage works right in these cases.
         private CreationResultStatus EnterMaintenanceFlow()
         {
-            if (!TemplateListResolver.ValidateRemainingParameters(_commandInput, out IReadOnlyList<string> invalidParams))
+            if (!TemplateResolver.ValidateRemainingParameters(_commandInput, out IReadOnlyList<string> invalidParams))
             {
                 HelpForTemplateResolution.DisplayInvalidParameters(invalidParams);
                 if (_commandInput.IsHelpFlagSpecified)
@@ -281,7 +281,7 @@ namespace Microsoft.TemplateEngine.Cli
                 if (installResult == CreationResultStatus.Success)
                 {
                     _settingsLoader.Reload();
-                    ListOrHelpTemplateListResolutionResult resolutionResult = TemplateListResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
+                    TemplateListResolutionResult resolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
                     HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(resolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, showUsageHelp: false);
                 }
 
@@ -289,7 +289,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             // No other cases specified, we've fallen through to "Optional usage help + List"
-            ListOrHelpTemplateListResolutionResult templateResolutionResult = TemplateListResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
+            TemplateListResolutionResult templateResolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
             HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, showUsageHelp: _commandInput.IsHelpFlagSpecified);
 
             return CreationResultStatus.Success;
@@ -390,11 +390,11 @@ namespace Microsoft.TemplateEngine.Cli
         {
             if (_commandInput.IsListFlagSpecified || _commandInput.IsHelpFlagSpecified)
             {
-                ListOrHelpTemplateListResolutionResult listingTemplateResolutionResult = TemplateListResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
+                TemplateListResolutionResult listingTemplateResolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
                 return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(listingTemplateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, showUsageHelp: _commandInput.IsHelpFlagSpecified);
             }
 
-            TemplateListResolutionResult templateResolutionResult = TemplateListResolver.GetTemplateResolutionResult(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
+            TemplateResolutionResult templateResolutionResult = TemplateResolver.GetTemplateResolutionResult(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
             TemplateInvocationAndAcquisitionCoordinator invocationCoordinator = new TemplateInvocationAndAcquisitionCoordinator(_settingsLoader, _commandInput, _templateCreator, _hostDataLoader, _telemetryLogger, _defaultLanguage, CommandName, _inputGetter, _callbacks);
             return await invocationCoordinator.CoordinateInvocationOrAcquisitionAsync();
         }
@@ -652,7 +652,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             get
             {
-                IReadOnlyCollection<ITemplateMatchInfo> allTemplates = TemplateListResolver.PerformAllTemplatesQuery(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader);
+                IReadOnlyCollection<ITemplateMatchInfo> allTemplates = TemplateResolver.PerformAllTemplatesQuery(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader);
 
                 HashSet<string> allShortNames = new HashSet<string>(StringComparer.Ordinal);
 

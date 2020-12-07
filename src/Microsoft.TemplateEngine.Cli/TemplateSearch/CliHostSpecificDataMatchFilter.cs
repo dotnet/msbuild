@@ -40,7 +40,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             IEnumerable<ITemplateNameSearchResult> templatesToFilter =
                 foundPackages.Where(foundPackage => packageFiltersToUse.All(pf => pf(_commandInput)(foundPackage.PackInfo)));
 
-            return TemplateListResolver.PerformCoreTemplateQueryForSearch(templatesToFilter.Select(x => x.Template), hostSpecificDataLoader, _commandInput).ToList();
+            return TemplateResolver.PerformCoreTemplateQueryForSearch(templatesToFilter.Select(x => x.Template), hostSpecificDataLoader, _commandInput).ToList();
         };
     }
 }

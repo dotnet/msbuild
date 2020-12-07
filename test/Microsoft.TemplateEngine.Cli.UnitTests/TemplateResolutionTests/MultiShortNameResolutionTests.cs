@@ -28,7 +28,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     TemplateName = testShortName
                 };
 
-                TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, "C#");
+                TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, "C#");
                 matchResult.TryGetCoreMatchedTemplatesWithDisposition(x => x.IsMatch, out IReadOnlyList<ITemplateMatchInfo> matchedTemplateList);
                 Assert.Equal(3, matchedTemplateList.Count);
 
@@ -56,9 +56,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     TemplateName = testShortName
                 };
 
-                TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, "C#");
-                Assert.True(matchResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo invokableTemplate, out TemplateListResolutionResult.SingularInvokableMatchCheckStatus resultStatus));
-                Assert.Equal(TemplateListResolutionResult.SingularInvokableMatchCheckStatus.SingleMatch, resultStatus);
+                TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, "C#");
+                Assert.True(matchResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo invokableTemplate, out TemplateResolutionResult.Status resultStatus));
+                Assert.Equal(TemplateResolutionResult.Status.SingleMatch, resultStatus);
                 Assert.Equal("MultiName.Test.High.CSharp", invokableTemplate.Info.Identity);
             }
         }
@@ -79,9 +79,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     Language = "F#"
                 };
 
-                TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, "C#");
-                Assert.True(matchResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo invokableTemplate, out TemplateListResolutionResult.SingularInvokableMatchCheckStatus resultStatus));
-                Assert.Equal(TemplateListResolutionResult.SingularInvokableMatchCheckStatus.SingleMatch, resultStatus);
+                TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, "C#");
+                Assert.True(matchResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo invokableTemplate, out TemplateResolutionResult.Status resultStatus));
+                Assert.Equal(TemplateResolutionResult.Status.SingleMatch, resultStatus);
                 Assert.Equal("Multiname.Test.Only.FSharp", invokableTemplate.Info.Identity);
             }
         }
@@ -105,10 +105,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 TemplateName = name
             };
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), commandInput, "C#");
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), commandInput, "C#");
 
-            Assert.True(matchResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo invokableTemplate, out TemplateListResolutionResult.SingularInvokableMatchCheckStatus resultStatus));
-            Assert.Equal(TemplateListResolutionResult.SingularInvokableMatchCheckStatus.SingleMatch, resultStatus);
+            Assert.True(matchResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo invokableTemplate, out TemplateResolutionResult.Status resultStatus));
+            Assert.Equal(TemplateResolutionResult.Status.SingleMatch, resultStatus);
             Assert.Equal(expectedIdentity, invokableTemplate.Info.Identity);
         }
 
@@ -131,10 +131,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 TemplateName = name
             };
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), commandInput, "C#");
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), commandInput, "C#");
 
-            Assert.True(matchResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo invokableTemplate, out TemplateListResolutionResult.SingularInvokableMatchCheckStatus resultStatus));
-            Assert.Equal(TemplateListResolutionResult.SingularInvokableMatchCheckStatus.SingleMatch, resultStatus);
+            Assert.True(matchResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo invokableTemplate, out TemplateResolutionResult.Status resultStatus));
+            Assert.Equal(TemplateResolutionResult.Status.SingleMatch, resultStatus);
             Assert.Equal(expectedIdentity, invokableTemplate.Info.Identity);
         }
 

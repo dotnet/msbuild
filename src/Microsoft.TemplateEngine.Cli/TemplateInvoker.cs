@@ -247,7 +247,7 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         // TODO: rework to avoid having to reparse.
                         // The canonical info could be in the ITemplateMatchInfo, but currently isn't.
-                        TemplateListResolver.ParseTemplateArgs(template, _hostDataLoader, _commandInput);
+                        TemplateResolver.ParseTemplateArgs(template, _hostDataLoader, _commandInput);
 
                         IReadOnlyList<string> missingParamNamesCanonical = instantiateResult.Message.Split(new[] { ',' })
                             .Select(x => _commandInput.VariantsForCanonical(x.Trim())

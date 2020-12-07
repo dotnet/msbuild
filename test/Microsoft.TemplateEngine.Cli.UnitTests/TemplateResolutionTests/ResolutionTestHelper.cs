@@ -32,7 +32,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             return new CacheTag(tagDescription, choicesDict, defaultValue, defaultIfOptionWithoutValue);
         }
 
-        public static string DebugOutputForResolutionResult(TemplateListResolutionResult matchResult, Func<ITemplateMatchInfo, bool> filter)
+        public static string DebugOutputForResolutionResult(TemplateResolutionResult matchResult, Func<ITemplateMatchInfo, bool> filter)
         {
             if (!matchResult.TryGetCoreMatchedTemplatesWithDisposition(filter, out IReadOnlyList<ITemplateMatchInfo> matchingTemplates))
             {

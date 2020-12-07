@@ -12,7 +12,7 @@ using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateSearch.Common;
 using Microsoft.TemplateSearch.Common.TemplateUpdate;
-using static Microsoft.TemplateEngine.Cli.TemplateResolution.TemplateListResolutionResult;
+using static Microsoft.TemplateEngine.Cli.TemplateResolution.TemplateResolutionResult;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -30,9 +30,9 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly New3Callbacks _callbacks;
 
         private bool _resolutionResultInitialized = false;
-        TemplateListResolutionResult _templateResolutionResult;
+        TemplateResolutionResult _templateResolutionResult;
         ITemplateMatchInfo _templateToInvoke;
-        SingularInvokableMatchCheckStatus _singleMatchStatus;
+        Status _singleMatchStatus;
 
         public TemplateInvocationAndAcquisitionCoordinator(SettingsLoader settingsLoader, INewCommandInput commandInput, TemplateCreator templateCreator, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, string defaultLanguage, string commandName, Func<string> inputGetter, New3Callbacks callbacks)
         {
@@ -63,7 +63,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else
             {
-                ListOrHelpTemplateListResolutionResult listingTemplateListResolutionResult = TemplateListResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
+                TemplateListResolutionResult listingTemplateListResolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
                 return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(listingTemplateListResolutionResult, _environment, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, false);
             }
         }
@@ -115,8 +115,8 @@ namespace Microsoft.TemplateEngine.Cli
                 return;
             }
 
-            _templateResolutionResult = TemplateListResolver.GetTemplateResolutionResult(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
-            _singleMatchStatus = SingularInvokableMatchCheckStatus.None;
+            _templateResolutionResult = TemplateResolver.GetTemplateResolutionResult(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
+            _singleMatchStatus = Status.NotEvaluated;
 
             // If any template in the group has any ambiguous params, it's not invokable.
             // The check for HasAmbiguousParameterValueMatch is for an example like:
@@ -130,11 +130,11 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 _templateToInvoke = null;
 
-                if (_singleMatchStatus == SingularInvokableMatchCheckStatus.AmbiguousChoice)
+                if (_singleMatchStatus == Status.AmbiguousChoice)
                 {
                     _environment.Host.LogDiagnosticMessage(LocalizableStrings.Authoring_AmbiguousChoiceParameterValue, "Authoring");
                 }
-                else if (_singleMatchStatus == SingularInvokableMatchCheckStatus.AmbiguousPrecedence)
+                else if (_singleMatchStatus == Status.AmbiguousPrecedence)
                 {
                     _environment.Host.LogDiagnosticMessage(LocalizableStrings.Authoring_AmbiguousBestPrecedence, "Authoring");
                 }

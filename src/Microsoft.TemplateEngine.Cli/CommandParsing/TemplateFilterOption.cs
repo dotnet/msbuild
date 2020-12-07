@@ -24,6 +24,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         /// <summary>
         /// A predicate that returns if the filter option caused a mismatch in ListOrHelpTemplateListResolutionResult in case of partial match
         /// </summary>
-        internal Func<ListOrHelpTemplateListResolutionResult, bool> MismatchCriteria { get; set; }
+        internal Func<TemplateListResolutionResult, bool> MismatchCriteria { get; set; }
     }
 }

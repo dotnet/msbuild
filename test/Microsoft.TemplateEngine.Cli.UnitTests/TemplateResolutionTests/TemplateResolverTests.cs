@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
     //  otherwise an exception will be thrown in TemplateInfo.Parameters getter
     //  (just about every situation will get to the secondary matching)
     // MockNewCommandInput doesn't support everything in the interface, just enough for this type of testing.
-    public class TemplateListResolverTests
+    public class TemplateResolverTests
     {
         [Fact(DisplayName = nameof(TestFindHighestPrecedenceTemplateIfAllSameGroupIdentity))]
         public void TestFindHighestPrecedenceTemplateIfAllSameGroupIdentity()
@@ -53,7 +53,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     GroupIdentity = "TestGroup"
                 }));
 
-            ITemplateMatchInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(templatesToCheck);
+            ITemplateMatchInfo highestPrecedenceTemplate = TemplateResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(templatesToCheck);
             Assert.NotNull(highestPrecedenceTemplate);
             Assert.Equal("Template2", highestPrecedenceTemplate.Info.Identity);
             Assert.Equal(20, highestPrecedenceTemplate.Info.Precedence);
@@ -81,7 +81,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     GroupIdentity = "RealGroup"
                 }
                 , null));
-            ITemplateMatchInfo highestPrecedenceTemplate = TemplateListResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(templatesToCheck);
+            ITemplateMatchInfo highestPrecedenceTemplate = TemplateResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(templatesToCheck);
             Assert.Null(highestPrecedenceTemplate);
         }
 
@@ -142,23 +142,23 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             IHostSpecificDataLoader hostDataLoader = new MockHostSpecificDataLoader();
 
-            IReadOnlyCollection<ITemplateMatchInfo> projectTemplates = TemplateListResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "project");
+            IReadOnlyCollection<ITemplateMatchInfo> projectTemplates = TemplateResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "project");
             Assert.Equal(3, projectTemplates.Count);
             Assert.True(projectTemplates.Where(x => string.Equals(x.Info.Identity, "Template1", StringComparison.Ordinal)).Any());
             Assert.True(projectTemplates.Where(x => string.Equals(x.Info.Identity, "Template4", StringComparison.Ordinal)).Any());
             Assert.True(projectTemplates.Where(x => string.Equals(x.Info.Identity, "Template5", StringComparison.Ordinal)).Any());
 
-            IReadOnlyCollection<ITemplateMatchInfo> itemTemplates = TemplateListResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "item");
+            IReadOnlyCollection<ITemplateMatchInfo> itemTemplates = TemplateResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "item");
             Assert.Equal(1, itemTemplates.Count);
             Assert.True(itemTemplates.Where(x => string.Equals(x.Info.Identity, "Template2", StringComparison.Ordinal)).Any());
 
             //Visual Studio only supports "project" and "item", so using other types is no longer allowed, therefore "other" handling is removed.
             //support of match on custom type still remains
-            IReadOnlyCollection<ITemplateMatchInfo> otherTemplates = TemplateListResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "other");
+            IReadOnlyCollection<ITemplateMatchInfo> otherTemplates = TemplateResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "other");
             Assert.Equal(0, otherTemplates.Count);
             Assert.False(otherTemplates.Where(x => string.Equals(x.Info.Identity, "Template3", StringComparison.Ordinal)).Any());
 
-            IReadOnlyCollection<ITemplateMatchInfo> customTypeTemplates = TemplateListResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "myType");
+            IReadOnlyCollection<ITemplateMatchInfo> customTypeTemplates = TemplateResolver.PerformAllTemplatesInContextQuery(templatesToSearch, hostDataLoader, "myType");
             Assert.Equal(1, customTypeTemplates.Count);
             Assert.True(customTypeTemplates.Where(x => string.Equals(x.Info.Identity, "Template3", StringComparison.Ordinal)).Any());
         }
@@ -189,7 +189,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 TemplateName = "Template2"
             };
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
 
             Assert.Equal(1, matchResult.GetBestTemplateMatchList().Count);
             Assert.Equal("Template2", matchResult.GetBestTemplateMatchList()[0].Info.Identity);
@@ -232,7 +232,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 TemplateName = "foo"
             };
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "Perl");
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "Perl");
             Assert.Equal(1, matchResult.GetBestTemplateMatchList().Count);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
             Assert.Equal(1, unambiguousGroup.Count);
@@ -274,7 +274,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 Language = "LISP"
             };
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "Perl");
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "Perl");
 
             Assert.Equal(1, matchResult.GetBestTemplateMatchList().Count);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
@@ -322,7 +322,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 TemplateName = "foo"
             };
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.Equal(2, matchResult.GetBestTemplateMatchList().Count);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
             Assert.Equal(2, unambiguousGroup.Count);
@@ -369,7 +369,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 TemplateName = "foo"
             };
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
             Assert.Equal(1, unambiguousGroup.Count);
             Assert.Equal("foo.test.new", unambiguousGroup[0].Info.Identity);
@@ -416,7 +416,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 TemplateName = "foo"
             };
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
             Assert.Equal(1, unambiguousGroup.Count);
             Assert.Equal("foo.test.old", unambiguousGroup[0].Info.Identity);
@@ -452,11 +452,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             IHostSpecificDataLoader hostSpecificDataLoader = new MockHostSpecificDataLoader();
 
-            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
             Assert.Equal(1, unambiguousGroup.Count);
 
-            Assert.False(TemplateListResolver.ValidateRemainingParameters(unambiguousGroup[0], out IReadOnlyList<string> invalidParams));
+            Assert.False(TemplateResolver.ValidateRemainingParameters(unambiguousGroup[0], out IReadOnlyList<string> invalidParams));
             Assert.Equal(1, invalidParams.Count);
             Assert.Equal("baz", invalidParams[0]);
         }
@@ -503,7 +503,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             };
 
             IHostSpecificDataLoader hostSpecificDataLoader = new MockHostSpecificDataLoader();
-            TemplateListResolutionResult matchResult = TemplateListResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
             Assert.Equal(2, unambiguousGroup.Count);
             Assert.Equal(2, matchResult.GetBestTemplateMatchList().Count);
