@@ -68,6 +68,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="Microsoft.NET.props" Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' or '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"/>
 
   <PropertyGroup>
+    <!-- Generates full paths for the 'File' property in errors, warnings and messages in many targets -->
+    <GenerateFullPaths Condition="'$(GenerateFullPaths)' == ''">true</GenerateFullPaths>
     <!-- Yield optimization properties -->
     <YieldDuringToolExecution Condition="'$(YieldDuringToolExecution)' == ''">true</YieldDuringToolExecution>
   </PropertyGroup>
@@ -109,8 +111,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     OutDir can be used to gather multiple project outputs in one location. In addition,
     OutDir is included in AssemblySearchPaths used for resolving references.
 
+    BaseOutputPath:
+    This is the top level folder where all configuration specific output folders will be created.
+    Default value is bin\
+
     OutputPath:
-    This property is usually specified in the project file and is used to initialize OutDir.
+    This is the full Output Path, and is derived from BaseOutputPath, if none specified
+    (eg. bin\Debug). If this property is overridden, then setting BaseOutputPath has no effect.
+
+    For Legacy projects using only Common targets, this property is usually specified in the project file
+    and is used to initialize OutDir. Some SDKs including the .NET SDK derive this automatically.
     OutDir and OutputPath are distinguished for legacy reasons, and OutDir should be used if at all possible.
 
     BaseIntermediateOutputPath:
@@ -119,26 +129,42 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     IntermediateOutputPath:
     This is the full intermediate Output Path, and is derived from BaseIntermediateOutputPath, if none specified
-    (eg. obj\debug). If this property is overridden, then setting BaseIntermediateOutputPath has no effect.
+    (eg. obj\Debug). If this property is overridden, then setting BaseIntermediateOutputPath has no effect.
+
+    Ensure any and all path property has a trailing slash, so it can be concatenated.
     -->
 
   <PropertyGroup>
-    <GenerateFullPaths Condition="'$(GenerateFullPaths)' == ''">true</GenerateFullPaths>
-    <!-- Ensure any OutputPath has a trailing slash, so it can be concatenated -->
-    <OutputPath Condition="'$(OutputPath)' != '' and !HasTrailingSlash('$(OutputPath)')">$(OutputPath)\</OutputPath>
-    <AssemblyName Condition=" '$(AssemblyName)'=='' ">$(MSBuildProjectName)</AssemblyName>
-    <!--
-        Be careful not to give OutputPath a default value in the case of an invalid Configuration/Platform.
-        We use OutputPath specifically to check for invalid configurations/platforms.
-        -->
-    <OutputPath Condition=" '$(Platform)'=='' and '$(Configuration)'=='' and '$(OutputPath)'=='' ">bin\Debug\</OutputPath>
-    <_OriginalConfiguration>$(Configuration)</_OriginalConfiguration>
+    <!-- Example, AnyCPU -->
     <_OriginalPlatform>$(Platform)</_OriginalPlatform>
-    <Configuration Condition=" '$(Configuration)'=='' ">Debug</Configuration>
-    <ConfigurationName Condition=" '$(ConfigurationName)' == '' ">$(Configuration)</ConfigurationName>
     <!-- Example, Debug -->
-    <Platform Condition=" '$(Platform)'=='' ">AnyCPU</Platform>
+    <_OriginalConfiguration>$(Configuration)</_OriginalConfiguration>
+    <!-- Check whether OutputPath was specified for valid Configuration/Platform combination -->
+    <_OutputPathWasMissing Condition="'$(_OriginalPlatform)' != '' and '$(_OriginalConfiguration)' != '' and '$(OutputPath)' == ''">true</_OutputPathWasMissing>
+    <!-- Check whether BaseOutputPath was specified -->
+    <BaseOutputPathWasSpecified Condition="'$(BaseOutputPath)' != ''">true</BaseOutputPathWasSpecified>
+  </PropertyGroup>
 
+  <PropertyGroup>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <PlatformName Condition="'$(PlatformName)' == ''">$(Platform)</PlatformName>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <ConfigurationName Condition="'$(ConfigurationName)' == ''">$(Configuration)</ConfigurationName>
+
+    <BaseOutputPath>$([MSBuild]::EnsureTrailingSlash($([MSBuild]::ValueOrDefault('$(BaseOutputPath)', 'bin'))))</BaseOutputPath>
+    <OutputPath Condition="'$(OutputPath)' == '' and '$(PlatformName)' == 'AnyCPU'">$([System.IO.Path]::Combine('$(BaseOutputPath)', '$(Configuration)'))</OutputPath>
+    <OutputPath Condition="'$(OutputPath)' == '' and '$(PlatformName)' != 'AnyCPU'">$([System.IO.Path]::Combine('$(BaseOutputPath)', '$(PlatformName)', '$(Configuration)'))</OutputPath>
+    <OutputPath>$([MSBuild]::EnsureTrailingSlash('$(OutputPath)'))</OutputPath>
+
+    <BaseIntermediateOutputPath>$([MSBuild]::EnsureTrailingSlash($([MSBuild]::ValueOrDefault('$(BaseIntermediateOutputPath)', 'obj'))))</BaseIntermediateOutputPath>
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == '' and '$(PlatformName)' == 'AnyCPU'">$([System.IO.Path]::Combine('$(BaseIntermediateOutputPath)', '$(Configuration)'))</IntermediateOutputPath>
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == '' and '$(PlatformName)' != 'AnyCPU'">$([System.IO.Path]::Combine('$(BaseIntermediateOutputPath)', '$(PlatformName)', '$(Configuration)'))</IntermediateOutputPath>
+    <IntermediateOutputPath>$([MSBuild]::EnsureTrailingSlash('$(IntermediateOutputPath)'))</IntermediateOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+
+    <!-- Determine OutputType property from the legacy TargetType property -->
     <OutputType Condition=" '$(TargetType)' != ''">$(TargetType)</OutputType>
     <OutputType Condition=" '$(TargetType)' == 'Container' or '$(TargetType)' == 'DocumentContainer' ">library</OutputType>
     <OutputType Condition=" '$(OutputType)' == '' ">exe</OutputType>
@@ -162,12 +188,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ProduceReferenceAssembly Condition="'$(ProduceReferenceAssembly)' == ''">false</ProduceReferenceAssembly>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(OutputPath)' == '' ">
+  <!--
+    For Legacy projects that define properties per Configuration/Platform combination, the validity of an
+    invalid combination is determined by the non-empty value of the 'OutputPath' property specified under
+    the IDE generated Configuration/Platform specific 'PropertyGroup' section.
+
+    If 'BaseOutputPath' is specified, we can skip the validation, since, we assume the 'OutputPath' property
+    will be derived (e.g.: from the 'BaseOutputPath' property).
+  -->
+  <PropertyGroup Condition="'$(BaseOutputPathWasSpecified)' != 'true' and '$(_OutputPathWasMissing)' == 'true'">
     <!--
-        A blank OutputPath at this point means that the user passed in an invalid Configuration/Platform
-        combination.  Whether this is considered an error or a warning depends on the value of
-        $(SkipInvalidConfigurations).
-        -->
+        When 'OutputPath' is missing or empty (along with non-existent 'BaseOutputPath') at this point means,
+        we're in legacy mode and we shall assume the current Configuration/Platform combination as invalid.
+        Whether this is considered an error or a warning depends on the value of $(SkipInvalidConfigurations).
+    -->
     <_InvalidConfigurationError Condition=" '$(SkipInvalidConfigurations)' != 'true' ">true</_InvalidConfigurationError>
     <_InvalidConfigurationWarning Condition=" '$(SkipInvalidConfigurations)' == 'true' ">true</_InvalidConfigurationWarning>
   </PropertyGroup>
@@ -176,7 +210,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     IDE Macros available from both integrated builds and from command line builds.
     The following properties are 'macros' that are available via IDE for
     pre and post build steps.
-    -->
+  -->
   <PropertyGroup>
     <TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='exe'">.exe</TargetExt>
     <TargetExt Condition="'$(TargetExt)' == '' and '$(OutputType)'=='winexe'">.exe</TargetExt>
@@ -191,16 +225,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Required for enabling Team Build for packaging app package-generating projects -->
     <OutDirWasSpecified Condition=" '$(OutDir)'!='' and '$(OutDirWasSpecified)'=='' ">true</OutDirWasSpecified>
 
-    <OutDir Condition=" '$(OutDir)' == '' ">$(OutputPath)</OutDir>
     <!-- Example, bin\Debug\ -->
     <!-- Ensure OutDir has a trailing slash, so it can be concatenated -->
-    <OutDir Condition="'$(OutDir)' != '' and !HasTrailingSlash('$(OutDir)')">$(OutDir)\</OutDir>
+    <OutDir>$([MSBuild]::EnsureTrailingSlash($([MSBuild]::ValueOrDefault('$(OutDir)', '$(OutputPath)'))))</OutDir>
     <ProjectName Condition=" '$(ProjectName)' == '' ">$(MSBuildProjectName)</ProjectName>
     <!-- Example, MyProject -->
 
     <!-- For projects that generate app packages or ones that want a per-project output directory, update OutDir to include the project name -->
-    <OutDir Condition="'$(OutDir)' != '' and '$(OutDirWasSpecified)' == 'true' and (('$(WindowsAppContainer)' == 'true' and '$(GenerateProjectSpecificOutputFolder)' != 'false') or '$(GenerateProjectSpecificOutputFolder)' == 'true')">$(OutDir)$(ProjectName)\</OutDir>
+    <OutDir Condition="'$(OutDir)' != '' and '$(OutDirWasSpecified)' == 'true' and (('$(WindowsAppContainer)' == 'true' and '$(GenerateProjectSpecificOutputFolder)' != 'false') or '$(GenerateProjectSpecificOutputFolder)' == 'true')">$([MSBuild]::EnsureTrailingSlash('$(OutDir)$(ProjectName)'))</OutDir>
 
+    <AssemblyName Condition=" '$(AssemblyName)'=='' ">$(MSBuildProjectName)</AssemblyName>
     <TargetName Condition="'$(TargetName)' == '' and '$(OutputType)' == 'winmdobj' and '$(RootNamespace)' != ''">$(RootNamespace)</TargetName>
     <TargetName Condition=" '$(TargetName)' == '' ">$(AssemblyName)</TargetName>
     <!-- Example, MyAssembly -->
@@ -279,26 +313,23 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </ItemGroup>
 
   <PropertyGroup>
-    <!-- Example, c:\MyProjects\MyProject\bin\debug\ -->
+    <!-- Example, C:\MyProjects\MyProject\bin\Debug\ -->
     <!--
         Condition intentionally omitted on this one, because it causes problems
         when we pick up the value of an environment variable named TargetDir
         -->
-    <TargetDir Condition="'$(OutDir)' != ''">$([MSBuild]::Escape($([System.IO.Path]::GetFullPath(`$([System.IO.Path]::Combine(`$(MSBuildProjectDirectory)`, `$(OutDir)`))`))))</TargetDir>
+    <TargetDir Condition="'$(OutDir)' != ''">$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(OutDir)'))</TargetDir>
 
-    <!-- Example, c:\MyProjects\MyProject\bin\debug\MyAssembly.dll -->
+    <!-- Example, C:\MyProjects\MyProject\bin\Debug\MyAssembly.dll -->
     <TargetPath Condition=" '$(TargetPath)' == '' ">$(TargetDir)$(TargetFileName)</TargetPath>
 
     <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' ">$([MSBuild]::NormalizePath($(TargetDir), 'ref', $(TargetFileName)))</TargetRefPath>
 
-    <!-- Example, c:\MyProjects\MyProject\ -->
-    <ProjectDir Condition=" '$(ProjectDir)' == '' ">$(MSBuildProjectDirectory)\</ProjectDir>
+    <!-- Example, C:\MyProjects\MyProject\ -->
+    <ProjectDir Condition=" '$(ProjectDir)' == '' ">$([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory)))</ProjectDir>
 
-    <!-- Example, c:\MyProjects\MyProject\MyProject.csproj -->
+    <!-- Example, C:\MyProjects\MyProject\MyProject.csproj -->
     <ProjectPath Condition=" '$(ProjectPath)' == '' ">$(ProjectDir)$(ProjectFileName)</ProjectPath>
-
-    <!-- Example, AnyCPU -->
-    <PlatformName Condition=" '$(PlatformName)' == '' ">$(Platform)</PlatformName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -336,7 +367,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <AutoUnifyAssemblyReferences Condition="'$(GenerateBindingRedirectsOutputType)' == 'true' and '$(AutoGenerateBindingRedirects)' != 'true'">false</AutoUnifyAssemblyReferences>
   </PropertyGroup>
   <PropertyGroup>
-    <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
     <CleanFile Condition="'$(CleanFile)'==''">$(MSBuildProjectFile).FileListAbsolute.txt</CleanFile>
     <!-- During DesignTime Builds, skip project reference build as Design time is only queueing information.-->
     <BuildProjectReferences Condition="'$(BuildProjectReferences)' == '' and '$(DesignTimeBuild)' == 'true'">false</BuildProjectReferences>
@@ -349,12 +379,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ComReferenceNoClassMembers Condition="'$(ComReferenceNoClassMembers)' == ''">false</ComReferenceNoClassMembers>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" $(IntermediateOutputPath) == '' ">
-    <IntermediateOutputPath Condition=" '$(PlatformName)' == 'AnyCPU' ">$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
-    <IntermediateOutputPath Condition=" '$(PlatformName)' != 'AnyCPU' ">$(BaseIntermediateOutputPath)$(PlatformName)\$(Configuration)\</IntermediateOutputPath>
-  </PropertyGroup>
   <PropertyGroup>
-    <IntermediateOutputPath Condition="!HasTrailingSlash('$(IntermediateOutputPath)')">$(IntermediateOutputPath)\</IntermediateOutputPath>
     <_GenerateBindingRedirectsIntermediateAppConfig>$(IntermediateOutputPath)$(TargetFileName).config</_GenerateBindingRedirectsIntermediateAppConfig>
   </PropertyGroup>
   <ItemGroup>
@@ -377,12 +402,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <PropertyGroup Condition="'$(_DebugSymbolsProduced)' == 'true' and '$(OutputType)' == 'winmdobj'">
     <WinMDExpOutputPdb Condition="'$(WinMDExpOutputPdb)' == ''">$(IntermediateOutputPath)$(TargetName).pdb</WinMDExpOutputPdb>
-    <_WinMDDebugSymbolsOutputPath>$([System.IO.Path]::Combine('$(OutDir)', $([System.IO.Path]::GetFileName('$(WinMDExpOutputPdb)'))))</_WinMDDebugSymbolsOutputPath>
+    <_WinMDDebugSymbolsOutputPath>$(OutDir)$([System.IO.Path]::GetFileName('$(WinMDExpOutputPdb)'))</_WinMDDebugSymbolsOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OutputType)' == 'winmdobj' and '$(DocumentationFile)'!=''">
     <WinMDOutputDocumentationFile Condition="'$(WinMDOutputDocumentationFile)' == ''">$(IntermediateOutputPath)$(TargetName).xml</WinMDOutputDocumentationFile>
-    <_WinMDDocFileOutputPath>$([System.IO.Path]::Combine('$(OutDir)', $([System.IO.Path]::GetFileName('$(WinMDOutputDocumentationFile)'))))</_WinMDDocFileOutputPath>
+    <_WinMDDocFileOutputPath>$(OutDir)$([System.IO.Path]::GetFileName('$(WinMDOutputDocumentationFile)'))</_WinMDDocFileOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(WinMDExpOutputWindowsMetadataFilename)' != ''">
@@ -454,8 +479,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!-- Output location for publish target. -->
   <PropertyGroup>
-    <PublishDir Condition="'$(PublishDir)' != '' and !HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
-    <PublishDir Condition="'$(PublishDir)'==''">$(OutputPath)app.publish\</PublishDir>
+    <PublishDir>$([MSBuild]::EnsureTrailingSlash($([MSBuild]::ValueOrDefault('$(PublishDir)', '$(OutputPath)app.publish'))))</PublishDir>
   </PropertyGroup>
 
   <!--
@@ -784,7 +808,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       BeforeTargets="$(BuildDependsOn);Build;$(RebuildDependsOn);Rebuild;$(CleanDependsOn);Clean">
 
     <PropertyGroup>
-      <_InvalidConfigurationMessageText>The OutputPath property is not set for project '$(MSBuildProjectFile)'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='$(_OriginalConfiguration)'  Platform='$(_OriginalPlatform)'.</_InvalidConfigurationMessageText>
+      <_InvalidConfigurationMessageText>The BaseOutputPath/OutputPath property is not set for project '$(MSBuildProjectFile)'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='$(_OriginalConfiguration)'  Platform='$(_OriginalPlatform)'.</_InvalidConfigurationMessageText>
       <_InvalidConfigurationMessageText Condition="'$(BuildingInsideVisualStudio)' == 'true'">$(_InvalidConfigurationMessageText)  This error may also appear if some other project is trying to follow a project-to-project reference to this project, this project has been unloaded or is not included in the solution, and the referencing project does not build using the same or an equivalent Configuration or Platform.</_InvalidConfigurationMessageText>
       <_InvalidConfigurationMessageText Condition="'$(BuildingInsideVisualStudio)' != 'true'">$(_InvalidConfigurationMessageText)  You may be seeing this message because you are trying to build a project without a solution file, and have specified a non-default Configuration or Platform that doesn't exist for this project.</_InvalidConfigurationMessageText>
     </PropertyGroup>
@@ -797,8 +821,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Although we try to ensure a trailing slash, it's possible to circumvent this if the property is set on the command line -->
     <Error Condition="'$(OutDir)' != '' and !HasTrailingSlash('$(OutDir)')" Text="The OutDir property must end with a trailing slash." />
-    <Error Condition="'$(BaseIntermediateOutputPath)' != '' and !HasTrailingSlash('$(BaseIntermediateOutputPath)')" Text="The BaseIntermediateOutputPath must end with a trailing slash." />
+    <Error Condition="'$(OutputPath)' != '' and !HasTrailingSlash('$(OutputPath)')" Text="The OutputPath must end with a trailing slash." />
+    <Error Condition="'$(BaseOutputPath)' != '' and !HasTrailingSlash('$(BaseOutputPath)')" Text="The BaseOutputPath must end with a trailing slash." />
     <Error Condition="'$(IntermediateOutputPath)' != '' and !HasTrailingSlash('$(IntermediateOutputPath)')" Text="The IntermediateOutputPath must end with a trailing slash." />
+    <Error Condition="'$(BaseIntermediateOutputPath)' != '' and !HasTrailingSlash('$(BaseIntermediateOutputPath)')" Text="The BaseIntermediateOutputPath must end with a trailing slash." />
 
     <!-- Also update the value of PlatformTargetAsMSBuildArchitecture per the value of Prefer32Bit.  We are doing
          this here because Prefer32Bit may be set anywhere in the targets, so we can't depend on it having the
@@ -1692,7 +1718,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Pass the CurrentProjectTargetPlatform parameter to the task only if GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter is true.  This means
          that we are using a version of NuGet which supports that parameter on this task. -->
-    
+
     <GetReferenceNearestTargetFrameworkTask AnnotatedProjectReferences="@(_ProjectReferenceTargetFrameworkPossibilities)"
                                             CurrentProjectTargetFramework="$(ReferringTargetFrameworkForProjectReferences)"
                                             CurrentProjectTargetPlatform="$(TargetPlatformMoniker)"
@@ -1761,7 +1787,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
 
         <HasSingleTargetFramework>true</HasSingleTargetFramework>
-        
+
         <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
         <IsRidAgnostic>false</IsRidAgnostic>
         <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
@@ -3363,7 +3389,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup Condition="'$(TargetFrameworkMoniker)' != ''">
     <!-- Do not clean if we are going to default the path to the temp directory -->
     <TargetFrameworkMonikerAssemblyAttributesFileClean Condition="'$(TargetFrameworkMonikerAssemblyAttributesFileClean)' == '' and '$(TargetFrameworkMonikerAssemblyAttributesPath)' != ''">true</TargetFrameworkMonikerAssemblyAttributesFileClean>
-    <TargetFrameworkMonikerAssemblyAttributesPath Condition="'$(TargetFrameworkMonikerAssemblyAttributesPath)' == ''">$([System.IO.Path]::Combine('$(IntermediateOutputPath)','$(TargetFrameworkMoniker).AssemblyAttributes$(DefaultLanguageSourceExtension)'))</TargetFrameworkMonikerAssemblyAttributesPath>
+    <TargetFrameworkMonikerAssemblyAttributesPath Condition="'$(TargetFrameworkMonikerAssemblyAttributesPath)' == ''">$(IntermediateOutputPath)$(TargetFrameworkMoniker).AssemblyAttributes$(DefaultLanguageSourceExtension)</TargetFrameworkMonikerAssemblyAttributesPath>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -4003,7 +4029,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="_DeploymentGenerateLauncher"
       Condition="'$(GenerateClickOnceManifests)'=='true' and '$(_DeploymentLauncherBased)' == 'true'">
 
-    <!-- 
+    <!--
       If apphost based built EXE is found, use that as the Launcher.exe's entry point otherwise
       use the built DLL as the entry point
     -->
@@ -4580,7 +4606,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="DestinationFiles" ItemName="FinalWinmdExpArtifacts" />
     </Copy>
 
-    <Message Importance="High" Text="$(MSBuildProjectName) -&gt; $([System.IO.Path]::GetFullPath('$(_WindowsMetadataOutputPath)'))" Condition="'$(SkipCopyWinMDArtifact)' != 'true' and '$(_WindowsMetadataOutputPath)' != ''" />
+    <Message Importance="High" Text="$(MSBuildProjectName) -&gt; $([MSBuild]::NormalizePath('$(_WindowsMetadataOutputPath)'))" Condition="'$(SkipCopyWinMDArtifact)' != 'true' and '$(_WindowsMetadataOutputPath)' != ''" />
 
   </Target>
 
