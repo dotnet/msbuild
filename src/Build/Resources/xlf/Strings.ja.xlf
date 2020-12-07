@@ -1670,8 +1670,8 @@
         <note>{StrBegin="MSB4091: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
-        <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a settable public instance property.</source>
-        <target state="translated">MSB4064: "{0}" パラメーターは "{1}" タスクではサポートされていません。タスク上にパラメーターが存在し、設定可能なパブリック インスタンス プロパティであることを確認してください。</target>
+        <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from {2}. Verify that the parameter exists on the task, the UsingTask points to the correct assembly and it is a settable public instance property.</source>
+        <target state="new">MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from {2}. Verify that the parameter exists on the task, the UsingTask points to the correct assembly and it is a settable public instance property.</target>
         <note>{StrBegin="MSB4064: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">
