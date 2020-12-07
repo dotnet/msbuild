@@ -194,7 +194,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Theory]
+        [Theory(Timeout = 20_000)]
         [MemberData(nameof(GraphsWithUniformSolutionConfigurations))]
         public void GraphConstructionCanLoadEntryPointsFromSolution(
             Dictionary<int, int[]> edges,
