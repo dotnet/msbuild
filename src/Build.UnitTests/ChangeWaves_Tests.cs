@@ -8,6 +8,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.UnitTests;
 using Xunit.Abstractions;
 using System;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -17,6 +18,18 @@ namespace Microsoft.Build.Engine.UnitTests
         public ChangeWaves_Tests(ITestOutputHelper output)
         {
             _output = output;
+        }
+
+        /// <summary>
+        /// Performs necessary operations for setting the MSBuildDisableFeaturesFromVersion environment variable.
+        /// This is required because Change Waves is static and stale values can be seen between tests in the same assembly.
+        /// </summary>
+        /// <param name="wave">The version to set as the current Change Wave.</param>
+        private void SetChangeWave(string wave, TestEnvironment env)
+        {
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", wave);
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
         }
 
         /// <summary>
@@ -65,7 +78,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetChangeWave(ChangeWaves.EnableAllFeatures);
+                SetChangeWave(ChangeWaves.EnableAllFeatures.ToString(), env);
 
                 for (int i = 0; i < ChangeWaves.AllWaves.Length - 1; i++)
                 {
@@ -105,7 +118,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetChangeWave(disableFeaturesFromVersion);
+                SetChangeWave(disableFeaturesFromVersion, env);
 
                 buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
                                                         versionToCheckAgainstCurrentChangeWave: ChangeWaves.HighestWave,
@@ -122,7 +135,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetChangeWave(disableFeaturesFromVersion);
+                SetChangeWave(disableFeaturesFromVersion, env);
 
                 // All waves should be disabled
                 for (int i = 0; i < ChangeWaves.AllWaves.Length; i++)
@@ -142,7 +155,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetChangeWave(disableFeaturesFromVersion);
+                SetChangeWave(disableFeaturesFromVersion, env);
 
                 // all waves but the highest should pass
                 for (int i = 0; i < ChangeWaves.AllWaves.Length - 1; i++)
@@ -166,7 +179,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetChangeWave($"{ChangeWaves.LowestWave.Major}.{ChangeWaves.LowestWave.Minor}.{ChangeWaves.LowestWave.Build + 1}");
+                SetChangeWave($"{ChangeWaves.LowestWave.Major}.{ChangeWaves.LowestWave.Minor}.{ChangeWaves.LowestWave.Build + 1}", env);
 
                 buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
                                                         versionToCheckAgainstCurrentChangeWave: ChangeWaves.LowestWave,
@@ -180,7 +193,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetChangeWave(ChangeWaves.HighestWave);
+                SetChangeWave(ChangeWaves.HighestWave.ToString(), env);
 
                 for (int i = 0; i < ChangeWaves.AllWaves.Length - 1; i++)
                 {
@@ -203,7 +216,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetChangeWave(ChangeWaves.LowestWave);
+                SetChangeWave(ChangeWaves.LowestWave.ToString(), env);
 
                 foreach (Version wave in ChangeWaves.AllWaves)
                 {
