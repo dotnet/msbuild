@@ -88,6 +88,9 @@ namespace Microsoft.Build.UnitTests
                 // Assert invariants
                 foreach (var item in _invariants)
                     item.AssertInvariant(Output);
+
+                SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
 

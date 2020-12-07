@@ -44,8 +44,6 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             bool isThisWaveEnabled = versionToCheckAgainstCurrentChangeWave < currentChangeWaveShouldUltimatelyResolveTo || currentChangeWaveShouldUltimatelyResolveTo == ChangeWaves.EnableAllFeatures;
 
-            // This is required because ChangeWaves is static and the value of a previous test can carry over.
-            ChangeWaves.ResetStateForTests();
             ChangeWaves.AreFeaturesEnabled(versionToCheckAgainstCurrentChangeWave).ShouldBe(isThisWaveEnabled);
 
             string projectFile = $"" +
@@ -99,6 +97,8 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                // Reset static ChangeWave
+                SetChangeWave(string.Empty, env);
                 Version featureAsVersion = Version.Parse(featureVersion);
                 ChangeWaves.AreFeaturesEnabled(featureAsVersion).ShouldBe(true);
 

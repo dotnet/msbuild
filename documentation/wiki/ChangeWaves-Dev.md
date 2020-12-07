@@ -57,9 +57,10 @@ Create tests as you normally would. Include one test with environment variable `
 ```c#
 TestEnvironment env = TestEnvironment.Create()
 
-env.SetChangeWave(ChangeWaves.Wave17_4);
+ChangeWaves.ResetStateForTests();
+// Important: use the version here
+env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
 ```
-When the TestEnvironment is disposed, it handles special logic to properly reset Change Waves for future tests.
 
 **Important!** If you need to build a project to test your feature (say, for tasks or targets), build via `ProjectCollection` in your test.
 
@@ -67,8 +68,8 @@ Example:
 ```c#
 using (TestEnvironment env = TestEnvironment.Create())
 {
-    // Important: use the version here
-    env.SetChangeWave(ChangeWaves.Wave17_4);
+    ChangeWaves.ResetStateForTests();
+    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
 
     string projectFile = @"
         <Project>
