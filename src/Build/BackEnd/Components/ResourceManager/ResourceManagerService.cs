@@ -56,7 +56,7 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
 #endif
         }
 
-        public int RequestCores(int requestedCores)
+        public int? RequestCores(int requestedCores)
         {
             if (s is null)
             {
@@ -65,7 +65,7 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
                     // Since the current implementation of the cross-process resource count uses
                     // named semaphores, it's not usable on non-Windows, so just return the
                     // guaranteed resource.
-                    return 1;
+                    return null;
                 }
 
                 throw new InternalErrorException($"{nameof(ResourceManagerService)} was called while uninitialized");

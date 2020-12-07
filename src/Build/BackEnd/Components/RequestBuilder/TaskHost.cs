@@ -684,7 +684,7 @@ namespace Microsoft.Build.BackEnd
 
         int runningTotal = 0;
 
-        public int RequestCores(int requestedCores)
+        public int? RequestCores(int requestedCores)
         {
             var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
 
@@ -692,7 +692,10 @@ namespace Microsoft.Build.BackEnd
 
             var coresAcquired = rms.RequestCores(requestedCores);
 
-            runningTotal += coresAcquired;
+            if (coresAcquired.HasValue)
+            {
+                runningTotal += coresAcquired.Value;
+            }
 
             return coresAcquired;
         }

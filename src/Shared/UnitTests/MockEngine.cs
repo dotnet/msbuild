@@ -490,7 +490,7 @@ namespace Microsoft.Build.UnitTests
 
         int runningTotal = 0;
         Semaphore cpuCount;
-        public int RequestCores(int requestedCores)
+        public int? RequestCores(int requestedCores)
         {
             cpuCount ??= Semaphore.OpenExisting(ResourceSemaphoreName);
 

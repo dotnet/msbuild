@@ -1162,14 +1162,15 @@ namespace Microsoft.Build.CommandLine
             LogErrorEvent(error);
         }
 
-        public int RequestCores(int requestedCores)
+        public int? RequestCores(int requestedCores)
         {
-            throw new NotImplementedException();
+            // indicate to caller that resource management isn't hooked up
+            return null;
         }
 
         public void ReleaseCores(int coresToRelease)
         {
-            throw new NotImplementedException();
+            // Do nothing: no resource management in OOP nodes
         }
 
         public void BlockingWaitForCore()
