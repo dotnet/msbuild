@@ -80,6 +80,7 @@
     <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('net4'))">net</GenAPIShortFrameworkIdentifier>
     <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('netstandard'))">netstandard</GenAPIShortFrameworkIdentifier>
     <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('netcoreapp'))">netstandard</GenAPIShortFrameworkIdentifier>
+    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('net5'))">netstandard</GenAPIShortFrameworkIdentifier>
     <GenAPITargetPath>$(RepoRoot)ref\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\$(GenAPIAssemblyName).cs</GenAPITargetPath>
   </PropertyGroup>
   
