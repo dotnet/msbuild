@@ -15,10 +15,7 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
 
         ILoggingService? _loggingService;
 
-#if DEBUG
         public int TotalNumberHeld = -1;
-        public string? SemaphoreName;
-#endif
 
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
@@ -29,26 +26,24 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
 
         public void InitializeComponent(IBuildComponentHost host)
         {
-            string semaphoreName = host.BuildParameters.ResourceManagerSemaphoreName;
-
-            int resourceCount = host.BuildParameters.MaxNodeCount; // TODO: tweakability
-
-            _loggingService = host.LoggingService;
-
-#if DEBUG
-            TotalNumberHeld = 0;
-            SemaphoreName = semaphoreName;
-#endif
-
             if (NativeMethodsShared.IsWindows)
             {
+                string semaphoreName = host.BuildParameters.ResourceManagerSemaphoreName;
+
+                int resourceCount = host.BuildParameters.MaxNodeCount; // TODO: tweakability
+
+                _loggingService = host.LoggingService;
+
+                TotalNumberHeld = 0;
+
                 s = new Semaphore(resourceCount, resourceCount, semaphoreName); // TODO: SemaphoreSecurity?
             }
             else
             {
                 // UNDONE: just don't support gathering additional cores on non-Windows
-                s = new Semaphore(1, 1);
+                s = null;
             }
+
         }
 
         public void ShutdownComponent()
@@ -58,24 +53,14 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
 
             _loggingService = null;
 
-#if DEBUG
             TotalNumberHeld = -2;
-#endif
         }
 
         public int? RequestCores(int requestedCores, TaskLoggingContext _taskLoggingContext)
         {
             if (s is null)
             {
-                if (!NativeMethodsShared.IsWindows)
-                {
-                    // Since the current implementation of the cross-process resource count uses
-                    // named semaphores, it's not usable on non-Windows, so just return the
-                    // guaranteed resource.
-                    return null;
-                }
-
-                throw new InternalErrorException($"{nameof(ResourceManagerService)} was called while uninitialized");
+                return null;
             }
 
             int i = 0;
@@ -103,14 +88,9 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
         {
             if (s is null)
             {
-                if (!NativeMethodsShared.IsWindows)
-                {
-                    // Since the current implementation of the cross-process resource count uses
-                    // named semaphores, it's not usable on non-Windows, so just continue.
-                    return;
-                }
-
-                throw new InternalErrorException($"{nameof(ResourceManagerService)} was called while uninitialized");
+                // Since the current implementation of the cross-process resource count uses
+                // named semaphores, it's not usable on non-Windows, so just continue.
+                return;
             }
 
             ErrorUtilities.VerifyThrow(coresToRelease > 0, "Tried to release {0} cores", coresToRelease);
