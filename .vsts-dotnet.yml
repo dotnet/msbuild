@@ -95,7 +95,7 @@ stages:
                 /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                 /p:TeamName=MSBuild
                 /p:DotNetPublishUsingPipelines=true
-      displayName: Build b.sbn=${{ variables['Build.SourceBranchName'] }} ibcsbn=${{ variables['SourceBranch'] }} sw=${{startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')}} and=${{ and(eq(variables['Build.SourceBranchName'], variables['IbcSourceBranchName']), startsWith(variables['Build.SourceBranchName'], 'refs/heads/exp/')) }}
+      displayName: Build b.sbn=${{ variables['Build.SourceBranchName'] }} sb=${{ variables['SourceBranch'] }} eq=${{ eq(variables['Build.SourceBranchName'], variables['SourceBranch']) }} sw=${{startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')}} and=${{ and(eq(variables['Build.SourceBranchName'], variables['SourceBranch']), startsWith(variables['Build.SourceBranchName'], 'refs/heads/exp/')) }}
       condition: succeeded()
 
     # Publish OptProf configuration files
