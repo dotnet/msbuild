@@ -31,7 +31,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "BuildWithRid",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -135,7 +134,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "PublishWithRid",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -202,7 +200,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "DuplicateRuntimeIdentifiers",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 

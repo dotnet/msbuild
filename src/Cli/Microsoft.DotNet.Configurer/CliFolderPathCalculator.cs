@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Configurer
         public static string ToolsResolverCachePath => Path.Combine(DotnetUserProfileFolderPath, ToolsResolverCacheFolderName);
 
         public static string PlatformHomeVariableName =>
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "USERPROFILE" : "HOME";
+            OperatingSystem.IsWindows() ? "USERPROFILE" : "HOME";
 
         public static string DotnetHomePath
         {

@@ -26,7 +26,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "SelfContainedWebApp",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 

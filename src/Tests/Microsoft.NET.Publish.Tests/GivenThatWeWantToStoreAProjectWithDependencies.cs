@@ -310,7 +310,6 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "Test",
-                IsSdkProject = true,
                 TargetFrameworks = TFM,
                 IsExe = isExe,
             };

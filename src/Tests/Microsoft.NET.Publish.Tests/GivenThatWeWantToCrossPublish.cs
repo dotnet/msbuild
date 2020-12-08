@@ -26,7 +26,6 @@ namespace Microsoft.NET.Publish.Tests
                 Name = "CrossPublish",
                 TargetFrameworks = "netcoreapp2.0",
                 IsExe = true,
-                IsSdkProject = true,
                 RuntimeIdentifier = "centos.7-x64"
             };
 

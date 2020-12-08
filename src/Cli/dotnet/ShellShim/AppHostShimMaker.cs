@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.ShellShim
         public void CreateApphostShellShim(FilePath entryPoint, FilePath shimPath)
         {
             string appHostSourcePath;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 appHostSourcePath = Path.Combine(_appHostSourceDirectory, ApphostNameWithoutExtension + ".exe");
             }

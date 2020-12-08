@@ -30,7 +30,6 @@ namespace Microsoft.NET.Restore.Tests
             {
                 Name = testProjectName,
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("NuGet.Packaging", "3.5.0", null));
@@ -61,7 +60,6 @@ namespace Microsoft.NET.Restore.Tests
             {
                 Name = testProjectName,
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
             };
 
             testProject.AdditionalProperties.Add("WarningsAsErrors", string.Empty);

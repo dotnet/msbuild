@@ -17,8 +17,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Automatically set AnalysisLevel if not specified -->
     <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
-                              '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
-                              $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))">latest</AnalysisLevel>
+                              (('$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
+                               $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))) Or
+							                 '$(AnalysisMode)' != '')">latest</AnalysisLevel>
 
     <!-- EffectiveAnalysisLevel is used to differentiate from user specified strings (such as 'none')
          and an implied numerical option (such as '4')-->

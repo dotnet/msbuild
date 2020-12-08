@@ -59,7 +59,6 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "Project",
-                IsSdkProject = true,
                 IsExe = false,
                 TargetFrameworks = targetFramework,
             };
@@ -245,7 +244,6 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
             {
                 Name = referenceProjectName,
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
             };
             project.AdditionalProperties.Add("Version", version);
             return project;

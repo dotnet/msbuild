@@ -33,7 +33,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NetStandard2Library",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(project, identifier: targetFramework);
@@ -54,7 +53,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NetStandard2Library",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
             };
 
             project.SourceFiles[project.Name + ".cs"] = $@"

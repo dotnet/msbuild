@@ -84,7 +84,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = "RuntimeFrameworkVersionFloat",
                 TargetFrameworks = "netcoreapp2.0",
                 RuntimeFrameworkVersion = "2.0.*",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -132,7 +131,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = "FrameworkTargetTest",
                 TargetFrameworks = targetFramework,
                 RuntimeFrameworkVersion = runtimeFrameworkVersion,
-                IsSdkProject = true,
                 IsExe = isExe,
                 RuntimeIdentifier = runtimeIdentifier
             };
@@ -193,7 +191,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "MismatchFrameworkTest",
                 TargetFrameworks = "netcoreapp2.0",
-                IsSdkProject = true,
                 IsExe = true,
             };
 
@@ -313,7 +310,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject project = new TestProject()
             {
                 Name = testName,
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 RuntimeIdentifier = runtimeIdentifier,
                 IsExe = true,
@@ -380,7 +376,6 @@ public static class Program
                 Name = "NetCore2App",
                 TargetFrameworks = targetFramework,
                 IsExe = true,
-                IsSdkProject = true
             };
 
             project.SourceFiles["Program.cs"] = @"
@@ -447,7 +442,6 @@ public static class Program
                 Name = "NetCore2App",
                 TargetFrameworks = targetFramework,
                 IsExe = true,
-                IsSdkProject = true,
                 RuntimeIdentifier = runtimeIdentifier
             };
 
@@ -486,7 +480,6 @@ public static class Program
             {
                 Name = "NetCoreApp1.1_Conflicts",
                 TargetFrameworks = "netcoreapp1.1",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -511,7 +504,6 @@ public static class Program
             {
                 Name = "AppUsingPackageWithSatellites",
                 TargetFrameworks = "netcoreapp2.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -555,7 +547,6 @@ public static class Program
             {
                 Name = "OutputPathCasing",
                 TargetFrameworks = "ignored",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -592,7 +583,6 @@ public static class Program
             {
                 Name = "NetCoreAppPackageReference",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -600,7 +590,6 @@ public static class Program
             {
                 Name = "NetStandardProject",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true,
                 IsExe = false
             };
 
@@ -626,7 +615,6 @@ public static class Program
             {
                 Name = "ProjectWithPackageThatNeedsEscapes",
                 TargetFrameworks = "net462",
-                IsSdkProject = true,
                 IsExe = true,
             };
 
@@ -676,7 +664,6 @@ class Program
             {
                 Name = "ReferencesLegacyContracts",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true,
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid("netcoreapp3.0")
             };
@@ -704,7 +691,6 @@ class Program
             {
                 Name = "NoPackageReferences",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -735,7 +721,6 @@ class Program
             {
                 Name = "Prj_すおヸょー",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true,
             };
 
@@ -762,7 +747,6 @@ class Program
                 Name = "GenerateFilesTest",
                 TargetFrameworks = TFM,
                 RuntimeIdentifier = runtimeIdentifier,
-                IsSdkProject = true,
                 IsExe = true
             };
 

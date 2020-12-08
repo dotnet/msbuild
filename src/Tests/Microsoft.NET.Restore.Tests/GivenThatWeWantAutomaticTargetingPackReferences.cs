@@ -34,7 +34,6 @@ namespace Microsoft.NET.Restore.Tests
             {
                 Name = "ProjectWithoutTargetingPackRef",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -72,7 +71,6 @@ namespace Microsoft.NET.Restore.Tests
             {
                 Name = "ProjectWithoutTargetingPackRef",
                 TargetFrameworks = "net471;net472;netcoreapp3.0",
-                IsSdkProject = true,
             };
 
             TestAsset testAsset = null;
@@ -142,7 +140,6 @@ namespace Microsoft.NET.Restore.Tests
             {
                 Name = "ProjectWithoutTargetingPackRef",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
             };
 
             // Add explicit reference to assembly packs
@@ -191,7 +188,6 @@ namespace Microsoft.NET.Restore.Tests
             {
                 Name = "ProjectWithoutTargetingPackRef",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
             };
             testProject.AdditionalProperties["AutomaticallyUseReferenceAssemblyPackages"] = "false";
 

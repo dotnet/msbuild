@@ -97,7 +97,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp2.0",
             };
 
@@ -115,7 +114,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp2.0",
             };
 
@@ -147,7 +145,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp2.0",
             };
 
@@ -180,7 +177,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp2.0",
             };
 
@@ -217,7 +213,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProjectWithSourceRevisionId",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp2.0",
             };
 
@@ -519,7 +514,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "UserSecretTest",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0"
             };
 
@@ -562,7 +556,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WebApp",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0"
             };
             testProject.FrameworkReferences.Add("Microsoft.AspNetCore.App");
@@ -570,7 +563,6 @@ namespace Microsoft.NET.Build.Tests
             var testTestProject = new TestProject()
             {
                 Name = "WebAppTests",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 ReferencedProjects = { testProject }
             };
@@ -605,7 +597,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "RepoUrlProject",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.1"
             };
 
@@ -639,7 +630,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "RepoUrlProject",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework
             };
 

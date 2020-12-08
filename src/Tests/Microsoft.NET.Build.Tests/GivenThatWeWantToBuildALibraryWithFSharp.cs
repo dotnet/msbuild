@@ -144,7 +144,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [Theory(Skip = "https://github.com/dotnet/coreclr/issues/27275")]
+        [Theory]
         [InlineData("Debug", "DEBUG")]
         [InlineData("Release", "RELEASE")]
         [InlineData("CustomConfiguration", "CUSTOMCONFIGURATION")]
@@ -173,16 +173,14 @@ namespace Microsoft.NET.Build.Tests
             definedConstants.Should().BeEquivalentTo(new[] { expectedDefine, "TRACE", "NETSTANDARD", "NETSTANDARD1_6" });
         }
 
-        [Theory(Skip = "https://github.com/dotnet/coreclr/issues/27275")]
-        [InlineData("netstandard1.6", new[] { "NETSTANDARD", "NETSTANDARD1_6" }, false)]
-        [InlineData("net45", new[] { "NETFRAMEWORK", "NET45" }, true)]
-        [InlineData("net461", new[] { "NETFRAMEWORK", "NET461" }, true)]
-        [InlineData("netcoreapp2.0", new[] { "NETCOREAPP", "NETCOREAPP2_0" }, false)]
-        [InlineData("net5.0", new[] { "NETCOREAPP", "NET", "NET5_0" }, false)]
-        public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines, bool buildOnlyOnWindows)
+        [Theory]
+        [InlineData("netstandard1.6", new[] { "NETSTANDARD", "NETSTANDARD1_6" })]
+        [InlineData("net45", new[] { "NETFRAMEWORK", "NET45", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER" })]
+        [InlineData("net461", new[] { "NETFRAMEWORK", "NET461", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER", "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER" })]
+        [InlineData("netcoreapp2.0", new[] { "NETCOREAPP", "NETCOREAPP2_0", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER" })]
+        [InlineData("net5.0", new[] { "NETCOREAPP", "NET", "NET5_0", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", "NETCOREAPP2_1_OR_GREATER", "NETCOREAPP2_2_OR_GREATER", "NETCOREAPP3_0_OR_GREATER", "NETCOREAPP3_1_OR_GREATER", "NET5_0_OR_GREATER" })]
+        public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines)
         {
-            bool shouldCompile = true;
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibraryFS", "ImplicitFrameworkConstantsFS", targetFramework)
                 .WithSource()
@@ -199,9 +197,6 @@ namespace Microsoft.NET.Build.Tests
 
                     if (targetFramework.Contains(",Version="))
                     {
-                        //  We use the full TFM for frameworks we don't have built-in support for targeting, so we don't want to run the Compile target
-                        shouldCompile = false;
-
                         var frameworkName = new FrameworkName(targetFramework);
 
                         var targetFrameworkProperty = targetFrameworkProperties.Single();
@@ -218,22 +213,16 @@ namespace Microsoft.NET.Build.Tests
                     }
                     else
                     {
-                        shouldCompile = true;
                         targetFrameworkProperties.Single().SetValue(targetFramework);
                     }
                 });
-
-            if (buildOnlyOnWindows && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                shouldCompile = false;
-            }
 
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,
                 targetFramework, "DefineConstants")
             {
-                ShouldCompile = shouldCompile
+                DependsOnTargets = "AddImplicitDefineConstants"
             };
 
             getValuesCommand

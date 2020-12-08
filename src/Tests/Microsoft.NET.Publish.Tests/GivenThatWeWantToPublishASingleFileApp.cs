@@ -93,7 +93,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "SingleFileTest",
                 TargetFrameworks = "net5.0",
-                IsSdkProject = true,
                 IsExe = true,
             };
             testProject.AdditionalProperties.Add("SelfContained", $"{true}");
@@ -149,7 +148,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "ClassLib",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true,
                 IsExe = false,
             };
 
@@ -173,7 +171,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "NetStandardExe",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true,
                 IsExe = true,
             };
 
@@ -197,7 +194,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "ConsoleApp",
                 TargetFrameworks = "netcoreapp2.2",
-                IsSdkProject = true,
                 IsExe = true,
             };
 
@@ -327,7 +323,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "SingleFileTest",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
                 IsExe = true,
             };
 
@@ -385,7 +380,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "SingleFileTest",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
                 IsExe = true,
             };
 
@@ -527,7 +521,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "SingleFileTest",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
                 IsExe = true,
             };
             testProject.AdditionalProperties.Add("SelfContained", $"{selfContained}");
@@ -559,7 +552,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "SingleFileTest",
                 TargetFrameworks = "net5.0",
-                IsSdkProject = true,
                 IsExe = true,
             };
             testProject.AdditionalProperties.Add("SelfContained", $"{selfContained}");

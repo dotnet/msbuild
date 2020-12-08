@@ -27,7 +27,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "MissingRuntimeListProject",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
@@ -61,7 +60,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DuplicateRuntimeListProject",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)

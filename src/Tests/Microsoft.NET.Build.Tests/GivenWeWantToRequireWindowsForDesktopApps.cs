@@ -107,7 +107,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "WinExeOutput",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
                 IsExe = true,
             };
             testProject.AdditionalProperties[propName] = propValue;
@@ -136,7 +135,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = ProjectName,
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 IsWinExe = true,
             };
@@ -165,7 +163,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = ProjectName,
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 IsWinExe = true,
             };
 
@@ -194,7 +191,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = ProjectName,
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 IsWinExe = true,
             };
 
@@ -275,7 +271,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = projectName,
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 IsWinExe = true,
             };
@@ -293,7 +288,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = projectName,
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 IsWinExe = true,
             };
 

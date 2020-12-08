@@ -176,7 +176,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 TargetFrameworks = tfm,
                 Name = "ChildProject",
-                IsSdkProject = true
             };
             var childAsset = _testAssetsManager.CreateTestProject(childProject)
                 .WithProjectChanges(project => AddProjectChanges(project));
@@ -186,7 +185,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 TargetFrameworks = tfm,
                 Name = "ParentProject",
-                IsSdkProject = true
             };
             if (explicitlySet)
             {
@@ -254,14 +252,12 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "ProjectA",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
 
             var testProjectB = new TestProject()
             {
                 Name = "ProjectB",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
             testProjectB.ReferencedProjects.Add(testProjectA);
 
@@ -269,7 +265,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "ProjectC",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
             testProjectC.AdditionalProperties.Add("DisableTransitiveProjectReferences", "true");
             testProjectC.ReferencedProjects.Add(testProjectB);

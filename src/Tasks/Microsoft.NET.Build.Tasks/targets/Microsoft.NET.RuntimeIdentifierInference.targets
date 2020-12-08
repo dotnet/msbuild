@@ -12,28 +12,28 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!--
-    .NETFramework cannot load native package dependencies dynamically
-    based on the current architecture.  We have must have a RID to
-    resolve and copy native dependencies to the output directory.
+    .NET Framework cannot load native package dependencies dynamically
+    based on the current architecture.  We must have a RID to resolve
+    and copy native dependencies to the output directory.
 
-     When building a .NETFramework exe on Windows and not given a RID,
-     we'll pick either win7-x64 or win7-x86 (based on PlatformTarget)
-     if we're not given an explicit RID. However, if after resolving
-     NuGet assets we find no copy-local native dependencies, we will
-     emit the binary as AnyCPU.
+    When building a .NET Framework exe on Windows and not given a RID,
+    we'll pick either win7-x64 or win7-x86 (based on PlatformTarget)
+    if we're not given an explicit RID. However, if after resolving
+    NuGet assets we find no copy-local native dependencies, we will
+    emit the binary as AnyCPU.
 
-     Note that we must set the RID here early (to be seen during NuGet
-     restore) in order for the project.assets.json to include the
-     native dependencies that will let us make the final call on
-     AnyCPU or platform-specific.
+    Note that we must set the RID here early (to be seen during NuGet
+    restore) in order for the project.assets.json to include the
+    native dependencies that will let us make the final call on
+    AnyCPU or platform-specific.
 
-     This allows these common cases to work without requiring mention
-     of RuntimeIdentifier in the user project PlatformTarget:
+    This allows these common cases to work without requiring mention
+    of RuntimeIdentifier in the user project PlatformTarget:
 
-      1. Building an AnyCPU .NETFramework application on any host OS
-         with no native NuGet dependencies. (*)
+      1. Building an AnyCPU .NET Framework application on any host OS
+         with no native NuGet dependencies.
 
-      2. Building an x86 or x64 NETFramework application on and for
+      2. Building an x86 or x64 .NET Framework application on and for
          Windows with native NuGet dependencies that do not require
          greater than win7.
 
@@ -91,7 +91,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       </PropertyGroup>
     </When>
 
-    <!-- NOTE: PlatformTarget=arm64 is not currently supported and therefore no inference of that here. -->
+    <When Condition="$(RuntimeIdentifier.EndsWith('-arm64')) or $(RuntimeIdentifier.Contains('-arm64-'))">
+      <PropertyGroup>
+        <PlatformTarget>arm64</PlatformTarget>
+      </PropertyGroup>
+    </When>
+
     <Otherwise>
       <PropertyGroup>
         <PlatformTarget>AnyCPU</PlatformTarget>
