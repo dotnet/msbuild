@@ -925,6 +925,35 @@ namespace FrameworkReferenceTest
                 selfContained);
         }
 
+        [CoreMSBuildOnlyFact]
+        public void TransitiveFrameworkReferencesAreNotIncludedInRestore()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "TransitiveFrameworkRef",
+                TargetFrameworks = "net5.0",
+                IsSdkProject = true
+            };
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.Authentication.JwtBearer", "5.0.0"));
+            var testAsset = _testAssetsManager.CreateTestProject(testProject).WithProjectChanges((project) =>
+            {
+                var ns = project.Root.Name.Namespace;
+                var target = XElement.Parse(@"  <Target Name=""GetFrameworkRefResults"" AfterTargets=""Build"" DependsOnTargets=""CollectFrameworkReferences"" >
+    <Message Text=""Framework References: @(_FrameworkReferenceForRestore)"" Importance=""High"" />
+  </Target>");
+                project.Root.Add(target);
+            });
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Microsoft.NETCore.App")
+                .And
+                .NotHaveStdOutContaining("Microsoft.AspNetCore.App");
+        }
+
         private void TestFrameworkReferenceProfiles(
             IEnumerable<string> frameworkReferences,
             IEnumerable<string> expectedReferenceNames,
