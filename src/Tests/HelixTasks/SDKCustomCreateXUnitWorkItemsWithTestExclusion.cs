@@ -6,13 +6,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Newtonsoft.Json;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.SdkCustomHelix.Sdk
 {
     /// <summary>
     /// MSBuild custom task to create HelixWorkItems given xUnit project publish information
     /// </summary>
-    public class SDKCustomCreateXUnitWorkItems : Build.Utilities.Task
+    public class SDKCustomCreateXUnitWorkItemsWithTestExclusion : Build.Utilities.Task
     {
         /// <summary>
         /// An array of XUnit project workitems containing the following metadata:
@@ -24,6 +25,12 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
         /// </summary>
         [Required]
         public ITaskItem[] XUnitProjects { get; set; }
+
+        /// <summary>
+        /// The path of a list of test projects partial name that cannot be run in Helix. 
+        /// </summary>
+        [Required]
+        public string TestProjectExclusionListPath { get; set; }
 
         /// <summary>
         /// The path to the dotnet executable on the Helix agent. Defaults to "dotnet"
@@ -72,7 +79,14 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
         /// <returns></returns>
         private async Task ExecuteAsync()
         {
-            XUnitWorkItems = (await Task.WhenAll(XUnitProjects.Select(PrepareWorkItem)))
+            var testExclusion = File.ReadAllLines(TestProjectExclusionListPath)
+                .Select(l => l.Trim())
+                .Where(l => !string.IsNullOrWhiteSpace(l));
+
+            var xUnitProjectsCanRunInHelix
+                = XUnitProjects.Where(p => !testExclusion.Any(p.ItemSpec.Contains));
+
+            XUnitWorkItems = (await Task.WhenAll(xUnitProjectsCanRunInHelix.Select(PrepareWorkItem)))
                 .SelectMany(i => i)
                 .Where(wi => wi != null)
                 .ToArray();
@@ -105,7 +119,9 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
             xunitProject.TryGetMetadata("Arguments", out string arguments);
 
             string assemblyName = Path.GetFileName(targetPath);
-            if (!runtimeTargetFramework.Contains("core"))
+
+            var runtimeTargetFrameworkParsed = NuGetFramework.Parse(runtimeTargetFramework);
+            if (runtimeTargetFrameworkParsed.Framework != ".NETCoreApp")
             {
                 throw new NotImplementedException("does not support non core runtime target");
             }
@@ -116,7 +132,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
             // but on Windows, if we running against working item diretory, we would hit long path.
             string testExecutionDirectory = IsPosixShell ? "-testExecutionDirectory $TestExecutionDirectory" : "-testExecutionDirectory %TestExecutionDirectory%";
 
-            string msBuildSDKsPath = IsPosixShell ? "-MSBuildSDKsPath $TestSubjectMSBuildSDKsPath" : "-MSBuildSDKsPath %TestSubjectMSBuildSDKsPath%";
+            string msbuildAdditionalSdkResolverFolder = IsPosixShell ? "" : "-msbuildAdditionalSdkResolverFolder %HELIX_CORRELATION_PAYLOAD%\\r";
 
             var scheduler = new AssemblyScheduler(methodLimit: 40);
             var assemblyPartitionInfos = scheduler.Schedule(targetPath);
@@ -124,7 +140,7 @@ namespace Microsoft.DotNet.SdkCustomHelix.Sdk
             var partitionedWorkItem = new List<ITaskItem>();
             foreach (var assemblyPartitionInfo in assemblyPartitionInfos)
             {
-                string command = $"{driver}{assemblyName} {testExecutionDirectory} {msBuildSDKsPath} {(XUnitArguments != null ? " " + XUnitArguments : "")} -xml testResults.xml {assemblyPartitionInfo.ClassListArgumentString} {arguments}";
+                string command = $"{driver}{assemblyName} {testExecutionDirectory} {msbuildAdditionalSdkResolverFolder} {(XUnitArguments != null ? " " + XUnitArguments : "")} -xml testResults.xml {assemblyPartitionInfo.ClassListArgumentString} {arguments}";
 
                 Log.LogMessage($"Creating work item with properties Identity: {assemblyName}, PayloadDirectory: {publishDirectory}, Command: {command}");
 
