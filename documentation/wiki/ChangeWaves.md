@@ -1,8 +1,11 @@
 # What are Change Waves?
-A Change Wave is a set of risky features developed under the same opt-out flag. This flag happens to be the version of MSBuild that the features were developed for. The purpose of this is to warn developers of risky changes that will become standard functionality down the line.
+A Change Wave is a set of risky features developed under the same opt-out flag. The purpose of this is to warn developers of "risky" changes that will become standard functionality down the line. If there's something we think is worth the risk, we found that Change Waves were a good middle ground between making necessary changes and warning customers of what will soon be permanent.
+
+## Why Opt-Out vs. Opt-In?
+Opt-out is a better approach for us because we'd likely get limited feedback when a feature impacts customer builds. When a feature does impact a customer negatively, it's a quick switch to disable and allows time to adapt. The key aspect to Change Waves is that it smooths the transition for customers adapting to risky changes that the MSBuild team feels strongly enough to take.
 
 ## How do they work?
-The opt out comes in the form of setting the environment variable `MSBuildDisableFeaturesFromVersion` to the Change Wave (or version) that contains the feature you want **disabled**. See the mapping of change waves to features below.
+The opt-out comes in the form of setting the environment variable `MSBuildDisableFeaturesFromVersion` to the Change Wave (or version) that contains the feature you want **disabled**. This version happens to be the version of MSBuild that the features were developed for. See the mapping of change waves to features below.
 
 ## MSBuildDisableFeaturesFromVersion Values & Outcomes
 | `MSBuildDisableFeaturesFromVersion` Value                         | Result        | Receive Warning? |
@@ -21,7 +24,7 @@ The opt out comes in the form of setting the environment variable `MSBuildDisabl
 - [Truncate Target/Task skipped log messages to 1024 chars](https://github.com/dotnet/msbuild/pull/5553)
 - [Don't expand full drive globs with false condition](https://github.com/dotnet/msbuild/pull/5669)
 ### 16.10
-
+- [Error when a property expansion in a condition has whitespace](https://github.com/dotnet/msbuild/pull/5672)
 ### 17.0
 
 ## Change Waves No Longer In Rotation

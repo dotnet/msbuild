@@ -104,6 +104,11 @@
         <target state="new">MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="IllFormedPropertySpaceInCondition">
+        <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
+        <target state="new">MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</target>
+        <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
         <target state="new">MSB4255: The following input result cache files do not exist: "{0}"</target>

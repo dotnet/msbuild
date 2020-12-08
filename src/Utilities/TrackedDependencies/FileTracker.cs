@@ -711,7 +711,7 @@ namespace Microsoft.Build.Utilities
             {
                 ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, nameof(messageResourceName));
 
-                Log.LogMessage(importance, AssemblyResources.FormatResourceString(messageResourceName, messageArgs));
+                Log.LogMessage(importance, AssemblyResources.GetString(messageResourceName), messageArgs);
             }
         }
 
