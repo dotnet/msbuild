@@ -703,13 +703,6 @@ namespace Microsoft.Build.BackEnd
         {
             var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
 
-            if (coresToRelease > runningTotal)
-            {
-                // TODO: log
-            }
-
-            coresToRelease = Math.Min(runningTotal, coresToRelease);
-
             if (coresToRelease >= 1)
             {
                 rms.ReleaseCores(coresToRelease, _taskLoggingContext);

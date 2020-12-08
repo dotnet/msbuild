@@ -118,6 +118,8 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
             if (coresToRelease > TotalNumberHeld)
             {
                 _loggingService?.LogWarning(_taskLoggingContext.BuildEventContext, null, null, "ResourceManagerExcessRelease", coresToRelease);
+
+                coresToRelease = TotalNumberHeld;
             }
 
             s.Release(coresToRelease);
