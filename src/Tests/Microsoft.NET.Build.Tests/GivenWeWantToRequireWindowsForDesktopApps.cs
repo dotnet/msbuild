@@ -225,7 +225,7 @@ namespace Microsoft.NET.Build.Tests
 
             Assert(publishCommand.GetOutputDirectory(tfm, runtimeIdentifier: runtimeIdentifier));
 
-            var command = new GetValuesCommand(
+            var filesCopiedToPublishDirCommand = new GetValuesCommand(
                 Log,
                 Path.Combine(asset.Path, testProject.Name),
                 testProject.TargetFrameworks,
@@ -236,21 +236,49 @@ namespace Microsoft.NET.Build.Tests
                 MetadataNames = { "RelativePath" },
             };
 
-            command.Execute().Should().Pass();
-            var items = from item in command.GetValuesWithMetadata()
-                        select new
-                        {
-                            Identity = item.value,
-                            RelativePath = item.metadata["RelativePath"]
-                        };
+            filesCopiedToPublishDirCommand.Execute().Should().Pass();
+            var filesCopiedToPublishDircommandItems
+                = from item in filesCopiedToPublishDirCommand.GetValuesWithMetadata()
+                  select new
+                  {
+                      Identity = item.value,
+                      RelativePath = item.metadata["RelativePath"]
+                  };
 
-            items
+            filesCopiedToPublishDircommandItems
                 .Should().Contain(i => i.RelativePath == "Microsoft.Windows.SDK.NET.dll" && Path.GetFileName(i.Identity) == "Microsoft.Windows.SDK.NET.dll",
                                   because: "wapproj should copy cswinrt dlls");
-            items
+            filesCopiedToPublishDircommandItems
                 .Should()
                 .Contain(i => i.RelativePath == "WinRT.Runtime.dll" && Path.GetFileName(i.Identity) == "WinRT.Runtime.dll",
                          because: "wapproj should copy cswinrt dlls");
+
+            var publishItemsOutputGroupOutputsCommand = new GetValuesCommand(
+                Log,
+                Path.Combine(asset.Path, testProject.Name),
+                testProject.TargetFrameworks,
+                "PublishItemsOutputGroupOutputs",
+                GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "Publish",
+                MetadataNames = { "OutputPath" },
+            };
+
+            publishItemsOutputGroupOutputsCommand.Execute().Should().Pass();
+            var publishItemsOutputGroupOutputsItems =
+                from item in publishItemsOutputGroupOutputsCommand.GetValuesWithMetadata()
+                select new
+                {
+                    FullAssetPath = Path.GetFullPath(Path.Combine(asset.Path, testProject.Name, item.metadata["OutputPath"]))
+                };
+
+            publishItemsOutputGroupOutputsItems
+                .Should().Contain(i => Path.GetFileName(Path.GetFullPath(i.FullAssetPath)) == "WinRT.Runtime.dll" && File.Exists(i.FullAssetPath),
+                      because: (string)"as the replacement for FilesCopiedToPublishDir, wapproj should copy cswinrt dlls");
+            publishItemsOutputGroupOutputsItems
+                .Should()
+                .Contain(i => Path.GetFileName(Path.GetFullPath(i.FullAssetPath)) == "WinRT.Runtime.dll" && File.Exists(i.FullAssetPath),
+                         because: "as the replacement for FilesCopiedToPublishDir, wapproj should copy cswinrt dlls");
 
             // ready to run is supported
             publishCommand.Execute("-p:SelfContained=true", $"-p:RuntimeIdentifier={runtimeIdentifier}", $"-p:PublishReadyToRun=true")
