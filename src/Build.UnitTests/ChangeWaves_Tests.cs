@@ -69,6 +69,8 @@ namespace Microsoft.Build.Engine.UnitTests
                 log.WarningCount.ShouldBe(warningCodesLogShouldContain.Length);
                 log.AssertLogContains(warningCodesLogShouldContain);
             }
+
+            ChangeWaves.ResetStateForTests();
         }
 
         [Fact]

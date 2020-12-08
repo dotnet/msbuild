@@ -1613,6 +1613,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // but that goes back to MSBuild 4.something so I'm codifying it in this test. If you're here because you cleaned it up
                 // and want to fix the test my current opinion is that's fine.
                 actual.ShouldBe(expected);
+                ChangeWaves.ResetStateForTests();
             }
         }
 

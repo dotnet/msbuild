@@ -132,6 +132,7 @@ namespace Microsoft.Build.UnitTests
             lexer = new Scanner("$( x)", ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
             Assert.Null(lexer.UnexpectedlyFound);
+            ChangeWaves.ResetStateForTests();
         }
 
         /// <summary>
