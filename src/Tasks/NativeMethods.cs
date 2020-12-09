@@ -1108,18 +1108,16 @@ typedef enum _tagAssemblyComparisonResult
                 string pwzAssemblyIdentity2,
                 [MarshalAs(UnmanagedType.Bool)] bool fUnified2,
                 [MarshalAs(UnmanagedType.Bool)] out bool pfEquivalent,
-                out AssemblyComparisonResult pResult
+                out int pResult
             );
 
         // TODO: Verify correctness of this implementation and
         // extend to more cases.
-        internal static void CompareAssemblyIdentity(
+        internal static bool AreAssembliesEquivalent(
             string assemblyIdentity1,
             bool fUnified1,
             string assemblyIdentity2,
-            bool fUnified2,
-            out bool pfEquivalent,
-            out AssemblyComparisonResult pResult)
+            bool fUnified2)
         {
 #if FEATURE_FUSION_COMPAREASSEMBLYIDENTITY
             if (NativeMethodsShared.IsWindows)
@@ -1129,46 +1127,38 @@ typedef enum _tagAssemblyComparisonResult
                     fUnified1,
                     assemblyIdentity2,
                     fUnified2,
-                    out pfEquivalent,
-                    out pResult);
+                    out bool pfEquivalent,
+                    out _);
+                return pfEquivalent;
             }
 #endif
 
             AssemblyName an1 = new AssemblyName(assemblyIdentity1);
             AssemblyName an2 = new AssemblyName(assemblyIdentity2);
 
-            //pfEquivalent = AssemblyName.ReferenceMatchesDefinition(an1, an2);
-            pfEquivalent = RefMatchesDef(an1, an2);
-            if (pfEquivalent)
+            if (RefMatchesDef(an1, an2))
             {
-                pResult = AssemblyComparisonResult.ACR_EquivalentFullMatch;
-                return;
+                return true;
             }
 
             if (!an1.Name.Equals(an2.Name, StringComparison.OrdinalIgnoreCase))
             {
-                pResult = AssemblyComparisonResult.ACR_NonEquivalent;
-                pfEquivalent = false;
-                return;
+                return false;
             }
 
             var versionCompare = an1.Version.CompareTo(an2.Version);
 
             if ((versionCompare < 0 && fUnified2) || (versionCompare > 0 && fUnified1))
             {
-                pResult = AssemblyComparisonResult.ACR_NonEquivalentVersion;
-                pfEquivalent = true;
-                return;
+                return true;
             }
 
             if (versionCompare == 0)
             {
-                pResult = AssemblyComparisonResult.ACR_EquivalentFullMatch;
-                pfEquivalent = true;
-                return;
+                return true;
             }
 
-            pResult = pfEquivalent ? AssemblyComparisonResult.ACR_EquivalentFullMatch : AssemblyComparisonResult.ACR_NonEquivalent;
+            return false;
         }
 
         //  Based on coreclr baseassemblyspec.cpp (https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L330)
@@ -1227,23 +1217,6 @@ typedef enum _tagAssemblyComparisonResult
             }
 
             return true;
-        }
-
-        internal enum AssemblyComparisonResult
-        {
-            ACR_Unknown,                    // Unknown 
-            ACR_EquivalentFullMatch,        // all fields match
-            ACR_EquivalentWeakNamed,        // match based on weak-name, version numbers ignored
-            ACR_EquivalentFXUnified,        // match based on FX-unification of version numbers
-            ACR_EquivalentUnified,          // match based on legacy-unification of version numbers
-            ACR_NonEquivalentVersion,       // all fields match except version field
-            ACR_NonEquivalent,              // no match
-
-            ACR_EquivalentPartialMatch,
-            ACR_EquivalentPartialWeakNamed,
-            ACR_EquivalentPartialUnified,
-            ACR_EquivalentPartialFXUnified,
-            ACR_NonEquivalentPartialVersion
         }
 
         //------------------------------------------------------------------------------

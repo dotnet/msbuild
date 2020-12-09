@@ -2279,14 +2279,12 @@ namespace Microsoft.Build.Tasks
                 bool rightConflictLegacyUnified = !isNonUnified && assemblyReference1.reference.IsPrimary;
 
                 // This is ok here because even if the method says two versions are equivalent the algorithm below will still pick the highest version.
-                NativeMethods.CompareAssemblyIdentity
+                bool equivalent = NativeMethods.AreAssembliesEquivalent
                 (
                     leftConflictFusionName,
                     leftConflictLegacyUnified,
                     rightConflictFusionName,
-                    rightConflictLegacyUnified,
-                    out bool equivalent,
-                    out _
+                    rightConflictLegacyUnified
                 );
 
                 Version leftConflictVersion = assemblyReference0.assemblyName.Version;
