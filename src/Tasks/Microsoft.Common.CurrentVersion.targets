@@ -792,6 +792,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </PropertyGroup>
   </Target>
 
+  <Target
+      Name="_EnsureOutputPathHasTrailingSlash"
+      BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
+      
+    <PropertyGroup>
+      <OutputPath>$([MSBuild]::EnsureTrailingSlash('$(OutputPath)'))</OutputPath>
+    </PropertyGroup>
+  </Target>
+
   <!--
     ============================================================
                                         _CheckForInvalidConfigurationAndPlatform
