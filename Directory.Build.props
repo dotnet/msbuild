@@ -17,19 +17,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('windows'))">windows</OsEnvironment>
-    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('linux'))">linux</OsEnvironment>
-    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('osx'))">osx</OsEnvironment>
-    <!-- Replace with MSBuild::IsBsdLike once the initial msbuild knows about it -->
-    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">bsd</OsEnvironment>
-
-    <OsUnixLike>false</OsUnixLike>
-    <OsUnixLike Condition="$([MSBuild]::IsOsUnixLike())">true</OsUnixLike>
-
-    <!-- <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)'==''">$(OSEnvironment)</TargetPlatformIdentifier> -->
-  </PropertyGroup>
-
-  <PropertyGroup>
     <DOTNET_INSTALL_DIR Condition="'$(DOTNET_INSTALL_DIR)' == ''">$(RepoRoot).dotnet\</DOTNET_INSTALL_DIR>
 
     <!-- Repository and project URLs (used in nuget packages) -->

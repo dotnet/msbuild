@@ -108,7 +108,7 @@
     <DefineConstants Condition="'$(MonoBuild)'=='true'">$(DefineConstants);MONO</DefineConstants>
 
     <!-- Useful for tests that need OS information as a constant -->
-    <DefineConstants Condition="'$(OsEnvironment)'=='windows'">$(DefineConstants);TEST_ISWINDOWS</DefineConstants>
+    <DefineConstants Condition="$([MSBuild]::IsOSPlatform('windows'))">$(DefineConstants);TEST_ISWINDOWS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('netcore')) or $(TargetFramework.StartsWith('net5'))">
