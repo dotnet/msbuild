@@ -472,9 +472,11 @@ namespace Microsoft.Build.BackEnd
             {
                 if (localPipeServer.IsConnected)
                 {
+#if NETCOREAPP // OperatingSystem.IsWindows() is new in .NET 5.0
                     if (OperatingSystem.IsWindows())
+#endif
                     {
-                    localPipeServer.WaitForPipeDrain();
+                        localPipeServer.WaitForPipeDrain();
                     }
 
                     localPipeServer.Disconnect();
