@@ -2400,5 +2400,42 @@ EndGlobal
 
             exception.Message.ShouldStartWith(message);
         }
+
+        /// <summary>
+        /// A test where paths contain ..\ segments to ensure the paths are normalized.
+        /// </summary>
+        [Fact]
+        public void ParseSolutionWithParentedPaths()
+        {
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 9.00
+                # Visual Studio 2005
+                Project('{749ABBD6-B803-4DA5-8209-498127164114}')  = 'ProjectA',  '..\ProjectA\ProjectA.csproj', '{0ABED153-9451-483C-8140-9E8D7306B216}'
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|AnyCPU = Debug|AnyCPU
+                        Release|AnyCPU = Release|AnyCPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {0ABED153-9451-483C-8140-9E8D7306B216}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+                        {0ABED153-9451-483C-8140-9E8D7306B216}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+                        {0ABED153-9451-483C-8140-9E8D7306B216}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+                        {0ABED153-9451-483C-8140-9E8D7306B216}.Release|AnyCPU.Build.0 = Release|AnyCPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            string expectedRelativePath = Path.Combine("..", "ProjectA", "ProjectA.csproj");
+            Assert.Equal("ProjectA", solution.ProjectsInOrder[0].ProjectName);
+            Assert.Equal(expectedRelativePath, solution.ProjectsInOrder[0].RelativePath);
+            Assert.Equal(Path.GetFullPath(Path.Combine(Path.GetDirectoryName(solution.FullPath), expectedRelativePath)), solution.ProjectsInOrder[0].AbsolutePath);
+            Assert.Equal("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
+        }
     }
 }
