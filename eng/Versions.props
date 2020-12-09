@@ -37,7 +37,7 @@
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <DotNetCliVersion>5.0.100</DotNetCliVersion>
-    <MicrosoftNetCompilersToolsetVersion>3.3.1-beta3-final</MicrosoftNetCompilersToolsetVersion>
+    <MicrosoftNetCompilersToolsetVersion>3.9.0-2.20574.26</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>5.9.0-preview.2.6979</NuGetBuildTasksVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
