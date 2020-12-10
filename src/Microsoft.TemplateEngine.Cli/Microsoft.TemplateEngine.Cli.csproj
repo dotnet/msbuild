@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>$(NETStandardTargetFramework)</TargetFrameworks>
         <Description>Template creation for the dotnet CLI</Description>
         <IsPackable>true</IsPackable>
 		<IsShipping>false</IsShipping>
