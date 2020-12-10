@@ -1,0 +1,10 @@
+[
+  {
+    "kind": "file_does_not_exist",
+    "path": "Api/bar.cs"
+  },
+  {
+    "kind": "file_exists",
+    "path": "Source/Api/Microsoft/Office/bar.cs"
+  }
+]
