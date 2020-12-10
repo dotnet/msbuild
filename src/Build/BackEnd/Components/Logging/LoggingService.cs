@@ -1333,6 +1333,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         BuildEventContext = warningEvent.BuildEventContext,
                         ProjectFile = warningEvent.ProjectFile,
                     };
+                    
                 }
             }
 

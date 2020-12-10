@@ -211,6 +211,29 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogWarning(string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            // PROBLEM WITH THIS CHUNK:
+            // LoggingContext has no idea if LoggingService actually interpreted the warning as an error, and logged it as so.
+            // It's a problem because TaskBuilder checks _THIS FILE'S _HASLOGGEDERRORS_ boolean to see if it logged errors.
+            // But loggingservice does not expose this info!
+
+            //doesn't work if the submission had already logged an error. unless we count the number of logged errors.
+
+            // Another problem is you need the warning code. Okay we can get that from resourceutilities.
+
+            // The fix: Have LoggingContext see if what we were about to log as an warning is actually an error.
+            // Prev code path: LogWarning -> _loggingService.LogWarning -> RouteBuildEvent -> LoggingService.RouteBuildEvent "Oh should we ACTUALLY log it as an error? -> Replace with error args.
+            // New code path: LogWarning "Oh are we actually going to log that as an error?" -> _loggingService.LogWarning -> LoggingService.RouteBuildEvent -> done.
+
+            string warningCode;
+            string helpKeyword;
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out warningCode, out helpKeyword, messageResourceName, messageArgs);
+
+            if(_loggingService.WarningsAsErrors.Contains(warningCode))
+            {
+                LogError(file, messageResourceName, messageArgs);
+                return;
+            }
+
             _loggingService.LogWarning(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
         }
 
@@ -225,6 +248,12 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogWarningFromText(string subcategoryResourceName, string warningCode, string helpKeyword, BuildEventFileInfo file, string message)
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+
+            if(_loggingService.WarningsAsErrors.Contains(warningCode))
+            {
+                LogErrorFromText(subcategoryResourceName, warningCode, helpKeyword, file, message);
+            }
+
             _loggingService.LogWarningFromText(_eventContext, subcategoryResourceName, warningCode, helpKeyword, file, message);
         }
 

@@ -113,6 +113,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_lockObject)
             {
+                _buildSubmissionIdsThatHaveLoggedErrors.Add(location.SubmissionId);
                 LogError(location, null, file, messageResourceName, messageArgs);
             }
         }
