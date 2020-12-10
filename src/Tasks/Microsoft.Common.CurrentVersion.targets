@@ -4125,13 +4125,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Include the following files in clickonce manifest only if single file publish is false -->
     <ItemGroup Condition="'$(PublishSingleFile)' != 'true'">
-      <ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce)"/>
+      <!-- 
+      _ClickOnceRuntimeCopyLocalItems group contains any runtimes folder assets of Nuget packages that are not included in 
+      _DeploymentReferencePaths (e.g. pdbs). They are populated from the RuntimeTargetsCopyLocalItems and NativeCopyLocalItems 
+      group that contain the RID-specific assets that go in runtimes folder on publish. They are output groups of the 
+      ResolvePackageAssets target in dotnet/sdk
+      -->
+      <_ClickOnceRuntimeCopyLocalItems Include="@(RuntimeTargetsCopyLocalItems)"
+                                      Condition="'%(RuntimeTargetsCopyLocalItems.CopyLocal)' == 'true'" />
+
+      <_ClickOnceRuntimeCopyLocalItems Include="@(NativeCopyLocalItems)" 
+                                      Condition="'%(NativeCopyLocalItems.CopyLocal)' == 'true'" />
+      <_ClickOnceRuntimeCopyLocalItems Remove="@(_DeploymentReferencePaths)" />
+      <_ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce);@(_ClickOnceRuntimeCopyLocalItems)"/>
     </ItemGroup>
 
     <!-- For single file publish, we need to include the SF bundle EXE and files excluded from the bundle EXE in the clickonce manifest -->
     <ItemGroup Condition="'$(PublishSingleFile)' == 'true'">
-      <ClickOnceFiles Include="$(PublishedSingleFilePath)"/>
-      <ClickOnceFiles Include="@(_FilesExcludedFromBundle)"/>
+      <_ClickOnceFiles Include="$(PublishedSingleFilePath)"/>
+      <_ClickOnceFiles Include="@(_FilesExcludedFromBundle)"/>
     </ItemGroup>
 
     <!-- For single file publish in .net core app, sign the SF EXE if signing is enabled -->
@@ -4166,7 +4178,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         AssemblyName="$(_DeploymentApplicationManifestIdentity)"
         EntryPoint="@(_DeploymentClickOnceApplicationExecutable)"
         ExtraFiles="@(_DebugSymbolsIntermediatePath);$(IntermediateOutputPath)$(TargetName).xml;@(_ReferenceRelatedPaths)"
-        Files="@(ClickOnceFiles)"
+        Files="@(_ClickOnceFiles)"
         IsSelfContainedPublish="$(SelfContained)"
         IsSingleFilePublish="$(PublishSingleFile)"
         LauncherBasedDeployment="$(_DeploymentLauncherBased)"

@@ -180,7 +180,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            OutputFiles = GetOutputFiles(filePublishInfoList);
+            OutputFiles = GetOutputFiles(filePublishInfoList, OutputAssemblies);
 
             if (!_canPublish && is35Project)
             {
@@ -350,6 +350,10 @@ namespace Microsoft.Build.Tasks
             string targetPath = item.GetMetadata(ItemMetadataNames.targetPath);
             if (String.IsNullOrEmpty(targetPath))
             {
+                targetPath = item.GetMetadata(ItemMetadataNames.destinationSubPath);
+            }
+            if (String.IsNullOrEmpty(targetPath))
+            {
                 targetPath = Path.GetFileName(item.ItemSpec);
                 // If item is a satellite then make sure the culture is part of the path...
                 string assemblyType = item.GetMetadata("AssemblyType");
@@ -462,16 +466,49 @@ namespace Microsoft.Build.Tasks
             return assemblyList.ToArray();
         }
 
-        private ITaskItem[] GetOutputFiles(List<PublishInfo> publishInfos)
+        private ITaskItem[] GetOutputFiles(List<PublishInfo> publishInfos, IEnumerable<ITaskItem> outputAssemblies)
         {
             var fileList = new List<ITaskItem>();
             var fileMap = new FileMap();
+
+            // Dictionary used to look up any content output files that are also in References
+            var outputAssembliesMap = outputAssemblies.ToDictionary(p => Path.GetFullPath(p.ItemSpec), StringComparer.OrdinalIgnoreCase);
 
             // Add all input Files to the FileMap, flagging them to be published by default...
             if (Files != null)
             {
                 foreach (ITaskItem item in Files)
                 {
+                    //
+                    // Files already included in References as copylocal should be skipped.
+                    // Lookup full path of the File in outputAssembliesMap and skip the
+                    // file if the target/destination path is the same.
+                    //
+                    string key = Path.GetFullPath(item.ItemSpec);
+                    outputAssembliesMap.TryGetValue(key, out var assembly);
+                    if (assembly != null)
+                    {
+                        if (GetItemCopyLocal(assembly))
+                        {
+                            // Get target path for the item
+                            string itemDestPath = item.GetMetadata(ItemMetadataNames.targetPath);
+                            if (String.IsNullOrEmpty(itemDestPath))
+                            {
+                                itemDestPath = item.GetMetadata(ItemMetadataNames.destinationSubPath);
+                            }
+                            // Get target path for the assembly
+                            string assemblyDestPath = assembly.GetMetadata(ItemMetadataNames.targetPath);
+                            if (String.IsNullOrEmpty(assemblyDestPath))
+                            {
+                                assemblyDestPath = assembly.GetMetadata(ItemMetadataNames.destinationSubPath);
+                            }
+                            // Skip item if target paths are the same for both
+                            if (String.Equals(itemDestPath, assemblyDestPath, StringComparison.OrdinalIgnoreCase))
+                            {
+                                continue;
+                            }
+                        }
+                    }
                     fileMap.Add(item, true);
                 }
             }
@@ -665,6 +702,8 @@ namespace Microsoft.Build.Tasks
 
         private bool IsFiltered(ITaskItem item)
         {
+            bool isDotNetCore = String.Equals(TargetFrameworkIdentifier, Constants.DotNetCoreAppIdentifier, StringComparison.InvariantCultureIgnoreCase);
+
             // In the case of .NET Core apps published as self-contained with loose files (i.e. PublishSingleFile != true),
             // .NETCore binaries that come from the .NETCore Runtime pack should not be filtered out.
             if (IsSelfContainedPublish && !IsSingleFilePublish &&
@@ -680,15 +719,16 @@ namespace Microsoft.Build.Tasks
             // OpenScope and returns null if not an assembly, which is much faster.
 
             AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
-            if (item.ItemSpec.EndsWith(".dll") && identity == null)
+            if (item.ItemSpec.EndsWith(".dll") && identity == null && !isDotNetCore)
             {
                 // It is possible that a native dll gets passed in here that was declared as a content file
-                // in a referenced nuget package, which will yield null here. We just need to ignore those, 
-                // since those aren't actually references we care about.
+                // in a referenced nuget package, which will yield null here. We just need to ignore those 
+                // for .NET FX case since those aren't actually references we care about. For .NET Core, native
+                // dll can be passed as a reference so we won't ignore it if isDotNetCore is true.
                 return true;
             }
 
-            if (String.Equals(TargetFrameworkIdentifier, Constants.DotNetCoreAppIdentifier, StringComparison.InvariantCultureIgnoreCase))
+            if (isDotNetCore)
             {
                 if (identity?.IsInFramework(Constants.DotNetCoreIdentifier, null) == true)
                 {
@@ -775,7 +815,15 @@ namespace Microsoft.Build.Tasks
                 string fusionName = item.GetMetadata(ItemMetadataNames.fusionName);
                 if (String.IsNullOrEmpty(fusionName))
                 {
-                    fusionName = Path.GetFileNameWithoutExtension(item.ItemSpec);
+                    string destSubDir = item.GetMetadata(ItemMetadataNames.destinationSubDirectory);
+                    if (!String.IsNullOrEmpty(destSubDir))
+                    {
+                        fusionName = Path.Combine(destSubDir, Path.GetFileNameWithoutExtension(item.ItemSpec));
+                    }
+                    else
+                    {
+                       fusionName = Path.GetFileNameWithoutExtension(item.ItemSpec);
+                    }
                 }
 
                 // Add to map with full name, for SpecificVersion=true case
