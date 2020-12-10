@@ -62,8 +62,8 @@ bootstrapRoot="$Stage1Dir/bin/bootstrap"
 if [ $host_type = "core" ]
 then
   _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
-  _InitializeBuildToolCommand="$bootstrapRoot/netcoreapp2.1/MSBuild/MSBuild.dll"
-  _InitializeBuildToolFramework="netcoreapp2.1"
+  _InitializeBuildToolCommand="$bootstrapRoot/net5.0/MSBuild/MSBuild.dll"
+  _InitializeBuildToolFramework="net5.0"
 elif [ $host_type = "mono" ]
 then
   export _InitializeBuildTool="mono"

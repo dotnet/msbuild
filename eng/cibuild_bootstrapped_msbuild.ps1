@@ -95,8 +95,8 @@ try {
   else
   {
     $buildToolPath = $dotnetExePath
-    $buildToolCommand = Join-Path $bootstrapRoot "netcoreapp2.1\MSBuild\MSBuild.dll"
-    $buildToolFramework = "netcoreapp2.1"
+    $buildToolCommand = Join-Path $bootstrapRoot "net5.0\MSBuild\MSBuild.dll"
+    $buildToolFramework = "net5.0"
   }
 
   # Use separate artifacts folder for stage 2
