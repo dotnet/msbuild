@@ -5,86 +5,173 @@ using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Edge.Template;
+using Newtonsoft.Json;
+using Xunit.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 {
-    internal class MockNewCommandInput : INewCommandInput
+    internal class MockNewCommandInput : INewCommandInput, IXunitSerializable
     {
         // a list of all the parameters defined by the template
         private IReadOnlyList<string> _allParametersForTemplate;
+        private Dictionary<string, string> _templateOptions;
+        private Dictionary<string, string> _commandOptions;
 
-        private IReadOnlyDictionary<string, string> _rawParameterInputs;
-
-        public MockNewCommandInput() : this(new Dictionary<string, string>())
+        public MockNewCommandInput(string templateName, string language = null, string type = null) : this()
         {
+            TemplateName = templateName;
+            if (!string.IsNullOrWhiteSpace(language))
+            {
+                _commandOptions["--language"] = language;
+            }
+            if (!string.IsNullOrWhiteSpace(type))
+            {
+                _commandOptions["--type"] = type;
+            }
         }
 
-        public MockNewCommandInput(IReadOnlyDictionary<string, string> rawParameterInputs)
+        public MockNewCommandInput()
         {
-            _rawParameterInputs = rawParameterInputs;
-
             InputTemplateParams = new Dictionary<string, string>();
             RemainingParameters = new Dictionary<string, IList<string>>();
             RemainingArguments = new List<string>();
             _allParametersForTemplate = new List<string>();
+            _commandOptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            _templateOptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
-        public string Alias { get; set; }
 
-        public string AllowScriptsToRun { get; set; }
+        public MockNewCommandInput WithTemplateOption(string optionName, string optionValue = null)
+        {
+            _templateOptions[optionName] = optionValue;
+            return this;
+        }
 
-        public string AuthorFilter { get; set; }
+        public MockNewCommandInput WithHelpOption()
+        {
+            _commandOptions["--help"] = null;
+            return this;
+        }
+        public MockNewCommandInput WithListOption()
+        {
+            _commandOptions["--list"] = null;
+            return this;
+        }
 
-        public string BaselineName { get; set; }
+        public MockNewCommandInput WithCommandOption(string optionName, string optionValue = null)
+        {
+            _commandOptions[optionName] = optionValue;
+            return this;
+        }
 
-        public bool CheckForUpdates { get; set; }
 
-        public bool CheckForUpdatesNoPrompt { get; set; }
 
-        public IReadOnlyCollection<string> Columns { get; set; } = new List<string>();
+        public string Alias { get; }
+
+        public string AllowScriptsToRun { get; }
+
+        public string AuthorFilter
+        {
+            get
+            {
+                if (_commandOptions.ContainsKey("--author"))
+                {
+                    return _commandOptions["--author"];
+                }
+                return string.Empty;
+            }
+        }
+
+        public string BaselineName
+        {
+            get
+            {
+                if (_commandOptions.ContainsKey("--baseline"))
+                {
+                    return _commandOptions["--baseline"];
+                }
+                return string.Empty;
+            }
+        }
+
+        public bool CheckForUpdates { get; }
+
+        public bool CheckForUpdatesNoPrompt { get; }
+
+        public IReadOnlyCollection<string> Columns
+        {
+            get
+            {
+                if (_commandOptions.ContainsKey("--columns"))
+                {
+                    return _commandOptions["--columns"].Split(",");
+                }
+                return new List<string>();
+            }
+        }
 
         public string ColumnsParseError => throw new NotImplementedException();
 
         public string CommandName => "MockNew";
 
-        public bool ExpandedExtraArgsFiles { get; set; }
+        public bool ExpandedExtraArgsFiles { get; }
 
-        public IList<string> ExtraArgsFileNames { get; set; }
+        public IList<string> ExtraArgsFileNames { get; }
 
         public bool HasColumnsParseError => throw new NotImplementedException();
 
-        public bool HasParseError { get; set; }
+        public bool HasParseError { get; }
 
-        public string HelpText { get; set; }
+        public string HelpText { get; }
 
         // When using this mock, set the inputs using constructor input.
         // This property gets assigned based on the constructor input and the template being worked with.
         public IReadOnlyDictionary<string, string> InputTemplateParams { get; private set; }
 
-        public IList<string> InstallNuGetSourceList { get; set; }
+        public IList<string> InstallNuGetSourceList { get; }
 
-        public bool IsDryRun { get; set; }
+        public bool IsDryRun { get; }
 
-        public bool IsForceFlagSpecified { get; set; }
+        public bool IsForceFlagSpecified { get; }
 
-        public bool IsHelpFlagSpecified { get; set; }
+        public bool IsHelpFlagSpecified => _commandOptions.ContainsKey("--help") || _commandOptions.ContainsKey("-h");
 
-        public bool IsInteractiveFlagSpecified { get; set; }
+        public bool IsInteractiveFlagSpecified { get; }
 
-        public bool IsListFlagSpecified { get; set; }
+        public bool IsListFlagSpecified => _commandOptions.ContainsKey("--list") || _commandOptions.ContainsKey("-l");
 
-        public bool IsQuietFlagSpecified { get; set; }
+        public bool IsQuietFlagSpecified { get; }
 
-        public bool IsShowAllFlagSpecified { get; set; }
+        public bool IsShowAllFlagSpecified { get; }
 
-        public string Language { get; set; }
+        public string Language 
+        {
+            get
+            {
+                if (_commandOptions.ContainsKey("--language"))
+                {
+                    return _commandOptions["--language"];
+                }
+                return string.Empty;
+            }
+        }
 
-        public string Locale { get; set; }
+        public string Locale { get; }
 
-        public string Name { get; set; }
+        public string Name { get; }
 
-        public string OutputPath { get; set; }
+        public string OutputPath { get; }
 
-        public string PackageFilter { get; set; }
+        public string PackageFilter
+        {
+            get
+            {
+                if (_commandOptions.ContainsKey("--package"))
+                {
+                    return _commandOptions["--package"];
+                }
+                return string.Empty;
+            }
+        }
 
         // When using this mock, set the inputs using constructor input.
         // This property gets assigned based on the constructor input and the template being worked with.
@@ -94,25 +181,35 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         // This property gets assigned based on the constructor input and the template being worked with.
         public IDictionary<string, IList<string>> RemainingParameters { get; private set; }
 
-        public bool SearchOnline { get; set; }
+        public bool SearchOnline { get; }
 
-        public string ShowAliasesAliasName { get; set; }
+        public string ShowAliasesAliasName { get; }
 
-        public bool ShowAliasesSpecified { get; set; }
+        public bool ShowAliasesSpecified { get; }
 
-        public bool ShowAllColumns { get; set; } = false;
+        public bool ShowAllColumns => _commandOptions.ContainsKey("--columns-all");
 
-        public bool SkipUpdateCheck { get; set; }
+        public bool SkipUpdateCheck { get; }
 
-        public string TemplateName { get; set; }
+        public string TemplateName { get; private set; }
 
-        public IList<string> ToInstallList { get; set; }
+        public IList<string> ToInstallList { get; }
 
-        public IReadOnlyList<string> Tokens { get; set; }
+        public IReadOnlyList<string> Tokens { get; }
 
-        public IList<string> ToUninstallList { get; set; }
+        public IList<string> ToUninstallList { get; }
+        public string TypeFilter
+        {
+            get
+            {
+                if (_commandOptions.ContainsKey("--type"))
+                {
+                    return _commandOptions["--type"];
+                }
+                return string.Empty;
+            }
+        }
 
-        public string TypeFilter { get; set; }
 
         public int Execute(params string[] args)
         {
@@ -140,7 +237,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
                 overrideToCanonicalMap[shortNameOverride.Value] = shortNameOverride.Key;
             }
 
-            foreach (KeyValuePair<string, string> inputParam in _rawParameterInputs)
+            foreach (KeyValuePair<string, string> inputParam in _templateOptions)
             {
                 ITemplateParameter matchedParam = default(ITemplateParameter);
 
@@ -182,7 +279,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public string TemplateParamInputFormat(string canonical)
         {
-            throw new NotImplementedException();
+            return canonical;
         }
 
         public string TemplateParamValue(string paramName)
@@ -209,5 +306,28 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         {
             throw new NotImplementedException();
         }
+
+        #region IXunitSerializable implementation
+        public void Deserialize(IXunitSerializationInfo info)
+        {
+            TemplateName = info.GetValue<string>("command_templateName");
+            _commandOptions = JsonConvert.DeserializeObject<Dictionary<string, string>>(info.GetValue<string>("command_options"));
+            _templateOptions = JsonConvert.DeserializeObject<Dictionary<string, string>>(info.GetValue<string>("command_templateOptions"));
+        }
+        public void Serialize(IXunitSerializationInfo info)
+        {
+            info.AddValue("command_templateName", TemplateName, typeof(string));
+            info.AddValue("command_options", JsonConvert.SerializeObject(_commandOptions), typeof(string));
+            info.AddValue("command_templateOptions", JsonConvert.SerializeObject(_templateOptions), typeof(string));
+        }
+
+        public override string ToString()
+        {
+            string result = TemplateName;
+            result += " " + string.Join(" ", _commandOptions.Select(kvp => kvp.Key + (string.IsNullOrWhiteSpace(kvp.Value) ? string.Empty : " " + kvp.Value)));
+            result += " " + string.Join(" ", _templateOptions.Select(kvp => kvp.Key + (string.IsNullOrWhiteSpace(kvp.Value) ? string.Empty : " " + kvp.Value)));
+            return result;
+        }
+        #endregion
     }
 }

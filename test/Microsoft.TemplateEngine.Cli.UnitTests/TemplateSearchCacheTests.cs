@@ -26,10 +26,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
 
-            INewCommandInput commandInput = new MockNewCommandInput()
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput commandInput = new MockNewCommandInput("foo");
 
             TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
             SearchResults searchResults = await searchCoordinator.SearchAsync();
@@ -51,15 +48,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
 
-            // The template symbol is "Framework" (capital "F"). This checks that the host specific override is applied
-            Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>()
-            {
-                { "framework", "netcoreapp2.0" }
-            };
-            INewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs)
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput commandInput = new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp2.0");
 
             TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
             SearchResults searchResults = await searchCoordinator.SearchAsync();
@@ -69,15 +58,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal(1, searchResults.MatchesBySource[0].PacksWithMatches.Count);
             Assert.Single(searchResults.MatchesBySource[0].PacksWithMatches[_packTwoInfo].TemplateMatches.Where(t => string.Equals(t.Info.Name, _fooTwoTemplate.Name)));
 
-            // same check, except with the short version of Framework, namely "f"
-            Dictionary<string, string> shortNameCheckRawCommandInputs = new Dictionary<string, string>()
-            {
-                { "f", "netcoreapp2.0" }
-            };
-            INewCommandInput shortNameCommandInput = new MockNewCommandInput(shortNameCheckRawCommandInputs)
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput shortNameCommandInput = new MockNewCommandInput("foo").WithTemplateOption("f", "netcoreapp2.0");
 
             TemplateSearchCoordinator shortNameSearchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, shortNameCommandInput, DefaultLanguage);
             SearchResults shortNameSearchResults = await searchCoordinator.SearchAsync();
@@ -97,14 +78,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
 
             // "tfm" is not a vaild symbol for the "foo" template. So it should not match.
-            Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>()
-            {
-                { "tfm", "netcoreapp2.0" }
-            };
-            INewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs)
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput commandInput = new MockNewCommandInput("foo").WithTemplateOption("tfm", "netcoreapp2.0");
 
             TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
             SearchResults searchResults = await searchCoordinator.SearchAsync();
@@ -122,11 +96,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
 
             Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>();
-            MockNewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs)
-            {
-                Language = "F#",
-                TemplateName = "bar"
-            };
+            MockNewCommandInput commandInput = new MockNewCommandInput("bar", "F#");
 
             TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
             SearchResults searchResults = await searchCoordinator.SearchAsync();
@@ -147,12 +117,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
 
-            Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>();
-            MockNewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs)
-            {
-                TemplateName = commandTemplate,
-                AuthorFilter = commandAuthor
-            };
+            MockNewCommandInput commandInput = new MockNewCommandInput(commandTemplate).WithCommandOption("--author", commandAuthor);
 
             TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
             SearchResults searchResults = await searchCoordinator.SearchAsync();
@@ -179,12 +144,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
 
-            Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>();
-            MockNewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs)
-            {
-                TemplateName = commandTemplate,
-                TypeFilter = commandType
-            };
+            MockNewCommandInput commandInput = new MockNewCommandInput(commandTemplate, type: commandType);
 
             TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
             SearchResults searchResults = await searchCoordinator.SearchAsync();
@@ -212,12 +172,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
 
-            Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>();
-            MockNewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs)
-            {
-                TemplateName = commandTemplate,
-                PackageFilter = commandPackage
-            };
+            MockNewCommandInput commandInput = new MockNewCommandInput(commandTemplate).WithCommandOption("--package", commandPackage);
 
             TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
             SearchResults searchResults = await searchCoordinator.SearchAsync();
@@ -242,12 +197,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
             EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
 
-            Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>();
-            MockNewCommandInput commandInput = new MockNewCommandInput(rawCommandInputs)
-            {
-                TemplateName = "bar",
-                Language = "VB"
-            };
+            MockNewCommandInput commandInput = new MockNewCommandInput("bar", "VB");
 
             TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(EngineEnvironmentSettings, commandInput, DefaultLanguage);
             SearchResults searchResults = await searchCoordinator.SearchAsync();

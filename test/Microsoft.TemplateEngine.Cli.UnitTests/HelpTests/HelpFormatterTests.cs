@@ -212,10 +212,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
                 }
             };
 
-            INewCommandInput command = new MockNewCommandInput()
-            {
-                Columns = new List<string>() { "column3" }
-            };
+            INewCommandInput command = new MockNewCommandInput().WithCommandOption("--columns", "column3");
 
             IEnumerable<Tuple<string, string, string>> data = new List<Tuple<string, string, string>>()
             {
@@ -261,10 +258,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
                 }
             };
 
-            INewCommandInput command = new MockNewCommandInput()
-            {
-                ShowAllColumns = true
-            };
+            INewCommandInput command = new MockNewCommandInput().WithCommandOption("--columns-all");
 
             IEnumerable<Tuple<string, string, string>> data = new List<Tuple<string, string, string>>()
             {

@@ -38,11 +38,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 Tags = new Dictionary<string, ICacheTag>()
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "console2",
-                IsHelpFlagSpecified = true
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("console2").WithHelpOption();
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
@@ -73,11 +69,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 Tags = new Dictionary<string, ICacheTag>()
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "console",
-                IsHelpFlagSpecified = true
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
@@ -128,11 +120,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 }
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "console",
-                IsHelpFlagSpecified = true
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
@@ -207,11 +195,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 }
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "c",
-                IsHelpFlagSpecified = true
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("c").WithHelpOption();
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
@@ -249,11 +233,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 }
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "console",
-                IsHelpFlagSpecified = true
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "L1");
             Assert.True(matchResult.HasExactMatches);
@@ -295,12 +275,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 }
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "console",
-                IsHelpFlagSpecified = true,
-                Language = "L2"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("console", "L2").WithHelpOption();
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "L1");
             Assert.True(matchResult.HasExactMatches);
@@ -352,11 +327,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 }
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "console",
-                IsHelpFlagSpecified = true
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
@@ -408,11 +379,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 }
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "console",
-                IsHelpFlagSpecified = true
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
@@ -446,12 +413,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 }
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "console",
-                IsHelpFlagSpecified = true,
-                Language = "L2"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("console", "L2").WithHelpOption();
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);
@@ -489,12 +451,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 }
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "console",
-                IsHelpFlagSpecified = true,
-                TypeFilter = "item"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("console", type: "item").WithHelpOption();
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);
@@ -532,12 +489,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 }
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "console",
-                IsHelpFlagSpecified = true,
-                BaselineName = "core"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption().WithCommandOption("--baseline", "core");
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);
@@ -575,14 +527,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 }
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "console",
-                IsHelpFlagSpecified = true,
-                Language = "L2",
-                TypeFilter = "item",
-                BaselineName = "core"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("console", "L2", "item").WithHelpOption().WithCommandOption("--baseline", "core");
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);
@@ -639,13 +584,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 }
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "console",
-                IsHelpFlagSpecified = true,
-                Language = "L2",
-                TypeFilter = "item"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("console", "L2", "item").WithHelpOption();
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);
@@ -684,14 +623,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             });
 
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "zzzzz",
-                IsHelpFlagSpecified = true,
-                Language = "L1",
-                TypeFilter = "project",
-                BaselineName = "app"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("zzzzz", "L1", "item").WithHelpOption().WithCommandOption("--baseline", "app");
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);
@@ -778,16 +710,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             });
 
 
-            INewCommandInput userInputs = new MockNewCommandInput(
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "langVersion", null }
-                }
-            )
-            {
-                TemplateName = "c",
-                IsHelpFlagSpecified = true,
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("c").WithHelpOption().WithTemplateOption("langVersion");
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
@@ -871,16 +794,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             });
 
 
-            INewCommandInput userInputs = new MockNewCommandInput(
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "framework", null }
-                }
-            )
-            {
-                TemplateName = "c",
-                IsHelpFlagSpecified = true,
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("c").WithHelpOption().WithTemplateOption("framework");
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
@@ -963,16 +877,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             });
 
 
-            INewCommandInput userInputs = new MockNewCommandInput(
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "do-not-exist", null }
-                }
-            )
-            {
-                TemplateName = "c",
-                IsHelpFlagSpecified = true,
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("c").WithHelpOption().WithTemplateOption("do-not-exist");
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
@@ -1012,11 +917,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             });
 
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "Common",
-                IsHelpFlagSpecified = true,
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("Common").WithHelpOption();
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);

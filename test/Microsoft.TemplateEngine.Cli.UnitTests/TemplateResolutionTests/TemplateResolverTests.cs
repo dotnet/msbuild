@@ -184,10 +184,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 Tags = new Dictionary<string, ICacheTag>()
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "Template2"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("Template2");
 
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
 
@@ -227,10 +224,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 CacheParameters = new Dictionary<string, ICacheParameter>()
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("foo");
 
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "Perl");
             Assert.Equal(1, matchResult.GetBestTemplateMatchList().Count);
@@ -268,11 +262,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 CacheParameters = new Dictionary<string, ICacheParameter>()
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "foo",
-                Language = "LISP"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("foo", "LISP");
 
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "Perl");
 
@@ -317,10 +307,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 Tags = new Dictionary<string, ICacheTag>()
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput()
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("foo");
 
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.Equal(2, matchResult.GetBestTemplateMatchList().Count);
@@ -359,15 +346,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 }
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput(
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "baz", "whatever" }
-                }
-            )
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("foo").WithTemplateOption("baz", "whatever");
 
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
@@ -406,15 +385,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 CacheParameters = new Dictionary<string, ICacheParameter>()
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput(
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "framework", "netcoreapp1.0" }
-                }
-            )
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp1.0");
 
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.TryGetUnambiguousTemplateGroupToUse(out IReadOnlyList<ITemplateMatchInfo> unambiguousGroup));
@@ -440,15 +411,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 }
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput(
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "baz", null }
-                }
-            )
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("foo").WithTemplateOption("baz");
 
             IHostSpecificDataLoader hostSpecificDataLoader = new MockHostSpecificDataLoader();
 
@@ -492,15 +455,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 CacheParameters = new Dictionary<string, ICacheParameter>()
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput(
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "framework", "netcoreapp3.0" }
-                }
-            )
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp3.0");
+
 
             IHostSpecificDataLoader hostSpecificDataLoader = new MockHostSpecificDataLoader();
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);

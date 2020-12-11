@@ -23,10 +23,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             foreach (string testShortName in shortNamesForGroup)
             {
-                INewCommandInput userInputs = new MockNewCommandInput()
-                {
-                    TemplateName = testShortName
-                };
+                INewCommandInput userInputs = new MockNewCommandInput(testShortName);
 
                 TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, "C#");
                 matchResult.TryGetCoreMatchedTemplatesWithDisposition(x => x.IsMatch, out IReadOnlyList<ITemplateMatchInfo> matchedTemplateList);
@@ -51,10 +48,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             foreach (string testShortName in shortNamesForGroup)
             {
-                INewCommandInput userInputs = new MockNewCommandInput()
-                {
-                    TemplateName = testShortName
-                };
+                INewCommandInput userInputs = new MockNewCommandInput(testShortName);
 
                 TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, "C#");
                 Assert.True(matchResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo invokableTemplate, out TemplateResolutionResult.Status resultStatus));
@@ -73,11 +67,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             foreach (string testShortName in shortNamesForGroup)
             {
-                INewCommandInput userInputs = new MockNewCommandInput()
-                {
-                    TemplateName = testShortName,
-                    Language = "F#"
-                };
+                INewCommandInput userInputs = new MockNewCommandInput(testShortName, "F#");
 
                 TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, "C#");
                 Assert.True(matchResult.TryGetSingularInvokableMatch(out ITemplateMatchInfo invokableTemplate, out TemplateResolutionResult.Status resultStatus));
@@ -95,15 +85,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [InlineData("eee", "Y", "Multiname.Test.Only.FSharp")]  // uses a short name from a different template in the group
         public void ChoiceValueDisambiguatesMatchesWithMultipleShortNames(string name, string fooChoice, string expectedIdentity)
         {
-            IReadOnlyDictionary<string, string> userParams = new Dictionary<string, string>()
-            {
-                {  "foo", fooChoice }
-            };
-
-            INewCommandInput commandInput = new MockNewCommandInput(userParams)
-            {
-                TemplateName = name
-            };
+            INewCommandInput commandInput = new MockNewCommandInput(name).WithTemplateOption("foo", fooChoice);
 
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), commandInput, "C#");
 
@@ -121,15 +103,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [InlineData("eee", "OnlyF", "someValue", "Multiname.Test.Only.FSharp")] // uses a short name from a different template in the group
         public void ParameterExistenceDisambiguatesMatchesWithMultipleShortNames(string name, string paramName, string paramValue, string expectedIdentity)
         {
-            IReadOnlyDictionary<string, string> userParams = new Dictionary<string, string>()
-            {
-                { paramName, paramValue }
-            };
-
-            INewCommandInput commandInput = new MockNewCommandInput(userParams)
-            {
-                TemplateName = name
-            };
+            INewCommandInput commandInput = new MockNewCommandInput(name).WithTemplateOption(paramName, paramValue);
 
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), commandInput, "C#");
 

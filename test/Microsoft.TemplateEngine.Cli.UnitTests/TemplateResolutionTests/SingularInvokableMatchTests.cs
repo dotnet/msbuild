@@ -44,15 +44,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 CacheParameters = new Dictionary<string, ICacheParameter>(),
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput(
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "MyChoice", "value_" }
-                }
-            )
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_");
 
             IHostSpecificDataLoader hostSpecificDataLoader = new MockHostSpecificDataLoader();
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);
@@ -97,15 +89,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 CacheParameters = new Dictionary<string, ICacheParameter>(),
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput(
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "MyChoice", "value_" }
-                }
-            )
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_");
 
             IHostSpecificDataLoader hostSpecificDataLoader = new MockHostSpecificDataLoader();
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);
@@ -150,15 +134,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 CacheParameters = new Dictionary<string, ICacheParameter>(),
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput(
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "MyChoice", "value_" }
-                }
-            )
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_");
 
             IHostSpecificDataLoader hostSpecificDataLoader = new MockHostSpecificDataLoader();
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);
@@ -205,16 +181,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 CacheParameters = new Dictionary<string, ICacheParameter>(),
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput(
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "MyChoice", "value_" },
-                    { "OtherChoice", "foo_" }
-                }
-            )
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_").WithTemplateOption("OtherChoice", "foo_");
 
             IHostSpecificDataLoader hostSpecificDataLoader = new MockHostSpecificDataLoader();
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);
@@ -246,12 +213,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 CacheParameters = new Dictionary<string, ICacheParameter>(),
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput(
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { }
-            )
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("foo");
 
             IHostSpecificDataLoader hostSpecificDataLoader = new MockHostSpecificDataLoader();
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);
@@ -296,13 +258,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 CacheParameters = new Dictionary<string, ICacheParameter>(),
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput(
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { }
-            )
-            {
-                TemplateName = "foo"
-            };
-
+            INewCommandInput userInputs = new MockNewCommandInput("foo");
 
             IHostSpecificDataLoader hostSpecificDataLoader = new MockHostSpecificDataLoader();
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);
@@ -347,12 +303,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 CacheParameters = new Dictionary<string, ICacheParameter>(),
             });
 
-            INewCommandInput userInputs = new MockNewCommandInput(
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { }
-            )
-            {
-                TemplateName = "foo"
-            };
+            INewCommandInput userInputs = new MockNewCommandInput("foo");
 
             IHostSpecificDataLoader hostSpecificDataLoader = new MockHostSpecificDataLoader();
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templatesToSearch, hostSpecificDataLoader, userInputs, null);
