@@ -22,7 +22,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 #else
             string configuration = "Release";
 #endif
-            string harnessPath = Path.Combine(dir, "..", "..", "..", "..", "bin", "Microsoft.TemplateEngine.EndToEndTestHarness", configuration, "netcoreapp3.1");
+            string harnessPath = Path.Combine(dir, "..", "..", "..", "..", "bin", "Microsoft.TemplateEngine.EndToEndTestHarness", configuration, Path.GetFileName(dir));
             int scriptCount = scripts.Length;
             StringBuilder builder = new StringBuilder();
             builder.Append(scriptCount);
