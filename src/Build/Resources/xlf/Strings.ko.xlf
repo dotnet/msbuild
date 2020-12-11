@@ -159,6 +159,11 @@
         <target state="translated">BeginBuild가 아직 호출되지 않았으므로 작업을 완료할 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NotAllNodesDefineACacheItem">
+        <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
+        <target state="new">MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
         <source>A required NuGet assembly was not found. Expected Path: {0}</source>
         <target state="translated">필요한 NuGet 어셈블리를 찾을 수 없습니다. 예상 경로: {0}</target>
@@ -215,8 +220,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">
-        <source>MSB4268:The project cache failed during shutdown.</source>
-        <target state="new">MSB4268:The project cache failed during shutdown.</target>
+        <source>MSB4268: The project cache failed during shutdown.</source>
+        <target state="new">MSB4268: The project cache failed during shutdown.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">

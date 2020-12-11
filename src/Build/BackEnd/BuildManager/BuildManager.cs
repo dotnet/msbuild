@@ -1825,23 +1825,25 @@ namespace Microsoft.Build.Execution
                 return new DisposePluginService(null);
             }
 
-            var cacheItems = projectGraph.ProjectNodes
-                .Select(n => n.ProjectInstance)
-                .SelectMany(p => p.GetItems(ItemTypeNames.ProjectCachePlugin))
-                .Select(
-                    i =>
-                    {
-                        var metadataDictionary = i.Metadata.ToDictionary(
-                            m => ((IKeyed) m).Key,
-                            m => ((IValued) m).EscapedValue);
+            var nodeToCacheItems = projectGraph.ProjectNodes.ToDictionary(
+                n => n,
+                n => n.ProjectInstance.GetItems(ItemTypeNames.ProjectCachePlugin)
+                    .Select(
+                        i =>
+                        {
+                            var metadataDictionary = i.Metadata.ToDictionary(
+                                m => ((IKeyed) m).Key,
+                                m => ((IValued) m).EscapedValue);
 
-                        var pluginPath = Path.Combine(i.Project.Directory, i.EvaluatedInclude);
+                            var pluginPath = Path.Combine(i.Project.Directory, i.EvaluatedInclude);
 
-                        var projectCacheItem = new ProjectCacheItem(pluginPath, metadataDictionary);
+                            var projectCacheItem = new ProjectCacheItem(pluginPath, metadataDictionary);
 
-                        return projectCacheItem;
-                    })
-                .ToHashSet();
+                            return projectCacheItem;
+                        })
+                    .ToArray());
+
+            var cacheItems = nodeToCacheItems.Values.SelectMany(i => i).ToHashSet();
 
             if (cacheItems.Count == 0)
             {
@@ -1853,6 +1855,16 @@ namespace Microsoft.Build.Execution
                 ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                     "OnlyOneCachePluginMustBeSpecified",
                     string.Join("; ", cacheItems.Select(ci => ci.PluginPath))));
+
+            var nodesWithoutCacheItems = nodeToCacheItems.Where(kvp => kvp.Value.Length == 0).ToArray();
+
+            if (nodesWithoutCacheItems.Length > 0)
+            {
+                ErrorUtilities.ThrowInvalidOperation(
+                    "NotAllNodesDefineACacheItem",
+                    ItemTypeNames.ProjectCachePlugin,
+                    string.Join(", ", nodesWithoutCacheItems.Select(kvp => kvp.Key.ProjectInstance.FullPath)));
+            }
 
             var cacheItem = cacheItems.First();
 
