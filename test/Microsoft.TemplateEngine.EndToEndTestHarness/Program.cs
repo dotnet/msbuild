@@ -216,7 +216,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
 
         private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstaller installer)
         {
-            string codebase = typeof(Program).GetTypeInfo().Assembly.CodeBase;
+            string codebase = typeof(Program).GetTypeInfo().Assembly.Location;
             Uri cb = new Uri(codebase);
             string asmPath = cb.LocalPath;
             string dir = Path.GetDirectoryName(asmPath);

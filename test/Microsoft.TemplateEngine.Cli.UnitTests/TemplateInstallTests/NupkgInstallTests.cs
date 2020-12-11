@@ -38,7 +38,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
             int initializeResult = New3Command.Run(CommandName, host, telemetryLogger, null, new string[] { });
             Assert.Equal(0, initializeResult);
 
-            string codebase = typeof(NupkgInstallTests).GetTypeInfo().Assembly.CodeBase;
+            string codebase = typeof(NupkgInstallTests).GetTypeInfo().Assembly.Location;
             Uri cb = new Uri(codebase);
             string asmPath = cb.LocalPath;
             string dir = Path.GetDirectoryName(asmPath);

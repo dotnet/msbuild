@@ -12,7 +12,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
     {
         public void Run(string args, params string[] scripts)
         {
-            string codebase = typeof(EndToEndTestBase).GetTypeInfo().Assembly.CodeBase;
+            string codebase = typeof(EndToEndTestBase).GetTypeInfo().Assembly.Location;
             Uri cb = new Uri(codebase);
             string asmPath = cb.LocalPath;
             string dir = Path.GetDirectoryName(asmPath);

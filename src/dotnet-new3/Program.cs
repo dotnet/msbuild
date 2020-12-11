@@ -112,7 +112,7 @@ namespace dotnet_new3
             if (baseDir.Contains('%'))
             {
                 Assembly a = typeof(Program).GetTypeInfo().Assembly;
-                string path = new Uri(a.CodeBase, UriKind.Absolute).LocalPath;
+                string path = new Uri(a.Location, UriKind.Absolute).LocalPath;
                 path = Path.GetDirectoryName(path);
                 Environment.SetEnvironmentVariable("DN3", path);
             }
