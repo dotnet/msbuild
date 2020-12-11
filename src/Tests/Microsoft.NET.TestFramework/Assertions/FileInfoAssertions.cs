@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Microsoft.NET.TestFramework.Assertions
@@ -47,5 +48,30 @@ namespace Microsoft.NET.TestFramework.Assertions
 
             return new AndWhichConstraint<FileInfoAssertions, DateTimeOffset>(this, lastWriteTimeUtc);
         }
+
+        public AndConstraint<FileInfoAssertions> HashEquals(string expectedSha)
+        {
+            using var algorithm = SHA256.Create();
+            var actualSha256 = algorithm.ComputeHash(File.ReadAllBytes(_fileInfo.FullName));
+            var actualSha256Base64 = Convert.ToBase64String(actualSha256);
+
+            Execute.Assertion
+                .ForCondition(actualSha256Base64 == expectedSha)
+                .FailWith($"File {_fileInfo.FullName} did not have SHA matching {expectedSha}. Found {actualSha256Base64}.");
+
+            return new AndConstraint<FileInfoAssertions>(this);
+        }
+
+        public AndConstraint<FileInfoAssertions> Contain(string expectedContent)
+        {
+            var actualContent = File.ReadAllText(_fileInfo.FullName);
+
+            Execute.Assertion
+                .ForCondition(actualContent.Contains(expectedContent))
+                .FailWith($"File {_fileInfo.FullName} did not have content: {expectedContent}.");
+
+            return new AndConstraint<FileInfoAssertions>(this);
+        }
+
     }
 }

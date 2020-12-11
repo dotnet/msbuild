@@ -76,6 +76,7 @@
       <NETSdkPublishSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Publish</NETSdkPublishSourceRoot>
       <NETSdkWebProjectSystemSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Web.ProjectSystem</NETSdkWebProjectSystemSourceRoot>
       <NETSdkWorkerSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Worker</NETSdkWorkerSourceRoot>
+      <NETSdkBlazorWasmSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.BlazorWebAssembly</NETSdkBlazorWasmSourceRoot>
     </PropertyGroup>
     <ItemGroup>
       <NETSdksContent Include="$(NETSdkSourceRoot)\**\*.*" 
@@ -88,6 +89,8 @@
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Web.ProjectSystem"/>
       <NETSdksContent Include="$(NETSdkWorkerSourceRoot)\**\*.*" 
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Worker"/>
+      <NETSdksContent Include="$(NETSdkBlazorWasmSourceRoot)\**\*.*" 
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.BlazorWebAssembly"/>
     </ItemGroup>
     <Copy SourceFiles="@(NETSdksContent)"
       DestinationFiles="@(NETSdksContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
@@ -175,6 +178,29 @@
     <Delete Files="$(FSharpDirectory)/tool_fsc.pdb" />
     <Delete Files="$(FSharpDirectory)/tool_fsc.runtimeconfig.json" />
     <Delete Files="$(FSharpDirectory)/tool_fsc.deps.json" />
+  </Target>
+
+  <Target Name="PublishBlazorWasmTools"
+          BeforeTargets="Build">
+    <MSBuild
+      Targets="Publish"
+      Projects="$(RepoRoot)/src/BlazorWasmSdk/Tool/Microsoft.NET.Sdk.BlazorWebAssembly.Tool.csproj"
+      Properties="Configuration=$(Configuration)" />
+  </Target>
+
+  <Target Name="MoveBlazorWasmTools" AfterTargets="PublishBlazorWasmTools">
+    <ItemGroup>
+      <_WebAssemblyToolsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.BlazorWebAssembly.Tool\$(Configuration)\$(SdkTargetFramework)\publish\Microsoft.*" />
+    </ItemGroup>
+
+    <Error
+      Text="WebAssembly SDK tools outputs were not found in $(ArtifactsBinDir)Microsoft.NET.Sdk.BlazorWebAssembly.Tool\$(Configuration)\$(SdkTargetFramework)\publish"
+      Condition="'@(_WebAssemblyToolsOutput->Count())' == '0'" />
+    
+    <Copy
+      SourceFiles="@(_WebAssemblyToolsOutput)"
+      DestinationFolder="$(NETSdkBlazorWasmSourceRoot)\tools\$(SdkTargetFramework)\"
+      SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="PublishTargetExtensions"
@@ -288,6 +314,7 @@
                             PublishRoslyn;
                             PublishMSBuildExtensions;
                             PublishFSharp;
+                            PublishBlazorWasmTools;
                             GenerateCliRuntimeConfigurationFiles;
                             MakeFscRunnableAndMoveToPublishDir;
                             RemoveFscFilesAfterPublish;
