@@ -110,7 +110,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn -->
-    <MicrosoftNetCompilersToolsetPackageVersion>3.9.0-3.20608.10</MicrosoftNetCompilersToolsetPackageVersion>
+    <MicrosoftNetCompilersToolsetPackageVersion>3.9.0-3.20610.26</MicrosoftNetCompilersToolsetPackageVersion>
     <MicrosoftCodeAnalysisCodeStyleVersion>3.8.0-4.20469.1</MicrosoftCodeAnalysisCodeStyleVersion>
   </PropertyGroup>
   <PropertyGroup>
