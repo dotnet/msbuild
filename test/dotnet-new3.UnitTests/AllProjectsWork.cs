@@ -16,75 +16,38 @@ using Xunit.Abstractions;
 
 namespace dotnet_new3.UnitTests
 {
-    public class AllProjectsWork
+    public class AllProjectsWork : IClassFixture<SharedHomeDirectory>
     {
+        private readonly SharedHomeDirectory sharedHome;
         private readonly ITestOutputHelper log;
 
-        public AllProjectsWork(ITestOutputHelper log)
+        public AllProjectsWork(SharedHomeDirectory sharedHome, ITestOutputHelper log)
         {
+            this.sharedHome = sharedHome;
             this.log = log;
-        }
-
-
-        private static readonly Guid _tempDirParent = Guid.NewGuid();
-
-        private static string GetWorkingDirectoryName(string suffix, [CallerMemberName] string callerName = "")
-        {
-            return Path.Combine(Path.GetTempPath(), _tempDirParent.ToString(), "WorkingDirectories", callerName, suffix);
-        }
-        private static string GetUserHomeName(string suffix, [CallerMemberName] string callerName = "")
-        {
-            return Path.Combine(Path.GetTempPath(), _tempDirParent.ToString(), "Homes", callerName, suffix);
+            sharedHome.InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.5.0");
+            sharedHome.InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.3.1");
         }
 
         [Theory]
-        [InlineData("emptyweb_cs-50", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "web")]
-        [InlineData("mvc_cs-50", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "mvc")]
-        [InlineData("mvc_fs-50", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "mvc", "-lang", "F#")]
-        [InlineData("api_cs-50", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "api")]
-        [InlineData("emptyweb_cs-31", "Microsoft.DotNet.Web.ProjectTemplates.3.1", "web", "-f", "netcoreapp3.1")]
-        [InlineData("mvc_cs-31", "Microsoft.DotNet.Web.ProjectTemplates.3.1", "mvc", "-f", "netcoreapp3.1")]
-        [InlineData("mvc_fs-31", "Microsoft.DotNet.Web.ProjectTemplates.3.1", "mvc", "-lang", "F#", "-f", "netcoreapp3.1")]
-        [InlineData("api_cs-31", "Microsoft.DotNet.Web.ProjectTemplates.3.1", "api", "-f", "netcoreapp3.1")]
-        [InlineData("console_cs-31", null, "console", "-f", "netcoreapp3.1")]
-        [InlineData("library_cs-50", null, "library", "-f", "net5.0")]
-        public void AllWebProjectsRestoreAndBuild(string testName, string installNuget, params string[] args)
+        [InlineData("emptyweb_cs-50",  "web")]
+        [InlineData("mvc_cs-50",  "mvc")]
+        [InlineData("mvc_fs-50",  "mvc", "-lang", "F#")]
+        [InlineData("api_cs-50",  "api")]
+        [InlineData("emptyweb_cs-31",  "web", "-f", "netcoreapp3.1")]
+        [InlineData("mvc_cs-31",  "mvc", "-f", "netcoreapp3.1")]
+        [InlineData("mvc_fs-31",  "mvc", "-lang", "F#", "-f", "netcoreapp3.1")]
+        [InlineData("api_cs-31",  "api", "-f", "netcoreapp3.1")]
+        [InlineData("console_cs-31", "console", "-f", "netcoreapp3.1")]
+        [InlineData("library_cs-50", "classlib", "-f", "net5.0")]
+        public void AllWebProjectsRestoreAndBuild(string testName, params string[] args)
         {
-            var homeVariable = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "USERPROFILE" : "HOME";
-            var homeDir = GetUserHomeName(testName);
-
-            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DN3")))
-            {
-                var path = typeof(AllProjectsWork).Assembly.Location;
-                while (path != null && !File.Exists(Path.Combine(path, "Microsoft.TemplateEngine.sln")))
-                {
-                    path = Path.GetDirectoryName(path);
-                }
-                if (path == null)
-                    throw new Exception("Couldn't find repository root, because \"Microsoft.TemplateEngine.sln\" is not in any of parent directories.");
-                // DummyFolder Path just represents folder next to "artifacts" and "template_feed", so paths inside
-                // defaultinstall.package.list correctly finds packages in "../artifacts/"
-                // via %DN3%\..\template_feed\ or %DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Core.*
-                path = Path.Combine(path, "DummyFolder");
-                Environment.SetEnvironmentVariable("DN3", path);
-            }
-
-            string workingDir = GetWorkingDirectoryName(testName);
+            string workingDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), testName);
             Directory.CreateDirectory(workingDir);
-
-            if (!string.IsNullOrEmpty(installNuget))
-                new DotnetNewCommand(log, "-i", installNuget)
-                    .WithWorkingDirectory(workingDir)
-                    .WithEnvironmentVariable(homeVariable, homeDir)
-                    .Execute()
-                    .Should()
-                    .ExitWith(0)
-                    .And
-                    .NotHaveStdErr();
 
             new DotnetNewCommand(log, args)
                 .WithWorkingDirectory(workingDir)
-                .WithEnvironmentVariable(homeVariable, homeDir)
+                .WithEnvironmentVariable(sharedHome.HomeVariable, sharedHome.HomeDirectory)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -108,7 +71,6 @@ namespace dotnet_new3.UnitTests
                 .NotHaveStdErr();
 
             Directory.Delete(workingDir, true);
-            Directory.Delete(homeDir, true);
         }
     }
 }
