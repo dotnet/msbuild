@@ -2676,67 +2676,18 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 <afterFourth Include='@(i)' />
 ";
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(contents, allItems: true);
-            Dictionary<string, string> expectedAfterFirsta = new Dictionary<string, string>
-            {
-                {"m1", "second" }
-            };
-            Dictionary<string, string> expectedAfterFirstb = new Dictionary<string, string>
-            {
-                {"m1", "third" }
-            };
-            Dictionary<string, string> expectedAfterFirstc = new Dictionary<string, string>
-            {
-                {"m1", "fourth" }
-            };
-            Dictionary<string, string> expectedAfterSeconda = new Dictionary<string, string>
-            {
-                {"m1", "sixth" }
-            };
-            Dictionary<string, string> expectedAfterSecondb = new Dictionary<string, string>
-            {
-                {"m1", "sixth" }
-            };
-            Dictionary<string, string> expectedAfterSecondc = new Dictionary<string, string>
-            {
-                {"m1", "sixth" }
-            };
-            Dictionary<string, string> expectedAfterThirda = new Dictionary<string, string>
-            {
-                {"m1", "sixth" }
-            };
-            Dictionary<string, string> expectedAfterThirdb = new Dictionary<string, string>
-            {
-                {"m1", "seventh" }
-            };
-            Dictionary<string, string> expectedAfterThirdc = new Dictionary<string, string>
-            {
-                {"m1", "sixth" }
-            };
-            Dictionary<string, string> expectedAfterFourtha = new Dictionary<string, string>
-            {
-                {"m1", "sixth" }
-            };
-            Dictionary<string, string> expectedAfterFourthb = new Dictionary<string, string>
-            {
-                {"m1", "seventh" }
-            };
-            Dictionary<string, string> expectedAfterFourthc = new Dictionary<string, string>
-            {
-                {"m1", "eighth" }
-            };
-
-            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterFirsta, items[3]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterFirstb, items[4]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterFirstc, items[5]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterSeconda, items[6]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterSecondb, items[7]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterSecondc, items[8]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterThirda, items[9]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterThirdb, items[10]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterThirdc, items[11]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterFourtha, items[12]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterFourthb, items[13]);
-            ObjectModelHelpers.AssertItemHasMetadata(expectedAfterFourthc, items[14]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "second", items[3]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "third", items[4]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "fourth", items[5]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "sixth", items[6]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "sixth", items[7]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "sixth", items[8]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "sixth", items[9]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "seventh", items[10]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "sixth", items[11]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "sixth", items[12]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "seventh", items[13]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "eighth", items[14]);
         }
 
         [Fact]

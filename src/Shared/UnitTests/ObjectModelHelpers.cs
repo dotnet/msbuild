@@ -424,6 +424,12 @@ namespace Microsoft.Build.UnitTests
             AssertItemHasMetadata(expected, new ProjectItemTestItemAdapter(item));
         }
 
+        internal static void AssertItemHasMetadata(string key, string value, ProjectItem item)
+        {
+            item.DirectMetadataCount.ShouldBe(1, () => $"Expected 1 metadata, ({key}), got {item.DirectMetadataCount}");
+            item.GetMetadataValue(key).ShouldBe(value);
+        }
+
         internal static void AssertItemHasMetadata(Dictionary<string, string> expected, TestItem item)
         {
             expected ??= new Dictionary<string, string>();
