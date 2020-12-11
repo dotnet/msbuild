@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.DotNet.Cli.Utils;
@@ -14,6 +15,9 @@ namespace Microsoft.NET.TestFramework.Commands
     {
         public DotnetNewCommand(ITestOutputHelper log, params string[] args) : base(log)
         {
+            // Set dotnet-new3.dll as first Argument to be passed to "dotnet"
+            // And use full path since we want to execute in any working directory
+            Arguments.Add(Path.GetFullPath("dotnet-new3.dll"));
             Arguments.AddRange(args);
         }
 
@@ -21,13 +25,14 @@ namespace Microsoft.NET.TestFramework.Commands
         {
             var sdkCommandSpec = new SdkCommandSpec()
             {
-                FileName = "dotnet-new3",
+                FileName = "dotnet",
                 Arguments = args.ToList(),
                 WorkingDirectory = WorkingDirectory
             };
             return sdkCommandSpec;
         }
     }
+
     public class DotnetCommand : TestCommand
     {
         private readonly string commandName;
