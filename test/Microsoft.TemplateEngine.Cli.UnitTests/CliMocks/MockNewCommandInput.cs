@@ -69,29 +69,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public string AllowScriptsToRun { get; }
 
-        public string AuthorFilter
-        {
-            get
-            {
-                if (_commandOptions.ContainsKey("--author"))
-                {
-                    return _commandOptions["--author"];
-                }
-                return string.Empty;
-            }
-        }
+        public string AuthorFilter => _commandOptions.ContainsKey("--author") ? _commandOptions["--author"] : string.Empty;
 
-        public string BaselineName
-        {
-            get
-            {
-                if (_commandOptions.ContainsKey("--baseline"))
-                {
-                    return _commandOptions["--baseline"];
-                }
-                return string.Empty;
-            }
-        }
+        public string BaselineName => _commandOptions.ContainsKey("--baseline") ? _commandOptions["--baseline"] : string.Empty;
 
         public bool CheckForUpdates { get; }
 
@@ -143,17 +123,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public bool IsShowAllFlagSpecified { get; }
 
-        public string Language 
-        {
-            get
-            {
-                if (_commandOptions.ContainsKey("--language"))
-                {
-                    return _commandOptions["--language"];
-                }
-                return string.Empty;
-            }
-        }
+        public string Language => _commandOptions.ContainsKey("--language") ? _commandOptions["--language"] : string.Empty;
 
         public string Locale { get; }
 
@@ -161,17 +131,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public string OutputPath { get; }
 
-        public string PackageFilter
-        {
-            get
-            {
-                if (_commandOptions.ContainsKey("--package"))
-                {
-                    return _commandOptions["--package"];
-                }
-                return string.Empty;
-            }
-        }
+        public string PackageFilter => _commandOptions.ContainsKey("--package") ? _commandOptions["--package"] : string.Empty;
 
         // When using this mock, set the inputs using constructor input.
         // This property gets assigned based on the constructor input and the template being worked with.
@@ -198,18 +158,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         public IReadOnlyList<string> Tokens { get; }
 
         public IList<string> ToUninstallList { get; }
-        public string TypeFilter
-        {
-            get
-            {
-                if (_commandOptions.ContainsKey("--type"))
-                {
-                    return _commandOptions["--type"];
-                }
-                return string.Empty;
-            }
-        }
-
+        public string TypeFilter => _commandOptions.ContainsKey("--type") ? _commandOptions["--type"] : string.Empty;
 
         public int Execute(params string[] args)
         {
@@ -314,6 +263,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             _commandOptions = JsonConvert.DeserializeObject<Dictionary<string, string>>(info.GetValue<string>("command_options"));
             _templateOptions = JsonConvert.DeserializeObject<Dictionary<string, string>>(info.GetValue<string>("command_templateOptions"));
         }
+
         public void Serialize(IXunitSerializationInfo info)
         {
             info.AddValue("command_templateName", TemplateName, typeof(string));

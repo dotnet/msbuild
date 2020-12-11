@@ -10,6 +10,7 @@ using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
+using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.Utils;
 using Xunit;
 
@@ -26,32 +27,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestFindHighestPrecedenceTemplateIfAllSameGroupIdentity()
         {
             List<ITemplateMatchInfo> templatesToCheck = new List<ITemplateMatchInfo>();
+
             templatesToCheck.Add(new TemplateMatchInfo(
-                new TemplateInfo()
-                {
-                    Precedence = 10,
-                    Name = "Template1",
-                    Identity = "Template1",
-                    GroupIdentity = "TestGroup"
-                }
-                , null));
+                new MockTemplateInfo("Template1", name: "Template1", identity: "Template1", groupIdentity: "TestGroup", precedence: 10), null));
             templatesToCheck.Add(new TemplateMatchInfo(
-                new TemplateInfo()
-                {
-                    Precedence = 20,
-                    Name = "Template2",
-                    Identity = "Template2",
-                    GroupIdentity = "TestGroup"
-                }
-                , null));
+                new MockTemplateInfo("Template2", name: "Template2", identity: "Template2", groupIdentity: "TestGroup", precedence: 20), null));
             templatesToCheck.Add(new TemplateMatchInfo(
-                new TemplateInfo()
-                {
-                    Precedence = 0,
-                    Name = "Template3",
-                    Identity = "Template3",
-                    GroupIdentity = "TestGroup"
-                }));
+                new MockTemplateInfo("Template3", name: "Template3", identity: "Template3", groupIdentity: "TestGroup", precedence: 0), null));
 
             ITemplateMatchInfo highestPrecedenceTemplate = TemplateResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(templatesToCheck);
             Assert.NotNull(highestPrecedenceTemplate);
@@ -64,23 +46,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         {
             List<ITemplateMatchInfo> templatesToCheck = new List<ITemplateMatchInfo>();
             templatesToCheck.Add(new TemplateMatchInfo(
-                new TemplateInfo()
-                {
-                    Precedence = 10,
-                    Name = "Template1",
-                    Identity = "Template1",
-                    GroupIdentity = "TestGroup"
-                }
-                , null));
+                new MockTemplateInfo("Template1", name: "Template1", identity: "Template1", groupIdentity: "TestGroup", precedence: 10), null));
             templatesToCheck.Add(new TemplateMatchInfo(
-                new TemplateInfo()
-                {
-                    Precedence = 20,
-                    Name = "Template2",
-                    Identity = "Template2",
-                    GroupIdentity = "RealGroup"
-                }
-                , null));
+                new MockTemplateInfo("Template2", name: "Template2", identity: "Template2", groupIdentity: "RealGroup", precedence: 20), null));
+
             ITemplateMatchInfo highestPrecedenceTemplate = TemplateResolver.FindHighestPrecedenceTemplateIfAllSameGroupIdentity(templatesToCheck);
             Assert.Null(highestPrecedenceTemplate);
         }
@@ -89,56 +58,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestPerformAllTemplatesInContextQuery()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                Name = "Template1",
-                Identity = "Template1",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project") }
-                },
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                Name = "Template2",
-                Identity = "Template2",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("item") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                Name = "Template3",
-                Identity = "Template3",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("myType") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                Name = "Template4",
-                Identity = "Template4",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "type",ResolutionTestHelper.CreateTestCacheTag("project") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                Name = "Template5",
-                Identity = "Template5",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project") }
-                }
-            });
+            templatesToSearch.Add(new MockTemplateInfo("Template1", name: "Template1", identity: "Template1")
+                                    .WithTag("type", "project"));
+            templatesToSearch.Add(new MockTemplateInfo("Template2", name: "Template2", identity: "Template2")
+                                    .WithTag("type", "item"));
+            templatesToSearch.Add(new MockTemplateInfo("Template3", name: "Template3", identity: "Template3")
+                                    .WithTag("type", "myType"));
+            templatesToSearch.Add(new MockTemplateInfo("Template4", name: "Template4", identity: "Template4")
+                                    .WithTag("type", "project"));
+            templatesToSearch.Add(new MockTemplateInfo("Template5", name: "Template5", identity: "Template5")
+                                     .WithTag("type", "project"));
 
             IHostSpecificDataLoader hostDataLoader = new MockHostSpecificDataLoader();
 
@@ -167,22 +96,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestPerformCoreTemplateQuery_UniqueNameMatchesCorrectly()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "Template1",
-                Name = "Long name of Template1",
-                Identity = "Template1",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>()
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "Template2",
-                Name = "Long name of Template2",
-                Identity = "Template2",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>()
-            });
+            templatesToSearch.Add(new MockTemplateInfo("Template1", name: "Long name of Template1", identity: "Template1"));
+            templatesToSearch.Add(new MockTemplateInfo("Template2", name: "Long name of Template2", identity: "Template2"));
 
             INewCommandInput userInputs = new MockNewCommandInput("Template2");
 
@@ -199,30 +114,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestPerformCoreTemplateQuery_DefaultLanguageDisambiguates()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "foo",
-                Name = "Description of foo Perl template",
-                Identity = "foo.test.Perl",
-                GroupIdentity = "foo.test.template",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("Perl") }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>()
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "foo",
-                Name = "Description of foo LISP template",
-                Identity = "foo.test.Lisp",
-                GroupIdentity = "foo.test.template",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("LISP") }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>()
-            });
+            templatesToSearch.Add(new MockTemplateInfo("foo", name: "Description of foo Perl template", identity: "foo.test.Perl", groupIdentity: "foo.test.template")
+                                      .WithTag("language", "Perl"));
+            templatesToSearch.Add(new MockTemplateInfo("foo", name: "Description of foo LISP template", identity: "foo.test.Lisp", groupIdentity: "foo.test.template")
+                                      .WithTag("language", "LISP"));
 
             INewCommandInput userInputs = new MockNewCommandInput("foo");
 
@@ -237,30 +132,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestPerformCoreTemplateQuery_InputLanguageIsPreferredOverDefault()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "foo",
-                Name = "Description of foo Perl template",
-                Identity = "foo.test.Perl",
-                GroupIdentity = "foo.test.template",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("Perl") }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>()
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "foo",
-                Name = "Description of foo LISP template",
-                Identity = "foo.test.Lisp",
-                GroupIdentity = "foo.test.template",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("LISP") }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>()
-            });
+            templatesToSearch.Add(new MockTemplateInfo("foo", name: "Description of foo Perl template", identity: "foo.test.Perl", groupIdentity: "foo.test.template")
+                                      .WithTag("language", "Perl"));
+            templatesToSearch.Add(new MockTemplateInfo("foo", name: "Description of foo LISP template", identity: "foo.test.Lisp", groupIdentity: "foo.test.template")
+                                      .WithTag("language", "LISP"));
 
             INewCommandInput userInputs = new MockNewCommandInput("foo", "LISP");
 
@@ -276,36 +151,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestPerformCoreTemplateQuery_GroupIsFound()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "foo",
-                Name = "Foo template old",
-                Identity = "foo.test.old",
-                GroupIdentity = "foo.test.template",
-                Precedence = 100,
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>()
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "foo",
-                Name = "Foo template new",
-                Identity = "foo.test.new",
-                GroupIdentity = "foo.test.template",
-                Precedence = 200,
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>()
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "bar",
-                Name = "Bar template",
-                Identity = "bar.test",
-                GroupIdentity = "bar.test.template",
-                Precedence = 100,
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>()
-            });
+            templatesToSearch.Add(new MockTemplateInfo("foo", name: "Foo template old", identity: "foo.test.old", groupIdentity: "foo.test.template", precedence: 100));
+            templatesToSearch.Add(new MockTemplateInfo("foo", name: "Foo template new", identity: "foo.test.new", groupIdentity: "foo.test.template", precedence: 200));
+            templatesToSearch.Add(new MockTemplateInfo("bar", name: "Bar template", identity: "bar.test", groupIdentity: "bar.test.template", precedence: 100));
 
             INewCommandInput userInputs = new MockNewCommandInput("foo");
 
@@ -321,30 +169,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestPerformCoreTemplateQuery_ParameterNameDisambiguates()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "foo",
-                Name = "Foo template",
-                Identity = "foo.test.old",
-                GroupIdentity = "foo.test.template",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase),
-                CacheParameters = new Dictionary<string, ICacheParameter>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "bar", new CacheParameter() },
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "foo",
-                Name = "Foo template",
-                Identity = "foo.test.new",
-                GroupIdentity = "foo.test.template",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase),
-                CacheParameters = new Dictionary<string, ICacheParameter>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "baz", new CacheParameter() },
-                }
-            });
+            templatesToSearch.Add(new MockTemplateInfo("foo", name: "Foo template old", identity: "foo.test.old", groupIdentity: "foo.test.template").WithParameters("bar"));
+            templatesToSearch.Add(new MockTemplateInfo("foo", name: "Foo template new", identity: "foo.test.new", groupIdentity: "foo.test.template").WithParameters("baz"));
 
             INewCommandInput userInputs = new MockNewCommandInput("foo").WithTemplateOption("baz", "whatever");
 
@@ -358,32 +184,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestPerformCoreTemplateQuery_ParameterValueDisambiguates()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "foo",
-                Name = "Foo template old",
-                Identity = "foo.test.old",
-                GroupIdentity = "foo.test.template",
-                Precedence = 100,
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "framework", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "netcoreapp1.0", "netcoreapp1.1" }) }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>()
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "foo",
-                Name = "Foo template new",
-                Identity = "foo.test.new",
-                GroupIdentity = "foo.test.template",
-                Precedence = 200,
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "framework", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "netcoreapp2.0" }) }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>()
-            });
+            templatesToSearch.Add(new MockTemplateInfo("foo", name: "Foo template old", identity: "foo.test.old", groupIdentity: "foo.test.template", precedence: 100).WithTag("framework", "netcoreapp1.0", "netcoreapp1.1"));
+            templatesToSearch.Add(new MockTemplateInfo("foo", name: "Foo template new", identity: "foo.test.new", groupIdentity: "foo.test.template", precedence: 200).WithTag("framework", "netcoreapp2.0"));
 
             INewCommandInput userInputs = new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp1.0");
 
@@ -397,19 +199,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestPerformCoreTemplateQuery_UnknownParameterNameInvalidatesMatch()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "foo",
-                Name = "Foo template",
-                Identity = "foo.test",
-                GroupIdentity = "foo.test.template",
-                Precedence = 100,
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase),
-                CacheParameters = new Dictionary<string, ICacheParameter>()
-                {
-                    { "bar", new CacheParameter() },
-                }
-            });
+            templatesToSearch.Add(new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test", groupIdentity: "foo.test.template", precedence: 100).WithParameters("bar"));
 
             INewCommandInput userInputs = new MockNewCommandInput("foo").WithTemplateOption("baz");
 
@@ -428,32 +218,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestPerformCoreTemplateQuery_InvalidChoiceValueInvalidatesMatch()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "foo",
-                Name = "Foo template",
-                Identity = "foo.test.1x",
-                GroupIdentity = "foo.test.template",
-                Precedence = 100,
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "framework", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "netcoreapp1.0", "netcoreapp1.1" }) }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>()
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "foo",
-                Name = "Foo template",
-                Identity = "foo.test.2x",
-                GroupIdentity = "foo.test.template",
-                Precedence = 200,
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "framework", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "netcoreapp2.0" }) }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>()
-            });
+            templatesToSearch.Add(new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test.1x", groupIdentity: "foo.test.template", precedence: 100).WithTag("framework", "netcoreapp1.0", "netcoreapp1.1"));
+            templatesToSearch.Add(new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test.2x", groupIdentity: "foo.test.template", precedence: 200).WithTag("framework", "netcoreapp2.0"));
 
             INewCommandInput userInputs = new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp3.0");
 

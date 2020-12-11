@@ -2,6 +2,7 @@ using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
+using Microsoft.TemplateEngine.Mocks;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
@@ -11,7 +12,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(EmptyMatchDisposition_ReportsCorrectly))]
         public void EmptyMatchDisposition_ReportsCorrectly()
         {
-            ITemplateInfo templateInfo = new TemplateInfo();
+            ITemplateInfo templateInfo = new MockTemplateInfo();
             ITemplateMatchInfo TemplateMatchInfo = new TemplateMatchInfo(templateInfo);
             Assert.False(TemplateMatchInfo.IsMatch);
             Assert.False(TemplateMatchInfo.IsMatchExceptContext());
@@ -28,7 +29,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(NameExactMatch_ReportsCorrectly))]
         public void NameExactMatch_ReportsCorrectly()
         {
-            ITemplateInfo templateInfo = new TemplateInfo();
+            ITemplateInfo templateInfo = new MockTemplateInfo();
             ITemplateMatchInfo TemplateMatchInfo = new TemplateMatchInfo(templateInfo);
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Name, Kind = MatchKind.Exact });
             Assert.True(TemplateMatchInfo.IsMatch);
@@ -44,7 +45,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(NamePartialMatch_ReportsCorrectly))]
         public void NamePartialMatch_ReportsCorrectly()
         {
-            ITemplateInfo templateInfo = new TemplateInfo();
+            ITemplateInfo templateInfo = new MockTemplateInfo();
             ITemplateMatchInfo TemplateMatchInfo = new TemplateMatchInfo(templateInfo);
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Name, Kind = MatchKind.Partial });
             Assert.True(TemplateMatchInfo.IsMatch);
@@ -60,7 +61,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(NameMismatch_ReportsCorrectly))]
         public void NameMismatch_ReportsCorrectly()
         {
-            ITemplateInfo templateInfo = new TemplateInfo();
+            ITemplateInfo templateInfo = new MockTemplateInfo();
             ITemplateMatchInfo TemplateMatchInfo = new TemplateMatchInfo(templateInfo);
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Name, Kind = MatchKind.Mismatch });
             Assert.False(TemplateMatchInfo.IsMatch);
@@ -76,7 +77,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(ContextMatch_ReportsCorrectly))]
         public void ContextMatch_ReportsCorrectly()
         {
-            ITemplateInfo templateInfo = new TemplateInfo();
+            ITemplateInfo templateInfo = new MockTemplateInfo();
             ITemplateMatchInfo TemplateMatchInfo = new TemplateMatchInfo(templateInfo);
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Context, Kind = MatchKind.Exact });
             Assert.True(TemplateMatchInfo.IsMatch);
@@ -92,7 +93,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(ContextMismatch_ReportsCorrectly))]
         public void ContextMismatch_ReportsCorrectly()
         {
-            ITemplateInfo templateInfo = new TemplateInfo();
+            ITemplateInfo templateInfo = new MockTemplateInfo();
             ITemplateMatchInfo TemplateMatchInfo = new TemplateMatchInfo(templateInfo);
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Context, Kind = MatchKind.Mismatch });
             Assert.False(TemplateMatchInfo.IsMatch);
@@ -108,7 +109,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(ContextMatch_NameMatch_ReportsCorrectly))]
         public void ContextMatch_NameMatch_ReportsCorrectly()
         {
-            ITemplateInfo templateInfo = new TemplateInfo();
+            ITemplateInfo templateInfo = new MockTemplateInfo();
             ITemplateMatchInfo TemplateMatchInfo = new TemplateMatchInfo(templateInfo);
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Name, Kind = MatchKind.Exact });
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Context, Kind = MatchKind.Exact });
@@ -125,7 +126,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(ContextMatch_NameMismatch_ReportsCorrectly))]
         public void ContextMatch_NameMismatch_ReportsCorrectly()
         {
-            ITemplateInfo templateInfo = new TemplateInfo();
+            ITemplateInfo templateInfo = new MockTemplateInfo();
             ITemplateMatchInfo TemplateMatchInfo = new TemplateMatchInfo(templateInfo);
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Name, Kind = MatchKind.Mismatch });
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Context, Kind = MatchKind.Exact });
@@ -142,7 +143,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(ContextMatch_NamePartialMatch_ReportsCorrectly))]
         public void ContextMatch_NamePartialMatch_ReportsCorrectly()
         {
-            ITemplateInfo templateInfo = new TemplateInfo();
+            ITemplateInfo templateInfo = new MockTemplateInfo();
             ITemplateMatchInfo TemplateMatchInfo = new TemplateMatchInfo(templateInfo);
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Name, Kind = MatchKind.Partial });
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Context, Kind = MatchKind.Exact });
@@ -159,7 +160,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(ContextMismatch_NameMatch_ReportsCorrectly))]
         public void ContextMismatch_NameMatch_ReportsCorrectly()
         {
-            ITemplateInfo templateInfo = new TemplateInfo();
+            ITemplateInfo templateInfo = new MockTemplateInfo();
             ITemplateMatchInfo TemplateMatchInfo = new TemplateMatchInfo(templateInfo);
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Name, Kind = MatchKind.Exact });
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Context, Kind = MatchKind.Mismatch });
@@ -176,7 +177,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(ContextMismatch_NamePartialMatch_ReportsCorrectly))]
         public void ContextMismatch_NamePartialMatch_ReportsCorrectly()
         {
-            ITemplateInfo templateInfo = new TemplateInfo();
+            ITemplateInfo templateInfo = new MockTemplateInfo();
             ITemplateMatchInfo TemplateMatchInfo = new TemplateMatchInfo(templateInfo);
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Name, Kind = MatchKind.Partial });
             TemplateMatchInfo.AddDisposition(new MatchInfo { Location = MatchLocation.Context, Kind = MatchKind.Mismatch });

@@ -12,6 +12,7 @@ using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
 using System.Linq;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
+using Microsoft.TemplateEngine.Mocks;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 {
@@ -21,22 +22,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_UniqueNameMatchesCorrectly()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console1",
-                Name = "Long name for Console App",
-                Identity = "Console.App",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>()
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console2",
-                Name = "Long name for Console App #2",
-                Identity = "Console.App2",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>()
-            });
+            templatesToSearch.Add(new MockTemplateInfo("console1", name: "Long name for Console App", identity: "Console.App"));
+            templatesToSearch.Add(new MockTemplateInfo("console2", name: "Long name for Console App #2", identity: "Console.App2"));
 
             INewCommandInput userInputs = new MockNewCommandInput("console2").WithHelpOption();
 
@@ -52,22 +39,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_ExactMatchOnShortNameMatchesCorrectly()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>()
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console2",
-                Name = "Long name for Console App #2",
-                Identity = "Console.App2",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>()
-            });
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App"));
+            templatesToSearch.Add(new MockTemplateInfo("console2", name: "Long name for Console App #2", identity: "Console.App2"));
 
             INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
@@ -83,42 +56,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_UnambiguousGroupIsFound()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.L1",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.L2",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L2") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.L3",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L3") }
-                }
-            });
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"));
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2"));
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L3", groupIdentity: "Console.App.Test").WithTag("language", "L3"));
 
             INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
@@ -134,66 +74,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_MultipleGroupsAreFound()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.L1",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.L2",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L2") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.L3",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L3") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "classlib",
-                Name = "Long name for Class Library App",
-                Identity = "Class.Library.L1",
-                GroupIdentity = "Class.Library.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "classlib",
-                Name = "Long name for Class Library App",
-                Identity = "Class.Library.L2",
-                GroupIdentity = "Class.Library.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L2") }
-                }
-            });
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"));
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2"));
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L3", groupIdentity: "Console.App.Test").WithTag("language", "L3"));
+            templatesToSearch.Add(new MockTemplateInfo("classlib", name: "Long name for Class Library App", identity: "Class.Library.L1", groupIdentity: "Class.Library.Test").WithTag("language", "L1"));
+            templatesToSearch.Add(new MockTemplateInfo("classlib", name: "Long name for Class Library App", identity: "Class.Library.L2", groupIdentity: "Class.Library.Test").WithTag("language", "L2"));
 
             INewCommandInput userInputs = new MockNewCommandInput("c").WithHelpOption();
 
@@ -208,30 +93,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_DefaultLanguageDisambiguates()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.L1",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.L2",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L2") }
-                }
-            });
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"));
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2"));
 
             INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
@@ -250,30 +113,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_InputLanguageIsPreferredOverDefault()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.L1",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.L2",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L2") }
-                }
-            });
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"));
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2"));
 
             INewCommandInput userInputs = new MockNewCommandInput("console", "L2").WithHelpOption();
 
@@ -290,42 +131,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_UnambiguousGroup_TemplatesAreNotSameLanguage()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.L1",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.L2",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L2") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.L3",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L3") }
-                }
-            });
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L1", groupIdentity: "Console.App.Test").WithTag("language", "L1"));
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L2", groupIdentity: "Console.App.Test").WithTag("language", "L2"));
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.L3", groupIdentity: "Console.App.Test").WithTag("language", "L3"));
 
             INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
@@ -342,42 +150,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_UnambiguousGroup_TemplatesAreSameLanguage()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T1",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T2",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") }
-                }
-            });
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T3",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") }
-                }
-            });
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test").WithTag("language", "L1"));
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T2", groupIdentity: "Console.App.Test").WithTag("language", "L1"));
+            templatesToSearch.Add(new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T3", groupIdentity: "Console.App.Test").WithTag("language", "L1"));
 
             INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
@@ -394,24 +169,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_PartialMatch_HasLanguageMismatch()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T1",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                }
-            });
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
+                    .WithTag("language", "L1")
+                    .WithTag("type", "project")
+                    .WithBaselineInfo("app", "standard"));
 
             INewCommandInput userInputs = new MockNewCommandInput("console", "L2").WithHelpOption();
 
@@ -432,24 +194,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_PartialMatch_HasContextMismatch()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T1",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                }
-            });
+
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
+                    .WithTag("language", "L1")
+                    .WithTag("type", "project")
+                    .WithBaselineInfo("app", "standard"));
 
             INewCommandInput userInputs = new MockNewCommandInput("console", type: "item").WithHelpOption();
 
@@ -470,24 +220,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_PartialMatch_HasBaselineMismatch()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T1",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                }
-            });
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
+                    .WithTag("language", "L1")
+                    .WithTag("type", "project")
+                    .WithBaselineInfo("app", "standard"));
 
             INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption().WithCommandOption("--baseline", "core");
 
@@ -508,24 +245,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_PartialMatch_HasMultipleMismatches()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T1",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                }
-            });
+
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
+                    .WithTag("language", "L1")
+                    .WithTag("type", "project")
+                    .WithBaselineInfo("app", "standard"));
 
             INewCommandInput userInputs = new MockNewCommandInput("console", "L2", "item").WithHelpOption().WithCommandOption("--baseline", "core");
 
@@ -546,43 +271,18 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_PartialMatchGroup_HasTypeMismatch_HasGroupLanguageMatch()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T1",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                }
-            });
 
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T2",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L2") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                }
-            });
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
+                    .WithTag("language", "L1")
+                    .WithTag("type", "project")
+                    .WithBaselineInfo("app", "standard"));
+
+            templatesToSearch.Add(
+               new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T2", groupIdentity: "Console.App.Test")
+                   .WithTag("language", "L2")
+                   .WithTag("type", "project")
+                   .WithBaselineInfo("app", "standard"));
 
             INewCommandInput userInputs = new MockNewCommandInput("console", "L2", "item").WithHelpOption();
 
@@ -603,25 +303,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_NoMatch()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T1",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                }
-            });
 
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
+                    .WithTag("language", "L1")
+                    .WithTag("type", "project")
+                    .WithBaselineInfo("app", "standard"));
 
             INewCommandInput userInputs = new MockNewCommandInput("zzzzz", "L1", "item").WithHelpOption().WithCommandOption("--baseline", "app");
 
@@ -644,71 +331,26 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_OtherParameterMatch_Text()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T1",
-                GroupIdentity = "Console.App.Test1",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "langVersion", new CacheParameter("text", "", "test description") }
-                }
 
-            });
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test1")
+                    .WithTag("language", "L1")
+                    .WithTag("type", "project")
+                    .WithParameters("langVersion")
+                    .WithBaselineInfo("app", "standard"));
 
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T2",
-                GroupIdentity = "Console.App.Test2",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L2") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "test", new CacheParameter("text", "", "test description") }
-                }
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T2", groupIdentity: "Console.App.Test2")
+                    .WithTag("language", "L2")
+                    .WithTag("type", "project")
+                    .WithParameters("test")
+                    .WithBaselineInfo("app", "standard"));
 
-            });
-
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T3",
-                GroupIdentity = "Console.App.Test3",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L3") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>()
-            });
-
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T3", groupIdentity: "Console.App.Test3")
+                    .WithTag("language", "L3")
+                    .WithTag("type", "project")
+                    .WithBaselineInfo("app", "standard"));
 
             INewCommandInput userInputs = new MockNewCommandInput("c").WithHelpOption().WithTemplateOption("langVersion");
 
@@ -730,69 +372,26 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_OtherParameterMatch_Choice()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T1",
-                GroupIdentity = "Console.App.Test1",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")},
-                    { "framework", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "netcoreapp1.0", "netcoreapp1.1" }) }
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>()
 
-            });
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test1")
+                    .WithTag("language", "L1")
+                    .WithTag("type", "project")
+                    .WithTag("framework", "netcoreapp1.0", "netcoreapp1.1")
+                    .WithBaselineInfo("app", "standard"));
 
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T2",
-                GroupIdentity = "Console.App.Test2",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L2") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "test", new CacheParameter("text", "", "test description") }
-                }
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T2", groupIdentity: "Console.App.Test2")
+                    .WithTag("language", "L2")
+                    .WithTag("type", "project")
+                    .WithParameters("test")
+                    .WithBaselineInfo("app", "standard"));
 
-            });
-
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T3",
-                GroupIdentity = "Console.App.Test3",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L3") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>()
-            });
-
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T3", groupIdentity: "Console.App.Test3")
+                    .WithTag("language", "L3")
+                    .WithTag("type", "project")
+                    .WithBaselineInfo("app", "standard"));
 
             INewCommandInput userInputs = new MockNewCommandInput("c").WithHelpOption().WithTemplateOption("framework");
 
@@ -813,69 +412,26 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_OtherParameterDoesNotExist()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T1",
-                GroupIdentity = "Console.App.Test1",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")},
-                    { "framework", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "netcoreapp1.0", "netcoreapp1.1" }) }
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>()
 
-            });
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test1")
+                    .WithTag("language", "L1")
+                    .WithTag("type", "project")
+                    .WithTag("framework", "netcoreapp1.0", "netcoreapp1.1")
+                    .WithBaselineInfo("app", "standard"));
 
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T2",
-                GroupIdentity = "Console.App.Test2",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L2") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "test", new CacheParameter("text", "", "test description") }
-                }
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T2", groupIdentity: "Console.App.Test2")
+                    .WithTag("language", "L2")
+                    .WithTag("type", "project")
+                    .WithParameters("test")
+                    .WithBaselineInfo("app", "standard"));
 
-            });
-
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T3",
-                GroupIdentity = "Console.App.Test3",
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L3") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                },
-                CacheParameters = new Dictionary<string, ICacheParameter>()
-            });
-
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T3", groupIdentity: "Console.App.Test3")
+                    .WithTag("language", "L3")
+                    .WithTag("type", "project")
+                    .WithBaselineInfo("app", "standard"));
 
             INewCommandInput userInputs = new MockNewCommandInput("c").WithHelpOption().WithTemplateOption("do-not-exist");
 
@@ -896,25 +452,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         public void TestGetTemplateResolutionResult_MatchByTagsIgnoredForHelp()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
-            templatesToSearch.Add(new TemplateInfo()
-            {
-                ShortName = "console",
-                Name = "Long name for Console App",
-                Identity = "Console.App.T1",
-                GroupIdentity = "Console.App.Test",
-                CacheParameters = new Dictionary<string, ICacheParameter>(),
-                Classifications = new List<string> { "Common", "Test" },
-                Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "language", ResolutionTestHelper.CreateTestCacheTag("L1") },
-                    { "type", ResolutionTestHelper.CreateTestCacheTag("project")}
-                },
-                BaselineInfo = new Dictionary<string, IBaselineInfo>()
-                {
-                    { "app", new BaselineInfo() },
-                    { "standard", new BaselineInfo() }
-                }
-            });
+            templatesToSearch.Add(
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test1")
+                    .WithTag("language", "L1")
+                    .WithTag("type", "project")
+                    .WithClassifications("Common", "Test")
+                    .WithBaselineInfo("app", "standard"));
 
 
             INewCommandInput userInputs = new MockNewCommandInput("Common").WithHelpOption();

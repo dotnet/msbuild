@@ -4,9 +4,8 @@ using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
-using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
-using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
+using Microsoft.TemplateEngine.Mocks;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
@@ -120,74 +119,28 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 {
                     List<ITemplateInfo> templateList = new List<ITemplateInfo>();
 
-                    templateList.Add(new TemplateInfo()
-                    {
-                        ShortNameList = new string[] { "aaa", "bbb" },
-                        Name = "High precedence C# in group",
-                        Precedence = 2000,
-                        Identity = "MultiName.Test.High.CSharp",
-                        GroupIdentity = "MultiName.Test",
-                        Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                        {
-                            { "language", ResolutionTestHelper.CreateTestCacheTag("C#") },
-                            { "foo", ResolutionTestHelper.CreateTestCacheTag(new string[] { "A", "W" }) }
-                        },
-                        CacheParameters = new Dictionary<string, ICacheParameter>(StringComparer.OrdinalIgnoreCase)
-                        {
-                            { "HighC", new CacheParameter("string", "high c", "high c description") }
-                        }
-                    });
+                    templateList.Add(
+                        new MockTemplateInfo(new string[] { "aaa", "bbb" }, name: "High precedence C# in group", precedence: 2000, identity: "MultiName.Test.High.CSharp", groupIdentity: "MultiName.Test")
+                            .WithTag("language", "C#")
+                            .WithTag("foo", "A", "W")
+                            .WithParameters("HighC"));
 
-                    templateList.Add(new TemplateInfo()
-                    {
-                        ShortNameList = new string[] { "ccc", "ddd", "eee" },
-                        Name = "Low precedence C# in group",
-                        Precedence = 100,
-                        Identity = "MultiName.Test.Low.CSharp",
-                        GroupIdentity = "MultiName.Test",
-                        Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                        {
-                            { "language", ResolutionTestHelper.CreateTestCacheTag("C#") },
-                            { "foo", ResolutionTestHelper.CreateTestCacheTag(new string[] { "A", "X" }) }
-                        },
-                        CacheParameters = new Dictionary<string, ICacheParameter>(StringComparer.OrdinalIgnoreCase)
-                        {
-                            { "LowC", new CacheParameter("string", "low c", "low c description") }
-                        }
-                    });
+                    templateList.Add(
+                        new MockTemplateInfo(new string[] { "ccc", "ddd", "eee" }, name: "Low precedence C# in group", precedence: 100, identity: "MultiName.Test.Low.CSharp", groupIdentity: "MultiName.Test")
+                            .WithTag("language", "C#")
+                            .WithTag("foo", "A", "X")
+                            .WithParameters("LowC"));
 
-                    templateList.Add(new TemplateInfo()
-                    {
-                        ShortNameList = new string[] { "fff" },
-                        Name = "Only F# in group",
-                        Precedence = 100,
-                        Identity = "Multiname.Test.Only.FSharp",
-                        GroupIdentity = "MultiName.Test",
-                        Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                        {
-                            { "language", ResolutionTestHelper.CreateTestCacheTag("F#") },
-                            { "foo", ResolutionTestHelper.CreateTestCacheTag(new string[] { "A", "Y" }) }
-                        },
-                        CacheParameters = new Dictionary<string, ICacheParameter>(StringComparer.OrdinalIgnoreCase)
-                        {
-                            { "OnlyF", new CacheParameter("string", "only f", "only f description") }
-                        }
-                    });
+                    templateList.Add(
+                       new MockTemplateInfo(new string[] { "fff" }, name: "Only F# in group", precedence: 100, identity: "Multiname.Test.Only.FSharp", groupIdentity: "MultiName.Test")
+                           .WithTag("language", "F#")
+                           .WithTag("foo", "A", "Y")
+                           .WithParameters("OnlyF"));
 
-                    templateList.Add(new TemplateInfo()
-                    {
-                        ShortNameList = new string[] { "other" },
-                        Name = "Unrelated template",
-                        Precedence = 9999,
-                        Identity = "Unrelated.Template.CSharp",
-                        GroupIdentity = "Unrelated.Template",
-                        Tags = new Dictionary<string, ICacheTag>(StringComparer.OrdinalIgnoreCase)
-                        {
-                            { "language", ResolutionTestHelper.CreateTestCacheTag("C#") },
-                            { "foo", ResolutionTestHelper.CreateTestCacheTag(new string[] { "A", "Z" }) }
-                        },
-                        CacheParameters = new Dictionary<string, ICacheParameter>(StringComparer.OrdinalIgnoreCase)
-                    });
+                    templateList.Add(
+                        new MockTemplateInfo(new string[] { "other" }, name: "Unrelated template", precedence: 9999, identity: "Unrelated.Template.CSharp", groupIdentity: "Unrelated.Template")
+                            .WithTag("language", "C#")
+                            .WithTag("foo", "A", "Z"));
 
                     _multiShortNameGroupTemplateInfo = templateList;
                 }

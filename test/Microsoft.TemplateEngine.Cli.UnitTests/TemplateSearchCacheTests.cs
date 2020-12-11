@@ -210,79 +210,29 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         private static readonly PackInfo _packTwoInfo = new PackInfo("PackTwo", "1.6.0");
         private static readonly PackInfo _packThreeInfo = new PackInfo("PackThree", "2.1");
 
-        private static readonly ITemplateInfo _fooOneTemplate = new TemplateInfo()
-        {
-            Identity = "Mock.Foo.1",
-            GroupIdentity = "Mock.Foo",
-            Description = "Mock Foo template one",
-            Name = "MockFooTemplateOne",
-            ShortName = "foo1",
-            Author = "TestAuthor",
-            Tags = new Dictionary<string, ICacheTag>(StringComparer.Ordinal)
-            {
-                {
-                    "Framework", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "netcoreapp3.0", "netcoreapp3.1" })
-                },
-                {
-                    "language", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "C#" })
-                },
-                {
-                    "type", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "project" })
-                }
-            },
-            CacheParameters = new Dictionary<string, ICacheParameter>()
-        };
+        private static readonly ITemplateInfo _fooOneTemplate =
+            new MockTemplateInfo("foo1", name: "MockFooTemplateOne", identity: "Mock.Foo.1", groupIdentity: "Mock.Foo", author: "TestAuthor")
+                .WithDescription("Mock Foo template one")
+                .WithTag("Framework", "netcoreapp3.0", "netcoreapp3.1")
+                .WithTag("language", "C#")
+                .WithTag("type", "project");
 
-        private static readonly ITemplateInfo _fooTwoTemplate = new TemplateInfo()
-        {
-            Identity = "Mock.Foo.2",
-            GroupIdentity = "Mock.Foo",
-            Description = "Mock Foo template two",
-            Name = "MockFooTemplateTwo",
-            ShortName = "foo2",
-            Tags = new Dictionary<string, ICacheTag>(StringComparer.Ordinal)
-            {
-                {
-                    "Framework", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "netcoreapp2.0", "netcoreapp2.1", "netcoreapp3.1" })
-                },
-                {
-                    "language", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "C#" })
-                }
-            },
-            CacheParameters = new Dictionary<string, ICacheParameter>()
-        };
+        private static readonly ITemplateInfo _fooTwoTemplate =
+            new MockTemplateInfo("foo2", name: "MockFooTemplateTwo", identity: "Mock.Foo.2", groupIdentity: "Mock.Foo")
+                .WithDescription("Mock Foo template two")
+                .WithTag("Framework", "netcoreapp2.0", "netcoreapp2.1", "netcoreapp3.1")
+                .WithTag("language", "C#");
 
-        private static readonly ITemplateInfo _barCSharpTemplate = new MockTemplateInfo()
-        {
-            Identity = "Mock.Bar.1.Csharp",
-            GroupIdentity = "Mock.Bar",
-            Description = "Mock Bar CSharp template",
-            Name = "MockBarCsharpTemplate",
-            ShortName = "barC",
-            Tags = new Dictionary<string, ICacheTag>(StringComparer.Ordinal)
-            {
-                {
-                    "language", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "C#" })
-                }
-            },
-            CacheParameters = new Dictionary<string, ICacheParameter>()
-        };
 
-        private static readonly ITemplateInfo _barFSharpTemplate = new MockTemplateInfo()
-        {
-            Identity = "Mock.Bar.1.FSharp",
-            GroupIdentity = "Mock.Bar",
-            Description = "Mock Bar FSharp template",
-            Name = "MockBarFSharpTemplate",
-            ShortName = "barF",
-            Tags = new Dictionary<string, ICacheTag>(StringComparer.Ordinal)
-            {
-                {
-                    "language", ResolutionTestHelper.CreateTestCacheTag(new List<string>() { "F#" })
-                }
-            },
-            CacheParameters = new Dictionary<string, ICacheParameter>()
-        };
+        private static readonly ITemplateInfo _barCSharpTemplate =
+            new MockTemplateInfo("barC", name: "MockBarCsharpTemplate", identity: "Mock.Bar.1.Csharp", groupIdentity: "Mock.Bar")
+                .WithDescription("Mock Bar CSharp template")
+                .WithTag("language", "C#");
+
+        private static readonly ITemplateInfo _barFSharpTemplate =
+            new MockTemplateInfo("barF", name: "MockBarFSharpTemplate", identity: "Mock.Bar.1.FSharp", groupIdentity: "Mock.Bar")
+                .WithDescription("Mock Bar FSharp template")
+                .WithTag("language", "F#");
 
         private static TemplateDiscoveryMetadata SetupDiscoveryMetadata(bool includehostData = false)
         {

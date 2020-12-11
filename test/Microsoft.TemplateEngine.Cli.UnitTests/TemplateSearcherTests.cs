@@ -76,33 +76,15 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             List<TemplateNameSearchResult> sourceOneResults = new List<TemplateNameSearchResult>();
 
-            ITemplateInfo sourceOneTemplateOne = new MockTemplateInfo()
-            {
-                Identity = "Mock.Foo.1",
-                Description = "Mock Foo template one",
-                Name = "MockFooTemplateOne",
-                ShortName = "foo1",
-            };
+            ITemplateInfo sourceOneTemplateOne = new MockTemplateInfo("foo1", name: "MockFooTemplateOne", identity: "Mock.Foo.1").WithDescription("Mock Foo template one");
             TemplateNameSearchResult sourceOneResultOne = new TemplateNameSearchResult(sourceOneTemplateOne, _fooPackInfo);
             sourceOneResults.Add(sourceOneResultOne);
 
-            ITemplateInfo sourceOneTemplateTwo = new MockTemplateInfo()
-            {
-                Identity = "Mock.Foo.2",
-                Description = "Mock Foo template two",
-                Name = "MockFooTemplateTwo",
-                ShortName = "foo2"
-            };
+            ITemplateInfo sourceOneTemplateTwo = new MockTemplateInfo("foo2", name: "MockFooTemplateTwo", identity: "Mock.Foo.2").WithDescription("Mock Foo template two");
             TemplateNameSearchResult sourceOneResultTwo = new TemplateNameSearchResult(sourceOneTemplateTwo, _fooPackInfo);
             sourceOneResults.Add(sourceOneResultTwo);
 
-            ITemplateInfo sourceOneTemplateThree = new MockTemplateInfo()
-            {
-                Identity = "Mock.Bar.1",
-                Description = "Mock Bar template one",
-                Name = "MockBarTemplateOne",
-                ShortName = "bar1"
-            };
+            ITemplateInfo sourceOneTemplateThree = new MockTemplateInfo("bar1", name: "MockBarTemplateOne", identity: "Mock.Bar.1").WithDescription("Mock Bar template one");
             TemplateNameSearchResult sourceOneResultThree = new TemplateNameSearchResult(sourceOneTemplateThree, _barPackInfo);
             sourceOneResults.Add(sourceOneResultThree);
 
@@ -110,33 +92,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             List<TemplateNameSearchResult> sourceTwoResults = new List<TemplateNameSearchResult>();
 
-            ITemplateInfo sourceTwoTemplateOne = new MockTemplateInfo()
-            {
-                Identity = "Mock.Red.1",
-                Description = "Mock red template",
-                Name = "MockRedTemplate",
-                ShortName = "red",
-            };
+            ITemplateInfo sourceTwoTemplateOne = new MockTemplateInfo("red", name: "MockRedTemplate", identity: "Mock.Red.1").WithDescription("Mock red template");
+
             TemplateNameSearchResult sourceTwoResultOne = new TemplateNameSearchResult(sourceTwoTemplateOne, _redPackInfo);
             sourceTwoResults.Add(sourceTwoResultOne);
 
-            ITemplateInfo sourceTwoTemplateTwo = new MockTemplateInfo()
-            {
-                Identity = "Mock.Blue.1",
-                Description = "Mock blue template",
-                Name = "MockBlueTemplate",
-                ShortName = "blue"
-            };
+            ITemplateInfo sourceTwoTemplateTwo = new MockTemplateInfo("blue", name: "MockBlueTemplate", identity: "Mock.Blue.1").WithDescription("Mock blue template");
             TemplateNameSearchResult sourceTwoResultTwo = new TemplateNameSearchResult(sourceTwoTemplateTwo, _bluePackInfo);
             sourceTwoResults.Add(sourceTwoResultTwo);
 
-            ITemplateInfo sourceTwoTemplateThree = new MockTemplateInfo()
-            {
-                Identity = "Mock.Green.1",
-                Description = "Mock green template",
-                Name = "MockGreenTemplate",
-                ShortName = "green"
-            };
+            ITemplateInfo sourceTwoTemplateThree = new MockTemplateInfo("green", name: "MockGreenTemplate", identity: "Mock.Green.1").WithDescription("Mock green template");
             TemplateNameSearchResult sourceTwoResultThree = new TemplateNameSearchResult(sourceTwoTemplateThree, _greenPackInfo);
             sourceTwoResults.Add(sourceTwoResultThree);
 
