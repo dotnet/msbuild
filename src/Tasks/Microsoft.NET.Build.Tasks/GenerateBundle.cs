@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public class GenerateBundle : TaskBase
+    public class GenerateBundle : TaskWithAssemblyResolveHooks
     {
         [Required]
         public ITaskItem[] FilesToBundle { get; set; }

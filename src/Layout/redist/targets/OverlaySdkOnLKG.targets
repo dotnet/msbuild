@@ -48,8 +48,13 @@
   <Target Name="PublishTestWorkloads"
           AfterTargets="OverlaySdkOnLKG">
     <PropertyGroup>
-      <!-- TODO: Update this to actually calculate the band (ie the band should still be 5.0.100 if the VersionPrefix is 5.0.101 -->
-      <VersionBand>$(VersionPrefix)</VersionBand>
+      <!-- Calculate the version band (ie the band should still be 5.0.100 if the VersionPrefix is 5.0.101 -->
+      <_VersionPrefixMajor>$(VersionPrefix.Split('.')[0])</_VersionPrefixMajor>
+      <_VersionPrefixMinor>$(VersionPrefix.Split('.')[1])</_VersionPrefixMinor>
+      <_VersionPrefixPatch>$(VersionPrefix.Split('.')[2])</_VersionPrefixPatch>
+      <_VersionPrefixPatchBand>$([System.Convert]::ToUInt16($([MSBuild]::Divide($(_VersionPrefixPatch), 100))))</_VersionPrefixPatchBand>
+      <_VersionPrefixPatchBand>$([MSBuild]::Multiply($(_VersionPrefixPatchBand), 100))</_VersionPrefixPatchBand>
+      <VersionBand>$(_VersionPrefixMajor).$(_VersionPrefixMinor).$(_VersionPrefixPatchBand)</VersionBand>
     </PropertyGroup>
 
     <ItemGroup>
