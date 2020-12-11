@@ -18,8 +18,8 @@ namespace dotnet_new3.UnitTests
     {
         private readonly ITestOutputHelper log;
 
-        public string HomeDirectory { get; } = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        public string HomeVariable { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)? "USERPROFILE" : "HOME";
+        public string HomeDirectory { get; } = Helpers.CreateTemporaryFolder("Home");
+        public string HomeVariable { get; } = Helpers.HomeEnvironmentVariableName;
 
         public SharedHomeDirectory(IMessageSink messageSink)
         {

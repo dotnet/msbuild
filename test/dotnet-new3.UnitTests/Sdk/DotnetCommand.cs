@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using dotnet_new3.UnitTests;
 using Microsoft.DotNet.Cli.Utils;
 using Xunit.Abstractions;
 
@@ -29,6 +30,10 @@ namespace Microsoft.NET.TestFramework.Commands
                 Arguments = args.ToList(),
                 WorkingDirectory = WorkingDirectory
             };
+            if (!_environment.ContainsKey(Helpers.HomeEnvironmentVariableName))
+            {
+                throw new Exception($"{nameof(Helpers.HomeEnvironmentVariableName)} is not set, call {nameof(DotnetNewCommand)}{nameof(WithEnvironmentVariable)} to set it.");
+            }
             return sdkCommandSpec;
         }
     }

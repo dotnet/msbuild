@@ -12,7 +12,7 @@ namespace Microsoft.NET.TestFramework.Commands
 {
     public abstract class TestCommand
     {
-        private Dictionary<string, string> _environment = new Dictionary<string, string>();
+        protected Dictionary<string, string> _environment = new Dictionary<string, string>();
 
         public ITestOutputHelper Log { get; }
 
