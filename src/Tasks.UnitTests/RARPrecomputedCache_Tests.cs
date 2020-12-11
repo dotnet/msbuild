@@ -112,6 +112,10 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 rarWriterTask.AssemblyInformationCacheOutputPath = precomputedCache.Path;
                 rarWriterTask._cache.IsDirty = true;
+
+                // Throws an exception because precomputedCache.Path already exists.
+                Should.Throw<InvalidOperationException>(() => rarWriterTask.WriteStateFile());
+                File.Delete(precomputedCache.Path);
                 rarWriterTask.WriteStateFile();
 
                 ResolveAssemblyReference rarReaderTask = new ResolveAssemblyReference();
