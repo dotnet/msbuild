@@ -512,4 +512,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <!-- Override EnsureNETCoreAppRuntime target which is included in Microsoft.NETCore.App NuGet package for
+       .NET Core 2.x.  It no longer works with the .NET 5.0.100 SDK, as the ParentTarget metadata has changed format
+       but the targets in the NuGet package still expect the old format.
+       
+       So here we just override that target.  We have logic in the SDK that covers this scenario and generates
+       NETSDK1056. -->
+  <Target Name="EnsureNETCoreAppRuntime" />
+
 </Project>
