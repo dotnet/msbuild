@@ -336,17 +336,23 @@ namespace Microsoft.Build.Tasks
         {
             if (IgnoreExitCode)
             {
-                Log.LogMessageFromResources(MessageImportance.Normal, "Exec.CommandFailedNoErrorCode", Command, ExitCode);
+                if (!EchoOff)
+                {
+                    Log.LogMessageFromResources(MessageImportance.Normal, "Exec.CommandFailedNoErrorCode", Command, ExitCode);
+                }
                 return true;
             }
 
-            if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
+            if (!EchoOff)
             {
-                Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", Command, ExitCode);
-            }
-            else
-            {
-                Log.LogErrorWithCodeFromResources("Exec.CommandFailed", Command, ExitCode);
+                if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
+                {
+                    Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", Command, ExitCode);
+                }
+                else
+                {
+                    Log.LogErrorWithCodeFromResources("Exec.CommandFailed", Command, ExitCode);
+                }
             }
             return false;
         }
