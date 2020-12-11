@@ -1,25 +1,40 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
 using Microsoft.TemplateEngine.Utils;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace dotnet_new3.UnitTests
 {
     public class AllProjectsWork
     {
+        private readonly ITestOutputHelper log;
+
+        public AllProjectsWork(ITestOutputHelper log)
+        {
+            this.log = log;
+        }
+
+
         private static readonly Guid _tempDirParent = Guid.NewGuid();
 
         private static string GetWorkingDirectoryName(string suffix, [CallerMemberName] string callerName = "")
         {
-            return Path.Combine(Path.GetTempPath(), _tempDirParent.ToString(), callerName, suffix);
+            return Path.Combine(Path.GetTempPath(), _tempDirParent.ToString(), "WorkingDirectories", callerName, suffix);
+        }
+        private static string GetUserHomeName(string suffix, [CallerMemberName] string callerName = "")
+        {
+            return Path.Combine(Path.GetTempPath(), _tempDirParent.ToString(), "Homes", callerName, suffix);
         }
 
         [Theory]
@@ -35,54 +50,57 @@ namespace dotnet_new3.UnitTests
         [InlineData("library_cs-50", null, "library", "-f", "net5.0")]
         public void AllWebProjectsRestoreAndBuild(string testName, string installNuget, params string[] args)
         {
-            string workingDir = GetWorkingDirectoryName(testName);
-            Directory.CreateDirectory(workingDir);
-
-            Program.Main(new[] { "--debug:reinit" });
+            var homeVariable = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "USERPROFILE" : "HOME";
+            var homeDir = GetUserHomeName(testName);
 
             if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DN3")))
             {
-                string relTo = new Uri(typeof(Program).GetTypeInfo().Assembly.CodeBase, UriKind.Absolute).LocalPath;
-                relTo = Path.GetDirectoryName(relTo);
-                relTo = Path.Combine(relTo, @"..\..\..\..\..\dev");
-                Environment.SetEnvironmentVariable("DN3", relTo);
+                var path = typeof(AllProjectsWork).Assembly.Location;
+                while (path != null && !File.Exists(Path.Combine(path, "Microsoft.TemplateEngine.sln")))
+                {
+                    path = Path.GetDirectoryName(path);
+                }
+                if (path == null)
+                    throw new Exception("Couldn't find repository root, because \"Microsoft.TemplateEngine.sln\" is not in any of parent directories.");
+                // DummyFolder Path just represents folder next to "artifacts" and "template_feed", so paths inside
+                // defaultinstall.package.list correctly finds packages in "../artifacts/"
+                // via %DN3%\..\template_feed\ or %DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Core.*
+                path = Path.Combine(path, "DummyFolder");
+                Environment.SetEnvironmentVariable("DN3", path);
             }
 
+            string workingDir = GetWorkingDirectoryName(testName);
+            Directory.CreateDirectory(workingDir);
+
             if (!string.IsNullOrEmpty(installNuget))
-                Command.Create("dotnet-new3", new[] { "-i", installNuget }, outputPath: Environment.GetEnvironmentVariable("DN3"))
-                    .WorkingDirectory(workingDir)
-                    .CaptureStdErr()
-                    .CaptureStdOut()
+                new DotnetNewCommand(log, "-i", installNuget)
+                    .WithWorkingDirectory(workingDir)
+                    .WithEnvironmentVariable(homeVariable, homeDir)
                     .Execute()
                     .Should()
                     .ExitWith(0)
                     .And
                     .NotHaveStdErr();
 
-            Command.Create("dotnet-new3", args, outputPath: Environment.GetEnvironmentVariable("DN3"))
-                .WorkingDirectory(workingDir)
-                .CaptureStdErr()
-                .CaptureStdOut()
+            new DotnetNewCommand(log, args)
+                .WithWorkingDirectory(workingDir)
+                .WithEnvironmentVariable(homeVariable, homeDir)
                 .Execute()
                 .Should()
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr();
 
-            Command.CreateDotNet("restore", new string[0])
-                .WorkingDirectory(workingDir)
-                .CaptureStdErr()
-                .CaptureStdOut()
+            new DotnetCommand(log, "restore")
+                .WithWorkingDirectory(workingDir)
                 .Execute()
                 .Should()
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr();
 
-            Command.CreateDotNet("build", new string[0])
-                .WorkingDirectory(workingDir)
-                .CaptureStdErr()
-                .CaptureStdOut()
+            new DotnetCommand(log, "build")
+                .WithWorkingDirectory(workingDir)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -90,6 +108,7 @@ namespace dotnet_new3.UnitTests
                 .NotHaveStdErr();
 
             Directory.Delete(workingDir, true);
+            Directory.Delete(homeDir, true);
         }
     }
 }
