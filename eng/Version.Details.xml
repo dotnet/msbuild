@@ -199,7 +199,7 @@
     </Dependency>
     <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.2">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>26b215936e21a5b80d82e394b523f3d284af8a4f</Sha>
+      <Sha>f7c4e625c1101d1ad652f27d1412cb3c5a9f52cd</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
