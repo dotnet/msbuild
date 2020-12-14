@@ -17,10 +17,7 @@ variables:
     # For exp branches, get data from master unless explicitly specified
     - name: SourceBranch
       value: master
-  - name: _DotNetArtifactsCategory
-    value: .NETCore
-  - name: _DotNetValidationArtifactsCategory
-    value: .NETCoreValidation
+
 
 stages:
 - stage: build
@@ -35,20 +32,7 @@ stages:
 
     timeoutInMinutes: 180
 
-    variables:
-    - group: DotNet-Blob-Feed
-    - group: DotNet-Symbol-Publish
-    - group: Publish-Build-Assets
-    - name: TeamName
-      value: MSBuild
-    - name: VisualStudio.MajorVersion
-      value: 16
-    - name: VisualStudio.ChannelName
-      value: 'int.main'
-    - name: VisualStudio.DropName
-      value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
-
     steps:
-    - script: echo BSBN $(Build.SourceBranchName) IBCSBN $(IbcSourceBranchName) SourceBranch $(SourceBranch)
-      displayName: Build b.sbn="${{ variables['Build.SourceBranchName'] }}" ibc="${{variables['IbcSourceBranchName']}}" ibcq="${{'$(IbcSourceBranchName)'}}" eq="${{eq(variables['Build.SourceBranchName'], '$(IbcSourceBranchName)')}}" sb="${{variables['SourceBranch']}}"
+    - script: echo BSBN $(Build.SourceBranchName) IBCSBN $(IbcSourceBranchName) SourceBranch $(SourceBranch) eq('$(Build.SourceBranchName)', '$(IbcSourceBranchName)')
+      displayName: Build b.sbn="${{ variables['Build.SourceBranchName'] }}" ibc="${{variables['IbcSourceBranchName']}}" ibcq="${{'$(IbcSourceBranchName)'}}" eq="${{eq('$(Build.SourceBranchName)', '$(IbcSourceBranchName)')}}" sb="${{variables['SourceBranch']}}"
       condition: succeeded()
