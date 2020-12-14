@@ -36,6 +36,6 @@ stages:
     - script: echo BSBN $(Build.SourceBranchName) IBCSBN $(IbcSourceBranchName) SourceBranch $(SourceBranch) eq('$(Build.SourceBranchName)', '$(IbcSourceBranchName)')
       displayName: Build b.sbn="${{ variables['Build.SourceBranchName'] }}" ibc="${{variables['IbcSourceBranchName']}}" ibcq="${{'$(IbcSourceBranchName)'}}" eq="${{eq('$(Build.SourceBranchName)', '$(IbcSourceBranchName)')}}" sb="${{variables['SourceBranch']}}"
       condition: succeeded()
-    - script: echo eq('$(Build.SourceBranchName)', '$(IbcSourceBranchName)') evals to
-      displayName: evals to ${{ eq('$(Build.SourceBranchName)', '$(IbcSourceBranchName)') }}
+    - script: echo eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName) evals to ${{eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName)}}
+      displayName: evals to ${{ eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName) }}
       condition: succeeded()
