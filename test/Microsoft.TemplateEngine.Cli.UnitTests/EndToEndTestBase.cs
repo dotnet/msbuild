@@ -15,14 +15,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             string codebase = typeof(EndToEndTestBase).GetTypeInfo().Assembly.Location;
             Uri cb = new Uri(codebase);
             string asmPath = cb.LocalPath;
-            string dir = Path.GetDirectoryName(asmPath);
+            DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(asmPath));
 
 #if DEBUG
             string configuration = "Debug";
 #else
             string configuration = "Release";
 #endif
-            string harnessPath = Path.Combine(dir, "..", "..", "..", "..", "bin", "Microsoft.TemplateEngine.EndToEndTestHarness", configuration, Path.GetFileName(dir));
+            // dir.Name is name of folder, which for ".NET 5" is "net5.0"
+            string frameworkFolderName = dir.Name;
+            string harnessPath = Path.Combine(dir.FullName, "..", "..", "..", "Microsoft.TemplateEngine.EndToEndTestHarness", configuration, frameworkFolderName);
             int scriptCount = scripts.Length;
             StringBuilder builder = new StringBuilder();
             builder.Append(scriptCount);
@@ -30,7 +32,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             foreach (string script in scripts)
             {
-                string testScript = Path.Combine(dir, script);
+                string testScript = Path.Combine(dir.FullName, script);
                 builder.Append($"\"{testScript}\" ");
             }
 
