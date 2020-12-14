@@ -50,5 +50,5 @@ stages:
 
     steps:
     - script: echo BSBN $(Build.SourceBranchName) IBCSBN $(IbcSourceBranchName) SourceBranch $(SourceBranch)
-      displayName: Build b.sbn="${{ variables['Build.SourceBranchName'] }}" ibc="${{variables['IbcSourceBranchName']}}"
+      displayName: Build b.sbn="${{ variables['Build.SourceBranchName'] }}" ibc="${{variables['IbcSourceBranchName']}}" ibcq="${{'$(IbcSourceBranchName)'}}" sb="${{variables['SourceBranch']}}"
       condition: succeeded()
