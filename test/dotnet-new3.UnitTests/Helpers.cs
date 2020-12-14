@@ -13,7 +13,7 @@ namespace dotnet_new3.UnitTests
     {
         public static string CreateTemporaryFolder([CallerMemberName] string name = "")
         {
-            string workingDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), name);
+            string workingDir = Path.Combine(Path.GetTempPath(), "DotnetNew3_Tests", Guid.NewGuid().ToString(), name);
             Directory.CreateDirectory(workingDir);
             return workingDir;
         }
