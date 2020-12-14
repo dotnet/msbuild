@@ -59,7 +59,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public Dictionary<string, string> AdditionalProperties { get; } = new Dictionary<string, string>();
 
-        public Dictionary<string, string> AdditionalItems { get; } = new Dictionary<string, string>();
+        public Dictionary<string, Dictionary<string, string>> AdditionalItems { get; } = new Dictionary<string, Dictionary<string, string>>();
 
         public IEnumerable<string> TargetFrameworkIdentifiers
         {
@@ -230,9 +230,10 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                         additionalItemGroup = new XElement(ns + "ItemGroup");
                         projectXml.Root.Add(packageReferenceItemGroup);
                     }
-                    additionalItemGroup.Add(new XElement(
-                        ns + additionalItem.Key, 
-                        new XAttribute("Include", additionalItem.Value)));
+                    var item = new XElement(ns + additionalItem.Key);
+                    foreach (var attribute in additionalItem.Value)
+                        item.Add(new XAttribute(attribute.Key, attribute.Value));
+                    additionalItemGroup.Add(item);
                 }
             }
 

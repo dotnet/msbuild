@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
@@ -59,7 +60,7 @@ namespace Microsoft.NET.Publish.Tests
                 "ClassLib");
 
             testProject.AdditionalProperties["PublishReadyToRun"] = "True";
-            testProject.AdditionalItems["PublishReadyToRunExclude"] = "Classlib.dll";
+            testProject.AdditionalItems["PublishReadyToRunExclude"] = new Dictionary<string, string> { ["Include"] = "Classlib.dll" };
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 

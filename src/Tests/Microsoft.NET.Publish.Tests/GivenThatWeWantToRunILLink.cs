@@ -493,12 +493,13 @@ namespace Microsoft.NET.Publish.Tests
             var targetFramework = "net5.0";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
-            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
-            // Set up a conditional feature substitution for the "FeatureDisabled" property
-            AddFeatureDefinition(testProject, referenceProjectName);
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName,
+                // Reference the classlib to ensure its XML is processed.
+                addAssemblyReference: true,
+                // Set up a conditional feature substitution for the "FeatureDisabled" property
+                modifyReferencedProject: (referencedProject) => AddFeatureDefinition(referencedProject, referenceProjectName));
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(project => EnableNonFrameworkTrimming(project))
-                .WithProjectChanges(project => EmbedSubstitutions(project))
                 // Set a matching RuntimeHostConfigurationOption, with Trim = "true"
                 .WithProjectChanges(project => AddRuntimeConfigOption(project, trim: true))
                 .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"));
@@ -525,12 +526,13 @@ namespace Microsoft.NET.Publish.Tests
             var targetFramework = "net5.0";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
-            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
-            // Set up a conditional feature substitution for the "FeatureDisabled" property
-            AddFeatureDefinition(testProject, referenceProjectName);
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName,
+                // Reference the classlib to ensure its XML is processed.
+                addAssemblyReference: true,
+                // Set up a conditional feature substitution for the "FeatureDisabled" property
+                modifyReferencedProject: (referencedProject) => AddFeatureDefinition(referencedProject, referenceProjectName));
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(project => EnableNonFrameworkTrimming(project))
-                .WithProjectChanges(project => EmbedSubstitutions(project))
                 // Set a matching RuntimeHostConfigurationOption, with Trim = "false"
                 .WithProjectChanges(project => AddRuntimeConfigOption(project, trim: false))
                 .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"));
@@ -1114,28 +1116,23 @@ namespace Microsoft.NET.Publish.Tests
 
         static readonly string substitutionsFilename = "ILLink.Substitutions.xml";
 
-        private void EmbedSubstitutions(XDocument project)
-        {
-            var ns = project.Root.Name.Namespace;
-
-            project.Root.Add(new XElement(ns + "ItemGroup",
-                                new XElement("EmbeddedResource",
-                                    new XAttribute("Include", substitutionsFilename),
-                                    new XElement("LogicalName", substitutionsFilename))));
-        }
-
-        private void AddFeatureDefinition(TestProject testProject, string referenceAssemblyName)
+        private void AddFeatureDefinition(TestProject testProject, string assemblyName)
         {
             // Add a feature definition that replaces the FeatureDisabled property when DisableFeature is true.
             testProject.EmbeddedResources[substitutionsFilename] = $@"
 <linker>
-  <assembly fullname=""{referenceAssemblyName}"" feature=""DisableFeature"" featurevalue=""true"">
+  <assembly fullname=""{assemblyName}"" feature=""DisableFeature"" featurevalue=""true"">
     <type fullname=""ClassLib"">
       <method signature=""System.Boolean get_FeatureDisabled()"" body=""stub"" value=""true"" />
     </type>
   </assembly>
 </linker>
 ";
+
+            testProject.AdditionalItems["EmbeddedResource"] = new Dictionary<string, string> {
+                ["Include"] = substitutionsFilename,
+                ["LogicalName"] = substitutionsFilename
+            };
         }
 
         private void AddRuntimeConfigOption(XDocument project, bool trim)
@@ -1218,7 +1215,9 @@ public class Program
             string referenceProjectName = null,
             bool usePackageReference = true,
             [CallerMemberName] string callingMethod = "",
-            string referenceProjectIdentifier = "")
+            string referenceProjectIdentifier = "",
+            Action<TestProject> modifyReferencedProject = null,
+            bool addAssemblyReference = false)
         {
             var testProject = new TestProject()
             {
@@ -1235,11 +1234,24 @@ public class Program
     {
         Console.WriteLine(""Hello world"");
     }
-}
 ";
+
+            if (addAssemblyReference)
+            {
+                testProject.SourceFiles[$"{mainProjectName}.cs"] += @"
+    public static void UseClassLib()
+    {
+        ClassLib.UsedMethod();
+    }
+}";
+            } else {
+                testProject.SourceFiles[$"{mainProjectName}.cs"] += @"}";
+            }
 
             if (referenceProjectName == null)
             {
+                if (addAssemblyReference)
+                    throw new ArgumentException("Adding an assembly reference requires a project to reference.");
                 return testProject;
             }
 
@@ -1253,8 +1265,13 @@ public class Program
             };
             referenceProject.SourceFiles[$"{referenceProjectName}.cs"] = @"
 using System;
+
 public class ClassLib
 {
+    public static void UsedMethod()
+    {
+    }
+
     public void UnusedMethod()
     {
     }
@@ -1278,6 +1295,8 @@ public class ClassLib
     }
 }
 ";
+            if (modifyReferencedProject != null)
+                modifyReferencedProject(referenceProject);
 
             if (usePackageReference)
             {
