@@ -31,7 +31,6 @@ namespace Microsoft.NET.Build.Tests
             var testProj = new TestProject()
             {
                 Name = "TargetPlatformTests",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProj);
@@ -71,7 +70,6 @@ namespace Microsoft.NET.Build.Tests
             var testProj = new TestProject()
             {
                 Name = "TargetPlatformTests",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework
             };
             testProj.AdditionalProperties["TargetPlatformVersion"] = targetPlatformVersion;
@@ -91,7 +89,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "UnsupportedOS",
-                IsSdkProject = true,
                 TargetFrameworks = "net5.0-unsupported"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject);

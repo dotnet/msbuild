@@ -29,7 +29,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "UseComReferences",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 IsExe = true,
                 SourceFiles =
@@ -77,7 +76,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "MultiComReference",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 IsExe = true,
                 SourceFiles =

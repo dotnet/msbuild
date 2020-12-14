@@ -51,7 +51,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471App",
                 TargetFrameworks = "net471",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -83,7 +82,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471App_Referencing_NetStandard20",
                 TargetFrameworks = "net471",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -91,7 +89,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NetStandard20_Library",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
             };
 
             testProject.ReferencedProjects.Add(netStandardProject);
@@ -126,7 +123,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471_NuGetFacades",
                 TargetFrameworks = "net471",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -167,7 +163,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471App_Referencing_NetStandard16",
                 TargetFrameworks = "net471",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -175,7 +170,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NetStandard16_Library",
                 TargetFrameworks = "netstandard1.6",
-                IsSdkProject = true
             };
 
             testProject.ReferencedProjects.Add(netStandardProject);
@@ -211,7 +205,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471App_Referencing_Net471Library",
                 TargetFrameworks = "net471",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -219,14 +212,12 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471_Library",
                 TargetFrameworks = "net471",
-                IsSdkProject = true
             };
 
             var net461library = new TestProject()
             {
                 Name = "Net461_Library",
                 TargetFrameworks = "net461",
-                IsSdkProject = true
             };
 
             testProject.ReferencedProjects.Add(net471library);
@@ -264,7 +255,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471App",
                 TargetFrameworks = "net471",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -299,7 +289,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "Net471AliasTest",
                 TargetFrameworks = "net471",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -307,7 +296,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "NetStandard20_Library",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
             };
 
             testProject.SourceFiles["Program.cs"] = $@"
@@ -390,7 +378,6 @@ public static class Program
             {
                 Name = "NetStandard16_Library",
                 TargetFrameworks = "netstandard1.6",
-                IsSdkProject = true
             };
 
             netStandardProject.PackageReferences.AddRange(new[]

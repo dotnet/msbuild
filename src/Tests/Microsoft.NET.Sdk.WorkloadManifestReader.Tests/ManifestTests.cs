@@ -13,6 +13,8 @@ namespace ManifestReaderTests
     {
         private const string fakeRootPath = "fakeRootPath";
 
+        public static readonly string[] TEST_RUNTIME_IDENTIFIER_CHAIN = new[] { "win-x64", "win", "any", "base" };
+
         [Fact]
         public void ItCanDeserialize()
         {
@@ -33,10 +35,9 @@ namespace ManifestReaderTests
         public void AliasedPackPath()
         {
             var manifestProvider = new FakeManifestProvider(Path.Combine("Manifests", "Sample.json"));
-            var resolver = new WorkloadResolver(manifestProvider, fakeRootPath);
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, fakeRootPath, TEST_RUNTIME_IDENTIFIER_CHAIN);
 
             resolver.ReplaceFilesystemChecksForTest(_ => true, _ => true);
-            resolver.ReplacePlatformIdsForTest(new[] { "win-x64", "*" });
 
             var buildToolsPack = resolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk).FirstOrDefault(pack => pack.Id == "Xamarin.Android.BuildTools");
 

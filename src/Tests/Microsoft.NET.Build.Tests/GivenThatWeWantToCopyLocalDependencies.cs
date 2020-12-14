@@ -35,7 +35,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true
             };
@@ -79,7 +78,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true
             };
@@ -115,7 +113,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true
             };
@@ -157,7 +154,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = false
             };
@@ -190,7 +186,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = false
             };
@@ -229,7 +224,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard2.0"
             };
 
@@ -261,7 +255,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard2.0"
             };
 
@@ -300,7 +293,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
                 TargetFrameworks = "net46"
             };
 
@@ -334,7 +326,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = ProjectName,
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true
             };

@@ -30,7 +30,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "Project",
-                IsSdkProject = true,
                 IsExe = false,
                 TargetFrameworks = targetFramework,
             };
@@ -71,7 +70,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "Project",
-                IsSdkProject = true,
                 IsExe = false,
                 TargetFrameworks = targetFramework,
             };
@@ -115,7 +113,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "Project",
-                IsSdkProject = true,
                 IsExe = false,
                 TargetFrameworks = targetFramework,
             };
@@ -168,7 +165,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = referenceProjectName,
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
             project.SourceFiles[$"{referenceProjectName}.cs"] = projectFileContent;
             return project;

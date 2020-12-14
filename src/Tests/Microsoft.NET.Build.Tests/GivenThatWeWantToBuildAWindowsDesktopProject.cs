@@ -25,7 +25,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "MissingTargetPlatform",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework
             };
             testProject.AdditionalProperties[propertyName] = "true";
@@ -49,7 +48,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProjectA = new TestProject()
             {
                 Name = "A",
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 TargetFrameworks = "netcoreapp3.1"
             };
@@ -58,7 +56,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProjectB = new TestProject()
             {
                 Name = "B",
-                IsSdkProject = true,
                 TargetFrameworks = "net5.0"
             };
             testProjectB.ReferencedProjects.Add(testProjectA);
@@ -66,7 +63,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProjectC = new TestProject()
             {
                 Name = "C",
-                IsSdkProject = true,
                 TargetFrameworks = "net5.0"
             };
             testProjectC.ReferencedProjects.Add(testProjectB);
@@ -88,7 +84,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "windowsDesktopSdk",
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 TargetFrameworks = targetFramework
             };
@@ -110,7 +105,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "windowsDesktopSdk",
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 TargetFrameworks = targetFramework
             };
@@ -133,7 +127,6 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "windowsDesktopSdk",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework
             };
             testProject.AdditionalProperties["UseWPF"] = "true";
@@ -158,7 +151,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "InvalidWindowsVersion",
-                IsSdkProject = true,
                 TargetFrameworks = "net5.0-windows1.0"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -179,7 +171,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "ValidWindowsVersion",
-                IsSdkProject = true,
                 TargetFrameworks = setInTargetframework ? "net5.0-windows10.0.18362" : "net5.0"
             };
             if (!setInTargetframework)
@@ -207,7 +198,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "InvalidTargetPlatform",
-                IsSdkProject = true,
                 TargetFrameworks = "net5.0-custom1.0"
             };
             var testAsset = _testAssetsManager.CreateTestProject(testProject);

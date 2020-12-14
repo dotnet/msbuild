@@ -72,8 +72,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             var sdkVersion = Path.GetFileName(sdkDirectory);
 
             _workloadManifestProvider ??= new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion);
-            
-            _workloadResolver ??= new WorkloadResolver(_workloadManifestProvider, dotnetRootPath);
+            _workloadResolver ??= WorkloadResolver.Create(_workloadManifestProvider, dotnetRootPath, sdkVersion);
         }
 
         public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext, SdkResultFactory factory)

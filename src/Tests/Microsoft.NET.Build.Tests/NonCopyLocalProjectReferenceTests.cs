@@ -29,7 +29,6 @@ namespace Microsoft.NET.Build.Tests
             var referencedProject = new TestProject
             {
                 Name = "ReferencedProject",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 IsExe = false,
             };
@@ -37,7 +36,6 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject
             {
                 Name = "MainProject",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework,
                 IsExe = true,
                 ReferencedProjects = { referencedProject },

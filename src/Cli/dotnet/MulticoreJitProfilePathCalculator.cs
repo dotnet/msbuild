@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli
 
         private string GetRuntimeDataRootPathString()
         {
-            return RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            return OperatingSystem.IsWindows()
                 ? GetWindowsRuntimeDataRoot()
                 : GetNonWindowsRuntimeDataRoot();
         }

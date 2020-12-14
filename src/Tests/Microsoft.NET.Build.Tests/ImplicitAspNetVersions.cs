@@ -32,7 +32,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "AspNetImplicitVersion",
                 TargetFrameworks = "netcoreapp2.1",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -63,7 +62,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "AspNetImplicitVersion",
                 TargetFrameworks = "netcoreapp2.1",
-                IsSdkProject = true,
                 IsExe = true,
                 
             };
@@ -97,7 +95,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "AspNetExplicitVersion",
                 TargetFrameworks = "netcoreapp2.1",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -128,7 +125,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "MultipleExplicitReferences",
                 TargetFrameworks = "netcoreapp2.1",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -168,7 +164,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "AspNetCoreAll_On3_0",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 ProjectSdk = useWebSdk ? "Microsoft.NET.Sdk.Web" : null,
                 IsExe = true
             };
@@ -204,7 +199,6 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "AspNetCoreApp_On3_0",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 ProjectSdk = useWebSdk ? "Microsoft.NET.Sdk.Web" : null,
                 IsExe = true
             };

@@ -30,7 +30,6 @@ namespace Microsoft.NET.Build.Tests
                 TestProject testProject = new TestProject()
                 {
                     Name = "FailedResolution",
-                    IsSdkProject = true,
                     TargetFrameworks = "net5.0"
                 };
 

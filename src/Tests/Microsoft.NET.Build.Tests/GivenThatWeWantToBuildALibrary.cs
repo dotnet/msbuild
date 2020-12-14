@@ -309,22 +309,21 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD", "NETSTANDARD1_0" }, false)]
-        [InlineData("netstandard1.3", new[] { "NETSTANDARD", "NETSTANDARD1_3" }, false)]
-        [InlineData("netstandard1.6", new[] { "NETSTANDARD", "NETSTANDARD1_6" }, false)]
-        [InlineData("net45", new[] { "NETFRAMEWORK", "NET45" }, true)]
-        [InlineData("net461", new[] { "NETFRAMEWORK", "NET461" }, true)]
-        [InlineData("netcoreapp1.0", new[] { "NETCOREAPP", "NETCOREAPP1_0" }, false)]
-        [InlineData("netcoreapp3.0", new[] { "NETCOREAPP", "NETCOREAPP3_0" }, false)]
-        [InlineData("net5.0", new[] { "NETCOREAPP", "NET", "NET5_0" }, false)]
-        [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { }, false)]
-        [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NETFRAMEWORK", "NET40" }, false)]
-        [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS", "XAMARINIOS1_0" }, false)]
-        [InlineData("UnknownFramework,Version=v3.14", new string[] { "UNKNOWNFRAMEWORK", "UNKNOWNFRAMEWORK3_14" }, false)]
-        public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines, bool buildOnlyOnWindows)
+        [InlineData(".NETStandard,Version=v1.0", new[] { "NETSTANDARD", "NETSTANDARD1_0" })]
+        [InlineData("netstandard1.3", new[] { "NETSTANDARD", "NETSTANDARD1_3" })]
+        [InlineData("netstandard1.6", new[] { "NETSTANDARD", "NETSTANDARD1_6" })]
+        [InlineData("net45", new[] { "NETFRAMEWORK", "NET45", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER" })]
+        [InlineData("net461", new[] { "NETFRAMEWORK", "NET461", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER", "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER" })]
+        [InlineData("net48", new[] { "NETFRAMEWORK", "NET48", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER", "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER", "NET462_OR_GREATER", "NET47_OR_GREATER", "NET471_OR_GREATER", "NET472_OR_GREATER", "NET48_OR_GREATER" })]
+        [InlineData("netcoreapp1.0", new[] { "NETCOREAPP", "NETCOREAPP1_0", "NETCOREAPP1_0_OR_GREATER" })]
+        [InlineData("netcoreapp3.0", new[] { "NETCOREAPP", "NETCOREAPP3_0", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", "NETCOREAPP2_1_OR_GREATER", "NETCOREAPP2_2_OR_GREATER", "NETCOREAPP3_0_OR_GREATER" })]
+        [InlineData("net5.0", new[] { "NETCOREAPP", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", "NETCOREAPP2_1_OR_GREATER", "NETCOREAPP2_2_OR_GREATER", "NETCOREAPP3_0_OR_GREATER", "NETCOREAPP3_1_OR_GREATER", "NET", "NET5_0", "NET5_0_OR_GREATER" })]
+        [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { })]
+        [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NETFRAMEWORK", "NET40", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER" })]
+        [InlineData("Xamarin.iOS,Version=v1.0", new string[] { "XAMARINIOS", "XAMARINIOS1_0" })]
+        [InlineData("UnknownFramework,Version=v3.14", new string[] { "UNKNOWNFRAMEWORK", "UNKNOWNFRAMEWORK3_14" })]
+        public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines)
         {
-            bool shouldCompile = true;
-
             var testAsset = _testAssetsManager
                 .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework)
                 .WithSource()
@@ -341,9 +340,6 @@ namespace Microsoft.NET.Build.Tests
 
                     if (targetFramework.Contains(",Version="))
                     {
-                        //  We use the full TFM for frameworks we don't have built-in support for targeting, so we don't want to run the Compile target
-                        shouldCompile = false;
-
                         var frameworkName = new FrameworkName(targetFramework);
 
                         var targetFrameworkProperty = targetFrameworkProperties.Single();
@@ -360,22 +356,16 @@ namespace Microsoft.NET.Build.Tests
                     }
                     else
                     {
-                        shouldCompile = true;
                         targetFrameworkProperties.Single().SetValue(targetFramework);
                     }
                 });
-
-            if (buildOnlyOnWindows && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                shouldCompile = false;
-            }
             
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,
                 targetFramework, "DefineConstants")
             {
-                ShouldCompile = shouldCompile
+                DependsOnTargets = "AddImplicitDefineConstants"
             };
 
             getValuesCommand
@@ -389,9 +379,9 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData(new string[] { }, "windows", "10.0.19041.0", new[] { "WINDOWS" })]
-        [InlineData(new[] { "1.0", "1.1" }, "ios", "1.1", new[] { "IOS" })]
-        [InlineData(new[] { "11.11", "12.12", "13.13" }, "android", "12.12", new[] { "ANDROID" })]
+        [InlineData(new string[] { }, "windows", "10.0.18362.0", new[] { "WINDOWS", "WINDOWS10_0_18362_0", "WINDOWS7_0_OR_GREATER", "WINDOWS8_0_OR_GREATER", "WINDOWS10_0_17763_0_OR_GREATER", "WINDOWS10_0_18362_0_OR_GREATER" })]
+        [InlineData(new[] { "1.0", "1.1" }, "ios", "1.1", new[] { "IOS", "IOS1_1", "IOS1_0_OR_GREATER", "IOS1_1_OR_GREATER" })]
+        [InlineData(new[] { "11.11", "12.12", "13.13" }, "android", "12.12", new[] { "ANDROID", "ANDROID12_12", "ANDROID11_11_OR_GREATER", "ANDROID12_12_OR_GREATER" })]
         public void It_implicitly_defines_compilation_constants_for_the_target_platform(string[] sdkSupportedTargetPlatformVersion, string targetPlatformIdentifier, string targetPlatformVersion, string[] expectedDefines)
         {
             var targetFramework = "net5.0";
@@ -423,7 +413,30 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
-            AssertDefinedConstantsOutput(testAsset, targetFramework, new[] { "NETCOREAPP", "NET", "NET5_0" }.Concat(expectedDefines).ToArray());
+            AssertDefinedConstantsOutput(testAsset, targetFramework, 
+                new[] { "NETCOREAPP", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", "NETCOREAPP2_1_OR_GREATER", "NETCOREAPP2_2_OR_GREATER",  "NETCOREAPP3_0_OR_GREATER", "NETCOREAPP3_1_OR_GREATER", "NET", "NET5_0", "NET5_0_OR_GREATER" }
+                .Concat(expectedDefines).ToArray());
+        }
+
+        [WindowsOnlyFact]
+        public void It_does_not_generate_or_greater_symbols_on_disabled_implicit_framework_defines()
+        {
+            var targetFramework = "net5.0-windows10.0.19041.0";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework)
+                .WithSource()
+                .WithTargetFramework(targetFramework)
+                .WithProjectChanges(project =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propGroup = new XElement(ns + "PropertyGroup");
+                    project.Root.Add(propGroup);
+
+                    var disableImplicitFrameworkDefines = new XElement(ns + "DisableImplicitFrameworkDefines", "true");
+                    propGroup.Add(disableImplicitFrameworkDefines);
+                });
+
+            AssertDefinedConstantsOutput(testAsset, targetFramework, Array.Empty<string>());
         }
 
         private void AssertDefinedConstantsOutput(TestAsset testAsset, string targetFramework, string[] expectedDefines)
@@ -448,8 +461,8 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyTheory]
-        [InlineData("netcoreapp3.1", new[] { "NETCOREAPP", "NETCOREAPP3_1" })]
-        [InlineData("net5.0", new[] { "NETCOREAPP", "NET", "NET5_0", "WINDOWS" }, "windows", "7.0")]
+        [InlineData("netcoreapp3.1", new[] { "NETCOREAPP", "NETCOREAPP3_1", "NETCOREAPP3_1_OR_GREATER" })]
+        [InlineData("net5.0", new[] { "NETCOREAPP", "NET", "NETCOREAPP3_1_OR_GREATER", "NET5_0_OR_GREATER", "NET5_0", "WINDOWS", "WINDOWS7_0", "WINDOWS7_0_OR_GREATER" }, "windows", "7.0")]
         public void It_can_use_implicitly_defined_compilation_constants(string targetFramework, string[] expectedOutput, string targetPlatformIdentifier = null, string targetPlatformVersion = null)
         {
             var testProj = new TestProject()
@@ -457,7 +470,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = "CompilationConstants",
                 TargetFrameworks = targetFramework,
                 IsExe = true,
-                IsSdkProject = true
             };
             if (targetPlatformIdentifier != null)
             {
@@ -480,14 +492,26 @@ class Program
         #if NETCOREAPP3_1
             Console.WriteLine(""NETCOREAPP3_1"");
         #endif
+        #if NETCOREAPP3_1_OR_GREATER
+            Console.WriteLine(""NETCOREAPP3_1_OR_GREATER"");
+        #endif
         #if NET
             Console.WriteLine(""NET"");
         #endif
         #if NET5_0
             Console.WriteLine(""NET5_0"");
         #endif
+        #if NET5_0_OR_GREATER
+            Console.WriteLine(""NET5_0_OR_GREATER"");
+        #endif
         #if WINDOWS
             Console.WriteLine(""WINDOWS"");
+        #endif
+        #if WINDOWS7_0
+            Console.WriteLine(""WINDOWS7_0"");
+        #endif
+        #if WINDOWS7_0_OR_GREATER
+            Console.WriteLine(""WINDOWS7_0_OR_GREATER"");
         #endif
         #if IOS
             Console.WriteLine(""IOS"");
@@ -546,7 +570,6 @@ class Program
             TestProject testProject = new TestProject()
             {
                 Name = "TargetPlatformDefaults",
-                IsSdkProject = true,
                 TargetFrameworks = targetFramework
             };
 
@@ -581,7 +604,6 @@ class Program
             TestProject testProject = new TestProject()
             {
                 Name = "WindowsVersionDefault",
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk.WindowsDesktop",
                 TargetFrameworks = targetFramework
             };
@@ -603,7 +625,6 @@ class Program
             {
                 Name = testName,
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
 
             string identifier = useSolution ? "_Solution" : "";
@@ -680,7 +701,6 @@ class Program
             {
                 Name = "TargetFrameworkVersionCap",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, targetFramework);
@@ -712,7 +732,6 @@ class Program
                 Name = "CompileDoesntUseRid",
                 TargetFrameworks = "netcoreapp2.0",
                 RuntimeIdentifier = runtimeIdentifier,
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name)
@@ -773,7 +792,6 @@ class Program
             {
                 Name = "Library",
                 TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true,
                 // references from packages go through a different code path to be marked externally resolved.
                 PackageReferences = { new TestPackageReference("NewtonSoft.Json", "10.0.1") }
             };
@@ -825,7 +843,6 @@ class Program
             {
                 Name = "EnableDynamicLoading",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
 
             testProject.AdditionalProperties["EnableDynamicLoading"] = "true";
@@ -890,7 +907,6 @@ class Program
             {
                 Name = "Project Name With Spaces",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);

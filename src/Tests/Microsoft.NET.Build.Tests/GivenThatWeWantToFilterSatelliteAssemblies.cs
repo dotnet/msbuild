@@ -39,7 +39,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = "FilterSatelliteAssemblies",
                 TargetFrameworks = targetFramework,
                 IsExe = true,
-                IsSdkProject = true
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Spatial", "5.8.3"));
@@ -105,7 +104,6 @@ namespace Microsoft.NET.Build.Tests
                 Name = "DontFilterSatelliteAssemblies",
                 TargetFrameworks = targetFramework,
                 IsExe = true,
-                IsSdkProject = true
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("System.Spatial", "5.8.3"));

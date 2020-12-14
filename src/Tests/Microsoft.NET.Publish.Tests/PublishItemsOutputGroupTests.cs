@@ -129,7 +129,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "TestPublishOutputGroup",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 

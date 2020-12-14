@@ -33,7 +33,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "ConsoleWithPublishProfile",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 ProjectSdk = "Microsoft.NET.Sdk;Microsoft.NET.Sdk.Publish",
                 IsExe = true,
             };

@@ -935,7 +935,6 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject
             {
                 Name = "TestWeb",
-                IsSdkProject = true,
                 IsExe = true,
                 ProjectSdk = "Microsoft.NET.Sdk.Web",
                 TargetFrameworks = targetFramework,
@@ -1038,7 +1037,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = "ConsoleApp",
                 TargetFrameworks = "netcoreapp2.2",
-                IsSdkProject = true,
                 IsExe = true,
             };
 
@@ -1157,7 +1155,6 @@ namespace Microsoft.NET.Publish.Tests
             {
                 Name = projectName,
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
             };
 
             testProject.SourceFiles[$"{projectName}.cs"] = @"
@@ -1227,7 +1224,6 @@ public class Program
             {
                 Name = mainProjectName,
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -1254,7 +1250,6 @@ public class Program
                 // from the nuget cache. Set the reference project TFM to the lowest common denominator
                 // of these tests to prevent conflicts.
                 TargetFrameworks = usePackageReference ? "netcoreapp3.0" : targetFramework,
-                IsSdkProject = true
             };
             referenceProject.SourceFiles[$"{referenceProjectName}.cs"] = @"
 using System;

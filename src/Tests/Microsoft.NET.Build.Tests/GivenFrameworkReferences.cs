@@ -41,7 +41,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "MultipleFrameworkReferenceTest",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -78,7 +77,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "MultipleFrameworkReferenceTest",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -123,7 +121,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "NETFrameworkTFMTest",
                 TargetFrameworks = "net472",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -152,7 +149,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "MultipleProfileFrameworkReferenceTest",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -187,7 +183,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "UnknownFrameworkReferenceTest",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -227,7 +222,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "FrameworkReferenceTest",
                 TargetFrameworks = targetFramework,
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -268,7 +262,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "FrameworkReferenceTest",
                 TargetFrameworks = "net5.0-windows",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -308,7 +301,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "DisableTargetingPackDownload",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -349,7 +341,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "RollForwardSetting",
                 TargetFrameworks = tfm,
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -399,7 +390,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "RollForwardSettingNotSupported",
                 TargetFrameworks = "netcoreapp2.2",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -434,7 +424,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "RuntimePackNotAvailable",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true,
                 RuntimeIdentifier = "linux-x64"
             };
@@ -472,7 +461,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "RuntimePackNotAvailable",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true,
                 RuntimeIdentifier = "invalid-rid"
             };
@@ -499,7 +487,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "RuntimePackNotRestored",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true,
             };
             
@@ -691,7 +678,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "TransitiveFrameworkReference",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -699,7 +685,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "ReferencedProject",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true
             };
 
             referencedProject.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
@@ -732,7 +717,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "ReferencedPackage",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true
             };
             referencedPackage.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
 
@@ -750,7 +734,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "TransitiveFrameworkReference",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
 
@@ -831,7 +814,6 @@ namespace FrameworkReferenceTest
             var testProject = new TestProject()
             {
                 Name = "ResolvedFrameworkReferenceTest",
-                IsSdkProject = true,
                 IsExe = true,
                 TargetFrameworks = "netcoreapp3.0",
                 RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
@@ -954,7 +936,6 @@ namespace FrameworkReferenceTest
             {
                 Name = "WindowsFormsFrameworkReference",
                 TargetFrameworks = "netcoreapp3.0",
-                IsSdkProject = true,
                 IsExe = true
             };
             testProject.FrameworkReferences.AddRange(frameworkReferences);
@@ -1044,7 +1025,6 @@ namespace FrameworkReferenceTest
         {
             testProject.Name = "ResolvedVersionsTest";
             testProject.TargetFrameworks = "netcoreapp3.0";
-            testProject.IsSdkProject = true;
             testProject.IsExe = true;
             testProject.AdditionalProperties["DisableImplicitFrameworkReferences"] = "true";
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
@@ -1120,7 +1100,6 @@ namespace FrameworkReferenceTest
 
             testProject.Name = "TrimInfoTest";
             testProject.TargetFrameworks = targetFramework;;
-            testProject.IsSdkProject = true;
             testProject.IsExe = true;
             testProject.RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 

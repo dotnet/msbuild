@@ -868,6 +868,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          NoConfig="true"
          NoLogo="$(NoLogo)"
          NoStandardLib="$(NoCompilerStandardLib)"
+         Optimize="$(Optimize)"
          PublicSign="$(PublicSign)"
          DelaySign="$(DelaySign)"
          Deterministic="$(Deterministic)"

@@ -26,7 +26,6 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "RegularPublishToSingleExe",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true,
                 RuntimeIdentifier = "win-x86"
@@ -61,7 +60,6 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "PublishSingleFile1",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true,
                 RuntimeIdentifier = "win-x86"
@@ -101,7 +99,6 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "PublishSingleExe",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true,
                 RuntimeIdentifier = "win-x86"
@@ -135,7 +132,6 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "RegularPublishToTrimmedSingleExe",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true,
                 RuntimeIdentifier = "win-x86"
@@ -207,7 +203,6 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "PublishToCustomDir",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true,
                 RuntimeIdentifier = "win-x86"
@@ -243,7 +238,6 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = new TestProject()
             {
                 Name = "PublishToMultipleDirs",
-                IsSdkProject = true,
                 TargetFrameworks = "netcoreapp3.0",
                 IsExe = true,
                 RuntimeIdentifier = "win-x86"

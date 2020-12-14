@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tools.Help
         public static Process ConfigureProcess(string docUrl)
         {
             ProcessStartInfo psInfo;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 psInfo = new ProcessStartInfo
                 {
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Tools.Help
                     Arguments = $"/c start {docUrl}"
                 };
             }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            else if (OperatingSystem.IsMacOS())
             {
                 psInfo = new ProcessStartInfo
                 {

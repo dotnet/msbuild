@@ -223,7 +223,6 @@ namespace Microsoft.NET.Build.Tests
                 {
                     Name = testProjectName,
                     TargetFrameworks = callerTargetFramework,
-                    IsSdkProject = true
                 };
 
             if (additionalProperties != null)
@@ -251,7 +250,6 @@ namespace Microsoft.NET.Build.Tests
                 {
                     Name = $"{targetFrameworks.Replace(';', '_')}_pkg",
                     TargetFrameworks = targetFrameworks,
-                    IsSdkProject = true
                 };
 
             var packageReference =

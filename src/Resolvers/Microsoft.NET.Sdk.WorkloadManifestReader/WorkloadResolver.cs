@@ -17,27 +17,32 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     {
         private readonly Dictionary<WorkloadDefinitionId, WorkloadDefinition> _workloads = new Dictionary<WorkloadDefinitionId, WorkloadDefinition>();
         private readonly Dictionary<WorkloadPackId, WorkloadPack> _packs = new Dictionary<WorkloadPackId, WorkloadPack>();
-        private string[] _platformIds;
-        private readonly string _dotNetRootPath;
+        private string[] _currentRuntimeIdentifiers;
+        private readonly string _dotnetRootPath;
 
         private Func<string, bool>? _fileExistOverride;
         private Func<string, bool>? _directoryExistOverride;
 
-        public WorkloadResolver(IWorkloadManifestProvider manifestProvider, string dotNetRootPath)
+        public static WorkloadResolver Create(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string sdkVersion)
         {
-            this._dotNetRootPath = dotNetRootPath;
+            string runtimeIdentifierChainPath = Path.Combine(dotnetRootPath, "sdk", sdkVersion, "NETCoreSdkRuntimeIdentifierChain.txt");
+            string[] currentRuntimeIdentifiers = File.Exists(runtimeIdentifierChainPath) ?
+                File.ReadAllLines(runtimeIdentifierChainPath).Where(l => !string.IsNullOrEmpty(l)).ToArray() :
+                new string[] { };
 
-            // eventually we may want a series of fallbacks here, as rids have in general
-            // but for now, keep it simple
-            var platformId = GetHostPlatformId();
-            if (platformId != null)
-            {
-                _platformIds = new[] { platformId, "*" };
-            }
-            else
-            {
-                _platformIds = new[] { "*" };
-            }
+            return new WorkloadResolver(manifestProvider, dotnetRootPath, currentRuntimeIdentifiers);
+        }
+
+        public static WorkloadResolver CreateForTests(IWorkloadManifestProvider manifestProvider, string dotNetRootPath, string[] currentRuntimeIdentifiers)
+        {
+            return new WorkloadResolver(manifestProvider, dotNetRootPath, currentRuntimeIdentifiers);
+        }
+
+        private WorkloadResolver(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string [] currentRuntimeIdentifiers)
+        {
+            this._dotnetRootPath = dotnetRootPath;
+
+            _currentRuntimeIdentifiers = currentRuntimeIdentifiers;
 
             var manifests = new List<WorkloadManifest>();
 
@@ -61,32 +66,6 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     _packs.Add(pack.Key, pack.Value);
                 }
             }
-        }
-
-
-        // rather that forcing all consumers to depend on and parse the RID catalog, or doing that here, for now just bake in a small
-        // subset of dev host platform rids for now for the workloads that are likely to need this functionality soonest
-        private string? GetHostPlatformId()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                return RuntimeInformation.OSArchitecture switch
-                {
-                    Architecture.X64 => "osx-x64",
-                    Architecture.Arm64 => "osx-arm64",
-                    _ => null
-                };
-            }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                if (RuntimeInformation.OSArchitecture == Architecture.X64)
-                {
-                    return "win-x64";
-                }
-            }
-
-            return null;
         }
 
         /// <summary>
@@ -119,15 +98,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _directoryExistOverride = directoryExists;
         }
 
-        internal void ReplacePlatformIdsForTest(string[] platformIds)
-        {
-            this._platformIds = platformIds;
-        }
-
         private PackInfo CreatePackInfo(WorkloadPack pack)
         {
-            var aliasedId = pack.TryGetAliasForPlatformIds(_platformIds) ?? pack.Id;
-            var packPath = GetPackPath(_dotNetRootPath, aliasedId, pack.Version, pack.Kind);
+            var aliasedId = pack.TryGetAliasForRuntimeIdentifiers(_currentRuntimeIdentifiers) ?? pack.Id;
+            var packPath = GetPackPath(_dotnetRootPath, aliasedId, pack.Version, pack.Kind);
 
             return new PackInfo(
                 pack.Id.ToString(),
@@ -155,19 +129,19 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
         }
 
-        private static string GetPackPath (string dotNetRootPath, WorkloadPackId packageId, string packageVersion, WorkloadPackKind kind)
+        private static string GetPackPath (string dotnetRootPath, WorkloadPackId packageId, string packageVersion, WorkloadPackKind kind)
         {
             switch (kind)
             {
                 case WorkloadPackKind.Framework:
                 case WorkloadPackKind.Sdk:
-                    return Path.Combine(dotNetRootPath, "packs", packageId.ToString(), packageVersion);
+                    return Path.Combine(dotnetRootPath, "packs", packageId.ToString(), packageVersion);
                 case WorkloadPackKind.Template:
-                    return Path.Combine(dotNetRootPath, "template-packs", packageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
+                    return Path.Combine(dotnetRootPath, "template-packs", packageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
                 case WorkloadPackKind.Library:
-                    return Path.Combine(dotNetRootPath, "library-packs", packageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
+                    return Path.Combine(dotnetRootPath, "library-packs", packageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
                 case WorkloadPackKind.Tool:
-                    return Path.Combine(dotNetRootPath, "tool-packs", packageId.ToString(), packageVersion);
+                    return Path.Combine(dotnetRootPath, "tool-packs", packageId.ToString(), packageVersion);
                 default:
                     throw new ArgumentException($"The package kind '{kind}' is not known", nameof(kind));
             }

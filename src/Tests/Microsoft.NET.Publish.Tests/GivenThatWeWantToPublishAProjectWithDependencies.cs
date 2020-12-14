@@ -251,7 +251,6 @@ namespace Microsoft.NET.Publish.Tests
             var libProject = new TestProject
             {
                 Name = "NetStdLib",
-                IsSdkProject = true,
                 TargetFrameworks = "netstandard1.0"
             };
 
@@ -265,7 +264,6 @@ namespace Microsoft.NET.Publish.Tests
             var appProject = new TestProject
             {
                 Name = "TestApp",
-                IsSdkProject = true,
                 IsExe = true,
                 TargetFrameworks = "netcoreapp2.0",
                 References = { publishedLibPath }
