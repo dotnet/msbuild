@@ -13,7 +13,7 @@ trigger:
 variables:
   - name: SourceBranch
     value: $(IbcSourceBranchName)
-  - ${{ if eq(variables['Build.SourceBranchName'], variables['IbcSourceBranchName']) }}:
+  - ${{ if startsWith(variables['Build.SourceBranchName'], variables['IbcSourceBranchName']) }}:
     # For exp branches, get data from master unless explicitly specified
     - name: SourceBranch
       value: master
@@ -50,4 +50,5 @@ stages:
 
     steps:
     - script: echo BSBN $(Build.SourceBranchName) IBCSBN $(IbcSourceBranchName) SourceBranch $(SourceBranch)
+      displayName: Build b.sbn=${{ variables['Build.SourceBranchName'] }}
       condition: succeeded()
