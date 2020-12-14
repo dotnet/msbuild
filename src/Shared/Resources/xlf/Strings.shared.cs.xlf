@@ -82,7 +82,7 @@
       </trans-unit>
       <trans-unit id="SolutionParseNestedProjectErrorWithNameAndGuid">
         <source>MSB5009: Error parsing the project "{0}" section with GUID: "{1}". It is nested under "{2}" but that project is not found in the solution.</source>
-        <target state="new">MSB5009: Error parsing the project "{0}" section with GUID: "{1}". It is nested under "{2}" but that project is not found in the solution.</target>
+        <target state="translated">MSB5009: Při analýze oddílu {0} projektu s identifikátorem GUID: {1} došlo k chybě. Je vnořený pod {2}, ale tento projekt nebyl v řešení nalezen.</target>
         <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
@@ -222,7 +222,7 @@
       </trans-unit>
       <trans-unit id="SolutionParseNestedProjectError">
         <source>MSB5009: Error parsing the nested project section in solution file.</source>
-        <target state="new">MSB5009: Error parsing the nested project section in solution file.</target>
+        <target state="translated">MSB5009: Při analýze vnořeného oddílu projektu v souboru řešení došlo k chybě.</target>
         <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
       <trans-unit id="SolutionParseNestedProjectUndefinedError">

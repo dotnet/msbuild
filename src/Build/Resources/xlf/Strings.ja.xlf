@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
         <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</source>
-        <target state="translated">環境変数 MSBUILDDISABLEFEATURESFROMVERSION が無効な形式に設定されています。すべての Change Wave バージョンを有効にしています。入力された値: {0}。</target>
+        <target state="translated">環境変数 MSBUILDDISABLEFEATURESFROMVERSION が無効な形式に設定されています。すべての変更ウェーブ バージョンを有効にしています。入力された値: {0}。</target>
         <note>
        Value should be of the format: xx.yy
     </note>
@@ -106,7 +106,7 @@
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
-        <target state="new">MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</target>
+        <target state="translated">MSB4259: 条件 "{0}" の位置 "{1}" に予期しないスペースがあります。スペースを削除したか確認してください。</target>
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">

@@ -106,7 +106,7 @@
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
-        <target state="new">MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</target>
+        <target state="translated">MSB4259: 在条件“{0}”的位置“{1}”处出现意外空格。是否忘记了删除空格?</target>
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
@@ -1896,7 +1896,8 @@ Id                  : 独占时间 总时间 路径(目标)
 ============================== Node Utilization (IDs represent configurations) ====================================================
 Timestamp:            {0} Duration   Cumulative
 -----------------------------------------------------------------------------------------------------------------------------------</source>
-        <target state="translated">============================== 节点利用率(ID 表示配置) ====================================================
+        <target state="translated">
+============================== 节点利用率(ID 表示配置) ====================================================
 时间戳:            {0} 持续时间  累计
 -----------------------------------------------------------------------------------------------------------------------------------</target>
         <note>Spacing is important.  Preserve the number of characters between the start of each word.</note>

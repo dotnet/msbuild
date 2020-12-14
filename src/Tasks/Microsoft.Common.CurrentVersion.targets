@@ -821,8 +821,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Although we try to ensure a trailing slash, it's possible to circumvent this if the property is set on the command line -->
     <Error Condition="'$(OutDir)' != '' and !HasTrailingSlash('$(OutDir)')" Text="The OutDir property must end with a trailing slash." />
-    <Error Condition="'$(OutputPath)' != '' and !HasTrailingSlash('$(OutputPath)')" Text="The OutputPath must end with a trailing slash." />
-    <Error Condition="'$(BaseOutputPath)' != '' and !HasTrailingSlash('$(BaseOutputPath)')" Text="The BaseOutputPath must end with a trailing slash." />
     <Error Condition="'$(IntermediateOutputPath)' != '' and !HasTrailingSlash('$(IntermediateOutputPath)')" Text="The IntermediateOutputPath must end with a trailing slash." />
     <Error Condition="'$(BaseIntermediateOutputPath)' != '' and !HasTrailingSlash('$(BaseIntermediateOutputPath)')" Text="The BaseIntermediateOutputPath must end with a trailing slash." />
 
