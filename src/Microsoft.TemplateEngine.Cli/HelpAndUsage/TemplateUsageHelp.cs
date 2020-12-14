@@ -151,7 +151,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 {
                     commandInput.InputTemplateParams.TryGetValue(canonical, out string specifiedValue);
                     string inputFormat = commandInput.TemplateParamInputFormat(canonical);
-                    InvalidParameterInfo invalidParam = new InvalidParameterInfo(inputFormat, specifiedValue, canonical);
+                    InvalidParameterInfo invalidParam = new InvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, inputFormat, specifiedValue, canonical);
                     invalidParameters.Add(invalidParam);
                 }
             }
@@ -172,7 +172,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                             ?? inputVariants.Aggregate("", (max, cur) => max.Length > cur.Length ? max : cur)
                             ?? param.Name;
 
-                        InvalidParameterInfo invalidParam = new InvalidParameterInfo(displayName, param.DefaultValue, displayName, true);
+                        InvalidParameterInfo invalidParam = new InvalidParameterInfo(InvalidParameterInfo.Kind.InvalidDefaultValue, displayName, param.DefaultValue, displayName);
                         invalidParameters.Add(invalidParam);
                     }
                 }
