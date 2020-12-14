@@ -13,8 +13,7 @@ trigger:
 variables:
   - name: SourceBranch
     value: $(IbcSourceBranchName)
-  - ${{ if and(eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName), startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')) }}:
-    # For exp branches, get data from master unless explicitly specified
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}:
     - name: SourceBranch
       value: master
   - name: _DotNetArtifactsCategory
@@ -95,7 +94,7 @@ stages:
                 /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                 /p:TeamName=MSBuild
                 /p:DotNetPublishUsingPipelines=true
-      displayName: Build and=${{and(eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName), startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/'))}} eq=${{eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName)}} sw=${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')}}
+      displayName: Build
       condition: succeeded()
 
     # Publish OptProf configuration files
