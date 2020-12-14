@@ -13,14 +13,6 @@ trigger:
 variables:
   - name: SourceBranch
     value: $(IbcSourceBranchName)
-  - ${{ if eq(variables['Build.SourceBranchName'], variables['IbcSourceBranchName'])) }}:
-    # For exp branches, get data from master unless explicitly specified
-    - name: SourceBranchEq
-      value: eq
-  - ${{ if and(eq(variables['Build.SourceBranchName'], variables['IbcSourceBranchName']), startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')) }}:
-    # For exp branches, get data from master unless explicitly specified
-    - name: SourceBranch
-      value: master
   - ${{ if and(eq(variables['Build.SourceBranchName'], variables['IbcSourceBranchName']), startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')) }}:
     # For exp branches, get data from master unless explicitly specified
     - name: SourceBranch
