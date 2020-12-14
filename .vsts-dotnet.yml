@@ -34,7 +34,7 @@ stages:
 
     steps:
     - script: echo final=$(SourceBranch)
-      displayName: Build b.sbn="${{ variables['Build.SourceBranchName'] }}" ibc="${{variables['IbcSourceBranchName']}}" ibcq="${{'$(IbcSourceBranchName)'}}" eq="${{eq('$(Build.SourceBranchName)', '$(IbcSourceBranchName)')}}" sb="${{variables['SourceBranch']}}"
+      displayName: and(eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName), startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/'))
       condition: succeeded()
     - script: echo eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName) evals to ${{eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName)}}
       displayName: evals to ${{ eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName) }}
