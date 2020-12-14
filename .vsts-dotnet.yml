@@ -34,8 +34,11 @@ stages:
 
     steps:
     - script: echo final=$(SourceBranch)
-      displayName: and(eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName), startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/'))
+      displayName: ${{ and(eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName), startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')) }}
       condition: succeeded()
     - script: echo eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName) evals to ${{eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName)}}
       displayName: evals to ${{ eq(variables.Build.SourceBranchName, variables.IbcSourceBranchName) }}
+      condition: succeeded()
+    - script: echo startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') evals to ${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}
+      displayName: evals to ${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}
       condition: succeeded()
