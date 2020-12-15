@@ -223,7 +223,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
 
             string packages = Path.Combine(dir, "..", "..", "..", "..", "..", "artifacts", "packages") + Path.DirectorySeparatorChar + "*";
             string templates = Path.Combine(dir, "..", "..", "..", "..", "..", "template_feed") + Path.DirectorySeparatorChar;
-            string testTemplates = Path.Combine(dir, "test_templates") + Path.DirectorySeparatorChar;
+            string testTemplates = Path.Combine(dir, "..", "..", "..", "..", "..", "test", "Microsoft.TemplateEngine.TestTemplates", "test_templates") + Path.DirectorySeparatorChar;
             installer.InstallPackages(new[] { packages });
             installer.InstallPackages(new[] { templates, testTemplates });
         }
