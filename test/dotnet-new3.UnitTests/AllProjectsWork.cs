@@ -1,78 +1,75 @@
-﻿//using System;
-//using System.IO;
-//using System.Linq;
-//using System.Reflection;
-//using System.Runtime.CompilerServices;
-//using Microsoft.DotNet.Cli.Utils;
-//using Microsoft.TemplateEngine.Edge;
-//using Microsoft.TemplateEngine.Mocks;
-//using Microsoft.TemplateEngine.TestHelper;
-//using Microsoft.TemplateEngine.Utils;
-//using Xunit;
+using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.NET.TestFramework.Commands;
+using Microsoft.TemplateEngine.Edge;
+using Microsoft.TemplateEngine.Mocks;
+using Microsoft.TemplateEngine.TestHelper;
+using Microsoft.TemplateEngine.Utils;
+using Xunit;
+using Xunit.Abstractions;
 
-//namespace DotnetNew3.UnitTests
-//{
-//    public class AllProjectsWork
-//    {
-//        private static readonly Guid _tempDirParent = Guid.NewGuid();
+namespace dotnet_new3.UnitTests
+{
+    public class AllProjectsWork : IClassFixture<SharedHomeDirectory>
+    {
+        private readonly SharedHomeDirectory sharedHome;
+        private readonly ITestOutputHelper log;
 
-//        private static string GetWorkingDirectoryName(string suffix, [CallerMemberName]string callerName = "")
-//        {
-//            string relTo = new Uri(typeof(AllProjectsWork).GetTypeInfo().Assembly.CodeBase, UriKind.Absolute).LocalPath;
-//            relTo = Path.GetDirectoryName(relTo);
-//            return Path.Combine(relTo, callerName, _tempDirParent.ToString(), suffix);
-//        }
-                
-//        [Theory]
-//        [InlineData("emptyweb_cs-10", "web")]
-//        [InlineData("mvc_cs-10", "mvc")]
-//        [InlineData("mvc_fs-10", "mvc", "-lang", "F#")]
-//        [InlineData("api_cs-10", "api")]
-//        [InlineData("emptyweb_cs-11", "web", "-f", "1.1")]
-//        [InlineData("mvc_cs-11", "mvc", "-f", "1.1")]
-//        [InlineData("mvc_fs-11", "mvc", "-lang", "F#", "-f", "1.1")]
-//        [InlineData("api_cs-11", "api", "-f", "1.1")]
-//        [InlineData("console_cs-10", "console")]
-//        [InlineData("library_cs-10", "library")]
-//        public void AllWebProjectsRestoreAndBuild(string testName, params string[] args)
-//        {
-//            string workingDir = GetWorkingDirectoryName(testName);
-//            Directory.CreateDirectory(workingDir);
+        public AllProjectsWork(SharedHomeDirectory sharedHome, ITestOutputHelper log)
+        {
+            this.sharedHome = sharedHome;
+            this.log = log;
+            sharedHome.InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.5.0");
+            sharedHome.InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.3.1");
+        }
 
-//            Program.Main(new[] { "--debug:reinit" });
-            
-//            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DN3")))
-//            {
-//                string relTo = new Uri(typeof(Program).GetTypeInfo().Assembly.CodeBase, UriKind.Absolute).LocalPath;
-//                relTo = Path.GetDirectoryName(relTo);
-//                relTo = Path.Combine(relTo, @"..\..\..\..\..\dev");
-//                Environment.SetEnvironmentVariable("DN3", relTo);
-//            }
+        [Theory]
+        [InlineData("emptyweb_cs-50",  "web")]
+        [InlineData("mvc_cs-50",  "mvc")]
+        [InlineData("mvc_fs-50",  "mvc", "-lang", "F#")]
+        [InlineData("api_cs-50",  "api")]
+        [InlineData("emptyweb_cs-31",  "web", "-f", "netcoreapp3.1")]
+        [InlineData("mvc_cs-31",  "mvc", "-f", "netcoreapp3.1")]
+        [InlineData("mvc_fs-31",  "mvc", "-lang", "F#", "-f", "netcoreapp3.1")]
+        [InlineData("api_cs-31",  "api", "-f", "netcoreapp3.1")]
+        [InlineData("console_cs-31", "console", "-f", "netcoreapp3.1")]
+        [InlineData("library_cs-50", "classlib", "-f", "net5.0")]
+        public void AllWebProjectsRestoreAndBuild(string testName, params string[] args)
+        {
+            string workingDir = Helpers.CreateTemporaryFolder(testName);
 
-//            CommandResult result = Command.Create("dotnet-new3", args, outputPath: Environment.GetEnvironmentVariable("DN3"))
-//                .WorkingDirectory(workingDir)
-//                .CaptureStdErr()
-//                .CaptureStdOut()
-//                .Execute();
-//            Assert.Equal(0, result.ExitCode);
+            new DotnetNewCommand(log, args)
+                .WithWorkingDirectory(workingDir)
+                .WithEnvironmentVariable(sharedHome.HomeVariable, sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr();
 
-//            result = Command.CreateDotNet("restore", new string[0])
-//                .WorkingDirectory(workingDir)
-//                .CaptureStdErr()
-//                .CaptureStdOut()
-//                .Execute();
-//            Assert.Equal(string.Empty, result.StdErr);
-//            Assert.Equal(0, result.ExitCode);
+            new DotnetCommand(log, "restore")
+                .WithWorkingDirectory(workingDir)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr();
 
-//            result = Command.CreateDotNet("build", new string[0])
-//                .WorkingDirectory(workingDir)
-//                .CaptureStdErr()
-//                .CaptureStdOut()
-//                .Execute();
-//            Assert.Equal(string.Empty, result.StdErr);
-//            Assert.Equal(0, result.ExitCode);
+            new DotnetCommand(log, "build")
+                .WithWorkingDirectory(workingDir)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr();
 
-//            Directory.Delete(workingDir, true);
-//        }
-//    }
-//}
+            Directory.Delete(workingDir, true);
+        }
+    }
+}

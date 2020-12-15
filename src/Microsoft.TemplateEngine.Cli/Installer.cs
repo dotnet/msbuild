@@ -277,7 +277,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             var restoreArgs = restoreArgsList.ToArray();
 
-            Dotnet.Restore(restoreArgs).ForwardStdOut().ForwardStdErr().Execute();
+            Dotnet.Restore(restoreArgs).ForwardStdErr().Execute();
             string stagingDir = Path.Combine(_paths.User.ScratchDir, "Staging");
             _paths.CreateDirectory(stagingDir);
 
