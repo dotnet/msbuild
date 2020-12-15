@@ -13,5 +13,17 @@
       "source": "../../../", // This is MountPointRoot
       "target": "./blah/"
     }
+  ],
+  "primaryOutputs": [
+    {
+      "path": "blah/MountPointRoot/mount.foo.cs"
+    },
+    {
+      "path": "blah/MountPointRoot/foo/foo.foo.cs"
+    },
+    {
+      "path": "blah/MountPointRoot/foo/bar/bar.foo.cs"
+    }
   ]
 }
+

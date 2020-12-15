@@ -13,5 +13,10 @@
       "source": "./",
       "target": "./bar/foo/"
     }
+  ],
+  "primaryOutputs": [
+    {
+      "path": "bar/foo/foo.cs"
+    }
   ]
 }

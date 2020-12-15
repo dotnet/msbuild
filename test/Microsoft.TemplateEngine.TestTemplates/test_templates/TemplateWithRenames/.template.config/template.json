@@ -38,5 +38,22 @@
     "lc": {
       "identifier": "lowercase"
     }
-  }
+  },
+  "primaryOutputs": [
+    {
+      "path": "MyProject1.cs"
+    },
+    {
+      "path": "myproject2.cs"
+    },
+    {
+      "path": "MYPROJECT3.cs"
+    },
+    {
+      "path": "bar.cs"
+    },
+    {
+      "path": "bar_uc.cs"
+    }
+  ]
 }

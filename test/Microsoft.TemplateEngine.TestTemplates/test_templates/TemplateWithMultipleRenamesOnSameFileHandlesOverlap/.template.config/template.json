@@ -18,5 +18,10 @@
       "dataType": "string",
       "fileRename": "oob"
     }
-  }
+  },
+  "primaryOutputs": [
+    {
+      "path": "foob.txt"
+    }
+  ]
 }

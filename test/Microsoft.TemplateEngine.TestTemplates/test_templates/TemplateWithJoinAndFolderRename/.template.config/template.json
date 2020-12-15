@@ -44,5 +44,10 @@
         "separator": "/"
       }
     }
-  }
+  },
+  "primaryOutputs": [
+    {
+      "path": "Api/bar.cs"
+    }
+  ]
 }

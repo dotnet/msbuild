@@ -13,5 +13,13 @@
       "source": "./Src/Custom/Path/",
       "target": "./Target/Output/"
     }
+  ],
+  "primaryOutputs": [
+    {
+      "path": "Target/Output/foo/foo.cs"
+    },
+    {
+      "path": "Target/Output/foo.name.txt"
+    }
   ]
 }

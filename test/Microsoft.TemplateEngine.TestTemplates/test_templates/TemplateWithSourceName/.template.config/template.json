@@ -1,4 +1,4 @@
-﻿{
+{
   "author": "Test Asset",
   "classifications": [ "Test Asset" ],
   "name": "TemplateWithSourceName",
@@ -7,5 +7,13 @@
   "precedence": "100",
   "identity": "TestAssets.TemplateWithSourceName",
   "shortName": "TestAssets.TemplateWithSourceName",
-  "sourceName": "bar"
+  "sourceName": "bar",
+  "primaryOutputs": [
+    {
+      "path": "bar.cs"
+    },
+    {
+      "path": "bar/bar.cs"
+    },
+  ]
 }

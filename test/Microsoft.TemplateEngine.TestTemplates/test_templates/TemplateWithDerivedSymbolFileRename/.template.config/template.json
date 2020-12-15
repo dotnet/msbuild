@@ -23,5 +23,10 @@
       "pattern": "^.*\\.(?=[^\\.]+$)", // match everything up to and including the final "."
       "replacement": ""
     }
-  }
+  },
+  "primaryOutputs": [
+    {
+      "path": "Application1.cs"
+    }
+  ]
 }

@@ -12,5 +12,13 @@
     {
       "source": "./Custom/Path/"
     }
+  ],
+  "primaryOutputs": [
+    {
+      "path": "foo/foo.cs"
+    },
+    {
+      "path": "foo.name.txt"
+    }
   ]
 }

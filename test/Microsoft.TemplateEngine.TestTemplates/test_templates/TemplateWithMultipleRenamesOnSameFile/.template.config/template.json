@@ -18,5 +18,13 @@
       "dataType": "string",
       "fileRename": "bar"
     }
-  }
+  },
+  "primaryOutputs": [
+    {
+      "path": "barandfoo.txt"
+    },
+    {
+      "path": "foobar.txt"
+    }
+  ]
 }

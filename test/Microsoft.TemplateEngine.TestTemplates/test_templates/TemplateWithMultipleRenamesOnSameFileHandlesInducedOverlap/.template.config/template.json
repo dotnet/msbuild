@@ -18,5 +18,10 @@
       "dataType": "string",
       "fileRename": "bar"
     }
-  }
+  },
+  "primaryOutputs": [
+    {
+      "path": "foo.txt"
+    }
+  ]
 }

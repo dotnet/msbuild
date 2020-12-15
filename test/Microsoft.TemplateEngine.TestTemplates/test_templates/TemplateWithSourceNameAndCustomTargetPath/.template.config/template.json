@@ -12,5 +12,13 @@
     {
       "target": "./Custom/Path/"
     }
+  ],
+  "primaryOutputs": [
+    {
+      "path": "Custom/Path/foo/foo.cs"
+    },
+    {
+      "path": "Custom/Path/foo.name.txt"
+    }
   ]
 }

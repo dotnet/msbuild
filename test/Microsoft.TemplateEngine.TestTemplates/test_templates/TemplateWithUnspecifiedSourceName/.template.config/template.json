@@ -6,5 +6,13 @@
   "groupIdentity": "TestAssets.TemplateWithUnspecifiedSourceName",
   "precedence": "100",
   "identity": "TestAssets.TemplateWithUnspecifiedSourceName",
-  "shortName": "TestAssets.TemplateWithUnspecifiedSourceName"
+  "shortName": "TestAssets.TemplateWithUnspecifiedSourceName",
+  "primaryOutputs": [
+    {
+      "path": "bar.cs"
+    },
+    {
+      "path": "bar/bar.cs"
+    }
+  ]
 }
