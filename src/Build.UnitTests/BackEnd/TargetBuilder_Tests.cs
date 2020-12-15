@@ -1251,6 +1251,34 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Tests a circular dependency target.
+        /// </summary>
+        [Fact]
+        public void TestCircularDependencyTarget()
+        {
+            string projectContents = @"
+<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+    <Target Name=""TargetA"" AfterTargets=""Build"" DependsOnTargets=""TargetB"">
+        <Message Text=""TargetA""></Message>
+    </Target>
+    <Target Name=""TargetB"" DependsOnTargets=""TargetC"">
+        <Message Text=""TargetB""></Message>
+    </Target>
+    <Target Name=""TargetC"" DependsOnTargets=""TargetA"">
+        <Message Text=""TargetC""></Message>
+    </Target>
+</Project>
+      ";
+            string errorMessage = @"There is a circular dependency in the target dependency graph involving target ""TargetA"". Since ""TargetC"" has ""DependsOn"" dependence on ""TargetA"", the circular is ""TargetA<-TargetC<-TargetB<-TargetA"".";
+
+            StringReader reader = new StringReader(projectContents);
+            Project project = new Project(new XmlTextReader(reader), null, null);
+            project.Build(_mockLogger).ShouldBeFalse();
+            _mockLogger.ErrorCount.ShouldBe(1);
+            _mockLogger.Errors[0].Message.ShouldBe(errorMessage);
+        }
+
+        /// <summary>
         /// Tests that cancel with no entries after building does not fail.
         /// </summary>
         [Fact]
