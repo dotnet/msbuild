@@ -1331,6 +1331,11 @@
         <target state="translated">Microsoft Windows SDK が "{0}" にインストールされていました。</target>
         <note />
       </trans-unit>
+      <trans-unit id="GetReferenceAssemblyPaths.OutOfDateSDK">
+        <source>MSB3971: The reference assemblies for "{0}" were not found. You might be using an older .NET SDK to target .NET 5.0 or higher. Update Visual Studio and/or your .NET SDK.</source>
+        <target state="translated">MSB3971: "{0}" の参照アセンブリが見つかりませんでした。.Net 5.0 以上をターゲットにするために、古い .NET SDK を使用している可能性があります。Visual Studio と .NET SDK のいずれかまたはその両方を更新してください。</target>
+        <note>{StrBegin="MSB3971: "}</note>
+      </trans-unit>
       <trans-unit id="MakeDir.Comment">
         <source>Creating directory "{0}".</source>
         <target state="translated">ディレクトリ "{0}" を作成しています。</target>
@@ -1827,8 +1832,10 @@
         <note>{StrBegin="MSB3276: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
-        <target state="translated">MSB3277: "{0}" の異なるバージョン間で、解決できない競合が見つかりました。これらの参照上の競合は、ログの詳細度が詳細に設定されている場合にビルド ログにリストされます。</target>
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="translated">MSB3277: "{0}" の異なるバージョン間で、解決できない競合が見つかりました。
+{1}</target>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">

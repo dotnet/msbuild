@@ -269,6 +269,11 @@
     <comment>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</comment>
   </data>
+  <data name="CircularDependencyInTargetGraph" xml:space="preserve">
+    <value>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}". Since "{1}" has "{2}" dependence on "{3}", the circular is "{4}".</value>
+    <comment>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
+    request a target to build itself (perhaps via a chain of other targets).</comment>
+  </data>
   <data name="ComparisonOnNonNumericExpression" xml:space="preserve">
     <value>MSB4086: A numeric comparison was attempted on "{1}" that evaluates to "{2}" instead of a number, in condition "{0}".</value>
     <comment>{StrBegin="MSB4086: "}</comment>

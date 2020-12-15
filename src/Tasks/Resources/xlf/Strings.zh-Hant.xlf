@@ -1331,6 +1331,11 @@
         <target state="translated">找到安裝在 "{0}" 的 Microsoft Windows SDK。</target>
         <note />
       </trans-unit>
+      <trans-unit id="GetReferenceAssemblyPaths.OutOfDateSDK">
+        <source>MSB3971: The reference assemblies for "{0}" were not found. You might be using an older .NET SDK to target .NET 5.0 or higher. Update Visual Studio and/or your .NET SDK.</source>
+        <target state="translated">MSB3971: 找不到 "{0}" 的參考組件。您可能使用了舊版 .NET SDK 來以 .NET 5.0 或更高版本為目標。請更新 Visual Studio 及 (或) 您的 .NET SDK。</target>
+        <note>{StrBegin="MSB3971: "}</note>
+      </trans-unit>
       <trans-unit id="MakeDir.Comment">
         <source>Creating directory "{0}".</source>
         <target state="translated">正在建立目錄 "{0}"。</target>
@@ -1827,8 +1832,10 @@
         <note>{StrBegin="MSB3276: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
-        <target state="translated">MSB3277: 在 "{0}" 的不同版本間發現衝突，但無法解決。當記錄詳細程度設定為 [詳細] 時，這些參考衝突會列在組建記錄檔中。</target>
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="translated">MSB3277: 不同版本的 "{0}" 之間發生無法解決的衝突。
+{1}</target>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">

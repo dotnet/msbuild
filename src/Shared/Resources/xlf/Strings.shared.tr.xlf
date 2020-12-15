@@ -80,6 +80,11 @@
         <target state="translated">MSB5026: "{0}" konumundaki çözüm filtresi dosyası, "{1}" konumunda bir çözüm dosyası olacağını belirtiyor, ancak bu dosya mevcut değil.</target>
         <note>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectErrorWithNameAndGuid">
+        <source>MSB5009: Error parsing the project "{0}" section with GUID: "{1}". It is nested under "{2}" but that project is not found in the solution.</source>
+        <target state="translated">MSB5009: "{1}" GUID'si ile "{0}" proje bölümü ayrıştırılırken hata oluştu. Proje "{2}" altında iç içe yerleştirilmiş ancak bu proje çözümde bulunamadı.</target>
+        <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: Araçlar sürümü "{0}" tanınmıyor. Kullanılabilir araç sürümleri şunlardır: {1}.</target>

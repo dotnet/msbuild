@@ -1331,6 +1331,11 @@
         <target state="translated">Le Kit de développement Microsoft Windows SDK a été trouvé dans "{0}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="GetReferenceAssemblyPaths.OutOfDateSDK">
+        <source>MSB3971: The reference assemblies for "{0}" were not found. You might be using an older .NET SDK to target .NET 5.0 or higher. Update Visual Studio and/or your .NET SDK.</source>
+        <target state="translated">MSB3971: les assemblys de référence de "{0}" sont introuvables. Vous utilisez peut-être une ancienne version du kit SDK .NET pour cibler .NET 5.0 ou une version ultérieure. Mettez à jour Visual Studio et/ou votre kit SDK .NET.</target>
+        <note>{StrBegin="MSB3971: "}</note>
+      </trans-unit>
       <trans-unit id="MakeDir.Comment">
         <source>Creating directory "{0}".</source>
         <target state="translated">Création du répertoire "{0}".</target>
@@ -1827,8 +1832,10 @@
         <note>{StrBegin="MSB3276: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
-        <target state="translated">MSB3277: Des conflits entre différentes versions de "{0}" ont été trouvés et n'ont pas pu être résolus.  Ces conflits de référence sont consignés dans le journal de génération quand la verbosité du journal est définie sur Detailed.</target>
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="translated">MSB3277: détection de conflits non résolus entre différentes versions de "{0}".
+{1}</target>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">

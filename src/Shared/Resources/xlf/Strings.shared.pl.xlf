@@ -80,6 +80,11 @@
         <target state="translated">MSB5026: Plik filtru rozwiązania w lokalizacji „{0}” określa, że plik rozwiązania będzie się znajdował w lokalizacji „{1}”, ale ten plik nie istnieje.</target>
         <note>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectErrorWithNameAndGuid">
+        <source>MSB5009: Error parsing the project "{0}" section with GUID: "{1}". It is nested under "{2}" but that project is not found in the solution.</source>
+        <target state="translated">MSB5009: Błąd analizowania sekcji projektu „{0}” o identyfikatorze GUID: „{1}”. Jest ona zagnieżdżona w obszarze „{2}”, ale nie znaleziono tego projektu w rozwiązaniu.</target>
+        <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: Wersja narzędzi „{0}” nie została rozpoznana. Dostępne wersje narzędzi to {1}.</target>

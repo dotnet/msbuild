@@ -2774,6 +2774,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataC, items[4]);
         }
 
+        [Fact]
+        public void OptimizedRemoveOperationRespectsCondition()
+        {
+            string content = @"<TheItem Include=""InitialValue"" />
+                               <TheItem Remove=""@(TheItem)"" Condition=""false"" />
+                               <TheItem Include=""ReplacedValue"" Condition=""false"" /> ";
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, true);
+
+            items[0].EvaluatedInclude.ShouldBe("InitialValue");
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -2820,7 +2831,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void UpdateFromReferencedItemShouldBeCaseInsensitive()
         {
             string content = @"
-                              <from Include='a'>
+                              <from Include='A'>
                                   <metadata>m1_contents</metadata>
                               </from>
 
@@ -3177,28 +3188,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
 
-            if (FileUtilities.GetIsFileSystemCaseSensitive())
+            items.ShouldHaveSingleItem();
+
+            var expectedUpdated = new Dictionary<string, string>
             {
-                var expectedUpdated = new Dictionary<string, string>
-                {
-                    {"m1", "m1_contents"},
-                    {"m2", "m2_contents"},
-                };
+                {"m1", "m1_updated"},
+                {"m2", "m2_updated"},
+            };
 
-                ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
-            }
-            else
-            {
-                items.ShouldHaveSingleItem();
-
-                var expectedUpdated = new Dictionary<string, string>
-                {
-                    {"m1", "m1_updated"},
-                    {"m2", "m2_updated"},
-                };
-
-                ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
-            }
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
         }
 
         public static IEnumerable<Object[]> UpdateAndRemoveShouldWorkWithEscapedCharactersTestData

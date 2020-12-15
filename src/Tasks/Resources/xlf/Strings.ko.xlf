@@ -1331,6 +1331,11 @@
         <target state="translated">Microsoft Windows SDK가 "{0}"에 설치되어 있습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="GetReferenceAssemblyPaths.OutOfDateSDK">
+        <source>MSB3971: The reference assemblies for "{0}" were not found. You might be using an older .NET SDK to target .NET 5.0 or higher. Update Visual Studio and/or your .NET SDK.</source>
+        <target state="translated">MSB3971: "{0}"에 대한 참조 어셈블리를 찾을 수 없습니다. 이전 .NET SDK를 사용하여 .NET 5.0 이상을 대상으로 하고 있을 수 있습니다. Visual Studio 및/또는 .NET SDK를 업데이트하세요.</target>
+        <note>{StrBegin="MSB3971: "}</note>
+      </trans-unit>
       <trans-unit id="MakeDir.Comment">
         <source>Creating directory "{0}".</source>
         <target state="translated">"{0}" 디렉터리를 만들고 있습니다.</target>
@@ -1827,8 +1832,10 @@
         <note>{StrBegin="MSB3276: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
-        <target state="translated">MSB3277: 확인할 수 없는 "{0}"의 서로 다른 버전이 충돌합니다. 이러한 참조 충돌은 로그의 세부 정보 표시가 [자세히]로 설정된 경우 빌드 로그에 나열됩니다.</target>
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="translated">MSB3277: 해결할 수 없는 "{0}"의 다른 버전 간 충돌이 발견되었습니다.
+{1}</target>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">

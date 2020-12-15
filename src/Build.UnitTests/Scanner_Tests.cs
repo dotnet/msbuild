@@ -7,6 +7,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 
@@ -68,11 +69,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="lexer"></param>
         private void AdvanceToScannerError(Scanner lexer)
         {
-            while (true)
-            {
-                if (!lexer.Advance()) break;
-                if (lexer.IsNext(Token.TokenType.EndOfInput)) break;
-            }
+            while (lexer.Advance() && !lexer.IsNext(Token.TokenType.EndOfInput));
         }
 
         /// <summary>
@@ -105,16 +102,32 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests the space errors case
         /// </summary>
-        [Fact]
-        public void SpaceProperty()
+        [Theory]
+        [InlineData("$(x )")]
+        [InlineData("$( x)")]
+        [InlineData("$([MSBuild]::DoSomething($(space ))")]
+        [InlineData("$([MSBuild]::DoSomething($(_space ))")]
+        public void SpaceProperty(string pattern)
         {
-            Scanner lexer = new Scanner("$(x )", ParserOptions.AllowProperties);
+            Scanner lexer = new Scanner(pattern, ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
             Assert.Equal("IllFormedPropertySpaceInCondition", lexer.GetErrorResource());
+        }
 
-            lexer = new Scanner("$( x)", ParserOptions.AllowProperties);
+        /// <summary>
+        /// Tests the space not next to end so no errors case
+        /// </summary>
+        [Theory]
+        [InlineData("$(x.StartsWith( 'y' ))")]
+        [InlineData("$(x.StartsWith ('y'))")]
+        [InlineData("$( x.StartsWith( $(SpacelessProperty) ) )")]
+        [InlineData("$( x.StartsWith( $(_SpacelessProperty) ) )")]
+        [InlineData("$(x.StartsWith('Foo', StringComparison.InvariantCultureIgnoreCase))")]
+        public void SpaceInMiddleOfProperty(string pattern)
+        {
+            Scanner lexer = new Scanner(pattern, ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
-            Assert.Equal("IllFormedPropertySpaceInCondition", lexer.GetErrorResource());
+            lexer._errorState.ShouldBeFalse();
         }
 
         [Fact]

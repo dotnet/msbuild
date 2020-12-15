@@ -1331,6 +1331,11 @@
         <target state="translated">Byla nalezena instalace sady Microsoft Windows SDK v umístění {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="GetReferenceAssemblyPaths.OutOfDateSDK">
+        <source>MSB3971: The reference assemblies for "{0}" were not found. You might be using an older .NET SDK to target .NET 5.0 or higher. Update Visual Studio and/or your .NET SDK.</source>
+        <target state="translated">MSB3971: Referenční sestavení pro {0} se nenašla. Je možné, že používáte starší sadu .NET SDK, se kterou cílíte na .NET 5.0 nebo novější. Aktualizujte Visual Studio nebo sadu .NET SDK.</target>
+        <note>{StrBegin="MSB3971: "}</note>
+      </trans-unit>
       <trans-unit id="MakeDir.Comment">
         <source>Creating directory "{0}".</source>
         <target state="translated">Probíhá vytváření adresáře {0}.</target>
@@ -1827,8 +1832,10 @@
         <note>{StrBegin="MSB3276: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
-        <target state="translated">MSB3277: Byly zjištěny konflikty mezi různými verzemi sestavení {0}. Tyto problémy nebylo možné vyřešit. Tyto konflikty odkazů jsou uvedeny v protokolu sestavení, jestliže je protokolování nastaveno jako podrobné.</target>
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="translated">MSB3277: Našly se konflikty mezi různými verzemi {0}, které se nepovedlo přeložit.
+{1}</target>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">

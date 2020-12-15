@@ -1331,6 +1331,11 @@
         <target state="translated">Znaleziono zestaw Microsoft Windows SDK zainstalowany w lokalizacji „{0}”.</target>
         <note />
       </trans-unit>
+      <trans-unit id="GetReferenceAssemblyPaths.OutOfDateSDK">
+        <source>MSB3971: The reference assemblies for "{0}" were not found. You might be using an older .NET SDK to target .NET 5.0 or higher. Update Visual Studio and/or your .NET SDK.</source>
+        <target state="translated">MSB3971: Nie znaleziono zestawów odwołań dla elementu „{0}”. Być może używasz starszego zestawu SDK platformy .NET do kierowania się do platformy docelowej .NET 5.0 lub nowszej. Zaktualizuj program Visual Studio i/lub zestaw SDK platformy .NET.</target>
+        <note>{StrBegin="MSB3971: "}</note>
+      </trans-unit>
       <trans-unit id="MakeDir.Comment">
         <source>Creating directory "{0}".</source>
         <target state="translated">Tworzenie katalogu „{0}”.</target>
@@ -1827,8 +1832,10 @@
         <note>{StrBegin="MSB3276: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</source>
-        <target state="translated">MSB3277: Wykryto konflikty pomiędzy różnymi wersjami elementu „{0}”, których nie można rozwiązać. Takie konflikty odwołań są rejestrowane w dzienniku kompilacji po ustawieniu wysokiego poziomu szczegółowości.</target>
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="translated">MSB3277: Znaleziono konflikty między różnymi wersjami elementu „{0}”, których nie można rozstrzygnąć.
+{1}</target>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">
