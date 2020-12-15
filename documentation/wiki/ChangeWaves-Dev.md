@@ -55,11 +55,12 @@ If you need to condition a Task or Target, use the built in `AreFeaturesEnabled`
 ## Test Your Feature
 Create tests as you normally would. Include one test with environment variable `MSBuildDisableFeaturesFromVersion` set to `ChangeWaves.Wave17_4`. Set this like so:
 ```c#
-TestEnvironment env = TestEnvironment.Create()
+using TestEnvironment env = TestEnvironment.Create();
 
 ChangeWaves.ResetStateForTests();
 // Important: use the version here
 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
+BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 ```
 
 **Important!** If you need to build a project to test your feature (say, for tasks or targets), build via `ProjectCollection` in your test.
@@ -70,6 +71,7 @@ using (TestEnvironment env = TestEnvironment.Create())
 {
     ChangeWaves.ResetStateForTests();
     env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
+    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
     string projectFile = @"
         <Project>
