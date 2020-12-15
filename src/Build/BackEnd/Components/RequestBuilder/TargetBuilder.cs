@@ -697,8 +697,7 @@ namespace Microsoft.Build.BackEnd
                     // Does this target exist in our direct parent chain, if it is a before target (since these can cause circular dependency issues)
                     if (buildReason == TargetBuiltReason.BeforeTargets || buildReason == TargetBuiltReason.DependsOn || buildReason == TargetBuiltReason.None)
                     {
-                        List<string> targetDependenceChain;
-                        if (HasCircularDependenceInTargets(parentTargetEntry, targetSpecification, out targetDependenceChain))
+                        if (HasCircularDependenceInTargets(parentTargetEntry, targetSpecification, out List<string> targetDependenceChain))
                         {
                             ProjectErrorUtilities.ThrowInvalidProject(targetLocation, "CircularDependencyInTargetGraph", targetSpecification.TargetName, parentTargetEntry.Name, buildReason, targetSpecification.TargetName, string.Join("<-", targetDependenceChain));
                         }
