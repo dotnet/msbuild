@@ -54,6 +54,7 @@ namespace Microsoft.DotNet.DotNetSdkResolver
         {
             var commandNameWithExtension = commandName + ExecutableExtension;
             var commandPath = SearchPaths
+                .Where(p => !Path.GetInvalidPathChars().Any(c => p.Contains(c)))
                 .Select(p => Path.Combine(p, commandNameWithExtension))
                 .FirstOrDefault(File.Exists);
 
