@@ -606,7 +606,11 @@ namespace Microsoft.Build.Tasks
                         }
                         else
                         {
-                            candidateAssemblyLocation = CacheAssemblyIdentityFromPath(referenceAssembly);
+                            if (!TryCacheAssemblyIdentityFromPath(referenceAssembly, out candidateAssemblyLocation))
+                            {
+                                // Assembly should be skipped; return
+                                return;
+                            }
                         }
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
@@ -659,15 +663,23 @@ namespace Microsoft.Build.Tasks
                 return candidateAssemblyLocation;
             }
 
-            string CacheAssemblyIdentityFromPath(string assemblyFile)
+            bool TryCacheAssemblyIdentityFromPath(string assemblyFile, out string candidateAssemblyLocation)
             {
-                string candidateAssemblyLocation = null;
+                candidateAssemblyLocation = null;
 
                 try
                 {
                     Assembly candidateAssembly = Assembly.UnsafeLoadFrom(assemblyFile);
                     if (candidateAssembly != null)
                     {
+                        if (candidateAssembly.FullName == typeof(Task).Assembly.FullName ||
+                            candidateAssembly.FullName == typeof(ITask).Assembly.FullName)
+                        {
+                            // Framework and Utilities are default references but are often
+                            // specified in the UsingTask anyway; if so just ignore them.
+                            return false;
+                        }
+
                         candidateAssemblyLocation = candidateAssembly.Location;
                         s_knownReferenceAssemblies[candidateAssembly.FullName] = candidateAssembly;
                     }
@@ -680,7 +692,7 @@ namespace Microsoft.Build.Tasks
                     _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.HaveReflectionOnlyAssembly", assemblyFile);
                 }
 
-                return candidateAssemblyLocation;
+                return true;
             }
         }
 
