@@ -642,12 +642,12 @@ namespace Microsoft.Build.Tasks
                         {
                             if (!referenceAssembly.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || !referenceAssembly.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                             {
-                                candidateAssemblyLocation = GetPathFromPartialAssemblyName(referenceAssembly, candidateAssemblyLocation);
+                                candidateAssemblyLocation = GetPathFromPartialAssemblyName(referenceAssembly);
                             }
                         }
                         else
                         {
-                            candidateAssemblyLocation = CacheAssemblyIdentityFromPath(referenceAssembly, candidateAssemblyLocation);
+                            candidateAssemblyLocation = CacheAssemblyIdentityFromPath(referenceAssembly);
                         }
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
@@ -666,8 +666,10 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            static string GetPathFromPartialAssemblyName(string partialName, string candidateAssemblyLocation)
+            static string GetPathFromPartialAssemblyName(string partialName)
             {
+                string candidateAssemblyLocation = null;
+
 #pragma warning disable 618, 612
                 // Unfortunately Assembly.Load is not an alternative to LoadWithPartialName, since
                 // Assembly.Load requires the full assembly name to be passed to it.
@@ -698,8 +700,10 @@ namespace Microsoft.Build.Tasks
                 return candidateAssemblyLocation;
             }
 
-            string CacheAssemblyIdentityFromPath(string assemblyFile, string candidateAssemblyLocation)
+            string CacheAssemblyIdentityFromPath(string assemblyFile)
             {
+                string candidateAssemblyLocation = null;
+
                 try
                 {
                     Assembly candidateAssembly = Assembly.UnsafeLoadFrom(assemblyFile);
