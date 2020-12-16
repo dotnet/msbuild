@@ -732,8 +732,7 @@ namespace Microsoft.Build.Tasks
         private Assembly CompileInMemoryAssembly()
         {
             // Combine our default assembly references with those specified
-            var finalReferencedAssemblies = new List<string>();
-            CombineReferencedAssemblies(finalReferencedAssemblies);
+            var finalReferencedAssemblies = CombineReferencedAssemblies();
 
             // Combine our default using's with those specified
             string[] finalUsingNamespaces = CombineUsingNamespaces();
@@ -862,8 +861,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Combine our default referenced assemblies with those explicitly specified
         /// </summary>
-        private void CombineReferencedAssemblies(List<string> finalReferenceList)
+        private List<string> CombineReferencedAssemblies()
         {
+            List<string> finalReferenceList = new List<string>(s_defaultReferencedFrameworkAssemblyNames.Length + 2 + _referencedAssemblies.Count);
+
             foreach (string defaultReference in DefaultReferencedAssemblies)
             {
                 AddReferenceAssemblyToReferenceList(finalReferenceList, defaultReference);
@@ -876,6 +877,8 @@ namespace Microsoft.Build.Tasks
                     AddReferenceAssemblyToReferenceList(finalReferenceList, referenceAssembly);
                 }
             }
+
+            return finalReferenceList;
         }
 
         /// <summary>
