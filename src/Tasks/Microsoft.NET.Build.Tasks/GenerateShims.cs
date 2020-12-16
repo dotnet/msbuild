@@ -15,7 +15,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    public sealed class GenerateShims : TaskBase
+    public sealed class GenerateShims : TaskWithAssemblyResolveHooks
     {
         /// <summary>
         /// Relative paths for Apphost for different ShimRuntimeIdentifiers with RuntimeIdentifier as meta data
