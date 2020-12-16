@@ -643,33 +643,7 @@ namespace Microsoft.Build.Tasks
                         {
                             if (!referenceAssembly.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || !referenceAssembly.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                             {
-#pragma warning disable 618, 612
-                                // Unfortunately Assembly.Load is not an alternative to LoadWithPartialName, since
-                                // Assembly.Load requires the full assembly name to be passed to it.
-                                // Therefore we must ignore the deprecated warning.
-                                Assembly candidateAssembly = Assembly.LoadWithPartialName(referenceAssembly);
-                                if (candidateAssembly != null)
-                                {
-                                    candidateAssemblyLocation = candidateAssembly.Location;
-                                }
-                                else if (NativeMethodsShared.IsMono)
-                                {
-                                    string path = Path.Combine(
-                                        NativeMethodsShared.FrameworkCurrentPath,
-                                        "Facades",
-                                        Path.GetFileName(referenceAssembly));
-                                    if (!FileSystems.Default.FileExists(path))
-                                    {
-                                        var newPath = path + ".dll";
-                                        path = !FileSystems.Default.FileExists(newPath) ? path + ".exe" : newPath;
-                                    }
-                                    candidateAssembly = Assembly.UnsafeLoadFrom(path);
-                                    if (candidateAssembly != null)
-                                    {
-                                        candidateAssemblyLocation = candidateAssembly.Location;
-                                    }
-                                }
-#pragma warning restore 618, 612
+                                candidateAssemblyLocation = GetPathFromPartialAssemblyName(referenceAssembly, candidateAssemblyLocation);
                             }
                         }
                         else
@@ -706,6 +680,38 @@ namespace Microsoft.Build.Tasks
                 {
                     _log.LogErrorWithCodeFromResources("CodeTaskFactory.CouldNotFindReferenceAssembly", referenceAssembly);
                 }
+            }
+
+            static string GetPathFromPartialAssemblyName(string referenceAssembly, string candidateAssemblyLocation)
+            {
+#pragma warning disable 618, 612
+                // Unfortunately Assembly.Load is not an alternative to LoadWithPartialName, since
+                // Assembly.Load requires the full assembly name to be passed to it.
+                // Therefore we must ignore the deprecated warning.
+                Assembly candidateAssembly = Assembly.LoadWithPartialName(referenceAssembly);
+                if (candidateAssembly != null)
+                {
+                    candidateAssemblyLocation = candidateAssembly.Location;
+                }
+                else if (NativeMethodsShared.IsMono)
+                {
+                    string path = Path.Combine(
+                        NativeMethodsShared.FrameworkCurrentPath,
+                        "Facades",
+                        Path.GetFileName(referenceAssembly));
+                    if (!FileSystems.Default.FileExists(path))
+                    {
+                        var newPath = path + ".dll";
+                        path = !FileSystems.Default.FileExists(newPath) ? path + ".exe" : newPath;
+                    }
+                    candidateAssembly = Assembly.UnsafeLoadFrom(path);
+                    if (candidateAssembly != null)
+                    {
+                        candidateAssemblyLocation = candidateAssembly.Location;
+                    }
+                }
+#pragma warning restore 618, 612
+                return candidateAssemblyLocation;
             }
         }
 
