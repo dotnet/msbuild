@@ -647,22 +647,7 @@ namespace Microsoft.Build.Tasks
                         }
                         else
                         {
-                            try
-                            {
-                                Assembly candidateAssembly = Assembly.UnsafeLoadFrom(referenceAssembly);
-                                if (candidateAssembly != null)
-                                {
-                                    candidateAssemblyLocation = candidateAssembly.Location;
-                                    s_knownReferenceAssemblies[candidateAssembly.FullName] = candidateAssembly;
-                                }
-                            }
-                            catch (BadImageFormatException e)
-                            {
-                                Debug.Assert(e.Message.Contains("0x80131058"), "Expected Message to contain 0x80131058");
-                                AssemblyName.GetAssemblyName(referenceAssembly);
-                                candidateAssemblyLocation = referenceAssembly;
-                                _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.HaveReflectionOnlyAssembly", referenceAssembly);
-                            }
+                            candidateAssemblyLocation = CacheAssemblyIdentityFromPath(referenceAssembly, candidateAssemblyLocation);
                         }
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
@@ -710,6 +695,28 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 #pragma warning restore 618, 612
+                return candidateAssemblyLocation;
+            }
+
+            string CacheAssemblyIdentityFromPath(string referenceAssembly, string candidateAssemblyLocation)
+            {
+                try
+                {
+                    Assembly candidateAssembly = Assembly.UnsafeLoadFrom(referenceAssembly);
+                    if (candidateAssembly != null)
+                    {
+                        candidateAssemblyLocation = candidateAssembly.Location;
+                        s_knownReferenceAssemblies[candidateAssembly.FullName] = candidateAssembly;
+                    }
+                }
+                catch (BadImageFormatException e)
+                {
+                    Debug.Assert(e.Message.Contains("0x80131058"), "Expected Message to contain 0x80131058");
+                    AssemblyName.GetAssemblyName(referenceAssembly);
+                    candidateAssemblyLocation = referenceAssembly;
+                    _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.HaveReflectionOnlyAssembly", referenceAssembly);
+                }
+
                 return candidateAssemblyLocation;
             }
         }
