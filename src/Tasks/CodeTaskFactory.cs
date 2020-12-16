@@ -666,13 +666,13 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            static string GetPathFromPartialAssemblyName(string referenceAssembly, string candidateAssemblyLocation)
+            static string GetPathFromPartialAssemblyName(string partialName, string candidateAssemblyLocation)
             {
 #pragma warning disable 618, 612
                 // Unfortunately Assembly.Load is not an alternative to LoadWithPartialName, since
                 // Assembly.Load requires the full assembly name to be passed to it.
                 // Therefore we must ignore the deprecated warning.
-                Assembly candidateAssembly = Assembly.LoadWithPartialName(referenceAssembly);
+                Assembly candidateAssembly = Assembly.LoadWithPartialName(partialName);
                 if (candidateAssembly != null)
                 {
                     candidateAssemblyLocation = candidateAssembly.Location;
@@ -682,7 +682,7 @@ namespace Microsoft.Build.Tasks
                     string path = Path.Combine(
                         NativeMethodsShared.FrameworkCurrentPath,
                         "Facades",
-                        Path.GetFileName(referenceAssembly));
+                        Path.GetFileName(partialName));
                     if (!FileSystems.Default.FileExists(path))
                     {
                         var newPath = path + ".dll";
@@ -698,11 +698,11 @@ namespace Microsoft.Build.Tasks
                 return candidateAssemblyLocation;
             }
 
-            string CacheAssemblyIdentityFromPath(string referenceAssembly, string candidateAssemblyLocation)
+            string CacheAssemblyIdentityFromPath(string assemblyFile, string candidateAssemblyLocation)
             {
                 try
                 {
-                    Assembly candidateAssembly = Assembly.UnsafeLoadFrom(referenceAssembly);
+                    Assembly candidateAssembly = Assembly.UnsafeLoadFrom(assemblyFile);
                     if (candidateAssembly != null)
                     {
                         candidateAssemblyLocation = candidateAssembly.Location;
@@ -712,9 +712,9 @@ namespace Microsoft.Build.Tasks
                 catch (BadImageFormatException e)
                 {
                     Debug.Assert(e.Message.Contains("0x80131058"), "Expected Message to contain 0x80131058");
-                    AssemblyName.GetAssemblyName(referenceAssembly);
-                    candidateAssemblyLocation = referenceAssembly;
-                    _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.HaveReflectionOnlyAssembly", referenceAssembly);
+                    AssemblyName.GetAssemblyName(assemblyFile);
+                    candidateAssemblyLocation = assemblyFile;
+                    _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.HaveReflectionOnlyAssembly", assemblyFile);
                 }
 
                 return candidateAssemblyLocation;
