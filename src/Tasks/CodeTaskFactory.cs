@@ -638,8 +638,7 @@ namespace Microsoft.Build.Tasks
                 {
                     try
                     {
-                        bool fileExists = FileSystems.Default.FileExists(referenceAssembly);
-                        if (!fileExists)
+                        if (!FileSystems.Default.FileExists(referenceAssembly))
                         {
                             if (!referenceAssembly.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || !referenceAssembly.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
                             {
