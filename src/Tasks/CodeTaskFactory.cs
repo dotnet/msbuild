@@ -71,11 +71,6 @@ namespace Microsoft.Build.Tasks
         private static readonly ConcurrentDictionary<FullTaskSpecification, Assembly> s_compiledTaskCache = new ConcurrentDictionary<FullTaskSpecification, Assembly>();
 
         /// <summary>
-        /// The default assemblies to reference when compiling inline code.
-        /// </summary>
-        private static List<string> s_defaultReferencedAssemblies;
-
-        /// <summary>
         /// Merged set of assembly reference paths (default + specified)
         /// </summary>
         private List<string> _referencedAssemblies;
@@ -149,42 +144,6 @@ namespace Microsoft.Build.Tasks
         /// Gets the type of the generated task.
         /// </summary>
         public Type TaskType { get; private set; }
-
-        /// <summary>
-        /// The assemblies that the codetaskfactory should reference by default.
-        /// </summary>
-        private static List<string> DefaultReferencedAssemblies
-        {
-            get
-            {
-                if (s_defaultReferencedAssemblies == null)
-                {
-                    s_defaultReferencedAssemblies = new List<string>();
-
-                    // Loading with the partial name is fine for framework assemblies -- we'll always get the correct one 
-                    // through the magic of unification
-                    foreach (string frameworkAssembly in s_defaultReferencedFrameworkAssemblyNames)
-                    {
-                        s_defaultReferencedAssemblies.Add(frameworkAssembly);
-                    }
-
-                    // We also want to add references to two MSBuild assemblies: Microsoft.Build.Framework.dll and 
-                    // Microsoft.Build.Utilities.Core.dll.  If we just let the CLR unify the simple name, it will 
-                    // pick the highest version on the machine, which means that in hosts with restrictive binding 
-                    // redirects, or no binding redirects, we'd end up creating an inline task that could not be 
-                    // run.  Instead, to make sure that we can actually use what we're building, just use the Framework
-                    // and Utilities currently loaded into this process -- Since we're in Microsoft.Build.Tasks.Core.dll
-                    // right now, by definition both of them are always already loaded. 
-                    string msbuildFrameworkPath = Assembly.GetAssembly(typeof(ITask)).Location;
-                    string msbuildUtilitiesPath = Assembly.GetAssembly(typeof(Task)).Location;
-
-                    s_defaultReferencedAssemblies.Add(msbuildFrameworkPath);
-                    s_defaultReferencedAssemblies.Add(msbuildUtilitiesPath);
-                }
-
-                return s_defaultReferencedAssemblies;
-            }
-        }
 
         /// <summary>
         /// Get the type information for all task parameters
@@ -865,11 +824,33 @@ namespace Microsoft.Build.Tasks
         {
             List<string> finalReferenceList = new List<string>(s_defaultReferencedFrameworkAssemblyNames.Length + 2 + _referencedAssemblies.Count);
 
-            foreach (string defaultReference in DefaultReferencedAssemblies)
+            // Set some default references:
+
+            // Loading with the partial name is fine for framework assemblies -- we'll always get the correct one 
+            // through the magic of unification
+            foreach (string defaultReference in s_defaultReferencedFrameworkAssemblyNames)
             {
                 AddReferenceAssemblyToReferenceList(finalReferenceList, defaultReference);
             }
 
+            // We also want to add references to two MSBuild assemblies: Microsoft.Build.Framework.dll and 
+            // Microsoft.Build.Utilities.Core.dll.  If we just let the CLR unify the simple name, it will 
+            // pick the highest version on the machine, which means that in hosts with restrictive binding 
+            // redirects, or no binding redirects, we'd end up creating an inline task that could not be 
+            // run.  Instead, to make sure that we can actually use what we're building, just use the Framework
+            // and Utilities currently loaded into this process -- Since we're in Microsoft.Build.Tasks.Core.dll
+            // right now, by definition both of them are always already loaded.
+            //
+            // NOTE Dec 2020: I don't think the above really applies given the eternally-15.1.0.0 version policy
+            // we are currently using. But loading these from an explicit path seems fine so I'm not changing
+            // that.
+            string msbuildFrameworkPath = Assembly.GetAssembly(typeof(ITask)).Location;
+            string msbuildUtilitiesPath = Assembly.GetAssembly(typeof(Task)).Location;
+
+            finalReferenceList.Add(msbuildFrameworkPath);
+            finalReferenceList.Add(msbuildUtilitiesPath);
+
+            // Now for the explicitly-specified references:
             if (_referencedAssemblies != null)
             {
                 foreach (string referenceAssembly in _referencedAssemblies)
