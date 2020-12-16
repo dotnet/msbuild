@@ -39,6 +39,15 @@ namespace Microsoft.Build.Tasks
 
         static CodeTaskFactory()
         {
+            // Populate default-reference-assembly information
+            Assembly frameworkAssembly = Assembly.GetAssembly(typeof(ITask));
+            _msbuildFrameworkName = frameworkAssembly.FullName;
+            _msbuildFrameworkPath = frameworkAssembly.Location;
+
+            Assembly utilitiesAssembly = Assembly.GetAssembly(typeof(Task));
+            _msbuildUtilitiesName = utilitiesAssembly.FullName;
+            _msbuildUtilitiesPath = utilitiesAssembly.Location;
+
             // The handler is not detached because it only returns assemblies for custom references that cannot be found in the normal Load context
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
         }
@@ -53,6 +62,11 @@ namespace Microsoft.Build.Tasks
 
             return assembly;
         }
+
+        private static readonly string _msbuildFrameworkName;
+        private static readonly string _msbuildFrameworkPath;
+        private static readonly string _msbuildUtilitiesName;
+        private static readonly string _msbuildUtilitiesPath;
 
         /// <summary>
         /// Default assemblies names to reference during inline code compilation - from the .NET Framework
@@ -672,8 +686,9 @@ namespace Microsoft.Build.Tasks
                     Assembly candidateAssembly = Assembly.UnsafeLoadFrom(assemblyFile);
                     if (candidateAssembly != null)
                     {
-                        if (candidateAssembly.FullName == typeof(Task).Assembly.FullName ||
-                            candidateAssembly.FullName == typeof(ITask).Assembly.FullName)
+                        string name = candidateAssembly.FullName;
+                        if (name == _msbuildFrameworkName ||
+                            name == _msbuildUtilitiesName)
                         {
                             // Framework and Utilities are default references but are often
                             // specified in the UsingTask anyway; if so just ignore them.
@@ -856,11 +871,9 @@ namespace Microsoft.Build.Tasks
             // NOTE Dec 2020: I don't think the above really applies given the eternally-15.1.0.0 version policy
             // we are currently using. But loading these from an explicit path seems fine so I'm not changing
             // that.
-            string msbuildFrameworkPath = Assembly.GetAssembly(typeof(ITask)).Location;
-            string msbuildUtilitiesPath = Assembly.GetAssembly(typeof(Task)).Location;
 
-            finalReferenceList.Add(msbuildFrameworkPath);
-            finalReferenceList.Add(msbuildUtilitiesPath);
+            finalReferenceList.Add(_msbuildFrameworkPath);
+            finalReferenceList.Add(_msbuildUtilitiesPath);
 
             // Now for the explicitly-specified references:
             if (_referencedAssemblies != null)
