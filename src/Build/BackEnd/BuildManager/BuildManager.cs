@@ -1268,7 +1268,7 @@ namespace Microsoft.Build.Execution
                 var projectCacheItem = ProjectCacheItems.First().Value;
 
                 InitializeProjectCacheService(
-                    new ProjectCacheDescriptor(
+                    ProjectCacheDescriptor.FromAssemblyPath(
                         projectCacheItem.PluginPath,
                         new[]
                         {
@@ -1871,7 +1871,7 @@ namespace Microsoft.Build.Execution
             lock (_syncLock)
             {
                 InitializeProjectCacheService(
-                    new ProjectCacheDescriptor(
+                    ProjectCacheDescriptor.FromAssemblyPath(
                         cacheItem.PluginPath,
                         entryPoints: null,
                         projectGraph,

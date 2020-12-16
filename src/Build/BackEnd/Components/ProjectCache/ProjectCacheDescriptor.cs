@@ -4,6 +4,7 @@
 #nullable enable
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Shared;
 
@@ -11,26 +12,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
 {
     public class ProjectCacheDescriptor
     {
-        public ProjectCacheDescriptor(
-            string pluginPath,
-            IReadOnlyCollection<ProjectGraphEntryPoint>? entryPoints,
-            ProjectGraph? projectGraph,
-            IReadOnlyDictionary<string, string>? pluginSettings = null)
-        {
-            ErrorUtilities.VerifyThrowArgument(
-                (entryPoints == null) ^ (projectGraph == null),
-                "EitherEntryPointsOrTheProjectGraphIsSet");
-
-            PluginPath = pluginPath;
-            EntryPoints = entryPoints;
-            ProjectGraph = projectGraph;
-            PluginSettings = pluginSettings ?? new Dictionary<string, string>();
-        }
-
         /// <summary>
         ///     The path to the assembly containing the project cache plugin.
         /// </summary>
-        public string PluginPath { get; }
+        public string? PluginAssemblyPath { get; }
 
         /// <summary>
         ///     The entry points with which the plugin will be initialized.
@@ -44,8 +29,71 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public IReadOnlyDictionary<string, string> PluginSettings { get; }
 
+        public ProjectCacheBase? PluginInstance { get; }
+
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
+        private ProjectCacheDescriptor()
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        {
+        }
+
+        private ProjectCacheDescriptor(
+            IReadOnlyCollection<ProjectGraphEntryPoint>? entryPoints,
+            ProjectGraph? projectGraph,
+            IReadOnlyDictionary<string, string>? pluginSettings)
+        {
+            ErrorUtilities.VerifyThrowArgument(
+                (entryPoints == null) ^ (projectGraph == null),
+                "EitherEntryPointsOrTheProjectGraphIsSet");
+
+            EntryPoints = entryPoints;
+            ProjectGraph = projectGraph;
+            PluginSettings = pluginSettings ?? new Dictionary<string, string>();
+        }
+
+        private ProjectCacheDescriptor(
+            string pluginAssemblyPath,
+            IReadOnlyCollection<ProjectGraphEntryPoint>? entryPoints,
+            ProjectGraph? projectGraph,
+            IReadOnlyDictionary<string, string>? pluginSettings) : this(entryPoints, projectGraph, pluginSettings)
+        {
+            PluginAssemblyPath = pluginAssemblyPath;
+        }
+
+        private ProjectCacheDescriptor(
+            ProjectCacheBase pluginInstance,
+            IReadOnlyCollection<ProjectGraphEntryPoint>? entryPoints,
+            ProjectGraph? projectGraph,
+            IReadOnlyDictionary<string, string>? pluginSettings) : this(entryPoints, projectGraph, pluginSettings)
+        {
+            PluginInstance = pluginInstance;
+        }
+
+        public static ProjectCacheDescriptor FromAssemblyPath(
+            string pluginAssemblyPath,
+            IReadOnlyCollection<ProjectGraphEntryPoint>? entryPoints,
+            ProjectGraph? projectGraph,
+            IReadOnlyDictionary<string, string>? pluginSettings = null)
+        {
+            return new ProjectCacheDescriptor(pluginAssemblyPath, entryPoints, projectGraph, pluginSettings);
+        }
+
+        public static ProjectCacheDescriptor FromInstance(
+            ProjectCacheBase pluginInstance,
+            IReadOnlyCollection<ProjectGraphEntryPoint>? entryPoints,
+            ProjectGraph? projectGraph,
+            IReadOnlyDictionary<string, string>? pluginSettings = null)
+        {
+            return new ProjectCacheDescriptor(pluginInstance, entryPoints, projectGraph, pluginSettings);
+        }
+
         public override string ToString()
         {
+            var loadStyle = PluginInstance != null
+                ? $"Instance based: {PluginInstance.GetType().AssemblyQualifiedName}"
+                : $"Assembly path based: {PluginAssemblyPath}";
+
             var entryPointStyle = EntryPoints != null
                 ? "Non static graph based"
                 : "Static graph based";
@@ -60,7 +108,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         n =>
                             $"{n.ProjectInstance.FullPath} {{{FormatGlobalProperties(n.ProjectInstance.GlobalProperties)}}}"));
 
-            return $"{PluginPath}\nEntry-point style: {entryPointStyle}\nEntry-points:\n{entryPoints}";
+            return $"{loadStyle}\nEntry-point style: {entryPointStyle}\nEntry-points:\n{entryPoints}";
 
             static string FormatGlobalProperties(IDictionary<string, string> globalProperties)
             {

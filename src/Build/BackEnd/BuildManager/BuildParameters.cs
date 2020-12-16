@@ -298,6 +298,7 @@ namespace Microsoft.Build.Execution
             _outputResultsCacheFile = other._outputResultsCacheFile;
             DiscardBuildResults = other.DiscardBuildResults;
             LowPriority = other.LowPriority;
+            ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
 
 #if FEATURE_THREAD_PRIORITY

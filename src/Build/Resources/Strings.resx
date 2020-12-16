@@ -1852,7 +1852,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</value>
   </data>
   <data name="LoadingProjectCachePlugin" xml:space="preserve">
-    <value>"Loading the following project cache plugin: {0}"</value>
+    <value>"Loading the following project cache plugin:
+    {0}"</value>
   </data>
   <data name="SolutionPathPropertyMustBeSetOnVSSubmissions" xml:space="preserve">
     <value>"MSB4264: Invalid $(SolutionPath) property: {0}"</value>

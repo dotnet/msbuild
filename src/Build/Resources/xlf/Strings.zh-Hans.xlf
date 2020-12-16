@@ -133,8 +133,10 @@
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
-        <source>"Loading the following project cache plugin: {0}"</source>
-        <target state="new">"Loading the following project cache plugin: {0}"</target>
+        <source>"Loading the following project cache plugin:
+    {0}"</source>
+        <target state="new">"Loading the following project cache plugin:
+    {0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">

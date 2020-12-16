@@ -44,7 +44,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             ILoggingService loggingService,
             CancellationToken cancellationToken)
         {
-            var plugin = await Task.Run(() => LoadPluginFromAssembly(pluginDescriptor.PluginPath), cancellationToken)
+            var plugin = await Task.Run(() => GetPluginInstance(pluginDescriptor), cancellationToken)
                 .ConfigureAwait(false);
 
             // TODO: Detect and use the highest verbosity from all the user defined loggers. That's tricky because right now we can't discern between user set loggers and msbuild's internally added loggers.
@@ -69,13 +69,32 @@ namespace Microsoft.Build.Experimental.ProjectCache
             return new ProjectCacheService(plugin, buildManager, logger, pluginDescriptor, cancellationToken);
         }
 
-        private static ProjectCacheBase LoadPluginFromAssembly(string pluginAssemblyPath)
+        private static ProjectCacheBase GetPluginInstance(ProjectCacheDescriptor pluginDescriptor)
+        {
+            if (pluginDescriptor.PluginInstance != null)
+            {
+                return pluginDescriptor.PluginInstance;
+            }
+            if (pluginDescriptor.PluginAssemblyPath != null)
+            {
+                return GetPluginInstanceFromType(GetTypeFromAssemblyPath(pluginDescriptor.PluginAssemblyPath));
+            }
+            ErrorUtilities.ThrowInternalErrorUnreachable();
+            return null;
+        }
+
+        private static ProjectCacheBase GetPluginInstanceFromType(Type pluginType)
+        {
+            return pluginType != null
+                ? (ProjectCacheBase) Activator.CreateInstance(pluginType)
+                : null;
+        }
+
+        private static Type GetTypeFromAssemblyPath(string pluginAssemblyPath)
         {
             var assembly = LoadAssembly(pluginAssemblyPath);
 
-            var pluginType = GetTypes<ProjectCacheBase>(assembly).First();
-
-            return (ProjectCacheBase) Activator.CreateInstance(pluginType);
+            return GetTypes<ProjectCacheBase>(assembly).FirstOrDefault();
 
             Assembly LoadAssembly(string resolverPath)
             {
@@ -107,8 +126,8 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             // TODO: Parent these logs under the project build event so they appear nested under the project in the binlog viewer.
             var queryDescription = $"{buildRequest.ProjectFullPath}" +
-                    $"\n\tTargets:[{string.Join(", ", buildRequest.TargetNames)}]" +
-                    $"\n\tGlobal Properties: {{{string.Join(",", buildRequest.GlobalProperties.Select(kvp => $"{kvp.Name}={kvp.EvaluatedValue}"))}}}";
+                                   $"\n\tTargets:[{string.Join(", ", buildRequest.TargetNames)}]" +
+                                   $"\n\tGlobal Properties: {{{string.Join(",", buildRequest.GlobalProperties.Select(kvp => $"{kvp.Name}={kvp.EvaluatedValue}"))}}}";
 
             _logger.LogMessage(
                 "\n====== Querying plugin for project " + queryDescription,
@@ -162,14 +181,14 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             private readonly ILoggingService _loggingService;
 
+            public override bool HasLoggedErrors { get; protected set; }
+
             public LoggingServiceToPluginLoggerAdapter(
                 LoggerVerbosity verbosity,
                 ILoggingService loggingService) : base(verbosity)
             {
                 _loggingService = loggingService;
             }
-
-            public override bool HasLoggedErrors { get; protected set; }
 
             public override void LogMessage(string message, MessageImportance? messageImportance = null)
             {

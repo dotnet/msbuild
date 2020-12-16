@@ -1453,11 +1453,14 @@ namespace Microsoft.Build.Experimental.ProjectCache
     }
     public partial class ProjectCacheDescriptor
     {
-        public ProjectCacheDescriptor(string pluginPath, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings=null) { }
+        internal ProjectCacheDescriptor() { }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> EntryPoints { get { throw null; } }
-        public string PluginPath { get { throw null; } }
+        public string PluginAssemblyPath { get { throw null; } }
+        public Microsoft.Build.Experimental.ProjectCache.ProjectCacheBase PluginInstance { get { throw null; } }
         public System.Collections.Generic.IReadOnlyDictionary<string, string> PluginSettings { get { throw null; } }
         public Microsoft.Build.Graph.ProjectGraph ProjectGraph { get { throw null; } }
+        public static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor FromAssemblyPath(string pluginAssemblyPath, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings=null) { throw null; }
+        public static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor FromInstance(Microsoft.Build.Experimental.ProjectCache.ProjectCacheBase pluginInstance, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings=null) { throw null; }
         public override string ToString() { throw null; }
     }
     public partial class ProxyTargets
