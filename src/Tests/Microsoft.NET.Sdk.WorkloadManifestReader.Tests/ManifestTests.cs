@@ -2,9 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
+
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+
 using System.IO;
 using System.Linq;
+
 using Xunit;
 
 namespace ManifestReaderTests

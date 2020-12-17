@@ -13,25 +13,39 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal static class LockFileExtensions
     {
-        public static LockFileTarget GetTargetAndThrowIfNotFound(this LockFile lockFile, string frameworkAlias, string runtime)
+        public static LockFileTarget GetTargetAndReturnNullIfNotFound(this LockFile lockFile, string frameworkAlias, string runtimeIdentifier)
         {
-            LockFileTarget lockFileTarget = lockFile.GetTarget(frameworkAlias, runtime);
+            LockFileTarget lockFileTarget = lockFile.GetTarget(frameworkAlias, runtimeIdentifier);
+
+            if (lockFileTarget == null &&
+                lockFile.PackageSpec.TargetFrameworks.All(tfi => string.IsNullOrEmpty(tfi.TargetAlias)))
+            {
+                var nuGetFramework = NuGetUtils.ParseFrameworkName(frameworkAlias);
+                lockFileTarget = lockFile.GetTarget(nuGetFramework, runtimeIdentifier);
+            }
+
+            return lockFileTarget;
+        }
+
+        public static LockFileTarget GetTargetAndThrowIfNotFound(this LockFile lockFile, string frameworkAlias, string runtimeIdentifier)
+        {
+            LockFileTarget lockFileTarget = lockFile.GetTargetAndReturnNullIfNotFound(frameworkAlias, runtimeIdentifier);
 
             if (lockFileTarget == null)
             {
                 string frameworkString = frameworkAlias;
-                string targetMoniker = string.IsNullOrEmpty(runtime) ?
+                string targetMoniker = string.IsNullOrEmpty(runtimeIdentifier) ?
                     frameworkString :
-                    $"{frameworkString}/{runtime}";
+                    $"{frameworkString}/{runtimeIdentifier}";
 
                 string message;
-                if (string.IsNullOrEmpty(runtime))
+                if (string.IsNullOrEmpty(runtimeIdentifier))
                 {
                     message = string.Format(Strings.AssetsFileMissingTarget, lockFile.Path, targetMoniker, frameworkString);
                 }
                 else
                 {
-                    message = string.Format(Strings.AssetsFileMissingRuntimeIdentifier, lockFile.Path, targetMoniker, frameworkString, runtime);
+                    message = string.Format(Strings.AssetsFileMissingRuntimeIdentifier, lockFile.Path, targetMoniker, frameworkString, runtimeIdentifier);
                 }
 
                 throw new BuildErrorException(message);

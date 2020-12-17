@@ -70,7 +70,7 @@
                 "Xamarin.Android.LLVM.Aot.armv7a"
             ],
             "extends": [
-                "xamarin-android"
+                "xamarin-android-build"
             ]
         },
         // this is a convenience for devs who want to pre-install everything

@@ -12,40 +12,21 @@ using System;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
-    public class NuGetRestoreCommand : TestCommand
+    public class NuGetExeRestoreCommand : TestCommand
     {
-        private List<string> _sources = new List<string>();
-        
         private readonly string _projectRootPath;
         public string ProjectRootPath => _projectRootPath;
 
         public string ProjectFile { get; }
 
+        public string NuGetExeVersion { get; set; }
+
         public string FullPathProjectFile => Path.Combine(ProjectRootPath, ProjectFile);
 
-        public NuGetRestoreCommand(ITestOutputHelper log, string projectRootPath, string relativePathToProject = null) : base(log)
+        public NuGetExeRestoreCommand(ITestOutputHelper log, string projectRootPath, string relativePathToProject = null) : base(log)
         {
             _projectRootPath = projectRootPath;
             ProjectFile = MSBuildCommand.FindProjectFile(ref _projectRootPath, relativePathToProject);
-        }
-
-        public NuGetRestoreCommand AddSource(string source)
-        {
-            _sources.Add(source);
-            return this;
-        }
-
-        public NuGetRestoreCommand AddSourcesFromCurrentConfig()
-        {
-            var settings = Settings.LoadDefaultSettings(Directory.GetCurrentDirectory(), null, null);
-            var packageSourceProvider = new PackageSourceProvider(settings);
-
-            foreach (var packageSource in packageSourceProvider.LoadPackageSources())
-            {
-                _sources.Add(packageSource.Source);
-            }
-
-            return this;
         }
 
         protected override SdkCommandSpec CreateCommand(IEnumerable<string> args)
@@ -53,12 +34,6 @@ namespace Microsoft.NET.TestFramework.Commands
             var newArgs = new List<string>();
 
             newArgs.Add("restore");
-
-            if (_sources.Any())
-            {
-                newArgs.Add("-Source");
-                newArgs.Add(string.Join(";", _sources));
-            }
 
             newArgs.Add(FullPathProjectFile);
 
@@ -71,12 +46,28 @@ namespace Microsoft.NET.TestFramework.Commands
             {
                 throw new InvalidOperationException("Path to nuget.exe not set");
             }
-            else if (!File.Exists(TestContext.Current.NuGetExePath))
+
+            var nugetExePath = TestContext.Current.NuGetExePath;
+            if (!string.IsNullOrEmpty(NuGetExeVersion))
             {
-                //  https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
-                using(var client = new System.Net.Http.HttpClient())
-                using(var response = client.GetAsync("https://dist.nuget.org/win-x86-commandline/latest/nuget.exe").ConfigureAwait(false).GetAwaiter().GetResult())
-                using(var fs = new FileStream(TestContext.Current.NuGetExePath, FileMode.CreateNew))
+                nugetExePath = Path.Combine(Path.GetDirectoryName(nugetExePath), NuGetExeVersion, "nuget.exe");
+            }
+
+            if (!File.Exists(nugetExePath))
+            {
+                string directory = Path.GetDirectoryName(nugetExePath);
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                string url = string.IsNullOrEmpty(NuGetExeVersion) ?
+                    "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" :
+                    $"https://dist.nuget.org/win-x86-commandline/v{NuGetExeVersion}/nuget.exe";
+
+                using (var client = new System.Net.Http.HttpClient())
+                using (var response = client.GetAsync(url).ConfigureAwait(false).GetAwaiter().GetResult())
+                using (var fs = new FileStream(nugetExePath, FileMode.CreateNew))
                 {
                     response.Content.CopyToAsync(fs).ConfigureAwait(false).GetAwaiter().GetResult();
                 }
@@ -84,9 +75,11 @@ namespace Microsoft.NET.TestFramework.Commands
 
             var ret = new SdkCommandSpec()
             {
-                FileName = TestContext.Current.NuGetExePath,
+                FileName = nugetExePath,
                 Arguments = newArgs
             };
+
+            TestContext.Current.AddTestEnvironmentVariables(ret);
 
             return ret;
         }
