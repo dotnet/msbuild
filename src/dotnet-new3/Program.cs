@@ -107,35 +107,35 @@ namespace dotnet_new3
 
         private static void FirstRun(IEngineEnvironmentSettings environmentSettings, IInstaller installer)
         {
-            string baseDir = Environment.ExpandEnvironmentVariables("%DN3%");
-
-            if (baseDir.Contains('%'))
+            string dn3Path = Environment.GetEnvironmentVariable("DN3");
+            if (string.IsNullOrEmpty(dn3Path))
             {
-                Assembly a = typeof(Program).GetTypeInfo().Assembly;
-                string path = new Uri(a.Location, UriKind.Absolute).LocalPath;
-                path = Path.GetDirectoryName(path);
+                string path = typeof(Program).Assembly.Location;
+                while (path != null && !File.Exists(Path.Combine(path, "Microsoft.TemplateEngine.sln")))
+                {
+                    path = Path.GetDirectoryName(path);
+                }
+                if (path == null)
+                {
+                    environmentSettings.Host.LogDiagnosticMessage("Couldn't the setup package location, because \"Microsoft.TemplateEngine.sln\" is not in any of parent directories.", "Install");
+                    return;
+                }
                 Environment.SetEnvironmentVariable("DN3", path);
             }
 
             List<string> toInstallList = new List<string>();
             Paths paths = new Paths(environmentSettings);
 
-            if (paths.FileExists(paths.Global.DefaultInstallPackageList))
-            {
-                toInstallList.AddRange(paths.ReadAllText(paths.Global.DefaultInstallPackageList).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
-            }
-
             if (paths.FileExists(paths.Global.DefaultInstallTemplateList))
             {
-                toInstallList.AddRange(paths.ReadAllText(paths.Global.DefaultInstallTemplateList).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
+                toInstallList.AddRange(paths.ReadAllText(paths.Global.DefaultInstallTemplateList).Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries));
             }
 
             if (toInstallList.Count > 0)
             {
                 for (int i = 0; i < toInstallList.Count; i++)
                 {
-                    toInstallList[i] = toInstallList[i].Replace("\r", "")
-                                                        .Replace('\\', Path.DirectorySeparatorChar);
+                    toInstallList[i] = toInstallList[i].Replace('\\', Path.DirectorySeparatorChar);
                 }
 
                 installer.InstallPackages(toInstallList);

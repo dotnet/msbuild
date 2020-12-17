@@ -1,5 +1,0 @@
-﻿%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Abstractions.*
-%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Core.Contracts.*
-%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Utils.*
-%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Core.*
-%DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Orchestrator.RunnableProjects.*

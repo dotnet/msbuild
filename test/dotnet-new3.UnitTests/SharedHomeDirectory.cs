@@ -39,10 +39,6 @@ namespace dotnet_new3.UnitTests
                 }
                 if (path == null)
                     throw new Exception("Couldn't find repository root, because \"Microsoft.TemplateEngine.sln\" is not in any of parent directories.");
-                // DummyFolder Path just represents folder next to "artifacts" and "template_feed", so paths inside
-                // defaultinstall.package.list correctly finds packages in "../artifacts/"
-                // via %DN3%\..\template_feed\ or %DN3%\..\artifacts\packages\Microsoft.TemplateEngine.Core.*
-                path = Path.Combine(path, "DummyFolder");
                 dn3Path = path;
             }
 
