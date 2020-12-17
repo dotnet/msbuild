@@ -345,14 +345,14 @@ namespace Microsoft.Build.Tasks
             }
 
             // Don't emit expanded form of Command when EchoOff is set.
-            string commandForLogging = EchoOff ? nameof(EchoOff) : Command;
+            string commandForLog = EchoOff ? "..." : Command;
             if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
             {
-                Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", commandForLogging, ExitCode);
+                Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", commandForLog, ExitCode);
             }
             else
             {
-                Log.LogErrorWithCodeFromResources("Exec.CommandFailed", commandForLogging, ExitCode);
+                Log.LogErrorWithCodeFromResources("Exec.CommandFailed", commandForLog, ExitCode);
             }
             return false;
         }
