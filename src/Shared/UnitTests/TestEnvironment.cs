@@ -89,16 +89,9 @@ namespace Microsoft.Build.UnitTests
                 foreach (var item in _invariants)
                     item.AssertInvariant(Output);
 
-                // Reset change waves
-                SetChangeWave(string.Empty);
+                SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
-        }
-
-        public void SetChangeWave(string wave)
-        {
-            ChangeWaves.ResetStateForTests();
-            SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", wave);
         }
 
         /// <summary>

@@ -1555,7 +1555,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetChangeWave(ChangeWaves.Wave16_8);
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_8.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
                 ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
                 var manySpaces = "".PadLeft(2000);
@@ -1612,6 +1613,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // but that goes back to MSBuild 4.something so I'm codifying it in this test. If you're here because you cleaned it up
                 // and want to fix the test my current opinion is that's fine.
                 actual.ShouldBe(expected);
+                ChangeWaves.ResetStateForTests();
             }
         }
 
