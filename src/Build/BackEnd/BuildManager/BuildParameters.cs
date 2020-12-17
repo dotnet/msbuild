@@ -558,7 +558,7 @@ namespace Microsoft.Build.Execution
         /// <comments>
         /// toolsetProvider.Toolsets is already a readonly collection.
         /// </comments>
-        public ICollection<Toolset> Toolsets => _toolsetProvider.Toolsets;
+        public ICollection<Toolset> Toolsets => ToolsetProvider.Toolsets;
 
         /// <summary>
         /// The name of the UI culture to use during the build.
