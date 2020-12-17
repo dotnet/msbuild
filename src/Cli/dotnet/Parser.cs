@@ -170,6 +170,11 @@ namespace Microsoft.DotNet.Cli
                         ListCommandParser.SlnOrProjectArgument.Name = CommonLocalizableStrings.ProjectArgumentName;
                         ListCommandParser.SlnOrProjectArgument.Description = CommonLocalizableStrings.ProjectArgumentDescription;
                     }
+                    else if (command.Name.Equals(AddPackageParser.GetCommand().Name))
+                    {
+                        // Don't show package suggestions in help
+                        AddPackageParser.CmdPackageArgument.Suggestions.Clear();
+                    }
 
                     base.Write(command);
                 }
