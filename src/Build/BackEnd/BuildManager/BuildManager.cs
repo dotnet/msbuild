@@ -1124,8 +1124,13 @@ namespace Microsoft.Build.Execution
                             CreateRealBuildRequest(submission, newConfiguration.ConfigurationId);
 
                             var result = new BuildResult(submission.BuildRequest);
-                            result.MergeResults(cacheResult.BuildResult);
 
+                            foreach (var targetResult in cacheResult.BuildResult.ResultsByTarget)
+                            {
+                                result.AddResultsForTarget(targetResult.Key, targetResult.Value);
+                            }
+
+                            submission.CompleteLogging(false);
                             ReportResultsToSubmission(result);
                         }
                     }
