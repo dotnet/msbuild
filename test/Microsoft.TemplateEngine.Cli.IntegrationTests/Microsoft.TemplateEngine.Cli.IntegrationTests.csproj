@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>$(NETCoreTargetFramework)</TargetFramework>
+        <TestProject>true</TestProject>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Update="**\*.json" CopyToOutputDirectory="Always" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="$(TestDir)Microsoft.TemplateEngine.EndToEndTestHarness\Microsoft.TemplateEngine.EndToEndTestHarness.csproj" />
+    </ItemGroup>
+</Project>

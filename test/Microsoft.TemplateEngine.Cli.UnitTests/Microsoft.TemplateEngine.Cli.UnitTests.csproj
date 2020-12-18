@@ -5,17 +5,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Update="**\*.json" CopyToOutputDirectory="Always" />
-    </ItemGroup>
-
-    <ItemGroup>
         <None Include="TemplateInstallTests/TestTemplates/**/*" CopyToOutputDirectory="Always" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Cli\Microsoft.TemplateEngine.Cli.csproj" />
         <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Edge\Microsoft.TemplateEngine.Edge.csproj" />
-        <ProjectReference Include="$(TestDir)Microsoft.TemplateEngine.EndToEndTestHarness\Microsoft.TemplateEngine.EndToEndTestHarness.csproj" />
+        <ProjectReference Include="$(SrcDir)Microsoft.TemplateSearch.Common\Microsoft.TemplateSearch.Common.csproj" />
         <ProjectReference Include="$(TestDir)Microsoft.TemplateEngine.TestHelper\Microsoft.TemplateEngine.TestHelper.csproj" />
-        <ProjectReference Include="$(TestDir)Microsoft.TemplateEngine.Utils.UnitTests\Microsoft.TemplateEngine.Utils.UnitTests.csproj" />
     </ItemGroup>
 </Project>

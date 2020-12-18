@@ -32,7 +32,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             foreach (string script in scripts)
             {
-                string testScript = Path.Combine(dir.FullName, script);
+                string testScript = Path.Combine(dir.FullName, "Resources", script);
                 builder.Append($"\"{testScript}\" ");
             }
 
