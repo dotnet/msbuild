@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.ProjectCache
@@ -10,7 +11,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     /// </summary>
     public abstract class PluginLoggerBase
     {
-        public PluginLoggerBase(LoggerVerbosity verbosity)
+        protected PluginLoggerBase(LoggerVerbosity verbosity)
         {
             Verbosity = verbosity;
         }

@@ -161,6 +161,11 @@
         <target state="translated">BeginBuild がまだ呼び出されていないため、操作を完了できません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoProjectCachePluginFoundInAssembly">
+        <source>MSB4270: No project cache plugin found in assembly "{0}"</source>
+        <target state="new">MSB4270: No project cache plugin found in assembly "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NotAllNodesDefineACacheItem">
         <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
         <target state="new">MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</target>

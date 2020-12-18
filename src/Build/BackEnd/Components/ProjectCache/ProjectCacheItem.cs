@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,11 +28,6 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public bool Equals(ProjectCacheItem other)
         {
-            if (ReferenceEquals(null, other))
-            {
-                return false;
-            }
-
             if (ReferenceEquals(this, other))
             {
                 return true;
@@ -43,11 +39,6 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
-
             if (ReferenceEquals(this, obj))
             {
                 return true;

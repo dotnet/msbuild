@@ -1430,7 +1430,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     }
     public abstract partial class PluginLoggerBase
     {
-        public PluginLoggerBase(Microsoft.Build.Framework.LoggerVerbosity verbosity) { }
+        protected PluginLoggerBase(Microsoft.Build.Framework.LoggerVerbosity verbosity) { }
         public abstract bool HasLoggedErrors { get; protected set; }
         public abstract void LogError(string error);
         public abstract void LogMessage(string message, System.Nullable<Microsoft.Build.Framework.MessageImportance> messageImportance=default(System.Nullable<Microsoft.Build.Framework.MessageImportance>));

@@ -747,7 +747,7 @@ namespace Microsoft.Build.Shared
 
 #if !CLR2COMPATIBILITY
         /// <summary>
-        /// Throws an ArgumentNullException if the given string parameter is null
+        /// Throws an ArgumentNullException if the given collection is null
         /// and ArgumentException if it has zero length.
         /// </summary>
         /// <param name="parameter"></param>
@@ -757,6 +757,19 @@ namespace Microsoft.Build.Shared
             VerifyThrowArgumentNull(parameter, parameterName);
 
             if (parameter.Count == 0 && s_throwExceptions)
+            {
+                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
+            }
+        }
+
+        /// <summary>
+        /// Throws an ArgumentException if the given collection is not null but of zero length.
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="parameterName"></param>
+        internal static void VerifyThrowArgumentLengthIfNotNull<T>(IReadOnlyCollection<T> parameter, string parameterName)
+        {
+            if (parameter?.Count == 0 && s_throwExceptions)
             {
                 throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
             }

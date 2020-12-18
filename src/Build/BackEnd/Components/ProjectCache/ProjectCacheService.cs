@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,22 +80,28 @@ namespace Microsoft.Build.Experimental.ProjectCache
             {
                 return GetPluginInstanceFromType(GetTypeFromAssemblyPath(pluginDescriptor.PluginAssemblyPath));
             }
+
             ErrorUtilities.ThrowInternalErrorUnreachable();
+
+#pragma warning disable CS8603 // Possible null reference return.
             return null;
+#pragma warning restore CS8603 // Possible null reference return.
         }
 
         private static ProjectCacheBase GetPluginInstanceFromType(Type pluginType)
         {
-            return pluginType != null
-                ? (ProjectCacheBase) Activator.CreateInstance(pluginType)
-                : null;
+            return (ProjectCacheBase) Activator.CreateInstance(pluginType);
         }
 
         private static Type GetTypeFromAssemblyPath(string pluginAssemblyPath)
         {
             var assembly = LoadAssembly(pluginAssemblyPath);
 
-            return GetTypes<ProjectCacheBase>(assembly).FirstOrDefault();
+            var type = GetTypes<ProjectCacheBase>(assembly).FirstOrDefault();
+
+            ErrorUtilities.VerifyThrow(type != null, "NoProjectCachePluginFoundInAssembly", pluginAssemblyPath);
+
+            return type!;
 
             Assembly LoadAssembly(string resolverPath)
             {
