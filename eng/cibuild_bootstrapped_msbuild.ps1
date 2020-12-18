@@ -96,7 +96,7 @@ try {
   {
     $buildToolPath = $dotnetExePath
     $buildToolCommand = Join-Path $bootstrapRoot "net5.0\MSBuild\MSBuild.dll"
-    $buildToolFramework = "net5.0"
+    $buildToolFramework = "netcoreapp2.1"
   }
 
   # Use separate artifacts folder for stage 2
