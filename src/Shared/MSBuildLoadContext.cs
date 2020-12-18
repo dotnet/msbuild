@@ -33,6 +33,7 @@ namespace Microsoft.Build.Shared
 
 
         public MSBuildLoadContext(string assemblyPath)
+            : base($"MSBuild plugin {assemblyPath}")
         {
             _directory = Directory.GetParent(assemblyPath)!.FullName;
         }
