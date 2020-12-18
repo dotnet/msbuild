@@ -336,17 +336,23 @@ namespace Microsoft.Build.Tasks
         {
             if (IgnoreExitCode)
             {
-                Log.LogMessageFromResources(MessageImportance.Normal, "Exec.CommandFailedNoErrorCode", Command, ExitCode);
+                // Don't log when EchoOff and IgnoreExitCode.
+                if (!EchoOff)
+                {
+                    Log.LogMessageFromResources(MessageImportance.Normal, "Exec.CommandFailedNoErrorCode", Command, ExitCode);
+                }
                 return true;
             }
 
+            // Don't emit expanded form of Command when EchoOff is set.
+            string commandForLog = EchoOff ? "..." : Command;
             if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
             {
-                Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", Command, ExitCode);
+                Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", commandForLog, ExitCode);
             }
             else
             {
-                Log.LogErrorWithCodeFromResources("Exec.CommandFailed", Command, ExitCode);
+                Log.LogErrorWithCodeFromResources("Exec.CommandFailed", commandForLog, ExitCode);
             }
             return false;
         }
