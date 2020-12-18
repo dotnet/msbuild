@@ -506,7 +506,7 @@ function InitializeBuildTool() {
       ExitWithExitCode 1
     }
     $dotnetPath = Join-Path $dotnetRoot (GetExecutableFileName 'dotnet')
-    $buildTool = @{ Path = $dotnetPath; Command = 'msbuild'; Tool = 'dotnet'; Framework = 'net5.0' }
+    $buildTool = @{ Path = $dotnetPath; Command = 'msbuild'; Tool = 'dotnet'; Framework = 'netcoreapp2.1' }
   } elseif ($msbuildEngine -eq "vs") {
     try {
       $msbuildPath = InitializeVisualStudioMSBuild -install:$restore
