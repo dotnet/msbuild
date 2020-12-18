@@ -6,9 +6,11 @@ using Microsoft.Build.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Xunit;
+using static Microsoft.NET.Build.Tasks.ResolvePackageAssets;
 
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {
@@ -80,6 +82,39 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             newHash.Should().BeEquivalentTo(oldHash,
                 because: $"{nameof(task.DesignTimeBuild)} should not be included in hash.");
+        }
+
+        [Fact]
+        public void It_does_not_error_on_duplicate_package_names()
+        {
+            string projectAssetsJsonPath = Path.GetTempFileName();
+            var assetsContent =  @"{
+  `version`: 3,
+  `targets`: {
+    `net5.0`: {
+      `Humanizer.Core/2.2.0`: {
+        `type`: `package`
+      },
+      `Humanizer.Core/2.2.1`: {
+        `type`: `package`
+      }
+    }
+  },
+  `project`: {
+    `version`: `1.0.0`,
+    `frameworks`: {
+      `net5.0`: {
+        `targetAlias`: `net5.0`
+      }
+    }
+  }
+}".Replace('`', '"');
+            File.WriteAllText(projectAssetsJsonPath, assetsContent);
+
+            var task = InitializeTask(out _);
+            task.ProjectAssetsFile = projectAssetsJsonPath;
+            task.TargetFramework = "net5.0";
+            new CacheWriter(task); // Should not error
         }
 
         private ResolvePackageAssets InitializeTask(out IEnumerable<PropertyInfo> inputProperties)
