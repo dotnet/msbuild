@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests
             // This probably doesn't need to be how it is forever: https://github.com/microsoft/msbuild/issues/5041
             if (thisLoadContext.GetType().FullName == typeof(MSBuildLoadContext).FullName)
             {
-#if NETCOREAPP && !NETCOREAPP2_1 // TODO: enable this functionality when targeting .NET Core 3.0+
+#if NETCOREAPP && !NETCOREAPP2_1 && !NET5_0 // TODO: enable this functionality when targeting .NET Core 3.0+
                 if (!thisLoadContext.Name.EndsWith(typeof(ValidateAssemblyLoadContext).Assembly.GetName().Name + ".dll"))
                 {
                     Log.LogError($"Unexpected AssemblyLoadContext name: \"{thisLoadContext.Name}\", but the current executing assembly was {typeof(ValidateAssemblyLoadContext).Assembly.GetName().Name}");
