@@ -673,80 +673,12 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Reads in cached data from stateFiles to build an initial cache. Avoids logging warnings or errors.
+        /// Cached implementation of GetDirectories.
         /// </summary>
-        internal static SystemState DeserializePrecomputedCaches(ITaskItem[] stateFiles, TaskLoggingHelper log, Type requiredReturnType, GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo, Func<string, bool> fileExists)
-        {
-            SystemState retVal = new SystemState();
-            retVal.SetGetLastWriteTime(getLastWriteTime);
-            retVal.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
-            retVal.isDirty = stateFiles.Length > 0;
-            HashSet<string> assembliesFound = new HashSet<string>();
-            fileExists ??= FileSystems.Default.FileExists;
-
-            foreach (ITaskItem stateFile in stateFiles)
-            {
-                // Verify that it's a real stateFile; log message but do not error if not
-                var deserializeOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-                deserializeOptions.Converters.Add(new SystemState.Converter());
-                SystemState sysBase = JsonSerializer.Deserialize<SystemState>(File.ReadAllText(stateFile.ToString()), deserializeOptions);
-                if (sysBase == null)
-                {
-                    continue;
-                }
-
-                foreach (KeyValuePair<string, FileState> kvp in sysBase.instanceLocalFileStateCache)
-                {
-                    string relativePath = kvp.Key;
-                    if (!assembliesFound.Contains(relativePath))
-                    {
-                        FileState fileState = kvp.Value;
-                        string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stateFile.ToString()), relativePath));
-                        if (fileExists(fullPath))
-                        {
-                            // Correct file path and timestamp
-                            fileState.LastModified = retVal.getLastWriteTime(fullPath);
-                            retVal.instanceLocalFileStateCache[fullPath] = fileState;
-                            assembliesFound.Add(relativePath);
-                        }
-                    }
-                }
-            }
-
-            return retVal;
-        }
-
-        /// <summary>
-        /// Modifies this object to be more portable across machines, then writes it to stateFile.
-        /// </summary>
-        internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log)
-        {
-            Dictionary<string, FileState> oldInstanceLocalFileStateCache = instanceLocalFileStateCache;
-            Dictionary<string, FileState> newInstanceLocalFileStateCache = new Dictionary<string, FileState>(instanceLocalFileStateCache.Count);
-            foreach (KeyValuePair<string, FileState> kvp in instanceLocalFileStateCache)
-            {
-                string relativePath = FileUtilities.MakeRelative(Path.GetDirectoryName(stateFile), kvp.Key);
-                newInstanceLocalFileStateCache[relativePath] = kvp.Value;
-            }
-            instanceLocalFileStateCache = newInstanceLocalFileStateCache;
-
-            if (FileUtilities.FileExistsNoThrow(stateFile))
-            {
-                log.LogWarningWithCodeFromResources("General.StateFileAlreadyPresent", stateFile);
-            }
-            JsonSerializerOptions options = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
-            options.Converters.Add(new SystemState.Converter());
-            File.WriteAllText(stateFile, JsonSerializer.Serialize(this, options));
-            instanceLocalFileStateCache = oldInstanceLocalFileStateCache;
-        }
-
-            /// <summary>
-            /// Cached implementation of GetDirectories.
-            /// </summary>
-            /// <param name="path"></param>
-            /// <param name="pattern"></param>
-            /// <returns></returns>
-            private string[] GetDirectories(string path, string pattern)
+        /// <param name="path"></param>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
+        private string[] GetDirectories(string path, string pattern)
         {
             // Only cache the *. pattern. This is by far the most common pattern
             // and generalized caching would require a call to Path.Combine which

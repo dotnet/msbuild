@@ -1859,27 +1859,19 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the state file (if present) into the cache. If not present, attempts to read from CacheInputPaths, then creates a new cache if necessary.
         /// </summary>
-        internal void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo, Func<string, bool> fileExists = null)
+        internal void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
         {
             var deserializeOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
             deserializeOptions.Converters.Add(new SystemState.Converter());
             try
             {
                 _cache = JsonSerializer.Deserialize<SystemState>(File.ReadAllText(_stateFile), deserializeOptions);
+                _cache.SetGetLastWriteTime(getLastWriteTime);
+                _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
             }
             catch (Exception)
             {
-                // log message
-            }
-
-            if (_cache == null)
-            {
-                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths ?? Array.Empty<ITaskItem>(), Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo, fileExists);
-            }
-            else
-            {
-                _cache.SetGetLastWriteTime(getLastWriteTime);
-                _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
+                // log message. This should happen if, for instance, the user has caches created with the BinaryFormatter.
             }
         }
 
@@ -1888,11 +1880,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void WriteStateFile()
         {
-            if (!string.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
-            {
-                _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log);
-            }
-            else if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
+            if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
                 var deserializeOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
                 deserializeOptions.Converters.Add(new SystemState.Converter());
