@@ -10,6 +10,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Xml.Linq;
 
 using Microsoft.Build.Eventing;
@@ -49,7 +51,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache of system state information, used to optimize performance.
         /// </summary>
-        private SystemState _cache = null;
+        internal SystemState _cache = null;
 
         /// <summary>
         /// Construct
@@ -1855,27 +1857,46 @@ namespace Microsoft.Build.Tasks
 
         #region StateFile
         /// <summary>
-        /// Reads the state file (if present) into the cache.
+        /// Reads the state file (if present) into the cache. If not present, attempts to read from CacheInputPaths, then creates a new cache if necessary.
         /// </summary>
-        private void ReadStateFile()
+        internal void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo, Func<string, bool> fileExists = null)
         {
-            _cache = (SystemState)StateFileBase.DeserializeCache(_stateFile, Log, typeof(SystemState));
+            var deserializeOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+            deserializeOptions.Converters.Add(new SystemState.Converter());
+            try
+            {
+                _cache = JsonSerializer.Deserialize<SystemState>(File.ReadAllText(_stateFile), deserializeOptions);
+            }
+            catch (Exception)
+            {
+                // log message
+            }
 
-            // Construct the cache if necessary.
             if (_cache == null)
             {
-                _cache = new SystemState();
+                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths ?? Array.Empty<ITaskItem>(), Log, typeof(SystemState), getLastWriteTime, installedAssemblyTableInfo, fileExists);
+            }
+            else
+            {
+                _cache.SetGetLastWriteTime(getLastWriteTime);
+                _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
             }
         }
 
         /// <summary>
-        /// Write out the state file if a state name was supplied and the cache is dirty.
+        /// If CacheOutputPath is non-null, writes out a cache to that location. Otherwise, writes out the state file if a state name was supplied and the cache is dirty.
         /// </summary>
-        private void WriteStateFile()
+        internal void WriteStateFile()
         {
-            if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
+            if (!string.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
             {
-                _cache.SerializeCache(_stateFile, Log);
+                _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log);
+            }
+            else if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
+            {
+                var deserializeOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                deserializeOptions.Converters.Add(new SystemState.Converter());
+                File.WriteAllText(_stateFile, JsonSerializer.Serialize<SystemState>(_cache, deserializeOptions));
             }
         }
         #endregion
@@ -2105,9 +2126,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Load any prior saved state.
-                    ReadStateFile();
-                    _cache.SetGetLastWriteTime(getLastWriteTime);
-                    _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
+                    ReadStateFile(getLastWriteTime, installedAssemblyTableInfo);
 
                     // Cache delegates.
                     getAssemblyName = _cache.CacheDelegate(getAssemblyName);

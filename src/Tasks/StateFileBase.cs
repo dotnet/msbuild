@@ -64,9 +64,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the specified file from disk into a StateFileBase derived object.
         /// </summary>
-        internal static StateFileBase DeserializeCache(string stateFile, TaskLoggingHelper log, Type requiredReturnType)
+        internal static T DeserializeCache<T>(string stateFile, TaskLoggingHelper log, bool logWarnings = true) where T : StateFileBase
         {
-            StateFileBase retVal = null;
+            T retVal = null;
+            object deserializedObject = null;
 
             // First, we read the cache from disk if one exists, or if one does not exist
             // then we create one.  
@@ -77,32 +78,35 @@ namespace Microsoft.Build.Tasks
                     using (FileStream s = new FileStream(stateFile, FileMode.Open))
                     {
                         var formatter = new BinaryFormatter();
-                        object deserializedObject = formatter.Deserialize(s);
-                        retVal = deserializedObject as StateFileBase;
-
-                        // If the deserialized object is null then there would be no cast error but retVal would still be null
-                        // only log the message if there would have been a cast error
-                        if (retVal == null && deserializedObject != null)
+                        deserializedObject = formatter.Deserialize(s);
+                        retVal = deserializedObject as T;
+                    }
+                    // If the deserialized object is null then there would be no cast error but retVal would still be null
+                    // only log the message if there would have been a cast error
+                    if (retVal == null && deserializedObject != null)
+                    {
+                        // When upgrading to Visual Studio 2008 and running the build for the first time the resource cache files are replaced which causes a cast error due
+                        // to a new version number on the tasks class. "Unable to cast object of type 'Microsoft.Build.Tasks.SystemState' to type 'Microsoft.Build.Tasks.StateFileBase".
+                        // If there is an invalid cast, a message rather than a warning should be emitted.
+                        log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
+                    }
+                    else if (retVal != null && !(retVal is T))
+                    {
+                        if (logWarnings)
                         {
-                            // When upgrading to Visual Studio 2008 and running the build for the first time the resource cache files are replaced which causes a cast error due
-                            // to a new version number on the tasks class. "Unable to cast object of type 'Microsoft.Build.Tasks.SystemState' to type 'Microsoft.Build.Tasks.StateFileBase".
-                            // If there is an invalid cast, a message rather than a warning should be emitted.
-                            log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
+                            log.LogWarningWithCodeFromResources("General.CouldNotReadStateFile", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
                         }
-
-                        if ((retVal != null) && (!requiredReturnType.IsInstanceOfType(retVal)))
+                        else
                         {
-                            log.LogWarningWithCodeFromResources("General.CouldNotReadStateFile", stateFile,
-                                log.FormatResourceString("General.IncompatibleStateFileType"));
-                            retVal = null;
+                            log.LogMessageFromResources("General.CouldNotReadStateFile", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
                         }
-
-                        // If we get back a valid object and internals were changed, things are likely to be null. Check the version before we use it.
-                        if (retVal != null && retVal._serializedVersion != CurrentSerializationVersion)
-                        {
-                            log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
-                            retVal = null;
-                        }
+                        retVal = null;
+                    }
+                    // If we get back a valid object and internals were changed, things are likely to be null. Check the version before we use it.
+                    else if (retVal != null && retVal._serializedVersion != CurrentSerializationVersion)
+                    {
+                        log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
+                        retVal = null;
                     }
                 }
             }

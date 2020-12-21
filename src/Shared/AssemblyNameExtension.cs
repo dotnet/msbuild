@@ -2,13 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Text;
-using System.Reflection;
-using System.Globalization;
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
-using System.Runtime.Serialization;
+using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Text;
+#if !NET35
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+#endif
 #if FEATURE_ASSEMBLYLOADCONTEXT
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
@@ -314,6 +320,11 @@ namespace Microsoft.Build.Shared
                 // Is there a string?
                 CreateAssemblyName();
                 return asAssemblyName.Version;
+            }
+            set
+            {
+                CreateAssemblyName();
+                asAssemblyName.Version = value;
             }
         }
 
@@ -993,5 +1004,237 @@ namespace Microsoft.Build.Shared
             info.AddValue("immutable", immutable);
             info.AddValue("remapped", remappedFrom);
         }
+
+#if !NET35
+        internal class Converter : JsonConverter<AssemblyNameExtension>
+        {
+            public override AssemblyNameExtension Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                AssemblyNameExtension ane = new AssemblyNameExtension();
+                if (reader.TokenType != JsonTokenType.StartObject)
+                {
+                    throw new JsonException();
+                }
+                while (reader.Read())
+                {
+                    if (reader.TokenType == JsonTokenType.EndObject)
+                    {
+                        return ane;
+                    }
+                    else if (reader.TokenType == JsonTokenType.Null)
+                    {
+                        return null;
+                    }
+                    else if (reader.TokenType != JsonTokenType.PropertyName)
+                    {
+                        throw new JsonException();
+                    }
+                    string parameter = reader.GetString();
+                    reader.Read();
+                    if (reader.TokenType == JsonTokenType.Null)
+                    {
+                        continue;
+                    }
+                    switch (parameter)
+                    {
+                        case nameof(ane.asAssemblyName):
+                            AssemblyName an = new AssemblyName();
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonTokenType.EndObject)
+                                {
+                                    ane.asAssemblyName = an;
+                                    break;
+                                }
+                                if (reader.TokenType != JsonTokenType.PropertyName)
+                                {
+                                    throw new JsonException();
+                                }
+                                string anParameter = reader.GetString();
+                                reader.Read();
+                                if (reader.TokenType == JsonTokenType.Null)
+                                {
+                                    continue;
+                                }
+                                switch (anParameter)
+                                {
+                                    case nameof(an.Name):
+                                        an.Name = reader.GetString();
+                                        break;
+                                    case "PublicKey":
+                                        an.SetPublicKey(ParseByteArray(ref reader));
+                                        break;
+                                    case "PublicKeyToken":
+                                        an.SetPublicKeyToken(ParseByteArray(ref reader));
+                                        break;
+                                    case nameof(an.Version):
+                                        an.Version = Version.Parse(reader.GetString());
+                                        break;
+                                    case "Flags":
+                                        an.Flags = (AssemblyNameFlags)reader.GetDecimal();
+                                        break;
+                                    case "CPUArch":
+                                        an.ProcessorArchitecture = (ProcessorArchitecture)reader.GetDecimal();
+                                        break;
+                                    case nameof(an.CultureInfo):
+                                        an.CultureInfo = new CultureInfo(reader.GetString());
+                                        break;
+                                    case "HashAlg":
+                                        an.HashAlgorithm = (System.Configuration.Assemblies.AssemblyHashAlgorithm)reader.GetDecimal();
+                                        break;
+                                    case "VersionCompat":
+                                        an.VersionCompatibility = (AssemblyVersionCompatibility)reader.GetDecimal();
+                                        break;
+                                    case nameof(an.CodeBase):
+                                        an.CodeBase = reader.GetString();
+                                        break;
+                                    case nameof(an.KeyPair):
+                                        an.KeyPair = new StrongNameKeyPair(reader.GetString());
+                                        break;
+                                    default:
+                                        throw new JsonException();
+                                }
+                            }
+                            break;
+                        case nameof(ane.asString):
+                            ane.asString = reader.GetString();
+                            break;
+                        case nameof(ane.isSimpleName):
+                            ane.isSimpleName = reader.GetBoolean();
+                            break;
+                        case nameof(ane.hasProcessorArchitectureInFusionName):
+                            ane.hasProcessorArchitectureInFusionName = reader.GetBoolean();
+                            break;
+                        case nameof(ane.immutable):
+                            ane.immutable = reader.GetBoolean();
+                            break;
+                        case nameof(ane.remappedFrom):
+                            ane.remappedFrom = ParseArray<AssemblyNameExtension>(ref reader, this);
+                            break;
+                    }
+                }
+                throw new JsonException();
+            }
+
+            private HashSet<T> ParseArray<T>(ref Utf8JsonReader reader, JsonConverter<T> converter)
+            {
+                // If the array is null
+                if (reader.TokenType != JsonTokenType.StartArray)
+                {
+                    return null;
+                }
+                HashSet<T> ret = new HashSet<T>();
+                while (reader.Read())
+                {
+                    if (reader.TokenType == JsonTokenType.EndArray)
+                    {
+                        return ret;
+                    }
+                    ret.Add(converter.Read(ref reader, typeof(T), new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }));
+                }
+                throw new JsonException();
+            }
+
+            public override void Write(Utf8JsonWriter writer, AssemblyNameExtension asn, JsonSerializerOptions options)
+            {
+                writer.WriteStartObject();
+                if (asn.asAssemblyName != null)
+                {
+                    writer.WritePropertyName(nameof(asn.asAssemblyName));
+                    writer.WriteStartObject();
+                    writer.WriteString(nameof(asn.asAssemblyName.Name), asn.asAssemblyName.Name);
+                    byte[] publicKey = asn.asAssemblyName.GetPublicKey();
+                    if (publicKey != null)
+                    {
+                        writer.WritePropertyName("PublicKey");
+                        writer.WriteStartArray();
+                        foreach (byte b in asn.asAssemblyName.GetPublicKey())
+                        {
+                            writer.WriteNumberValue(b);
+                        }
+                        writer.WriteEndArray();
+                    }
+                    byte[] publicKeyToken = asn.asAssemblyName.GetPublicKeyToken();
+                    if (publicKeyToken != null)
+                    {
+                        writer.WritePropertyName("PublicKeyToken");
+                        writer.WriteStartArray();
+                        foreach (byte b in asn.asAssemblyName.GetPublicKeyToken())
+                        {
+                            writer.WriteNumberValue(b);
+                        }
+                        writer.WriteEndArray();
+                    }
+                    if (asn.asAssemblyName.Version != null)
+                    {
+                        writer.WriteString(nameof(asn.asAssemblyName.Version), asn.asAssemblyName.Version.ToString());
+                    }
+                    writer.WriteNumber("Flags", (int)asn.asAssemblyName.Flags);
+                    writer.WriteNumber("CPUArch", (int)asn.asAssemblyName.ProcessorArchitecture);
+                    if (asn.asAssemblyName.CultureInfo != null)
+                    {
+                        writer.WriteString(nameof(asn.asAssemblyName.CultureInfo), asn.asAssemblyName.CultureInfo.ToString());
+                    }
+                    writer.WriteNumber("HashAlg", (int)asn.asAssemblyName.HashAlgorithm);
+                    writer.WriteNumber("VersionCompat", (int)asn.asAssemblyName.VersionCompatibility);
+                    writer.WriteString(nameof(asn.asAssemblyName.CodeBase), asn.asAssemblyName.CodeBase);
+                    if (asn.asAssemblyName.KeyPair != null)
+                    {
+                        writer.WriteString(nameof(asn.asAssemblyName.KeyPair), asn.asAssemblyName.KeyPair.ToString());
+                    }
+                    writer.WriteEndObject();
+                }
+                writer.WriteString(nameof(asn.asString), asn.asString);
+                writer.WriteBoolean(nameof(asn.isSimpleName), asn.isSimpleName);
+                writer.WriteBoolean(nameof(asn.hasProcessorArchitectureInFusionName), asn.hasProcessorArchitectureInFusionName);
+                writer.WriteBoolean(nameof(asn.immutable), asn.immutable);
+                if (asn.remappedFrom != null)
+                {
+                    writer.WritePropertyName(nameof(asn.remappedFrom));
+                    writer.WriteStartArray();
+                    JsonSerializerOptions aneOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+                    bool first = true;
+                    foreach (AssemblyNameExtension ane in asn.remappedFrom)
+                    {
+                        if (first)
+                        {
+                            first = false;
+                        }
+                        else
+                        {
+                            writer.WriteStringValue(string.Empty);
+                        }
+                        if (ane is null)
+                        {
+                            writer.WriteNullValue();
+                            continue;
+                        }
+                        Write(writer, ane, aneOptions);
+                    }
+                    writer.WriteEndArray();
+                }
+                writer.WriteEndObject();
+            }
+
+            private byte[] ParseByteArray(ref Utf8JsonReader reader)
+            {
+                // If the array is null
+                if (reader.TokenType != JsonTokenType.StartArray)
+                {
+                    return null;
+                }
+                List<byte> ret = new List<byte>();
+                while (reader.Read())
+                {
+                    if (reader.TokenType == JsonTokenType.EndArray)
+                    {
+                        return ret.ToArray();
+                    }
+                    ret.Add(reader.GetByte());
+                }
+                throw new JsonException();
+            }
+        }
+#endif
     }
 }
