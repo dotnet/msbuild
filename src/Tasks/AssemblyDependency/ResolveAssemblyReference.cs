@@ -1866,13 +1866,15 @@ namespace Microsoft.Build.Tasks
             try
             {
                 _cache = JsonSerializer.Deserialize<SystemState>(File.ReadAllText(_stateFile), deserializeOptions);
-                _cache.SetGetLastWriteTime(getLastWriteTime);
-                _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
             }
             catch (Exception)
             {
                 // log message. This should happen if, for instance, the user has caches created with the BinaryFormatter.
             }
+
+            _cache ??= new SystemState();
+            _cache.SetGetLastWriteTime(getLastWriteTime);
+            _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
         }
 
         /// <summary>
