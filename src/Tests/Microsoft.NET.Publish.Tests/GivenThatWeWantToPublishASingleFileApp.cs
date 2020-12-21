@@ -525,7 +525,7 @@ namespace Microsoft.NET.Publish.Tests
             };
             testProject.AdditionalProperties.Add("SelfContained", $"{selfContained}");
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework + selfContained.ToString() + bundleOption);
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
             publishCommand.Execute(PublishSingleFile, RuntimeIdentifier, bundleOption)
