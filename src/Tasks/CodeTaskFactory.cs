@@ -440,7 +440,7 @@ namespace Microsoft.Build.Tasks
                     return null;
                 }
 
-                references.Add(attribute.Value);
+                references.Add(FileUtilities.MaybeAdjustFilePath(attribute.Value));
             }
 
             return references;
