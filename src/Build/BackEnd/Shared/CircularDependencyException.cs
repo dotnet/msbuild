@@ -31,7 +31,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor for deserialization.
         /// </summary>
-        protected CircularDependencyException(SerializationInfo info, StreamingContext context)
+        public CircularDependencyException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
