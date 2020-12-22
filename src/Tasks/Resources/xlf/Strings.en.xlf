@@ -1602,6 +1602,11 @@
         <target state="new">AssemblyFoldersEx location: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.CacheSerializationFailed">
+        <source>Cache deserialization failed, possibly because the user's caches are serialized with a different serialization technology than the MSBuild currently in use uses.</source>
+        <target state="new">Cache deserialization failed, possibly because the user's caches are serialized with a different serialization technology than the MSBuild currently in use uses.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
         <source>Considered AssemblyFoldersEx locations.</source>
         <target state="new">Considered AssemblyFoldersEx locations.</target>

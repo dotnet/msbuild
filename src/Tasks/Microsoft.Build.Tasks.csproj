@@ -986,15 +986,14 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="System.Reflection.Metadata" />
     <PackageReference Include="System.Resources.Extensions" />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
   <!-- Tasks need to mimic redistributing the compilers, so add references to both full framework and .net core -->
   <ItemGroup>
     <!-- Reference this package to get binaries at runtime even when Arcade is not adding compiler references -->
     <PackageReference Include="Microsoft.Net.Compilers.Toolset" ExcludeAssets="all" Condition="'$(UsingToolMicrosoftNetCompilers)' == 'false'" />
-    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -1006,6 +1005,7 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <PackageReference Include="System.CodeDom" />
+    <PackageReference Include="System.Reflection.Metadata" />
     <PackageReference Include="System.Reflection.TypeExtensions" />
     <PackageReference Include="System.Runtime.InteropServices" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" />

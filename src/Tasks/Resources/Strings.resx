@@ -1367,6 +1367,9 @@
 
         If this bucket overflows, pls. contact 'vsppbdev'.
   -->
+  <data name="ResolveAssemblyReference.CacheSerializationFailed">
+    <value>Cache deserialization failed, possibly because the user's caches are serialized with a different serialization technology than the MSBuild currently in use uses.</value>
+  </data>
   <data name="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
     <value>AssemblyFoldersEx location: "{0}"</value>
   </data>

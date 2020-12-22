@@ -1869,7 +1869,8 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception)
             {
-                // log message. This should happen if, for instance, the user has caches created with the BinaryFormatter.
+                // This should happen if, for instance, the user has caches created with the BinaryFormatter.
+                Log.LogMessageFromResources("ResolveAssemblyReference.CacheSerializationFailed");
             }
 
             _cache ??= new SystemState();

@@ -1,12 +1,4 @@
 <Project>
-
-  <PropertyGroup>
-      <NuGetPackageVersion>5.9.0-preview.1.6870</NuGetPackageVersion>
-      <NuGetBuildTasksVersion Condition="'$(NuGetBuildTasksVersion)' == ''">$(NuGetPackageVersion)</NuGetBuildTasksVersion>
-      <NuGetCommandsVersion Condition="'$(NuGetCommandsVersion)' == ''">$(NuGetPackageVersion)</NuGetCommandsVersion>
-      <NuGetProtocolVersion Condition="'$(NuGetProtocolVersion)' == ''">$(NuGetPackageVersion)</NuGetProtocolVersion>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Update="jnm2.ReferenceAssemblies.net35" Version="1.0.1" />
     <PackageReference Update="LargeAddressAware" Version="1.0.3" />
