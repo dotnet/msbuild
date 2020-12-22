@@ -1859,13 +1859,16 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the state file (if present) into the cache. If not present, attempts to read from CacheInputPaths, then creates a new cache if necessary.
         /// </summary>
-        internal void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
+        internal async void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
         {
             var deserializeOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
             deserializeOptions.Converters.Add(new SystemState.Converter());
             try
             {
-                _cache = JsonSerializer.Deserialize<SystemState>(File.ReadAllText(_stateFile), deserializeOptions);
+                using (FileStream s = new FileStream(_stateFile, FileMode.Open))
+                {
+                    _cache = await JsonSerializer.DeserializeAsync<SystemState>(s, deserializeOptions);
+                }
             }
             catch (Exception)
             {
@@ -1881,13 +1884,16 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// If CacheOutputPath is non-null, writes out a cache to that location. Otherwise, writes out the state file if a state name was supplied and the cache is dirty.
         /// </summary>
-        internal void WriteStateFile()
+        internal async void WriteStateFile()
         {
             if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
                 var deserializeOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
                 deserializeOptions.Converters.Add(new SystemState.Converter());
-                File.WriteAllText(_stateFile, JsonSerializer.Serialize<SystemState>(_cache, deserializeOptions));
+                using (FileStream fs = new FileStream(_stateFile, FileMode.OpenOrCreate))
+                {
+                    await JsonSerializer.SerializeAsync<SystemState>(fs, _cache, deserializeOptions);
+                }
             }
         }
         #endregion
