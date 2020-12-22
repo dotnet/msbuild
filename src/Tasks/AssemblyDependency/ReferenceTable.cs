@@ -2237,14 +2237,15 @@ namespace Microsoft.Build.Tasks
         }
 
         // TODO: Verify correctness of this implementation and extend to more cases.
-        // Should be consistent with CompareAssemblyIdentity from Fusion API.
-        // Both of these identities must be full-specified (name, version, pkt, culture). The result parameter will TRUE if one (or more) of the following conditions is true:
+        // Should be consistent with CompareAssemblyIdentity from Fusion API:
+        // The result should be TRUE if one (or more) of the following conditions is true:
         // a) The assembly identities are equivalent. For strongly-named assemblies this means full match on (name, version, pkt, culture); for simply-named assemblies this means a match on (name, culture)
         // b) The assemblies being compared are FX assemblies (even if the version numbers are not the same, these will compare as equivalent by way of unification)
         // c) The assemblies are not FX assemblies but are equivalent because fUnified1 and/or fUnified2 were set.
         // The fUnified flag is used to indicate that all versions up to the version number of the strongly-named assembly are considered equivalent to itself.
         // For example, if assemblyIdentity1 is "foo, version=5.0.0.0, culture=neutral, publicKeyToken=...." and fUnified1==TRUE, then this means to treat all versions of the assembly in the range 0.0.0.0-5.0.0.0 to be equivalent to "foo, version=5.0.0.0, culture=neutral, publicKeyToken=...".
-        // If assemblyIdentity2 is the same as assemblyIdentity1, except has a lower version number (e.g.version range 0.0.0.0-5.0.0.0), then the function will return that the identities are equivalent.If assemblyIdentity2 is the same as assemblyIdentity1, but has a greater version number than 5.0.0.0 then the two identities will only be equivalent if fUnified2 is set.
+        // If assemblyIdentity2 is the same as assemblyIdentity1, except has a lower version number (e.g.version range 0.0.0.0-5.0.0.0), then the function will return that the identities are equivalent.
+        // If assemblyIdentity2 is the same as assemblyIdentity1, but has a greater version number than 5.0.0.0 then the two identities will only be equivalent if fUnified2 is set.
         /// <summary>
         /// Compares two assembly identities to determine whether or not they are equivalent.
         /// </summary>
