@@ -47,7 +47,7 @@
     <PackageReference Update="xunit.core" Version="$(XUnitVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition="($([MSBuild]::IsOSPlatform('osx')) and '$(MonoBuild)' == 'true') or $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1'))">
+  <ItemGroup Condition="'$(MonoBuild)' == 'true' or $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1'))">
     <PackageReference Update="Microsoft.Extensions.DependencyModel" Version="5.0.0"/>
   </ItemGroup>
 
