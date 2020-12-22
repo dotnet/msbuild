@@ -14,7 +14,7 @@ namespace Microsoft.Build.BackEnd
     /// If you add fields to this class, add a custom serialization constructor and override GetObjectData().
     /// </remarks>
     [Serializable]
-    internal class CircularDependencyException : Exception
+    public class CircularDependencyException : Exception
     {
         /// <summary>
         /// Constructs a standard BuildAbortedException.
