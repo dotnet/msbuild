@@ -473,8 +473,9 @@ BuildEngine5.BuildProjectFilesInParallel(
 ".Cleanup()).Path;
 
             _buildParametersPrototype.IsolateProjects.ShouldBeTrue();
+            var buildParameters = _buildParametersPrototype.Clone();
 
-            using (var buildManagerSession = new Helpers.BuildManagerSession(_env, _buildParametersPrototype))
+            using (var buildManagerSession = new Helpers.BuildManagerSession(_env, buildParameters))
             {
                 // seed caches with results from the reference
                 buildManagerSession.BuildProjectFile(referenceFile).OverallResult.ShouldBe(BuildResultCode.Success);

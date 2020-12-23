@@ -1134,6 +1134,7 @@ namespace Microsoft.Build.Execution
                                 result.AddResultsForTarget(targetResult.Key, targetResult.Value);
                             }
 
+                            _resultsCache.AddResult(result);
                             submission.CompleteLogging(false);
                             ReportResultsToSubmission(result);
                         }
@@ -1270,7 +1271,10 @@ namespace Microsoft.Build.Execution
                 _buildParameters.ProjectCacheDescriptor == null)
             {
                 _projectCacheServiceInstantiatedByVSWorkaround = true;
-                ErrorUtilities.VerifyThrowInvalidOperation(ProjectCacheItems.Count == 1, "OnlyOneCachePluginMustBeSpecified");
+                ErrorUtilities.VerifyThrowInvalidOperation(
+                    ProjectCacheItems.Count == 1,
+                    "OnlyOneCachePluginMustBeSpecified",
+                    string.Join("; ", ProjectCacheItems.Values.Select(c => c.PluginPath)));
 
                 LoadSubmissionProjectIntoConfiguration(submission, config);
 
@@ -1600,6 +1604,10 @@ namespace Microsoft.Build.Execution
                 }
             }
 
+            ex = ex is AggregateException ae && ae.InnerExceptions.Count == 1
+                ? ae.InnerExceptions.First()
+                : ex;
+
             if (submission.IsStarted)
             {
                 submission.CompleteResults(new GraphBuildResult(submission.SubmissionId, ex));
@@ -1880,9 +1888,8 @@ namespace Microsoft.Build.Execution
 
             ErrorUtilities.VerifyThrowInvalidOperation(
                 cacheItems.Count == 1,
-                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                    "OnlyOneCachePluginMustBeSpecified",
-                    string.Join("; ", cacheItems.Select(ci => ci.PluginPath))));
+                "OnlyOneCachePluginMustBeSpecified",
+                string.Join("; ", cacheItems.Select(ci => ci.PluginPath)));
 
             var nodesWithoutCacheItems = nodeToCacheItems.Where(kvp => kvp.Value.Length == 0).ToArray();
 

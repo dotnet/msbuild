@@ -144,7 +144,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                                    $"\n\tGlobal Properties: {{{string.Join(",", buildRequest.GlobalProperties.Select(kvp => $"{kvp.Name}={kvp.EvaluatedValue}"))}}}";
 
             _logger.LogMessage(
-                "\n====== Querying plugin for project " + queryDescription,
+                "\n====== Querying project cache for project " + queryDescription,
                 MessageImportance.High);
 
             var cacheResult = await _projectCachePlugin.GetCacheResultAsync(buildRequest, _logger, _cancellationToken);

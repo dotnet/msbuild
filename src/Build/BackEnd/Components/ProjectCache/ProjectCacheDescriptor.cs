@@ -88,7 +88,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 : $"Assembly path based: {PluginAssemblyPath}";
 
             var entryPointStyle = EntryPoints != null
-                ? "Non static graph based"
+                ? "Graph entrypoint based"
                 : "Static graph based";
 
             var entryPoints = EntryPoints != null
@@ -103,9 +103,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             return $"{loadStyle}\nEntry-point style: {entryPointStyle}\nEntry-points:\n{entryPoints}";
 
-            static string FormatGlobalProperties(IDictionary<string, string> globalProperties)
+            static string FormatGlobalProperties(IDictionary<string, string>? globalProperties)
             {
-                return string.Join(", ", globalProperties.Select(gp => $"{gp.Key}={gp.Value}"));
+                return globalProperties == null
+                    ? string.Empty
+                    : string.Join(", ", globalProperties.Select(gp => $"{gp.Key}={gp.Value}"));
             }
         }
     }
