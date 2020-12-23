@@ -214,13 +214,16 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Log an error if the warning we were about to log is listed as a WarningAsError
             // https://github.com/dotnet/msbuild/issues/5511
-            string warningCode;
-            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out warningCode, out _, messageResourceName, messageArgs);
-
-            if(_loggingService.WarningsAsErrors.Contains(warningCode))
+            if(_loggingService.WarningsAsErrors != null)
             {
-                LogError(file, messageResourceName, messageArgs);
-                return;
+                string warningCode;
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out warningCode, out _, messageResourceName, messageArgs);
+
+                if (_loggingService.WarningsAsErrors.Contains(warningCode))
+                {
+                    LogError(file, messageResourceName, messageArgs);
+                    return;
+                }
             }
 
             _loggingService.LogWarning(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
