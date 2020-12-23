@@ -4,7 +4,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Build.BackEnd
+namespace Microsoft.Build.Exceptions
 {
     /// <summary>
     /// An exception representing the case where a BuildRequest has caused a circular project dependency.  This is used to
@@ -14,7 +14,7 @@ namespace Microsoft.Build.BackEnd
     /// If you add fields to this class, add a custom serialization constructor and override GetObjectData().
     /// </remarks>
     [Serializable]
-    internal class CircularDependencyException : Exception
+    public class CircularDependencyException : Exception
     {
         /// <summary>
         /// Constructs a standard BuildAbortedException.

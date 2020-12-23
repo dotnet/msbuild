@@ -888,6 +888,10 @@ namespace Microsoft.Build.Exceptions
         public string ErrorCode { get { throw null; } }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
+    public partial class CircularDependencyException : System.Exception
+    {
+        protected CircularDependencyException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+    }
     public sealed partial class InternalLoggerException : System.Exception
     {
         public InternalLoggerException() { }
