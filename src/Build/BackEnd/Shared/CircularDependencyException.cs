@@ -4,7 +4,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Build.BackEnd
+namespace Microsoft.Build.Exceptions
 {
     /// <summary>
     /// An exception representing the case where a BuildRequest has caused a circular project dependency.  This is used to
@@ -31,7 +31,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor for deserialization.
         /// </summary>
-        public CircularDependencyException(SerializationInfo info, StreamingContext context)
+        protected CircularDependencyException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

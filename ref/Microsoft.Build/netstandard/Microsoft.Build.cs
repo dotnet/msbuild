@@ -1,12 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-namespace Microsoft.Build.BackEnd
-{
-    public partial class CircularDependencyException : System.Exception
-    {
-        public CircularDependencyException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-    }
-}
 namespace Microsoft.Build.Construction
 {
     public abstract partial class ElementLocation
@@ -894,6 +887,10 @@ namespace Microsoft.Build.Exceptions
         public BuildAbortedException(string message, System.Exception innerException) { }
         public string ErrorCode { get { throw null; } }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+    }
+    public partial class CircularDependencyException : System.Exception
+    {
+        protected CircularDependencyException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public sealed partial class InternalLoggerException : System.Exception
     {
