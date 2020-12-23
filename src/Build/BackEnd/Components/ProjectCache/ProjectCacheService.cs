@@ -90,7 +90,14 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         private static ProjectCacheBase GetPluginInstanceFromType(Type pluginType)
         {
-            return (ProjectCacheBase) Activator.CreateInstance(pluginType);
+            try
+            {
+                return (ProjectCacheBase) Activator.CreateInstance(pluginType);
+            }
+            catch (TargetInvocationException e) when (e.InnerException != null)
+            {
+                throw e.InnerException;
+            }
         }
 
         private static Type GetTypeFromAssemblyPath(string pluginAssemblyPath)

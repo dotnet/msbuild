@@ -836,6 +836,10 @@ namespace Microsoft.Build.Execution
                     _resultsCache.ClearResults();
                 }
             }
+            catch (AggregateException ae) when (ae.InnerExceptions.Count == 1)
+            {
+                throw ae.InnerExceptions.First();
+            }
             finally
             {
                 try
@@ -998,8 +1002,12 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(submission, nameof(submission));
             ErrorUtilities.VerifyThrow(!submission.IsCompleted, "Submission already complete.");
 
+            bool thisMethodIsAsync = false;
+
             if (ProjectCacheIsPresent())
             {
+                thisMethodIsAsync = true;
+
                 // Potential long running operations:
                 //  - submission may need evaluation
                 //  - project cache may need initializing
@@ -1088,6 +1096,8 @@ namespace Microsoft.Build.Execution
 
                         newConfiguration.ExplicitlyLoaded = true;
 
+                        submission.BuildRequest = CreateRealBuildRequest(submission, newConfiguration.ConfigurationId);
+
                         // TODO: Remove this when VS gets updated to setup project cache plugins.
                         InstantiateProjectCacheServiceForVisualStudioWorkaround(submission, newConfiguration);
 
@@ -1100,9 +1110,6 @@ namespace Microsoft.Build.Execution
                         if (cacheResult == null || cacheResult.ResultType != CacheResultType.CacheHit)
                         {
                             // Issue the real build request.
-
-                            CreateRealBuildRequest(submission, newConfiguration.ConfigurationId);
-
                             SubmitBuildRequest();
                         }
                         else if (cacheResult?.ResultType == CacheResultType.CacheHit && cacheResult.ProxyTargets != null)
@@ -1110,7 +1117,7 @@ namespace Microsoft.Build.Execution
                             // Setup submission.BuildRequest with proxy targets. The proxy request is built on the inproc node (to avoid ProjectInstance serialization).
                             // The proxy target results are used as results for the real targets.
 
-                            CreateProxyBuildRequest(
+                            submission.BuildRequest = CreateProxyBuildRequest(
                                 submission,
                                 newConfiguration.ConfigurationId,
                                 cacheResult.ProxyTargets);
@@ -1120,9 +1127,6 @@ namespace Microsoft.Build.Execution
                         else if (cacheResult?.ResultType == CacheResultType.CacheHit && cacheResult.BuildResult != null)
                         {
                             // Mark the build submission as complete with the provided results and return.
-
-                            CreateRealBuildRequest(submission, newConfiguration.ConfigurationId);
-
                             var result = new BuildResult(submission.BuildRequest);
 
                             foreach (var targetResult in cacheResult.BuildResult.ResultsByTarget)
@@ -1139,7 +1143,10 @@ namespace Microsoft.Build.Execution
                         HandleExecuteSubmissionException(submission, ex);
                         throw;
                     }
-
+                    catch (Exception ex) when (thisMethodIsAsync)
+                    {
+                        OnThreadException(ex);
+                    }
                     void SubmitBuildRequest()
                     {
                         if (CheckForShutdown())
@@ -1196,11 +1203,23 @@ namespace Microsoft.Build.Execution
 
             CacheResult QueryCache(BuildSubmission buildSubmission, BuildRequestConfiguration newConfiguration)
             {
-                CacheResult cacheResult;
+                ProjectCacheService cacheService = null;
+
+                try
+                {
+                    cacheService = _projectCacheService.Result;
+                }
+                catch
+                {
+                    // Set to null so that EndBuild does not try to shut it down and thus rethrow the exception.
+                    _projectCacheService = null;
+                    throw;
+                }
+
                 // Project cache plugins require an evaluated project. Evaluate the submission if it's by path.
                 LoadSubmissionProjectIntoConfiguration(buildSubmission, newConfiguration);
 
-                cacheResult = _projectCacheService.Result.GetCacheResultAsync(
+                var cacheResult = cacheService.GetCacheResultAsync(
                         new BuildRequestData(
                             newConfiguration.Project,
                             buildSubmission.BuildRequestData.TargetNames.ToArray()))
@@ -1210,9 +1229,9 @@ namespace Microsoft.Build.Execution
                 return cacheResult;
             }
 
-            static void CreateRealBuildRequest(BuildSubmission submission, int configurationId)
+            static BuildRequest CreateRealBuildRequest(BuildSubmission submission, int configurationId)
             {
-                submission.BuildRequest = new BuildRequest(
+                return new BuildRequest(
                     submission.SubmissionId,
                     BackEnd.BuildRequest.InvalidNodeRequestId,
                     configurationId,
@@ -1224,12 +1243,12 @@ namespace Microsoft.Build.Execution
                     submission.BuildRequestData.RequestedProjectState);
             }
 
-            static void CreateProxyBuildRequest(
+            static BuildRequest CreateProxyBuildRequest(
                 BuildSubmission submission,
                 int configurationId,
                 ProxyTargets proxyTargets)
             {
-                submission.BuildRequest = new BuildRequest(
+                return new BuildRequest(
                     submission.SubmissionId,
                     BackEnd.BuildRequest.InvalidNodeRequestId,
                     configurationId,
@@ -1540,6 +1559,10 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void HandleExecuteSubmissionException(BuildSubmission submission, Exception ex)
         {
+            if (ex is AggregateException ae && ae.InnerExceptions.Count == 1)
+            {
+                ex = ae.InnerExceptions.First();
+            }
             if (ex is InvalidProjectFileException projectException)
             {
                 if (!projectException.HasBeenLogged)
@@ -1905,7 +1928,7 @@ namespace Microsoft.Build.Execution
 
                 lock (_buildManager._syncLock)
                 {
-                    _buildManager._projectCacheService.Result.ShutDown().GetAwaiter().GetResult();
+                    _buildManager._projectCacheService?.Result.ShutDown().GetAwaiter().GetResult();
                     _buildManager._projectCacheService = null;
                 }
             }
