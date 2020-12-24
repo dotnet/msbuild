@@ -3089,8 +3089,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         Assert.Equal(cache, t.FilesWritten[0].ItemSpec);
                     }
 
-                    File.Delete(t.StateFile);
-
                     // Check attributes on resolve files.
                     for (int i = 0; i < t.ResolvedFiles.Length; i++)
                     {
@@ -3112,6 +3110,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 if (File.Exists(rarCacheFile))
                 {
                     FileUtilities.DeleteNoThrow(rarCacheFile);
+                }
+
+                if (File.Exists(t.StateFile))
+                {
+                    FileUtilities.DeleteNoThrow(t.StateFile);
                 }
             }
             return succeeded;

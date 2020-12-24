@@ -1859,7 +1859,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the state file (if present) into the cache. If not present, attempts to read from CacheInputPaths, then creates a new cache if necessary.
         /// </summary>
-        internal async void ReadStateFile(GetLastWriteTime getLastWriteTime, AssemblyTableInfo[] installedAssemblyTableInfo)
+        internal async void ReadStateFile()
         {
             var deserializeOptions = new JsonSerializerOptions() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
             deserializeOptions.Converters.Add(new SystemState.Converter());
@@ -1877,8 +1877,6 @@ namespace Microsoft.Build.Tasks
             }
 
             _cache ??= new SystemState();
-            _cache.SetGetLastWriteTime(getLastWriteTime);
-            _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
         }
 
         /// <summary>
@@ -2123,7 +2121,9 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Load any prior saved state.
-                    ReadStateFile(getLastWriteTime, installedAssemblyTableInfo);
+                    ReadStateFile();
+                    _cache.SetGetLastWriteTime(getLastWriteTime);
+                    _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
 
                     // Cache delegates.
                     getAssemblyName = _cache.CacheDelegate(getAssemblyName);
