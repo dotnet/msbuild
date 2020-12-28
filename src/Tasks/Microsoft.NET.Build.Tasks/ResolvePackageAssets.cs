@@ -618,7 +618,7 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private sealed class CacheWriter : IDisposable
+        internal sealed class CacheWriter : IDisposable
         {
             private const int InitialStringTableCapacity = 32;
 
@@ -1347,7 +1347,10 @@ namespace Microsoft.NET.Build.Tasks
             private void ComputePackageExclusions()
             {
                 var copyLocalPackageExclusions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                var libraryLookup = _runtimeTarget.Libraries.ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
+                var libraryLookup = _runtimeTarget.Libraries
+                    .GroupBy(p => p.Name)
+                    .Select(g => g.First())
+                    .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
 
                 // Only exclude platform packages for framework-dependent applications
                 if ((!_task.IsSelfContained || string.IsNullOrEmpty(_runtimeTarget.RuntimeIdentifier)) &&
