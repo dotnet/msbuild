@@ -1009,25 +1009,21 @@ namespace Microsoft.Build.Tasks
                             // Log the reference which lost the conflict and the dependencies and source items which caused it.
                             LogReferenceDependenciesAndSourceItemsToStringBuilder(fusionName, conflictCandidate, logDependencies.AppendLine());
 
-                            if (!logWarning)
-                            {
-                                Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), StringBuilderCache.GetStringAndRelease(logConflict));
-                                Log.LogMessage(MessageImportance.Low, StringBuilderCache.GetStringAndRelease(logDependencies));
-                            }
-                            else if (OutputUnresolvedAssemblyConflicts)
-                            {
-                                _unresolvedConflicts.Add(new TaskItem(StringBuilderCache.GetStringAndRelease(logConflict)));
-                            }
-                            else
+                            if (logWarning)
                             {
                                 // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference	
                                 // chosen was not the conflict victor in a version comparison. In other words, the victor was older.
                                 Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts", assemblyName.Name, StringBuilderCache.GetStringAndRelease(logConflict));
                             }
+                            else
+                            {
+                                Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), StringBuilderCache.GetStringAndRelease(logConflict));
+                                Log.LogMessage(MessageImportance.Low, StringBuilderCache.GetStringAndRelease(logDependencies));
+                            }
 
                             if (OutputUnresolvedAssemblyConflicts)
                             {
-
+                                _unresolvedConflicts.Add(new TaskItem(assemblyName.Name));
                             }
                         }
                     }
