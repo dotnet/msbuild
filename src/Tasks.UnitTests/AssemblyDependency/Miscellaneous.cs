@@ -14,7 +14,6 @@ using Xunit;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Xunit.Abstractions;
 using Shouldly;
-using System.Text;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
