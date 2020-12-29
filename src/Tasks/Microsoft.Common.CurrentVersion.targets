@@ -2156,6 +2156,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <ResolveAssemblyReferencesFindRelatedSatellites Condition="'$(ResolveAssemblyReferencesFindRelatedSatellites)' == ''">$(BuildingProject)</ResolveAssemblyReferencesFindRelatedSatellites>
       <ResolveAssemblyReferencesFindSerializationAssemblies Condition="'$(ResolveAssemblyReferencesFindSerializationAssemblies)' == ''">$(BuildingProject)</ResolveAssemblyReferencesFindSerializationAssemblies>
       <ResolveAssemblyReferencesFindRelatedFiles Condition="'$(ResolveAssemblyReferencesFindRelatedFiles)' == ''">$(BuildingProject)</ResolveAssemblyReferencesFindRelatedFiles>
+      <ResolveAssemblyReferenceAlwaysWarnOnConflict Condition="'$(ResolveAssemblyReferenceAlwaysWarnOnConflict)' == ''">false</ResolveAssemblyReferenceAlwaysWarnOnConflict>
     </PropertyGroup>
 
     <ItemGroup>
@@ -2218,7 +2219,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         IgnoreTargetFrameworkAttributeVersionMismatch ="$(ResolveAssemblyReferenceIgnoreTargetFrameworkAttributeVersionMismatch)"
         FindDependenciesOfExternallyResolvedReferences="$(FindDependenciesOfExternallyResolvedReferences)"
         ContinueOnError="$(ContinueOnError)"
-        AlwaysWarnOnConflicts="$(ResolveAssemblyReferenceAlwaysLogOnConflict)"
+        AlwaysWarnOnConflicts="$(ResolveAssemblyReferenceAlwaysWarnOnConflict)"
         Condition="'@(Reference)'!='' or '@(_ResolvedProjectReferencePaths)'!='' or '@(_ExplicitReference)' != ''"
         >
 
