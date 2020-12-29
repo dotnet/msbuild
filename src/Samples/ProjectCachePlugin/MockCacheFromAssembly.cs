@@ -10,7 +10,7 @@ using Microsoft.Build.Framework;
 
 namespace MockCacheFromAssembly
 {
-    public class MockCacheFromAssembly : ProjectCacheBase
+    public class MockCacheFromAssembly : ProjectCachePluginBase
     {
         public MockCacheFromAssembly()
         {

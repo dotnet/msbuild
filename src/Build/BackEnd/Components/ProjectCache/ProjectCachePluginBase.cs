@@ -11,7 +11,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     /// <summary>
     ///     Only one plugin instance can exist for a given BuildManager BeginBuild / EndBuild session.
     /// </summary>
-    public abstract class ProjectCacheBase
+    public abstract class ProjectCachePluginBase
     {
         /// <summary>
         ///     Called once before the build, to have the plugin instantiate its state.

@@ -29,7 +29,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public IReadOnlyDictionary<string, string> PluginSettings { get; }
 
-        public ProjectCacheBase? PluginInstance { get; }
+        public ProjectCachePluginBase? PluginInstance { get; }
 
         private ProjectCacheDescriptor(
             IReadOnlyCollection<ProjectGraphEntryPoint>? entryPoints,
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         }
 
         private ProjectCacheDescriptor(
-            ProjectCacheBase pluginInstance,
+            ProjectCachePluginBase pluginInstance,
             IReadOnlyCollection<ProjectGraphEntryPoint>? entryPoints,
             ProjectGraph? projectGraph,
             IReadOnlyDictionary<string, string>? pluginSettings) : this(entryPoints, projectGraph, pluginSettings)
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         }
 
         public static ProjectCacheDescriptor FromInstance(
-            ProjectCacheBase pluginInstance,
+            ProjectCachePluginBase pluginInstance,
             IReadOnlyCollection<ProjectGraphEntryPoint>? entryPoints,
             ProjectGraph? projectGraph,
             IReadOnlyDictionary<string, string>? pluginSettings = null)

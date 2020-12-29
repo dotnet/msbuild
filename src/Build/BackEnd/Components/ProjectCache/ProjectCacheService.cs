@@ -23,10 +23,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private readonly PluginLoggerBase _logger;
         private readonly ProjectCacheDescriptor _projectCacheDescriptor;
         private readonly CancellationToken _cancellationToken;
-        private readonly ProjectCacheBase _projectCachePlugin;
+        private readonly ProjectCachePluginBase _projectCachePlugin;
 
         private ProjectCacheService(
-            ProjectCacheBase projectCachePlugin,
+            ProjectCachePluginBase projectCachePlugin,
             BuildManager buildManager,
             PluginLoggerBase logger,
             ProjectCacheDescriptor projectCacheDescriptor,
@@ -70,7 +70,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             return new ProjectCacheService(plugin, buildManager, logger, pluginDescriptor, cancellationToken);
         }
 
-        private static ProjectCacheBase GetPluginInstance(ProjectCacheDescriptor pluginDescriptor)
+        private static ProjectCachePluginBase GetPluginInstance(ProjectCacheDescriptor pluginDescriptor)
         {
             if (pluginDescriptor.PluginInstance != null)
             {
@@ -88,11 +88,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
 #pragma warning restore CS8603 // Possible null reference return.
         }
 
-        private static ProjectCacheBase GetPluginInstanceFromType(Type pluginType)
+        private static ProjectCachePluginBase GetPluginInstanceFromType(Type pluginType)
         {
             try
             {
-                return (ProjectCacheBase) Activator.CreateInstance(pluginType);
+                return (ProjectCachePluginBase) Activator.CreateInstance(pluginType);
             }
             catch (TargetInvocationException e) when (e.InnerException != null)
             {
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             var assembly = LoadAssembly(pluginAssemblyPath);
 
-            var type = GetTypes<ProjectCacheBase>(assembly).FirstOrDefault();
+            var type = GetTypes<ProjectCachePluginBase>(assembly).FirstOrDefault();
 
             ErrorUtilities.VerifyThrow(type != null, "NoProjectCachePluginFoundInAssembly", pluginAssemblyPath);
 

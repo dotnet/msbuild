@@ -198,7 +198,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             EndBuildAsync = 1 << 3
         }
 
-        public class MockProjectCache : ProjectCacheBase
+        public class MockProjectCache : ProjectCachePluginBase
         {
             private readonly GraphCacheResponse? _testData;
             public ConcurrentQueue<BuildRequestData> Requests { get; } = new ConcurrentQueue<BuildRequestData>();
