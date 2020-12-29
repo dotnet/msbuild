@@ -564,7 +564,7 @@ namespace Microsoft.Build.Execution
                 ErrorUtilities.ThrowInternalError("Only one project cache plugin may be set on the BuildManager during a begin / end build session");
             }
 
-            LogMessage(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LoadingProjectCachePlugin", pluginDescriptor.ToString()));
+            LogMessage(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LoadingProjectCachePlugin", pluginDescriptor.GetDetailedDescription()));
 
             _projectCacheService = ProjectCacheService.FromDescriptorAsync(
                 pluginDescriptor,

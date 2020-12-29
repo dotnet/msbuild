@@ -81,7 +81,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             return new ProjectCacheDescriptor(pluginInstance, entryPoints, projectGraph, pluginSettings);
         }
 
-        public override string ToString()
+        public string GetDetailedDescription()
         {
             var loadStyle = PluginInstance != null
                 ? $"Instance based: {PluginInstance.GetType().AssemblyQualifiedName}"
