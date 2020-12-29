@@ -17,6 +17,19 @@
   "packs": {
     "Microsoft.NET.Sdk.TestWorkload.Pack": {
       "kind": "sdk",
+      "version": "0.42.42",
+      "alias-to":
+      {
+        "win": "Microsoft.NET.Sdk.TestWorkload.Pack.Win",
+        "unix": "Microsoft.NET.Sdk.TestWorkload.Pack.Unix"
+      }
+    },
+    "Microsoft.NET.Sdk.TestWorkload.Pack.Win": {
+      "kind": "sdk",
+      "version": "0.42.42"
+    },
+    "Microsoft.NET.Sdk.TestWorkload.Pack.Unix": {
+      "kind": "sdk",
       "version": "0.42.42"
     },
     "Microsoft.NET.Sdk.MissingTestWorkload.Pack": {

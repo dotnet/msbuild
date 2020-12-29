@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -140,7 +141,40 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var getValuesCommand = new GetValuesCommand(testAsset, "TestWorkloadAutoImportPropsImported");
+            foreach (var property in new[] { "WinTestWorkloadAutoImportPropsImported", "UnixTestWorkloadAutoImportPropsImported" })
+            {
+                var getValuesCommand = new GetValuesCommand(testAsset, property);
+
+                getValuesCommand
+                    .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "true")
+                    .Execute()
+                    .Should()
+                    .Pass();
+
+                getValuesCommand
+                    .GetValues()
+                    .Should()
+                    .BeEquivalentTo("true");
+            }
+        }
+
+        [CoreMSBuildOnlyFact]
+        public void It_should_import_aliased_pack()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "WorkloadTest",
+                TargetFrameworks = "net5.0-workloadtestplatform"
+            };
+
+            var testAsset = _testAssetsManager
+                .CreateTestProject(testProject);
+
+            var expectedProperty = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
+                "UsingWinTestWorkloadPack" :
+                "UsingUnixTestWorkloadPack";
+
+            var getValuesCommand = new GetValuesCommand(testAsset, expectedProperty);
 
             getValuesCommand
                 .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "true")

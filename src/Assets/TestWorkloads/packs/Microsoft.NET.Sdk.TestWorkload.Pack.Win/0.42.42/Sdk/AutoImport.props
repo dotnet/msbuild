@@ -3,6 +3,6 @@
   <!-- <Import Project="..\targets\Microsoft.NET.Sdk.TestWorkload.DefaultItems.props"  />   -->
 
   <PropertyGroup>
-    <TestWorkloadAutoImportPropsImported>true</TestWorkloadAutoImportPropsImported>
+    <WinTestWorkloadAutoImportPropsImported>true</WinTestWorkloadAutoImportPropsImported>
   </PropertyGroup>
 </Project>
