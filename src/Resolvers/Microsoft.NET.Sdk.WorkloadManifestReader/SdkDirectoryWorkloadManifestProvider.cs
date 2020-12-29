@@ -84,9 +84,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 Dictionary<string, string> directoriesWithManifests = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 foreach (var manifestDirectory in _manifestDirectories.Reverse())
                 {
-                    foreach (var workloadManifestDirectory in Directory.EnumerateDirectories(manifestDirectory))
+                    if (Directory.Exists(manifestDirectory))
                     {
-                        directoriesWithManifests[Path.GetFileName(workloadManifestDirectory)] = workloadManifestDirectory;
+                        foreach (var workloadManifestDirectory in Directory.EnumerateDirectories(manifestDirectory))
+                        {
+                            directoriesWithManifests[Path.GetFileName(workloadManifestDirectory)] = workloadManifestDirectory;
+                        }
                     }
                 }
 
@@ -94,7 +97,6 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 {
                     yield return workloadManifestDirectory;
                 }
-                
             }
         }
     }

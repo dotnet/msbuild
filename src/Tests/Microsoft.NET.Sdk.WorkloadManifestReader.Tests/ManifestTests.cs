@@ -3,15 +3,21 @@
 
 using FluentAssertions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+using Microsoft.NET.TestFramework;
 using System.IO;
 using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace ManifestReaderTests
 {
-    public class ManifestTests
+    public class ManifestTests : SdkTest
     {
         private const string fakeRootPath = "fakeRootPath";
+
+        public ManifestTests(ITestOutputHelper log) : base(log)
+        {
+        }
 
         [Fact]
         public void ItCanDeserialize()
@@ -43,6 +49,81 @@ namespace ManifestReaderTests
             buildToolsPack.Id.Should().Be("Xamarin.Android.BuildTools");
             buildToolsPack.Version.Should().Be("8.4.7");
             buildToolsPack.Path.Should().Be(Path.Combine(fakeRootPath, "packs", "Xamarin.Android.BuildTools.Win64Host", "8.4.7"));
+        }
+
+        [Fact]
+        public void GivenMultiplePackRoots_ItUsesTheLastOneIfThePackDoesntExist()
+        {
+            TestMultiplePackRoots(false, false);
+        }
+
+        [Fact]
+        public void GivenMultiplePackRoots_ItUsesTheFirstOneIfBothExist()
+        {
+            TestMultiplePackRoots(true, true);
+        }
+
+        [Fact]
+        public void GivenMultiplePackRoots_ItUsesTheFirstOneIfOnlyItExists()
+        {
+            TestMultiplePackRoots(false, true);
+        }
+
+        [Fact]
+        public void GivenMultiplePackRoots_ItUsesTheSecondOneIfOnlyItExists()
+        {
+            TestMultiplePackRoots(true, false);
+        }
+
+        void TestMultiplePackRoots(bool defaultExists, bool additionalExists)
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory(identifier: defaultExists.ToString() + "_" + additionalExists.ToString()).Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            Directory.CreateDirectory(dotnetRoot);
+            var additionalRoot = Path.Combine(testDirectory, "additionalPackRoot");
+            Directory.CreateDirectory(additionalRoot);
+
+            var defaultPackPath = Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7");
+            var additionalPackPath = Path.Combine(additionalRoot, "packs", "Xamarin.Android.Sdk", "8.4.7");
+
+            if (defaultExists)
+            {
+                Directory.CreateDirectory(defaultPackPath);
+            }
+            if (additionalExists)
+            {
+                Directory.CreateDirectory(additionalPackPath);
+            }
+
+            var manifestProvider = new FakeManifestProvider(Path.Combine("Manifests", "Sample.json"));
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { additionalRoot, dotnetRoot });
+
+            var pack = resolver.TryGetPackInfo("Xamarin.Android.Sdk");
+            pack.Should().NotBeNull();
+
+            string expectedPath = additionalExists ? additionalPackPath : defaultPackPath;
+
+            pack.Path.Should().Be(expectedPath);
+        }
+
+        [Fact]
+        public void GivenNonExistentPackRoot_ItIgnoresIt()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            Directory.CreateDirectory(dotnetRoot);
+            var additionalRoot = Path.Combine(testDirectory, "additionalPackRoot");
+
+            var defaultPackPath = Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7");
+            Directory.CreateDirectory(defaultPackPath);
+
+            var manifestProvider = new FakeManifestProvider(Path.Combine("Manifests", "Sample.json"));
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { additionalRoot, dotnetRoot });
+
+            var pack = resolver.TryGetPackInfo("Xamarin.Android.Sdk");
+            pack.Should().NotBeNull();
+
+            pack.Path.Should().Be(defaultPackPath);
         }
     }
 }
