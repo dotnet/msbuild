@@ -1009,21 +1009,36 @@ namespace Microsoft.Build.Tasks
                             // Log the reference which lost the conflict and the dependencies and source items which caused it.
                             LogReferenceDependenciesAndSourceItemsToStringBuilder(fusionName, conflictCandidate, logDependencies.AppendLine());
 
+                            string toOutput;
                             if (logWarning)
                             {
                                 // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference	
                                 // chosen was not the conflict victor in a version comparison. In other words, the victor was older.
-                                Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts", assemblyName.Name, StringBuilderCache.GetStringAndRelease(logConflict));
+                                toOutput = StringBuilderCache.GetStringAndRelease(logConflict);
+                                Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts", assemblyName.Name, toOutput);
                             }
                             else
                             {
-                                Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), StringBuilderCache.GetStringAndRelease(logConflict));
-                                Log.LogMessage(MessageImportance.Low, StringBuilderCache.GetStringAndRelease(logDependencies));
+                                toOutput = StringBuilderCache.GetStringAndRelease(logConflict);
+                                string extra = StringBuilderCache.GetStringAndRelease(logDependencies);
+                                Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), toOutput);
+                                Log.LogMessage(MessageImportance.Low, extra);
+
+                                // This does an extra allocation, so only do it when necessary.
+                                if (OutputUnresolvedAssemblyConflicts)
+                                {
+                                    toOutput += '\n' + extra;
+                                }
                             }
 
                             if (OutputUnresolvedAssemblyConflicts)
                             {
-                                _unresolvedConflicts.Add(new TaskItem(assemblyName.Name));
+                                _unresolvedConflicts.Add(new TaskItem(assemblyName.Name, new Dictionary<string, string>()
+                                {
+                                    { "logMessage", toOutput },
+                                    {"victorVersionNumber", victor.ReferenceVersion.ToString() },
+                                    {"victimVersionNumber", conflictCandidate.ReferenceVersion.ToString() }
+                                }));
                             }
                         }
                     }
