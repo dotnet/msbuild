@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">$(SdkTargetFramework)</TargetFrameworks>
+    <TargetFrameworks Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' ">$(SdkTargetFramework)</TargetFrameworks>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
@@ -33,13 +33,18 @@
   </ItemGroup>
 
   <Target Name="WriteFullFrameworkResolverManifest" AfterTargets="AfterBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PropertyGroup>
+      <_ResolverManifestDir>$(OutputPath)\SdkResolvers\$(AssemblyName)\</_ResolverManifestDir>
+      <_TargetPathRelativePath>$([System.IO.Path]::GetRelativePath('$(_ResolverManifestDir)','$(TargetPath)'))</_TargetPathRelativePath>
+    </PropertyGroup>
+
     <ItemGroup>
       <ManifestLines Include="&lt;SdkResolver&gt;" />
-      <ManifestLines Include="&lt;Path&gt;$(TargetPath)&lt;/Path&gt;" />
+      <ManifestLines Include="&lt;Path&gt;$(_TargetPathRelativePath)&lt;/Path&gt;" />
       <ManifestLines Include="&lt;/SdkResolver&gt;" />
     </ItemGroup>
 
-    <WriteLinesToFile File="$(OutputPath)\SdkResolvers\$(AssemblyName)\$(AssemblyName).xml" Lines="@(ManifestLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <WriteLinesToFile File="$(_ResolverManifestDir)$(AssemblyName).xml" Lines="@(ManifestLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
   </Target>
 
 </Project>

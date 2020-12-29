@@ -11,11 +11,19 @@
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
 
-  <Target Name="PrecompileScript" BeforeTargets="Build" Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
+  <Target Name="PrecompileScriptBuild" BeforeTargets="Build" Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
     <MSBuild
       BuildInParallel="False"
       Projects="../ArgumentsReflector/ArgumentsReflector.csproj"
       Properties="PublishDir=$(OutputPath)"
+      Targets="Publish" />
+  </Target>
+
+  <Target Name="PrecompileScriptPublish" BeforeTargets="Publish" Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
+    <MSBuild
+      BuildInParallel="False"
+      Projects="../ArgumentsReflector/ArgumentsReflector.csproj"
+      Properties="PublishDir=$(PublishDir)"
       Targets="Publish" />
   </Target>
 

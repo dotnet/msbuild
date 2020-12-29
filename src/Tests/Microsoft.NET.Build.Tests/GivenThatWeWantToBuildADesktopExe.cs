@@ -243,9 +243,8 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("win8-x64-aot", "x64")]
         [InlineData("win10-arm", "arm")]
         [InlineData("win10-arm-aot", "arm")]
-        //PlatformTarget=arm64 is not supported and never inferred
-        [InlineData("win10-arm64", "AnyCPU")]
-        [InlineData("win10-arm64-aot", "AnyCPU")]
+        [InlineData("win10-arm64", "arm64")]
+        [InlineData("win10-arm64-aot", "arm64")]
         // cpu architecture is never expected at the front
         [InlineData("x86-something", "AnyCPU")]
         [InlineData("x64-something", "AnyCPU")]

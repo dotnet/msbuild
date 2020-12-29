@@ -237,7 +237,10 @@ namespace Microsoft.NET.Build.Tests
 
             if (usePackagesConfig)
             {
-                testAsset.NuGetRestore(Log, relativePath: AppName);
+                new NuGetExeRestoreCommand(Log, testAsset.TestRoot, AppName)
+                    .Execute()
+                    .Should()
+                    .Pass();
             }
             else
             {

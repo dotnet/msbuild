@@ -25,7 +25,7 @@ namespace ZipDeployPublish.Test
             {
                 if (_testZippedPublishContentsPath == null)
                 {
-                    string codebase = typeof(ZipDeployerTaskTests).Assembly.CodeBase;
+                    string codebase = typeof(ZipDeployerTaskTests).Assembly.Location;
                     string assemblyPath = new Uri(codebase, UriKind.Absolute).LocalPath;
                     string baseDirectory = Path.GetDirectoryName(assemblyPath);
                     _testZippedPublishContentsPath = Path.Combine(baseDirectory, TestAssemblyToTestZipPath);

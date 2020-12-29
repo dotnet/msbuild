@@ -9,10 +9,15 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     {
         IEnumerable<WorkloadResolver.PackInfo> GetInstalledWorkloadPacksOfKind(WorkloadPackKind kind);
         IEnumerable<string> GetPacksInWorkload(string workloadId);
-        IList<WorkloadResolver.WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packId);
+        ISet<WorkloadResolver.WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packId);
+        
         /// <summary>
-        /// Gets information about a workload pack from the manifests, whether or not the pack is installed
+        /// Resolve the pack for this resolver's SDK band.
         /// </summary>
+        /// <remarks>
+        /// Used by the MSBuild SDK resolver to look up which versions of the SDK packs to import.
+        /// NOTE: The pack path may use an aliased ID.
+        /// </remarks>
         /// <param name="packId">A workload pack ID</param>
         /// <returns>Information about the workload pack, or null if the specified pack ID isn't found in the manifests</returns>
         WorkloadResolver.PackInfo? TryGetPackInfo(string packId);
