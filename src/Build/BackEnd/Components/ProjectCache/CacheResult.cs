@@ -20,7 +20,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
     }
 
     /// <summary>
-    ///     Only cache hits have non null build result information.
+    ///     Represents the cache result a plugin returns back to MSBuild when queried about a certain project.
+    ///     Results representing cache hits (with <see cref="ResultType"/> == <see cref="CacheResultType.CacheHit"/>)
+    ///     contain information about what <see cref="Execution.BuildResult"/> MSBuild should use for the queried project.
+    ///     It is assumed that all cache hits result in a successful <see cref="Execution.BuildResult"/>.
     /// </summary>
     public class CacheResult
     {

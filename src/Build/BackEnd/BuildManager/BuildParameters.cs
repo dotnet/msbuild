@@ -789,7 +789,7 @@ namespace Microsoft.Build.Execution
         /// Any <see cref="GraphBuildSubmission"/> requests will also use this project cache instead of
         /// the potential project caches described in graph node's evaluations.
         /// </summary>
-        public ProjectCacheDescriptor ProjectCacheDescriptor{ get; set; }
+        public ProjectCacheDescriptor ProjectCacheDescriptor { get; set; }
 
         /// <summary>
         /// Retrieves a toolset.

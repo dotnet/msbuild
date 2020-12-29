@@ -4,7 +4,6 @@
 #nullable enable
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Shared;
 
