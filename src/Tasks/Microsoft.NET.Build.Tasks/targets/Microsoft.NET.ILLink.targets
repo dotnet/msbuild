@@ -91,7 +91,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup Condition=" '$(DOTNET_HOST_PATH)' == '' ">
       <_DotNetHostDirectory>$(NetCoreRoot)</_DotNetHostDirectory>
       <_DotNetHostFileName>dotnet</_DotNetHostFileName>
-      <_DotNetHostFileName Condition=" '$(OS)' == 'Windows_NT' ">dotnet.exe</_DotNetHostFileName>
+      <_DotNetHostFileName Condition="$([MSBuild]::IsOSPlatform(`Windows`))">dotnet.exe</_DotNetHostFileName>
     </PropertyGroup>
 
     <Delete Files="@(_LinkedResolvedFileToPublishCandidate)" />

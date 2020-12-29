@@ -46,8 +46,8 @@
       <TestExecutionDirectoryFiles Include="$(ArtifactsTmpDir)Directory.Build.targets"/>
 
       <FilesInHelixRoot Include="$(RepoRoot)\artifacts\tmp\$(Configuration)\NuGet.config"/>
-      <FilesInHelixRoot Condition="'$(OS)' == 'Windows_NT'" Include="$(RepoRoot)\build\RunTestsOnHelix.cmd"/>
-      <FilesInHelixRoot Condition="'$(OS)' != 'Windows_NT'" Include="$(RepoRoot)\build\RunTestsOnHelix.sh"/>
+      <FilesInHelixRoot Condition="$([MSBuild]::IsOSPlatform(`Windows`))" Include="$(RepoRoot)\build\RunTestsOnHelix.cmd"/>
+      <FilesInHelixRoot Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' " Include="$(RepoRoot)\build\RunTestsOnHelix.sh"/>
     </ItemGroup>
 
     <PropertyGroup>
@@ -78,7 +78,7 @@
     </PropertyGroup>
 
     <TarGzFileCreateFromDirectory
-        Condition="'$(OS)' != 'Windows_NT'"
+        Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' "
         SourceDirectory="$(TestDotnetRoot)"
         DestinationArchive="$(HelixStage0Targz)"
         OverwriteDestination="true"/>
@@ -89,11 +89,11 @@
         <Destination>t</Destination>
       </HelixCorrelationPayload>
 
-      <HelixCorrelationPayload Condition="'$(OS)' != 'Windows_NT'" Include="$(HelixStage0Targz)">
+      <HelixCorrelationPayload Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' " Include="$(HelixStage0Targz)">
         <Destination>d</Destination>
       </HelixCorrelationPayload>
 
-      <HelixCorrelationPayload Condition="'$(OS)' == 'Windows_NT'" Include="$(TestDotnetRoot)">
+      <HelixCorrelationPayload Condition="$([MSBuild]::IsOSPlatform(`Windows`))" Include="$(TestDotnetRoot)">
         <PayloadDirectory>$(TestDotnetRoot)</PayloadDirectory>
         <Destination>d</Destination>
       </HelixCorrelationPayload>
