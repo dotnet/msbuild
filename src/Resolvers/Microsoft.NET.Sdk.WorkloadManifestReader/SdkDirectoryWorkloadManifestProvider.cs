@@ -48,7 +48,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             var manifestDirectoryEnvironmentVariable = Environment.GetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS");
             if (!string.IsNullOrEmpty(manifestDirectoryEnvironmentVariable))
             {
-                _manifestDirectories = manifestDirectoryEnvironmentVariable.Split(';').Concat(new[] { manifestDirectory }).ToArray();
+                _manifestDirectories = manifestDirectoryEnvironmentVariable.Split(Path.PathSeparator).Concat(new[] { manifestDirectory }).ToArray();
             }
             else
             {
