@@ -772,6 +772,11 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Always fire a warning for a version conflict even if we think we can resolve it appropriately.
+        /// </summary>
+        public bool AlwaysWarnOnConflicts { get; set; }
+
+        /// <summary>
         /// This is a list of all primary references resolved to full paths.
         ///     bool CopyLocal - whether the given reference should be copied to the output directory.
         ///     string FusionName - the fusion name for this dependency.
@@ -976,7 +981,7 @@ namespace Microsoft.Build.Tasks
 
                         if (conflictCandidate.IsConflictVictim)
                         {
-                            bool logWarning = idealAssemblyRemappingsIdentities.Any(i => i.assemblyName.FullName.Equals(fusionName) && i.reference.GetConflictVictims().Count == 0);
+                            bool logWarning = idealAssemblyRemappingsIdentities.Any(i => i.assemblyName.FullName.Equals(fusionName) && i.reference.GetConflictVictims().Count == 0) || AlwaysWarnOnConflicts;
                             StringBuilder logConflict = StringBuilderCache.Acquire();
                             LogConflict(conflictCandidate, fusionName, logConflict);
                             StringBuilder logDependencies = logWarning ? logConflict.AppendLine() : StringBuilderCache.Acquire();
