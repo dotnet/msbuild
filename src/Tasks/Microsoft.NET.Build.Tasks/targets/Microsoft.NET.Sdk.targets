@@ -94,7 +94,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <_DefaultUserProfileRuntimeStorePath>$(HOME)</_DefaultUserProfileRuntimeStorePath>
-    <_DefaultUserProfileRuntimeStorePath Condition="'$(OS)' == 'Windows_NT'">$(USERPROFILE)</_DefaultUserProfileRuntimeStorePath>
+    <_DefaultUserProfileRuntimeStorePath Condition="$([MSBuild]::IsOSPlatform(`Windows`))">$(USERPROFILE)</_DefaultUserProfileRuntimeStorePath>
     <_DefaultUserProfileRuntimeStorePath>$([System.IO.Path]::Combine($(_DefaultUserProfileRuntimeStorePath), '.dotnet', 'store'))</_DefaultUserProfileRuntimeStorePath>
     <UserProfileRuntimeStorePath Condition="'$(UserProfileRuntimeStorePath)' == ''">$(_DefaultUserProfileRuntimeStorePath)</UserProfileRuntimeStorePath>
   </PropertyGroup>
@@ -797,11 +797,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     </When>
 
     <When Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(_IsExecutable)' == 'true'">
-      <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+      <PropertyGroup Condition="$([MSBuild]::IsOSPlatform(`Windows`))">
         <RunCommand Condition="'$(RunCommand)' == ''">$(TargetPath)</RunCommand>
         <RunArguments Condition="'$(RunArguments)' == ''">$(StartArguments)</RunArguments>
       </PropertyGroup>
-      <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+      <PropertyGroup Condition="$([MSBuild]::IsOSUnixLike())">
         <RunCommand Condition="'$(RunCommand)' == ''">mono</RunCommand>
         <RunArguments Condition="'$(RunArguments)' == ''">&quot;$(TargetPath)&quot; $(StartArguments)</RunArguments>
       </PropertyGroup>

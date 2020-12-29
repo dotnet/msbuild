@@ -54,7 +54,7 @@ Copyright (c) .NET Foundation. All rights reserved.
    -->
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and
                             '$(HasRuntimeOutput)' == 'true' and
-                            '$(OS)' == 'Windows_NT' and
+                            $([MSBuild]::IsOSPlatform(`Windows`))and
                             '$(RuntimeIdentifier)' == ''">
     <_UsingDefaultRuntimeIdentifier>true</_UsingDefaultRuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(PlatformTarget)' == 'x64'">win7-x64</RuntimeIdentifier>
