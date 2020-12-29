@@ -25,8 +25,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        //  Enabling all of these tests on full framework is tracked by https://github.com/dotnet/sdk/issues/13849
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_should_build_with_workload()
         {
             var testProject = new TestProject()
@@ -45,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_should_fail_without_workload()
         {
             var testProject = new TestProject()
@@ -66,7 +65,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1147");
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_should_fail_without_workload_when_multitargeted()
         {
             var testProject = new TestProject()
@@ -87,7 +86,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1147");
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_should_fail_when_multitargeted_to_unknown_platforms()
         {
             var testProject = new TestProject()
@@ -109,7 +108,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_should_fail_without_resolver_enabled()
         {
             var testProject = new TestProject()
@@ -130,7 +129,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1139");
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_should_import_AutoImports_for_installed_workloads()
         {
             var testProject = new TestProject()
@@ -158,7 +157,7 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_should_import_aliased_pack()
         {
             var testProject = new TestProject()
