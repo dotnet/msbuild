@@ -35,7 +35,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             string[] dotnetRootPaths;
             if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
             {
-                dotnetRootPaths = packRootEnvironmentVariable.Split(Path.DirectorySeparatorChar).Concat(new[] { dotnetRootPath }).ToArray();
+                dotnetRootPaths = packRootEnvironmentVariable.Split(Path.DirectorySeparatorChar).Append(dotnetRootPath).ToArray();
             }
             else
             {
