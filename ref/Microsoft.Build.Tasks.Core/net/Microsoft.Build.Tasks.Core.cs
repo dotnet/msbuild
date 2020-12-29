@@ -894,6 +894,7 @@ namespace Microsoft.Build.Tasks
         public ResolveAssemblyReference() { }
         public string[] AllowedAssemblyExtensions { get { throw null; } set { } }
         public string[] AllowedRelatedFileExtensions { get { throw null; } set { } }
+        public bool AlwaysWarnOnConflicts { get { throw null; } set { } }
         public string AppConfigFile { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] Assemblies { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] AssemblyFiles { get { throw null; } set { } }
