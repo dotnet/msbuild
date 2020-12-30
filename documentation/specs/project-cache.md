@@ -1,7 +1,7 @@
 - [Summary](#summary)
 - [Motivation](#motivation)
 - [Plugin requirements](#plugin-requirements)
-- [High level design](#high-level-design)
+- [High-level design](#high-level-design)
 - [APIs and calling patterns](#apis-and-calling-patterns)
   - [From BuildManager API users who have a project dependency graph at hand and want to manually issue builds for each graph node in reverse topo sort order.](#from-buildmanager-api-users-who-have-a-project-dependency-graph-at-hand-and-want-to-manually-issue-builds-for-each-graph-node-in-reverse-topo-sort-order)
   - [From command line](#from-command-line)
@@ -13,25 +13,23 @@
 
 # Summary
 
-Project cache is a new assembly based plugin extension point in MSBuild which determines whether a build request (a project) can be skipped during build. The main expected benefit is reduced build times via [caching and / or distribution](https://github.com/dotnet/msbuild/blob/master/documentation/specs/static-graph.md#weakness-of-the-old-model-caching-and-distributability).
+Project cache is a new assembly-based plugin extension point in MSBuild which determines whether a build request (a project) can be skipped during build. The main expected benefit is reduced build times via [caching and/or distribution](https://github.com/dotnet/msbuild/blob/master/documentation/specs/static-graph.md#weakness-of-the-old-model-caching-and-distributability).
 
 # Motivation
 
-As the introduction to [static graph](https://github.com/dotnet/msbuild/blob/master/documentation/specs/static-graph.md#what-is-static-graph-for) suggests, as a repo gets bigger and more complex, weaknesses in MSBuild's scheduling and incrementality models become more apparent and build times get very long. This suggests MSBuild needs to change or get replaced in order to scale.
-However, many users and tools depend on MSBuild's current APIs and language semantics. This makes MSBuild very hard to significantly change or replace, as it would induce a big cost to users. The project cache plugin allows MSBuild to natively communicate with existing tools that enable build caching and / or distribution but without changing its public API and user interface (too much).
+As the introduction to [static graph](https://github.com/dotnet/msbuild/blob/master/documentation/specs/static-graph.md#what-is-static-graph-for) suggests, large and complex repos expose the weaknesses in MSBuild's scheduling and incrementality models as build times elongate. This project cache plugin lets MSBuild natively communicate with existing tools that enable build caching and/or distribution, enabling true scalability.
 
-For example, it allows Visual Studio builds to benefit from caching and distribution without extensive changes to Visual Studio. The plugin achieves a dependency inversion: instead of higher level build engines ([Cloudbuild](https://www.microsoft.com/research/publication/cloudbuild-microsofts-distributed-and-caching-build-service/), [Anybuild](https://github.com/AnyBuild/AnyBuild), [BuildXL](https://github.com/microsoft/BuildXL), etc) calling into MSBuild, MSBuild will call into them, keeping MSBuild's external APIs and command line arguments largely unchanged and thus reusable by Visual Studio.
+Visual Studio is one beneficiary. This plugin inverts dependencies among build systems: instead of higher level build engines ([Cloudbuild](https://www.microsoft.com/research/publication/cloudbuild-microsofts-distributed-and-caching-build-service/), [Anybuild](https://github.com/AnyBuild/AnyBuild), [BuildXL](https://github.com/microsoft/BuildXL), etc) calling into MSBuild, MSBuild calls into them, keeping MSBuild's external APIs and command line arguments largely unchanged and thus reusable by Visual Studio.
 
-Users also reuse their investment in learning MSBuild's mental models, command line experience, logging formats, etc. Furthermore, user cognitive load is reduced by having the same build experience between Visual Studio and command line. Before, users with access to higher level build engines would use that tool from the command line, but it would have a different experience from the build experience that Visual Studio provided.
+This change also simplifies and unifies user experiences. MSBuild works the same from Visual Studio or the command line without dramatically changing how it works.
 
 # Plugin requirements
-- Respond to MSBuild whether a build request needs building. If a project is skipped, then the plugin needs to ensure that:
-  - the filesystem looks as if the project built
-  - returns sufficient information that MSBuild can construct a valid [BuildResult](https://github.com/dotnet/msbuild/blob/d39f2e4f5f3d461bc456f9abed9adec4a2f0f542/src/Build/BackEnd/Shared/BuildResult.cs#L30-L33) for its internal scheduling logic, such that future requests to build a skipped project are served directly from MSBuild's internal caches.
-- New MSBuild execution mode where it can query the plugin but not build anything.
-- Do not impose constraints in addition to static graph and the plugin's constraints.
 
-# High level design
+- The plugin should tell MSBuild whether a build request needs building. If a project is skipped, then the plugin needs to ensure that:
+  - it makes the filesystem look as if the project built
+  - it returns sufficient information back to MSBuild such that MSBuild can construct a valid [BuildResult](https://github.com/dotnet/msbuild/blob/d39f2e4f5f3d461bc456f9abed9adec4a2f0f542/src/Build/BackEnd/Shared/BuildResult.cs#L30-L33) for its internal scheduling logic, such that future requests to build a skipped project are served directly from MSBuild's internal caches.
+
+# High-level design
 - For each [BuildRequestData](https://github.com/dotnet/msbuild/blob/d39f2e4f5f3d461bc456f9abed9adec4a2f0f542/src/Build/BackEnd/BuildManager/BuildRequestData.cs#L83) ([ProjectInstance](https://github.com/dotnet/msbuild/blob/d39f2e4f5f3d461bc456f9abed9adec4a2f0f542/src/Build/Instance/ProjectInstance.cs#L71), Global Properties, Targets) submitted to the [BuildManager](https://github.com/dotnet/msbuild/blob/d39f2e4f5f3d461bc456f9abed9adec4a2f0f542/src/Build/BackEnd/BuildManager/BuildManager.cs#L38), MSBuild asks the plugin whether to build the request or not.
   - If the BuildRequestData is based on a project path instead of a ProjectInstance, the project is evaluated by the BuildManager.
 - If the plugin decides to build, then MSBuild proceeds building the project as usual.
@@ -46,10 +44,10 @@ Users also reuse their investment in learning MSBuild's mental models, command l
 - A single plugin is supported (for now).
 
 # APIs and calling patterns
-- Plugin APIs are found [here]().
+- Plugin APIs are found [here](https://github.com/cdmihai/msbuild/tree/projectCache/src/Build/BackEnd/Components/ProjectCache).
 
 ## From BuildManager API users who have a project dependency graph at hand and want to manually issue builds for each graph node in reverse topo sort order.
-- Users set [BuildParameters.ProjectCacheDescriptor]() which triggers MSBuild to instantiate the plugin and call `ProjectCacheBase.BeginBuildAsync` on it in `BuildManager.BeginBuild`.
+- Users set [BuildParameters.ProjectCacheDescriptor](https://github.com/cdmihai/msbuild/blob/projectCache/src/Build/BackEnd/Components/ProjectCache/ProjectCacheDescriptor.cs) which triggers MSBuild to instantiate the plugin and call `ProjectCacheBase.BeginBuildAsync` on it in `BuildManager.BeginBuild`.
   - `BuildManager.BeginBuild` does not wait for the plugin to initialize. The first query on the plugin will wait for plugin initialization.
 - All the build requests submitted in the current `BuildManager.BeginBuild/EndBuild` session will get checked against the plugin instance.
 - Only the user provided top level build requests are checked against the cache. The build requests issued recursively from the top level requests are not checked against the cache, since it is assumed that users issue build requests in reverse toposort order. Therefore when a project builds its references, those references should have already been built and present in MSBuild's internal cache, provided either by the project cache plugin or real builds.
@@ -99,7 +97,7 @@ Users also reuse their investment in learning MSBuild's mental models, command l
         - They do not mutate state (file system, environment variables, etc).
         - They do not MSBuild task call into other projects.
       - The BuildManager schedules the proxy targets to build on the in proc node to avoid ProjectInstance serialization costs.
-    - Best: when the plugins run and cache the build, they tell MSBuild to serialize the BuildResult to a file via [BuildParameters.OutputResultsCacheFile](https://github.com/dotnet/msbuild/blob/d39f2e4f5f3d461bc456f9abed9adec4a2f0f542/src/Build/BackEnd/BuildManager/BuildParameters.cs#L767) or the `/outputResultsCache` command line argument. Then, on cache hits, the plugins deserialize the BuildResult and send it back to MSBuild. This is the most correct option, as it requires neither guessing nor proxy targets. Whatever the build did, that's what's returned.
+    - Best: when the plugin's infrastructure (e.g. cloudbuild or anybuild builder nodes) runs and caches the build, it can tell MSBuild to serialize the BuildResult to a file via [BuildParameters.OutputResultsCacheFile](https://github.com/dotnet/msbuild/blob/d39f2e4f5f3d461bc456f9abed9adec4a2f0f542/src/Build/BackEnd/BuildManager/BuildParameters.cs#L767) or the `/outputResultsCache` command line argument. Then, on cache hits, the plugins deserialize the BuildResult and send it back to MSBuild. This is the most correct option, as it requires neither guessing nor proxy targets. Whatever the build did, that's what's returned.
       - This is not yet possible. Outputting results cache files needs to first be decoupled from `/isolate`.
       - Potential Issue: serialization format may change between runtime msbuild and the cache results file, especially if binary serialization is used.
 - Configuring plugins
@@ -113,7 +111,7 @@ Users also reuse their investment in learning MSBuild's mental models, command l
 - Logging
   - Log messages from `Plugin.{BeginBuild, EndBuild}` do not have a parent build event context and get displayed at the top level in the binlog.
   - Log messages from querying a project get parented under that project's logging context.
-  - This is not yet implemented. For now, all plugin log messages do not have a parent event context.
+    - This is not yet implemented. For now, all plugin log messages do not have a parent event context.
 
 # Caveats
 - Absolute paths circulating through the saved build results
@@ -130,5 +128,5 @@ Users also reuse their investment in learning MSBuild's mental models, command l
 
 # Potential work of dubious value
 - Allow multiple plugin instances and query them based on some priority, similar to sdk resolvers.
-- Enable plugins to work with the just in time top down msbuild traversal that msbuild natively does when it's not using `/graph`.
+- Enable plugins to work with the just-in-time top down msbuild traversal that msbuild natively does when it's not using `/graph`.
 - Extend the project cache API to allow skipping individual targets or tasks instead of entire projects. This would allow for smaller specialized plugins, like plugins that only know to distribute, cache, and skip CSC.exe calls.
