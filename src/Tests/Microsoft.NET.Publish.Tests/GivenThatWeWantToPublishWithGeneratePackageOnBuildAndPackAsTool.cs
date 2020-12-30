@@ -43,8 +43,7 @@ namespace Microsoft.NET.ToolPack.Tests
                     propertyGroup.Add(new XElement(ns + "PackAsTool", packAsTool.ToString()));
                 });
 
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot);
-            var publishCommand = new PublishCommand(Log, appProjectDirectory);
+            var publishCommand = new PublishCommand(testAsset);
 
             CommandResult result = publishCommand.Execute();
 

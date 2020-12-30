@@ -526,7 +526,7 @@ public static class Program
                     }
                 });
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute("/v:normal", $"/p:TargetFramework={testProject.TargetFrameworks}")
                 .Should()

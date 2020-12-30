@@ -37,7 +37,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var command = new PublishCommand(Log, testAsset.TestRoot);
+            var command = new PublishCommand(testAsset);
 
             command
                 .Execute(args)
@@ -78,7 +78,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            var command = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            var command = new PublishCommand(testProjectInstance);
 
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
             command
@@ -135,7 +135,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            var command = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            var command = new PublishCommand(testProjectInstance);
 
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
             command
@@ -200,7 +200,7 @@ namespace Microsoft.NET.Publish.Tests
 </Project>
 ");
 
-            var command = new PublishCommand(Log, projectDirectory);
+            var command = new PublishCommand(testProjectInstance);
             command
                 .Execute("/p:PublishProfile=test")
                 .Should()

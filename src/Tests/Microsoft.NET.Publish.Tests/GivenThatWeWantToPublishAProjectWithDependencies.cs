@@ -31,7 +31,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("SimpleDependencies")
                 .WithSource();
 
-            PublishCommand publishCommand = new PublishCommand(Log, simpleDependenciesAsset.TestRoot);
+            PublishCommand publishCommand = new PublishCommand(simpleDependenciesAsset);
             publishCommand
                 .Execute()
                 .Should()
@@ -74,7 +74,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("DesktopNeedsBindingRedirects")
                 .WithSource();
 
-            PublishCommand publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            PublishCommand publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute()
                 .Should()
@@ -132,7 +132,7 @@ namespace Microsoft.NET.Publish.Tests
             string manifestFile1 = Path.Combine(filterProjDir, manifestFileName1);
             string manifestFile2 = Path.Combine(filterProjDir, manifestFileName2);
 
-            PublishCommand publishCommand = new PublishCommand(Log, simpleDependenciesAsset.TestRoot);
+            PublishCommand publishCommand = new PublishCommand(simpleDependenciesAsset);
             publishCommand
                 .Execute($"/p:TargetManifestFiles={manifestFile1}%3b{manifestFile2}")
                 .Should()
@@ -181,7 +181,7 @@ namespace Microsoft.NET.Publish.Tests
             // since this scenario is not supported. Running the published app doesn't work currently.
             // This test should be updated when that bug is fixed.
 
-            PublishCommand publishCommand = new PublishCommand(Log, simpleDependenciesAsset.TestRoot);
+            PublishCommand publishCommand = new PublishCommand(simpleDependenciesAsset);
             publishCommand
                 .Execute($"/p:RuntimeIdentifier={rid}", $"/p:TargetManifestFiles={manifestFile}")
                 .Should()

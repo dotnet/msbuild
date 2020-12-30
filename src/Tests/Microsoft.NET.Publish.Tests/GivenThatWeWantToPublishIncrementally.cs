@@ -38,7 +38,7 @@ namespace Microsoft.NET.Publish.Tests
             var expectedSingleExeFiles = new string[] { ".exe", ".pdb" }.Select(ending => testProject.Name + ending);
 
             // Publish normally
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass();
@@ -47,7 +47,7 @@ namespace Microsoft.NET.Publish.Tests
             File.WriteAllText(Path.Combine(publishDir, "UserData.txt"), string.Empty);
 
             // Publish as a single file
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true")
                 .Should()
                 .Pass();
@@ -70,7 +70,7 @@ namespace Microsoft.NET.Publish.Tests
             var expectedSingleExeFileExtensions = new string[] { ".exe", ".pdb" };
 
             // Publish as a single file
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true")
                 .Should()
                 .Pass();
@@ -85,7 +85,7 @@ namespace Microsoft.NET.Publish.Tests
                 Path.Combine(testAsset.TestRoot, testProject.Name, newName + ".csproj"));
 
             // Publish as a single file
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true")
                 .Should()
                 .Pass();
@@ -109,7 +109,7 @@ namespace Microsoft.NET.Publish.Tests
             var expectedSingleExeFiles = new string[] { ".exe", ".pdb" }.Select(ending => testProject.Name + ending);
 
             // Publish as a single file
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true")
                 .Should()
                 .Pass();
@@ -119,7 +119,7 @@ namespace Microsoft.NET.Publish.Tests
             File.WriteAllText(Path.Combine(publishDir, testProject.Name + ".dll"), string.Empty);
 
             // Publish as a single file
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true")
                 .Should()
                 .Pass();
@@ -145,7 +145,7 @@ namespace Microsoft.NET.Publish.Tests
             var expectedSingleExeFiles = new string[] { ".exe", ".pdb" }.Select(ending => testProject.Name + ending);
 
             // Publish trimmed
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute()
                 .Should()
                 .Pass();
@@ -154,7 +154,7 @@ namespace Microsoft.NET.Publish.Tests
             File.WriteAllText(Path.Combine(publishDir, "UserData.txt"), string.Empty);
 
             // Publish as a single file
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true")
                 .Should()
                 .Pass();
@@ -216,7 +216,7 @@ namespace Microsoft.NET.Publish.Tests
             var expectedSingleExeFiles = new string[] { ".exe", ".pdb" }.Select(ending => testProject.Name + ending);
 
             // Publish normally
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute("/p:PublishDir=" + publishOutputFolder)
                 .Should()
                 .Pass();
@@ -225,7 +225,7 @@ namespace Microsoft.NET.Publish.Tests
             File.WriteAllText(Path.Combine(publishDir, "UserData.txt"), string.Empty);
 
             // Publish as a single file
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true", "/p:PublishDir=" + publishOutputFolder)
                 .Should()
                 .Pass();
@@ -253,14 +253,14 @@ namespace Microsoft.NET.Publish.Tests
             var expectedSingleExeFiles = new string[] { ".exe", ".pdb" }.Select(ending => testProject.Name + ending);
 
             // Publish normally in folder 1
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute("/p:PublishDir=" + publishOutputFolder1)
                 .Should()
                 .Pass();
             CheckPublishOutput(publishDir1, expectedSingleExeFiles.Concat(expectedNonSingleExeFiles), null);
 
             // Publish as a single file in folder 2
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute(@"/p:PublishSingleFile=true", "/p:PublishDir=" + publishOutputFolder2)
                 .Should()
                 .Pass();
@@ -272,7 +272,7 @@ namespace Microsoft.NET.Publish.Tests
             var newName = "PublishToMultipleDirs1";
             File.Move(Path.Combine(testAsset.TestRoot, testProject.Name, testProject.Name + ".csproj"),
                 Path.Combine(testAsset.TestRoot, testProject.Name, newName + ".csproj"));
-            new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name))
+            new PublishCommand(testAsset)
                 .Execute("/p:PublishDir=" + publishOutputFolder1)
                 .Should()
                 .Pass();

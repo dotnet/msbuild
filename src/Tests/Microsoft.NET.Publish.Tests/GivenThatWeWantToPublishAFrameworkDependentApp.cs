@@ -64,7 +64,7 @@ namespace Microsoft.NET.Publish.Tests
                 msbuildArgs.Add("/p:TargetLatestRuntimePatch=true");
             }
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute(msbuildArgs.ToArray())
                 .Should()
@@ -113,7 +113,7 @@ namespace Microsoft.NET.Publish.Tests
                 .WithSource()
                 .WithTargetFramework("netcoreapp2.0");
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute(
                     "/p:SelfContained=false",

@@ -44,7 +44,7 @@ namespace Microsoft.NET.Publish.Tests
 
                             });
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand.Execute()
                 .Should()

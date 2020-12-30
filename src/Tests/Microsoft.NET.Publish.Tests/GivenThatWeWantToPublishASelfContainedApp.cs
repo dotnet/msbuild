@@ -31,7 +31,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset(TestProjectName)
                 .WithSource();
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute(
                     "/p:SelfContained=true",
@@ -51,7 +51,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset(TestProjectName)
                 .WithSource();
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute(
                     "/p:SelfContained=true",
@@ -82,7 +82,7 @@ namespace Microsoft.NET.Publish.Tests
 
             restoreCommand.Execute(msbuildArgs);
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute(msbuildArgs)
                 .Should().Pass();
@@ -108,7 +108,7 @@ namespace Microsoft.NET.Publish.Tests
                     doc.Root.Element("PropertyGroup").Element("TargetFramework").SetValue(TargetFramework);
                 });
 
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            var publishCommand = new PublishCommand(testAsset);
             publishCommand
                 .Execute(
                     "/p:SelfContained=true",
@@ -143,11 +143,9 @@ namespace Microsoft.NET.Publish.Tests
                 $"/p:RuntimeIdentifier={EnvironmentInfo.GetCompatibleRid("netcoreapp3.1")}"
             };
 
-            var projectRoot = Path.Combine(testAsset.TestRoot, "main");
-
             new RestoreCommand(testAsset, "main").Execute(args);
 
-            new PublishCommand(Log, projectRoot)
+            new PublishCommand(testAsset, "main")
                 .Execute(args)
                 .Should()
                 .Pass();
@@ -171,7 +169,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
-            var command = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            var command = new PublishCommand(testProjectInstance);
 
             command
                 .Execute($"/p:RuntimeIdentifier={rid}")
@@ -216,7 +214,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
             var rid = EnvironmentInfo.GetCompatibleRid(tfm);
-            var command = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            var command = new PublishCommand(testProjectInstance);
 
             command
                 .Execute($"/p:RuntimeIdentifier={rid}")

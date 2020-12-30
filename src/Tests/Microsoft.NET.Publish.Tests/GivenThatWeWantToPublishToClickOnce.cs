@@ -65,7 +65,7 @@ namespace Microsoft.NET.Publish.Tests
 </Project>
 ");
 
-            var command = new PublishCommand(Log, projectDirectory);
+            var command = new PublishCommand(testProjectInstance);
             command
                 .Execute("/p:PublishProfile=test")
                 .Should()
