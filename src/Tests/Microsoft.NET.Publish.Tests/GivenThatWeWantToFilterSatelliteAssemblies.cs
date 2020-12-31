@@ -38,7 +38,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();
@@ -76,7 +76,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();

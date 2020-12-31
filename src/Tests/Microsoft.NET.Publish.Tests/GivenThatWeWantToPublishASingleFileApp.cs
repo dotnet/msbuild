@@ -71,7 +71,7 @@ namespace Microsoft.NET.Publish.Tests
                 writer.Write("World!");
             }
 
-            return new PublishCommand(Log, testAsset.TestRoot);
+            return new PublishCommand(testAsset);
         }
 
         private string GetNativeDll(string baseName)
@@ -98,7 +98,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties.Add("SelfContained", $"{true}");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
-            var cmd = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var cmd = new PublishCommand(testAsset);
 
             var singleFilePath = Path.Combine(GetPublishDirectory(cmd).FullName, $"SingleFileTest{Constants.ExeSuffix}");
             cmd.Execute(RuntimeIdentifier).Should().Pass();
@@ -153,7 +153,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand.Execute(PublishSingleFile, RuntimeIdentifier)
                 .Should()
@@ -176,7 +176,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand.Execute(PublishSingleFile, RuntimeIdentifier, UseAppHost)
                 .Should()
@@ -199,7 +199,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand.Execute(PublishSingleFile, RuntimeIdentifier)
                 .Should()
@@ -327,7 +327,7 @@ namespace Microsoft.NET.Publish.Tests
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand
                 .Execute(PublishSingleFile, RuntimeIdentifier, IncludeAllContent, IncludePdb)
@@ -384,7 +384,7 @@ namespace Microsoft.NET.Publish.Tests
             };
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand
                 .Execute(PublishSingleFile, RuntimeIdentifier, ReadyToRun, ReadyToRunWithSymbols, IncludeAllContent, IncludePdb)
@@ -525,8 +525,8 @@ namespace Microsoft.NET.Publish.Tests
             };
             testProject.AdditionalProperties.Add("SelfContained", $"{selfContained}");
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework + selfContained.ToString() + bundleOption);
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand.Execute(PublishSingleFile, RuntimeIdentifier, bundleOption)
                 .Should()
@@ -557,7 +557,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties.Add("SelfContained", $"{selfContained}");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand.Execute(PublishSingleFile, RuntimeIdentifier, IncludePdb)
                 .Should()

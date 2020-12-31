@@ -171,7 +171,7 @@ namespace Microsoft.NET.Publish.Tests
                     publishArgs.Add("/p:NoBuild=true");
                 }
 
-                var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.Path, testProject.Name));
+                var publishCommand = new PublishCommand(testAsset);
                 publishCommand.Execute(publishArgs.ToArray())
                     .Should()
                     .Pass();

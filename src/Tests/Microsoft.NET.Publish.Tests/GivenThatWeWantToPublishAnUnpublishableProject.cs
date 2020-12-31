@@ -22,7 +22,7 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("Unpublishable")
                 .WithSource();
 
-            var publishCommand = new PublishCommand(Log, helloWorldAsset.TestRoot);
+            var publishCommand = new PublishCommand(helloWorldAsset);
             var publishResult = publishCommand.Execute();
 
             publishResult.Should().Pass();

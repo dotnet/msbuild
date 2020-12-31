@@ -34,7 +34,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute().Should().Pass();
 
             DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(
@@ -64,7 +64,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute().Should().Pass();
 
             DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(
@@ -149,7 +149,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
 
             publishCommand.Execute()
                 .Should()
@@ -169,7 +169,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand.Execute($"/p:PublishReadyToRun=true",
                                    $"/p:RuntimeIdentifier={RuntimeInformation.RuntimeIdentifier}")
@@ -256,7 +256,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute().Should().Pass();
 
             DirectoryInfo publishDirectory = publishCommand.GetOutputDirectory(
