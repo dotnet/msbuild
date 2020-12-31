@@ -250,7 +250,7 @@ namespace Microsoft.Build.UnitTests
                         {
                             string logMessage = $"{w.File}({w.LineNumber},{w.ColumnNumber}): {w.Subcategory} warning {w.Code}: {w.Message}";
 
-                            WriteLineToFullLog(logMessage);
+                            _fullLog.AppendLine(logMessage);
                             _testOutputHelper?.WriteLine(logMessage);
 
                             ++WarningCount;
@@ -260,7 +260,7 @@ namespace Microsoft.Build.UnitTests
                     case BuildErrorEventArgs e:
                     {
                         string logMessage = $"{e.File}({e.LineNumber},{e.ColumnNumber}): {e.Subcategory} error {e.Code}: {e.Message}";
-                        WriteLineToFullLog(logMessage);
+                        _fullLog.AppendLine(logMessage);
                         _testOutputHelper?.WriteLine(logMessage);
 
                         ++ErrorCount;
@@ -273,7 +273,7 @@ namespace Microsoft.Build.UnitTests
                         bool logMessage = !(eventArgs is BuildFinishedEventArgs) || LogBuildFinished;
                         if (logMessage)
                         {
-                            WriteLineToFullLog(eventArgs.Message);
+                            _fullLog.AppendLine(eventArgs.Message);
                             _testOutputHelper?.WriteLine(eventArgs.Message);
                         }
                         break;
@@ -357,11 +357,6 @@ namespace Microsoft.Build.UnitTests
                     }
                 }
             }
-        }
-
-        private void WriteLineToFullLog(string line)
-        {
-            _fullLog.AppendLine(line);
         }
 
         private void PrintFullLog()

@@ -24,7 +24,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private Dictionary<string, string> _proxyTargetToRealTargetMap = null!;
 
         /// <summary>
-        /// Mapping from proxy targets to real targets.
+        /// Mapping from proxy targets to real targets. Case insensitive.
         /// </summary>
         public IReadOnlyDictionary<string, string> ProxyTargetToRealTargetMap => _proxyTargetToRealTargetMap;
 
@@ -36,7 +36,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             ErrorUtilities.VerifyThrowArgumentLength(proxyTargetToRealTargetMap, nameof(proxyTargetToRealTargetMap));
 
-            _proxyTargetToRealTargetMap = proxyTargetToRealTargetMap.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            _proxyTargetToRealTargetMap = proxyTargetToRealTargetMap.ToDictionary(kvp => kvp.Key, kvp => kvp.Value, StringComparer.OrdinalIgnoreCase);
         }
 
         void ITranslatable.Translate(ITranslator translator)

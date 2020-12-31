@@ -1029,7 +1029,7 @@ namespace Microsoft.Build.Execution
             {
                 lock (_syncLock)
                 {
-                    var projectInstance = submission.BuildRequestData.ProjectInstance;
+                    ProjectInstance projectInstance = submission.BuildRequestData.ProjectInstance;
                     if (projectInstance != null)
                     {
                         if (_acquiredProjectRootElementCacheFromProjectInstance)
@@ -1065,34 +1065,24 @@ namespace Microsoft.Build.Execution
 
                             // If we have already named this instance when it was submitted previously during this build, use the same
                             // name so that we get the same configuration (and thus don't cause it to rebuild.)
-                            if (!_unnamedProjectInstanceToNames.TryGetValue(
-                                submission.BuildRequestData.ProjectInstance,
-                                out var tempName))
+                            if (!_unnamedProjectInstanceToNames.TryGetValue(submission.BuildRequestData.ProjectInstance, out var tempName))
                             {
                                 tempName = "Unnamed_" + _nextUnnamedProjectId++;
                                 _unnamedProjectInstanceToNames[submission.BuildRequestData.ProjectInstance] = tempName;
                             }
 
                             submission.BuildRequestData.ProjectFullPath = Path.Combine(
-                                submission.BuildRequestData.ProjectInstance
-                                    .GetProperty(ReservedPropertyNames.projectDirectory)
-                                    .EvaluatedValue,
+                                submission.BuildRequestData.ProjectInstance.GetProperty(ReservedPropertyNames.projectDirectory).EvaluatedValue,
                                 tempName);
                         }
 
                         // Create/Retrieve a configuration for each request
-                        var buildRequestConfiguration =
-                            new BuildRequestConfiguration(
-                                submission.BuildRequestData,
-                                _buildParameters.DefaultToolsVersion);
-                        var matchingConfiguration =
-                            _configCache.GetMatchingConfiguration(buildRequestConfiguration);
+                        var buildRequestConfiguration = new BuildRequestConfiguration(submission.BuildRequestData, _buildParameters.DefaultToolsVersion);
+                        var matchingConfiguration = _configCache.GetMatchingConfiguration(buildRequestConfiguration);
                         var newConfiguration = ResolveConfiguration(
                             buildRequestConfiguration,
                             matchingConfiguration,
-                            submission.BuildRequestData.Flags.HasFlag(
-                                BuildRequestDataFlags
-                                    .ReplaceExistingProjectInstance));
+                            submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.ReplaceExistingProjectInstance));
 
                         newConfiguration.ExplicitlyLoaded = true;
 
@@ -1183,7 +1173,7 @@ namespace Microsoft.Build.Execution
             {
                 return _projectCacheService != null ||
                        _buildParameters.ProjectCacheDescriptor != null ||
-                       BuildEnvironmentHelper.Instance.RunningInVisualStudio && ProjectCacheItems.Count > 0;
+                       (BuildEnvironmentHelper.Instance.RunningInVisualStudio && ProjectCacheItems.Count > 0);
             }
 
             bool CheckForShutdown()

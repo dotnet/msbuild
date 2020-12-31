@@ -160,14 +160,13 @@ namespace Microsoft.Build.Experimental.ProjectCache
             switch (cacheResult.ResultType)
             {
                 case CacheResultType.CacheHit:
-                    message += $"{message} Skipping project.";
+                    message += " Skipping project.";
                     break;
                 case CacheResultType.CacheMiss:
                 case CacheResultType.CacheNotApplicable:
-                    message += $"{message} Building project.";
+                    message += " Building project.";
                     break;
                 case CacheResultType.CacheError:
-                    message += $"{message}";
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

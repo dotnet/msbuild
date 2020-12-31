@@ -67,7 +67,7 @@ namespace Microsoft.Build.Shared
                     return false;
                 }
 
-                if (!aKvp.Value.Equals(bValue))
+                if (!Equals(aKvp.Value, bValue))
                 {
                     return false;
                 }

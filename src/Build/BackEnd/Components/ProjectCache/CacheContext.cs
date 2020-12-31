@@ -21,7 +21,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         public IReadOnlyDictionary<string, string> PluginSettings { get; }
         public ProjectGraph? Graph { get; }
         public IReadOnlyCollection<ProjectGraphEntryPoint>? GraphEntryPoints { get; }
-        public string MSBuildExePath { get; }
+        public string? MSBuildExePath { get; }
         public MSBuildFileSystemBase FileSystem { get; }
 
         public CacheContext(
