@@ -324,6 +324,54 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
+  <Target Name="AddDepsJsonAndRuntimeConfigToCopyItemsForReferencingProjects"
+          BeforeTargets="GetCopyToOutputDirectoryItems;_GetCopyToOutputDirectoryItemsFromThisProject"
+          Condition="'$(HasRuntimeOutput)' == 'true'">
+
+    <ItemGroup Condition="'$(GenerateDependencyFile)' == 'true'">
+      <AllItemsFullPathWithTargetPath Include="$(ProjectDepsFilePath)"
+                                      TargetPath="$([System.IO.Path]::GetFileName($(ProjectDepsFilePath)))"
+                                      CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+    
+    <ItemGroup Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'">
+      <AllItemsFullPathWithTargetPath Include="$(ProjectRuntimeConfigFilePath)"
+                                TargetPath="$([System.IO.Path]::GetFileName($(ProjectRuntimeConfigFilePath)))"
+                                CopyToOutputDirectory="PreserveNewest" />
+      <AllItemsFullPathWithTargetPath Include="$(ProjectRuntimeConfigDevFilePath)"
+                                TargetPath="$([System.IO.Path]::GetFileName($(ProjectRuntimeConfigDevFilePath)))"
+                                CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+    
+  </Target>
+
+  <Target Name="AddDepsJsonAndRuntimeConfigToPublishItemsForReferencingProjects"
+          DependsOnTargets="_ComputeUseBuildDependencyFile"
+          BeforeTargets="GetCopyToPublishDirectoryItems"
+          Condition="'$(HasRuntimeOutput)' == 'true'">
+
+    <ItemGroup Condition="'$(GenerateDependencyFile)' == 'true'">
+      <AllPublishItemsFullPathWithTargetPath Include="$(ProjectDepsFilePath)"
+                                      TargetPath="$([System.IO.Path]::GetFileName($(ProjectDepsFilePath)))"
+                                      CopyToPublishDirectory="PreserveNewest" 
+                                      Condition="'$(_UseBuildDependencyFile)' == 'true'"/>
+      <AllPublishItemsFullPathWithTargetPath Include="$(PublishDepsFilePath)"
+                                      TargetPath="$([System.IO.Path]::GetFileName($(PublishDepsFilePath)))"
+                                      CopyToPublishDirectory="PreserveNewest"
+                                      Condition="'$(PublishDepsFilePath)' != '' and '$(_UseBuildDependencyFile)' != 'true'"/>
+    </ItemGroup>
+
+    <ItemGroup Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'">
+      <AllPublishItemsFullPathWithTargetPath Include="$(ProjectRuntimeConfigFilePath)"
+                                TargetPath="$([System.IO.Path]::GetFileName($(ProjectRuntimeConfigFilePath)))"
+                                CopyToPublishDirectory="PreserveNewest" />
+    
+
+    </ItemGroup>
+    
+    
+  </Target>
+
   <Target Name="_SdkBeforeClean">
     <PropertyGroup Condition="'$(_CleaningWithoutRebuilding)' == ''">
       <_CleaningWithoutRebuilding>true</_CleaningWithoutRebuilding>

@@ -65,14 +65,12 @@ namespace Microsoft.NET.Publish.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: appTargetFramework + withoutCopyingRefs);
 
-            var appProjectDirectory = Path.Combine(testAsset.TestRoot, "TestApp");
-
-            var getValuesCommand = new GetValuesCommand(Log, appProjectDirectory, testProject.TargetFrameworks, "LangVersion");
+            var getValuesCommand = new GetValuesCommand(testAsset, "LangVersion");
             getValuesCommand.Execute().Should().Pass();
 
             var langVersion = getValuesCommand.GetValues().FirstOrDefault() ?? string.Empty;
 
-            var publishCommand = new PublishCommand(Log, appProjectDirectory);
+            var publishCommand = new PublishCommand(testAsset);
 
             publishCommand
                 .Execute()

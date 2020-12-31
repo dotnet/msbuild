@@ -217,7 +217,7 @@ namespace Microsoft.NET.Build.Tests
 
             Assert(buildCommand.GetOutputDirectory(tfm));
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(asset.Path, ProjectName));
+            var publishCommand = new PublishCommand(asset);
             var runtimeIdentifier = "win-x64";
             publishCommand.Execute("-p:SelfContained=true", $"-p:RuntimeIdentifier={runtimeIdentifier}")
                 .Should()

@@ -33,7 +33,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
 
-            var publishCommand = new PublishCommand(Log, Path.Combine(testProjectInstance.Path, testProject.Name));
+            var publishCommand = new PublishCommand(testProjectInstance);
 
             //  Shouldn't have messages like the following:
             //  Encountered conflict between 'CopyLocal:C:\git\dotnet-sdk\artifacts\.nuget\packages\runtime.any.system.runtime\4.3.0\lib\netstandard1.5\System.Runtime.dll'
