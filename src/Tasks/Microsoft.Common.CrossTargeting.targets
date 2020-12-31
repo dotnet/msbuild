@@ -32,6 +32,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetFrameworks>@(_TargetFrameworkInfo)</TargetFrameworks>
         <TargetFrameworkMonikers>@(_TargetFrameworkInfo->'%(TargetFrameworkMonikers)')</TargetFrameworkMonikers>
         <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
+        <AdditionalPropertiesFromProject>@(_TargetFrameworkInfo->'%(AdditionalPropertiesFromProject)', ';;')</AdditionalPropertiesFromProject>
 
         <HasSingleTargetFramework>false</HasSingleTargetFramework>
 
