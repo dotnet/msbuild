@@ -162,8 +162,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
-        <source>MSB4270: No project cache plugin found in assembly "{0}"</source>
-        <target state="new">MSB4270: No project cache plugin found in assembly "{0}"</target>
+        <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
+        <target state="new">MSB4270: No project cache plugins found in assembly "{0}". Expected one.</target>
         <note />
       </trans-unit>
       <trans-unit id="NotAllNodesDefineACacheItem">
@@ -215,8 +215,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
-        <source>MSB4266: The project cache failed during initialization.</source>
-        <target state="new">MSB4266: The project cache failed during initialization.</target>
+        <source>MSB4266: Failed to initialize the project cache.</source>
+        <target state="new">MSB4266: Failed to initialize the project cache.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheQueryFailed">
@@ -227,8 +227,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">
-        <source>MSB4268: The project cache failed during shutdown.</source>
-        <target state="new">MSB4268: The project cache failed during shutdown.</target>
+        <source>MSB4268: The project cache failed to shut down properly.</source>
+        <target state="new">MSB4268: The project cache failed to shut down properly.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
