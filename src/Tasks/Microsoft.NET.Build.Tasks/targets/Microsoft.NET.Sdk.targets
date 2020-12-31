@@ -1031,6 +1031,31 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
   ============================================================
+  ValidateExecutableReferences
+  ============================================================
+  -->
+
+  <ItemGroup>
+    <AdditionalTargetFrameworkInfoProperty Include="SelfContained"/>
+    <AdditionalTargetFrameworkInfoProperty Include="_IsExecutable"/>
+  </ItemGroup>
+
+  <UsingTask TaskName="ValidateExecutableReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <Target Name="ValidateExecutableReferences"
+          AfterTargets="_GetProjectReferenceTargetFrameworkProperties"
+          Condition="'$(ValidateExecutableReferencesMatchSelfContained)' != 'false'">
+
+    <ValidateExecutableReferences
+      SelfContained="$(SelfContained)"
+      IsExecutable="$(_IsExecutable)"
+      ReferencedProjects="@(_MSBuildProjectReferenceExistent)"
+      />
+    
+  </Target>
+
+  <!--
+  ============================================================
                                          Project Capabilities
   ============================================================
   -->
