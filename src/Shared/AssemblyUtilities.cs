@@ -100,6 +100,8 @@ namespace Microsoft.Build.Shared
 #if !FEATURE_CULTUREINFO_GETCULTURES
         public static bool CultureInfoHasGetCultures()
         {
+            Initialize();
+
             return s_cultureInfoGetCultureMethod != null;
         }
 #endif // !FEATURE_CULTUREINFO_GETCULTURES
@@ -109,8 +111,6 @@ namespace Microsoft.Build.Shared
 #if FEATURE_CULTUREINFO_GETCULTURES
             return CultureInfo.GetCultures(CultureTypes.AllCultures);
 #else
-            Initialize();
-
             if (!CultureInfoHasGetCultures())
             {
                 throw new NotSupportedException("CultureInfo does not have the method GetCultures");
