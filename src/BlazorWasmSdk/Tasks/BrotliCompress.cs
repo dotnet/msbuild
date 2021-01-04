@@ -86,7 +86,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             {
                 var input = FilesToCompress[i];
                 var inputFullPath = input.GetMetadata("FullPath");
-                System.Console.WriteLine($"inputFullPath: {inputFullPath}");
                 var relativePath = input.GetMetadata("RelativePath");
                 var outputRelativePath = Path.Combine(OutputDirectory, CalculateTargetPath(inputFullPath, ".br"));
                 var outputFullPath = Path.GetFullPath(outputRelativePath);

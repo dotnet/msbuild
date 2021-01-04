@@ -181,7 +181,7 @@
   </Target>
 
   <Target Name="PublishBlazorWasmTools"
-          BeforeTargets="Build">
+          BeforeTargets="PublishNetSdks">
     <MSBuild
       Targets="Publish"
       Projects="$(RepoRoot)/src/BlazorWasmSdk/Tool/Microsoft.NET.Sdk.BlazorWebAssembly.Tool.csproj"
@@ -190,7 +190,7 @@
 
   <Target Name="MoveBlazorWasmTools" AfterTargets="PublishBlazorWasmTools">
     <ItemGroup>
-      <_WebAssemblyToolsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.BlazorWebAssembly.Tool\$(Configuration)\$(SdkTargetFramework)\publish\Microsoft.*" />
+      <_WebAssemblyToolsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.BlazorWebAssembly.Tool\$(Configuration)\$(SdkTargetFramework)\publish\*.*" />
     </ItemGroup>
 
     <Error
@@ -199,7 +199,7 @@
     
     <Copy
       SourceFiles="@(_WebAssemblyToolsOutput)"
-      DestinationFolder="$(NETSdkBlazorWasmSourceRoot)\tools\$(SdkTargetFramework)\"
+      DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.BlazorWebAssembly\tools\$(SdkTargetFramework)\"
       SkipUnchangedFiles="true" />
   </Target>
 

@@ -249,8 +249,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             VerifyCompression(testInstance, blazorPublishDirectory);
         }
 
-        [Fact]
-        public void Publish_WithStaticWebBasePathWorks()
+        [Theory]
+        [InlineData("different-path")]
+        [InlineData("/different-path")]
+        [InlineData("different-path/")]
+        [InlineData("/different-path/")]
+        public void Publish_WithStaticWebBasePathWorks(string basePath)
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
@@ -263,7 +267,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 {
                     var ns = project.Root.Name.Namespace;
                     var itemGroup = new XElement(ns + "PropertyGroup");
-                    itemGroup.Add(new XElement("StaticWebAssetBasePath", @"different-path/"));
+                    itemGroup.Add(new XElement("StaticWebAssetBasePath", basePath));
                     project.Root.Add(itemGroup);
                 }
 
@@ -310,8 +314,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 staticWebAssetsBasePath: "different-path");
         }
 
-        [Fact]
-        public void Publish_Hosted_WithStaticWebBasePathWorks()
+        [Theory]
+        [InlineData("different-path")]
+        [InlineData("/different-path")]
+        [InlineData("different-path/")]
+        [InlineData("/different-path/")]
+        public void Publish_Hosted_WithStaticWebBasePathWorks(string basePath)
         {
             var testAppName = "BlazorWasmWithLibrary";
             var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
@@ -323,7 +331,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 {
                     var ns = project.Root.Name.Namespace;
                     var itemGroup = new XElement(ns + "PropertyGroup");
-                    itemGroup.Add(new XElement("StaticWebAssetBasePath", @"different-path/"));
+                    itemGroup.Add(new XElement("StaticWebAssetBasePath", basePath));
                     project.Root.Add(itemGroup);
                 }
 

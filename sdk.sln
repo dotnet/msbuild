@@ -270,6 +270,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.BlazorWeb
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BlazorWasmSdk", "BlazorWasmSdk", "{9D207DE3-6D6E-4CD8-B3A4-E88FD255FCB0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{35D87DC9-B492-43B6-9FB3-F3ADFC162193}"
+	ProjectSection(SolutionItems) = preProject
+		src\BlazorWasmSdk\Targets\BlazorWasm.web.config = src\BlazorWasmSdk\Targets\BlazorWasm.web.config
+		src\BlazorWasmSdk\Targets\Microsoft.NET.Sdk.BlazorWebAssembly.Current.props = src\BlazorWasmSdk\Targets\Microsoft.NET.Sdk.BlazorWebAssembly.Current.props
+		src\BlazorWasmSdk\Targets\Microsoft.NET.Sdk.BlazorWebAssembly.Current.targets = src\BlazorWasmSdk\Targets\Microsoft.NET.Sdk.BlazorWebAssembly.Current.targets
+		src\BlazorWasmSdk\Targets\Microsoft.NET.Sdk.BlazorWebAssembly.ServiceWorkerAssetsManifest.targets = src\BlazorWasmSdk\Targets\Microsoft.NET.Sdk.BlazorWebAssembly.ServiceWorkerAssetsManifest.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -583,6 +591,7 @@ Global
 		{CB7F74C6-BF0A-4CD6-94B4-BBF47AF9BB56} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{6CFB4CBF-1618-4D13-8880-518939E1809A} = {9D207DE3-6D6E-4CD8-B3A4-E88FD255FCB0}
 		{9D207DE3-6D6E-4CD8-B3A4-E88FD255FCB0} = {22AB674F-ED91-4FBC-BFEE-8A1E82F9F05E}
+		{35D87DC9-B492-43B6-9FB3-F3ADFC162193} = {9D207DE3-6D6E-4CD8-B3A4-E88FD255FCB0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}

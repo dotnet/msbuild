@@ -24,10 +24,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tool
                 description: "System.IO.Compression.CompressionLevel for the Brotli compression algorithm.");
             var sourcesOption = new Option<List<string>>(
                 "-s",
-                description: "A list of files to compress.");
+                description: "A list of files to compress.") { AllowMultipleArgumentsPerToken = false };
             var outputsOption = new Option<List<string>>(
                 "-o",
-                "The filenames to output the compressed file to.");
+                "The filenames to output the compressed file to.") { AllowMultipleArgumentsPerToken = false };
 
             brotli.Add(compressionLevelOption);
             brotli.Add(sourcesOption);
@@ -35,17 +35,17 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tool
 
             rootCommand.Add(brotli);
 
-            brotli.Handler = CommandHandler.Create<CompressionLevel, List<string>, List<string>>((compressionLevel, sources, outputs) =>
+            brotli.Handler = CommandHandler.Create<CompressionLevel, List<string>, List<string>>((c, s, o) =>
             {
-                Parallel.For(0, sources.Count, i =>
+                Parallel.For(0, s.Count, i =>
                 {
-                    var source = sources[i];
-                    var output = outputs[i];
+                    var source = s[i];
+                    var output = o[i];
 
                     using var sourceStream = File.OpenRead(source);
                     using var fileStream = new FileStream(output, FileMode.Create);
 
-                    using var stream = new BrotliStream(fileStream, compressionLevel);
+                    using var stream = new BrotliStream(fileStream, c);
 
                     sourceStream.CopyTo(stream);
                 });

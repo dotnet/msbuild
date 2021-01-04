@@ -9,12 +9,12 @@
 /src/WebSdk/ @vijayrkn
 /src/Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests/ @vijayrkn
 
-/src/BlazorWasmSdk @captainsafia
-/src/Tests/Microsoft.NET.Sdk.BlazorWebAssembly.Tests @captainsafia
-/src/Assets/TestProjects/BlazorHosted @captainsafia
-/src/Assets/TestProjects/BlazorHostedRID @captainsafia
-/src/Assets/TestProjects/BlazorWasmMinimal @captainsafia
-/src/Assets/TestProjects/BlazorWasmWithLibrary @captainsafia
+/src/BlazorWasmSdk @captainsafia, @pranavkm, mkArtakMSFT
+/src/Tests/Microsoft.NET.Sdk.BlazorWebAssembly.Tests @captainsafia, @pranavkm, mkArtakMSFT
+/src/Assets/TestProjects/BlazorHosted @captainsafia, @pranavkm, mkArtakMSFT
+/src/Assets/TestProjects/BlazorHostedRID @captainsafia, @pranavkm, mkArtakMSFT
+/src/Assets/TestProjects/BlazorWasmMinimal @captainsafia, @pranavkm, mkArtakMSFT
+/src/Assets/TestProjects/BlazorWasmWithLibrary @captainsafia, @pranavkm, mkArtakMSFT
 
 /src/Cli/dotnet/commands/dotnet-add/dotnet-add-package @dotnet/nuget-team
 /src/Tests/dotnet-add-package.Tests @dotnet/nuget-team

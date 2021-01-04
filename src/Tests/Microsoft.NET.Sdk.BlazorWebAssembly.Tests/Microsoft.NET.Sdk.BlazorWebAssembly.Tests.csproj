@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>
 
   <PropertyGroup>

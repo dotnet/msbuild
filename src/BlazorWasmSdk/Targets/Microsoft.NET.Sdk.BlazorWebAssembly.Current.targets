@@ -35,8 +35,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <BlazorWebAssemblySdkDirectoryRoot Condition="'$(BlazorWebAssemblySdkDirectoryRoot)'==''">$(MSBuildThisFileDirectory)..\</BlazorWebAssemblySdkDirectoryRoot>
     <_BlazorWebAssemblySdkTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">net6.0</_BlazorWebAssemblySdkTasksTFM>
     <_BlazorWebAssemblySdkTasksTFM Condition=" '$(MSBuildRuntimeType)' != 'Core'">net46</_BlazorWebAssemblySdkTasksTFM>
-    <_BlazorWebAssemblySdkTasksAssembly>$(BlazorWebAssemblySdkDirectoryRoot)tasks\$(_BlazorWebAssemblySdkTasksTFM)\Microsoft.NET.Sdk.BlazorWebAssembly.Tasks.dll</_BlazorWebAssemblySdkTasksAssembly>
-    <_BlazorWebAssemblySdkToolAssembly>$(BlazorWebAssemblySdkDirectoryRoot)tools\net6.0\Microsoft.NET.Sdk.BlazorWebAssembly.Tools.dll</_BlazorWebAssemblySdkToolAssembly>
+    <_BlazorWebAssemblySdkTasksAssembly>$(BlazorWebAssemblySdkDirectoryRoot)tools\$(_BlazorWebAssemblySdkTasksTFM)\Microsoft.NET.Sdk.BlazorWebAssembly.Tasks.dll</_BlazorWebAssemblySdkTasksAssembly>
+    <_BlazorWebAssemblySdkToolAssembly>$(BlazorWebAssemblySdkDirectoryRoot)tools\net6.0\Microsoft.NET.Sdk.BlazorWebAssembly.Tool.dll</_BlazorWebAssemblySdkToolAssembly>
   </PropertyGroup>
 
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.GenerateBlazorWebAssemblyBootJson" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
@@ -463,7 +463,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </JoinItems>
 
     <PropertyGroup>
-      <_BlazorPublishOutputPath Condition="'$(StaticWebAssetBasePath)' != '/'">wwwroot\$(StaticWebAssetBasePath.Replace('/', '\'))</_BlazorPublishOutputPath>
+      <_BlazorPublishOutputPath Condition="'$(StaticWebAssetBasePath)' != '/'">wwwroot\$(StaticWebAssetBasePath.Replace('/', '\').Trim('\'))\</_BlazorPublishOutputPath>
       <_BlazorPublishOutputPath Condition="'$(StaticWebAssetBasePath)' == '/'">wwwroot\</_BlazorPublishOutputPath>
       <_BlazorFrameworkPublishPath>$(_BlazorPublishOutputPath)_framework\</_BlazorFrameworkPublishPath>
     </PropertyGroup>
