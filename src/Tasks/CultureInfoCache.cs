@@ -59,11 +59,15 @@ namespace Microsoft.Build.Tasks
         {
             var isValid = ValidCultureNames.Contains(name);
             if (isValid)
+            {
                 return true;
+            }
 
             var isInvalid = InvalidCultureNames.Contains(name);
             if (isInvalid)
+            {
                 return false;
+            }
 
             CultureInfo culture;
             try
@@ -950,4 +954,3 @@ namespace Microsoft.Build.Tasks
 #endif
     }
 }
-
