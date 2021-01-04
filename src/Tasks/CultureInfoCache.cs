@@ -18,12 +18,12 @@ namespace Microsoft.Build.Tasks
     internal static class CultureInfoCache
     {
         private static readonly HashSet<string> ValidCultureNames;
-        private static readonly HashSet<string> InvalidCultureNames;
+        private static readonly HashSet<string> KnownInvalidCultureNames;
 
         static CultureInfoCache()
         {
             ValidCultureNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            InvalidCultureNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            KnownInvalidCultureNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
 #if !FEATURE_CULTUREINFO_GETCULTURES
             if (!AssemblyUtilities.CultureInfoHasGetCultures())
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            var isInvalid = InvalidCultureNames.Contains(name);
+            var isInvalid = KnownInvalidCultureNames.Contains(name);
             if (isInvalid)
             {
                 return false;
@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception)
             {
-                InvalidCultureNames.Add(name);
+                KnownInvalidCultureNames.Add(name);
                 return false;
             }
 
@@ -84,7 +84,7 @@ namespace Microsoft.Build.Tasks
             const int LOCALE_CUSTOM_UNSPECIFIED = 0x1000;
             if (culture.LCID == LOCALE_CUSTOM_UNSPECIFIED)
             {
-                InvalidCultureNames.Add(name);
+                KnownInvalidCultureNames.Add(name);
                 return false;
             }
 
