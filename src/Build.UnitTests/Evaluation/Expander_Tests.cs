@@ -3213,11 +3213,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-#if FEATURE_CULTUREINFO_GETCULTURES
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.Globalization.CultureInfo]::GetCultureInfo(`en-US`).ToString())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-#else
-            string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.Globalization.CultureInfo]::new(`en-US`).ToString())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-#endif
 
             Assert.Equal(new CultureInfo("en-US").ToString(), result);
         }

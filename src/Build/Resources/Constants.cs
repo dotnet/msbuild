@@ -343,9 +343,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.IO.File::GetLastWriteTime", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::ReadAllText", fileType);
 
-#if FEATURE_CULTUREINFO_GETCULTUREINFO
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::GetCultureInfo", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
-#endif
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::new", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::CurrentUICulture", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
 

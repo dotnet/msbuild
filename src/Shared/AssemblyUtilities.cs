@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
@@ -13,16 +12,11 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class AssemblyUtilities
     {
-#if !FEATURE_CULTUREINFO_GETCULTURES
         // True when the cached method info objects have been set.
         private static bool s_initialized;
 
         // Cached method info
         private static PropertyInfo s_assemblylocationProperty;
-        private static MethodInfo s_cultureInfoGetCultureMethod;
-
-        private static Lazy<CultureInfo[]> s_validCultures = new Lazy<CultureInfo[]>(() => GetValidCultures(), true);
-#endif
 
 #if !CLR2COMPATIBILITY
         private static Lazy<Assembly> s_entryAssembly = new Lazy<Assembly>(() => GetEntryAssembly());
@@ -97,30 +91,6 @@ namespace Microsoft.Build.Shared
 
         }
 
-#if !FEATURE_CULTUREINFO_GETCULTURES
-        public static bool CultureInfoHasGetCultures()
-        {
-            return s_cultureInfoGetCultureMethod != null;
-        }
-#endif // !FEATURE_CULTUREINFO_GETCULTURES
-
-        public static CultureInfo[] GetAllCultures()
-        {
-#if FEATURE_CULTUREINFO_GETCULTURES
-            return CultureInfo.GetCultures(CultureTypes.AllCultures);
-#else
-            Initialize();
-
-            if (!CultureInfoHasGetCultures())
-            {
-                throw new NotSupportedException("CultureInfo does not have the method GetCultures");
-            }
-
-            return s_validCultures.Value;
-#endif
-        }
-
-#if !FEATURE_CULTUREINFO_GETCULTURES
         /// <summary>
         /// Initialize static fields. Doesn't need to be thread safe.
         /// </summary>
@@ -129,11 +99,9 @@ namespace Microsoft.Build.Shared
             if (s_initialized) return;
 
             s_assemblylocationProperty = typeof(Assembly).GetProperty("Location", typeof(string));
-            s_cultureInfoGetCultureMethod = typeof(CultureInfo).GetMethod("GetCultures");
 
             s_initialized = true;
         }
-#endif // !FEATURE_CULTUREINFO_GETCULTURES
 
         private static Assembly GetEntryAssembly()
         {
@@ -147,24 +115,5 @@ namespace Microsoft.Build.Shared
             return (Assembly) getEntryAssembly.Invoke(null, Array.Empty<object>());
 #endif
         }
-
-#if !FEATURE_CULTUREINFO_GETCULTURES
-        private static CultureInfo[] GetValidCultures()
-        {
-            var cultureTypesType = s_cultureInfoGetCultureMethod?.GetParameters().FirstOrDefault()?.ParameterType;
-
-            ErrorUtilities.VerifyThrow(cultureTypesType?.Name == "CultureTypes" &&
-                                       Enum.IsDefined(cultureTypesType, "AllCultures"),
-                                       "GetCulture is expected to accept CultureTypes.AllCultures");
-
-            var allCulturesEnumValue = Enum.Parse(cultureTypesType, "AllCultures", true);
-
-            var cultures = s_cultureInfoGetCultureMethod.Invoke(null, new[] {allCulturesEnumValue}) as CultureInfo[];
-
-            ErrorUtilities.VerifyThrowInternalNull(cultures, "CultureInfo.GetCultures should work if all reflection checks pass");
-
-            return cultures;
-        }
-#endif
     }
 }
