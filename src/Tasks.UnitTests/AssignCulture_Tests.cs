@@ -192,42 +192,57 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*
-        * Method:   PseudoLocalization
+        * Method:   ValidLocalization
         *
-        * Test the usage of Windows Pseudo-Locales
-        * https://docs.microsoft.com/en-gb/windows/desktop/Intl/pseudo-locales
+        * Test the usage of Windows Pseudo-Locales, aliased cultures and valid BCP-47 language tags
         */
         [Theory]
+        // Pseudo-Locales: https://docs.microsoft.com/en-gb/windows/desktop/Intl/pseudo-locales
         [InlineData("qps-ploc")]
         [InlineData("qps-plocm")]
         [InlineData("qps-ploca")]
         [InlineData("qps-Latn-x-sh")] // Windows 10+
-        public void PseudoLocalization(string culture)
-        {
-            AssignCulture t = new AssignCulture();
-            t.BuildEngine = new MockEngine();
-            ITaskItem i = new TaskItem($"MyResource.{culture}.resx");
-            t.Files = new ITaskItem[] { i };
-            t.Execute();
-
-            Assert.Single(t.AssignedFiles);
-            Assert.Single(t.CultureNeutralAssignedFiles);
-            Assert.Equal(culture, t.AssignedFiles[0].GetMetadata("Culture"));
-            Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
-            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
-        }
-
-        /*
-        * Method:   AliasedCulture
-        *
-        * Test that an aliased culture (e.g. zh-CN or zh-TW) which is _not_ returned by CultureInfo.GetCultures(CultureTypes.AllCultures)
-        * on Unix-based systems is still considered valid.
-        * See also https://github.com/dotnet/msbuild/issues/3897 (Cultures aliased by ICU cannot be used for resource localization on non-Windows environments)
-        */
-        [Theory]
+        // Aliased cultures: https://github.com/CodingDinosaur/CultureIcuTest#icu-locale-alias-list
+        [InlineData("ars")]
+        [InlineData("az-AZ")]
+        [InlineData("bs-BA")]
+        [InlineData("en-NH")]
+        [InlineData("en-RH")]
+        [InlineData("tl")]
+        [InlineData("tl-PH")]
+        [InlineData("iw")]
+        [InlineData("iw-IL")]
+        [InlineData("in")]
+        [InlineData("in-ID")]
+        [InlineData("no")]
+        [InlineData("no-NO")]
+        [InlineData("no-NO-NY")]
+        [InlineData("pa-PK")]
+        [InlineData("pa-IN")]
+        [InlineData("mo")]
+        [InlineData("shi-MA")]
+        [InlineData("sr-BA")]
+        [InlineData("sr-YU")]
+        [InlineData("sr-XK")]
+        [InlineData("sh")]
+        [InlineData("sh-BA")]
+        [InlineData("sr-ME")]
+        [InlineData("sr-Latn-YU")]
+        [InlineData("uz-AF")]
+        [InlineData("uz-UZ")]
+        [InlineData("vai-LR")]
+        [InlineData("yue-CN")]
+        [InlineData("yue-HK")]
         [InlineData("zh-CN")]
+        [InlineData("zh-SG")]
+        [InlineData("zh-HK")]
+        [InlineData("zh-MO")]
         [InlineData("zh-TW")]
-        public void AliasedCulture(string culture)
+        // Valid BCP-47 language tags: https://docs.microsoft.com/en-us/dotnet/api/system.globalization.cultureinfo#culture-names-and-identifiers
+        [InlineData("xx")]
+        [InlineData("yy")]
+        [InlineData("zz")]
+        public void ValidLocalization(string culture)
         {
             AssignCulture t = new AssignCulture();
             t.BuildEngine = new MockEngine();
@@ -245,12 +260,11 @@ namespace Microsoft.Build.UnitTests
         /*
         * Method:   InvalidCulture
         *
-        * Test for invalid culture (i.e. throwing an exception when using new CultureInfo())
-        * and unknown culture (i.e. a culture not known by the operating system but which can be created with new CultureInfo())
+        * Test for invalid culture (i.e. throwing CultureNotFoundException when using CultureInfo.GetCultureInfo())
         */
         [Theory]
+        [InlineData("@")]
         [InlineData("\U0001F4A5")]
-        [InlineData("xx")]
         public void InvalidCulture(string culture)
         {
             AssignCulture t = new AssignCulture();
