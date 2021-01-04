@@ -216,6 +216,56 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
+
+        /*
+        * Method:   AliasedCulture
+        *
+        * Test that an aliased culture (e.g. zh-CN or zh-TW) which is _not_ returned by CultureInfo.GetCultures(CultureTypes.AllCultures)
+        * on Unix-based systems is still considered valid.
+        * See also https://github.com/dotnet/msbuild/issues/3897 (Cultures aliased by ICU cannot be used for resource localization on non-Windows environments)
+        */
+        [Theory]
+        [InlineData("zh-CN")]
+        [InlineData("zh-TW")]
+        public void AliasedCulture(string culture)
+        {
+            AssignCulture t = new AssignCulture();
+            t.BuildEngine = new MockEngine();
+            ITaskItem i = new TaskItem($"MyResource.{culture}.resx");
+            t.Files = new ITaskItem[] { i };
+            t.Execute();
+
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
+            Assert.Equal(culture, t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+        }
+
+        /*
+        * Method:   InvalidCulture
+        *
+        * Test for invalid culture (i.e. throwing an exception when using new CultureInfo())
+        * and unknown culture (i.e. a culture not known by the operating system but which can be created with new CultureInfo())
+        */
+        [Theory]
+        [InlineData("\U0001F4A5")]
+        [InlineData("xx")]
+        public void InvalidCulture(string culture)
+        {
+            AssignCulture t = new AssignCulture();
+            t.BuildEngine = new MockEngine();
+            ITaskItem i = new TaskItem($"MyResource.{culture}.resx");
+            t.Files = new ITaskItem[] { i };
+            t.Execute();
+
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
+            Assert.Equal(String.Empty, t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal("false", t.AssignedFiles[0].GetMetadata("WithCulture"));
+            Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal($"MyResource.{culture}.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+        }
     }
 }
 

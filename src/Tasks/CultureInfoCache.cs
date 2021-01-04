@@ -18,10 +18,12 @@ namespace Microsoft.Build.Tasks
     internal static class CultureInfoCache
     {
         private static readonly HashSet<string> ValidCultureNames;
+        private static readonly HashSet<string> InvalidCultureNames;
 
         static CultureInfoCache()
         {
             ValidCultureNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            InvalidCultureNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
 #if !FEATURE_CULTUREINFO_GETCULTURES
             if (!AssemblyUtilities.CultureInfoHasGetCultures())
@@ -55,7 +57,35 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if the culture is determined to be valid.</returns>
         internal static bool IsValidCultureString(string name)
         {
-            return ValidCultureNames.Contains(name);
+            var isValid = ValidCultureNames.Contains(name);
+            if (isValid)
+                return true;
+
+            var isInvalid = InvalidCultureNames.Contains(name);
+            if (isInvalid)
+                return false;
+
+            CultureInfo culture;
+            try
+            {
+                culture = new CultureInfo(name);
+            }
+            catch (Exception)
+            {
+                InvalidCultureNames.Add(name);
+                return false;
+            }
+
+            // See https://docs.microsoft.com/en-us/dotnet/api/System.Globalization.CultureInfo.LCID#remarks
+            const int LOCALE_CUSTOM_UNSPECIFIED = 0x1000;
+            if (culture.LCID == LOCALE_CUSTOM_UNSPECIFIED)
+            {
+                InvalidCultureNames.Add(name);
+                return false;
+            }
+
+            ValidCultureNames.Add(name);
+            return true;
         }
 
 #if !FEATURE_CULTUREINFO_GETCULTURES
