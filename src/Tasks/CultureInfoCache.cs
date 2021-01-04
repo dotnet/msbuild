@@ -74,7 +74,7 @@ namespace Microsoft.Build.Tasks
             {
                 culture = new CultureInfo(name);
             }
-            catch (Exception)
+            catch (CultureNotFoundException)
             {
                 KnownInvalidCultureNames.Add(name);
                 return false;
