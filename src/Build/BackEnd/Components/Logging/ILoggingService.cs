@@ -427,8 +427,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="targetNames">The entrypoint target names for this project</param>
         /// <param name="properties">The initial properties of the project</param>
         /// <param name="items">The initial items of the project</param>
+        /// <param name="evaluationId">EvaluationId of the project instance</param>
         /// <returns>The BuildEventContext to use for this project.</returns>
-        BuildEventContext LogProjectStarted(BuildEventContext nodeBuildEventContext, int submissionId, int projectId, BuildEventContext parentBuildEventContext, string projectFile, string targetNames, IEnumerable<DictionaryEntry> properties, IEnumerable<DictionaryEntry> items);
+        BuildEventContext LogProjectStarted(BuildEventContext nodeBuildEventContext, int submissionId, int projectId, BuildEventContext parentBuildEventContext, string projectFile, string targetNames, IEnumerable<DictionaryEntry> properties, IEnumerable<DictionaryEntry> items, int evaluationId = BuildEventContext.InvalidEvaluationId);
 
         /// <summary>
         /// Log that the project has finished
