@@ -1160,7 +1160,7 @@ namespace Microsoft.Build.BackEnd
                             configurationId: matchingConfig.ConfigurationId,
                             escapedTargets: request.Targets,
                             hostServices: issuingEntry.Request.HostServices,
-                            parentBuildEventContext: issuingEntry.Request.BuildEventContext,
+                            parentBuildEventContext: issuingEntry.Request.CurrentTaskContext ?? issuingEntry.Request.BuildEventContext,
                             parentRequest: issuingEntry.Request,
                             buildRequestDataFlags: buildRequestDataFlags,
                             requestedProjectState: null,
