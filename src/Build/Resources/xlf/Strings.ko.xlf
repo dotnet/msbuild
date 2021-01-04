@@ -64,12 +64,12 @@
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
         <source>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="new">MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</target>
+        <target state="translated">MSB4271: 환경 변수 MSBuildDisableFeaturesFromVersion이 잘못된 형식으로 설정되어 있습니다. 변경 웨이브 버전을 모두 사용하도록 설정합니다. 입력한 값: {0}. 현재 변경 웨이브: {1}.</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
         <source>MSB4272: Environment variable MSBuildDisableFeaturesFromVersion is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="new">MSB4272: Environment variable MSBuildDisableFeaturesFromVersion is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</target>
+        <target state="translated">MSB4272: 환경 변수 MSBuildDisableFeaturesFromVersion이 순환되지 않는 버전으로 설정되어 있습니다. 기본값인 변경 웨이브 버전 {0}(으)로 설정합니다. 입력한 값: {1}. 현재 변경 웨이브: {2}.</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -88,7 +88,7 @@
       </trans-unit>
       <trans-unit id="CircularDependencyInTargetGraph">
         <source>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}". Since "{1}" has "{2}" dependence on "{3}", the circular is "{4}".</source>
-        <target state="new">MSB4006: There is a circular dependency in the target dependency graph involving target "{0}". Since "{1}" has "{2}" dependence on "{3}", the circular is "{4}".</target>
+        <target state="translated">MSB4006: 대상 종속성 그래프에 "{0}" 대상과 관련된 순환 종속성이 있습니다. "{1}"에 "{3}"에 대한 "{2}" 종속이 있으므로 순환은 "{4}"입니다.</target>
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
