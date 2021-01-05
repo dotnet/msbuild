@@ -19,7 +19,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    
+    <ProjectReference Include="..\StringTools\StringTools.csproj" />
+
     <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
 

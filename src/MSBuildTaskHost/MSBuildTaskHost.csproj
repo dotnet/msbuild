@@ -211,6 +211,9 @@
     <Content Include="..\MSBuild.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\StringTools\StringTools.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
     <!-- Disabled PdbGit because of warnings; it could/should be brought back.
     <PackageReference Include="PdbGit" /> -->
