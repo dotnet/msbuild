@@ -10,16 +10,16 @@ using Microsoft.Build.Framework;
 
 namespace MockCacheFromAssembly
 {
-    public class MockCacheFromAssembly : ProjectCachePluginBase
+    public class AssemblyMockCache : ProjectCachePluginBase
     {
-        public MockCacheFromAssembly()
+        public AssemblyMockCache()
         {
             ThrowFrom("Constructor");
         }
 
         public override Task BeginBuildAsync(CacheContext context, PluginLoggerBase logger, CancellationToken cancellationToken)
         {
-            logger.LogMessage("MockCacheFromAssembly: BeginBuildAsync", MessageImportance.High);
+            logger.LogMessage($"{nameof(AssemblyMockCache)}: BeginBuildAsync", MessageImportance.High);
 
             ThrowFrom(nameof(BeginBuildAsync));
 
@@ -31,7 +31,7 @@ namespace MockCacheFromAssembly
             PluginLoggerBase logger,
             CancellationToken cancellationToken)
         {
-            logger.LogMessage($"MockCacheFromAssembly: GetCacheResultAsync for {buildRequest.ProjectFullPath}", MessageImportance.High);
+            logger.LogMessage($"{nameof(AssemblyMockCache)}: GetCacheResultAsync for {buildRequest.ProjectFullPath}", MessageImportance.High);
 
             ThrowFrom(nameof(GetCacheResultAsync));
 
@@ -40,7 +40,7 @@ namespace MockCacheFromAssembly
 
         public override Task EndBuildAsync(PluginLoggerBase logger, CancellationToken cancellationToken)
         {
-            logger.LogMessage("MockCacheFromAssembly: EndBuildAsync", MessageImportance.High);
+            logger.LogMessage($"{nameof(AssemblyMockCache)}: EndBuildAsync", MessageImportance.High);
 
             ThrowFrom(nameof(EndBuildAsync));
 

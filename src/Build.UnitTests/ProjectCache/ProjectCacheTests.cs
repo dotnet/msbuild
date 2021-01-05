@@ -41,6 +41,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             _env.Dispose();
         }
 
+        private static readonly string AssemblyMockCache = nameof(AssemblyMockCache);
+
         private static readonly Lazy<string> SamplePluginAssemblyPath =
             new Lazy<string>(
                 () =>
@@ -198,7 +200,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             EndBuildAsync = 1 << 3
         }
 
-        public class MockProjectCache : ProjectCachePluginBase
+        public class InstanceMockCache : ProjectCachePluginBase
         {
             private readonly GraphCacheResponse? _testData;
             public ConcurrentQueue<BuildRequestData> Requests { get; } = new ConcurrentQueue<BuildRequestData>();
@@ -206,7 +208,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             public bool BeginBuildCalled { get; set; }
             public bool EndBuildCalled { get; set; }
 
-            public MockProjectCache(GraphCacheResponse? testData = null)
+            public InstanceMockCache(GraphCacheResponse? testData = null)
             {
                 _testData = testData;
             }
@@ -379,7 +381,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         {
             _output.WriteLine(testData.ToString());
             var graph = testData.CreateGraph(_env);
-            var mockCache = new MockProjectCache(testData);
+            var mockCache = new InstanceMockCache(testData);
 
             buildParameters.ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
                 mockCache,
@@ -404,7 +406,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         public void ProjectCacheByBuildParametersAndBottomUpBuildWorks(GraphCacheResponse testData, BuildParameters buildParameters)
         {
             var graph = testData.CreateGraph(_env);
-            var mockCache = new MockProjectCache(testData);
+            var mockCache = new InstanceMockCache(testData);
 
             buildParameters.ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
                 mockCache,
@@ -479,25 +481,25 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         private void AssertCacheBuild(
             ProjectGraph graph,
             GraphCacheResponse testData,
-            MockProjectCache? mockCache,
+            InstanceMockCache? instanceMockCache,
             MockLogger mockLogger,
             IReadOnlyDictionary<ProjectGraphNode, BuildResult> projectPathToBuildResults)
         {
-            if (mockCache != null)
+            if (instanceMockCache != null)
             {
                 mockLogger.FullLog.ShouldContain("MockCache: BeginBuildAsync");
                 mockLogger.FullLog.ShouldContain("Instance based");
                 mockLogger.FullLog.ShouldNotContain("Assembly path based");
 
-                mockCache.Requests.Count.ShouldBe(graph.ProjectNodes.Count);
+                instanceMockCache.Requests.Count.ShouldBe(graph.ProjectNodes.Count);
             }
             else
             {
-                mockLogger.FullLog.ShouldContain("MockCacheFromAssembly: BeginBuildAsync");
+                mockLogger.FullLog.ShouldContain($"{AssemblyMockCache}: BeginBuildAsync");
                 mockLogger.FullLog.ShouldContain("Assembly path based");
                 mockLogger.FullLog.ShouldNotContain("Instance based");
 
-                Regex.Matches(mockLogger.FullLog, "MockCacheFromAssembly: GetCacheResultAsync for").Count.ShouldBe(graph.ProjectNodes.Count);
+                Regex.Matches(mockLogger.FullLog, $"{AssemblyMockCache}: GetCacheResultAsync for").Count.ShouldBe(graph.ProjectNodes.Count);
             }
 
             foreach (var node in graph.ProjectNodes)
@@ -506,18 +508,18 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
                 mockLogger.FullLog.ShouldContain($"====== Querying project cache for project {node.ProjectInstance.FullPath}");
 
-                if (mockCache != null)
+                if (instanceMockCache != null)
                 {
-                    mockCache.Requests.ShouldContain(r => r.ProjectFullPath.Equals(node.ProjectInstance.FullPath));
-                    mockCache.BeginBuildCalled.ShouldBeTrue();
-                    mockCache.EndBuildCalled.ShouldBeTrue();
+                    instanceMockCache.Requests.ShouldContain(r => r.ProjectFullPath.Equals(node.ProjectInstance.FullPath));
+                    instanceMockCache.BeginBuildCalled.ShouldBeTrue();
+                    instanceMockCache.EndBuildCalled.ShouldBeTrue();
                 }
                 else
                 {
-                    mockLogger.FullLog.ShouldContain($"MockCacheFromAssembly: GetCacheResultAsync for {node.ProjectInstance.FullPath}");
+                    mockLogger.FullLog.ShouldContain($"{AssemblyMockCache}: GetCacheResultAsync for {node.ProjectInstance.FullPath}");
                 }
 
-                if (mockCache == null)
+                if (instanceMockCache == null)
                 {
                     // Too complicated, not worth it to send expected results to the assembly plugin, so skip checking the build results.
                     continue;
@@ -601,7 +603,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         </Target>
                     </Project>".Cleanup());
 
-            var mockCache = new MockProjectCache();
+            var mockCache = new InstanceMockCache();
             buildParameters.ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
                 mockCache,
                 new[] {new ProjectGraphEntryPoint(project1.Path)},
@@ -706,7 +708,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 );
 
             var graph = testData.CreateGraph(_env);
-            var mockCache = new MockProjectCache(testData);
+            var mockCache = new InstanceMockCache(testData);
 
             using var buildSession = new Helpers.BuildManagerSession(
                 _env,
@@ -869,13 +871,13 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             if ((exceptionsThatShouldPreventCacheQueryAndEndBuildAsync & exceptionLocations) != 0)
             {
-                logger.FullLog.ShouldNotContain("MockCacheFromAssembly: GetCacheResultAsync for");
-                logger.FullLog.ShouldNotContain("MockCacheFromAssembly: EndBuildAsync");
+                logger.FullLog.ShouldNotContain($"{AssemblyMockCache}: GetCacheResultAsync for");
+                logger.FullLog.ShouldNotContain($"{AssemblyMockCache}: EndBuildAsync");
             }
             else
             {
-                logger.FullLog.ShouldContain("MockCacheFromAssembly: GetCacheResultAsync for");
-                logger.FullLog.ShouldContain("MockCacheFromAssembly: EndBuildAsync");
+                logger.FullLog.ShouldContain($"{AssemblyMockCache}: GetCacheResultAsync for");
+                logger.FullLog.ShouldContain($"{AssemblyMockCache}: EndBuildAsync");
             }
         }
     }
