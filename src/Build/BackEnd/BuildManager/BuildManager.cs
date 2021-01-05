@@ -1089,7 +1089,7 @@ namespace Microsoft.Build.Execution
                         submission.BuildRequest = CreateRealBuildRequest(submission, newConfiguration.ConfigurationId);
 
                         // TODO: Remove this when VS gets updated to setup project cache plugins.
-                        InstantiateProjectCacheServiceForVisualStudioWorkaround(submission, newConfiguration);
+                        AutomaticallyDetectAndInstantiateProjectCacheServiceForVisualStudio(submission, newConfiguration);
 
                         CacheResult cacheResult = null;
                         if (_projectCacheService != null)
@@ -1250,7 +1250,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private void InstantiateProjectCacheServiceForVisualStudioWorkaround(
+        private void AutomaticallyDetectAndInstantiateProjectCacheServiceForVisualStudio(
             BuildSubmission submission,
             BuildRequestConfiguration config)
         {
