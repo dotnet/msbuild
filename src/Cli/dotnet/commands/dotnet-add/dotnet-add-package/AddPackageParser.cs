@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Argument CmdPackageArgument = new Argument<string>(LocalizableStrings.CmdPackage)
         {
             Description = LocalizableStrings.CmdPackageDescription
-        };
+        }.AddSuggestions((parseResult, match) => QueryNuGet(match));
 
         public static readonly Option VersionOption = new Option<string>(new string[] { "-v", "--version" },
                               LocalizableStrings.CmdVersionDescription)
