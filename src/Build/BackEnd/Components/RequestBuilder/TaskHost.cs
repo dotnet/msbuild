@@ -690,18 +690,25 @@ namespace Microsoft.Build.BackEnd
         #region IBuildEngine8 Members
 
         int runningTotal = 0;
+        bool implicitCoreUsed = false;
 
         public int? RequestCores(int requestedCores)
         {
             var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
-
-            int coresAcquiredBeforeMoreCoresGetAcquired = runningTotal;
 
             var coresAcquired = rms.RequestCores(requestedCores, _taskLoggingContext);
 
             if (coresAcquired.HasValue)
             {
                 runningTotal += coresAcquired.Value;
+            }
+
+            if (!implicitCoreUsed && coresAcquired == 0)
+            {
+                // If we got nothing back from the actual system, pad it with the one implicit core
+                // you get just for running--that way we never block and always return > 1
+                implicitCoreUsed = true;
+                coresAcquired = 1;
             }
 
             return coresAcquired;
@@ -711,8 +718,15 @@ namespace Microsoft.Build.BackEnd
         {
             var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
 
+            if (implicitCoreUsed)
+            {
+                coresToRelease -= 1;
+                implicitCoreUsed = false;
+            }
+
             if (coresToRelease >= 1)
             {
+
                 rms.ReleaseCores(coresToRelease, _taskLoggingContext);
                 runningTotal -= coresToRelease;
             }
@@ -723,6 +737,7 @@ namespace Microsoft.Build.BackEnd
             ReleaseCores(runningTotal);
 
             runningTotal = 0;
+            implicitCoreUsed = false;
         }
 
         #endregion

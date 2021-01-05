@@ -16,6 +16,7 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
         ILoggingService? _loggingService;
 
         public int TotalNumberHeld = -1;
+        public int Count = 0;
 
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
@@ -31,6 +32,8 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
                 string semaphoreName = host.BuildParameters.ResourceManagerSemaphoreName;
 
                 int resourceCount = host.BuildParameters.MaxNodeCount; // TODO: tweakability
+
+                Count = resourceCount;
 
                 _loggingService = host.LoggingService;
 
@@ -63,13 +66,10 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
                 return null;
             }
 
-            int i = 0;
-
-            // First core gets a blocking wait: the user task wants to do *something*
-            s.WaitOne();
+            int i;
 
             // Keep requesting cores until we can't anymore, or we've gotten the number of cores we wanted.
-            for (i = 1; i < requestedCores; i++)
+            for (i = 0; i < requestedCores; i++)
             {
                 if (!s.WaitOne(0))
                 {
