@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The .NET Core version of MSBuild doesn't support targeting .NET Framework 3.5.  So in that case, we import
+       a .props file that prevents building the project from doing much of anything. -->
+  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(MSBuildRuntimeType)' == 'Core' or '$(MonoBuild)' == 'true'" />
+
+  <PropertyGroup>
+    <TargetFrameworks>$(FullFrameworkTFM)</TargetFrameworks>
+    <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
+
+    <IsPackable>false</IsPackable>
+
+    <AssemblyName>Microsoft.NET.StringTools.net35.UnitTests</AssemblyName>
+    <IsTestProject>true</IsTestProject>
+    <IsLibraryTestProject>true</IsLibraryTestProject>
+    <DefineConstants>$(DefineConstants);NET35_UNITTEST</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="xunit.core" />
+    <PackageReference Include="xunit.assert" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\StringTools\StringTools.csproj" Aliases="StringToolsNet35">
+      <SetTargetFramework>TargetFramework=net35</SetTargetFramework>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Shared\UnitTests\App.config">
+      <Link>App.config</Link>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="..\Shared\UnitTests\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>
