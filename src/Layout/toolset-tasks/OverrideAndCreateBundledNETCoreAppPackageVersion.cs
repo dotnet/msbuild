@@ -54,8 +54,10 @@ namespace Microsoft.DotNet.Build.Tasks
 
             var propertyGroup = projectXml.Root.Elements(ns + "PropertyGroup").First();
 
+            var isSDKServicing = IsSDKServicing(propertyGroup.Element(ns + "NETCoreSdkVersion").Value);
+
             var originalBundledNETCoreAppPackageVersion =
-                propertyGroup.Element(ns + "BundledNETCoreAppPackageVersion").Value;
+            propertyGroup.Element(ns + "BundledNETCoreAppPackageVersion").Value;
             propertyGroup.Element(ns + "BundledNETCoreAppPackageVersion").Value = microsoftNETCoreAppRefPackageVersion;
 
             void CheckAndReplaceElement(XElement element)
@@ -83,22 +85,42 @@ namespace Microsoft.DotNet.Build.Tasks
                 attribute.Value = microsoftNETCoreAppRefPackageVersion;
             }
 
-            CheckAndReplaceElement(propertyGroup.Element(ns + "BundledNETCorePlatformsPackageVersion"));
+            if (!isSDKServicing)
+            {
+                CheckAndReplaceElement(propertyGroup.Element(ns + "BundledNETCorePlatformsPackageVersion"));
+            }
 
             var itemGroup = projectXml.Root.Elements(ns + "ItemGroup").First();
 
-            CheckAndReplaceAttribute(itemGroup
-                .Elements(ns + "KnownFrameworkReference").First().Attribute("DefaultRuntimeFrameworkVersion"));
+            if (!isSDKServicing)
+            {
+                CheckAndReplaceAttribute(itemGroup
+                    .Elements(ns + "KnownFrameworkReference").First().Attribute("DefaultRuntimeFrameworkVersion"));
+                CheckAndReplaceAttribute(itemGroup
+                    .Elements(ns + "KnownFrameworkReference").First().Attribute("TargetingPackVersion"));
+            }
+
             CheckAndReplaceAttribute(itemGroup
                 .Elements(ns + "KnownFrameworkReference").First().Attribute("LatestRuntimeFrameworkVersion"));
-            CheckAndReplaceAttribute(itemGroup
-                .Elements(ns + "KnownFrameworkReference").First().Attribute("TargetingPackVersion"));
+
             CheckAndReplaceAttribute(itemGroup
                 .Elements(ns + "KnownAppHostPack").First().Attribute("AppHostPackVersion"));
             CheckAndReplaceAttribute(itemGroup
                 .Elements(ns + "KnownCrossgen2Pack").First().Attribute("Crossgen2PackVersion"));
 
             return projectXml.ToString();
+        }
+
+        /// <summary>
+        /// For SDK servicing, few Attributes like "DefaultRuntimeFrameworkVersion" does not use the latest flowed version
+        /// so there is no need to replace them.
+        /// </summary>
+        /// <returns></returns>
+        private static bool IsSDKServicing(string sdkVersion)
+        {
+            var parsedSdkVersion = NuGet.Versioning.NuGetVersion.Parse(sdkVersion);
+
+            return parsedSdkVersion.Patch % 100 != 0;
         }
     }
 }
