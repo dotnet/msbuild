@@ -66,15 +66,6 @@ namespace Microsoft.DotNet.Tests.ParserTests
         }
 
         [Fact]
-        public void NuGetProvidesSuggestionsForAddPackages()
-        {
-            var parseResult = Parser.Instance.Parse("dotnet add package Micr");
-            parseResult.GetSuggestions()
-                .Should()
-                .NotBeEmpty();
-        }
-
-        [Fact]
         public void EnumerablePackageIdFromQueryResponseResultsPackageIds()
         {
             using (var stream = new MemoryStream())
