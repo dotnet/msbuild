@@ -22,7 +22,7 @@
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateProgramFile>false</GenerateProgramFile>
-    <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments>
+    <!-- <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments> -->
   </PropertyGroup>
 
   <Import Project="build/GenerateResxSource.targets" />
