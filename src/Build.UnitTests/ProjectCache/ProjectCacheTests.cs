@@ -182,7 +182,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                             : 'T',
                         CacheResultType.CacheMiss => 'M',
                         CacheResultType.CacheNotApplicable => 'N',
-                        CacheResultType.CacheError => 'E',
+                        CacheResultType.None => 'E',
                         _ => throw new ArgumentOutOfRangeException()
                         };
                 }
@@ -532,7 +532,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         break;
                     case CacheResultType.CacheNotApplicable:
                         break;
-                    case CacheResultType.CacheError:
+                    case CacheResultType.None:
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

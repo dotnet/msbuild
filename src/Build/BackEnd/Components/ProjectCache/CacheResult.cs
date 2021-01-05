@@ -11,12 +11,31 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {
+    /// <summary>
+    /// Result types that a plugin can return for a given build request.
+    /// </summary>
     public enum CacheResultType
     {
+        /// <summary>
+        /// The plugin failed and couldn't return a result. The plugin should log an error detailing the failure. MSBuild will stop the build.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// The plugin determined that it supports a build request and found that it can be skipped. MSBuild won't build the request.
+        /// </summary>
         CacheHit,
+
+        /// <summary>
+        /// The plugin determined that it supports a build request and found that it cannot be skipped. MSBuild will build the request.
+        /// </summary>
         CacheMiss,
-        CacheNotApplicable,
-        CacheError
+
+        /// <summary>
+        /// The plugin determined that it does not support a certain build request. MSBuild will build the request.
+        /// For example, a plugin may not support projects with a certain extension, certain properties, or certain called targets.
+        /// </summary>
+        CacheNotApplicable
     }
 
     /// <summary>

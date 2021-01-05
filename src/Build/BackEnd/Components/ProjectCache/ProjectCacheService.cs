@@ -149,7 +149,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             var cacheResult = await _projectCachePlugin.GetCacheResultAsync(buildRequest, _logger, _cancellationToken);
 
-            if (_logger.HasLoggedErrors || cacheResult.ResultType == CacheResultType.CacheError)
+            if (_logger.HasLoggedErrors || cacheResult.ResultType == CacheResultType.None)
             {
                 throw new Exception(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectCacheQueryFailed", queryDescription));
@@ -166,7 +166,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 case CacheResultType.CacheNotApplicable:
                     message += " Building project.";
                     break;
-                case CacheResultType.CacheError:
+                case CacheResultType.None:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

@@ -1423,10 +1423,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
     }
     public enum CacheResultType
     {
-        CacheError = 3,
-        CacheHit = 0,
-        CacheMiss = 1,
-        CacheNotApplicable = 2,
+        CacheHit = 1,
+        CacheMiss = 2,
+        CacheNotApplicable = 3,
+        None = 0,
     }
     public abstract partial class PluginLoggerBase
     {
