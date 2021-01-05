@@ -3,6 +3,8 @@
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+
 using System.Threading;
 
 #nullable enable
@@ -31,7 +33,7 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
             {
                 string semaphoreName = host.BuildParameters.ResourceManagerSemaphoreName;
 
-                int resourceCount = host.BuildParameters.MaxNodeCount; // TODO: tweakability
+                int resourceCount = host.BuildParameters.MaxNodeCount + Traits.Instance.ResourceManagerOversubscription;
 
                 Count = resourceCount;
 
