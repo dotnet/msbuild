@@ -2228,14 +2228,11 @@ namespace Microsoft.Build.UnitTests
   
 </Project>");
 
+            TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
 
-            TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents, new string[0]);
+            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" -warnaserror", out bool success, _output);
 
-            bool success;
-
-            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" -warnaserror", out success, _output);
-
-            success.ShouldBeFalse(() => output);
+            success.ShouldBeFalse();
         }
 
 #if FEATURE_ASSEMBLYLOADCONTEXT
