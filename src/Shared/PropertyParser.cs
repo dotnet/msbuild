@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Text;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.NET.StringTools;
 
 #if BUILD_ENGINE
 namespace Microsoft.Build.BackEnd
@@ -146,8 +146,7 @@ namespace Microsoft.Build.Tasks
                             // There was a property definition previous to this one.  Append the current string
                             // to that previous value, using semicolon as a separator.
                             string propertyValue = EscapingUtilities.Escape(propertyNameValueString.Trim());
-                            finalPropertiesList[finalPropertiesList.Count - 1].Value.Append(';');
-                            finalPropertiesList[finalPropertiesList.Count - 1].Value.Append(propertyValue);
+                            finalPropertiesList[finalPropertiesList.Count - 1].Value.Add(propertyValue);
                         }
                         else
                         {
@@ -163,9 +162,22 @@ namespace Microsoft.Build.Tasks
                 // needs to pass onto the engine.
                 log?.LogMessageFromText(parameterName, MessageImportance.Low);
 
+                using SpanBasedStringBuilder stringBuilder = Strings.GetSpanBasedStringBuilder();
                 foreach (PropertyNameValuePair propertyNameValuePair in finalPropertiesList)
                 {
-                    string propertyValue = OpportunisticIntern.StringBuilderToString(propertyNameValuePair.Value);
+                    stringBuilder.Clear();
+                    bool needsSemicolon = false;
+                    foreach (string valueFragment in propertyNameValuePair.Value)
+                    {
+                        if (needsSemicolon)
+                        {
+                            stringBuilder.Append(";");
+                        }
+                        needsSemicolon = true;
+                        stringBuilder.Append(valueFragment);
+                    }
+
+                    string propertyValue = stringBuilder.ToString();
                     finalPropertiesTable[propertyNameValuePair.Name] = propertyValue;
                     log?.LogMessageFromText(
                         $"  {propertyNameValuePair.Name}={propertyValue}",
@@ -187,14 +199,17 @@ namespace Microsoft.Build.Tasks
             internal string Name { get; }
 
             /// <summary>
-            /// Property value
+            /// Property value fragments. Join with semicolon to get the final value.
             /// </summary>
-            internal StringBuilder Value { get; }
+            internal List<string> Value { get; }
 
             internal PropertyNameValuePair(string propertyName, string propertyValue)
             {
                 Name = propertyName;
-                Value = new StringBuilder(propertyValue);
+                Value = new List<string>
+                {
+                    propertyValue
+                };
             }
         }
     }
