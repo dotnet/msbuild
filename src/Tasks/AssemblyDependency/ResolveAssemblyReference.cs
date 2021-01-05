@@ -216,8 +216,7 @@ namespace Microsoft.Build.Tasks
         public bool FindDependenciesOfExternallyResolvedReferences { get; set; }
 
         /// <summary>
-        /// If true, outputs any unresolved assembly conflicts (MSB3277) in UnresolvedAssemblyConflicts
-        /// instead of logging them.
+        /// If true, outputs any unresolved assembly conflicts (MSB3277) in UnresolvedAssemblyConflicts.
         /// </summary>
         public bool OutputUnresolvedAssemblyConflicts { get; set; }
 
