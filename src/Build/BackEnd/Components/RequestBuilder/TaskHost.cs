@@ -368,16 +368,8 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrow(_yieldThreadId != -1, "Cannot call Reacquire() before Yield().");
                 ErrorUtilities.VerifyThrow(_yieldThreadId == Thread.CurrentThread.ManagedThreadId, "Cannot call Reacquire() on thread {0} when Yield() was called on thread {1}", Thread.CurrentThread.ManagedThreadId, _yieldThreadId);
                 MSBuildEventSource.Log.ExecuteTaskYieldStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
-
                 MSBuildEventSource.Log.ExecuteTaskReacquireStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
-
-                // If a task acquires all available cores, yields, then another instance of the task comes along and blocks on RequestCores,
-                // the build can deadlock because the node can't be required by the first task to release the cores. Instead, treat reacquire
-                // as a checkpoint and release nodes here before blocking on getting the node back.
-                ReleaseAllCores();
-
                 builderCallback.Reacquire();
-
                 MSBuildEventSource.Log.ExecuteTaskReacquireStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 _yieldThreadId = -1;
             }
