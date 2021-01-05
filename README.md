@@ -43,7 +43,7 @@ To get started on **Visual Studio 2019**:
 3. Clone the source code: `git clone https://github.com/Microsoft/msbuild.git`
   - You may have to [download Git](https://git-scm.com/downloads) first.
 4. Run `.\build.cmd` from the root of the repo to build the code. This also restores packages needed to open the projects in Visual Studio.
-5. Open `MSBuild.sln` or `MSBuild.Dev.sln` in Visual Studio 2019.
+5. Open `MSBuild.sln` or `MSBuild.Dev.slnf` in Visual Studio 2019.
 
 Note: To create a usable MSBuild with your changes, run `.\build.cmd /p:CreateBootstrap=true`.
 
