@@ -27,7 +27,9 @@ namespace Microsoft.Build.Tasks
             try
             {
                 var culture = CultureInfo.GetCultureInfo(name);
-                return culture.LCID != LocaleCustomUnspecified || culture.ThreeLetterISOLanguageName.Length == 3;
+                // On .NET Core, unknown cultures don't have a ThreeLetterISOLanguageName (empty string)
+                // On .NET Framework, unknown cultures have a ThreeLetterISOLanguageName but their NativeName is Unknown Language (...)
+                return culture.LCID != LocaleCustomUnspecified || (culture.ThreeLetterISOLanguageName.Length == 3 && culture.NativeName != $"Unknown Language ({name})");
             }
             catch (CultureNotFoundException)
             {

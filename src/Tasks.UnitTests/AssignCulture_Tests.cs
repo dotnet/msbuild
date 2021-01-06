@@ -300,8 +300,11 @@ namespace Microsoft.Build.UnitTests
         [InlineData("@")]
         [InlineData("\U0001F4A5")]
         [InlineData("xx")]
+        [InlineData("xxx")]
         [InlineData("yy")]
+        [InlineData("yyy")]
         [InlineData("zz")]
+        [InlineData("zzz")]
         public void InvalidCulture(string culture)
         {
             AssignCulture t = new AssignCulture();
