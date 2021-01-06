@@ -5,6 +5,7 @@ using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -192,57 +193,75 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*
-        * Method:   ValidLocalization
+        * Method:   Aliased
         *
-        * Test the usage of Windows Pseudo-Locales, aliased cultures and valid BCP-47 language tags
+        * Test the usage of aliased locales.
+        * List taken from https://github.com/CodingDinosaur/CultureIcuTest#icu-locale-alias-list
         */
         [Theory]
-        // Pseudo-Locales: https://docs.microsoft.com/en-gb/windows/desktop/Intl/pseudo-locales
-        [InlineData("qps-ploc")]
-        [InlineData("qps-plocm")]
-        [InlineData("qps-ploca")]
-        [InlineData("qps-Latn-x-sh")] // Windows 10+
-        // Aliased cultures: https://github.com/CodingDinosaur/CultureIcuTest#icu-locale-alias-list
         [InlineData("ars")]
         [InlineData("az-AZ")]
         [InlineData("bs-BA")]
         [InlineData("en-NH")]
         [InlineData("en-RH")]
-        [InlineData("tl")]
-        [InlineData("tl-PH")]
-        [InlineData("iw")]
-        [InlineData("iw-IL")]
         [InlineData("in")]
         [InlineData("in-ID")]
+        [InlineData("iw")]
+        [InlineData("iw-IL")]
         [InlineData("no")]
         [InlineData("no-NO")]
         [InlineData("no-NO-NY")]
-        [InlineData("pa-PK")]
         [InlineData("pa-IN")]
-        [InlineData("mo")]
-        [InlineData("shi-MA")]
-        [InlineData("sr-BA")]
-        [InlineData("sr-YU")]
-        [InlineData("sr-XK")]
+        [InlineData("pa-PK")]
         [InlineData("sh")]
         [InlineData("sh-BA")]
-        [InlineData("sr-ME")]
+        [InlineData("sh-CS")]
+        [InlineData("sh-YU")]
+        [InlineData("shi-MA")]
+        [InlineData("sr-BA")]
+        [InlineData("sr-CS")]
+        [InlineData("sr-Cyrl-CS")]
+        [InlineData("sr-Cyrl-YU")]
+        [InlineData("sr-Latn-CS")]
         [InlineData("sr-Latn-YU")]
+        [InlineData("sr-ME")]
+        [InlineData("sr-RS")]
+        [InlineData("sr-XK")]
+        [InlineData("sr-YU")]
+        [InlineData("tl")]
+        [InlineData("tl-PH")]
         [InlineData("uz-AF")]
         [InlineData("uz-UZ")]
         [InlineData("vai-LR")]
         [InlineData("yue-CN")]
         [InlineData("yue-HK")]
         [InlineData("zh-CN")]
-        [InlineData("zh-SG")]
         [InlineData("zh-HK")]
         [InlineData("zh-MO")]
+        [InlineData("zh-SG")]
         [InlineData("zh-TW")]
-        // Valid BCP-47 language tags: https://docs.microsoft.com/en-us/dotnet/api/system.globalization.cultureinfo#culture-names-and-identifiers
-        [InlineData("xx")]
-        [InlineData("yy")]
-        [InlineData("zz")]
-        public void ValidLocalization(string culture)
+        public void Aliased(string culture)
+        {
+            TestValidCulture(culture);
+        }
+
+        /*
+        * Method:   PseudoLocales
+        *
+        * Windows-only, see https://docs.microsoft.com/en-gb/windows/desktop/Intl/pseudo-locales
+        */
+        [Theory]
+        [InlineData("qps-ploc")]
+        [InlineData("qps-plocm")]
+        [InlineData("qps-ploca")]
+        [InlineData("qps-Latn-x-sh")] // Windows 10+
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void PseudoLocales(string culture)
+        {
+            TestValidCulture(culture);
+        }
+
+        private static void TestValidCulture(string culture)
         {
             AssignCulture t = new AssignCulture();
             t.BuildEngine = new MockEngine();
@@ -250,21 +269,25 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.Single(t.AssignedFiles);
-            Assert.Single(t.CultureNeutralAssignedFiles);
-            Assert.Equal(culture, t.AssignedFiles[0].GetMetadata("Culture"));
-            Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
-            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+            var assignedFile = t.AssignedFiles.ShouldHaveSingleItem();
+            assignedFile.GetMetadata("Culture").ShouldBe(culture);
+            assignedFile.ItemSpec.ShouldBe($"MyResource.{culture}.resx");
+
+            var cultureNeutralFile = t.CultureNeutralAssignedFiles.ShouldHaveSingleItem();
+            cultureNeutralFile.ItemSpec.ShouldBe("MyResource.resx");
         }
 
         /*
         * Method:   InvalidCulture
         *
-        * Test for invalid culture (i.e. throwing CultureNotFoundException when using CultureInfo.GetCultureInfo())
+        * Test for invalid culture (i.e. not known by the operating system)
         */
         [Theory]
         [InlineData("@")]
         [InlineData("\U0001F4A5")]
+        [InlineData("xx")]
+        [InlineData("yy")]
+        [InlineData("zz")]
         public void InvalidCulture(string culture)
         {
             AssignCulture t = new AssignCulture();
@@ -273,12 +296,13 @@ namespace Microsoft.Build.UnitTests
             t.Files = new ITaskItem[] { i };
             t.Execute();
 
-            Assert.Single(t.AssignedFiles);
-            Assert.Single(t.CultureNeutralAssignedFiles);
-            Assert.Equal(String.Empty, t.AssignedFiles[0].GetMetadata("Culture"));
-            Assert.Equal("false", t.AssignedFiles[0].GetMetadata("WithCulture"));
-            Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
-            Assert.Equal($"MyResource.{culture}.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+            var assignedFile = t.AssignedFiles.ShouldHaveSingleItem();
+            assignedFile.GetMetadata("Culture").ShouldBeEmpty();
+            assignedFile.GetMetadata("WithCulture").ShouldBe("false");
+            assignedFile.ItemSpec.ShouldBe($"MyResource.{culture}.resx");
+
+            var cultureNeutralFile = t.CultureNeutralAssignedFiles.ShouldHaveSingleItem();
+            cultureNeutralFile.ItemSpec.ShouldBe($"MyResource.{culture}.resx");
         }
     }
 }

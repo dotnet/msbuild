@@ -14,6 +14,9 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal static class CultureInfoCache
     {
+        // See https://docs.microsoft.com/en-us/dotnet/api/system.globalization.cultureinfo#custom-cultures
+        private const int LocaleCustomUnspecified = 0x1000;
+
         /// <summary>
         /// Determine if a culture string represents a valid <see cref="CultureInfo"/> instance.
         /// </summary>
@@ -23,8 +26,8 @@ namespace Microsoft.Build.Tasks
         {
             try
             {
-                _ = CultureInfo.GetCultureInfo(name);
-                return true;
+                var culture = CultureInfo.GetCultureInfo(name);
+                return culture.LCID != LocaleCustomUnspecified || culture.ThreeLetterISOLanguageName.Length > 0;
             }
             catch (CultureNotFoundException)
             {
