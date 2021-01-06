@@ -1104,7 +1104,8 @@ namespace Microsoft.Build.BackEnd
                         "UnexpectedTaskAttribute",
                         parameterName,
                         _taskName,
-                        _taskFactoryWrapper.TaskFactoryLoadedType.Assembly.AssemblyName
+                        _taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssembly.FullName,
+                        _taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssembly.Location
                         );
                 }
             }
