@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks
             try
             {
                 var culture = CultureInfo.GetCultureInfo(name);
-                return culture.LCID != LocaleCustomUnspecified || culture.ThreeLetterISOLanguageName.Length > 0;
+                return culture.LCID != LocaleCustomUnspecified || culture.ThreeLetterISOLanguageName.Length == 3;
             }
             catch (CultureNotFoundException)
             {
