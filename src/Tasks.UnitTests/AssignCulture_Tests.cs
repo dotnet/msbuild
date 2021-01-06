@@ -228,7 +228,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("ars")]
         [InlineData("az-AZ")]
         [InlineData("bs-BA")]
         [InlineData("en-NH")]
@@ -255,6 +254,14 @@ namespace Microsoft.Build.UnitTests
         [InlineData("yue-HK")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public void AliasedUnavailableOnMono(string culture)
+        {
+            TestValidCulture(culture);
+        }
+
+        [Theory]
+        [InlineData("ars")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono | TargetFrameworkMonikers.NetFramework)]
+        public void AliasedUnavailableOnMonoAndNetFramework(string culture)
         {
             TestValidCulture(culture);
         }
