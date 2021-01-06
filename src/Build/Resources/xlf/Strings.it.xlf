@@ -64,12 +64,12 @@
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
         <source>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="new">MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</target>
+        <target state="translated">MSB4271: la variabile di ambiente MSBuildDisableFeaturesFromVersion è impostata su un formato non valido. Verranno abilitate tutte le versioni con flussi di modifiche. Valore immesso: {0}. Flussi di modifiche correnti: {1}.</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
         <source>MSB4272: Environment variable MSBuildDisableFeaturesFromVersion is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="new">MSB4272: Environment variable MSBuildDisableFeaturesFromVersion is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</target>
+        <target state="translated">MSB4272: la variabile di ambiente MSBuildDisableFeaturesFromVersion è impostata su una versione esclusa dalla rotazione. Per impostazione predefinita, verrà usata la versione con flussi di modifiche: {0}. Valore immesso: {1}. Flussi di modifiche correnti: {2}.</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -88,7 +88,7 @@
       </trans-unit>
       <trans-unit id="CircularDependencyInTargetGraph">
         <source>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}". Since "{1}" has "{2}" dependence on "{3}", the circular is "{4}".</source>
-        <target state="new">MSB4006: There is a circular dependency in the target dependency graph involving target "{0}". Since "{1}" has "{2}" dependence on "{3}", the circular is "{4}".</target>
+        <target state="translated">MSB4006: è presente una dipendenza circolare nel grafico di dipendenze che usa la destinazione "{0}". Dal momento che "{1}" ha la dipendenza di "{2}" da "{3}", la dipendenza circolare è "{4}".</target>
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
