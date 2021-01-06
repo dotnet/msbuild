@@ -204,19 +204,11 @@ namespace Microsoft.Build.UnitTests
         [InlineData("bs-BA")]
         [InlineData("en-NH")]
         [InlineData("en-RH")]
-        [InlineData("in")]
-        [InlineData("in-ID")]
-        [InlineData("iw")]
-        [InlineData("iw-IL")]
         [InlineData("no")]
         [InlineData("no-NO")]
         [InlineData("no-NO-NY")]
         [InlineData("pa-IN")]
         [InlineData("pa-PK")]
-        [InlineData("sh")]
-        [InlineData("sh-BA")]
-        [InlineData("sh-CS")]
-        [InlineData("sh-YU")]
         [InlineData("shi-MA")]
         [InlineData("sr-BA")]
         [InlineData("sr-CS")]
@@ -228,8 +220,6 @@ namespace Microsoft.Build.UnitTests
         [InlineData("sr-RS")]
         [InlineData("sr-XK")]
         [InlineData("sr-YU")]
-        [InlineData("tl")]
-        [InlineData("tl-PH")]
         [InlineData("uz-AF")]
         [InlineData("uz-UZ")]
         [InlineData("vai-LR")]
@@ -241,6 +231,23 @@ namespace Microsoft.Build.UnitTests
         [InlineData("zh-SG")]
         [InlineData("zh-TW")]
         public void Aliased(string culture)
+        {
+            TestValidCulture(culture);
+        }
+
+        [Theory]
+        [InlineData("in")]
+        [InlineData("in-ID")]
+        [InlineData("iw")]
+        [InlineData("iw-IL")]
+        [InlineData("sh")]
+        [InlineData("sh-BA")]
+        [InlineData("sh-CS")]
+        [InlineData("sh-YU")]
+        [InlineData("tl")]
+        [InlineData("tl-PH")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void AliasedUnavailableOnNetFramework(string culture)
         {
             TestValidCulture(culture);
         }
