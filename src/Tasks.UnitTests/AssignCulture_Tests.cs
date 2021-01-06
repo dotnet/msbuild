@@ -224,6 +224,11 @@ namespace Microsoft.Build.UnitTests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void AliasedUnavailableOnNetFramework(string culture)
         {
+            // Skipping .NET Framework is not enough, we must also skip .NET Core when running on NLS
+            if (IsUsingNLS())
+            {
+                return;
+            }
             TestValidCulture(culture);
         }
 
@@ -263,8 +268,16 @@ namespace Microsoft.Build.UnitTests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Mono | TargetFrameworkMonikers.NetFramework)]
         public void AliasedUnavailableOnMonoAndNetFramework(string culture)
         {
+            // Skipping .NET Framework is not enough, we must also skip .NET Core when running on NLS
+            if (IsUsingNLS())
+            {
+                return;
+            }
             TestValidCulture(culture);
         }
+
+        // See https://docs.microsoft.com/en-us/dotnet/standard/globalization-localization/globalization-icu#stringindexof
+        static private bool IsUsingNLS() => "\r\n".IndexOf("\n") == 1;
 
         /*
         * Method:   PseudoLocales
