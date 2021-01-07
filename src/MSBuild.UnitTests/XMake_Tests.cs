@@ -2230,7 +2230,7 @@ namespace Microsoft.Build.UnitTests
 
             TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
 
-            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" -warnaserror", out bool success, _output);
+            RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" -warnaserror", out bool success, _output);
 
             success.ShouldBeFalse();
         }
