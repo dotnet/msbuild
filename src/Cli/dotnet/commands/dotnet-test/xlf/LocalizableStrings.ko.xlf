@@ -70,12 +70,12 @@ Examples:
 -e VARIABLE="value;seperated with;semicolons"
 -e VAR1=abc -e VAR2=def -e VAR3=ghi
 </source>
-        <target state="new">Sets the value of an environment variable. 
-Creates the variable if it does not exist, overrides if it does. 
-This will force the tests to be run in an isolated process. 
-This argument can be specified multiple times to provide multiple variables.
+        <target state="translated">환경 변수의 값을 설정합니다. 
+변수가 없는 경우 변수를 만들고, 변수가 있으면 재정의합니다. 
+이는 테스트가 격리된 프로세스에서 강제로 실행되도록 합니다. 
+이 인수를 여러 번 지정하여 여러 변수를 제공할 수 있습니다.
 
-Examples:
+예:
 -e VARIABLE=abc
 -e VARIABLE="value with spaces"
 -e VARIABLE="value;seperated with;semicolons"
@@ -85,7 +85,7 @@ Examples:
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableExpression">
         <source>NAME="VALUE"</source>
-        <target state="new">NAME="VALUE"</target>
+        <target state="translated">NAME="VALUE"</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoLogo">

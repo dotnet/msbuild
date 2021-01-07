@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CurrentRuntimeOptionDescription">
         <source>Use current runtime as the target runtime.</source>
-        <target state="new">Use current runtime as the target runtime.</target>
+        <target state="translated">Hedef çalışma zamanı olarak geçerli çalışma zamanını kullanın.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">

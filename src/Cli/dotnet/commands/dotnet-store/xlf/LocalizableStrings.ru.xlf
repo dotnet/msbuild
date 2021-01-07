@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CurrentRuntimeOptionDescription">
         <source>Use current runtime as the target runtime.</source>
-        <target state="new">Use current runtime as the target runtime.</target>
+        <target state="translated">Использовать текущую среду выполнения в качестве целевой среды выполнения.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">

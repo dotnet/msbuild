@@ -70,22 +70,22 @@ Examples:
 -e VARIABLE="value;seperated with;semicolons"
 -e VAR1=abc -e VAR2=def -e VAR3=ghi
 </source>
-        <target state="new">Sets the value of an environment variable. 
-Creates the variable if it does not exist, overrides if it does. 
-This will force the tests to be run in an isolated process. 
-This argument can be specified multiple times to provide multiple variables.
+        <target state="translated">Bir ortam değişkeninin değerini ayarlar. 
+Değişken yoksa oluşturur, varsa değişkeni geçersiz kılar. 
+Bu, testleri yalıtılmış bir işlemde çalıştırılmaya zorlar. 
+Bu bağımsız değişken, birden çok değişken sağlamak için birden çok kez belirtilebilir.
 
-Examples:
--e VARIABLE=abc
--e VARIABLE="value with spaces"
--e VARIABLE="value;seperated with;semicolons"
--e VAR1=abc -e VAR2=def -e VAR3=ghi
+Örnek:
+-e DEĞİŞKEN=abc
+-e DEĞİŞKEN="boşluk içeren değerler"
+-e DEĞİŞKEN="noktalı virgülle;ayrılmış;değerler"
+-e DEĞ1=abc -e DEĞ2=def -e DEĞ3=ghi
 </target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableExpression">
         <source>NAME="VALUE"</source>
-        <target state="new">NAME="VALUE"</target>
+        <target state="translated">AD="DEĞER"</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoLogo">

@@ -4,27 +4,27 @@
     <body>
       <trans-unit id="CharacterNotAllowedInPath">
         <source>Character not allowed in a path: {0}</source>
-        <target state="new">Character not allowed in a path: {0}</target>
+        <target state="translated">경로에 사용할 수 없는 문자: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandExpectsFewerArguments">
         <source>Command '{0}' expects no more than {1} arguments, but {2} were provided.</source>
-        <target state="new">Command '{0}' expects no more than {1} arguments, but {2} were provided.</target>
+        <target state="translated">명령 '{0}'에는 {1}개 이하의 인수가 필요한데 {2}개가 제공되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DirectoryDoesNotExist">
         <source>Directory does not exist: {0}</source>
-        <target state="new">Directory does not exist: {0}</target>
+        <target state="translated">디렉터리 {0}이(가) 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingResponseFile">
         <source>Error reading response file '{0}': {1}</source>
-        <target state="new">Error reading response file '{0}': {1}</target>
+        <target state="translated">지시 파일 '{0}'을(를) 읽는 동안 오류가 발생했습니다. {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FileOrDirectoryDoesNotExist">
         <source>File or directory does not exist: {0}</source>
-        <target state="new">File or directory does not exist: {0}</target>
+        <target state="translated">파일 또는 디렉터리가 없음: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LastArgumentMultiValueError">
@@ -34,22 +34,22 @@
       </trans-unit>
       <trans-unit id="OptionExpectsFewerArguments">
         <source>Option '{0}' expects no more than {1} arguments, but {2} were provided.</source>
-        <target state="new">Option '{0}' expects no more than {1} arguments, but {2} were provided.</target>
+        <target state="translated">옵션 '{0}'에는 {1}개 이하의 인수가 필요한데 {2}개가 제공되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RequiredCommandArgumentMissing">
         <source>Required argument missing for command: {0}</source>
-        <target state="new">Required argument missing for command: {0}</target>
+        <target state="translated">명령 {0}에 대한 필수 인수가 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RequiredOptionArgumentMissing">
         <source>Required argument missing for option: {0}</source>
-        <target state="new">Required argument missing for option: {0}</target>
+        <target state="translated">옵션 {0}에 대한 필수 인수가 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResponseFileNotFound">
         <source>Response file not found '{0}'</source>
-        <target state="new">Response file not found '{0}'</target>
+        <target state="translated">지시 파일을 찾을 수 없음: '{0}'</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedValueForOptionError">

@@ -70,22 +70,22 @@ Examples:
 -e VARIABLE="value;seperated with;semicolons"
 -e VAR1=abc -e VAR2=def -e VAR3=ghi
 </source>
-        <target state="new">Sets the value of an environment variable. 
-Creates the variable if it does not exist, overrides if it does. 
-This will force the tests to be run in an isolated process. 
-This argument can be specified multiple times to provide multiple variables.
+        <target state="translated">Устанавливает значение переменной среды. 
+Если переменной среды не существует, она создается. Если переменная среды существует, она переопределяется. 
+Этот аргумент подразумевает принудительное выполнение тестов в изолированном процессе. 
+Этот аргумент может быть указан несколько раз для нескольких переменных среды.
 
-Examples:
+Примеры:
 -e VARIABLE=abc
--e VARIABLE="value with spaces"
--e VARIABLE="value;seperated with;semicolons"
+-e VARIABLE="значение с пробелами"
+-e VARIABLE="значение;разделенное;точками;с;запятыми"
 -e VAR1=abc -e VAR2=def -e VAR3=ghi
 </target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableExpression">
         <source>NAME="VALUE"</source>
-        <target state="new">NAME="VALUE"</target>
+        <target state="translated">NAME="VALUE"</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoLogo">

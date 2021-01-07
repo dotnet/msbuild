@@ -4,27 +4,27 @@
     <body>
       <trans-unit id="CharacterNotAllowedInPath">
         <source>Character not allowed in a path: {0}</source>
-        <target state="new">Character not allowed in a path: {0}</target>
+        <target state="translated">Недопустимый символ в пути: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandExpectsFewerArguments">
         <source>Command '{0}' expects no more than {1} arguments, but {2} were provided.</source>
-        <target state="new">Command '{0}' expects no more than {1} arguments, but {2} were provided.</target>
+        <target state="translated">Максимальное допустимое число аргументов команды "{0}" — {1}. Число указанных аргументов — {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="DirectoryDoesNotExist">
         <source>Directory does not exist: {0}</source>
-        <target state="new">Directory does not exist: {0}</target>
+        <target state="translated">Каталог не существует: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingResponseFile">
         <source>Error reading response file '{0}': {1}</source>
-        <target state="new">Error reading response file '{0}': {1}</target>
+        <target state="translated">Ошибка при чтении файла ответа "{0}": {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FileOrDirectoryDoesNotExist">
         <source>File or directory does not exist: {0}</source>
-        <target state="new">File or directory does not exist: {0}</target>
+        <target state="translated">Файл или каталог не существует: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LastArgumentMultiValueError">
@@ -34,22 +34,22 @@
       </trans-unit>
       <trans-unit id="OptionExpectsFewerArguments">
         <source>Option '{0}' expects no more than {1} arguments, but {2} were provided.</source>
-        <target state="new">Option '{0}' expects no more than {1} arguments, but {2} were provided.</target>
+        <target state="translated">Максимальное допустимое число аргументов параметра "{0}" — {1}. Число указанных аргументов — {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="RequiredCommandArgumentMissing">
         <source>Required argument missing for command: {0}</source>
-        <target state="new">Required argument missing for command: {0}</target>
+        <target state="translated">Отсутствует обязательный аргумент для команды: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RequiredOptionArgumentMissing">
         <source>Required argument missing for option: {0}</source>
-        <target state="new">Required argument missing for option: {0}</target>
+        <target state="translated">Отсутствует обязательный аргумент для параметра: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ResponseFileNotFound">
         <source>Response file not found '{0}'</source>
-        <target state="new">Response file not found '{0}'</target>
+        <target state="translated">Не удалось найти файл ответа "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedValueForOptionError">

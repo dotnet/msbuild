@@ -286,7 +286,7 @@
       </trans-unit>
       <trans-unit id="DuplicatePublishOutputFiles">
         <source>NETSDK1148: Found multiple publish output files with the same relative path: {0}.</source>
-        <target state="new">NETSDK1148: Found multiple publish output files with the same relative path: {0}.</target>
+        <target state="translated">NETSDK1148: plusieurs fichiers de sortie de publication ayant le même chemin relatif ont été trouvés : {0}.</target>
         <note>{StrBegin="NETSDK1148: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
@@ -742,7 +742,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: The following workload packs were not installed: {0}</source>
-        <target state="new">NETSDK1147: The following workload packs were not installed: {0}</target>
+        <target state="translated">NETSDK1147: les packs de charges de travail suivants n'ont pas été installés : {0}</target>
         <note>{StrBegin="NETSDK1147: "}</note>
       </trans-unit>
     </body>

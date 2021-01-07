@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdDeprecatedDescription">
         <source>Lists packages that have been deprecated. Cannot be combined with '--vulnerable' or '--outdated' options.</source>
-        <target state="needs-review-translation">非推奨となったパッケージを一覧表示します。</target>
+        <target state="translated">非推奨化されたパッケージを一覧表示します。'--vulnerable' または '--outdated' オプションと組み合わせることはできません。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdOutdatedDescription">
         <source>Lists packages that have newer versions. Cannot be combined with '--deprecated' or '--vulnerable' options.</source>
-        <target state="needs-review-translation">新しいバージョンが含まれるパッケージを一覧表示します。</target>
+        <target state="translated">新しいバージョンのパッケージを一覧表示します。'--deprecated' または '--vulnerable' オプションと組み合わせることはできません。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="CmdVulnerableDescription">
         <source>Lists packages that have known vulnerabilities. Cannot be combined with '--deprecated' or '--outdated' options.</source>
-        <target state="new">Lists packages that have known vulnerabilities. Cannot be combined with '--deprecated' or '--outdated' options.</target>
+        <target state="translated">既知の脆弱性を持つパッケージを一覧表示します。'--deprecated' または '--outdated' オプションと組み合わせることはできません。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsOrSolutions">
@@ -49,22 +49,22 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>The path to the NuGet config file to use. Requires the '--outdated', '--deprecated' or '--vulnerable' option.</source>
-        <target state="needs-review-translation">使用する NuGet config ファイルのパス。'--outdated' または '--deprecated' のオプションが必要です。</target>
+        <target state="translated">使用する NuGet config ファイルのパス。'--outdated'、'--deprecated'、または '--vulnerable' のオプションが必要です。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
         <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">新しいパッケージを検索するときにメジャー バージョン番号が一致するパッケージのみを検討します。'--outdated' または '--deprecated' のオプションが必要です。</target>
+        <target state="translated">新しいパッケージを検索するときにメジャー バージョン番号が一致するパッケージのみを検討します。'--outdated' オプションが必要です。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
         <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">新しいパッケージを検索するときにメジャーとマイナーのバージョン番号が一致するパッケージのみを検討します。'--outdated' または '--deprecated' のオプションが必要です。</target>
+        <target state="translated">新しいパッケージを検索するときにメジャーとマイナーのバージョン番号が一致するパッケージのみを検討します。'--outdated' オプションが必要です。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
         <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">新しいパッケージを検索するときにプレリリース バージョンのパッケージを検討します。'--outdated' または '--deprecated' のオプションが必要です。</target>
+        <target state="translated">新しいパッケージを検索するときにプレリリース バージョンのパッケージを検討します。'--outdated' オプションが必要です。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated', '--deprecated' or '--vulnerable' option.</source>
-        <target state="needs-review-translation">新しいパッケージを検索するときに使用する NuGet ソース。'--outdated' または '--deprecated' オプションが必要です。</target>
+        <target state="translated">新しいパッケージを検索するときに使用する NuGet ソース。'--outdated'、'--deprecated'、または '--vulnerable' のオプションが必要です。</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="OptionsCannotBeCombined">
         <source>Options '--outdated', '--deprecated' and '--vulnerable' cannot be combined.</source>
-        <target state="new">Options '--outdated', '--deprecated' and '--vulnerable' cannot be combined.</target>
+        <target state="translated">オプション '--outdated'、'--deprecated'、'--vulnerable' を組み合わせることはできません。</target>
         <note />
       </trans-unit>
     </body>

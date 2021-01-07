@@ -1278,7 +1278,7 @@ For this sample script, you can change the deploy parameters by changing the fol
       </trans-unit>
       <trans-unit id="PublishLocalizedString_MsBuildPropertySettingValue">
         <source>$({0}) is {1}</source>
-        <target state="translated">$({0}) 是 {1}</target>
+        <target state="translated">$({0}) 為 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="PublishLocalizedString_PackagingIntoLocation">
@@ -1855,7 +1855,7 @@ Error details:</source>
       </trans-unit>
       <trans-unit id="WEBDEPLOY_AssemblyInfo_Start">
         <source>Generating AssemblyInfo.</source>
-        <target state="translated">正在產生 AssemblyInfo。</target>
+        <target state="translated">正在產生組件資訊。</target>
         <note />
       </trans-unit>
       <trans-unit id="WEBDEPLOY_AssemblyInfo_Succeeded">

@@ -70,22 +70,22 @@ Examples:
 -e VARIABLE="value;seperated with;semicolons"
 -e VAR1=abc -e VAR2=def -e VAR3=ghi
 </source>
-        <target state="new">Sets the value of an environment variable. 
-Creates the variable if it does not exist, overrides if it does. 
-This will force the tests to be run in an isolated process. 
-This argument can be specified multiple times to provide multiple variables.
+        <target state="translated">Nastaví hodnotu proměnné prostředí.
+Pokud proměnná neexistuje, vytvoří ji, a pokud existuje, přepíše ji.
+Tímto se vynutí spuštění testů v izolovaném procesu.
+Tento argument je možné zadat vícekrát a určit tak více proměnných.
 
-Examples:
--e VARIABLE=abc
--e VARIABLE="value with spaces"
--e VARIABLE="value;seperated with;semicolons"
--e VAR1=abc -e VAR2=def -e VAR3=ghi
+Příklady:
+-e PROMĚNNÁ=abc
+-e PROMĚNNÁ="hodnota s mezerami"
+-e PROMĚNNÁ="hodnota;oddělená;pomocí;středníků"
+-e PROM1=abc -e PROM2=def -e PROM3=ghi
 </target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableExpression">
         <source>NAME="VALUE"</source>
-        <target state="new">NAME="VALUE"</target>
+        <target state="translated">NÁZEV="HODNOTA"</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoLogo">

@@ -55,7 +55,7 @@ This option is currently supported only on Windows together with netcoreapp2.1 a
 此超时值的指定格式如下: 1.5h / 90m / 5400s / 5400000ms。如果不使用单位(例如 5400000)，此值被视为以毫秒计。
 如果与数据驱动的测试一起使用，超时行为取决于所使用的测试适配器。对于 xUnit 和 NUnit，每个测试用例后，会更新超时值。
 对于 MSTest，超时值用于所有测试用例。
-此选项目前仅在配有 netcoreapp2.1 和更高版本的 Windows 上受支持。OSX 和 UWP 不受支持。</target>
+此选项目前仅在配有 netcoreapp3.1 和更高版本的 Windows 上受支持。OSX 和 UWP 不受支持。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableDescription">
@@ -70,12 +70,12 @@ Examples:
 -e VARIABLE="value;seperated with;semicolons"
 -e VAR1=abc -e VAR2=def -e VAR3=ghi
 </source>
-        <target state="new">Sets the value of an environment variable. 
-Creates the variable if it does not exist, overrides if it does. 
-This will force the tests to be run in an isolated process. 
-This argument can be specified multiple times to provide multiple variables.
+        <target state="translated">设置环境变量的值。
+如果该变量不存在，则创建它；如果它已存在，则替代它。
+这将在隔离的进程中强制运行测试。
+可多次指定此参数来提供多个变量。
 
-Examples:
+示例:
 -e VARIABLE=abc
 -e VARIABLE="value with spaces"
 -e VARIABLE="value;seperated with;semicolons"
@@ -85,7 +85,7 @@ Examples:
       </trans-unit>
       <trans-unit id="CmdEnvironmentVariableExpression">
         <source>NAME="VALUE"</source>
-        <target state="new">NAME="VALUE"</target>
+        <target state="translated">NAME="VALUE"</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoLogo">

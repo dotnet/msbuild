@@ -4,27 +4,27 @@
     <body>
       <trans-unit id="CharacterNotAllowedInPath">
         <source>Character not allowed in a path: {0}</source>
-        <target state="new">Character not allowed in a path: {0}</target>
+        <target state="translated">Caractere não permitido em um caminho: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandExpectsFewerArguments">
         <source>Command '{0}' expects no more than {1} arguments, but {2} were provided.</source>
-        <target state="new">Command '{0}' expects no more than {1} arguments, but {2} were provided.</target>
+        <target state="translated">O comando '{0}' não espera mais de {1} argumentos, mas {2} foram fornecidos.</target>
         <note />
       </trans-unit>
       <trans-unit id="DirectoryDoesNotExist">
         <source>Directory does not exist: {0}</source>
-        <target state="new">Directory does not exist: {0}</target>
+        <target state="translated">O diretório não existe: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ErrorReadingResponseFile">
         <source>Error reading response file '{0}': {1}</source>
-        <target state="new">Error reading response file '{0}': {1}</target>
+        <target state="translated">Erro ao ler o arquivo de resposta '{0}': {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FileOrDirectoryDoesNotExist">
         <source>File or directory does not exist: {0}</source>
-        <target state="new">File or directory does not exist: {0}</target>
+        <target state="translated">O arquivo ou o diretório não existe: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LastArgumentMultiValueError">
@@ -34,22 +34,22 @@
       </trans-unit>
       <trans-unit id="OptionExpectsFewerArguments">
         <source>Option '{0}' expects no more than {1} arguments, but {2} were provided.</source>
-        <target state="new">Option '{0}' expects no more than {1} arguments, but {2} were provided.</target>
+        <target state="translated">A opção '{0}' não espera mais de {1} argumentos, mas {2} foram fornecidos.</target>
         <note />
       </trans-unit>
       <trans-unit id="RequiredCommandArgumentMissing">
         <source>Required argument missing for command: {0}</source>
-        <target state="new">Required argument missing for command: {0}</target>
+        <target state="translated">Argumento obrigatório ausente para o comando: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RequiredOptionArgumentMissing">
         <source>Required argument missing for option: {0}</source>
-        <target state="new">Required argument missing for option: {0}</target>
+        <target state="translated">Argumento obrigatório ausente para a opção: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ResponseFileNotFound">
         <source>Response file not found '{0}'</source>
-        <target state="new">Response file not found '{0}'</target>
+        <target state="translated">Arquivo de resposta não encontrado '{0}'</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedValueForOptionError">
