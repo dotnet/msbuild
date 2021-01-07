@@ -54,17 +54,17 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public override int GetHashCode()
         {
-            var hashCode = new HashCode();
+            int hashCode = -1043047289;
 
-            hashCode.Add(PluginPath);
+            hashCode = (hashCode * -1521134295) + PluginPath.GetHashCode();
 
             foreach (var pluginSetting in _pluginSettingsSorted)
             {
-                hashCode.Add(pluginSetting.Key);
-                hashCode.Add(pluginSetting.Value);
+                hashCode = (hashCode * -1521134295) + pluginSetting.Key.GetHashCode();
+                hashCode = (hashCode * -1521134295) + pluginSetting.Value.GetHashCode();
             }
 
-            return hashCode.ToHashCode();
+            return hashCode;
         }
     }
 }

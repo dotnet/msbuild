@@ -2,7 +2,6 @@
   <ItemGroup>
     <PackageReference Update="jnm2.ReferenceAssemblies.net35" Version="1.0.1" />
     <PackageReference Update="LargeAddressAware" Version="1.0.3" />
-    <PackageReference Update="Microsoft.Bcl.HashCode" Version="1.1.0" />
     <PackageReference Update="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="Microsoft.CodeAnalysis.Build.Tasks" Version="$(MicrosoftNetCompilersToolsetVersion)" />
     <PackageReference Update="Microsoft.DotNet.BuildTools.GenAPI" Version="2.1.0-prerelease-02404-02" />

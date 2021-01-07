@@ -40,7 +40,6 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="Microsoft.Bcl.HashCode" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.IO.Compression" />
