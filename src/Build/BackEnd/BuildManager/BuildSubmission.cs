@@ -198,6 +198,13 @@ namespace Microsoft.Build.Execution
                 bool hasCompleted = (Interlocked.Exchange(ref _completionInvoked, 1) == 1);
                 if (!hasCompleted)
                 {
+                    // Did this submission have warnings elevated to errors? If so, mark it as
+                    // failed even though it succeeded (with warnings--but they're errors).
+                    if (((IBuildComponentHost)BuildManager).LoggingService.HasBuildSubmissionLoggedErrors(BuildResult.SubmissionId))
+                    {
+                        BuildResult.SetOverallResult(overallResult: false);
+                    }
+
                     _completionEvent.Set();
 
                     if (_completionCallback != null)

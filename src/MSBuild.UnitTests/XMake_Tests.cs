@@ -2215,6 +2215,26 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Fact]
+        public void EndToEndWarnAsErrors()
+        {
+            using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
+
+            string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
+
+  <Target Name=""IssueWarning"">
+    <Warning Text=""Warning!"" />
+  </Target>
+  
+</Project>");
+
+            TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
+
+            RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" -warnaserror", out bool success, _output);
+
+            success.ShouldBeFalse();
+        }
+
 #if FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// Ensure that tasks get loaded into their own <see cref="System.Runtime.Loader.AssemblyLoadContext"/>.
