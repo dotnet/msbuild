@@ -2156,6 +2156,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <ResolveAssemblyReferencesFindRelatedSatellites Condition="'$(ResolveAssemblyReferencesFindRelatedSatellites)' == ''">$(BuildingProject)</ResolveAssemblyReferencesFindRelatedSatellites>
       <ResolveAssemblyReferencesFindSerializationAssemblies Condition="'$(ResolveAssemblyReferencesFindSerializationAssemblies)' == ''">$(BuildingProject)</ResolveAssemblyReferencesFindSerializationAssemblies>
       <ResolveAssemblyReferencesFindRelatedFiles Condition="'$(ResolveAssemblyReferencesFindRelatedFiles)' == ''">$(BuildingProject)</ResolveAssemblyReferencesFindRelatedFiles>
+      <ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts Condition="'$(ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts)' == ''">false</ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts>
     </PropertyGroup>
 
     <ItemGroup>
@@ -2218,6 +2219,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         IgnoreTargetFrameworkAttributeVersionMismatch ="$(ResolveAssemblyReferenceIgnoreTargetFrameworkAttributeVersionMismatch)"
         FindDependenciesOfExternallyResolvedReferences="$(FindDependenciesOfExternallyResolvedReferences)"
         ContinueOnError="$(ContinueOnError)"
+        OutputUnresolvedAssemblyConflicts="$(ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts)"
         Condition="'@(Reference)'!='' or '@(_ResolvedProjectReferencePaths)'!='' or '@(_ExplicitReference)' != ''"
         >
 
@@ -2233,6 +2235,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="FilesWritten" ItemName="FileWrites"/>
       <Output TaskParameter="DependsOnSystemRuntime" PropertyName="DependsOnSystemRuntime"/>
       <Output TaskParameter="DependsOnNETStandard" PropertyName="_DependsOnNETStandard"/>
+      <Output TaskParameter="UnresolvedAssemblyConflicts" ItemName="ResolveAssemblyReferenceUnresolvedAssemblyConflicts"/>
     </ResolveAssemblyReference>
   </Target>
 
