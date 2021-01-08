@@ -8,6 +8,9 @@ using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using System.Xml.Linq;
+using System.IO;
+using System.Linq;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -143,6 +146,29 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
             getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "true" });
+        }
+
+        [WindowsOnlyFact]
+        public void It_builds_successfully_when_targeting_net_framework()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var newCommand = new DotnetCommand(Log, "new", "wpf", "--no-restore");
+            newCommand.WorkingDirectory = testDirectory;
+            newCommand.Execute()
+                .Should()
+                .Pass();
+
+            // Set TargetFramework to net472
+            var projFile = Path.Combine(testDirectory, Path.GetFileName(testDirectory) + ".csproj");
+            var project = XDocument.Load(projFile);
+            var ns = project.Root.Name.Namespace;
+            project.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single().Value = "net472";
+            project.Save(projFile);
+
+            var buildCommand = new BuildCommand(Log, testDirectory);
+            buildCommand.Execute()
+                .Should()
+                .Pass();
         }
 
         [WindowsOnlyFact]

@@ -74,11 +74,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   
   <!-- Import WindowsDesktop targets if necessary -->
   <PropertyGroup Condition=" '$(ImportWindowsDesktopTargets)' == ''
-                 and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
-                 and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '3.0'))
-                 and '$(TargetPlatformIdentifier)' == 'Windows'
-                 and ('$(UseWpf)' == 'true' Or '$(UseWindowsForms)' == 'true')">
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+                            and ('$(UseWpf)' == 'true' Or '$(UseWindowsForms)' == 'true') ">
+    <ImportWindowsDesktopTargets Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                                           and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '3.0'))
+                                           and '$(TargetPlatformIdentifier)' == 'Windows' ">true</ImportWindowsDesktopTargets>
+    <ImportWindowsDesktopTargets Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(ImportWindowsDesktopTargets)' == 'true'">
     <AfterMicrosoftNETSdkTargets>$(AfterMicrosoftNETSdkTargets);$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.targets</AfterMicrosoftNETSdkTargets>
