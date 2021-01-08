@@ -510,9 +510,31 @@ namespace Microsoft.Build.Shared
 
         public static int GetLogicalCoreCount()
         {
-            return IsWindows
-                ? GetLogicalCoreCountOnWindows()
-                : Environment.ProcessorCount;
+            int numberOfCpus = Environment.ProcessorCount;
+#if !MONO
+            // .NET Core on Windows returns a core count limited to the current NUMA node
+            //     https://github.com/dotnet/runtime/issues/29686
+            // so always double-check it.
+            if (IsWindows
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_8)
+#endif
+#if NETFRAMEWORK
+                // .NET Framework calls Windows APIs that have a core count limit (32/64 depending on process bitness).
+                // So if we get a high core count on full framework, double-check it.
+                && (numberOfCpus >= 32)
+#endif
+            )
+            {
+                var result = GetLogicalCoreCountOnWindows();
+                if (result != -1)
+                {
+                    numberOfCpus = result;
+                }
+            }
+#endif
+
+            return numberOfCpus;
         }
 
         /// <summary>

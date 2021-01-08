@@ -11,6 +11,8 @@
 
     <AssemblyName>Microsoft.Build.Engine.OM.UnitTests</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_ENGINE_OM_UNITTESTS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -1726,23 +1726,7 @@ namespace Microsoft.Build.CommandLine
                                 String.Equals(switchName, "maxcpucount", StringComparison.OrdinalIgnoreCase))
                             {
                                 int numberOfCpus = NativeMethodsShared.GetLogicalCoreCount();
-#if !MONO
-                                // .NET Core on Windows returns a core count limited to the current NUMA node
-                                //     https://github.com/dotnet/runtime/issues/29686
-                                // so always double-check it.
-                                if (NativeMethodsShared.IsWindows && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_8)
-#if NETFRAMEWORK
-                                     // .NET Framework calls Windows APIs that have a core count limit (32/64 depending on process bitness).
-                                     // So if we get a high core count on full framework, double-check it.
-                                     && (numberOfCpus >= 32)
-#endif
-                                    )
-                                {
-                                    var result = NativeMethodsShared.GetLogicalCoreCount();
-                                    if(result != -1)
-                                        numberOfCpus = result;
-                                }
-#endif
+
                                 switchParameters = ":" + numberOfCpus;
                             }
                             else if (String.Equals(switchName, "bl", StringComparison.OrdinalIgnoreCase) ||
