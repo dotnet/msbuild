@@ -1,0 +1,13 @@
+{
+  "solution": {
+    "path": "MSBuild.sln",
+    "projects": [
+      "src\\Build\\Microsoft.Build.csproj",
+      "src\\Framework\\Microsoft.Build.Framework.csproj",
+      "src\\MSBuild\\MSBuild.csproj",
+      "src\\Package\\Localization\\Localization.csproj",
+      "src\\Tasks\\Microsoft.Build.Tasks.csproj",
+      "src\\Utilities\\Microsoft.Build.Utilities.csproj"
+    ]
+  }
+}
