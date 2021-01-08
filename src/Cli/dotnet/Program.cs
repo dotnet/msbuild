@@ -51,19 +51,11 @@ namespace Microsoft.DotNet.Cli
                 PerformanceLogEventSource.Log.LogStartUpInformation(startupInfo);
                 PerformanceLogEventSource.Log.CLIStart();
 
-                if (Env.GetEnvironmentVariableAsBool("DOTNET_CLI_CAPTURE_TIMING", false))
-                {
-                    PerfTrace.Enabled = true;
-                }
-
                 InitializeProcess();
 
                 try
                 {
-                    using (PerfTrace.Current.CaptureTiming())
-                    {
-                        return ProcessArgs(args);
-                    }
+                    return ProcessArgs(args);
                 }
                 catch (HelpException e)
                 {
@@ -94,12 +86,6 @@ namespace Microsoft.DotNet.Cli
                 }
                 finally
                 {
-                    if (PerfTrace.Enabled)
-                    {
-                        Reporter.Output.WriteLine("Performance Summary:");
-                        PerfTraceOutput.Print(Reporter.Output, PerfTrace.GetEvents());
-                    }
-
                     PerformanceLogEventSource.Log.CLIStop();
                 }
             }
@@ -280,27 +266,24 @@ namespace Microsoft.DotNet.Cli
             DotnetFirstRunConfiguration dotnetFirstRunConfiguration,
             IEnvironmentProvider environmentProvider)
         {
-            using (PerfTrace.Current.CaptureTiming())
+            var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(isDotnetBeingInvokedFromNativeInstaller, environmentProvider);
+            var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
+            var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
+            var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
+                firstTimeUseNoticeSentinel,
+                aspNetCertificateSentinel,
+                aspnetCertificateGenerator,
+                toolPathSentinel,
+                dotnetFirstRunConfiguration,
+                Reporter.Output,
+                CliFolderPathCalculator.CliFallbackFolderPath,
+                environmentPath);
+
+            dotnetConfigurer.Configure();
+
+            if (isDotnetBeingInvokedFromNativeInstaller && OperatingSystem.IsWindows())
             {
-                var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(isDotnetBeingInvokedFromNativeInstaller, environmentProvider);
-                var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
-                var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
-                var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
-                    firstTimeUseNoticeSentinel,
-                    aspNetCertificateSentinel,
-                    aspnetCertificateGenerator,
-                    toolPathSentinel,
-                    dotnetFirstRunConfiguration,
-                    Reporter.Output,
-                    CliFolderPathCalculator.CliFallbackFolderPath,
-                    environmentPath);
-
-                dotnetConfigurer.Configure();
-
-                if (isDotnetBeingInvokedFromNativeInstaller && OperatingSystem.IsWindows())
-                {
-                    DotDefaultPathCorrector.Correct();
-                }
+                DotDefaultPathCorrector.Correct();
             }
         }
 
