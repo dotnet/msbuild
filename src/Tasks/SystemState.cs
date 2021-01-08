@@ -244,7 +244,7 @@ namespace Microsoft.Build.Tasks
                             {
                                 if (reader.TokenType == JsonTokenType.EndObject)
                                 {
-                                    state.FrameworkNameAttribute = new FrameworkName(identifier, Version.Parse(version), profile);
+                                    state.frameworkName = new FrameworkName(identifier, Version.Parse(version), profile);
                                     break;
                                 }
                                 switch (reader.GetString())
@@ -343,13 +343,13 @@ namespace Microsoft.Build.Tasks
                         converter.Write(writer, fileInfo.Assembly, aneOptions);
                     }
                     writer.WriteString(nameof(fileInfo.RuntimeVersion), fileInfo.RuntimeVersion);
-                    if (fileInfo.FrameworkNameAttribute != null)
+                    if (fileInfo.frameworkName != null)
                     {
-                        writer.WritePropertyName(nameof(fileInfo.FrameworkNameAttribute));
+                        writer.WritePropertyName(nameof(fileInfo.frameworkName));
                         writer.WriteStartObject();
-                        writer.WriteString("Version", fileInfo.FrameworkNameAttribute.Version.ToString());
-                        writer.WriteString("Identifier", fileInfo.FrameworkNameAttribute.Identifier);
-                        writer.WriteString("Profile", fileInfo.FrameworkNameAttribute.Profile);
+                        writer.WriteString("Version", fileInfo.frameworkName.Version.ToString());
+                        writer.WriteString("Identifier", fileInfo.frameworkName.Identifier);
+                        writer.WriteString("Profile", fileInfo.frameworkName.Profile);
                         writer.WriteEndObject();
                     }
                     writer.WriteEndObject();
@@ -662,7 +662,7 @@ namespace Microsoft.Build.Tasks
 
             dependencies = fileState.dependencies;
             scatterFiles = fileState.scatterFiles;
-            frameworkName = fileState.FrameworkNameAttribute;
+            frameworkName = fileState.frameworkName;
         }
 
         /// <summary>
