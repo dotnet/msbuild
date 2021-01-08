@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build
 {
@@ -17,7 +18,7 @@ namespace Microsoft.Build
 
         public WeakStringCache()
         {
-            _stringsByHashCode = new ConcurrentDictionary<int, StringWeakHandle>(Environment.ProcessorCount, _initialCapacity);
+            _stringsByHashCode = new ConcurrentDictionary<int, StringWeakHandle>(NativeMethodsShared.GetLogicalCoreCount(), _initialCapacity);
         }
 
         /// <summary>

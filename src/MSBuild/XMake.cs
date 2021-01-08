@@ -1725,7 +1725,7 @@ namespace Microsoft.Build.CommandLine
                             if (String.Equals(switchName, "m", StringComparison.OrdinalIgnoreCase) ||
                                 String.Equals(switchName, "maxcpucount", StringComparison.OrdinalIgnoreCase))
                             {
-                                int numberOfCpus = Environment.ProcessorCount;
+                                int numberOfCpus = NativeMethodsShared.GetLogicalCoreCount();
 #if !MONO
                                 // .NET Core on Windows returns a core count limited to the current NUMA node
                                 //     https://github.com/dotnet/runtime/issues/29686

@@ -330,7 +330,7 @@ namespace Microsoft.Build.Graph
                 entryPoints,
                 projectCollection,
                 projectInstanceFactory,
-                Environment.ProcessorCount,
+                NativeMethodsShared.GetLogicalCoreCount(),
                 CancellationToken.None)
         {
         }
@@ -371,7 +371,7 @@ namespace Microsoft.Build.Graph
                 entryPoints,
                 projectCollection,
                 projectInstanceFactory,
-                Environment.ProcessorCount,
+                NativeMethodsShared.GetLogicalCoreCount(),
                 cancellationToken)
         {
         }

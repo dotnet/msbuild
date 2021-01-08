@@ -518,7 +518,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Get the exact physical core count on Windows
         /// Useful for getting the exact core count in 32 bits processes,
-        /// as NativeMethodsShared.GetLogicalCoreCount() has a 32-core limit in that case. 
+        /// as Environment.ProcessorCount has a 32-core limit in that case. 
         /// https://github.com/dotnet/runtime/blob/221ad5b728f93489655df290c1ea52956ad8f51c/src/libraries/System.Runtime.Extensions/src/System/Environment.Windows.cs#L171-L210
         /// </summary>
         private unsafe static int GetLogicalCoreCountOnWindows()
