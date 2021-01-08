@@ -1031,6 +1031,12 @@ namespace Microsoft.Build.Shared
                     }
                     string parameter = reader.GetString();
                     reader.Read();
+                    // This reader is set up such that each component has its own token type. If we encounter
+                    // the null token just after reader a PropertyName, we know that property is null, and we
+                    // don't need to assign to it. If it is not null, it will be read into the appropriate
+                    // parameter below unless the propertyName specifies that this is "asAssemblyName" or
+                    // "remappedFrom", in which case the value of the property will start with a StartObject
+                    // or StartArray token respectively. We can safely skip over those.
                     if (reader.TokenType == JsonTokenType.Null)
                     {
                         continue;
