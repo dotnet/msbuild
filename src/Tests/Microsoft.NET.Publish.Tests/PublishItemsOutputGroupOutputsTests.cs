@@ -104,7 +104,6 @@ namespace Microsoft.NET.Publish.Tests
             else
             {
                 FrameworkAssemblies.ForEach(fa => items.Should().NotContain(i => i.OutputPath.Equals(fa, StringComparison.OrdinalIgnoreCase)));
-
             }
         }
     }
