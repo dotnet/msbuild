@@ -771,7 +771,7 @@ namespace Microsoft.Build.CommandLine
                 if (!e.InitializationException)
                 {
                     // display the localized message from the outer exception in canonical format
-                    Console.WriteLine("MSBUILD : error " + e.ErrorCode + ": " + e.Message);
+                    Console.WriteLine($"MSBUILD : error {e.ErrorCode}: {e.Message}");
 #if DEBUG
                     Console.WriteLine("This is an unhandled exception from a logger -- PLEASE OPEN A BUG AGAINST THE LOGGER OWNER.");
 #endif
@@ -783,15 +783,15 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    Console.WriteLine("MSBUILD : error " + e.ErrorCode + ": " + e.Message +
-                        (e.InnerException != null ? " " + e.InnerException.Message : ""));
+                    Console.WriteLine(
+                        $"MSBUILD : error {e.ErrorCode}: {e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : "")}");
                     exitType = ExitType.InitializationError;
                 }
             }
             catch (BuildAbortedException e)
             {
-                Console.WriteLine("MSBUILD : error " + e.ErrorCode + ": " + e.Message +
-                                (e.InnerException != null ? " " + e.InnerException.Message : string.Empty));
+                Console.WriteLine(
+                    $"MSBUILD : error {e.ErrorCode}: {e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : string.Empty)}");
 
                 exitType = ExitType.Unexpected;
             }
@@ -1667,7 +1667,7 @@ namespace Microsoft.Build.CommandLine
                         {
                             switchName = null;
                             // add a (fake) parameter indicator for later parsing
-                            switchParameters = ":" + commandLineArg;
+                            switchParameters = $":{commandLineArg}";
                         }
                         else
                         {
@@ -1720,7 +1720,7 @@ namespace Microsoft.Build.CommandLine
                                         numberOfCpus = result;
                                 }
 #endif
-                                switchParameters = ":" + numberOfCpus;
+                                switchParameters = $":{numberOfCpus}";
                             }
                             else if (string.Equals(switchName, "bl", StringComparison.OrdinalIgnoreCase) ||
                                 string.Equals(switchName, "binarylogger", StringComparison.OrdinalIgnoreCase))
@@ -1811,7 +1811,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     // otherwise, use the quoted parameters, after compensating for the quoting that was started in the name
                     // portion of the switch
-                    switchParameters = ":\"" + commandLineArg.Substring(quotedSwitchParameterIndicator + 1);
+                    switchParameters = $":\"{commandLineArg.Substring(quotedSwitchParameterIndicator + 1)}";
                 }
             }
 
@@ -2056,7 +2056,7 @@ namespace Microsoft.Build.CommandLine
             if (FileSystems.Default.FileExists(autoResponseFile))
             {
                 found = true;
-                GatherResponseFileSwitch("@" + autoResponseFile, switchesFromAutoResponseFile);
+                GatherResponseFileSwitch($"@{autoResponseFile}", switchesFromAutoResponseFile);
 
                 // if the "/noautoresponse" switch was set in the auto-response file, flag an error
                 if (switchesFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
@@ -2252,7 +2252,7 @@ namespace Microsoft.Build.CommandLine
                     // figure out if there was a max cpu count provided
                     cpuCount = ProcessMaxCPUCountSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount]);
 
-                    // figure out if we shold reuse nodes
+                    // figure out if we should reuse nodes
                     // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
 
@@ -2340,7 +2340,7 @@ namespace Microsoft.Build.CommandLine
                     if (verbosity == LoggerVerbosity.Diagnostic)
                     {
                         string equivalentCommandLine = commandLineSwitches.GetEquivalentCommandLineExceptProjectFile();
-                        Console.WriteLine(Path.Combine(s_exePath, s_exeName) + " " + equivalentCommandLine + " " + projectFile);
+                        Console.WriteLine($"{Path.Combine(s_exePath, s_exeName)} {equivalentCommandLine} {projectFile}");
                     }
 
 #if FEATURE_XML_SCHEMA_VALIDATION
@@ -3086,7 +3086,7 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    fileParameters += "logfile=msbuild" + i + ".log;";
+                    fileParameters += $"logfile=msbuild{i}.log;";
                 }
 
                 if (groupedFileLoggerParameters[i].Length > 0)
@@ -3105,7 +3105,7 @@ namespace Microsoft.Build.CommandLine
                     // We've decided to use the MP logger even in single proc mode.
                     // Switch it on here, rather than in the logger, so that other hosts that use
                     // the existing ConsoleLogger don't see the behavior change in single proc.
-                    fileLogger.Parameters = "ENABLEMPLOGGING;" + fileParameters;
+                    fileLogger.Parameters = $"ENABLEMPLOGGING;{fileParameters}";
                     loggers.Add(fileLogger);
                 }
                 else
@@ -3170,7 +3170,7 @@ namespace Microsoft.Build.CommandLine
                     // We've decided to use the MP logger even in single proc mode.
                     // Switch it on here, rather than in the logger, so that other hosts that use
                     // the existing ConsoleLogger don't see the behavior change in single proc.
-                    logger.Parameters = "ENABLEMPLOGGING;" + consoleParameters;
+                    logger.Parameters = $"ENABLEMPLOGGING;{consoleParameters}";
                     loggers.Add(logger);
                 }
                 else
@@ -3244,7 +3244,8 @@ namespace Microsoft.Build.CommandLine
                     // If the string is empty then send it through as the distributed file logger WILL deal with EMPTY logfile paths
                     if (!string.IsNullOrEmpty(logFileName) && !Path.IsPathRooted(logFileName))
                     {
-                        fileParameters = fileParameters.Replace(logFileParameter, "logFile=" + Path.Combine(Directory.GetCurrentDirectory(), logFileName));
+                        fileParameters = fileParameters.Replace(logFileParameter,
+                            $"logFile={Path.Combine(Directory.GetCurrentDirectory(), logFileName)}");
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
@@ -3261,7 +3262,7 @@ namespace Microsoft.Build.CommandLine
                         fileParameters += ";";
                     }
 
-                    fileParameters += "logFile=" + Path.Combine(Directory.GetCurrentDirectory(), msbuildLogFileName);
+                    fileParameters += $"logFile={Path.Combine(Directory.GetCurrentDirectory(), msbuildLogFileName)}";
                 }
 
                 //Gets the currently loaded assembly in which the specified class is defined
@@ -3289,7 +3290,7 @@ namespace Microsoft.Build.CommandLine
             {
                 foreach (string name in parameterNames)
                 {
-                    bool found = nameValue.StartsWith(name + "=", StringComparison.OrdinalIgnoreCase) ||   // Parameters with value, such as "logfile=foo.txt"
+                    bool found = nameValue.StartsWith($"{name}=", StringComparison.OrdinalIgnoreCase) ||   // Parameters with value, such as "logfile=foo.txt"
                                  string.Equals(name, nameValue, StringComparison.OrdinalIgnoreCase);       // Parameters without value, such as "append"
 
                     if (found)
@@ -3679,7 +3680,7 @@ namespace Microsoft.Build.CommandLine
             string toolsVersionList = string.Empty;
             foreach (Toolset toolset in toolsets)
             {
-                toolsVersionList += "\"" + toolset.ToolsVersion + "\", ";
+                toolsVersionList += $"\"{toolset.ToolsVersion}\", ";
             }
 
             // Remove trailing comma and space
