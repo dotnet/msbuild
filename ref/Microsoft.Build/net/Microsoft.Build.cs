@@ -1591,9 +1591,10 @@ namespace Microsoft.Build.Logging
         public void Replay(string sourceFilePath) { }
         public void Replay(string sourceFilePath, System.Threading.CancellationToken cancellationToken) { }
     }
-    public partial class BuildEventArgsReader
+    public partial class BuildEventArgsReader : System.IDisposable
     {
         public BuildEventArgsReader(System.IO.BinaryReader binaryReader, int fileFormatVersion) { }
+        public void Dispose() { }
         public Microsoft.Build.Framework.BuildEventArgs Read() { throw null; }
     }
     public delegate void ColorResetter();
