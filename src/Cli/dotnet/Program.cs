@@ -46,8 +46,6 @@ namespace Microsoft.DotNet.Cli
                     perLogEventListener = PerformanceLogEventListener.Create(FileSystemWrapper.Default, PerformanceLogManager.Instance.CurrentLogDirectory);
                 }
 
-                new MulticoreJitActivator().TryActivateMulticoreJit();
-
                 PerformanceLogEventSource.Log.LogStartUpInformation(startupInfo);
                 PerformanceLogEventSource.Log.CLIStart();
 
