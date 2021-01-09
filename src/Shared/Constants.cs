@@ -97,6 +97,7 @@ namespace Microsoft.Build.Shared
         internal static readonly char[] ForwardSlash = { '/' };
         internal static readonly char[] ForwardSlashBackslash = { '/', '\\' };
         internal static readonly char[] WildcardChars = { '*', '?' };
+        internal static readonly string[] CharactersForExpansion = { "*", "?", "$(", "@(", "%" };
         internal static readonly char[] CommaChar = { ',' };
         internal static readonly char[] HyphenChar = { '-' };
         internal static readonly char[] DirectorySeparatorChar = { Path.DirectorySeparatorChar };
