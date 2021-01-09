@@ -1697,7 +1697,7 @@ namespace Microsoft.Build.UnitTests
             string[] fileLoggerParameters = null;
             List<DistributedLoggerRecord> distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
-            ArrayList loggers = new ArrayList();
+            var loggers = new List<ILogger>();
             MSBuildApp.ProcessDistributedFileLogger
                        (
                            distributedFileLogger,
@@ -1720,7 +1720,7 @@ namespace Microsoft.Build.UnitTests
             string[] fileLoggerParameters = null;
             List<DistributedLoggerRecord> distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
-            ArrayList loggers = new ArrayList();
+            var loggers = new List<ILogger>();
             MSBuildApp.ProcessDistributedFileLogger
                        (
                            distributedFileLogger,
@@ -1743,7 +1743,7 @@ namespace Microsoft.Build.UnitTests
             string[] fileLoggerParameters = null;
             List<DistributedLoggerRecord> distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
-            ArrayList loggers = new ArrayList();
+            var loggers = new List<ILogger>();
             MSBuildApp.ProcessDistributedFileLogger
                        (
                            distributedFileLogger,
@@ -1758,7 +1758,7 @@ namespace Microsoft.Build.UnitTests
             // add a set of parameters and make sure the logger has those parameters
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
-            loggers = new ArrayList();
+            loggers = new List<ILogger>();
             fileLoggerParameters = new string[1] { "Parameter" };
             MSBuildApp.ProcessDistributedFileLogger
                        (
@@ -1773,7 +1773,7 @@ namespace Microsoft.Build.UnitTests
 
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
-            loggers = new ArrayList();
+            loggers = new List<ILogger>();
             fileLoggerParameters = new string[2] { "Parameter1", "Parameter" };
             MSBuildApp.ProcessDistributedFileLogger
                        (
@@ -1797,7 +1797,7 @@ namespace Microsoft.Build.UnitTests
             string[] fileLoggerParameters = null;
             List<DistributedLoggerRecord> distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
-            ArrayList loggers = new ArrayList();
+            var loggers = new List<ILogger>();
             MSBuildApp.ProcessDistributedFileLogger
                        (
                            distributedFileLogger,
@@ -1813,7 +1813,7 @@ namespace Microsoft.Build.UnitTests
             // Not add a set of parameters and make sure the logger has those parameters
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
-            loggers = new ArrayList();
+            loggers = new List<ILogger>();
             fileLoggerParameters = new string[1] { "verbosity=Normal;" };
             MSBuildApp.ProcessDistributedFileLogger
                        (
@@ -1830,7 +1830,7 @@ namespace Microsoft.Build.UnitTests
             // Not add a set of parameters and make sure the logger has those parameters
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
-            loggers = new ArrayList();
+            loggers = new List<ILogger>();
             fileLoggerParameters = new string[2] { "verbosity=Normal", "" };
             MSBuildApp.ProcessDistributedFileLogger
                        (
@@ -1847,7 +1847,7 @@ namespace Microsoft.Build.UnitTests
             // Not add a set of parameters and make sure the logger has those parameters
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
-            loggers = new ArrayList();
+            loggers = new List<ILogger>();
             fileLoggerParameters = new string[2] { "", "Parameter1" };
             MSBuildApp.ProcessDistributedFileLogger
                        (
@@ -1864,7 +1864,7 @@ namespace Microsoft.Build.UnitTests
             // Not add a set of parameters and make sure the logger has those parameters
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
-            loggers = new ArrayList();
+            loggers = new List<ILogger>();
             fileLoggerParameters = new string[2] { "Parameter1", "verbosity=Normal;logfile=" + (NativeMethodsShared.IsWindows ? "c:\\temp\\cat.log" : "/tmp/cat.log") };
             MSBuildApp.ProcessDistributedFileLogger
                        (
@@ -1879,7 +1879,7 @@ namespace Microsoft.Build.UnitTests
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe(fileLoggerParameters[0] + ";" + fileLoggerParameters[1], StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
 
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
-            loggers = new ArrayList();
+            loggers = new List<ILogger>();
             fileLoggerParameters = new string[2] { "Parameter1", "verbosity=Normal;logfile=" + Path.Combine("..", "cat.log") + ";Parameter1" };
             MSBuildApp.ProcessDistributedFileLogger
                        (
@@ -1893,7 +1893,7 @@ namespace Microsoft.Build.UnitTests
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"Parameter1;verbosity=Normal;logFile={Path.Combine(Directory.GetCurrentDirectory(), "..", "cat.log")};Parameter1", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
 
-            loggers = new ArrayList();
+            loggers = new List<ILogger>();
             distributedLoggerRecords = new List<DistributedLoggerRecord>();
             fileLoggerParameters = new string[6] { "Parameter1", ";Parameter;", "", ";", ";Parameter", "Parameter;" };
             MSBuildApp.ProcessDistributedFileLogger
@@ -1917,7 +1917,7 @@ namespace Microsoft.Build.UnitTests
             string[] fileLoggerParameters = null;
             List<DistributedLoggerRecord> distributedLoggerRecords = new List<DistributedLoggerRecord>();
 
-            ArrayList loggers = new ArrayList();
+            var loggers = new List<ILogger>();
             MSBuildApp.ProcessDistributedFileLogger
                        (
                            distributedFileLogger,
@@ -1935,7 +1935,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ProcessConsoleLoggerSwitches()
         {
-            ArrayList loggers = new ArrayList();
+            var loggers = new List<ILogger>();
             LoggerVerbosity verbosity = LoggerVerbosity.Normal;
             List<DistributedLoggerRecord> distributedLoggerRecords = new List<DistributedLoggerRecord>(); 
             string[] consoleLoggerParameters = new string[6] { "Parameter1", ";Parameter;", "", ";", ";Parameter", "Parameter;" };

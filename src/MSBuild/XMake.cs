@@ -2565,7 +2565,7 @@ namespace Microsoft.Build.CommandLine
         /// and also returns the created logger. Otherwise, the collection of loggers is not affected and null
         /// is returned
         /// </remarks>
-        internal static ProfilerLogger ProcessProfileEvaluationSwitch(string[] parameters, ArrayList loggers, out bool enableProfiler)
+        internal static ProfilerLogger ProcessProfileEvaluationSwitch(string[] parameters, List<ILogger> loggers, out bool enableProfiler)
         {
             if (parameters == null || parameters.Length == 0)
             {
@@ -3044,7 +3044,7 @@ namespace Microsoft.Build.CommandLine
                 verbosity = ProcessVerbositySwitch(verbositySwitchParameters[verbositySwitchParameters.Length - 1]);
             }
 
-            ArrayList loggers = ProcessLoggerSwitch(loggerSwitchParameters, verbosity);
+            var loggers = ProcessLoggerSwitch(loggerSwitchParameters, verbosity);
 
             // Add any loggers which have been specified on the commandline
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
@@ -3064,7 +3064,7 @@ namespace Microsoft.Build.CommandLine
                 detailedSummary = true;
             }
 
-            return (ILogger[])loggers.ToArray(typeof(ILogger));
+            return loggers.ToArray();
         }
 
         /// <summary>
@@ -3094,7 +3094,7 @@ namespace Microsoft.Build.CommandLine
         /// Add a file logger with the appropriate parameters to the loggers list for each
         /// non-empty set of file logger parameters provided.
         /// </summary>
-        private static void ProcessFileLoggers(string[][] groupedFileLoggerParameters, List<DistributedLoggerRecord> distributedLoggerRecords, LoggerVerbosity verbosity, int cpuCount, ArrayList loggers)
+        private static void ProcessFileLoggers(string[][] groupedFileLoggerParameters, List<DistributedLoggerRecord> distributedLoggerRecords, LoggerVerbosity verbosity, int cpuCount, List<ILogger> loggers)
         {
             for (int i = 0; i < groupedFileLoggerParameters.Length; i++)
             {
@@ -3144,7 +3144,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, ArrayList loggers, ref LoggerVerbosity verbosity)
+        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, List<ILogger> loggers, ref LoggerVerbosity verbosity)
         {
             if (binaryLoggerParameters == null || binaryLoggerParameters.Length == 0)
             {
@@ -3174,7 +3174,7 @@ namespace Microsoft.Build.CommandLine
             List<DistributedLoggerRecord> distributedLoggerRecords,
             LoggerVerbosity verbosity,
             int cpuCount,
-            ArrayList loggers
+            List<ILogger> loggers
         )
         {
             // the console logger is always active, unless specifically disabled
@@ -3244,7 +3244,7 @@ namespace Microsoft.Build.CommandLine
             bool distributedFileLogger,
             string[] fileLoggerParameters,
             List<DistributedLoggerRecord> distributedLoggerRecords,
-            ArrayList loggers,
+            List<ILogger> loggers,
             int cpuCount
         )
         {
@@ -3393,9 +3393,9 @@ namespace Microsoft.Build.CommandLine
         /// Figures out which additional loggers are going to listen to build events.
         /// </summary>
         /// <returns>List of loggers.</returns>
-        private static ArrayList ProcessLoggerSwitch(string[] parameters, LoggerVerbosity verbosity)
+        private static List<ILogger> ProcessLoggerSwitch(string[] parameters, LoggerVerbosity verbosity)
         {
-            ArrayList loggers = new ArrayList();
+            var loggers = new List<ILogger>();
 
             foreach (string parameter in parameters)
             {

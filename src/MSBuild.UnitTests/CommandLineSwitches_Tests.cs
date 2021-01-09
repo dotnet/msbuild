@@ -1211,7 +1211,7 @@ namespace Microsoft.Build.UnitTests
         {
             bool enableProfiler = false;
             Should.Throw(
-                () => MSBuildApp.ProcessProfileEvaluationSwitch(new[] {filename}, new ArrayList(), out enableProfiler),
+                () => MSBuildApp.ProcessProfileEvaluationSwitch(new[] {filename}, new List<ILogger>(), out enableProfiler),
                 typeof(CommandLineSwitchException));
         }
 
