@@ -94,7 +94,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// The object used to synchronize access to shared build state
         /// </summary>
-        private static object s_buildLock = new object();
+        private static readonly object s_buildLock = new object();
 
         /// <summary>
         /// Whether a build has started.
@@ -104,17 +104,17 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Event signalled when the build is complete.
         /// </summary>
-        private static ManualResetEvent s_buildComplete = new ManualResetEvent(false);
+        private static readonly ManualResetEvent s_buildComplete = new ManualResetEvent(false);
 
         /// <summary>
         /// Event signalled when the cancel method is complete.
         /// </summary>
-        private static ManualResetEvent s_cancelComplete = new ManualResetEvent(true);
+        private static readonly ManualResetEvent s_cancelComplete = new ManualResetEvent(true);
 
         /// <summary>
         /// Cancel when handling Ctrl-C
         /// </summary>
-        private static CancellationTokenSource s_buildCancellationSource = new CancellationTokenSource();
+        private static readonly CancellationTokenSource s_buildCancellationSource = new CancellationTokenSource();
 
         private static readonly char[] s_commaSemicolon = { ',', ';' };
 
