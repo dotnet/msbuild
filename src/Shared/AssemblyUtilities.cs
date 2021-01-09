@@ -6,6 +6,12 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
+// Declare this to get init properties.
+namespace System.Runtime.CompilerServices
+{
+    internal static class IsExternalInit { }
+}
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
