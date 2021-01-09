@@ -2629,7 +2629,7 @@ namespace Microsoft.Build.CommandLine
                         // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                         bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
                         string[] lowPriorityInput = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.LowPriority];
-                        bool lowpriority = lowPriorityInput.Length > 0 ? lowPriorityInput[0].Equals("true") : false;
+                        bool lowpriority = lowPriorityInput.Length > 0 && lowPriorityInput[0].Equals("true");
 
                         shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
 
@@ -2873,7 +2873,7 @@ namespace Microsoft.Build.CommandLine
                     // There were characters before the extension.
                     InitializationException.VerifyThrow(string.Equals(extension, Path.GetExtension(extension), StringComparison.OrdinalIgnoreCase), "InvalidExtensionToIgnore", extension, null, false);
 
-                    // Make sure that no wild cards are in the string because for now we dont allow wild card extensions.
+                    // Make sure that no wild cards are in the string because for now we don't allow wild card extensions.
                     InitializationException.VerifyThrow(extension.IndexOfAny(s_wildcards) == -1, "InvalidExtensionToIgnore", extension, null, false);
                 }
             }
@@ -3058,7 +3058,7 @@ namespace Microsoft.Build.CommandLine
                 parametersToAggregate[i] = parametersToAggregate[i].Trim(MSBuildConstants.SemicolonChar);
             }
 
-            // Join the logger parameters into one string seperated by semicolons
+            // Join the logger parameters into one string separated by semicolons
             string result = anyPrefixingParameter ?? string.Empty;
 
             result += string.Join(";", parametersToAggregate);
@@ -3091,7 +3091,7 @@ namespace Microsoft.Build.CommandLine
 
                 if (groupedFileLoggerParameters[i].Length > 0)
                 {
-                    // Join the file logger parameters into one string seperated by semicolons
+                    // Join the file logger parameters into one string separated by semicolons
                     fileParameters = AggregateParameters(fileParameters, groupedFileLoggerParameters[i]);
                 }
 
@@ -3129,8 +3129,7 @@ namespace Microsoft.Build.CommandLine
 
             string arguments = binaryLoggerParameters[binaryLoggerParameters.Length - 1];
 
-            BinaryLogger logger = new BinaryLogger();
-            logger.Parameters = arguments;
+            BinaryLogger logger = new BinaryLogger {Parameters = arguments};
 
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.
@@ -3229,7 +3228,7 @@ namespace Microsoft.Build.CommandLine
                 string fileParameters = string.Empty;
                 if ((fileLoggerParameters?.Length > 0))
                 {
-                    // Join the file logger parameters into one string seperated by semicolons
+                    // Join the file logger parameters into one string separated by semicolons
                     fileParameters = AggregateParameters(null, fileLoggerParameters);
                 }
 
@@ -3255,7 +3254,7 @@ namespace Microsoft.Build.CommandLine
 
                 if (string.IsNullOrEmpty(logFileName))
                 {
-                    // If the string is not empty and it does not end in a ;, we need to add a ; to seperate what is in the parameter from the logfile
+                    // If the string is not empty and it does not end in a ;, we need to add a ; to separate what is in the parameter from the logfile
                     // if the string is empty, no ; is needed because logfile is the only parameter which will be passed in
                     if (!string.IsNullOrEmpty(fileParameters) && !fileParameters.EndsWith(";", StringComparison.OrdinalIgnoreCase))
                     {
@@ -3400,7 +3399,7 @@ namespace Microsoft.Build.CommandLine
             foreach (string parameter in parameters)
             {
                 // split each <central logger>|<node logger> string into two pieces, breaking on the first | that is found
-                var loggerSpec = QuotingUtilities.SplitUnquoted(parameter, 2, true /* keep empty splits */, false /* keep quotes */, out var emptySplits, '*');
+                var loggerSpec = QuotingUtilities.SplitUnquoted(parameter, 2, true /* keep empty splits */, false /* keep quotes */, out _, '*');
 
                 ErrorUtilities.VerifyThrow((loggerSpec.Count >= 1) && (loggerSpec.Count <= 2),
                     "SplitUnquoted() must return at least one string, and no more than two.");
@@ -3441,15 +3440,12 @@ namespace Microsoft.Build.CommandLine
         /// <returns></returns>
         private static LoggerDescription ParseLoggingParameter(string parameter, string unquotedParameter, LoggerVerbosity verbosity)
         {
-            List<string> loggerSpec;
             string loggerClassName;
-            string loggerAssemblyName;
-            string loggerAssemblyFile;
             string loggerParameters = null;
             bool isOptional = false;
 
             // split each <logger type>;<logger parameters> string into two pieces, breaking on the first ; that is found
-            loggerSpec = QuotingUtilities.SplitUnquoted(parameter, 2, true /* keep empty splits */, false /* keep quotes */, out _, ';');
+            var loggerSpec = QuotingUtilities.SplitUnquoted(parameter, 2, true /* keep empty splits */, false /* keep quotes */, out _, ';');
 
             ErrorUtilities.VerifyThrow((loggerSpec.Count >= 1) && (loggerSpec.Count <= 2),
                 "SplitUnquoted() must return at least one string, and no more than two.");
@@ -3495,8 +3491,8 @@ namespace Microsoft.Build.CommandLine
             CommandLineSwitchException.VerifyThrow(loggerAssemblySpec.Length > 0,
                 "InvalidLoggerError", unquotedParameter);
 
-            loggerAssemblyName = null;
-            loggerAssemblyFile = null;
+            string loggerAssemblyName = null;
+            string loggerAssemblyFile = null;
 
             // DDB Bug msbuild.exe -Logger:FileLogger,Microsoft.Build.Engine fails due to moved engine file.
             // Only add strong naming if the assembly is a non-strong named 'Microsoft.Build.Engine' (i.e, no additional characteristics)
