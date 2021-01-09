@@ -942,7 +942,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void ResetBuildState()
         {
-            s_includedResponseFiles = new ArrayList();
+            s_includedResponseFiles = new List<string>();
             usingSwitchesFromAutoResponseFile = false;
         }
 
@@ -1848,7 +1848,7 @@ namespace Microsoft.Build.CommandLine
         /// Used to keep track of response files to prevent them from
         /// being included multiple times (or even recursively).
         /// </summary>
-        private static ArrayList s_includedResponseFiles;
+        private static List<string> s_includedResponseFiles;
 
         /// <summary>
         /// Called when a response file switch is detected on the command line. It loads the specified response file, and parses
