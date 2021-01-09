@@ -1618,7 +1618,7 @@ namespace Microsoft.Build.CommandLine
             // split the command line on (unquoted) whitespace
             var commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
 
-            s_exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote((string)commandLineArgs[0]));
+            s_exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote(commandLineArgs[0]));
 #else
             var commandLineArgs = new List<string>(commandLine);
 
@@ -3429,9 +3429,9 @@ namespace Microsoft.Build.CommandLine
                 ErrorUtilities.VerifyThrow((loggerSpec.Count >= 1) && (loggerSpec.Count <= 2),
                     "SplitUnquoted() must return at least one string, and no more than two.");
 
-                string unquotedParameter = QuotingUtilities.Unquote((string)loggerSpec[0]);
+                string unquotedParameter = QuotingUtilities.Unquote(loggerSpec[0]);
                 LoggerDescription centralLoggerDescription =
-                    ParseLoggingParameter((string)loggerSpec[0], unquotedParameter, verbosity);
+                    ParseLoggingParameter(loggerSpec[0], unquotedParameter, verbosity);
 
                 if (!CreateAndConfigureLogger(centralLoggerDescription, verbosity, unquotedParameter, out ILogger centralLogger))
                 {
@@ -3443,8 +3443,8 @@ namespace Microsoft.Build.CommandLine
 
                 if (loggerSpec.Count > 1)
                 {
-                    unquotedParameter = QuotingUtilities.Unquote((string)loggerSpec[1]);
-                    forwardingLoggerDescription = ParseLoggingParameter((string)loggerSpec[1], unquotedParameter, verbosity);
+                    unquotedParameter = QuotingUtilities.Unquote(loggerSpec[1]);
+                    forwardingLoggerDescription = ParseLoggingParameter(loggerSpec[1], unquotedParameter, verbosity);
                 }
 
                 DistributedLoggerRecord distributedLoggerRecord =
@@ -3479,17 +3479,17 @@ namespace Microsoft.Build.CommandLine
                 "SplitUnquoted() must return at least one string, and no more than two.");
 
             // check that the logger is specified
-            CommandLineSwitchException.VerifyThrow(((string)loggerSpec[0]).Length > 0,
+            CommandLineSwitchException.VerifyThrow(loggerSpec[0].Length > 0,
                 "InvalidLoggerError", unquotedParameter);
 
             // extract logger parameters if present
             if (loggerSpec.Count == 2)
             {
-                loggerParameters = QuotingUtilities.Unquote((string)loggerSpec[1]);
+                loggerParameters = QuotingUtilities.Unquote(loggerSpec[1]);
             }
 
             // split each <logger class>,<logger assembly>[,<option1>][,option2] parameters string into pieces
-            var loggerTypeSpec = QuotingUtilities.SplitUnquoted((string)loggerSpec[0], int.MaxValue, true /* keep empty splits */, false /* keep quotes */, out _, ',');
+            var loggerTypeSpec = QuotingUtilities.SplitUnquoted(loggerSpec[0], int.MaxValue, true /* keep empty splits */, false /* keep quotes */, out _, ',');
 
             ErrorUtilities.VerifyThrow(loggerTypeSpec.Count >= 1, "SplitUnquoted() must return at least one string");
 
@@ -3498,13 +3498,13 @@ namespace Microsoft.Build.CommandLine
             // if the logger class and assembly are both specified
             if (loggerTypeSpec.Count >= 2)
             {
-                loggerClassName = QuotingUtilities.Unquote((string)loggerTypeSpec[0]);
-                loggerAssemblySpec = QuotingUtilities.Unquote((string)loggerTypeSpec[1]);
+                loggerClassName = QuotingUtilities.Unquote(loggerTypeSpec[0]);
+                loggerAssemblySpec = QuotingUtilities.Unquote(loggerTypeSpec[1]);
             }
             else
             {
                 loggerClassName = String.Empty;
-                loggerAssemblySpec = QuotingUtilities.Unquote((string)loggerTypeSpec[0]);
+                loggerAssemblySpec = QuotingUtilities.Unquote(loggerTypeSpec[0]);
             }
 
             // Loop through the remaining items as options

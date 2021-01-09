@@ -586,7 +586,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.SetConsoleUI();
 
             // Make sure this doesn't throw an exception.
-            string bar = String.Format(CultureInfo.CurrentUICulture, "{0}", (int)1);
+            string bar = String.Format(CultureInfo.CurrentUICulture, "{0}", 1);
 
             // Restore the current UI culture back to the way it was at the beginning of this unit test.
             thisThread.CurrentUICulture = originalUICulture;
@@ -1329,7 +1329,7 @@ namespace Microsoft.Build.UnitTests
         public void TestProcessProjectSwitchNullandEmptyProjectsToIgnore()
         {
             string[] projects = new string[] { "my.proj" };
-            string[] extensionsToIgnore = (string[])null;
+            string[] extensionsToIgnore = null;
             IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
 
@@ -1962,7 +1962,7 @@ namespace Microsoft.Build.UnitTests
                            loggers
                        );
             loggers.Count.ShouldBe(1); // "Expected a central loggers to be attached"
-            ((ILogger)loggers[0]).Parameters.ShouldBe("EnableMPLogging;SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;parameter;Parameter", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameters passed in"
+            loggers[0].Parameters.ShouldBe("EnableMPLogging;SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;parameter;Parameter", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameters passed in"
 
             MSBuildApp.ProcessConsoleLoggerSwitch
                        (
@@ -1975,7 +1975,7 @@ namespace Microsoft.Build.UnitTests
                       );
             loggers.Count.ShouldBe(1); // "Expected a central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
-            DistributedLoggerRecord distributedLogger = ((DistributedLoggerRecord)distributedLoggerRecords[0]);
+            DistributedLoggerRecord distributedLogger = distributedLoggerRecords[0];
             distributedLogger.CentralLogger.Parameters.ShouldBe("SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;parameter;Parameter", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameters passed in"
             distributedLogger.ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe("SHOWPROJECTFILE=TRUE;Parameter1;Parameter;;;Parameter;Parameter", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
         }
