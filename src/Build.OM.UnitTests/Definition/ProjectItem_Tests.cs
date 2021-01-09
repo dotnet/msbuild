@@ -2937,7 +2937,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
-        public void UpdateFromReferencedItemShouldBeCaseInsensitive2()
+        public void UpdateMetadataWithoutItemReferenceShouldBeCaseInsensitive()
         {
             string content = @"
                               <to Include='a' />
