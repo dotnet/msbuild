@@ -893,8 +893,7 @@ namespace Microsoft.Build.CommandLine
             // by calling Microsoft.Win32.SystemEvents.Initialize.
             // So do our work asynchronously so we can return immediately.
             // We're already on a threadpool thread anyway.
-            WaitCallback callback = new WaitCallback(
-            delegate (object state)
+            WaitCallback callback = delegate
             {
                 s_cancelComplete.Reset();
 
@@ -908,7 +907,7 @@ namespace Microsoft.Build.CommandLine
                 // If the build has already started (or already finished), we will cancel it
                 // If the build has not yet started, it will cancel itself, because
                 // we set alreadyCalled=1
-                bool hasBuildStarted = false;
+                bool hasBuildStarted;
                 lock (s_buildLock)
                 {
                     hasBuildStarted = s_hasBuildStarted;
@@ -921,7 +920,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 s_cancelComplete.Set(); // This will release our main Execute method so we can finally exit.
-            });
+            };
 
             ThreadPoolExtensions.QueueThreadPoolWorkItemWithCulture(callback, CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture);
         }
@@ -1058,16 +1057,13 @@ namespace Microsoft.Build.CommandLine
                 {
                     foreach (var logger in distributedLoggerRecords)
                     {
-                        if (logger.CentralLogger != null)
+                        if (logger.CentralLogger?.Parameters != null &&
+                            (logger.CentralLogger.Parameters.IndexOf("V=DIAG", StringComparison.OrdinalIgnoreCase) != -1 ||
+                             logger.CentralLogger.Parameters.IndexOf("VERBOSITY=DIAG", StringComparison.OrdinalIgnoreCase) != -1)
+                        )
                         {
-                            if (logger.CentralLogger.Parameters != null &&
-                                (logger.CentralLogger.Parameters.IndexOf("V=DIAG", StringComparison.OrdinalIgnoreCase) != -1 ||
-                                 logger.CentralLogger.Parameters.IndexOf("VERBOSITY=DIAG", StringComparison.OrdinalIgnoreCase) != -1)
-                               )
-                            {
-                                logTaskInputs = true;
-                                break;
-                            }
+                            logTaskInputs = true;
+                            break;
                         }
                     }
                 }
@@ -3614,9 +3610,9 @@ namespace Microsoft.Build.CommandLine
                 {
                     nodeLogger.Initialize(replayEventSource, cpuCount);
                 }
-                else if (centralLogger != null)
+                else
                 {
-                    centralLogger.Initialize(replayEventSource);
+                    centralLogger?.Initialize(replayEventSource);
                 }
             }
 
