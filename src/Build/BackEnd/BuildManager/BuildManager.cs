@@ -1723,16 +1723,23 @@ namespace Microsoft.Build.Execution
                         projectGraph.ConstructionMetrics.NodeCount,
                         projectGraph.ConstructionMetrics.EdgeCount));
 
-                var targetListTask = Task.Run(() => projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames));
-                var cacheServiceTask = Task.Run(() => SearchAndInitializeProjectCachePluginFromGraph(projectGraph));
+                Dictionary<ProjectGraphNode, BuildResult> resultsPerNode = null;
 
-                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = targetListTask.Result;
-                using var cacheService = cacheServiceTask.Result;
+                if (submission.BuildRequestData.GraphBuildOptions.Build)
+                {
+                    var cacheServiceTask = Task.Run(() => SearchAndInitializeProjectCachePluginFromGraph(projectGraph));
+                    var targetListTask = Task.Run(() => projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames));
 
-                var resultsPerNode = BuildGraph(projectGraph, targetLists, submission);
+                    using var cacheService = cacheServiceTask.Result;
+
+                    resultsPerNode = BuildGraph(projectGraph, targetListTask.Result, submission.BuildRequestData);
+                }
 
                 // The overall submission is complete, so report it as complete
-                ReportResultsToSubmission(new GraphBuildResult(submission.SubmissionId, new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode)));
+                ReportResultsToSubmission(
+                    new GraphBuildResult(
+                        submission.SubmissionId,
+                        new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>())));
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
@@ -1787,7 +1794,7 @@ namespace Microsoft.Build.Execution
         private Dictionary<ProjectGraphNode, BuildResult> BuildGraph(
             ProjectGraph projectGraph,
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode,
-            GraphBuildSubmission graphSubmission)
+            GraphBuildRequestData graphBuildRequestData)
         {
             var waitHandle = new AutoResetEvent(true);
             var graphBuildStateLock = new object();
@@ -1823,8 +1830,8 @@ namespace Microsoft.Build.Execution
                         var request = new BuildRequestData(
                             node.ProjectInstance,
                             targetList.ToArray(),
-                            graphSubmission.BuildRequestData.HostServices,
-                            graphSubmission.BuildRequestData.Flags);
+                            graphBuildRequestData.HostServices,
+                            graphBuildRequestData.Flags);
 
                         // TODO Tack onto the existing submission instead of pending a whole new submission for every node
                         // Among other things, this makes BuildParameters.DetailedSummary produce a summary for each node, which is not desirable.
