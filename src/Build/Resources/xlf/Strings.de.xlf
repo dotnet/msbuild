@@ -128,8 +128,8 @@
         <note />
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
-        <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
-        <target state="translated">"Die Übergabe eines MSBuildFileSystemBase-Dateisystems wird von EvaluationContext-Objekten, die mit SharingPolicy.Isolated erstellt wurden, nicht unterstützt."</target>
+        <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
+        <target state="needs-review-translation">"Die Übergabe eines MSBuildFileSystemBase-Dateisystems wird von EvaluationContext-Objekten, die mit SharingPolicy.Isolated erstellt wurden, nicht unterstützt."</target>
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
@@ -262,8 +262,8 @@
     </note>
       </trans-unit>
       <trans-unit id="StaticGraphConstructionMetrics">
-        <source>"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</source>
-        <target state="translated">"Statisches Diagramm in {0} Sekunden geladen: {1} Knoten, {2} Edges"</target>
+        <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
+        <target state="needs-review-translation">"Statisches Diagramm in {0} Sekunden geladen: {1} Knoten, {2} Edges"</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
