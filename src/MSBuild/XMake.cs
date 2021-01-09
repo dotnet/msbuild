@@ -258,7 +258,7 @@ namespace Microsoft.Build.CommandLine
         /// <comments>
         /// This is a non-supported feature to facilitate timing multiple runs
         /// </comments>
-        static private void AppendOutputFile(string path, long elapsedTime)
+        private static void AppendOutputFile(string path, long elapsedTime)
         {
             if (!FileSystems.Default.FileExists(path))
             {
@@ -568,9 +568,7 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
 
-                CommandLineSwitches switchesFromAutoResponseFile;
-                CommandLineSwitches switchesNotFromAutoResponseFile;
-                GatherAllSwitches(commandLine, out switchesFromAutoResponseFile, out switchesNotFromAutoResponseFile);
+                GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile);
 
                 if (ProcessCommandLineSwitches(
                         switchesFromAutoResponseFile,
@@ -1654,8 +1652,7 @@ namespace Microsoft.Build.CommandLine
         {
             foreach (string commandLineArg in commandLineArgs)
             {
-                int doubleQuotesRemovedFromArg;
-                string unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
+                string unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out var doubleQuotesRemovedFromArg);
 
                 if (unquotedCommandLineArg.Length > 0)
                 {
@@ -1698,14 +1695,6 @@ namespace Microsoft.Build.CommandLine
                                 switchParameters = ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, switchName, switchParameterIndicator);
                             }
                         }
-
-                        CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
-                        CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
-                        string duplicateSwitchErrorMessage;
-                        bool multipleParametersAllowed;
-                        string missingParametersErrorMessage;
-                        bool unquoteParameters;
-                        bool allowEmptyParameters;
 
                         // Special case: for the switches "/m" (or "/maxCpuCount") and "/bl" (or "/binarylogger") we wish to pretend we saw a default argument
                         // This allows a subsequent /m:n on the command line to override it.
@@ -1751,11 +1740,11 @@ namespace Microsoft.Build.CommandLine
                             }
                         }
 
-                        if (CommandLineSwitches.IsParameterlessSwitch(switchName, out parameterlessSwitch, out duplicateSwitchErrorMessage))
+                        if (CommandLineSwitches.IsParameterlessSwitch(switchName, out var parameterlessSwitch, out var duplicateSwitchErrorMessage))
                         {
                             GatherParameterlessCommandLineSwitch(commandLineSwitches, parameterlessSwitch, switchParameters, duplicateSwitchErrorMessage, unquotedCommandLineArg);
                         }
-                        else if (CommandLineSwitches.IsParameterizedSwitch(switchName, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out allowEmptyParameters))
+                        else if (CommandLineSwitches.IsParameterizedSwitch(switchName, out var parameterizedSwitch, out duplicateSwitchErrorMessage, out var multipleParametersAllowed, out var missingParametersErrorMessage, out var unquoteParameters, out var allowEmptyParameters))
                         {
                             GatherParameterizedCommandLineSwitch(commandLineSwitches, parameterizedSwitch, switchParameters, duplicateSwitchErrorMessage, multipleParametersAllowed, missingParametersErrorMessage, unquoteParameters, unquotedCommandLineArg, allowEmptyParameters);
                         }
@@ -1796,8 +1785,7 @@ namespace Microsoft.Build.CommandLine
             int quotedSwitchParameterIndicator = commandLineArg.IndexOf(':');
 
             // check if there is any quoting in the name portion of the switch
-            int doubleQuotesRemovedFromSwitchIndicatorAndName;
-            string unquotedSwitchIndicatorAndName = QuotingUtilities.Unquote(commandLineArg.Substring(0, quotedSwitchParameterIndicator), out doubleQuotesRemovedFromSwitchIndicatorAndName);
+            string unquotedSwitchIndicatorAndName = QuotingUtilities.Unquote(commandLineArg.Substring(0, quotedSwitchParameterIndicator), out var doubleQuotesRemovedFromSwitchIndicatorAndName);
 
             ErrorUtilities.VerifyThrow(switchName == unquotedSwitchIndicatorAndName.Substring(1),
                 "The switch name extracted from either the partially or completely unquoted arg should be the same.");
@@ -3415,8 +3403,7 @@ namespace Microsoft.Build.CommandLine
             foreach (string parameter in parameters)
             {
                 // split each <central logger>|<node logger> string into two pieces, breaking on the first | that is found
-                int emptySplits; // ignored
-                var loggerSpec = QuotingUtilities.SplitUnquoted(parameter, 2, true /* keep empty splits */, false /* keep quotes */, out emptySplits, '*');
+                var loggerSpec = QuotingUtilities.SplitUnquoted(parameter, 2, true /* keep empty splits */, false /* keep quotes */, out var emptySplits, '*');
 
                 ErrorUtilities.VerifyThrow((loggerSpec.Count >= 1) && (loggerSpec.Count <= 2),
                     "SplitUnquoted() must return at least one string, and no more than two.");
