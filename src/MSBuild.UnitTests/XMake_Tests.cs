@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            ArrayList arguments = new ArrayList();
+            var arguments = new List<string>();
             arguments.AddRange(new string[] { "/p:a=b", "/p:c=d" });
 
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            ArrayList arguments = new ArrayList();
+            var arguments = new List<string>();
             arguments.AddRange(new string[] { "/m:2" });
 
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
@@ -76,7 +76,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            ArrayList arguments = new ArrayList();
+            var arguments = new List<string>();
             arguments.AddRange(new string[] { "/m:3", "/m" });
 
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            ArrayList arguments = new ArrayList();
+            var arguments = new List<string>();
             arguments.AddRange(new string[] { "/m:" });
 
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void SplitUnquotedTest()
         {
-            ArrayList sa;
+            List<string> sa;
             int emptySplits;
 
             // nothing quoted

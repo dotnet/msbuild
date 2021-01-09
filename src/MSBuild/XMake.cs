@@ -1616,11 +1616,11 @@ namespace Microsoft.Build.CommandLine
         {
 #if FEATURE_GET_COMMANDLINE
             // split the command line on (unquoted) whitespace
-            ArrayList commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
+            var commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
 
             s_exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote((string)commandLineArgs[0]));
 #else
-            ArrayList commandLineArgs = new ArrayList(commandLine);
+            var commandLineArgs = new List<string>(commandLine);
 
             s_exeName = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 #endif
@@ -1658,7 +1658,7 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Internal for unit testing only.
         /// </remarks>
-        internal static void GatherCommandLineSwitches(ArrayList commandLineArgs, CommandLineSwitches commandLineSwitches)
+        internal static void GatherCommandLineSwitches(List<string> commandLineArgs, CommandLineSwitches commandLineSwitches)
         {
             foreach (string commandLineArg in commandLineArgs)
             {
@@ -1893,7 +1893,7 @@ namespace Microsoft.Build.CommandLine
                         var responseFileDirectory = FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(responseFile));
                         s_includedResponseFiles.Add(responseFile);
 
-                        ArrayList argsFromResponseFile;
+                        List<string> argsFromResponseFile;
 
 #if FEATURE_ENCODING_DEFAULT
                         using (StreamReader responseFileContents = new StreamReader(responseFile, Encoding.Default)) // HIGHCHAR: If response files have no byte-order marks, then assume ANSI rather than ASCII.
@@ -1901,7 +1901,7 @@ namespace Microsoft.Build.CommandLine
                         using (StreamReader responseFileContents = FileUtilities.OpenRead(responseFile)) // HIGHCHAR: If response files have no byte-order marks, then assume ANSI rather than ASCII.
 #endif
                         {
-                            argsFromResponseFile = new ArrayList();
+                            argsFromResponseFile = new List<string>();
 
                             while (responseFileContents.Peek() != -1)
                             {
@@ -3424,7 +3424,7 @@ namespace Microsoft.Build.CommandLine
             {
                 // split each <central logger>|<node logger> string into two pieces, breaking on the first | that is found
                 int emptySplits; // ignored
-                ArrayList loggerSpec = QuotingUtilities.SplitUnquoted(parameter, 2, true /* keep empty splits */, false /* keep quotes */, out emptySplits, '*');
+                var loggerSpec = QuotingUtilities.SplitUnquoted(parameter, 2, true /* keep empty splits */, false /* keep quotes */, out emptySplits, '*');
 
                 ErrorUtilities.VerifyThrow((loggerSpec.Count >= 1) && (loggerSpec.Count <= 2),
                     "SplitUnquoted() must return at least one string, and no more than two.");
@@ -3465,7 +3465,7 @@ namespace Microsoft.Build.CommandLine
         /// <returns></returns>
         private static LoggerDescription ParseLoggingParameter(string parameter, string unquotedParameter, LoggerVerbosity verbosity)
         {
-            ArrayList loggerSpec;
+            List<string> loggerSpec;
             string loggerClassName;
             string loggerAssemblyName;
             string loggerAssemblyFile;
@@ -3489,7 +3489,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             // split each <logger class>,<logger assembly>[,<option1>][,option2] parameters string into pieces
-            ArrayList loggerTypeSpec = QuotingUtilities.SplitUnquoted((string)loggerSpec[0], int.MaxValue, true /* keep empty splits */, false /* keep quotes */, out _, ',');
+            var loggerTypeSpec = QuotingUtilities.SplitUnquoted((string)loggerSpec[0], int.MaxValue, true /* keep empty splits */, false /* keep quotes */, out _, ',');
 
             ErrorUtilities.VerifyThrow(loggerTypeSpec.Count >= 1, "SplitUnquoted() must return at least one string");
 
