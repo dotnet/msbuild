@@ -102,12 +102,12 @@ namespace Microsoft.Build.CommandLine
         private static bool s_hasBuildStarted;
 
         /// <summary>
-        /// Event signalled when the build is complete.
+        /// Event signaled when the build is complete.
         /// </summary>
         private static readonly ManualResetEvent s_buildComplete = new ManualResetEvent(false);
 
         /// <summary>
-        /// Event signalled when the cancel method is complete.
+        /// Event signaled when the cancel method is complete.
         /// </summary>
         private static readonly ManualResetEvent s_cancelComplete = new ManualResetEvent(true);
 
@@ -211,29 +211,28 @@ namespace Microsoft.Build.CommandLine
 #endif
             )
         {
-            using (PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create())
-            {
-                if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
-                {
-                    DumpCounters(true /* initialize only */);
-                }
+            using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
-                // return 0 on success, non-zero on failure
-                int exitCode = ((s_initialized && Execute(
+            if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
+            {
+                DumpCounters(true /* initialize only */);
+            }
+
+            // return 0 on success, non-zero on failure
+            int exitCode = ((s_initialized && Execute(
 #if FEATURE_GET_COMMANDLINE
                 Environment.CommandLine
 #else
                 ConstructArrayArg(args)
 #endif
-                ) == ExitType.Success) ? 0 : 1);
+            ) == ExitType.Success) ? 0 : 1);
 
-                if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
-                {
-                    DumpCounters(false /* log to console */);
-                }
-
-                return exitCode;
+            if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
+            {
+                DumpCounters(false /* log to console */);
             }
+
+            return exitCode;
         }
 
 #if !FEATURE_GET_COMMANDLINE
@@ -263,17 +262,13 @@ namespace Microsoft.Build.CommandLine
         {
             if (!FileSystems.Default.FileExists(path))
             {
-                using (StreamWriter sw = File.CreateText(path))
-                {
-                    sw.WriteLine(elapsedTime);
-                }
+                using StreamWriter sw = File.CreateText(path);
+                sw.WriteLine(elapsedTime);
             }
             else
             {
-                using (StreamWriter sw = File.AppendText(path))
-                {
-                    sw.WriteLine(elapsedTime);
-                }
+                using StreamWriter sw = File.AppendText(path);
+                sw.WriteLine(elapsedTime);
             }
         }
 
@@ -318,19 +313,17 @@ namespace Microsoft.Build.CommandLine
             PerformanceCounterCategory processCategory = new PerformanceCounterCategory("Process");
             foreach (string instance in processCategory.GetInstanceNames())
             {
-                using (PerformanceCounter counter = new PerformanceCounter(".NET CLR Memory", "Process ID", instance, true))
+                using PerformanceCounter counter = new PerformanceCounter(".NET CLR Memory", "Process ID", instance, true);
+                try
                 {
-                    try
+                    if ((int)counter.RawValue == currentProcess.Id)
                     {
-                        if ((int)counter.RawValue == currentProcess.Id)
-                        {
-                            currentInstance = instance;
-                            break;
-                        }
+                        currentInstance = instance;
+                        break;
                     }
-                    catch (InvalidOperationException) // Instance 'WmiApSrv' does not exist in the specified Category. (??)
-                    {
-                    }
+                }
+                catch (InvalidOperationException) // Instance 'WmiApSrv' does not exist in the specified Category. (??)
+                {
                 }
             }
 
