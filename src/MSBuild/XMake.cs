@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 #if FEATURE_SYSTEM_CONFIGURATION
@@ -48,7 +47,7 @@ namespace Microsoft.Build.CommandLine
     /// This class implements the MSBuild.exe command-line application. It processes
     /// command-line arguments and invokes the build engine.
     /// </summary>
-    static public class MSBuildApp
+    public static class MSBuildApp
     {
         /// <summary>
         /// Enumeration of the various ways in which the MSBuild.exe application can exit.
@@ -95,7 +94,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// The object used to synchronize access to shared build state
         /// </summary>
-        private static Object s_buildLock = new Object();
+        private static object s_buildLock = new object();
 
         /// <summary>
         /// Whether a build has started.
@@ -260,7 +259,7 @@ namespace Microsoft.Build.CommandLine
         /// <comments>
         /// This is a non-supported feature to facilitate timing multiple runs
         /// </comments>
-        static private void AppendOutputFile(string path, Int64 elapsedTime)
+        static private void AppendOutputFile(string path, long elapsedTime)
         {
             if (!FileSystems.Default.FileExists(path))
             {
@@ -296,7 +295,7 @@ namespace Microsoft.Build.CommandLine
 
             if (!initializeOnly)
             {
-                Console.WriteLine("\n{0}{1}{0}", new String('=', 41 - ("Process".Length / 2)), "Process");
+                Console.WriteLine("\n{0}{1}{0}", new string('=', 41 - ("Process".Length / 2)), "Process");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Peak Working Set", currentProcess.PeakWorkingSet64, "bytes");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Peak Paged Memory", currentProcess.PeakPagedMemorySize64, "bytes"); // Not very useful one
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Peak Virtual Memory", currentProcess.PeakVirtualMemorySize64, "bytes"); // Not very useful one
@@ -304,7 +303,7 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Peak User Processor Time", currentProcess.UserProcessorTime.TotalMilliseconds, "ms");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Peak Total Processor Time", currentProcess.TotalProcessorTime.TotalMilliseconds, "ms");
 
-                Console.WriteLine("{0}{0}", new String('=', 41));
+                Console.WriteLine("{0}{0}", new string('=', 41));
             }
 
 #if FEATURE_PERFORMANCE_COUNTERS
@@ -366,7 +365,7 @@ namespace Microsoft.Build.CommandLine
 
             if (!initializeOnly)
             {
-                Console.WriteLine("\n{0}{1}{0}", new String('=', 41 - (category.CategoryName.Length / 2)), category.CategoryName);
+                Console.WriteLine("\n{0}{1}{0}", new string('=', 41 - (category.CategoryName.Length / 2)), category.CategoryName);
             }
 
             foreach (PerformanceCounter counter in counters)
@@ -376,7 +375,7 @@ namespace Microsoft.Build.CommandLine
 
             if (!initializeOnly)
             {
-                Console.WriteLine("{0}{0}", new String('=', 41));
+                Console.WriteLine("{0}{0}", new string('=', 41));
             }
         }
 
@@ -403,7 +402,7 @@ namespace Microsoft.Build.CommandLine
                     // Show decimal places if meaningful
                     string valueFormat = value < 10 ? "{0,20:N2}" : "{0,20:N0}";
 
-                    string valueString = String.Format(CultureInfo.CurrentCulture, valueFormat, value);
+                    string valueString = string.Format(CultureInfo.CurrentCulture, valueFormat, value);
 
                     Console.WriteLine("||{0,50}|{1}|{2,8}|", counter.CounterName, valueString, friendlyCounterType);
                 }
@@ -707,7 +706,7 @@ namespace Microsoft.Build.CommandLine
 
                     string timerOutputFilename = Environment.GetEnvironmentVariable("MSBUILDTIMEROUTPUTS");
 
-                    if (!String.IsNullOrEmpty(timerOutputFilename))
+                    if (!string.IsNullOrEmpty(timerOutputFilename))
                     {
                         AppendOutputFile(timerOutputFilename, (long)elapsedTime.TotalMilliseconds);
                     }
@@ -801,7 +800,7 @@ namespace Microsoft.Build.CommandLine
             catch (BuildAbortedException e)
             {
                 Console.WriteLine("MSBUILD : error " + e.ErrorCode + ": " + e.Message +
-                                (e.InnerException != null ? " " + e.InnerException.Message : String.Empty));
+                                (e.InnerException != null ? " " + e.InnerException.Message : string.Empty));
 
                 exitType = ExitType.Unexpected;
             }
@@ -904,7 +903,7 @@ namespace Microsoft.Build.CommandLine
             // So do our work asynchronously so we can return immediately.
             // We're already on a threadpool thread anyway.
             WaitCallback callback = new WaitCallback(
-            delegate (Object state)
+            delegate (object state)
             {
                 s_cancelComplete.Reset();
 
@@ -1144,7 +1143,7 @@ namespace Microsoft.Build.CommandLine
 
                     // By default we log synchronously to the console for compatibility with previous versions,
                     // but it is slightly slower
-                    if (!String.Equals(Environment.GetEnvironmentVariable("MSBUILDLOGASYNC"), "1", StringComparison.Ordinal))
+                    if (!string.Equals(Environment.GetEnvironmentVariable("MSBUILDLOGASYNC"), "1", StringComparison.Ordinal))
                     {
                         parameters.UseSynchronousLogging = true;
                     }
@@ -1176,13 +1175,13 @@ namespace Microsoft.Build.CommandLine
                         parameters.ProjectLoadSettings |= ProjectLoadSettings.ProfileEvaluation;
                     }
 
-                    if (!String.IsNullOrEmpty(toolsVersion))
+                    if (!string.IsNullOrEmpty(toolsVersion))
                     {
                         parameters.DefaultToolsVersion = toolsVersion;
                     }
 
                     string memoryUseLimit = Environment.GetEnvironmentVariable("MSBUILDMEMORYUSELIMIT");
-                    if (!String.IsNullOrEmpty(memoryUseLimit))
+                    if (!string.IsNullOrEmpty(memoryUseLimit))
                     {
                         parameters.MemoryUseLimit = Convert.ToInt32(memoryUseLimit, CultureInfo.InvariantCulture);
 
@@ -1214,7 +1213,7 @@ namespace Microsoft.Build.CommandLine
                         try
                         {
                             // Determine if the user specified /Target:Restore which means we should only execute a restore in the fancy way that /restore is executed
-                            bool restoreOnly = targets.Length == 1 && String.Equals(targets[0], MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase);
+                            bool restoreOnly = targets.Length == 1 && string.Equals(targets[0], MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase);
 
                             // ExecuteRestore below changes the current working directory and does not change back. Therefore, if we try to create the request after
                             // the restore call we end up with incorrectly normalized paths to the project. To avoid that, we are preparing the request before the first
@@ -1698,7 +1697,7 @@ namespace Microsoft.Build.CommandLine
                             if (switchParameterIndicator == -1)
                             {
                                 switchName = unquotedCommandLineArg.Substring(switchIndicatorsLength);
-                                switchParameters = String.Empty;
+                                switchParameters = string.Empty;
                             }
                             else
                             {
@@ -1720,10 +1719,10 @@ namespace Microsoft.Build.CommandLine
                         // We could create a new kind of switch with optional parameters, but it's a great deal of churn for this single case. 
                         // Note that if no "/m" or "/maxCpuCount" switch -- either with or without parameters -- is present, then we still default to 1 cpu
                         // for backwards compatibility.
-                        if (String.IsNullOrEmpty(switchParameters))
+                        if (string.IsNullOrEmpty(switchParameters))
                         {
-                            if (String.Equals(switchName, "m", StringComparison.OrdinalIgnoreCase) ||
-                                String.Equals(switchName, "maxcpucount", StringComparison.OrdinalIgnoreCase))
+                            if (string.Equals(switchName, "m", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(switchName, "maxcpucount", StringComparison.OrdinalIgnoreCase))
                             {
                                 int numberOfCpus = Environment.ProcessorCount;
 #if !MONO
@@ -1745,15 +1744,15 @@ namespace Microsoft.Build.CommandLine
 #endif
                                 switchParameters = ":" + numberOfCpus;
                             }
-                            else if (String.Equals(switchName, "bl", StringComparison.OrdinalIgnoreCase) ||
-                                String.Equals(switchName, "binarylogger", StringComparison.OrdinalIgnoreCase))
+                            else if (string.Equals(switchName, "bl", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(switchName, "binarylogger", StringComparison.OrdinalIgnoreCase))
                             {
                                 // we have to specify at least one parameter otherwise it's impossible to distinguish the situation
                                 // where /bl is not specified at all vs. where /bl is specified without the file name.
                                 switchParameters = ":msbuild.binlog";
                             }
-                            else if (String.Equals(switchName, "prof", StringComparison.OrdinalIgnoreCase) ||
-                                     String.Equals(switchName, "profileevaluation", StringComparison.OrdinalIgnoreCase))
+                            else if (string.Equals(switchName, "prof", StringComparison.OrdinalIgnoreCase) ||
+                                     string.Equals(switchName, "profileevaluation", StringComparison.OrdinalIgnoreCase))
                             {
                                 switchParameters = ":no-file";
                             }
@@ -1880,7 +1879,7 @@ namespace Microsoft.Build.CommandLine
 
                     foreach (string includedResponseFile in s_includedResponseFiles)
                     {
-                        if (String.Equals(responseFile, includedResponseFile, StringComparison.OrdinalIgnoreCase))
+                        if (string.Equals(responseFile, includedResponseFile, StringComparison.OrdinalIgnoreCase))
                         {
                             commandLineSwitches.SetParameterError("RepeatedResponseFileError", unquotedCommandLineArg);
                             isRepeatedResponseFile = true;
@@ -2209,10 +2208,10 @@ namespace Microsoft.Build.CommandLine
                         // gather any switches from the first Directory.Build.rsp found in the project directory or above
                         string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
 
-                        bool found = !String.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile);
+                        bool found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile);
 
                         // Don't look for more response files if it's only in the same place we already looked (next to the exe)
-                        if (!String.Equals(projectDirectory, s_exePath, StringComparison.OrdinalIgnoreCase))
+                        if (!string.Equals(projectDirectory, s_exePath, StringComparison.OrdinalIgnoreCase))
                         {
                             // this combines any found, with higher precedence, with the switches from the original auto response file switches
                             found |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile);
@@ -2376,7 +2375,7 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-            ErrorUtilities.VerifyThrow(!invokeBuild || !String.IsNullOrEmpty(projectFile), "We should have a project file if we're going to build.");
+            ErrorUtilities.VerifyThrow(!invokeBuild || !string.IsNullOrEmpty(projectFile), "We should have a project file if we're going to build.");
 
             return invokeBuild;
         }
@@ -2503,7 +2502,7 @@ namespace Microsoft.Build.CommandLine
                     // so that all warnings are treated errors
                     warningsAsErrors.Clear();
                 }
-                else if (!String.IsNullOrWhiteSpace(code))
+                else if (!string.IsNullOrWhiteSpace(code))
                 {
                     warningsAsErrors.Add(code.Trim());
                 }
@@ -2525,7 +2524,7 @@ namespace Microsoft.Build.CommandLine
 
             foreach (string code in parameters
                 .SelectMany(parameter => parameter?.Split(s_commaSemicolon, StringSplitOptions.RemoveEmptyEntries))
-                .Where(i => !String.IsNullOrWhiteSpace(i))
+                .Where(i => !string.IsNullOrWhiteSpace(i))
                 .Select(i => i.Trim()))
             {
                 warningsAsMessages.Add(code);
@@ -2822,7 +2821,7 @@ namespace Microsoft.Build.CommandLine
                     string solutionName = Path.GetFileNameWithoutExtension(actualSolutionFiles[0]);
                     string projectName = Path.GetFileNameWithoutExtension(actualProjectFiles[0]);
                     // Compare the names and error if they are not identical
-                    InitializationException.VerifyThrow(String.Equals(solutionName, projectName, StringComparison.OrdinalIgnoreCase), projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
+                    InitializationException.VerifyThrow(string.Equals(solutionName, projectName, StringComparison.OrdinalIgnoreCase), projectDirectory == null ? "AmbiguousProjectError" : "AmbiguousProjectDirectoryError", null, projectDirectory);
                     projectFile = actualSolutionFiles[0];
                 }
                 // If there is more than one solution file in the current directory we have no idea which one to use
@@ -2843,17 +2842,17 @@ namespace Microsoft.Build.CommandLine
                         string secondPotentialProjectExtension = Path.GetExtension(actualProjectFiles[1]);
 
                         // If the two projects have the same extension we can't decide which one to pick
-                        if (!String.Equals(firstPotentialProjectExtension, secondPotentialProjectExtension, StringComparison.OrdinalIgnoreCase))
+                        if (!string.Equals(firstPotentialProjectExtension, secondPotentialProjectExtension, StringComparison.OrdinalIgnoreCase))
                         {
                             // Check to see if the first project is the proj, if it is use it
-                            if (String.Equals(firstPotentialProjectExtension, ".proj", StringComparison.OrdinalIgnoreCase))
+                            if (string.Equals(firstPotentialProjectExtension, ".proj", StringComparison.OrdinalIgnoreCase))
                             {
                                 projectFile = actualProjectFiles[0];
                                 // We have made a decision
                                 isAmbiguousProject = false;
                             }
                             // If the first project is not the proj check to see if the second one is the proj, if so use it
-                            else if (String.Equals(secondPotentialProjectExtension, ".proj", StringComparison.OrdinalIgnoreCase))
+                            else if (string.Equals(secondPotentialProjectExtension, ".proj", StringComparison.OrdinalIgnoreCase))
                             {
                                 projectFile = actualProjectFiles[1];
                                 // We have made a decision
@@ -2895,7 +2894,7 @@ namespace Microsoft.Build.CommandLine
                     InitializationException.VerifyThrow(extension.IndexOfAny(Path.GetInvalidPathChars()) == -1, "InvalidExtensionToIgnore", extension, null, false);
 
                     // There were characters before the extension.
-                    InitializationException.VerifyThrow(String.Equals(extension, Path.GetExtension(extension), StringComparison.OrdinalIgnoreCase), "InvalidExtensionToIgnore", extension, null, false);
+                    InitializationException.VerifyThrow(string.Equals(extension, Path.GetExtension(extension), StringComparison.OrdinalIgnoreCase), "InvalidExtensionToIgnore", extension, null, false);
 
                     // Make sure that no wild cards are in the string because for now we dont allow wild card extensions.
                     InitializationException.VerifyThrow(extension.IndexOfAny(s_wildcards) == -1, "InvalidExtensionToIgnore", extension, null, false);
@@ -3083,9 +3082,9 @@ namespace Microsoft.Build.CommandLine
             }
 
             // Join the logger parameters into one string seperated by semicolons
-            string result = anyPrefixingParameter ?? String.Empty;
+            string result = anyPrefixingParameter ?? string.Empty;
 
-            result += String.Join(";", parametersToAggregate);
+            result += string.Join(";", parametersToAggregate);
 
             return result;
         }
@@ -3221,7 +3220,7 @@ namespace Microsoft.Build.CommandLine
             string verbosityValue = ExtractAnyParameterValue(verbosityParameter);
 
             LoggerVerbosity effectiveVerbosity = defaultVerbosity;
-            if (!String.IsNullOrEmpty(verbosityValue))
+            if (!string.IsNullOrEmpty(verbosityValue))
             {
                 effectiveVerbosity = ProcessVerbositySwitch(verbosityValue);
             }
@@ -3266,7 +3265,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     // If the path is not an absolute path set the path to the current directory of the exe combined with the relative path
                     // If the string is empty then send it through as the distributed file logger WILL deal with EMPTY logfile paths
-                    if (!String.IsNullOrEmpty(logFileName) && !Path.IsPathRooted(logFileName))
+                    if (!string.IsNullOrEmpty(logFileName) && !Path.IsPathRooted(logFileName))
                     {
                         fileParameters = fileParameters.Replace(logFileParameter, "logFile=" + Path.Combine(Directory.GetCurrentDirectory(), logFileName));
                     }
@@ -3276,11 +3275,11 @@ namespace Microsoft.Build.CommandLine
                     throw new LoggerException(e.Message, e);
                 }
 
-                if (String.IsNullOrEmpty(logFileName))
+                if (string.IsNullOrEmpty(logFileName))
                 {
                     // If the string is not empty and it does not end in a ;, we need to add a ; to seperate what is in the parameter from the logfile
                     // if the string is empty, no ; is needed because logfile is the only parameter which will be passed in
-                    if (!String.IsNullOrEmpty(fileParameters) && !fileParameters.EndsWith(";", StringComparison.OrdinalIgnoreCase))
+                    if (!string.IsNullOrEmpty(fileParameters) && !fileParameters.EndsWith(";", StringComparison.OrdinalIgnoreCase))
                     {
                         fileParameters += ";";
                     }
@@ -3314,7 +3313,7 @@ namespace Microsoft.Build.CommandLine
                 foreach (string name in parameterNames)
                 {
                     bool found = nameValue.StartsWith(name + "=", StringComparison.OrdinalIgnoreCase) ||   // Parameters with value, such as "logfile=foo.txt"
-                                 String.Equals(name, nameValue, StringComparison.OrdinalIgnoreCase);       // Parameters without value, such as "append"
+                                 string.Equals(name, nameValue, StringComparison.OrdinalIgnoreCase);       // Parameters without value, such as "append"
 
                     if (found)
                     {
@@ -3334,7 +3333,7 @@ namespace Microsoft.Build.CommandLine
         {
             string value = null;
 
-            if (!String.IsNullOrEmpty(parameter))
+            if (!string.IsNullOrEmpty(parameter))
             {
                 string[] nameValuePair = parameter.Split(MSBuildConstants.EqualsChar);
 
@@ -3356,28 +3355,28 @@ namespace Microsoft.Build.CommandLine
         {
             LoggerVerbosity verbosity = LoggerVerbosity.Normal;
 
-            if (String.Equals(value, "q", StringComparison.OrdinalIgnoreCase) ||
-                String.Equals(value, "quiet", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(value, "q", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(value, "quiet", StringComparison.OrdinalIgnoreCase))
             {
                 verbosity = LoggerVerbosity.Quiet;
             }
-            else if (String.Equals(value, "m", StringComparison.OrdinalIgnoreCase) ||
-                     String.Equals(value, "minimal", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(value, "m", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(value, "minimal", StringComparison.OrdinalIgnoreCase))
             {
                 verbosity = LoggerVerbosity.Minimal;
             }
-            else if (String.Equals(value, "n", StringComparison.OrdinalIgnoreCase) ||
-                     String.Equals(value, "normal", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(value, "n", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(value, "normal", StringComparison.OrdinalIgnoreCase))
             {
                 verbosity = LoggerVerbosity.Normal;
             }
-            else if (String.Equals(value, "d", StringComparison.OrdinalIgnoreCase) ||
-                     String.Equals(value, "detailed", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(value, "d", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(value, "detailed", StringComparison.OrdinalIgnoreCase))
             {
                 verbosity = LoggerVerbosity.Detailed;
             }
-            else if (String.Equals(value, "diag", StringComparison.OrdinalIgnoreCase) ||
-                     String.Equals(value, "diagnostic", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(value, "diag", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(value, "diagnostic", StringComparison.OrdinalIgnoreCase))
             {
                 verbosity = LoggerVerbosity.Diagnostic;
             }
@@ -3503,7 +3502,7 @@ namespace Microsoft.Build.CommandLine
             }
             else
             {
-                loggerClassName = String.Empty;
+                loggerClassName = string.Empty;
                 loggerAssemblySpec = QuotingUtilities.Unquote(loggerTypeSpec[0]);
             }
 
@@ -3525,7 +3524,7 @@ namespace Microsoft.Build.CommandLine
             // DDB Bug msbuild.exe -Logger:FileLogger,Microsoft.Build.Engine fails due to moved engine file.
             // Only add strong naming if the assembly is a non-strong named 'Microsoft.Build.Engine' (i.e, no additional characteristics)
             // Concat full Strong Assembly to match v4.0
-            if (String.Equals(loggerAssemblySpec, "Microsoft.Build.Engine", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(loggerAssemblySpec, "Microsoft.Build.Engine", StringComparison.OrdinalIgnoreCase))
             {
                 loggerAssemblySpec = "Microsoft.Build.Engine,Version=4.0.0.0,Culture=neutral,PublicKeyToken=b03f5f7f11d50a3a";
             }
@@ -3701,7 +3700,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void ThrowInvalidToolsVersionInitializationException(IEnumerable<Toolset> toolsets, string toolsVersion)
         {
-            string toolsVersionList = String.Empty;
+            string toolsVersionList = string.Empty;
             foreach (Toolset toolset in toolsets)
             {
                 toolsVersionList += "\"" + toolset.ToolsVersion + "\", ";
