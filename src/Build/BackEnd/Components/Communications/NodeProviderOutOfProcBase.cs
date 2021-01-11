@@ -609,8 +609,20 @@ namespace Microsoft.Build.BackEnd
 
             /// <summary>
             /// A buffer typically big enough to handle a packet body.
+            /// We use this as a convenient way to manage and cache a byte[] that's resized
+            /// automatically to fit our payload.
             /// </summary>
-            private byte[] _smallReadBuffer;
+            private MemoryStream _readBufferMemoryStream;
+
+            /// <summary>
+            /// A buffer for writing packets.
+            /// </summary>
+            private MemoryStream _writeBufferMemoryStream;
+
+            /// <summary>
+            /// A BinaryWriter to assist writing bytes to the buffer.
+            /// </summary>
+            private BinaryWriter _writeBufferStreamWriter;
 
             /// <summary>
             /// Event indicating the node has terminated.
@@ -640,7 +652,11 @@ namespace Microsoft.Build.BackEnd
                 _serverToClientStream = nodePipe;
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
-                _smallReadBuffer = new byte[1000]; // 1000 was just an average seen on one profile run.
+
+                // packets get this large so avoid reallocations
+                _readBufferMemoryStream = new MemoryStream(MaxPacketWriteSize);
+                _writeBufferMemoryStream = new MemoryStream(MaxPacketWriteSize);
+                _writeBufferStreamWriter = new BinaryWriter(_writeBufferMemoryStream);
                 _nodeTerminated = new ManualResetEvent(false);
                 _terminateDelegate = terminateDelegate;
                 _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
@@ -685,16 +701,8 @@ namespace Microsoft.Build.BackEnd
                     NodePacketType packetType = (NodePacketType)_headerByte[0];
                     int packetLength = BitConverter.ToInt32(_headerByte, 1);
 
-                    byte[] packetData;
-                    if (packetLength < _smallReadBuffer.Length)
-                    {
-                        packetData = _smallReadBuffer;
-                    }
-                    else
-                    {
-                        // Preallocated buffer is not large enough to hold the body. Allocate now, but don't hold it forever.
-                        packetData = new byte[packetLength];
-                    }
+                    _readBufferMemoryStream.SetLength(packetLength);
+                    byte[] packetData = _readBufferMemoryStream.GetBuffer();
 
                     try
                     {
@@ -733,26 +741,30 @@ namespace Microsoft.Build.BackEnd
             /// <param name="packet">The packet to send.</param>
             public void SendData(INodePacket packet)
             {
-                MemoryStream writeStream = new MemoryStream();
-                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
+                // clear the buffer but keep the underlying capacity to avoid reallocations
+                _writeBufferMemoryStream.SetLength(0);
+
+                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(_writeBufferMemoryStream);
                 try
                 {
-                    writeStream.WriteByte((byte)packet.Type);
+                    _writeBufferMemoryStream.WriteByte((byte)packet.Type);
 
                     // Pad for the packet length
-                    writeStream.Write(BitConverter.GetBytes((int)0), 0, 4);
+                    _writeBufferStreamWriter.Write(0);
                     packet.Translate(writeTranslator);
 
+                    int writeStreamLength = (int)_writeBufferMemoryStream.Position;
+
                     // Now plug in the real packet length
-                    writeStream.Position = 1;
-                    writeStream.Write(BitConverter.GetBytes((int)writeStream.Length - 5), 0, 4);
+                    _writeBufferMemoryStream.Position = 1;
+                    _writeBufferStreamWriter.Write(writeStreamLength - 5);
 
-                    byte[] writeStreamBuffer = writeStream.GetBuffer();
+                    byte[] writeStreamBuffer = _writeBufferMemoryStream.GetBuffer();
 
-                    for (int i = 0; i < writeStream.Length; i += MaxPacketWriteSize)
+                    for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
                     {
-                        int lengthToWrite = Math.Min((int)writeStream.Length - i, MaxPacketWriteSize);
-                        if ((int)writeStream.Length - i <= MaxPacketWriteSize)
+                        int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
+                        if (writeStreamLength - i <= MaxPacketWriteSize)
                         {
                             // We are done, write the last bit asynchronously.  This is actually the general case for
                             // most packets in the build, and the asynchronous behavior here is desirable.
@@ -770,7 +782,7 @@ namespace Microsoft.Build.BackEnd
                             // might want to send data immediately afterward, and that could result in overlapping writes
                             // to the pipe on different threads.
 #if FEATURE_APM
-                            IAsyncResult result = _serverToClientStream.BeginWrite(writeStream.GetBuffer(), i, lengthToWrite, null, null);
+                            IAsyncResult result = _serverToClientStream.BeginWrite(writeStreamBuffer, i, lengthToWrite, null, null);
                             _serverToClientStream.EndWrite(result);
 #else
                             _serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
@@ -887,16 +899,10 @@ namespace Microsoft.Build.BackEnd
                 int packetLength = BitConverter.ToInt32(_headerByte, 1);
                 MSBuildEventSource.Log.PacketReadSize(packetLength);
 
-                byte[] packetData;
-                if (packetLength < _smallReadBuffer.Length)
-                {
-                    packetData = _smallReadBuffer;
-                }
-                else
-                {
-                    // Preallocated buffer is not large enough to hold the body. Allocate now, but don't hold it forever.
-                    packetData = new byte[packetLength];
-                }
+                // Ensures the buffer is at least this length.
+                // It avoids reallocations if the buffer is already large enough.
+                _readBufferMemoryStream.SetLength(packetLength);
+                byte[] packetData = _readBufferMemoryStream.GetBuffer();
 
                 _clientToServerStream.BeginRead(packetData, 0, packetLength, BodyReadComplete, new Tuple<byte[], int>(packetData, packetLength));
             }
