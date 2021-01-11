@@ -2792,6 +2792,9 @@
   <data name="Unzip.DidNotUnzipBecauseOfFileMatch">
     <value>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</value>
   </data>
+  <data name="Unzip.DidNotUnzipBecauseOfFilter">
+    <value>Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</value>
+  </data>
   <data name="Unzip.FileComment">
     <value>Unzipping file "{0}" to "{1}".</value>
   </data>

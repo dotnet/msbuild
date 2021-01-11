@@ -2530,6 +2530,11 @@
         <target state="new">Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFilter">
+        <source>Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</source>
+        <target state="new">Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
         <target state="new">MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</target>

@@ -2480,6 +2480,11 @@
         <target state="translated">Nie wykonano rozpakowywania z pliku „{0}” do pliku „{1}”, ponieważ parametr „{2}” w projekcie został ustawiony na wartość „{3}”, a rozmiary plików i sygnatury czasowe pasują do siebie.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFilter">
+        <source>Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</source>
+        <target state="new">Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
         <target state="translated">MSB3931: Nie można rozpakować do katalogu „{0}”, ponieważ nie można go utworzyć. {1}</target>

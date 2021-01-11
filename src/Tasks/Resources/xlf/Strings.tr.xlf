@@ -2480,6 +2480,11 @@
         <target state="translated">Projede "{2}" parametresi "{3}" olarak ayarlandığından ve dosya boyutlarıyla zaman damgaları eşleştiğinden "{0}" dosyasını "{1}" dosyasına çıkarma işlemi gerçekleştirilmedi.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFilter">
+        <source>Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</source>
+        <target state="new">Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
         <target state="translated">MSB3931: "{0}" dizini oluşturulamadığından bu dizine çıkarılamadı. {1}</target>

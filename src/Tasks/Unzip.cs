@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -48,6 +49,16 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Required]
         public ITaskItem[] SourceFiles { get; set; }
+
+        /// <summary>
+        /// Gets or sets a regular expression that will be used to include files to be unzipped.
+        /// </summary>
+        public string Include { get; set; }
+
+        /// <summary>
+        /// Gets or sets a regular expression that will be used to exclude files to be unzipped.
+        /// </summary>
+        public string Exclude { get; set; }
 
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
@@ -129,6 +140,12 @@ namespace Microsoft.Build.Tasks
         {
             foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
             {
+                if (ShouldSkipEntry(zipArchiveEntry))
+                {
+                    Log.LogMessageFromResources(MessageImportance.Low, "Unzip.DidNotUnzipBecauseOfFilter", zipArchiveEntry.FullName);
+                    continue;
+                }
+
                 FileInfo destinationPath = new FileInfo(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
 
                 // Zip archives can have directory entries listed explicitly.
@@ -197,6 +214,28 @@ namespace Microsoft.Build.Tasks
                     Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotExtractFile", zipArchiveEntry.FullName, destinationPath.FullName, e.Message);
                 }
             }
+        }
+
+        /// <summary>
+        /// Determines whether or not a file should be skipped when unzipping by filtering.
+        /// </summary>
+        /// <param name="zipArchiveEntry">The <see cref="ZipArchiveEntry"/> object containing information about the file in the zip archive.</param>
+        /// <returns><code>true</code> if the file should be skipped, otherwise <code>false</code>.</returns>
+        private bool ShouldSkipEntry(ZipArchiveEntry zipArchiveEntry)
+        {
+            bool result = false;
+
+            if (!string.IsNullOrWhiteSpace(Include))
+            {
+                result |= !Regex.IsMatch(zipArchiveEntry.FullName, Include);
+            }
+
+            if (!string.IsNullOrWhiteSpace(Exclude))
+            {
+                result |= Regex.IsMatch(zipArchiveEntry.FullName, Exclude);
+            }
+
+            return result;
         }
 
         /// <summary>

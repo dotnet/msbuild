@@ -2480,6 +2480,11 @@
         <target state="translated">"{2}" 매개 변수가 프로젝트에 "{3}"(으)로 설정되었고 파일 크기와 타임스탬프가 일치하기 때문에 "{0}" 파일에서 "{1}" 파일로 압축을 풀 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFilter">
+        <source>Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</source>
+        <target state="new">Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
         <target state="translated">MSB3931: "{0}" 디렉터리를 생성할 수 없기 때문에 이 디렉터리에 압축을 풀지 못했습니다.  {1}</target>

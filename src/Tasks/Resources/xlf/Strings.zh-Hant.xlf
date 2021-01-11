@@ -2480,6 +2480,11 @@
         <target state="translated">並未從檔案 "{0}" 解壓縮到檔案 "{1}"，因為在專案中的 "{2}" 參數原先設定為 "{3}"，且檔案的大小與時間戳記相符。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFilter">
+        <source>Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</source>
+        <target state="new">Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
         <target state="translated">MSB3931: 因為無法建立目錄 "{0}"，所以無法解壓縮至該目錄。{1}</target>

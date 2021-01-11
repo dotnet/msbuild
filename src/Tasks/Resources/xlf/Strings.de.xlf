@@ -2480,6 +2480,11 @@
         <target state="translated">Die Datei "{0}" wurde nicht in die Datei "{1}" entzippt, weil der Parameter "{2}" im Projekt auf "{3}" festgelegt war und die Größen und Zeitstempel der Dateien übereinstimmen.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFilter">
+        <source>Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</source>
+        <target state="new">Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
         <target state="translated">MSB3931: Fehler beim Entzippen in das Verzeichnis "{0}", weil dieses nicht erstellt werden konnte.  {1}</target>

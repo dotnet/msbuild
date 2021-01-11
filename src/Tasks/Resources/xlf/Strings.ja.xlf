@@ -2480,6 +2480,11 @@
         <target state="translated">"{2}" パラメーターがプロジェクトで "{3}" に設定されているため、またファイルのサイズとタイムスタンプが一致するため、ファイル "{0}" からファイル "{1}" に解凍しませんでした。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFilter">
+        <source>Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</source>
+        <target state="new">Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
         <target state="translated">MSB3931: ディレクトリ "{0}" への解凍は、そのディレクトリを作成できなかったため、失敗しました。{1}</target>

@@ -1217,6 +1217,8 @@ namespace Microsoft.Build.Tasks
         public Unzip() { }
         [Microsoft.Build.Framework.RequiredAttribute]
         public Microsoft.Build.Framework.ITaskItem DestinationFolder { get { throw null; } set { } }
+        public string Exclude { get { throw null; } set { } }
+        public string Include { get { throw null; } set { } }
         public bool OverwriteReadOnlyFiles { get { throw null; } set { } }
         public bool SkipUnchangedFiles { get { throw null; } set { } }
         [Microsoft.Build.Framework.RequiredAttribute]

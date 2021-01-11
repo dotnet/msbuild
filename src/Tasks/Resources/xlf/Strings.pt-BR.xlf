@@ -2480,6 +2480,11 @@
         <target state="translated">Não foi possível descompactar o arquivo "{0}" para o arquivo "{1}", pois o parâmetro "{2}" foi definido como "{3}" no projeto, e os tamanhos de arquivos e os carimbos de data/hora não correspondem.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFilter">
+        <source>Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</source>
+        <target state="new">Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
         <target state="translated">MSB3931: Falha ao descompactar no diretório "{0}" porque ele não pôde ser criado. {1}</target>
