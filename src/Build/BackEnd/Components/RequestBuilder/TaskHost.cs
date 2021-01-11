@@ -433,7 +433,6 @@ namespace Microsoft.Build.BackEnd
                                 e.HelpKeyword,
                                 e.SenderName
                             );
-
                     warningEvent.BuildEventContext = _taskLoggingContext.BuildEventContext;
                     _taskLoggingContext.LoggingService.LogBuildEvent(warningEvent);
 

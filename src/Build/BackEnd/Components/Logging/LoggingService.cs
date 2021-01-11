@@ -1008,7 +1008,26 @@ namespace Microsoft.Build.BackEnd.Logging
                 BuildErrorEventArgs errorEvent = null;
                 BuildMessageEventArgs messageEvent = null;
 
-                if ((warningEvent = buildEvent as BuildWarningEventArgs) != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+                bool shouldLogWarningAsError = WarningsAsErrors != null && (warningEvent = buildEvent as BuildWarningEventArgs) != null && WarningsAsErrors.Contains(warningEvent.Code);
+
+                if(shouldLogWarningAsError)
+                {
+                    errorEvent = new BuildErrorEventArgs(warningEvent.Subcategory,
+                                     warningEvent.Code,
+                                     warningEvent.File,
+                                     warningEvent.LineNumber,
+                                     warningEvent.ColumnNumber,
+                                     warningEvent.EndLineNumber,
+                                     warningEvent.EndColumnNumber,
+                                     warningEvent.Message,
+                                     warningEvent.HelpKeyword,
+                                     warningEvent.SenderName)
+                    {
+                        BuildEventContext = warningEvent.BuildEventContext
+                    };
+                }
+                
+                if (!shouldLogWarningAsError && (warningEvent = buildEvent as BuildWarningEventArgs) != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
                 {
                     warningEvent.ProjectFile = GetAndVerifyProjectFileFromContext(warningEvent.BuildEventContext);
                 }
@@ -1037,7 +1056,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 else
                 {
                     // Log all events if OnlyLogCriticalEvents is false
-                    ProcessLoggingEvent(buildEvent);
+                     ProcessLoggingEvent(buildEvent);
                 }
             }
         }
