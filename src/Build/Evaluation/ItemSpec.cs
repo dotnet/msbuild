@@ -49,6 +49,9 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
+            // Dictionary of <metadata to match on, values of those metadata>
+            private Dictionary<IEnumerable<string>, HashSet<IEnumerable<string>>> ReferencedItemsByMetadata { get; set; }
+
             protected override IMSBuildGlob MsBuildGlob
             {
                 get
@@ -87,8 +90,20 @@ namespace Microsoft.Build.Evaluation
 
             public override bool IsMatchOnMetadata(IItem item, IEnumerable<string> metadata, MatchOnMetadataOptions options)
             {
-                return ReferencedItems.Any(referencedItem =>
-                        metadata.All(m => !item.GetMetadataValue(m).Equals(string.Empty) && MetadataComparer(options, item.GetMetadataValue(m), referencedItem.Item.GetMetadataValue(m))));
+                IEnumerable<string> metadataValues = metadata.Select(m => item.GetMetadataValue(m));
+                if (ReferencedItemsByMetadata == null)
+                {
+                    ReferencedItemsByMetadata = new Dictionary<IEnumerable<string>, HashSet<IEnumerable<string>>>();
+                }
+                if (!ReferencedItemsByMetadata.TryGetValue(metadata, out HashSet<IEnumerable<string>> metadataMatcher))
+                {
+                    ReferencedItemsByMetadata.Add(metadata, new HashSet<IEnumerable<string>>());
+                    foreach (ReferencedItem i in ReferencedItems)
+                    {
+                        ReferencedItemsByMetadata[metadata].Add(metadata.Select(m => i.Item.GetMetadataValue(m)));
+                    }
+                }
+                return metadataMatcher.Contains(metadataValues);
             }
 
             private bool MetadataComparer(MatchOnMetadataOptions options, string itemMetadata, string referencedItemMetadata)
