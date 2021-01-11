@@ -125,12 +125,6 @@ namespace Microsoft.DotNet.Cli
 
             command.AddArgument(SlnOrProjectArgument);
 
-            BlameCrashDumpArgument.SetDefaultValue("full");
-            BlameCrashDumpOption.Argument = BlameCrashDumpArgument;
-
-            BlameHangDumpArgument.SetDefaultValue("full");
-            BlameHangDumpOption.Argument = BlameHangDumpArgument;
-
             command.AddOption(SettingsOption);
             command.AddOption(ListTestsOption);
             command.AddOption(EnvOption);
