@@ -23,6 +23,15 @@ namespace Microsoft.DotNet.Cli
 
         private static string GetVSTestExePath()
         {
+            // Provide custom path to vstest.console.dll or exe to be able to test it against any version of 
+            // vstest.console. This is useful especially for our integration tests.
+            // This is equivalent to specifying -p:VSTestConsolePath when using dotnet test with csproj.
+            string vsTestConsolePath = Environment.GetEnvironmentVariable("VSTEST_CONSOLE_PATH");
+            if (!string.IsNullOrWhiteSpace(vsTestConsolePath))
+            {
+                return vsTestConsolePath;
+            }
+
             return Path.Combine(AppContext.BaseDirectory, VstestAppName);
         }
 
