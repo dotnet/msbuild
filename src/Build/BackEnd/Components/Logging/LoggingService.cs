@@ -1605,6 +1605,39 @@ namespace Microsoft.Build.BackEnd.Logging
 
             return false;
         }
+
+        public bool ShouldTreatWarningAsError(string code, BuildEventContext context)
+        {
+            // This only applies if the user specified /warnaserror from the command-line or added an empty set through the object model
+            //
+            if (WarningsAsErrors != null)
+            {
+                // Global warnings as errors apply to all projects.  If the list is empty or contains the code, the warning should be treated as an error
+                //
+                if (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(code))
+                {
+                    return true;
+                }
+            }
+
+            // This only applies if the user specified <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors or <MSBuildWarningsAsErrors />
+            // and there is a valid ProjectInstanceId for the warning.
+            //
+            if (_warningsAsErrorsByProject != null && context != null && context.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
+            {
+                // Attempt to get the list of warnings to treat as errors for the current project
+                //
+                if (_warningsAsErrorsByProject.TryGetValue(GetWarningsAsErrorOrMessageKey(context), out ISet<string> codesByProject))
+                {
+                    // We create an empty set if all warnings should be treated as errors so that should be checked first.
+                    // If the set is not empty, check the specific code.
+                    //
+                    return codesByProject != null && (codesByProject.Count == 0 || codesByProject.Contains(code));
+                }
+            }
+            
+            return false;
+        }
         #endregion
         #endregion
     }

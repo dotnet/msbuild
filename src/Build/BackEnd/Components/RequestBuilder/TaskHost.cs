@@ -454,7 +454,7 @@ namespace Microsoft.Build.BackEnd
         /// Thread safe.
         /// </summary>
         /// <param name="e">The event args</param>
-        public void LogWarningEvent(Microsoft.Build.Framework.BuildWarningEventArgs e)
+        public void LogWarningEvent(BuildWarningEventArgs e)
         {
             lock (_callbackMonitor)
             {
@@ -486,7 +486,30 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 e.BuildEventContext = _taskLoggingContext.BuildEventContext;
-                _taskLoggingContext.LoggingService.LogBuildEvent(e);
+
+                if (_taskLoggingContext.LoggingService.ShouldTreatWarningAsError(e.Code, e.BuildEventContext))
+                {
+                    BuildErrorEventArgs errorEvent = new BuildErrorEventArgs
+                            (
+                                e.Subcategory,
+                                e.Code,
+                                e.File,
+                                e.LineNumber,
+                                e.ColumnNumber,
+                                e.EndLineNumber,
+                                e.EndColumnNumber,
+                                e.Message,
+                                e.HelpKeyword,
+                                e.SenderName
+                            );
+                    errorEvent.BuildEventContext = e.BuildEventContext;
+                    _taskLoggingContext.HasLoggedErrors = true;
+                    _taskLoggingContext.LoggingService.LogBuildEvent(errorEvent);
+                }
+                else
+                {
+                    _taskLoggingContext.LoggingService.LogBuildEvent(e);
+                }
             }
         }
 

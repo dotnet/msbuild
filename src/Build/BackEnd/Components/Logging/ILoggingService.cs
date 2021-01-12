@@ -350,6 +350,14 @@ namespace Microsoft.Build.BackEnd.Logging
 
         #region Log warnings
         /// <summary>
+        /// Determines if the specified warning code should be treated as an error.
+        /// </summary>
+        /// <param name="code">A <see cref="BuildWarningEventArgs"/> that specifies the warning.</param>
+        /// <param name="context">The event context for where the warning occurred</param>
+        /// <returns><code>true</code> if the warning should be treated as an error, otherwise <code>false</code>.</returns>
+        bool ShouldTreatWarningAsError(string code, BuildEventContext context);
+
+        /// <summary>
         /// Log a warning based on an exception
         /// </summary>
         /// <param name="buildEventContext">The event context for where the warning occurred</param>
