@@ -3,6 +3,8 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -14,6 +16,7 @@ namespace Microsoft.Build.Evaluation
         {
             readonly ImmutableList<string> _matchOnMetadata;
             readonly MatchOnMetadataOptions _matchOnMetadataOptions;
+            private MetadataSet metadataSet;
 
             public RemoveOperation(RemoveOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
                 : base(builder, lazyEvaluator)
@@ -55,11 +58,28 @@ namespace Microsoft.Build.Evaluation
                 var items = ImmutableHashSet.CreateBuilder<I>();
                 foreach (ItemData item in listBuilder)
                 {
-                    if (_matchOnMetadata.IsEmpty ? _itemSpec.MatchesItem(item.Item) : _itemSpec.MatchesItemOnMetadata(item.Item, _matchOnMetadata, _matchOnMetadataOptions))
+                    if (_matchOnMetadata.IsEmpty ? _itemSpec.MatchesItem(item.Item) : MatchesItemOnMetadata(item.Item))
                         items.Add(item.Item);
                 }
 
                 return items.ToImmutableList();
+            }
+
+            private bool MatchesItemOnMetadata(I item)
+            {
+                if (metadataSet == null)
+                {
+                    metadataSet = new MetadataSet();
+                    foreach (ItemSpec<P, I>.ItemExpressionFragment frag in _itemSpec.Fragments)
+                    {
+                        foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)
+                        {
+                            metadataSet.Add(_matchOnMetadata.Select(m => (referencedItem.Item.GetMetadata(m) as ProjectMetadata).EvaluatedValue));
+                        }
+                    }
+                }
+
+                return metadataSet.Contains(_matchOnMetadata.Select(m => (item.GetMetadata(m) as ProjectMetadata).EvaluatedValue));
             }
 
             protected override void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder)
@@ -97,6 +117,57 @@ namespace Microsoft.Build.Evaluation
 
             public RemoveOperationBuilder(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {
+            }
+        }
+    }
+
+    internal class MetadataSet
+    {
+        private Dictionary<string, MetadataSet> children;
+
+        internal MetadataSet()
+        {
+            children = new Dictionary<string, MetadataSet>();
+        }
+
+        // Relies on IEnumerable returning the metadata in a reasonable order. Reasonable?
+        internal void Add(IEnumerable<string> metadata)
+        {
+            MetadataSet current = this;
+            foreach (string s in metadata)
+            {
+                if (current.children.TryGetValue(s, out MetadataSet child))
+                {
+                    current = child;
+                }
+                else
+                {
+                    current.children.Add(s, new MetadataSet());
+                    current = current.children[s];
+                }
+            }
+        }
+
+        internal bool Contains(IEnumerable<string> metadata)
+        {
+            List<string> metadataList = metadata.ToList();
+            return this.Contains(metadataList, 0);
+        }
+
+        private bool Contains(List<string> metadata, int index)
+        {
+            if (index == metadata.Count)
+            {
+                return true;
+            }
+            else if (String.IsNullOrEmpty(metadata[index]))
+            {
+                return children.Any(kvp => !String.IsNullOrEmpty(kvp.Key) && kvp.Value.Contains(metadata, index + 1));
+            }
+            else
+            {
+                return (children.TryGetValue(metadata[index], out MetadataSet child) && child.Contains(metadata, index + 1)) ||
+                    (children.TryGetValue(string.Empty, out MetadataSet emptyChild) && emptyChild.Contains(metadata, index + 1));
             }
         }
     }
