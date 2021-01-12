@@ -10,11 +10,9 @@ namespace Microsoft.Build.Tasks
     /// Internal exception thrown when there's an unrecoverable failure resolving a COM reference and we should 
     /// move on to the next one, if it makes sense.
     /// </summary>
-    /// <remarks>
-    /// WARNING: marking a type [Serializable] without implementing ISerializable imposes a serialization contract -- it is a
-    /// promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type
-    /// without following certain special FX guidelines, can break both forward and backward compatibility
-    /// </remarks>
+    // WARNING: marking a type [Serializable] without implementing ISerializable imposes a serialization contract -- it is a
+    // promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type
+    // without following certain special FX guidelines, can break both forward and backward compatibility
     [Serializable]
     internal class ComReferenceResolutionException : Exception
     {
