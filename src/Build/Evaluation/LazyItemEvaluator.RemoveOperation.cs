@@ -69,7 +69,7 @@ namespace Microsoft.Build.Evaluation
             {
                 if (metadataSet == null)
                 {
-                    metadataSet = new MetadataSet();
+                    metadataSet = new MetadataSet(_matchOnMetadataOptions);
                     foreach (ItemSpec<P, I>.ItemExpressionFragment frag in _itemSpec.Fragments)
                     {
                         foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)
@@ -124,10 +124,13 @@ namespace Microsoft.Build.Evaluation
     internal class MetadataSet
     {
         private Dictionary<string, MetadataSet> children;
+        MatchOnMetadataOptions options;
 
-        internal MetadataSet()
+        internal MetadataSet(MatchOnMetadataOptions options)
         {
-            children = new Dictionary<string, MetadataSet>();
+            StringComparer comparer = options == MatchOnMetadataOptions.CaseInsensitive ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+            children = new Dictionary<string, MetadataSet>(comparer);
+            this.options = options;
         }
 
         // Relies on IEnumerable returning the metadata in a reasonable order. Reasonable?
@@ -136,14 +139,17 @@ namespace Microsoft.Build.Evaluation
             MetadataSet current = this;
             foreach (string s in metadata)
             {
-                if (current.children.TryGetValue(s, out MetadataSet child))
+                string normalizedString = options == MatchOnMetadataOptions.PathLike ?
+                    FileUtilities.NormalizeForPathComparison(s) :
+                    s;
+                if (current.children.TryGetValue(normalizedString, out MetadataSet child))
                 {
                     current = child;
                 }
                 else
                 {
-                    current.children.Add(s, new MetadataSet());
-                    current = current.children[s];
+                    current.children.Add(normalizedString, new MetadataSet(current.options));
+                    current = current.children[normalizedString];
                 }
             }
         }
@@ -166,7 +172,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                return (children.TryGetValue(metadata[index], out MetadataSet child) && child.Contains(metadata, index + 1)) ||
+                return (children.TryGetValue(FileUtilities.NormalizeForPathComparison(metadata[index]), out MetadataSet child) && child.Contains(metadata, index + 1)) ||
                     (children.TryGetValue(string.Empty, out MetadataSet emptyChild) && emptyChild.Contains(metadata, index + 1));
             }
         }
