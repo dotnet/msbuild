@@ -26,6 +26,7 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
+using System.Linq;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -49,6 +50,13 @@ namespace Microsoft.Build.BackEnd
         /// The amount of time to wait for an out-of-proc node to spool up before we give up.
         /// </summary>
         private const int TimeoutForNewNodeCreation = 30000;
+
+        /// <summary>
+        /// The number of MSBuild processes allowed on the computer. 5 is (low priority/normal priority) * (administrator/not administrator) + (no node reuse).
+        /// </summary>
+        private int AllowedMSBuildProcessCount = Environment.ProcessorCount * 5;
+
+        private List<int> nodeIds = new List<int>();
 
         /// <summary>
         /// The build component host.
@@ -109,9 +117,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="terminateNode">Delegate used to tell the node provider that a context has terminated</param>
         protected void ShutdownAllNodes(bool nodeReuse, NodeContextTerminateDelegate terminateNode)
         {
-            // INodePacketFactory
-            INodePacketFactory factory = new NodePacketFactory();
-
             List<Process> nodeProcesses = GetPossibleRunningNodes().nodeProcesses;
 
             // Find proper MSBuildTaskHost executable name
@@ -120,10 +125,19 @@ namespace Microsoft.Build.BackEnd
             // Search for all instances of msbuildtaskhost process and add them to the process list
             nodeProcesses.AddRange(new List<Process>(Process.GetProcessesByName(Path.GetFileNameWithoutExtension(msbuildtaskhostExeName))));
 
+            ShutDownNodes(nodeProcesses, nodeReuse, terminateNode);
+        }
+
+        private void ShutDownNodes(List<Process> nodeProcesses, bool nodeReuse, NodeContextTerminateDelegate terminateNode)
+        {
+            // INodePacketFactory
+            INodePacketFactory factory = new NodePacketFactory();
+
             // For all processes in the list, send signal to terminate if able to connect
             foreach (Process nodeProcess in nodeProcesses)
             {
                 // A 2013 comment suggested some nodes take this long to respond, so a smaller timeout would miss nodes.
+                // Updated 2021 to correspond to new times taken to respond.
                 int timeout = 50;
 
                 // Attempt to connect to the process with the handshake without low priority.
@@ -205,11 +219,18 @@ namespace Microsoft.Build.BackEnd
                     {
                         // Connection successful, use this node.
                         CommunicationsUtilities.Trace("Successfully connected to existed node {0} which is PID {1}", nodeId, nodeProcess.Id);
+                        nodeIds.Add(nodeId);
                         return new NodeContext(nodeId, nodeProcess.Id, nodeStream, factory, terminateNode);
                     }
                 }
             }
 #endif
+            List<Process> msbuildProcesses = GetPossibleRunningNodes().nodeProcesses;
+            if (msbuildProcesses.Count > AllowedMSBuildProcessCount)
+            {
+                List<Process> processesToShutDown = msbuildProcesses.Where(p => !nodeIds.Contains(p.Id)).ToList();
+                ShutDownNodes(processesToShutDown, false, terminateNode);
+            }
 
             // None of the processes we tried to connect to allowed a connection, so create a new one.
             // We try this in a loop because it is possible that there is another MSBuild multiproc
@@ -256,6 +277,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Connection successful, use this node.
                     CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcessId);
+                    nodeIds.Add(nodeId);
                     return new NodeContext(nodeId, msbuildProcessId, nodeStream, factory, terminateNode);
                 }
             }
