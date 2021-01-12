@@ -124,7 +124,7 @@ namespace Microsoft.Build.BackEnd
             foreach (Process nodeProcess in nodeProcesses)
             {
                 // A 2013 comment suggested some nodes take this long to respond, so a smaller timeout would miss nodes.
-                int timeout = 30;
+                int timeout = 50;
 
                 // Attempt to connect to the process with the handshake without low priority.
                 Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false));
