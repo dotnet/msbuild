@@ -7,6 +7,8 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
+    <!-- MSBuild.csproj no longer uses apphost. This fixes an issue where certain tests would find
+         MSBuild.exe AND MSBuild.dll when they should only find MSBuild.dll. -->
     <UseAppHost>false</UseAppHost>
 
     <!-- Set RuntimeIdentifiers so that NuGet will restore for both AnyCPU as well as x86 and x64.
