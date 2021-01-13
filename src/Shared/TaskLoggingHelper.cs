@@ -49,6 +49,11 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentNull(taskInstance, nameof(taskInstance));
             _taskInstance = taskInstance;
             TaskName = taskInstance.GetType().Name;
+
+            if(_taskInstance.BuildEngine is IBuildEngine8 engine)
+            {
+                engine.WarningLoggedAsError += BuildEngineLoggedWarningAsError;
+            }
         }
 
         /// <summary>
@@ -60,6 +65,12 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
             TaskName = taskName;
             _buildEngine = buildEngine;
+
+            // Tasks need to know if a warning they logged was actually logged as an error.
+            if(_buildEngine is IBuildEngine8 engine)
+            {
+                engine.WarningLoggedAsError += BuildEngineLoggedWarningAsError;
+            }
         }
 
         #endregion
@@ -117,6 +128,8 @@ namespace Microsoft.Build.Utilities
         /// The build engine we are going to log against
         /// </summary>
         private readonly IBuildEngine _buildEngine;
+
+        private HashSet<string> _warningCodesLogged = new HashSet<string>();
 
         /// <summary>
         /// Shortcut property for getting our build engine - we retrieve it from the task instance
@@ -923,6 +936,18 @@ namespace Microsoft.Build.Utilities
 
 #region Warning logging methods
 
+        public void BuildEngineLoggedWarningAsError(object sender, BuildWarningEventArgs args)
+        {
+            if(args.Code == null)
+            {
+
+            }
+            if(_warningCodesLogged.Contains(args.Code))
+            {
+                HasLoggedErrors = true;
+            }
+        }
+
         /// <summary>
         /// Logs a warning using the specified string.
         /// Thread safe.
@@ -1015,6 +1040,14 @@ namespace Microsoft.Build.Utilities
             // If the task has missed out all location information, add the location of the task invocation;
             // that gives the user something.
             bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
+
+            if(warningCode == null)
+            {
+
+            }
+
+            // Keep track of warnings logged, and compare them against when a warning is logged as an error.
+            _warningCodesLogged.Add(warningCode);
 
             var e = new BuildWarningEventArgs
                 (

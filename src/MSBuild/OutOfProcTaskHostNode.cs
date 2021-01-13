@@ -33,7 +33,7 @@ namespace Microsoft.Build.CommandLine
 #if CLR2COMPATIBILITY
         IBuildEngine3
 #else
-        IBuildEngine7
+        IBuildEngine8
 #endif
     {
         /// <summary>
@@ -162,6 +162,8 @@ namespace Microsoft.Build.CommandLine
         /// The task object cache.
         /// </summary>
         private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
+
+        public event BuildWarningEventHandler WarningLoggedAsError;
 #endif
 
         /// <summary>
@@ -861,6 +863,10 @@ namespace Microsoft.Build.CommandLine
                     if (taskResult == null)
                     {
                         taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
+                        if(_isTaskExecuting)
+                        {
+                            WarningLoggedAsError(null, null);
+                        }
                     }
 
                     lock (_taskCompleteLock)

@@ -391,6 +391,7 @@ namespace Microsoft.Build.Utilities
         public string HelpKeywordPrefix { get { throw null; } set { } }
         protected string TaskName { get { throw null; } }
         public System.Resources.ResourceManager TaskResources { get { throw null; } set { } }
+        public void BuildEngineLoggedWarningAsError(object sender, Microsoft.Build.Framework.BuildWarningEventArgs args) { }
         public string ExtractMessageCode(string message, out string messageWithoutCodePrefix) { messageWithoutCodePrefix = default(string); throw null; }
         public virtual string FormatResourceString(string resourceName, params object[] args) { throw null; }
         public virtual string FormatString(string unformatted, params object[] args) { throw null; }

@@ -33,7 +33,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine7
+        IBuildEngine8
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set.
@@ -489,6 +489,8 @@ namespace Microsoft.Build.BackEnd
 
                 if (_taskLoggingContext.LoggingService.ShouldTreatWarningAsError(e.Code, e.BuildEventContext))
                 {
+                    WarningLoggedAsError(null, e);
+
                     BuildErrorEventArgs errorEvent = new BuildErrorEventArgs
                             (
                                 e.Subcategory,
@@ -698,6 +700,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool AllowFailureWithoutError { get; set; } = false;
         #endregion
+
+
+        public event BuildWarningEventHandler WarningLoggedAsError;
 
         /// <summary>
         /// Called by the internal MSBuild task.
