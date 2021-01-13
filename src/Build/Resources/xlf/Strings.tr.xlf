@@ -220,10 +220,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheQueryFailed">
-        <source>MSB4267: The project cache failed while being queried for the following project (keep in mind that the cache is queried in parallel so this specific project might not be the cause):
-    {0}</source>
-        <target state="new">MSB4267: The project cache failed while being queried for the following project (keep in mind that the cache is queried in parallel so this specific project might not be the cause):
-    {0}</target>
+        <source>MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</source>
+        <target state="new">MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">
