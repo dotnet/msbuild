@@ -45,7 +45,7 @@
   </ItemGroup>
 
   <!-- Use deps file from this project with additional dependencies listed instead of the one generated in the MSBuild project -->
-  <Target Name="UpdateMSBuildDepsFile" AfterTargets="Build" Condition="$([MSBuild]::IsTargetFrameworkCompatibleWith('$(TargetFramework), 'netcoreapp2.1')) or '$(TargetFramework)' == 'netstandard2.0'">
+  <Target Name="UpdateMSBuildDepsFile" AfterTargets="Build" Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1')) or '$(TargetFramework)' == 'netstandard2.0'">
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).deps.json" DestinationFiles="$(OutputPath)MSBuild.deps.json" />
   </Target>
   <Target Name="UpdatePublishedMSBuildDepsFile" AfterTargets="Publish" Condition="'$(TargetFramework)' == 'net5.0'">
