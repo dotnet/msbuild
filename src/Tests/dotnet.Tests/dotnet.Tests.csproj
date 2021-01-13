@@ -9,7 +9,7 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <CanRunTestAsTool>false</CanRunTestAsTool>
-    
+
     <!-- Use layout folder for the output folder, to support in-process tests which expect to be running
          on a valid layout. -->
     <OutputPath>$(ArtifactsBinDir)redist\$(Configuration)</OutputPath>
@@ -43,7 +43,7 @@
     <Compile Include="..\Microsoft.DotNet.CommandFactory.Tests\**\*.cs" LinkBase="CommandFactory" />
     <Compile Include="..\Microsoft.DotNet.Configurer.UnitTests\**\*.cs" LinkBase="Configurer" />
     <Compile Include="..\Microsoft.DotNet.ShellShim.Tests\**\*.cs" LinkBase="ShellShim" />
-    
+
 
     <None Include="..\Microsoft.DotNet.ShellShim.Tests\WpfBinaryTestAsssets\testwpf.dll" LinkBase="WpfBinaryTestAsssets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -89,14 +89,14 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>-->
-  
+
   <!--<Target Name="WriteExpectedVersion"
           BeforeTargets="BeforeBuild"
           DependsOnTargets="PrepareForBuild">
 
     <PropertyGroup>
       <ExpectedVersionFileInIntermediateFolder>$(IntermediateOutputPath)ExpectedSdkVersion.txt</ExpectedVersionFileInIntermediateFolder>
-      
+
       <VersionFileContent>$(DotNetCoreSdkLKGVersion)</VersionFileContent>
       <ExistingVersionFileContent Condition=" Exists('$(ExpectedVersionFileInIntermediateFolder)') ">
         $([System.IO.File]::ReadAllText($(ExpectedVersionFileInIntermediateFolder)))
@@ -106,7 +106,7 @@
       <ShouldOverwriteVersionFile
         Condition=" '$(ExistingVersionFileContent.Trim())' != '$(VersionFileContent.Trim())' ">true</ShouldOverwriteVersionFile>
     </PropertyGroup>
-    
+
     <WriteLinesToFile File="$(ExpectedVersionFileInIntermediateFolder)"
                       Lines="$(VersionFileContent)"
                       Condition=" '$(ShouldOverwriteVersionFile)' == 'true' "
@@ -145,7 +145,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Moq" Version="4.7.25" />
+    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(MicrosoftDotNetCliCommandLinePackageVersion)" />
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
   </ItemGroup>

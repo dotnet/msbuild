@@ -24,6 +24,7 @@
     <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</NETStandardLibraryNETFrameworkVersion>
     <NewtonsoftJsonPackageVersion>11.0.1</NewtonsoftJsonPackageVersion>
     <NewtonsoftJsonVersion>$(NewtonsoftJsonPackageVersion)</NewtonsoftJsonVersion>
+    <SystemCommandLineVersion>2.0.0-beta1.20574.7</SystemCommandLineVersion>
     <SystemDiagnosticsFileVersionInfoVersion>4.0.0</SystemDiagnosticsFileVersionInfoVersion>
     <SystemReflectionMetadataVersion>5.0.0</SystemReflectionMetadataVersion>
     <MicrosoftDotNetSignToolVersion>5.0.0-beta.20580.4</MicrosoftDotNetSignToolVersion>
@@ -121,6 +122,7 @@
     <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>5.0.1-servicing.20601.7</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
     <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>5.0.1-servicing.20601.7</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
     <MicrosoftAspNetCoreAnalyzersPackageVersion>5.0.1-servicing.20601.7</MicrosoftAspNetCoreAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreTestHostPackageVersion>5.0.1</MicrosoftAspNetCoreTestHostPackageVersion>
     <MicrosoftNETSdkRazorPackageVersion>5.0.1-servicing.20601.7</MicrosoftNETSdkRazorPackageVersion>
     <MicrosoftNETSdkBlazorWebAssemblyPackageVersion>5.0.1-servicing.20601.7</MicrosoftNETSdkBlazorWebAssemblyPackageVersion>
   </PropertyGroup>
@@ -141,6 +143,7 @@
     <FluentAssertionsVersion>4.19.2</FluentAssertionsVersion>
     <FluentAssertionsJsonVersion>4.19.0</FluentAssertionsJsonVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>5.0.0-beta.20580.4</MicrosoftDotNetXUnitExtensionsVersion>
+    <MoqPackageVersion>4.8.2</MoqPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <ExeExtension>.exe</ExeExtension>

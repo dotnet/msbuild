@@ -26,3 +26,8 @@
 /src/Tests/dotnet-new.Tests @DonJoseLuis
 
 /src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.ClickOnce.targets @sujitnayak
+
+/src/Assets/TestProjects/Watch*     @captainsafia, @pranavkm, @mkArtakMSFT
+/src/Tests/dotnet-watch.Tests       @captainsafia, @pranavkm, @mkArtakMSFT
+/src/Tests/Microsoft.AspNetCore.Watch.BrowserRefresh.Tests       @captainsafia, @pranavkm, mkArtakMSFT
+/src/BuiltInTools/   @captainsafia, @pranavkm, mkArtakMSFT

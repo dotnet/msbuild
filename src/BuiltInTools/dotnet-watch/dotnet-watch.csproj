@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(SdkTargetFramework)</TargetFramework>
+    <OutputType>exe</OutputType>
+    <Description>Command line tool to watch for source file changes during development and restart the dotnet command.</Description>
+    <RootNamespace>Microsoft.DotNet.Watcher.Tools</RootNamespace>
+    <PackageTags>dotnet;watch</PackageTags>
+    <PackAsTool>true</PackAsTool>
+    <IsPackable>true</IsPackable>
+
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <UseAppHost>false</UseAppHost>
+    <RuntimeIdentifier />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
+    <Content Include="DotNetWatch.targets" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
+
+    <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
+
+    <ProjectReference
+      Include="..\BrowserRefresh\Microsoft.AspNetCore.Watch.BrowserRefresh.csproj"
+      PrivateAssets="All"
+      ReferenceOutputAssembly="false"
+      SkipGetTargetFrameworkProperties="true"
+      UndefineProperties="TargetFramework;TargetFrameworks" />
+  </ItemGroup>
+
+  <Target Name="AddRefreshMiddlewareToNupkg" BeforeTargets="PrepareForRun">
+    <ItemGroup>
+      <None Include="$(ArtifactsBinDir)Microsoft.AspNetCore.Watch.BrowserRefresh\$(Configuration)\netcoreapp3.1\Microsoft.AspNetCore.Watch.BrowserRefresh.dll"
+        Pack="true"
+        PackagePath="tools\$(SdkTargetFramework)\any\middleware" />
+    </ItemGroup>
+  </Target>
+
+</Project>
