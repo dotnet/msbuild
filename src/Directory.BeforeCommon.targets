@@ -111,7 +111,7 @@
     <DefineConstants Condition="$([MSBuild]::IsOSPlatform('windows'))">$(DefineConstants);TEST_ISWINDOWS</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp1.0')) or $(TargetFramework.StartsWith('netstandard'))">
+  <PropertyGroup Condition="'$(MonoBuild)' != 'true' and ($([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp1.0')) or $(TargetFramework.StartsWith('netstandard')))">
     <NetCoreBuild>true</NetCoreBuild>
     <DefineConstants>$(DefineConstants);RUNTIME_TYPE_NETCORE</DefineConstants>
   </PropertyGroup>
