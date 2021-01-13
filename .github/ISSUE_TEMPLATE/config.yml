@@ -1,4 +1,4 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
   - name: Issue with .NET (Core) SDK
     url:  https://github.com/dotnet/sdk/issues/new/choose
