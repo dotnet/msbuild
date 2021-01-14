@@ -250,8 +250,16 @@ namespace Microsoft.Build.BackEnd
             else
             {
                 ImmutableList<string> metadataList = matchOnMetadata.ToImmutableList();
-                MetadataSet<ProjectPropertyInstance, ProjectItemInstance> metadataSet = new(matchingOptions, metadataList,
-                    new ItemSpec<ProjectPropertyInstance, ProjectItemInstance>(child.Remove, bucket.Expander, child.RemoveLocation, Project.Directory, true));
+                ItemSpec<ProjectPropertyInstance, ProjectItemInstance> itemSpec = new(child.Remove, bucket.Expander, child.RemoveLocation, Project.Directory, true);
+                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                    itemSpec.Fragments.Count == 1
+                    && itemSpec.Fragments.First() is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment
+                    && matchOnMetadata.Count == 1,
+                    new BuildEventFileInfo(string.Empty),
+                    "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem",
+                    child.RemoveLocation,
+                    child.Remove);
+                MetadataSet<ProjectPropertyInstance, ProjectItemInstance> metadataSet = new(matchingOptions, metadataList, itemSpec);
                 itemsToRemove = group.Where(item => metadataSet.Contains(metadataList.Select(m => item.GetMetadataValue(m)))).ToList();
             }
 
