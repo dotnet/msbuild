@@ -280,9 +280,10 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 TransientTestFolder source = testEnvironment.CreateFolder(createFolder: true);
                 TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
-                testEnvironment.CreateFile(source, "BE78A17D30144B549D21F71D5C633F7D.txt", "file1");
-                testEnvironment.CreateFile(source, "A04FF4B88DF14860B7C73A8E75A4FB76.txt", "file2");
-                testEnvironment.CreateFile(source, "191CD39C4DCF4749A29887E496D0F141.txt", "file3");
+                testEnvironment.CreateFile(source, "file1.js", "file1");
+                testEnvironment.CreateFile(source, "file1.js.map", "file2");
+                testEnvironment.CreateFile(source, "file2.js", "file3");
+                testEnvironment.CreateFile(source, "readme.txt", "file4");
 
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
@@ -293,15 +294,16 @@ namespace Microsoft.Build.Tasks.UnitTests
                                       OverwriteReadOnlyFiles = true,
                                       SkipUnchangedFiles = false,
                                       SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                                      Include = "BE78A17D30144B549D21F71D5C633F7D",
-                                      Exclude = "A04FF4B88DF14860B7C73A8E75A4FB76"
+                                      Include = ".*?\\.js",
+                                      Exclude = ".*?\\.js\\.map"
                                   };
 
                 unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "BE78A17D30144B549D21F71D5C633F7D.txt"), () => _mockEngine.Log);
-                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), () => _mockEngine.Log);
-                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "191CD39C4DCF4749A29887E496D0F141.txt"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "file1.js"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "file1.js.map"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "file2.js"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "readme.txt"), () => _mockEngine.Log);
             }
         }
     }
