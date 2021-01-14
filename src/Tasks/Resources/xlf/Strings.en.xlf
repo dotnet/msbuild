@@ -2531,8 +2531,8 @@
         <note />
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFilter">
-        <source>Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</source>
-        <target state="new">Did not unzip file "{0}" because it didn't match the include or matched the exclude filter.</target>
+        <source>Did not unzip file "{0}" because it didn't match the include filter or because it matched the exclude filter.</source>
+        <target state="new">Did not unzip file "{0}" because it didn't match the include filter or because it matched the exclude filter.</target>
         <note />
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
