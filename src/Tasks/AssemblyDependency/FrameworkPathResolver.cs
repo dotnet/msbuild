@@ -21,8 +21,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        public FrameworkPathResolver(string[] frameworkPaths, InstalledAssemblies installedAssemblies, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false)
+        public FrameworkPathResolver(string[] frameworkPaths, InstalledAssemblies installedAssemblies, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, DirectoryFile getDirectoryFile, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
+            : base(searchPathElement, getAssemblyName, fileExists, getDirectoryFile, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false)
         {
             _frameworkPaths = frameworkPaths;
             _installedAssemblies = installedAssemblies;

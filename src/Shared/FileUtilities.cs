@@ -967,6 +967,19 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Get all files from directory matching pattern
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="pattern"></param>
+        /// <param name="fileSystem"></param>
+        /// <returns>list of files or null if it is impossible to get files</returns>
+        internal static string[] DirectoryGetFiles(string path, string pattern = "*", IFileSystem fileSystem = null)
+        {
+            path = AttemptToShortenPath(path);
+            return (fileSystem ?? DefaultFileSystem).EnumerateFiles(path, pattern).ToArray();
+        }
+
+        /// <summary>
         /// If there is a directory or file at the specified path, returns true.
         /// Otherwise, returns false.
         /// Does not throw IO exceptions, to match Directory.Exists and File.Exists.

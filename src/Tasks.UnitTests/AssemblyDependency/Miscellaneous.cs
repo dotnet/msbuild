@@ -3312,7 +3312,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <returns></returns>
         private ReferenceTable GenerateTableWithAssemblyFromTheGlobalLocation(string location)
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, getDirectoryFile, null, null, null, null,
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
@@ -5467,31 +5467,22 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
             t.TargetFrameworkDirectories = new string[] { @"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx" };
 
-            FileExists cachedFileExists = fileExists;
-            GetAssemblyName cachedGetAssemblyName = getAssemblyName;
             string redistFile = CreateGenericRedistList();
-
+            List<string> preservedExistentFiles = s_existentFiles;
+            s_existentFiles = new List<string>(s_existentFiles);
             bool success = false;
             try
             {
-                fileExists = new FileExists(delegate (string path)
-                {
-                    if (String.Equals(path, @"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx\Microsoft.Build.Engine.dll", StringComparison.OrdinalIgnoreCase) ||
-                        String.Equals(path, @"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx\System.Xml.dll", StringComparison.OrdinalIgnoreCase) ||
-                        path.EndsWith("RarCache", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-                    return false;
-                });
+                s_existentFiles.Add(@"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx\Microsoft.Build.Engine.dll");
+                s_existentFiles.Add(@"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx\System.Xml.dll");
+
                 t.InstalledAssemblyTables = new ITaskItem[] { new TaskItem(redistFile) };
 
                 success = Execute(t);
             }
             finally
             {
-                fileExists = cachedFileExists;
-                getAssemblyName = cachedGetAssemblyName;
+                s_existentFiles = preservedExistentFiles;
                 File.Delete(redistFile);
             }
 
@@ -5528,7 +5519,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
             t.TargetFrameworkDirectories = new string[] { @"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx" };
 
-            FileExists cachedFileExists = fileExists;
             GetAssemblyName cachedGetAssemblyName = getAssemblyName;
 
             // Create a redist list which will contains both of the assemblies to search for
@@ -5542,22 +5532,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistFile = FileUtilities.GetTemporaryFile();
             File.WriteAllText(redistFile, redistListContents);
 
+            List<string> preservedExistentFiles = s_existentFiles;
+            s_existentFiles = new List<string>(s_existentFiles);
+
             bool success = false;
             try
             {
-                fileExists = new FileExists(delegate (string path)
-                {
-                    if (String.Equals(path, @"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx\Microsoft.Build.Engine.dll", StringComparison.OrdinalIgnoreCase) ||
-                        String.Equals(path, @"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx\System.Xml.dll", StringComparison.OrdinalIgnoreCase) ||
-                        String.Equals(path, @"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx\B.dll", StringComparison.OrdinalIgnoreCase) ||
-                        String.Equals(path, @"c:\somewhere\c.dll", StringComparison.OrdinalIgnoreCase) ||
-                        String.Equals(path, @"c:\somewhere\d.dll", StringComparison.OrdinalIgnoreCase) ||
-                        path.EndsWith("RarCache", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-                    return false;
-                });
+                s_existentFiles.Add(@"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx\Microsoft.Build.Engine.dll");
+                s_existentFiles.Add(@"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx\System.Xml.dll");
+                s_existentFiles.Add(@"r:\WINDOWS\Microsoft.NET\Framework\v2.0.myfx\B.dll");
+                s_existentFiles.Add(@"c:\somewhere\c.dll");
+                s_existentFiles.Add(@"c:\somewhere\d.dll");
 
                 getAssemblyName = new GetAssemblyName(delegate (string path)
                 {
@@ -5579,7 +5564,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
             finally
             {
-                fileExists = cachedFileExists;
+                s_existentFiles = preservedExistentFiles;
                 getAssemblyName = cachedGetAssemblyName;
                 File.Delete(redistFile);
             }
@@ -6342,19 +6327,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Only the explicitly specified redist list should be used
             t.IgnoreDefaultInstalledAssemblyTables = true;
 
-            FileExists cachedFileExists = fileExists;
             GetAssemblyName cachedGetAssemblyName = getAssemblyName;
+            List<string> preservedExistentFiles = s_existentFiles;
+            s_existentFiles = new List<string>(s_existentFiles);
 
-            fileExists = new FileExists(delegate (string path)
-            {
-                if (String.Equals(path, microsoftBuildEnginePath, StringComparison.OrdinalIgnoreCase) ||
-                    String.Equals(path, systemXmlPath, StringComparison.OrdinalIgnoreCase) ||
-                    path.EndsWith("RarCache", StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-                return false;
-            });
+            s_existentFiles.Add(microsoftBuildEnginePath);
+            s_existentFiles.Add(systemXmlPath);
 
             getAssemblyName = new GetAssemblyName(delegate (string path)
             {
@@ -6377,7 +6355,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
             finally
             {
-                fileExists = cachedFileExists;
+                s_existentFiles = preservedExistentFiles;
                 getAssemblyName = cachedGetAssemblyName;
             }
 
@@ -6817,7 +6795,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ReferenceTableDependentItemsInBlackList4()
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null,
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, getDirectoryFile, null, null, null,
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
@@ -6995,7 +6973,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         private static ReferenceTable MakeEmptyReferenceTable(TaskLoggingHelper log)
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, getDirectoryFile, null, null, null, null,
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
@@ -7258,18 +7236,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         private bool GenerateHelperDelegatesAndExecuteTask(ResolveAssemblyReference t, string microsoftBuildEnginePath, string systemXmlPath)
         {
-            FileExists cachedFileExists = fileExists;
             GetAssemblyName cachedGetAssemblyName = getAssemblyName;
-            fileExists = new FileExists(delegate (string path)
-            {
-                if (String.Equals(path, microsoftBuildEnginePath, StringComparison.OrdinalIgnoreCase) ||
-                    String.Equals(path, systemXmlPath, StringComparison.OrdinalIgnoreCase) ||
-                    path.EndsWith("RarCache", StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-                return false;
-            });
+            List<string> preservedExistentFiles = s_existentFiles;
+            s_existentFiles = new List<string>(s_existentFiles);
+
+            s_existentFiles.Add(microsoftBuildEnginePath);
+            s_existentFiles.Add(systemXmlPath);
 
             getAssemblyName = new GetAssemblyName(delegate (string path)
             {
@@ -7292,7 +7264,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
             finally
             {
-                fileExists = cachedFileExists;
+                s_existentFiles = preservedExistentFiles;
                 getAssemblyName = cachedGetAssemblyName;
             }
             return success;
@@ -7609,33 +7581,26 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 t.BuildEngine = new MockEngine(_output);
 
                 t.Assemblies = new ITaskItem[]
-            {
-                new TaskItem("Microsoft.Build.Engine"),
-                new TaskItem("System.Xml")
-            };
+                {
+                    new TaskItem("Microsoft.Build.Engine"),
+                    new TaskItem("System.Xml")
+                };
 
-                t.SearchPaths = new string[]
-            {
-                @"{TargetFrameworkDirectory}"
-            };
+                    t.SearchPaths = new string[]
+                {
+                    @"{TargetFrameworkDirectory}"
+                };
                 t.TargetFrameworkDirectories = new string[] { Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5") };
                 string microsoftBuildEnginePath = Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5\\Microsoft.Build.Engine");
                 string systemXmlPath = Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5\\System.Xml.dll");
 
                 t.InstalledAssemblyTables = new ITaskItem[] { new TaskItem(redistListPath) };
 
-                FileExists cachedFileExists = fileExists;
                 GetAssemblyName cachedGetAssemblyName = getAssemblyName;
+                List<string> preservedExistentFiles = s_existentFiles;
+                s_existentFiles = new List<string>(s_existentFiles);
 
-                // Note that Microsoft.Build.Engine.dll does not exist
-                fileExists = new FileExists(delegate (string path)
-                {
-                    if (String.Equals(path, systemXmlPath, StringComparison.OrdinalIgnoreCase) || path.EndsWith("RarCache", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-                    return false;
-                });
+                s_existentFiles.Add(systemXmlPath);
 
                 getAssemblyName = new GetAssemblyName(delegate (string path)
                 {
@@ -7658,7 +7623,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
                 finally
                 {
-                    fileExists = cachedFileExists;
+                    s_existentFiles = preservedExistentFiles;
                     getAssemblyName = cachedGetAssemblyName;
                 }
 

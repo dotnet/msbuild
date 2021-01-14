@@ -6,12 +6,21 @@ using System.IO;
 namespace Microsoft.Build.Shared
 {
     /// <summary>
-    /// delegate for System.IO.Directory.GetFiles, used for testing
+    /// delegate for System.IO.Directory.GetFiles
     /// </summary>
     /// <param name="path">Directory path to start search for files in</param>
     /// <param name="searchPattern">pattern of files to match</param>
     /// <returns>string array of files which match search pattern</returns>
     internal delegate string[] DirectoryGetFiles(string path, string searchPattern);
+
+    /// <summary>
+    /// delegate for optimized looking up files in directory
+    /// designed to be used for testing and to verify file existence by directory listing
+    /// </summary>
+    /// <param name="path">Directory path to start search for files in</param>
+    /// <param name="fileName">name of file</param>
+    /// <returns>return full path file name or null if file do not exists</returns>
+    internal delegate string DirectoryFile(string path, string fileName);
 
     /// <summary>
     /// delegate for Directory.GetDirectories.

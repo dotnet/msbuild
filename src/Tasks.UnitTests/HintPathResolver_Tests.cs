@@ -66,6 +66,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 searchPathElement: "{HintPathFromItem}",
                 getAssemblyName: (path) => throw new NotImplementedException(), // not called in this code path
                 fileExists: p => FileUtilities.FileExistsNoThrow(p),
+                getDirectoryFile: null, // not used
                 getRuntimeVersion: (path) => throw new NotImplementedException(), // not called in this code path
                 targetedRuntimeVesion: Version.Parse("4.0.30319"));
 

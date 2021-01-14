@@ -74,11 +74,11 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         /// Construct.
         /// </summary>
         public AssemblyFoldersFromConfigResolver(string searchPathElement, GetAssemblyName getAssemblyName,
-            FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion,
+            FileExists fileExists, DirectoryFile getDirectoryFile, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion,
             ProcessorArchitecture targetProcessorArchitecture, bool compareProcessorArchitecture,
             IBuildEngine buildEngine, TaskLoggingHelper log)
             : base(
-                searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion,
+                searchPathElement, getAssemblyName, fileExists, getDirectoryFile, getRuntimeVersion, targetedRuntimeVesion,
                 targetProcessorArchitecture, compareProcessorArchitecture)
         {
             _buildEngine = buildEngine as IBuildEngine4;

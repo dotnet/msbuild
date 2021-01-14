@@ -30,6 +30,11 @@ namespace Microsoft.Build.Tasks
         protected FileExists fileExists;
 
         /// <summary>
+        /// Delegate.
+        /// </summary>
+        private readonly DirectoryFile getDirectoryFile;
+
+        /// <summary>
         /// Delegate
         /// </summary>
         protected GetAssemblyRuntimeVersion getRuntimeVersion;
@@ -52,11 +57,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
+        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, DirectoryFile getDirectoryFile, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
         {
             this.searchPathElement = searchPathElement;
             this.getAssemblyName = getAssemblyName;
             this.fileExists = fileExists;
+            this.getDirectoryFile = getDirectoryFile;
             this.getRuntimeVersion = getRuntimeVersion;
             this.targetedRuntimeVersion = targetedRuntimeVesion;
             this.targetProcessorArchitecture = targetedProcessorArchitecture;
@@ -109,7 +115,8 @@ namespace Microsoft.Build.Tasks
             bool isPrimaryProjectReference,
             bool wantSpecificVersion,
             bool allowMismatchBetweenFusionNameAndFileName,
-            List<ResolutionSearchLocation> assembliesConsideredAndRejected
+            List<ResolutionSearchLocation> assembliesConsideredAndRejected,
+            bool isFileExistenceVerified = false
         )
         {
             ResolutionSearchLocation considered = null;
@@ -122,7 +129,7 @@ namespace Microsoft.Build.Tasks
                 };
             }
 
-            if (FileMatchesAssemblyName(assemblyName, isPrimaryProjectReference, wantSpecificVersion, allowMismatchBetweenFusionNameAndFileName, fullPath, considered))
+            if (FileMatchesAssemblyName(assemblyName, isPrimaryProjectReference, wantSpecificVersion, allowMismatchBetweenFusionNameAndFileName, fullPath, considered, isFileExistenceVerified))
             {
                 return true;
             }
@@ -142,6 +149,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="allowMismatchBetweenFusionNameAndFileName">Whether to allow naming mismatch.</param>
         /// <param name="pathToCandidateAssembly">Path to a possible file.</param>
         /// <param name="searchLocation">Information about why the candidate file didn't match</param>
+        /// <param name="isFileExistenceVerified">Set it to true if file existence is guaranteed, to improve performance by avoiding unnecessary fileExists()</param>
         protected bool FileMatchesAssemblyName
         (
             AssemblyNameExtension assemblyName,
@@ -149,7 +157,8 @@ namespace Microsoft.Build.Tasks
             bool wantSpecificVersion,
             bool allowMismatchBetweenFusionNameAndFileName,
             string pathToCandidateAssembly,
-            ResolutionSearchLocation searchLocation
+            ResolutionSearchLocation searchLocation,
+            bool isFileExistenceVerified = false
         )
         {
             if (searchLocation != null)
@@ -181,7 +190,7 @@ namespace Microsoft.Build.Tasks
 
             bool isSimpleAssemblyName = assemblyName?.IsSimpleName == true;
 
-            if (fileExists(pathToCandidateAssembly))
+            if (isFileExistenceVerified || fileExists(pathToCandidateAssembly))
             {
                 // If the resolver we are using is targeting a given processor architecture then we must crack open the assembly and make sure the architecture is compatible
                 // We cannot do these simple name matches.
@@ -312,23 +321,47 @@ namespace Microsoft.Build.Tasks
             if (directory != null)
             {
                 string weakNameBase = assemblyName.Name;
+
+                // feature flag by ChangeWaves 
+                bool useFileEnumerationOptimization = Utilities.ChangeWaves.AreFeaturesEnabled(Utilities.ChangeWaves.Wave17_0);
+
                 foreach (string executableExtension in executableExtensions)
                 {
-                    string baseName = weakNameBase + executableExtension;
                     string fullPath;
+                    bool fileExistenceVerified = false;
+
+                    string fileName = $"{weakNameBase}{executableExtension}";
+                    if (useFileEnumerationOptimization)
+                    {
+                        try
+                        {
+                            fileExistenceVerified = getDirectoryFile(directory, fileName) != null;
+                        }
+                        catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                        {
+                            // Assuming it's the search path that's bad. But combine them both so the error is visible if it's the reference itself.
+                            throw new InvalidParameterValueException("SearchPaths", directory + (directory.EndsWith("\\", StringComparison.OrdinalIgnoreCase) ? String.Empty : "\\") + fileName, e.Message);
+                        }
+
+                        if (!fileExistenceVerified)
+                        {
+                            // file do not exists, try next file extension
+                            continue;
+                        }
+                    }
 
                     try
                     {
-                        fullPath = Path.Combine(directory, baseName);
+                        fullPath = Path.Combine(directory, fileName);
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
                         // Assuming it's the search path that's bad. But combine them both so the error is visible if it's the reference itself.
-                        throw new InvalidParameterValueException("SearchPaths", directory + (directory.EndsWith("\\", StringComparison.OrdinalIgnoreCase) ? String.Empty : "\\") + baseName, e.Message);
+                        throw new InvalidParameterValueException("SearchPaths", directory + (directory.EndsWith("\\", StringComparison.OrdinalIgnoreCase) ? String.Empty : "\\") + fileName, e.Message);
                     }
 
-                    // We have a full path returned 
-                    if (ResolveAsFile(fullPath, assemblyName, isPrimaryProjectReference, wantSpecificVersion, false, assembliesConsideredAndRejected))
+                    // We have a full path returned
+                    if (ResolveAsFile(fullPath, assemblyName, isPrimaryProjectReference, wantSpecificVersion, false, assembliesConsideredAndRejected, isFileExistenceVerified: fileExistenceVerified))
                     {
                         if (candidateFullPath == null)
                         {
@@ -341,7 +374,7 @@ namespace Microsoft.Build.Tasks
                          * If targeting AMD64 / X86 / IA64 / ARM /NONE we will return the first assembly which has a matching processor architecture OR is an assembly with a processor architecture of MSIL or NONE
                          * 
                          * If targeting MSIL we will first look through all of the assemblies, if an MSIL assembly is found we will return that. If no MSIL assembly is found we will return 
-                         * the first assembly which matches reguardless of its processor architecture.
+                         * the first assembly which matches regardless of its processor architecture.
                          */
 
                         if (targetProcessorArchitecture == ProcessorArchitecture.MSIL)
@@ -375,10 +408,31 @@ namespace Microsoft.Build.Tasks
                         {
                             if (String.Equals(executableExtension, weakNameBaseExtension, StringComparison.CurrentCultureIgnoreCase))
                             {
+                                bool fileExistenceVerified = false;
+
+                                if (useFileEnumerationOptimization)
+                                {
+                                    try
+                                    {
+                                        fileExistenceVerified = getDirectoryFile(directory, weakNameBase) != null;
+                                    }
+                                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                                    {
+                                        // Assuming it's the search path that's bad. But combine them both so the error is visible if it's the reference itself.
+                                        throw new InvalidParameterValueException("SearchPaths", directory + (directory.EndsWith("\\", StringComparison.OrdinalIgnoreCase) ? String.Empty : "\\") + weakNameBase, e.Message);
+                                    }
+
+                                    if (!fileExistenceVerified)
+                                    {
+                                        // file do not exists, try next file extension
+                                        continue;
+                                    }
+                                }
+
                                 string fullPath = Path.Combine(directory, weakNameBase);
                                 var extensionlessAssemblyName = new AssemblyNameExtension(weakNameBaseFileName);
 
-                                if (ResolveAsFile(fullPath, extensionlessAssemblyName, isPrimaryProjectReference, wantSpecificVersion, false, assembliesConsideredAndRejected))
+                                if (ResolveAsFile(fullPath, extensionlessAssemblyName, isPrimaryProjectReference, wantSpecificVersion, false, assembliesConsideredAndRejected, isFileExistenceVerified: fileExistenceVerified))
                                 {
                                     return fullPath;
                                 }
