@@ -463,13 +463,13 @@ namespace Microsoft.Build.Evaluation
     internal class MetadataSet<P, I> where P : class, IProperty where I : class, IItem, IMetadataTable
     {
         private Dictionary<string, MetadataSet<P, I>> children;
-        MatchOnMetadataOptions options;
+        Func<string, string> normalize;
 
         internal MetadataSet(MatchOnMetadataOptions options, ImmutableList<string> metadata, ItemSpec<P, I> itemSpec)
         {
             StringComparer comparer = options == MatchOnMetadataOptions.CaseInsensitive ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
             children = new Dictionary<string, MetadataSet<P, I>>(comparer);
-            this.options = options;
+            normalize = options == MatchOnMetadataOptions.PathLike ? FileUtilities.NormalizeForPathComparison : s => s;
             foreach (ItemSpec<P, I>.ItemExpressionFragment frag in itemSpec.Fragments)
             {
                 foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)
@@ -487,7 +487,6 @@ namespace Microsoft.Build.Evaluation
         // Relies on IEnumerable returning the metadata in a reasonable order. Reasonable?
         private void Add(IEnumerable<string> metadata, StringComparer comparer)
         {
-            Func<string, string> normalize = options == MatchOnMetadataOptions.PathLike ? FileUtilities.NormalizeForPathComparison : s => s;
             MetadataSet<P, I> current = this;
             foreach (string s in metadata)
             {
@@ -506,25 +505,20 @@ namespace Microsoft.Build.Evaluation
 
         internal bool Contains(IEnumerable<string> metadata)
         {
-            List<string> metadataList = metadata.ToList();
-            return this.Contains(metadataList, 0);
-        }
-
-        private bool Contains(List<string> metadata, int index)
-        {
-            if (index == metadata.Count)
+            bool nonEmptyFound = false;
+            MetadataSet<P, I> curr = this;
+            foreach (string m in metadata)
             {
-                return true;
+                if (!String.IsNullOrEmpty(m))
+                {
+                    nonEmptyFound = true;
+                }
+                if (!curr.children.TryGetValue(normalize(m), out curr))
+                {
+                    return false;
+                }
             }
-            else if (String.IsNullOrEmpty(metadata[index]))
-            {
-                return children.Any(kvp => !String.IsNullOrEmpty(kvp.Key) && kvp.Value.Contains(metadata, index + 1));
-            }
-            else
-            {
-                return (children.TryGetValue(FileUtilities.NormalizeForPathComparison(metadata[index]), out MetadataSet<P, I> child) && child.Contains(metadata, index + 1)) ||
-                    (children.TryGetValue(string.Empty, out MetadataSet<P, I> emptyChild) && emptyChild.Contains(metadata, index + 1));
-            }
+            return nonEmptyFound;
         }
     }
 

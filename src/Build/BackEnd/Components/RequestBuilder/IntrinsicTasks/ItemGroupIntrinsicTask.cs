@@ -252,7 +252,7 @@ namespace Microsoft.Build.BackEnd
                 ImmutableList<string> metadataList = matchOnMetadata.ToImmutableList();
                 MetadataSet<ProjectPropertyInstance, ProjectItemInstance> metadataSet = new(matchingOptions, metadataList,
                     new ItemSpec<ProjectPropertyInstance, ProjectItemInstance>(child.Remove, bucket.Expander, child.RemoveLocation, Project.Directory, true));
-                itemsToRemove = group.Where(item => metadataSet.Contains(metadataList.Select(m => item.GetMetadata(m).EvaluatedValue))).ToList();
+                itemsToRemove = group.Where(item => metadataSet.Contains(metadataList.Select(m => item.GetMetadataValue(m)))).ToList();
             }
 
             if (itemsToRemove != null)
