@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.NET.TestFramework;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Watcher.Tools
@@ -22,7 +23,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             _logger = logger;
         }
 
-        [PlatformSpecificFact(Xunit.TestPlatforms.Windows | Xunit.TestPlatforms.OSX)]
+        [Fact]
         public async Task LaunchesBrowserOnStart()
         {
             var expected = "watch : Launching browser: https://localhost:5001/";
@@ -40,7 +41,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             await app.Process.GetOutputLineStartsWithAsync(expected, TimeSpan.FromMinutes(2));
         }
 
-        [PlatformSpecificFact(Xunit.TestPlatforms.Windows | Xunit.TestPlatforms.OSX)]
+        [Fact]
         public async Task RefreshesBrowserOnChange()
         {
             var launchBrowserMessage = "watch : Launching browser: https://localhost:5001/";
@@ -64,7 +65,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             await app.Process.GetOutputLineStartsWithAsync(refreshBrowserMessage, TimeSpan.FromMinutes(2));
         }
 
-        [PlatformSpecificFact(Xunit.TestPlatforms.Windows | Xunit.TestPlatforms.OSX)]
+        [Fact]
         public async Task UsesBrowserSpecifiedInEnvironment()
         {
             var launchBrowserMessage = "watch : Launching browser: mycustombrowser.bat https://localhost:5001/";
