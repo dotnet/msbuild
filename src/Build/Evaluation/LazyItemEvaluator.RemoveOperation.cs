@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace Microsoft.Build.Evaluation
         {
             readonly ImmutableList<string> _matchOnMetadata;
             readonly MatchOnMetadataOptions _matchOnMetadataOptions;
-            private MetadataSet metadataSet;
+            private MetadataSet<P, I> metadataSet;
 
             public RemoveOperation(RemoveOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
                 : base(builder, lazyEvaluator)
@@ -69,14 +70,7 @@ namespace Microsoft.Build.Evaluation
             {
                 if (metadataSet == null)
                 {
-                    metadataSet = new MetadataSet(_matchOnMetadataOptions);
-                    foreach (ItemSpec<P, I>.ItemExpressionFragment frag in _itemSpec.Fragments)
-                    {
-                        foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)
-                        {
-                            metadataSet.Add(_matchOnMetadata.Select(m => (referencedItem.Item.GetMetadata(m) as ProjectMetadata).EvaluatedValue));
-                        }
-                    }
+                    metadataSet = new MetadataSet<P, I>(_matchOnMetadataOptions, _matchOnMetadata, _itemSpec);
                 }
 
                 return metadataSet.Contains(_matchOnMetadata.Select(m => (item.GetMetadata(m) as ProjectMetadata).EvaluatedValue));
@@ -119,73 +113,5 @@ namespace Microsoft.Build.Evaluation
             {
             }
         }
-    }
-
-    internal class MetadataSet
-    {
-        private Dictionary<string, MetadataSet> children;
-        MatchOnMetadataOptions options;
-
-        internal MetadataSet(MatchOnMetadataOptions options)
-        {
-            StringComparer comparer = options == MatchOnMetadataOptions.CaseInsensitive ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
-            children = new Dictionary<string, MetadataSet>(comparer);
-            this.options = options;
-        }
-
-        // Relies on IEnumerable returning the metadata in a reasonable order. Reasonable?
-        internal void Add(IEnumerable<string> metadata)
-        {
-            MetadataSet current = this;
-            foreach (string s in metadata)
-            {
-                string normalizedString = options == MatchOnMetadataOptions.PathLike ?
-                    FileUtilities.NormalizeForPathComparison(s) :
-                    s;
-                if (current.children.TryGetValue(normalizedString, out MetadataSet child))
-                {
-                    current = child;
-                }
-                else
-                {
-                    current.children.Add(normalizedString, new MetadataSet(current.options));
-                    current = current.children[normalizedString];
-                }
-            }
-        }
-
-        internal bool Contains(IEnumerable<string> metadata)
-        {
-            List<string> metadataList = metadata.ToList();
-            return this.Contains(metadataList, 0);
-        }
-
-        private bool Contains(List<string> metadata, int index)
-        {
-            if (index == metadata.Count)
-            {
-                return true;
-            }
-            else if (String.IsNullOrEmpty(metadata[index]))
-            {
-                return children.Any(kvp => !String.IsNullOrEmpty(kvp.Key) && kvp.Value.Contains(metadata, index + 1));
-            }
-            else
-            {
-                return (children.TryGetValue(FileUtilities.NormalizeForPathComparison(metadata[index]), out MetadataSet child) && child.Contains(metadata, index + 1)) ||
-                    (children.TryGetValue(string.Empty, out MetadataSet emptyChild) && emptyChild.Contains(metadata, index + 1));
-            }
-        }
-    }
-
-    public enum MatchOnMetadataOptions
-    {
-        CaseSensitive,
-        CaseInsensitive,
-        PathLike
-    }
-
-    public static class MatchOnMetadataConstants {
-        public const MatchOnMetadataOptions MatchOnMetadataOptionsDefaultValue = MatchOnMetadataOptions.CaseSensitive;
     }
 }

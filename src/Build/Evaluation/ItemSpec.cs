@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
@@ -83,24 +84,6 @@ namespace Microsoft.Build.Evaluation
             public override bool IsMatch(string itemToMatch)
             {
                 return ReferencedItems.Any(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
-            }
-
-            public override bool IsMatchOnMetadata(IItem item, IEnumerable<string> metadata, MatchOnMetadataOptions options)
-            {
-                return ReferencedItems.Any(referencedItem =>
-                        metadata.All(m => !item.GetMetadataValue(m).Equals(string.Empty) && MetadataComparer(options, item.GetMetadataValue(m), referencedItem.Item.GetMetadataValue(m))));
-            }
-
-            private bool MetadataComparer(MatchOnMetadataOptions options, string itemMetadata, string referencedItemMetadata)
-            {
-                if (options.Equals(MatchOnMetadataOptions.PathLike))
-                {
-                    return FileUtilities.ComparePathsNoThrow(itemMetadata, referencedItemMetadata, ProjectDirectory);
-                }
-                else 
-                {
-                    return String.Equals(itemMetadata, referencedItemMetadata, options.Equals(MatchOnMetadataOptions.CaseInsensitive) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
-                }
             }
 
             public override IMSBuildGlob ToMSBuildGlob()
@@ -311,26 +294,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        ///     Return true if any of the given <paramref name="metadata" /> matches the metadata on <paramref name="item" />
-        /// </summary>
-        /// <param name="item">The item to attempt to find a match for based on matching metadata</param>
-        /// <param name="metadata">Names of metadata to look for matches for</param>
-        /// <param name="options">metadata option matching</param>
-        /// <returns></returns>
-        public bool MatchesItemOnMetadata(IItem item, IEnumerable<string> metadata, MatchOnMetadataOptions options)
-        {
-            foreach (var fragment in Fragments)
-            {
-                if (fragment.IsMatchOnMetadata(item, metadata, options))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
         ///     Return the fragments that match against the given <paramref name="itemToMatch" />
         /// </summary>
         /// <param name="itemToMatch">The item to match.</param>
@@ -456,14 +419,6 @@ namespace Microsoft.Build.Evaluation
             return FileMatcher.IsMatch(itemToMatch);
         }
 
-        /// <summary>
-        /// Returns true if <paramref name="itemToMatch" /> matches any ReferencedItems based on <paramref name="metadata" /> and <paramref name="options" />.
-        /// </summary>
-        public virtual bool IsMatchOnMetadata(IItem itemToMatch, IEnumerable<string> metadata, MatchOnMetadataOptions options)
-        {
-            return false;
-        }
-
         public virtual IMSBuildGlob ToMSBuildGlob()
         {
             return MsBuildGlob;
@@ -503,5 +458,88 @@ namespace Microsoft.Build.Evaluation
             && TextFragment[1] == '*'
             && TextFragment[2] == '*'
             && FileUtilities.IsAnySlash(TextFragment[3]);
+    }
+
+    internal class MetadataSet<P, I> where P : class, IProperty where I : class, IItem, IMetadataTable
+    {
+        private Dictionary<string, MetadataSet<P, I>> children;
+        MatchOnMetadataOptions options;
+
+        internal MetadataSet(MatchOnMetadataOptions options, ImmutableList<string> metadata, ItemSpec<P, I> itemSpec)
+        {
+            StringComparer comparer = options == MatchOnMetadataOptions.CaseInsensitive ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+            children = new Dictionary<string, MetadataSet<P, I>>(comparer);
+            this.options = options;
+            foreach (ItemSpec<P, I>.ItemExpressionFragment frag in itemSpec.Fragments)
+            {
+                foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)
+                {
+                    this.Add(metadata.Select(m => referencedItem.Item.GetMetadataValue(m)));
+                }
+            }
+        }
+
+        private MetadataSet(MatchOnMetadataOptions options)
+        {
+            StringComparer comparer = options == MatchOnMetadataOptions.CaseInsensitive ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+            children = new Dictionary<string, MetadataSet<P, I>>(comparer);
+            this.options = options;
+        }
+
+        // Relies on IEnumerable returning the metadata in a reasonable order. Reasonable?
+        private void Add(IEnumerable<string> metadata)
+        {
+            MetadataSet<P, I> current = this;
+            foreach (string s in metadata)
+            {
+                string normalizedString = options == MatchOnMetadataOptions.PathLike ?
+                    FileUtilities.NormalizeForPathComparison(s) :
+                    s;
+                if (current.children.TryGetValue(normalizedString, out MetadataSet<P, I> child))
+                {
+                    current = child;
+                }
+                else
+                {
+                    current.children.Add(normalizedString, new MetadataSet<P, I>(current.options));
+                    current = current.children[normalizedString];
+                }
+            }
+        }
+
+        internal bool Contains(IEnumerable<string> metadata)
+        {
+            List<string> metadataList = metadata.ToList();
+            return this.Contains(metadataList, 0);
+        }
+
+        private bool Contains(List<string> metadata, int index)
+        {
+            if (index == metadata.Count)
+            {
+                return true;
+            }
+            else if (String.IsNullOrEmpty(metadata[index]))
+            {
+                return children.Any(kvp => !String.IsNullOrEmpty(kvp.Key) && kvp.Value.Contains(metadata, index + 1));
+            }
+            else
+            {
+                return (children.TryGetValue(FileUtilities.NormalizeForPathComparison(metadata[index]), out MetadataSet<P, I> child) && child.Contains(metadata, index + 1)) ||
+                    (children.TryGetValue(string.Empty, out MetadataSet<P, I> emptyChild) && emptyChild.Contains(metadata, index + 1));
+            }
+        }
+    }
+
+    public enum MatchOnMetadataOptions
+    {
+        CaseSensitive,
+        CaseInsensitive,
+        PathLike
+    }
+
+    public static class MatchOnMetadataConstants
+    {
+        public const MatchOnMetadataOptions MatchOnMetadataOptionsDefaultValue = MatchOnMetadataOptions.CaseSensitive;
     }
 }

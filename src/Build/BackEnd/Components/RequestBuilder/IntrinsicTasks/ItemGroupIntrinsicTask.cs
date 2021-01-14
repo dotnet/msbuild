@@ -249,7 +249,10 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                itemsToRemove = FindItemsUsingMatchOnMetadata(group, child, bucket, matchOnMetadata, matchingOptions);
+                ImmutableList<string> metadataList = matchOnMetadata.ToImmutableList();
+                MetadataSet<ProjectPropertyInstance, ProjectItemInstance> metadataSet = new(matchingOptions, metadataList,
+                    new ItemSpec<ProjectPropertyInstance, ProjectItemInstance>(child.Remove, bucket.Expander, child.RemoveLocation, Project.Directory, true));
+                itemsToRemove = group.Where(item => metadataSet.Contains(metadataList.Select(m => item.GetMetadata(m).EvaluatedValue))).ToList();
             }
 
             if (itemsToRemove != null)
@@ -266,29 +269,6 @@ namespace Microsoft.Build.BackEnd
 
                 bucket.Lookup.RemoveItems(itemsToRemove);
             }
-        }
-
-        private List<ProjectItemInstance> FindItemsUsingMatchOnMetadata(
-            ICollection<ProjectItemInstance> items,
-            ProjectItemGroupTaskItemInstance child,
-            ItemBucket bucket,
-            HashSet<string> matchOnMetadata,
-            MatchOnMetadataOptions options)
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(matchOnMetadata, nameof(matchOnMetadata));
-
-            var itemSpec = new ItemSpec<ProjectPropertyInstance, ProjectItemInstance>(child.Remove, bucket.Expander, child.RemoveLocation, Project.Directory, true);
-
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                itemSpec.Fragments.Count == 1
-                && itemSpec.Fragments.First() is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment
-                && matchOnMetadata.Count == 1,
-                new BuildEventFileInfo(string.Empty),
-                "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem",
-                child.RemoveLocation,
-                child.Remove);
-
-            return items.Where(item => itemSpec.MatchesItemOnMetadata(item, matchOnMetadata, options)).ToList();
         }
 
         /// <summary>
