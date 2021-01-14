@@ -474,34 +474,31 @@ namespace Microsoft.Build.Evaluation
             {
                 foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)
                 {
-                    this.Add(metadata.Select(m => referencedItem.Item.GetMetadataValue(m)));
+                    this.Add(metadata.Select(m => referencedItem.Item.GetMetadataValue(m)), comparer);
                 }
             }
         }
 
-        private MetadataSet(MatchOnMetadataOptions options)
+        private MetadataSet(StringComparer comparer)
         {
-            StringComparer comparer = options == MatchOnMetadataOptions.CaseInsensitive ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
             children = new Dictionary<string, MetadataSet<P, I>>(comparer);
-            this.options = options;
         }
 
         // Relies on IEnumerable returning the metadata in a reasonable order. Reasonable?
-        private void Add(IEnumerable<string> metadata)
+        private void Add(IEnumerable<string> metadata, StringComparer comparer)
         {
+            Func<string, string> normalize = options == MatchOnMetadataOptions.PathLike ? FileUtilities.NormalizeForPathComparison : s => s;
             MetadataSet<P, I> current = this;
             foreach (string s in metadata)
             {
-                string normalizedString = options == MatchOnMetadataOptions.PathLike ?
-                    FileUtilities.NormalizeForPathComparison(s) :
-                    s;
+                string normalizedString = normalize(s);
                 if (current.children.TryGetValue(normalizedString, out MetadataSet<P, I> child))
                 {
                     current = child;
                 }
                 else
                 {
-                    current.children.Add(normalizedString, new MetadataSet<P, I>(current.options));
+                    current.children.Add(normalizedString, new MetadataSet<P, I>(comparer));
                     current = current.children[normalizedString];
                 }
             }

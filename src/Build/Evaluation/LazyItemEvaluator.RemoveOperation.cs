@@ -73,7 +73,7 @@ namespace Microsoft.Build.Evaluation
                     metadataSet = new MetadataSet<P, I>(_matchOnMetadataOptions, _matchOnMetadata, _itemSpec);
                 }
 
-                return metadataSet.Contains(_matchOnMetadata.Select(m => (item.GetMetadata(m) as ProjectMetadata).EvaluatedValue));
+                return metadataSet.Contains(_matchOnMetadata.Select(m => item.GetMetadataValue(m)));
             }
 
             protected override void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder)
