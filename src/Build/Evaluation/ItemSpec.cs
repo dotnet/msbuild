@@ -467,9 +467,9 @@ namespace Microsoft.Build.Evaluation
 
         internal MetadataSet(MatchOnMetadataOptions options, ImmutableList<string> metadata, ItemSpec<P, I> itemSpec)
         {
-            StringComparer comparer = options == MatchOnMetadataOptions.CaseInsensitive ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+            StringComparer comparer = options == MatchOnMetadataOptions.CaseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
             children = new Dictionary<string, MetadataSet<P, I>>(comparer);
-            normalize = options == MatchOnMetadataOptions.PathLike ? FileUtilities.NormalizeForPathComparison : s => s;
+            normalize = options == MatchOnMetadataOptions.PathLike ? p => FileUtilities.NormalizePathForComparisonNoThrow(p, Environment.CurrentDirectory) : p => p;
             foreach (ItemSpec<P, I>.ItemExpressionFragment frag in itemSpec.Fragments)
             {
                 foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)
@@ -488,9 +488,9 @@ namespace Microsoft.Build.Evaluation
         private void Add(IEnumerable<string> metadata, StringComparer comparer)
         {
             MetadataSet<P, I> current = this;
-            foreach (string s in metadata)
+            foreach (string m in metadata)
             {
-                string normalizedString = normalize(s);
+                string normalizedString = normalize(m);
                 if (current.children.TryGetValue(normalizedString, out MetadataSet<P, I> child))
                 {
                     current = child;
@@ -513,6 +513,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     nonEmptyFound = true;
                 }
+                string normalizedString = normalize(m);
                 if (!curr.children.TryGetValue(normalize(m), out curr))
                 {
                     return false;
