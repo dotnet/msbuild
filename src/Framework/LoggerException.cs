@@ -14,11 +14,9 @@ namespace Microsoft.Build.Framework
     /// Allows a logger to force the build to stop in an explicit way, when, for example, it 
     /// receives invalid parameters, or cannot write to disk.
     /// </summary>
-    /// <remarks>
-    /// WARNING: marking a type [Serializable] without implementing ISerializable imposes a serialization contract -- it is a
-    /// promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type
-    /// without following certain special FX guidelines, can break both forward and backward compatibility
-    /// </remarks>
+    // WARNING: marking a type [Serializable] without implementing ISerializable imposes a serialization contract -- it is a
+    // promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type
+    // without following certain special FX guidelines, can break both forward and backward compatibility
     [Serializable]
     public class LoggerException : Exception
     {

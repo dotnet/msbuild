@@ -171,7 +171,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets of sets the MatchOnMetadata value.
+        /// Gets or sets the MatchOnMetadata value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty or null.
         /// </summary>
@@ -194,7 +194,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets of sets the MatchOnMetadataOptions value.
+        /// Gets or sets the MatchOnMetadataOptions value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty or null.
         /// </summary>
