@@ -513,7 +513,6 @@ namespace Microsoft.Build.Evaluation
                 {
                     nonEmptyFound = true;
                 }
-                string normalizedString = normalize(m);
                 if (!curr.children.TryGetValue(normalize(m), out curr))
                 {
                     return false;
