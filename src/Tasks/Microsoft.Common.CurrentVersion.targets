@@ -4172,10 +4172,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_SatelliteAssemblies Include="@(IntermediateSatelliteAssembliesWithTargetPath);@(ReferenceSatellitePaths)" />
       <_DeploymentReferencePaths Include="@(ReferenceCopyLocalPaths)"
-                                 Condition="'%(Extension)' == '.dll' Or '%(Extension)' == '.exe' Or '%(Extension)' == '.md'">
+                                 Condition="('%(Extension)' == '.dll' Or '%(Extension)' == '.exe' Or '%(Extension)' == '.md') and ('%(ReferenceCopyLocalPaths.CopyToPublishDirectory)' != 'false')">
         <IsPrimary>true</IsPrimary>
       </_DeploymentReferencePaths>
-      <_DeploymentReferencePaths Include="@(_DeploymentReferencePaths);@(_CopyLocalFalseRefPathsWithExclusion)" />
+      <_DeploymentReferencePaths Include="@(_CopyLocalFalseRefPathsWithExclusion)" />
     </ItemGroup>
 
     <!-- Include managed references in clickonce manifest only if single file publish is false -->
