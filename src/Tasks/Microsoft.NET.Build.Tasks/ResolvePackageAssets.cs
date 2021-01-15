@@ -1198,7 +1198,8 @@ namespace Microsoft.NET.Build.Tasks
 
                 foreach (var library in _runtimeTarget.Libraries)
                 {
-                    if (!library.IsTransitiveProjectReference(_lockFile, ref directProjectDependencies))
+                    if (!library.IsTransitiveProjectReference(_lockFile, ref directProjectDependencies, 
+                        _lockFile.GetLockFileTargetAlias(_lockFile.GetTargetAndReturnNullIfNotFound(_targetFramework, null))))
                     {
                         continue;
                     }
