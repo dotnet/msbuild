@@ -143,6 +143,10 @@ namespace Microsoft.Build.Logging
             }
 
             stream = new GZipStream(stream, CompressionLevel.Optimal);
+
+            // wrapping the GZipStream in a buffered stream significantly improves performance
+            // and the max throughput is reached with a 32K buffer. See details here:
+            // https://github.com/dotnet/runtime/issues/39233#issuecomment-745598847
             stream = new BufferedStream(stream, bufferSize: 32768);
             binaryWriter = new BinaryWriter(stream);
             eventArgsWriter = new BuildEventArgsWriter(binaryWriter);

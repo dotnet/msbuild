@@ -1200,8 +1200,11 @@ namespace Microsoft.Build.Logging
                         FileMode.OpenOrCreate,
                         FileAccess.ReadWrite,
                         FileShare.None,
-                        bufferSize: 4096,
+                        bufferSize: 4096, // 4096 seems to have the best performance on SSD
                         FileOptions.RandomAccess | FileOptions.DeleteOnClose);
+
+                    // 65536 has no particular significance, and maybe could be tuned
+                    // but 65536 performs well enough and isn't a lot of memory for a singleton
                     streamWriter = new StreamWriter(stream, utf8noBom, 65536);
                     streamWriter.AutoFlush = true;
                     streamReader = new StreamReader(stream, utf8noBom);
