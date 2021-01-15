@@ -16,6 +16,7 @@ namespace Microsoft.Build.Logging
     {
         private readonly BinaryReader binaryReader;
         private readonly int fileFormatVersion;
+        private long recordNumber = 0;
 
         /// <summary>
         /// A list of string records we've encountered so far. If it's a small string, it will be the string directly.
@@ -96,6 +97,8 @@ namespace Microsoft.Build.Logging
                     ReadBlob(recordKind);
                 }
 
+                recordNumber += 1;
+
                 recordKind = (BinaryLogRecordKind)ReadInt32();
             }
 
@@ -171,6 +174,8 @@ namespace Microsoft.Build.Logging
                     break;
             }
 
+            recordNumber += 1;
+
             return result;
         }
 
@@ -224,7 +229,9 @@ namespace Microsoft.Build.Logging
                 return dictionary;
             }
 
-            return new Dictionary<string, string>();
+            // this should never happen for valid binlogs
+            throw new InvalidDataException(
+                $"NameValueList record number {recordNumber} is invalid: index {id} is not within {stringRecords.Count}.");
         }
 
         private void ReadStringRecord()
@@ -1065,7 +1072,9 @@ namespace Microsoft.Build.Logging
                 return result;
             }
 
-            return string.Empty;
+            // this should never happen for valid binlogs
+            throw new InvalidDataException(
+                $"String record number {recordNumber} is invalid: string index {index} is not within {stringRecords.Count}.");
         }
 
         private int ReadInt32()
