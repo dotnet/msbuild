@@ -8,6 +8,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
+using Microsoft.Build.Engine.UnitTests.TestComparers;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {

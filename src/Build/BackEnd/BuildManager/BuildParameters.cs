@@ -10,7 +10,9 @@ using System.Globalization;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -296,6 +298,7 @@ namespace Microsoft.Build.Execution
             _outputResultsCacheFile = other._outputResultsCacheFile;
             DiscardBuildResults = other.DiscardBuildResults;
             LowPriority = other.LowPriority;
+            ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
 
 #if FEATURE_THREAD_PRIORITY
@@ -555,7 +558,7 @@ namespace Microsoft.Build.Execution
         /// <comments>
         /// toolsetProvider.Toolsets is already a readonly collection.
         /// </comments>
-        public ICollection<Toolset> Toolsets => _toolsetProvider.Toolsets;
+        public ICollection<Toolset> Toolsets => ToolsetProvider.Toolsets;
 
         /// <summary>
         /// The name of the UI culture to use during the build.
@@ -779,6 +782,14 @@ namespace Microsoft.Build.Execution
         /// Gets or sets a value indicating whether the build process should run as low priority.
         /// </summary>
         public bool LowPriority { get; set; }
+
+        /// <summary>
+        /// If set, the BuildManager will query all
+        /// incoming <see cref="BuildSubmission"/> requests against the specified project cache.
+        /// Any <see cref="GraphBuildSubmission"/> requests will also use this project cache instead of
+        /// the potential project caches described in graph node's evaluations.
+        /// </summary>
+        public ProjectCacheDescriptor ProjectCacheDescriptor { get; set; }
 
         /// <summary>
         /// Retrieves a toolset.

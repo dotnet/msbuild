@@ -7,8 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Definition;
+using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.BackEnd;
+using Shouldly;
 using SdkResolverContext = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 using SdkResultFactory = Microsoft.Build.Framework.SdkResultFactory;
@@ -141,6 +146,41 @@ namespace Microsoft.Build.Unittest
                 return _mapping.ContainsKey(sdkReference.Name)
                     ? factory.IndicateSuccess(_mapping[sdkReference.Name], null)
                     : factory.IndicateFailure(new[] { $"Not in {nameof(_mapping)}" });
+            }
+        }
+
+        internal static class EngineHelpers
+        {
+            internal static void AssertBuildResultsEqual(BuildResult actualBuildResult, BuildResult expectedBuildResult)
+            {
+                actualBuildResult.InitialTargets.ShouldBe(expectedBuildResult.InitialTargets);
+                actualBuildResult.DefaultTargets.ShouldBe(expectedBuildResult.DefaultTargets);
+                actualBuildResult.CircularDependency.ShouldBe(expectedBuildResult.CircularDependency);
+                actualBuildResult.Exception.ShouldBe(expectedBuildResult.Exception);
+                actualBuildResult.OverallResult.ShouldBe(expectedBuildResult.OverallResult);
+                actualBuildResult.ProjectStateAfterBuild.ShouldBe(expectedBuildResult.ProjectStateAfterBuild);
+
+                Helpers.AssertDictionariesEqual(
+                    actualBuildResult.ResultsByTarget,
+                    expectedBuildResult.ResultsByTarget,
+                    (a, b) =>
+                    {
+                        a.Key.ShouldBe(b.Key);
+
+                        AssertTargetResultsEqual(a.Value, b.Value);
+                    });
+            }
+
+            internal static void AssertTargetResultsEqual(TargetResult a, TargetResult b)
+            {
+                TranslationHelpers.CompareExceptions(a.Exception, b.Exception).ShouldBeTrue();
+                TranslationHelpers.CompareCollections(a.Items, b.Items, TaskItemComparer.Instance).ShouldBeTrue();
+
+                a.ResultCode.ShouldBe(b.ResultCode);
+
+                a.WorkUnitResult.ActionCode.ShouldBe(b.WorkUnitResult.ActionCode);
+                a.WorkUnitResult.Exception.ShouldBe(b.WorkUnitResult.Exception);
+                a.WorkUnitResult.ResultCode.ShouldBe(b.WorkUnitResult.ResultCode);
             }
         }
     }

@@ -86,6 +86,7 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] _scatterFiles = Array.Empty<TaskItem>();
         private ITaskItem[] _copyLocalFiles = Array.Empty<TaskItem>();
         private ITaskItem[] _suggestedRedirects = Array.Empty<TaskItem>();
+        private List<ITaskItem> _unresolvedConflicts = new List<ITaskItem>();
         private string[] _targetFrameworkSubsets = Array.Empty<string>();
         private string[] _fullTargetFrameworkSubsetNames = Array.Empty<string>();
         private string _targetedFrameworkMoniker = String.Empty;
@@ -213,6 +214,11 @@ namespace Microsoft.Build.Tasks
         /// conflicts within an externally resolved graph.
         /// </remarks>
         public bool FindDependenciesOfExternallyResolvedReferences { get; set; }
+
+        /// <summary>
+        /// If true, outputs any unresolved assembly conflicts (MSB3277) in UnresolvedAssemblyConflicts.
+        /// </summary>
+        public bool OutputUnresolvedAssemblyConflicts { get; set; }
 
         /// <summary>
         /// List of target framework subset names which will be searched for in the target framework directories
@@ -915,6 +921,13 @@ namespace Microsoft.Build.Tasks
             private set;
         }
 
+        /// <summary>
+        /// If OutputUnresolvedAssemblyConflicts then a list of information about unresolved conflicts that normally would have
+        /// been outputted in MSB3277. Otherwise empty.
+        /// </summary>
+        [Output]
+        public ITaskItem[] UnresolvedAssemblyConflicts => _unresolvedConflicts.ToArray();
+
         #endregion
         #region Logging
 
@@ -990,16 +1003,30 @@ namespace Microsoft.Build.Tasks
                             // Log the reference which lost the conflict and the dependencies and source items which caused it.
                             LogReferenceDependenciesAndSourceItemsToStringBuilder(fusionName, conflictCandidate, logDependencies.AppendLine());
 
+                            string output = StringBuilderCache.GetStringAndRelease(logConflict);
+                            string details = string.Empty;
                             if (logWarning)
                             {
                                 // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference	
                                 // chosen was not the conflict victor in a version comparison. In other words, the victor was older.
-                                Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts", assemblyName.Name, StringBuilderCache.GetStringAndRelease(logConflict));
+                                Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts", assemblyName.Name, output);
                             }
                             else
                             {
-                                Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), StringBuilderCache.GetStringAndRelease(logConflict));
-                                Log.LogMessage(MessageImportance.Low, StringBuilderCache.GetStringAndRelease(logDependencies));
+                                details = StringBuilderCache.GetStringAndRelease(logDependencies);
+                                Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), output);
+                                Log.LogMessage(MessageImportance.Low, details);
+                            }
+
+                            if (OutputUnresolvedAssemblyConflicts)
+                            {
+                                _unresolvedConflicts.Add(new TaskItem(assemblyName.Name, new Dictionary<string, string>()
+                                {
+                                    { "logMessage", output },
+                                    { "logMessageDetails", details },
+                                    { "victorVersionNumber", victor.ReferenceVersion.ToString() },
+                                    { "victimVersionNumber", conflictCandidate.ReferenceVersion.ToString() }
+                                }));
                             }
                         }
                     }

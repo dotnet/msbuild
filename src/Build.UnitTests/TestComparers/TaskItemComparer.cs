@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.UnitTests.BackEnd
+namespace Microsoft.Build.Engine.UnitTests.TestComparers
 {
     /// <summary>
     /// Implementation of IComparer on ITaskItems used for testing.

@@ -61,7 +61,7 @@ namespace Microsoft.Build.Execution
     /// and call it several times to build it.
     /// </summary>
     /// <comments>
-    /// Neither this class nor none of its constituents are allowed to have
+    /// Neither this class nor any of its constituents are allowed to have
     /// references to any of the Construction or Evaluation objects.
     /// This class is immutable except for adding instance items and setting instance properties.
     /// It only exposes items and properties: targets, host services, and the task registry are not exposed as they are only the concern of build.
@@ -2103,7 +2103,17 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a set of project instances which represent the project dependency graph for a solution build.
         /// </summary>
-        internal static ProjectInstance[] LoadSolutionForBuild(string projectFile, PropertyDictionary<ProjectPropertyInstance> globalPropertiesInstances, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext projectBuildEventContext, bool isExplicitlyLoaded, IReadOnlyCollection<string> targetNames, ISdkResolverService sdkResolverService, int submissionId)
+        internal static ProjectInstance[] LoadSolutionForBuild(
+            string projectFile,
+            PropertyDictionary<ProjectPropertyInstance> globalPropertiesInstances,
+            string toolsVersion,
+            BuildParameters buildParameters,
+            ILoggingService loggingService,
+            BuildEventContext projectBuildEventContext,
+            bool isExplicitlyLoaded,
+            IReadOnlyCollection<string> targetNames,
+            ISdkResolverService sdkResolverService,
+            int submissionId)
         {
             ErrorUtilities.VerifyThrowArgumentLength(projectFile, nameof(projectFile));
             ErrorUtilities.VerifyThrowArgumentNull(globalPropertiesInstances, nameof(globalPropertiesInstances));

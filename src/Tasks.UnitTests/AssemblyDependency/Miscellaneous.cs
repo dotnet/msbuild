@@ -3686,6 +3686,37 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
         }
 
+        [Fact]
+        public void ConflictOutputsExtraInformationOnDemand()
+        {
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            MockEngine e = new MockEngine(_output);
+            t.BuildEngine = e;
+
+            t.Assemblies = new ITaskItem[]
+            {
+                new TaskItem("B"),
+                new TaskItem("D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")
+            };
+
+            t.SearchPaths = new string[]
+            {
+                s_myLibrariesRootPath, s_myLibraries_V2Path, s_myLibraries_V1Path
+            };
+
+            t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
+            t.OutputUnresolvedAssemblyConflicts = true;
+
+            Execute(t);
+
+            ITaskItem[] conflicts = t.UnresolvedAssemblyConflicts;
+            conflicts.Length.ShouldBe(1);
+            conflicts[0].ItemSpec.ShouldBe("D");
+            conflicts[0].GetMetadata("victorVersionNumber").ShouldBe("1.0.0.0");
+            conflicts[0].GetMetadata("victimVersionNumber").ShouldBe("2.0.0.0");
+        }
+
         /// <summary>
         /// Consider this dependency chain:
         ///

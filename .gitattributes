@@ -20,7 +20,7 @@ src/Tasks/*.targets linguist-detectable=true
 src/Tasks/*.tasks linguist-detectable=true
 
 # Don't include Arcade-owned path
-eng/common/** linguist-detectable=false
+eng/common/** linguist-vendored linguist-generated
 
 # Display XLF files collapsed by default in PR diffs
 *.xlf linguist-generated=true
