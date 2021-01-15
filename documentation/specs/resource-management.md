@@ -1,6 +1,6 @@
 # Managing tools with their own parallelism in MSBuild
 
-MSBuild supports building projects in parallel using multiple processes. Most users opt into `NUM_PROCS` parallelism at the MSBuild layer.
+MSBuild supports building projects in parallel using multiple processes. Most users opt into `Environment.ProcessorCount` parallelism at the MSBuild layer.
 
 In addition, tools sometimes support parallel execution. The Visual C++ compiler `cl.exe` supports `/MP[n]`, which parallelizes compilation at the translation-unit (file) level. If a number isn't specified, it defaults to `NUM_PROCS`.
 
