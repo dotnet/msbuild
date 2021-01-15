@@ -40,6 +40,12 @@
     </ProjectReference>
     <ProjectReference Include="..\Samples\PortableTask\PortableTask.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="PortableTaskResolvedProjectReferencePath" SetTargetFramework="TargetFramework=netstandard1.3" />
 
+    <ProjectReference Include="..\Samples\ProjectCachePlugin\ProjectCachePlugin.csproj" Private="false" ReferenceOutputAssembly="false">
+      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
+      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MonoBuild)' == 'true'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
+      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=netcoreapp2.1</SetTargetFramework>
+    </ProjectReference>
+
     <Reference Include="System.Configuration" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 

@@ -20,6 +20,7 @@ using Microsoft.Build.Shared;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
+using Microsoft.Build.Engine.UnitTests.TestComparers;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {

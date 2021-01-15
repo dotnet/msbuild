@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using ObjectModel = System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -17,6 +18,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
@@ -737,6 +739,12 @@ namespace Microsoft.Build.Evaluation
                     _data.BeforeTargets = targetsWhichRunBeforeByTarget;
                     _data.AfterTargets = targetsWhichRunAfterByTarget;
 
+                    if (BuildEnvironmentHelper.Instance.RunningInVisualStudio)
+                    {
+                        // TODO: Remove this when VS gets updated to setup project cache plugins.
+                        CollectProjectCachePlugins();
+                    }
+
                     if (Traits.Instance.EscapeHatches.DebugEvaluation)
                     {
                         // This is so important for VS performance it's worth always tracing; accidentally having 
@@ -775,6 +783,20 @@ namespace Microsoft.Build.Evaluation
                 ProjectFile = projectFile,
                 ProfilerResult = _evaluationProfiler.ProfiledResult
             });
+        }
+
+        private void CollectProjectCachePlugins()
+        {
+            foreach (var item in _data.GetItems(ItemTypeNames.ProjectCachePlugin))
+            {
+                var metadataDictionary = item.Metadata.ToDictionary(m => m.Key, m => m.EscapedValue);
+
+                var pluginPath = Path.Combine(_data.Directory, item.EvaluatedInclude);
+
+                var projectCacheItem = new ProjectCacheItem(pluginPath, metadataDictionary);
+
+                BuildManager.ProjectCacheItems[pluginPath] = projectCacheItem;
+            }
         }
 
         /// <summary>
