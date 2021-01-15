@@ -9,6 +9,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+
+using Microsoft.Build.BackEnd.Components.ResourceManager;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -70,6 +72,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private int _nodeLimitOffset;
 
+        private int _resourceManagedCoresUsed = 0;
+
         /// <summary>
         /// { nodeId -> NodeInfo }
         /// A list of nodes we know about.  For the non-distributed case, there will be no more nodes than the
@@ -105,6 +109,7 @@ namespace Microsoft.Build.BackEnd
         /// The configuration cache.
         /// </summary>
         private IConfigCache _configCache;
+        private ResourceManagerService _resourceManager;
 
         /// <summary>
         /// The results cache.
@@ -529,6 +534,7 @@ namespace Microsoft.Build.BackEnd
             _componentHost = host;
             _resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
             _configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
+            _resourceManager = (ResourceManagerService)_componentHost.GetComponent(BuildComponentType.TaskResourceManager);
         }
 
         /// <summary>
@@ -928,6 +934,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (CanScheduleRequestToNode(request, nodeId))
                     {
+                        _resourceManager.RequireCores(1); // TODO: is it ok to block here?
                         AssignUnscheduledRequestToNode(request, nodeId, responses);
                         idleNodes.Remove(nodeId);
                         break;
@@ -1279,12 +1286,14 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            int limit = _componentHost.BuildParameters.MaxNodeCount switch
+            int limit = 1;
+
+            if (_componentHost.BuildParameters.MaxNodeCount > 1)
             {
-                1 => 1,
-                2 => _componentHost.BuildParameters.MaxNodeCount + 1 + _nodeLimitOffset,
-                _ => _componentHost.BuildParameters.MaxNodeCount + 2 + _nodeLimitOffset,
-            };
+                // Delegate the oversubscription factor to the resource manager
+                // but continue to support a manual override here
+                limit = _resourceManager.Count + _nodeLimitOffset;
+            }
 
             // We're at our limit of schedulable requests if: 
             // (1) MaxNodeCount requests are currently executing

@@ -110,5 +110,20 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
 
             _loggingService?.LogComment(_taskLoggingContext.BuildEventContext, Framework.MessageImportance.Low, "ResourceManagerReleasedCores", coresToRelease, TotalNumberHeld);
         }
+
+        internal void RequireCores(int requestedCores)
+        {
+            if (s is null)
+            {
+                // Since the current implementation of the cross-process resource count uses
+                // named semaphores, it's not usable on non-Windows, so just continue.
+                return;
+            }
+
+            if (!s.WaitOne())
+            {
+                ErrorUtilities.ThrowInternalError("Couldn't get a core to run a task even with infinite timeout");
+            }
+        }
     }
 }
