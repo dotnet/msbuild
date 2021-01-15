@@ -7638,7 +7638,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Fact]
-        [Trait("Category", "netcore-linux-failing")]
+        [Trait("Category", "mono-osx-failing")]
         public void HandleFilesInSearchPathsWhichDiffersOnlyInCasing()
         {
             string redistListPath = CreateGenericRedistList();
