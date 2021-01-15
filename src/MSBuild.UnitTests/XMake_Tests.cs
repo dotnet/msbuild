@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
-            parameters[1].ShouldBe(Convert.ToString(Environment.ProcessorCount));
+            parameters[1].ShouldBe(Convert.ToString(NativeMethodsShared.GetLogicalCoreCount()));
             parameters.Length.ShouldBe(2);
 
             switches.HaveErrors().ShouldBeFalse();

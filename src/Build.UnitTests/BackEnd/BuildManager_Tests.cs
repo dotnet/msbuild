@@ -3986,7 +3986,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 var buildParameters = new BuildParameters()
                 {
                     DisableInProcNode = true,
-                    MaxNodeCount = Environment.ProcessorCount,
+                    MaxNodeCount = NativeMethodsShared.GetLogicalCoreCount(),
                     EnableNodeReuse = false,
                     Loggers = new List<ILogger>()
                     {

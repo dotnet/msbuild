@@ -39,7 +39,7 @@ namespace Microsoft.Build.Tasks
         // threads at the advantage of performing file copies more quickly in the kernel - we must avoid
         // taking up the whole threadpool esp. when hosted in Visual Studio. IOW we use a specific number
         // instead of int.MaxValue.
-        private static readonly int DefaultCopyParallelism = Environment.ProcessorCount > 4 ? 6 : 4;
+        private static readonly int DefaultCopyParallelism = NativeMethodsShared.GetLogicalCoreCount() > 4 ? 6 : 4;
 
         /// <summary>
         /// Constructor.

@@ -243,7 +243,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // Do not set state for resolution requests that are not associated with a valid build submission ID
             if (submissionId != BuildEventContext.InvalidSubmissionId)
             {
-                ConcurrentDictionary<SdkResolver, object> resolverState = _resolverStateBySubmission.GetOrAdd(submissionId, new ConcurrentDictionary<SdkResolver, object>(Environment.ProcessorCount, _resolvers.Count));
+                ConcurrentDictionary<SdkResolver, object> resolverState = _resolverStateBySubmission.GetOrAdd(submissionId, new ConcurrentDictionary<SdkResolver, object>(NativeMethodsShared.GetLogicalCoreCount(), _resolvers.Count));
 
                 resolverState.AddOrUpdate(resolver, state, (sdkResolver, obj) => state);
             }
