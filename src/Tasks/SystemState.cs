@@ -615,7 +615,13 @@ namespace Microsoft.Build.Tasks
                     files = Array.Empty<string>();
                 }
 
-                cached = files.ToDictionary(fn => Path.GetFileName(fn), StringComparer.OrdinalIgnoreCase);
+                cached = new Dictionary<string, string>(files.Length, StringComparer.OrdinalIgnoreCase);
+                foreach(var file in files)
+                {
+                    // this will not throw if there are files which differs only by case
+                    cached[Path.GetFileName(file)] = file;
+                }
+
                 instanceLocalDirectoryFiles[path] = cached;
             }
 

@@ -7637,6 +7637,73 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
+        [Fact]
+        [Trait("Category", "netcore-linux-failing")]
+        public void HandleFilesInSearchPathsWhichDiffersOnlyInCasing()
+        {
+            string redistListPath = CreateGenericRedistList();
+            try
+            {
+                ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+                t.BuildEngine = new MockEngine(_output);
+
+                t.Assemblies = new ITaskItem[]
+                {
+                    new TaskItem("System.Xml")
+                };
+
+                t.SearchPaths = new string[]
+                {
+                        @"{TargetFrameworkDirectory}"
+                };
+
+                t.TargetFrameworkDirectories = new string[] { Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5") };
+                string systemXmlPath = Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5\\System.Xml.dll");
+                string aFile = Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5\\A.File.dll");
+                string aFileLowercase = Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5\\a.file.dll");
+
+                t.InstalledAssemblyTables = new ITaskItem[] { new TaskItem(redistListPath) };
+
+                GetAssemblyName cachedGetAssemblyName = getAssemblyName;
+                List<string> preservedExistentFiles = s_existentFiles;
+                s_existentFiles = new List<string>(s_existentFiles);
+
+                s_existentFiles.Add(systemXmlPath);
+                s_existentFiles.Add(aFile);
+                s_existentFiles.Add(aFileLowercase);
+
+                getAssemblyName = new GetAssemblyName(delegate (string path)
+                {
+                    if (String.Equals(path, systemXmlPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return new AssemblyNameExtension("System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+                    }
+
+                    return null;
+                });
+
+                bool success;
+                try
+                {
+                    success = Execute(t);
+                }
+                finally
+                {
+                    s_existentFiles = preservedExistentFiles;
+                    getAssemblyName = cachedGetAssemblyName;
+                }
+
+                Assert.True(success); // "Expected no errors."
+                Assert.Single(t.ResolvedFiles); // "Expected one resolved assembly."
+                Assert.Contains("System.Xml", t.ResolvedFiles[0].ItemSpec); // "Expected System.Xml to resolve."
+            }
+            finally
+            {
+                File.Delete(redistListPath);
+            }
+        }
+
         /// <summary>
         /// Here's how you get into this situation:
         ///
