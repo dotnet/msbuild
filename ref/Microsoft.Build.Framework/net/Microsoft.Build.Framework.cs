@@ -213,7 +213,7 @@ namespace Microsoft.Build.Framework
     }
     public partial interface IBuildEngine8 : Microsoft.Build.Framework.IBuildEngine, Microsoft.Build.Framework.IBuildEngine2, Microsoft.Build.Framework.IBuildEngine3, Microsoft.Build.Framework.IBuildEngine4, Microsoft.Build.Framework.IBuildEngine5, Microsoft.Build.Framework.IBuildEngine6, Microsoft.Build.Framework.IBuildEngine7
     {
-        event Microsoft.Build.Framework.BuildWarningEventHandler WarningLoggedAsError;
+        System.Collections.Generic.HashSet<string> WarningsLoggedAsErrors { get; }
     }
     public partial interface ICancelableTask : Microsoft.Build.Framework.ITask
     {

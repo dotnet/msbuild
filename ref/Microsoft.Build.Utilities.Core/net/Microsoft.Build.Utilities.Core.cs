@@ -353,6 +353,7 @@ namespace Microsoft.Build.Utilities
         public Microsoft.Build.Framework.IBuildEngine5 BuildEngine5 { get { throw null; } }
         public Microsoft.Build.Framework.IBuildEngine6 BuildEngine6 { get { throw null; } }
         public Microsoft.Build.Framework.IBuildEngine7 BuildEngine7 { get { throw null; } }
+        public Microsoft.Build.Framework.IBuildEngine8 BuildEngine8 { get { throw null; } }
         protected string HelpKeywordPrefix { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskHost HostObject { get { throw null; } set { } }
         public Microsoft.Build.Utilities.TaskLoggingHelper Log { get { throw null; } }
@@ -391,7 +392,6 @@ namespace Microsoft.Build.Utilities
         public string HelpKeywordPrefix { get { throw null; } set { } }
         protected string TaskName { get { throw null; } }
         public System.Resources.ResourceManager TaskResources { get { throw null; } set { } }
-        public void BuildEngineLoggedWarningAsError(object sender, Microsoft.Build.Framework.BuildWarningEventArgs args) { }
         public string ExtractMessageCode(string message, out string messageWithoutCodePrefix) { messageWithoutCodePrefix = default(string); throw null; }
         public virtual string FormatResourceString(string resourceName, params object[] args) { throw null; }
         public virtual string FormatString(string unformatted, params object[] args) { throw null; }

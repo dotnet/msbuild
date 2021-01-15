@@ -49,11 +49,6 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentNull(taskInstance, nameof(taskInstance));
             _taskInstance = taskInstance;
             TaskName = taskInstance.GetType().Name;
-
-            if(_taskInstance.BuildEngine is IBuildEngine8 engine)
-            {
-                engine.WarningLoggedAsError += BuildEngineLoggedWarningAsError;
-            }
         }
 
         /// <summary>
@@ -65,12 +60,6 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
             TaskName = taskName;
             _buildEngine = buildEngine;
-
-            // Tasks need to know if a warning they logged was actually logged as an error.
-            if(_buildEngine is IBuildEngine8 engine)
-            {
-                engine.WarningLoggedAsError += BuildEngineLoggedWarningAsError;
-            }
         }
 
         #endregion
@@ -129,6 +118,9 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         private readonly IBuildEngine _buildEngine;
 
+        /// <summary>
+        /// The set containing all warning codes logged.
+        /// </summary>
         private HashSet<string> _warningCodesLogged = new HashSet<string>();
 
         /// <summary>
@@ -165,9 +157,31 @@ namespace Microsoft.Build.Utilities
         public string HelpKeywordPrefix { get; set; }
 
         /// <summary>
-        /// Has the task logged any errors through this logging helper object?
+        /// 
         /// </summary>
-        public bool HasLoggedErrors { get; private set; }
+        private bool _hasLoggedErrors;
+
+        /// <summary>
+        /// Gets whether the task has logged an error or if the build engine
+        /// converted a warning into an error.
+        /// </summary>
+        public bool HasLoggedErrors
+        {
+            get
+            {
+                if(!_hasLoggedErrors)
+                {
+                    // See if a previously logged warning was turned into an error.
+                    _hasLoggedErrors = (BuildEngine as IBuildEngine8).WarningsLoggedAsErrors.Overlaps(_warningCodesLogged);
+                }
+
+                return _hasLoggedErrors;
+            }
+            private set
+            {
+                _hasLoggedErrors = value;
+            }
+        }
 
 #endregion
 
@@ -936,18 +950,6 @@ namespace Microsoft.Build.Utilities
 
 #region Warning logging methods
 
-        public void BuildEngineLoggedWarningAsError(object sender, BuildWarningEventArgs args)
-        {
-            if(args.Code == null)
-            {
-
-            }
-            if(_warningCodesLogged.Contains(args.Code))
-            {
-                HasLoggedErrors = true;
-            }
-        }
-
         /// <summary>
         /// Logs a warning using the specified string.
         /// Thread safe.
@@ -1046,7 +1048,7 @@ namespace Microsoft.Build.Utilities
 
             }
 
-            // Keep track of warnings logged, and compare them against when a warning is logged as an error.
+            // Keep track of warnings logged and compare to the what the build engine logged as an error.
             _warningCodesLogged.Add(warningCode);
 
             var e = new BuildWarningEventArgs

@@ -487,31 +487,14 @@ namespace Microsoft.Build.BackEnd
 
                 e.BuildEventContext = _taskLoggingContext.BuildEventContext;
 
+                // If the warning we're about to log will be logged as an error, store it so
+                // the TaskLoggingHelper can determine what was actually logged as an error.
                 if (_taskLoggingContext.LoggingService.ShouldTreatWarningAsError(e.Code, e.BuildEventContext))
                 {
-                    WarningLoggedAsError(null, e);
+                    WarningsLoggedAsErrors.Add(e.Code);
+                }
 
-                    BuildErrorEventArgs errorEvent = new BuildErrorEventArgs
-                            (
-                                e.Subcategory,
-                                e.Code,
-                                e.File,
-                                e.LineNumber,
-                                e.ColumnNumber,
-                                e.EndLineNumber,
-                                e.EndColumnNumber,
-                                e.Message,
-                                e.HelpKeyword,
-                                e.SenderName
-                            );
-                    errorEvent.BuildEventContext = e.BuildEventContext;
-                    _taskLoggingContext.HasLoggedErrors = true;
-                    _taskLoggingContext.LoggingService.LogBuildEvent(errorEvent);
-                }
-                else
-                {
-                    _taskLoggingContext.LoggingService.LogBuildEvent(e);
-                }
+                _taskLoggingContext.LoggingService.LogBuildEvent(e);
             }
         }
 
@@ -701,8 +684,12 @@ namespace Microsoft.Build.BackEnd
         public bool AllowFailureWithoutError { get; set; } = false;
         #endregion
 
-
-        public event BuildWarningEventHandler WarningLoggedAsError;
+        #region IBuildEngine8 Members
+        /// <summary>
+        /// Returns a set containing all warnings the build engine converted into errors.
+        /// </summary>
+        public HashSet<string> WarningsLoggedAsErrors { get; } = new HashSet<string>();
+        #endregion
 
         /// <summary>
         /// Called by the internal MSBuild task.

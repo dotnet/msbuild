@@ -352,8 +352,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Determines if the specified warning code should be treated as an error.
         /// </summary>
-        /// <param name="code">A <see cref="BuildWarningEventArgs"/> that specifies the warning.</param>
-        /// <param name="context">The event context for where the warning occurred</param>
+        /// <param name="code">The warning code to check..</param>
+        /// <param name="context">The event context for where the warning occurred.</param>
         /// <returns><code>true</code> if the warning should be treated as an error, otherwise <code>false</code>.</returns>
         bool ShouldTreatWarningAsError(string code, BuildEventContext context);
 

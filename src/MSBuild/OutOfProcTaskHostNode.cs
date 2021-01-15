@@ -162,9 +162,9 @@ namespace Microsoft.Build.CommandLine
         /// The task object cache.
         /// </summary>
         private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
+#endif
 
         public event BuildWarningEventHandler WarningLoggedAsError;
-#endif
 
         /// <summary>
         /// Constructor.
@@ -457,6 +457,14 @@ namespace Microsoft.Build.CommandLine
 
         #endregion
 #endif
+
+        #region IBuildEngine8 Implementation
+        /// <summary>
+        /// Returns a set containing all warnings the build engine converted into errors.
+        /// </summary>
+        public HashSet<string> WarningsLoggedAsErrors { get; } = new HashSet<string>();
+        #endregion
+
 
         #region INodePacketFactory Members
 
