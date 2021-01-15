@@ -157,7 +157,7 @@ namespace Microsoft.Build.Utilities
         public string HelpKeywordPrefix { get; set; }
 
         /// <summary>
-        /// 
+        /// A bool that determines whether or not the task has logged an error.
         /// </summary>
         private bool _hasLoggedErrors;
 
@@ -1042,11 +1042,6 @@ namespace Microsoft.Build.Utilities
             // If the task has missed out all location information, add the location of the task invocation;
             // that gives the user something.
             bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
-
-            if(warningCode == null)
-            {
-
-            }
 
             // Keep track of warnings logged and compare to the what the build engine logged as an error.
             _warningCodesLogged.Add(warningCode);

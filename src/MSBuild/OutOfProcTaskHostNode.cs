@@ -164,8 +164,6 @@ namespace Microsoft.Build.CommandLine
         private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
 #endif
 
-        public event BuildWarningEventHandler WarningLoggedAsError;
-
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -871,10 +869,6 @@ namespace Microsoft.Build.CommandLine
                     if (taskResult == null)
                     {
                         taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
-                        if(_isTaskExecuting)
-                        {
-                            WarningLoggedAsError(null, null);
-                        }
                     }
 
                     lock (_taskCompleteLock)

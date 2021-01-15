@@ -212,14 +212,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
 
-            string warningCode = null;
-            ResourceUtilities.ExtractMessageCode(true, ResourceUtilities.GetResourceString(messageResourceName), out warningCode);
-
-            if(_loggingService.ShouldTreatWarningAsError(warningCode, _eventContext))
-            {
-                _loggingService.LogError(_eventContext, file, messageResourceName, messageArgs);
-            }
-            
             _loggingService.LogWarning(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
         }
 
@@ -234,11 +226,6 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogWarningFromText(string subcategoryResourceName, string warningCode, string helpKeyword, BuildEventFileInfo file, string message)
         {
             ErrorUtilities.VerifyThrow(_isValid, "must be valid");
-
-            if (_loggingService.ShouldTreatWarningAsError(warningCode, _eventContext))
-            {
-                _loggingService.LogErrorFromText(_eventContext, subcategoryResourceName, warningCode, helpKeyword, file, message);
-            }
 
             _loggingService.LogWarningFromText(_eventContext, subcategoryResourceName, warningCode, helpKeyword, file, message);
         }

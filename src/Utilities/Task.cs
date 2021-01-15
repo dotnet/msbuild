@@ -50,22 +50,11 @@ namespace Microsoft.Build.Utilities
 
         #region Properties
 
-        private IBuildEngine _engine;
         /// <summary>
         /// The build engine automatically sets this property to allow tasks to call back into it.
         /// </summary>
         /// <value>The build engine interface available to tasks.</value>
-        public IBuildEngine BuildEngine
-        {
-            get
-            {
-                return _engine;
-            }
-            set
-            {
-                _engine = value;
-            }
-        }
+        public IBuildEngine BuildEngine { get; set; }
 
         // The casts below are always possible because this class is built against the 
         // Orcas Framework assembly or later, so the version of MSBuild that does not
