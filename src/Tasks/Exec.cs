@@ -17,9 +17,7 @@ namespace Microsoft.Build.Tasks
     /// This class defines an "Exec" MSBuild task, which simply invokes the specified process with the specified arguments, waits
     /// for it to complete, and then returns True if the process completed successfully, and False if an error occurred.
     /// </summary>
-    /// <comments>
-    /// UNDONE: ToolTask has a "UseCommandProcessor" flag that duplicates much of the code in this class. Remove the duplication.
-    /// </comments>
+    // UNDONE: ToolTask has a "UseCommandProcessor" flag that duplicates much of the code in this class. Remove the duplication.
     public class Exec : ToolTaskExtension
     {
         #region Constructors

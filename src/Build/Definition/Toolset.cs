@@ -35,9 +35,7 @@ namespace Microsoft.Build.Evaluation
     /// Aggregation of a toolset version (eg. "2.0"), tools path, and optional set of associated properties.
     /// Toolset is immutable.
     /// </summary>
-    /// <remarks>
-    /// UNDONE: Review immutability. If this is not immutable, add a mechanism to notify the project collection/s owning it to increment their toolsetVersion.
-    /// </remarks>
+    // UNDONE: Review immutability. If this is not immutable, add a mechanism to notify the project collection/s owning it to increment their toolsetVersion.
     [DebuggerDisplay("ToolsVersion={ToolsVersion} ToolsPath={ToolsPath} #Properties={_properties.Count}")]
     public class Toolset : ITranslatable
     {

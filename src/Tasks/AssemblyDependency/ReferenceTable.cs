@@ -2236,6 +2236,118 @@ namespace Microsoft.Build.Tasks
             }
         }
 
+        // TODO: Verify correctness of this implementation and extend to more cases.
+        // Should be consistent with CompareAssemblyIdentity from Fusion API:
+        // The result should be TRUE if one (or more) of the following conditions is true:
+        // a) The assembly identities are equivalent. For strongly-named assemblies this means full match on (name, version, pkt, culture); for simply-named assemblies this means a match on (name, culture)
+        // b) The assemblies being compared are FX assemblies (even if the version numbers are not the same, these will compare as equivalent by way of unification)
+        // c) The assemblies are not FX assemblies but are equivalent because fUnified1 and/or fUnified2 were set.
+        // The fUnified flag is used to indicate that all versions up to the version number of the strongly-named assembly are considered equivalent to itself.
+        // For example, if assemblyIdentity1 is "foo, version=5.0.0.0, culture=neutral, publicKeyToken=...." and fUnified1==TRUE, then this means to treat all versions of the assembly in the range 0.0.0.0-5.0.0.0 to be equivalent to "foo, version=5.0.0.0, culture=neutral, publicKeyToken=...".
+        // If assemblyIdentity2 is the same as assemblyIdentity1, except has a lower version number (e.g.version range 0.0.0.0-5.0.0.0), then the function will return that the identities are equivalent.
+        // If assemblyIdentity2 is the same as assemblyIdentity1, but has a greater version number than 5.0.0.0 then the two identities will only be equivalent if fUnified2 is set.
+        /// <summary>
+        /// Compares two assembly identities to determine whether or not they are equivalent.
+        /// </summary>
+        /// <param name="assemblyIdentity1"> Textual identity of the first assembly to be compared.</param>
+        /// <param name="fUnified1">Flag to indicate user-specified unification for assemblyIdentity1.</param>
+        /// <param name="assemblyIdentity2">Textual identity of the second assembly to be compared.</param>
+        /// <param name="fUnified2">Flag to indicate user-specified unification for assemblyIdentity2.</param>
+        /// <returns>
+        /// Boolean indicating whether the identities are equivalent.
+        /// </returns>
+        private static bool AreAssembliesEquivalent(
+            string assemblyIdentity1,
+            bool fUnified1,
+            string assemblyIdentity2,
+            bool fUnified2)
+        {
+            AssemblyName an1 = new AssemblyName(assemblyIdentity1);
+            AssemblyName an2 = new AssemblyName(assemblyIdentity2);
+
+            if (RefMatchesDef(an1, an2))
+            {
+                return true;
+            }
+
+            if (!an1.Name.Equals(an2.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            var versionCompare = an1.Version.CompareTo(an2.Version);
+
+            if ((versionCompare < 0 && fUnified2) || (versionCompare > 0 && fUnified1))
+            {
+                return true;
+            }
+
+            if (versionCompare == 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        //  Based on coreclr baseassemblyspec.cpp (https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L330)
+        private static bool RefMatchesDef(AssemblyName @ref, AssemblyName def)
+        {
+            if (IsStrongNamed(@ref))
+            {
+                return IsStrongNamed(def) && CompareRefToDef(@ref, def);
+            }
+            else
+            {
+                return @ref.Name.Equals(def.Name, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        // Based on coreclr baseassemblyspec.inl (https://github.com/dotnet/coreclr/blob/32f0f9721afb584b4a14d69135bea7ddc129f755/src/vm/baseassemblyspec.inl#L679-L683)
+        private static bool IsStrongNamed(AssemblyName assembly)
+        {
+            var refPkt = assembly.GetPublicKeyToken();
+            return refPkt != null && refPkt.Length != 0;
+        }
+
+        //  Based on https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L241
+        private static bool CompareRefToDef(AssemblyName @ref, AssemblyName def)
+        {
+            if (!@ref.Name.Equals(def.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            byte[] rpkt = @ref.GetPublicKeyToken();
+            byte[] dpkt = def.GetPublicKeyToken();
+
+            if (rpkt.Length != dpkt.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < rpkt.Length; i++)
+            {
+                if (rpkt[i] != dpkt[i])
+                {
+                    return false;
+                }
+            }
+
+            if (@ref.Version != def.Version)
+            {
+                return false;
+            }
+
+            if (@ref.CultureName != null &&
+                @ref.CultureName != def.CultureName)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Given two references along with their fusion names, resolve the filename conflict that they
         /// would have if both assemblies need to be copied to the same directory.
@@ -2279,14 +2391,12 @@ namespace Microsoft.Build.Tasks
                 bool rightConflictLegacyUnified = !isNonUnified && assemblyReference1.reference.IsPrimary;
 
                 // This is ok here because even if the method says two versions are equivalent the algorithm below will still pick the highest version.
-                NativeMethods.CompareAssemblyIdentity
+                bool equivalent = AreAssembliesEquivalent
                 (
                     leftConflictFusionName,
                     leftConflictLegacyUnified,
                     rightConflictFusionName,
-                    rightConflictLegacyUnified,
-                    out bool equivalent,
-                    out _
+                    rightConflictLegacyUnified
                 );
 
                 Version leftConflictVersion = assemblyReference0.assemblyName.Version;

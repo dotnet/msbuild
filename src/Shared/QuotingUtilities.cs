@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
@@ -58,7 +59,7 @@ namespace Microsoft.Build.Shared
         /// <param name="emptySplits">[out] a count of all pieces that were empty, and thus discarded, per remark (1) above</param>
         /// <param name="separator"></param>
         /// <returns>ArrayList of all the pieces the string was split into.</returns>
-        internal static ArrayList SplitUnquoted
+        internal static List<string> SplitUnquoted
         (
             string input,
             int maxSplits,
@@ -131,7 +132,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            ArrayList pieces = new ArrayList();
+            var pieces = new List<string>();
             emptySplits = 0;
 
             foreach (string splitPiece in splitString.ToString().Split(s_splitMarker, maxSplits))
@@ -163,7 +164,7 @@ namespace Microsoft.Build.Shared
         /// <param name="input"></param>
         /// <param name="separator"></param>
         /// <returns>ArrayList of all the pieces the string was split into.</returns>
-        internal static ArrayList SplitUnquoted(string input, params char[] separator)
+        internal static List<string> SplitUnquoted(string input, params char[] separator)
         {
             int emptySplits;
             return SplitUnquoted(input, int.MaxValue, false /* discard empty splits */, false /* don't unquote the split pieces */, out emptySplits, separator);

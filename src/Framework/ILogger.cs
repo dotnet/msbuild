@@ -19,11 +19,12 @@ namespace Microsoft.Build.Framework
     /// 3) Normal -- display all errors, warnings, high importance events, some status events, and a build summary
     /// 4) Detailed -- display all errors, warnings, high and normal importance events, all status events, and a build summary
     /// 5) Diagnostic -- display all events, and a build summary
-    /// 
-    /// WARNING: VS Automation code for the Tools/Options MSBuild build verbosity setting will be broken
-    /// by changes to this enum (not to mention existing MSBuild clients and vsproject code). 
-    /// Please make sure to talk to automation devs before changing it.
     /// </remarks>
+    // 
+    // WARNING: VS Automation code for the Tools/Options MSBuild build verbosity setting will be broken
+    // by changes to this enum (not to mention existing MSBuild clients and vsproject code). 
+    // Please make sure to talk to automation devs before changing it.
+
     [ComVisible(true)]
     public enum LoggerVerbosity
     {
