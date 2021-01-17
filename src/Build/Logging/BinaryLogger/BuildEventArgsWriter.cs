@@ -725,10 +725,7 @@ namespace Microsoft.Build.Logging
         {
             WriteDeduplicatedString(item.ItemSpec);
 
-            if (nameValueListBuffer.Count > 0)
-            {
-                nameValueListBuffer.Clear();
-            }
+            nameValueListBuffer.Clear();
 
             IDictionary customMetadata = item.CloneCustomMetadata();
 
@@ -768,10 +765,7 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            if (nameValueListBuffer.Count > 0)
-            {
-                nameValueListBuffer.Clear();
-            }
+            nameValueListBuffer.Clear();
 
             // there are no guarantees that the properties iterator won't change, so 
             // take a snapshot and work with the readonly copy
@@ -806,10 +800,7 @@ namespace Microsoft.Build.Logging
 
         private void Write(IEnumerable<KeyValuePair<string, string>> keyValuePairs)
         {
-            if (nameValueListBuffer.Count > 0)
-            {
-                nameValueListBuffer.Clear();
-            }
+            nameValueListBuffer.Clear();
 
             if (keyValuePairs != null)
             {
