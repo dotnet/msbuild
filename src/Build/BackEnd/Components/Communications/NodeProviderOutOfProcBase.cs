@@ -771,7 +771,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APM
                             _serverToClientStream.BeginWrite(writeStreamBuffer, i, lengthToWrite, PacketWriteComplete, null);
 #else
-                            _serverToClientStream.WriteAsync(writeStreamBuffer, i, lengthToWrite);
+                            _serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
 #endif
                             return;
                         }
