@@ -625,6 +625,9 @@ namespace Microsoft.Build.Tasks
                 instanceLocalDirectoryFiles[path] = cached;
             }
 
+            // At this point we have all files from directory loaded into dictionary.
+            // It TryGetValue do not found file as key in dictionary it will set fullPathFileName to default(string) i.e. null
+            // which is exactly what we need as null indicate that given file does not exists
             cached.TryGetValue(fileName, out string fullPathFileName);
 
             return fullPathFileName;
