@@ -12,7 +12,7 @@ trigger:
 
 variables:
   - name: SourceBranch
-    value: $(IbcSourceBranchName)
+    value: master
   - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}:
     - name: SourceBranch
       value: master
