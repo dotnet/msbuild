@@ -53,12 +53,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Gets or sets a regular expression that will be used to include files to be unzipped.
         /// </summary>
-        public string Include { get; set; }
+        public string IncludePattern { get; set; }
 
         /// <summary>
         /// Gets or sets a regular expression that will be used to exclude files to be unzipped.
         /// </summary>
-        public string Exclude { get; set; }
+        public string ExcludePattern { get; set; }
 
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
