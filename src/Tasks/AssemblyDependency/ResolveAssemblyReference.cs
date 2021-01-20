@@ -2144,7 +2144,7 @@ namespace Microsoft.Build.Tasks
                     getAssemblyMetadata = _cache.CacheDelegate(getAssemblyMetadata);
                     fileExists = _cache.CacheDelegate(fileExists);
                     directoryExists = _cache.CacheDelegate(directoryExists);
-                    DirectoryFile getDirectoryFile = _cache.CacheDelegate(getDirectoryFiles);
+                    FileExistsInDirectory fileExistsInDirectory = _cache.CacheDelegate(getDirectoryFiles);
                     getDirectories = _cache.CacheDelegate(getDirectories);
                     getRuntimeVersion = _cache.CacheDelegate(getRuntimeVersion);
 
@@ -2192,7 +2192,7 @@ namespace Microsoft.Build.Tasks
                         installedAssemblies,
                         processorArchitecture,
                         fileExists,
-                        getDirectoryFile,
+                        fileExistsInDirectory,
                         directoryExists,
                         getDirectories,
                         getAssemblyName,

@@ -14,13 +14,13 @@ namespace Microsoft.Build.Shared
     internal delegate string[] DirectoryGetFiles(string path, string searchPattern);
 
     /// <summary>
-    /// delegate for optimized looking up files in directory
-    /// designed to be used for testing and to verify file existence by directory listing
+    /// Delegate for optimized looking up files in directory.
+    /// Designed to be used for testing and to verify file existence by cached directory listing.
     /// </summary>
-    /// <param name="path">Directory path to start search for files in</param>
+    /// <param name="path">Directory path to search files in</param>
     /// <param name="fileName">name of file</param>
-    /// <returns>return full path file name or null if file do not exists</returns>
-    internal delegate string DirectoryFile(string path, string fileName);
+    /// <returns>true if file exists</returns>
+    internal delegate bool FileExistsInDirectory(string path, string fileName);
 
     /// <summary>
     /// delegate for Directory.GetDirectories.

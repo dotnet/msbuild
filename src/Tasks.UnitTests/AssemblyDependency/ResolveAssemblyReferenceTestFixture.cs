@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     {
         // Create the mocks.
         internal static Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
-        internal static Microsoft.Build.Shared.DirectoryFile getDirectoryFile = new Microsoft.Build.Shared.DirectoryFile(GetDirectoryFile);
+        internal static Microsoft.Build.Shared.FileExistsInDirectory fileExistsInDirectory = new Microsoft.Build.Shared.FileExistsInDirectory(FileExistsInDirectory);
         internal static Microsoft.Build.Shared.DirectoryExists directoryExists = new Microsoft.Build.Shared.DirectoryExists(DirectoryExists);
         internal static Microsoft.Build.Shared.DirectoryGetFiles getDirectoryFiles = new Microsoft.Build.Shared.DirectoryGetFiles(GetDirectoryFiles);
         internal static Microsoft.Build.Tasks.GetDirectories getDirectories = new Microsoft.Build.Tasks.GetDirectories(GetDirectories);
@@ -901,16 +901,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 .ToArray();
         }
 
-        internal static string GetDirectoryFile(string path, string fileName)
+        internal static bool FileExistsInDirectory(string path, string fileName)
         {
             string fullName = Path.Combine(path, fileName);
 
-            if (!FileExists(fullName))
-            {
-                return null;
-            }
-
-            return fullName;
+            return FileExists(fullName);
         }
 
         /// <summary>

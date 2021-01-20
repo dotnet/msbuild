@@ -60,7 +60,7 @@ namespace Microsoft.Build.Tasks
         /// is only considered good for the lifetime of the task (or whatever) that owns 
         /// this instance.
         /// </summary>
-        private Dictionary<string, Dictionary<string, string>> instanceLocalDirectoryFiles = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, HashSet<string>> instanceLocalDirectoryFiles = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Additional level of caching kept at the process level.
@@ -345,10 +345,10 @@ namespace Microsoft.Build.Tasks
             return DirectoryExists;
         }
 
-        public DirectoryFile CacheDelegate(DirectoryGetFiles getFilesValue)
+        public FileExistsInDirectory CacheDelegate(DirectoryGetFiles getFilesValue)
         {
             getFiles = getFilesValue;
-            return GetDirectoryFile;
+            return FileExistsInDirectory;
         }
 
         /// <summary>
@@ -598,10 +598,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="path"></param>
         /// <param name="fileName"></param>
-        /// <returns>file full path or null if file do not exists</returns>
-        private string GetDirectoryFile(string path, string fileName)
+        /// <returns>true if file exists</returns>
+        private bool FileExistsInDirectory(string path, string fileName)
         {
-            instanceLocalDirectoryFiles.TryGetValue(path, out Dictionary<string, string> cached);
+            instanceLocalDirectoryFiles.TryGetValue(path, out HashSet<string> cached);
             if (cached == null)
             {
                 string[] files;
@@ -614,22 +614,12 @@ namespace Microsoft.Build.Tasks
                     files = Array.Empty<string>();
                 }
 
-                cached = new Dictionary<string, string>(files.Length, StringComparer.OrdinalIgnoreCase);
-                foreach (var file in files)
-                {
-                    // this will not throw if there are files which differs only by case
-                    cached[Path.GetFileName(file)] = file;
-                }
+                cached = new HashSet<string>(files.Select(Path.GetFileName), StringComparer.OrdinalIgnoreCase);
 
                 instanceLocalDirectoryFiles[path] = cached;
             }
 
-            // At this point we have all files from directory loaded into dictionary.
-            // It TryGetValue do not found file as key in dictionary it will set fullPathFileName to default(string) i.e. null
-            // which is exactly what we need as null indicate that given file does not exists
-            cached.TryGetValue(fileName, out string fullPathFileName);
-
-            return fullPathFileName;
+            return cached.Contains(fileName);
         }
 
         /// <summary>

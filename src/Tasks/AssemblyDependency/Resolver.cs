@@ -32,7 +32,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Delegate.
         /// </summary>
-        private readonly DirectoryFile getDirectoryFile;
+        private readonly FileExistsInDirectory fileExistsInDirectory;
 
         /// <summary>
         /// Delegate
@@ -57,12 +57,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, DirectoryFile getDirectoryFile, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
+        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, FileExistsInDirectory fileExistsInDirectory, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
         {
             this.searchPathElement = searchPathElement;
             this.getAssemblyName = getAssemblyName;
             this.fileExists = fileExists;
-            this.getDirectoryFile = getDirectoryFile;
+            this.fileExistsInDirectory = fileExistsInDirectory;
             this.getRuntimeVersion = getRuntimeVersion;
             this.targetedRuntimeVersion = targetedRuntimeVesion;
             this.targetProcessorArchitecture = targetedProcessorArchitecture;
@@ -199,11 +199,11 @@ namespace Microsoft.Build.Tasks
             bool fileFound;
             if (useDirectoryCache && Utilities.ChangeWaves.AreFeaturesEnabled(Utilities.ChangeWaves.Wave16_10))
             {
-                // this verifies file existence using getDirectoryFile delegate which internally used cached list of all files in a particular directory
+                // this verifies file existence using fileExistsInDirectory delegate which internally used cached set of all files in a particular directory
                 // if some cases it render better performance than one by one FileExists
                 try
                 {
-                    fileFound = getDirectoryFile(directory, fileName) != null;
+                    fileFound = fileExistsInDirectory(directory, fileName);
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
