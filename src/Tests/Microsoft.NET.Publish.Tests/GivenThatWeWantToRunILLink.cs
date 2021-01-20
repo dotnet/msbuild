@@ -1083,7 +1083,7 @@ namespace Microsoft.NET.Publish.Tests
                                    new XElement("Condition", "true"),
                                    new XElement("IsTrimmable", "true")));
             items.Add(new XElement(ns + "TrimmerRootAssembly",
-                                   new XAttribute("Include", "@(IntermediateAssembly->'%(FileName)')")));
+                                   new XAttribute("Include", "@(IntermediateAssembly->'%(FullPath)')")));
         }
 
         static readonly string substitutionsFilename = "ILLink.Substitutions.xml";
