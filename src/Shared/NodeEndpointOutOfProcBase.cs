@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -472,7 +472,13 @@ namespace Microsoft.Build.BackEnd
             {
                 if (localPipeServer.IsConnected)
                 {
-                    localPipeServer.WaitForPipeDrain();
+#if NETCOREAPP // OperatingSystem.IsWindows() is new in .NET 5.0
+                    if (OperatingSystem.IsWindows())
+#endif
+                    {
+                        localPipeServer.WaitForPipeDrain();
+                    }
+
                     localPipeServer.Disconnect();
                 }
             }

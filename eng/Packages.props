@@ -28,6 +28,7 @@
     <PackageReference Update="System.Reflection.TypeExtensions" Version="4.1.0" />
     <PackageReference Update="System.Resources.Extensions" Version="4.6.0" />
     <PackageReference Update="System.Resources.Writer" Version="4.0.0" />
+    <PackageReference Update="System.Runtime.CompilerServices.Unsafe" Version="5.0.0"/>
     <PackageReference Update="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Update="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
     <PackageReference Update="System.Runtime.Loader" Version="4.0.0" />
@@ -44,6 +45,10 @@
     <PackageReference Update="xunit.assert" Version="$(XUnitVersion)" />
     <PackageReference Update="xunit.console" Version="$(XUnitVersion)" />
     <PackageReference Update="xunit.core" Version="$(XUnitVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(MonoBuild)' == 'true' or $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1'))">
+    <PackageReference Update="Microsoft.Extensions.DependencyModel" Version="5.0.0"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">

@@ -158,7 +158,7 @@ namespace Microsoft.Build.Shared
         private static bool ValidDecimalNumber(string number)
         {
             double value;
-            return Double.TryParse(number, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture.NumberFormat, out value);
+            return Double.TryParse(number, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture.NumberFormat, out value) && !double.IsInfinity(value);
         }
 
         /// <summary>

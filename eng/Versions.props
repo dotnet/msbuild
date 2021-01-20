@@ -23,8 +23,10 @@
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>3.1.100</DotNetCliVersion>
-    <MicrosoftNetCompilersToolsetVersion>3.3.1-beta3-final</MicrosoftNetCompilersToolsetVersion>
+    <!-- DotNetCliVersion MUST match the dotnet version in global.json.
+         Otherwise, this version of dotnet will not be installed and the build will error out. -->
+    <DotNetCliVersion>5.0.102</DotNetCliVersion>
+    <MicrosoftNetCompilersToolsetVersion>3.9.0-2.20574.26</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>5.9.0-preview.3.7016</NuGetBuildTasksVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
