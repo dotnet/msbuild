@@ -5,10 +5,6 @@
     <OutputType>exe</OutputType>
     <Description>Command line tool to watch for source file changes during development and restart the dotnet command.</Description>
     <RootNamespace>Microsoft.DotNet.Watcher.Tools</RootNamespace>
-    <PackageTags>dotnet;watch</PackageTags>
-    <PackAsTool>true</PackAsTool>
-    <IsPackable>true</IsPackable>
-
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <UseAppHost>false</UseAppHost>
     <RuntimeIdentifier />

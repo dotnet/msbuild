@@ -5,7 +5,7 @@
     <WriteLinesToFile File="$(OutputPath)/.toolsetversion"
                       Lines="$(GitCommitHash);$(Version);$(Rid)"
                       Overwrite="true" />
-    
+
     <!-- The .version file in the final product will be the .NET Core SDK version.  But
          for the layout we produce here, use the toolset information, so that we don't
          just always use the stage 0 version. -->
@@ -65,7 +65,7 @@
           BeforeTargets="Build">
     <Copy SourceFiles="@(MSBuildExtensionsContent)"
           DestinationFiles="@(MSBuildExtensionsContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
-    
+
   </Target>
 
   <Target Name="PublishNetSdks"
@@ -78,15 +78,15 @@
       <NETSdkWorkerSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Worker</NETSdkWorkerSourceRoot>
     </PropertyGroup>
     <ItemGroup>
-      <NETSdksContent Include="$(NETSdkSourceRoot)\**\*.*" 
+      <NETSdksContent Include="$(NETSdkSourceRoot)\**\*.*"
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk"/>
-      <NETSdksContent Include="$(NETSdkWebSourceRoot)\**\*.*" 
+      <NETSdksContent Include="$(NETSdkWebSourceRoot)\**\*.*"
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Web"/>
-      <NETSdksContent Include="$(NETSdkPublishSourceRoot)\**\*.*" 
+      <NETSdksContent Include="$(NETSdkPublishSourceRoot)\**\*.*"
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Publish"/>
-      <NETSdksContent Include="$(NETSdkWebProjectSystemSourceRoot)\**\*.*" 
+      <NETSdksContent Include="$(NETSdkWebProjectSystemSourceRoot)\**\*.*"
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Web.ProjectSystem"/>
-      <NETSdksContent Include="$(NETSdkWorkerSourceRoot)\**\*.*" 
+      <NETSdksContent Include="$(NETSdkWorkerSourceRoot)\**\*.*"
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Worker"/>
     </ItemGroup>
     <Copy SourceFiles="@(NETSdksContent)"
@@ -117,6 +117,23 @@
       Targets="Publish"
       Projects="$(RepoRoot)/src/Layout/tool_fsharp/tool_fsc.csproj"
       Properties="Configuration=$(Configuration);PublishDir=$(OutputPath)/FSharp" />
+  </Target>
+
+  <Target Name="PublishBuiltInTools"
+          BeforeTargets="Build">
+
+    <PropertyGroup>
+      <DotnetWatchOutputDirectory>$(OutputPath)\DotnetTools\dotnet-watch\$(Version)\tools\$(SdkTargetFramework)\any\</DotnetWatchOutputDirectory>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <DotNetWatchFile Include="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\**" />
+      <DotNetWatchFile Include="$(ArtifactsDir)bin\Microsoft.AspNetCore.Watch.BrowserRefresh\$(Configuration)\netcoreapp3.1\*.dll" DeploymentSubpath="middleware" />
+    </ItemGroup>
+
+    <Copy
+      SourceFiles="@(DotNetWatchFile)"
+      DestinationFiles="$(DotnetWatchOutputDirectory)%(DotNetWatchFile.DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)" />
   </Target>
 
   <Target Name="GenerateCliRuntimeConfigurationFiles"
