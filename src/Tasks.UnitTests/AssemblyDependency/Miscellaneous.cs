@@ -7655,7 +7655,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 t.SearchPaths = new string[]
                 {
-                        @"{TargetFrameworkDirectory}"
+                    @"{TargetFrameworkDirectory}"
                 };
 
                 t.TargetFrameworkDirectories = new string[] { Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5") };

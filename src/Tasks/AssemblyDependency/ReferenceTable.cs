@@ -79,7 +79,7 @@ namespace Microsoft.Build.Tasks
         private readonly DirectoryExists _directoryExists;
         /// <summary>Delegate used for getting directories.</summary>
         private readonly GetDirectories _getDirectories;
-        /// <summary>Delegate used for verify file in directories.</summary>
+        /// <summary>Delegate used for checking for the existence of a file in a directory and mapping it to full path.</summary>
         private readonly DirectoryFile _getDirectoryFile;
         /// <summary>Delegate used for getting assembly names.</summary>
         private readonly GetAssemblyName _getAssemblyName;

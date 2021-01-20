@@ -969,10 +969,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Get all files from directory matching pattern
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name="pattern"></param>
-        /// <param name="fileSystem"></param>
-        /// <returns>list of files or null if it is impossible to get files</returns>
         internal static string[] DirectoryGetFiles(string path, string pattern = "*", IFileSystem fileSystem = null)
         {
             path = AttemptToShortenPath(path);

@@ -601,7 +601,6 @@ namespace Microsoft.Build.Tasks
         /// <returns>file full path or null if file do not exists</returns>
         private string GetDirectoryFile(string path, string fileName)
         {
-
             instanceLocalDirectoryFiles.TryGetValue(path, out Dictionary<string, string> cached);
             if (cached == null)
             {
@@ -610,13 +609,13 @@ namespace Microsoft.Build.Tasks
                 {
                     files = getFiles(path, "*");
                 }
-                catch(DirectoryNotFoundException)
+                catch (DirectoryNotFoundException)
                 {
                     files = Array.Empty<string>();
                 }
 
                 cached = new Dictionary<string, string>(files.Length, StringComparer.OrdinalIgnoreCase);
-                foreach(var file in files)
+                foreach (var file in files)
                 {
                     // this will not throw if there are files which differs only by case
                     cached[Path.GetFileName(file)] = file;
