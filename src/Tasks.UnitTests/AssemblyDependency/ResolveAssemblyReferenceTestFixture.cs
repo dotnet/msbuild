@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         // Performance checks.
         internal static Dictionary<string, int> uniqueFileExists = null;
         internal static Dictionary<string, int> uniqueGetAssemblyName = null;
-        internal static ConcurrentDictionary<string, int> uniqueGetDirectoryFiles = null;
+        internal static Dictionary<string, int> uniqueGetDirectoryFiles = null;
 
         internal static bool useFrameworkFileExists = false;
         internal const string REDISTLIST = @"<FileList  Redist=""Microsoft-Windows-CLRCoreComp.4.0"" Name="".NET Framework 4"" RuntimeVersion=""4.0"" ToolsVersion=""12.0"">
@@ -305,7 +305,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // If tables are present then the corresponding IO function will do some monitoring.
             uniqueFileExists = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             uniqueGetAssemblyName = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-            uniqueGetDirectoryFiles = new ConcurrentDictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            uniqueGetDirectoryFiles = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -891,7 +891,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Do IO monitoring if needed.
             if (uniqueGetDirectoryFiles != null)
             {
-                uniqueGetDirectoryFiles.AddOrUpdate(path, 1, (_, n) => n+1);
+                uniqueGetDirectoryFiles.TryGetValue(path, out int count);
+                uniqueGetDirectoryFiles[path] = count + 1;
             }
 
             return s_existentFiles
