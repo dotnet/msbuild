@@ -92,7 +92,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             try
             {
-                return (ProjectCachePluginBase) Activator.CreateInstance(pluginType);
+                return (ProjectCachePluginBase) Activator.CreateInstance(pluginType)!;
             }
             catch (TargetInvocationException e) when (e.InnerException != null)
             {
