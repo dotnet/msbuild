@@ -81,7 +81,7 @@ stages:
                 -configuration $(BuildConfiguration)
                 -officialBuildId $(Build.BuildNumber)
                 -officialSkipApplyOptimizationData true
-                /p:RepositoryName=https://dnceng@dev.azure.com/dnceng/internal/_git/dotnet-msbuild
+                /p:RepositoryName=$(Build.Repository.Name)
                 /p:VisualStudioIbcSourceBranchName=$(SourceBranch)
                 /p:VisualStudioDropAccessToken=$(System.AccessToken)
                 /p:VisualStudioDropName=$(VisualStudio.DropName)
