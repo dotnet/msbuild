@@ -90,6 +90,10 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>a2300a8127e33191ffd995920f1c8feaf3db87d3</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.TestHost" Version="6.0.0-alpha.1.21070.18">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>a2300a8127e33191ffd995920f1c8feaf3db87d3</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.NET.Sdk.Razor" Version="6.0.0-alpha.1.21070.18">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>a2300a8127e33191ffd995920f1c8feaf3db87d3</Sha>

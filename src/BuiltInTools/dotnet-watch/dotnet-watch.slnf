@@ -1,0 +1,12 @@
+{
+  "solution": {
+    "path": "..\\..\\..\\sdk.sln",
+    "projects": [
+      "src\\Tests\\Microsoft.AspNetCore.Watch.BrowserRefresh.Tests\\Microsoft.AspNetCore.Watch.BrowserRefresh.Tests.csproj",
+      "src\\Tests\\Microsoft.NET.TestFramework\\Microsoft.NET.TestFramework.csproj",
+      "src\\Tests\\dotnet-watch.Tests\\dotnet-watch.Tests.csproj",
+      "src\\BuiltInTools\\BrowserRefresh\\Microsoft.AspNetCore.Watch.BrowserRefresh.csproj",
+      "src\\BuiltInTools\\dotnet-watch\\dotnet-watch.csproj"
+    ]
+  }
+}

@@ -23,7 +23,7 @@ Copyright (c) .NET Foundation. All rights reserved.
    multiple published applications in a single directory.
   ============================================================
    -->
-  <Target Name="Publish">
+  <Target Name="Publish" Condition=" '$(IsPublishable)' != 'false' ">
     <NETSdkError ResourceName="PublishUnsupportedWithoutTargetFramework"/>
   </Target>
 

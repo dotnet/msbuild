@@ -59,7 +59,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Get correct deps json files based on _UseBuildDependencyFile -->
     <ItemGroup>
       <ProjectDepsFilesForClickOnce Condition="'$(_UseBuildDependencyFile)' == 'true'" Include="$(ProjectDepsFilePath)"/>
-      <ProjectDepsFilesForClickOnce Condition="'$(_UseBuildDependencyFile)' != 'true'" Include="$(PublishDepsFilePath)"/>
+      <ProjectDepsFilesForClickOnce Condition="'$(_UseBuildDependencyFile)' != 'true'" Include="$(IntermediateDepsFilePath)"/>
     </ItemGroup>
 
     <!-- Add runtimeconfig and deps json file to item group that's included in files for clickonce publishing -->

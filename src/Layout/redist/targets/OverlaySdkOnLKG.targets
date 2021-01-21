@@ -15,7 +15,9 @@
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/Microsoft.NETCoreSdk.BundledCliTools.props" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/RuntimeIdentifierGraph.json" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/NETCoreSdkRuntimeIdentifierChain.txt" />
-      <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/**/*" RelativeDestination="DotnetTools"/>
+      <!-- Ignore dotnet-watch files from the SDK since we're building a newer version of it in this repo. -->
+      <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/**/*" RelativeDestination="DotnetTools"
+        Exclude="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/DotnetTools/dotnet-watch/**" />
       <OverlaySdkFilesFromStage0 Include="$(_DotNetHiveRoot)/sdk/$(Stage0SdkVersion)/AppHostTemplate/**/*" RelativeDestination="AppHostTemplate"/>
       <ToolsetToOverlay Include="$(OutputPath)/**/*" />
     </ItemGroup>
@@ -25,6 +27,7 @@
 
     <PropertyGroup>
       <SdkOutputDirectory>$(RedistLayoutPath)/sdk/$(Version)</SdkOutputDirectory>
+      <DotnetWatchOutputDirectory>$(SdkOutputDirectory)\DotnetTools\dotnet-watch\$(Version)\tools\$(SdkTargetFramework)\any\</DotnetWatchOutputDirectory>
     </PropertyGroup>
 
     <Copy SourceFiles="@(OverlaySdkFilesFromStage0)"
@@ -38,13 +41,22 @@
     <Copy SourceFiles="@(ToolsetToOverlay)"
           DestinationFiles="@(ToolsetToOverlay->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
+     <!-- Copy dotnet-watch files -->
+    <ItemGroup>
+      <DotNetWatchOverlay Include="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\**" />
+      <DotNetWatchOverlay Include="$(ArtifactsDir)bin\Microsoft.AspNetCore.Watch.BrowserRefresh\$(Configuration)\netcoreapp3.1\*.dll" TargetDir="middleware" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(DotNetWatchOverlay)"
+          DestinationFiles="$(DotnetWatchOutputDirectory)\%(RecursiveDir)%(DotNetWatchOverlay.TargetDir)\%(Filename)%(Extension)" />
+
     <!-- Run "dotnet new" (which will just display usage and available templates) in order to print first time
          use message so that it doesn't interfere with tests which check the output of commands. -->
     <Exec Command="$(RedistLayoutPath)dotnet new"
           EnvironmentVariables="DOTNET_CLI_HOME=$(ArtifactsTmpDir)" />
   </Target>
-  
-  
+
+
   <Target Name="PublishTestWorkloads"
           AfterTargets="OverlaySdkOnLKG">
     <PropertyGroup>
@@ -67,6 +79,6 @@
 
     <Copy SourceFiles="@(WorkloadPackContent)"
       DestinationFiles="@(WorkloadPackContent->'$(RedistLayoutPath)\packs\%(RecursiveDir)%(Filename)%(Extension)')" />
-    
+
   </Target>
 </Project>

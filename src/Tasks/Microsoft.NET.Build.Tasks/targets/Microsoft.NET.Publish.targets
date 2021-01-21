@@ -52,6 +52,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       PrepareForPublish;
       ComputeAndCopyFilesToPublishDirectory;
       $(PublishProtocolProviderTargets);
+      PublishItemsOutputGroup;
     </_CorePublishTargets>
 
     <_PublishNoBuildAlternativeDependsOn>$(_BeforePublishNoBuildTargets);$(_CorePublishTargets)</_PublishNoBuildAlternativeDependsOn>
@@ -1191,11 +1192,13 @@ Copyright (c) .NET Foundation. All rights reserved.
       <PublishItemsOutputGroupOutputs Include="@(ResolvedFileToPublish->'%(FullPath)')"
                                       TargetPath="%(ResolvedFileToPublish.RelativePath)"
                                       IsKeyOutput="%(ResolvedFileToPublish.IsKeyOutput)"
+                                      OutputPath="@(ResolvedFileToPublish->'$(PublishDir)%(relativePath)')"
                                       OutputGroup="PublishItemsOutputGroup" />
       <PublishItemsOutputGroupOutputs Include="$(PublishedSingleFilePath)"
                                       TargetPath="$(PublishedSingleFileName)"
                                       IsKeyOutput="true"
                                       Condition="'$(PublishSingleFile)' == 'true'"
+                                      OutputPath="$(PublishedSingleFilePath)"
                                       OutputGroup="PublishItemsOutputGroup" />
     </ItemGroup>
   </Target>
