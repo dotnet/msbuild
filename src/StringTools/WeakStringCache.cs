@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace Microsoft.Build
+namespace Microsoft.NET.StringTools
 {
     /// <summary>
     /// A cache of weak GC handles pointing to strings. Weak GC handles are functionally equivalent to WeakReference's but have less overhead
@@ -28,7 +28,7 @@ namespace Microsoft.Build
         /// <summary>
         /// Holds a weak GC handle to a string. Shared by all strings with the same hash code and referencing the last such string we've seen.
         /// </summary>
-        private struct StringWeakHandle
+        private class StringWeakHandle
         {
             /// <summary>
             /// Weak GC handle to the last string of the given hashcode we've seen.
@@ -45,12 +45,11 @@ namespace Microsoft.Build
             /// </summary>
             /// <param name="internable">The internable describing the string we're looking for.</param>
             /// <returns>The string matching the internable or null if the handle is referencing a collected string or the string is different.</returns>
-            public string GetString<T>(T internable) where T : IInternable
+            public string? GetString(ref InternableString internable)
             {
                 if (WeakHandle.IsAllocated && WeakHandle.Target is string str)
                 {
-                    if (internable.Length == str.Length &&
-                        internable.StartsWithStringByOrdinalComparison(str))
+                    if (internable.Equals(str))
                     {
                         return str;
                     }
@@ -95,33 +94,26 @@ namespace Microsoft.Build
         private int _scavengeThreshold = _initialCapacity;
 
         /// <summary>
-        /// Implements the simple yet very decently performing djb2 hash function (xor version).
-        /// </summary>
-        /// <param name="internable">The internable to compute the hash code for.</param>
-        /// <returns>The 32-bit hash code.</returns>
-        internal static int GetInternableHashCode<T>(T internable) where T : IInternable
-        {
-            int hashCode = 5381;
-            for (int i = 0; i < internable.Length; i++)
-            {
-                unchecked
-                {
-                    hashCode = hashCode * 33 ^ internable[i];
-                }
-            }
-            return hashCode;
-        }
-
-        /// <summary>
         /// Frees all GC handles and clears the cache.
         /// </summary>
-        public void Dispose()
+        private void DisposeImpl()
         {
             foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
             {
                 entry.Value.Free();
             }
             _stringsByHashCode.Clear();
+        }
+
+        public void Dispose()
+        {
+            DisposeImpl();
+            GC.SuppressFinalize(this);
+        }
+
+        ~WeakStringCache()
+        {
+            DisposeImpl();
         }
 
         /// <summary>

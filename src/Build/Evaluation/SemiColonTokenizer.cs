@@ -1,8 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
+
+using Microsoft.NET.StringTools;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -145,8 +148,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 if (startIndex < endIndex)
                 {
-                    var target = new SubstringInternTarget(_expression, startIndex, endIndex - startIndex);
-                    return OpportunisticIntern.InternableToString(target);
+                    return Strings.WeakIntern(_expression.AsSpan(startIndex, endIndex - startIndex));
                 }
                 return null;
             }

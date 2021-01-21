@@ -60,8 +60,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal const string CurrentToolsVersion = "Current";
 
-        // if you change the key also change the following clones
-        // Microsoft.Build.OpportunisticIntern.BucketedPrioritizedStringList.TryIntern
         internal const string MSBuildDummyGlobalPropertyHeader = "MSBuildProjectInstance";
 
         /// <summary>
