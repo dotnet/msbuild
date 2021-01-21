@@ -872,7 +872,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         /// <param name="path">The path to directory.</param>
         /// <returns>'true' if the file is supposed to exist</returns>
-
         internal static string[] GetDirectoryFiles(string path, string pattern)
         {
             if (!Path.IsPathRooted(path))
@@ -3054,7 +3053,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         fileExists,
                         directoryExists,
                         getDirectories,
-                            getDirectoryFiles,
+                        getDirectoryFiles,
                         getAssemblyName,
                         getAssemblyMetadata,
     #if FEATURE_WIN32_REGISTRY

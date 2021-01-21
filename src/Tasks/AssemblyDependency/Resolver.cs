@@ -208,7 +208,7 @@ namespace Microsoft.Build.Tasks
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
                     // Assuming it's the search path that's bad. But combine them both so the error is visible if it's the reference itself.
-                    throw new InvalidParameterValueException("SearchPaths", directory + (directory.EndsWith("\\", StringComparison.OrdinalIgnoreCase) ? String.Empty : "\\") + fileName, e.Message);
+                    throw new InvalidParameterValueException("SearchPaths", $"{directory.TrimEnd(Path.DirectorySeparatorChar)}{Path.DirectorySeparatorChar}{fileName}", e.Message);
                 }
             }
             else
@@ -360,7 +360,7 @@ namespace Microsoft.Build.Tasks
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
                         // Assuming it's the search path that's bad. But combine them both so the error is visible if it's the reference itself.
-                        throw new InvalidParameterValueException("SearchPaths", directory + (directory.EndsWith("\\", StringComparison.OrdinalIgnoreCase) ? String.Empty : "\\") + fileName, e.Message);
+                        throw new InvalidParameterValueException("SearchPaths", $"{directory.TrimEnd(Path.DirectorySeparatorChar)}{Path.DirectorySeparatorChar}{fileName}", e.Message);
                     }
 
                     // We have a full path returned

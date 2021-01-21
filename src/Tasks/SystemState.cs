@@ -594,7 +594,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Cached implementation of GetFiles aimed to verify existence of a file in a directory.
-        /// It does not throw if directory do not exists.
+        /// It does not throw if directory does not exists.
         /// </summary>
         /// <param name="path"></param>
         /// <param name="fileName"></param>
