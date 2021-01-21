@@ -96,9 +96,23 @@ namespace Microsoft.Build.BackEnd
             // Send the build completion message to the nodes, causing them to shutdown or reset.
             _processesToIgnore.Clear();
 
+            // We wait for child nodes to exit to avoid them changing the terminal
+            // after this process terminates.
+            bool waitForExit =  !enableReuse &&
+                                !Console.IsInputRedirected &&
+                                Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout;
+
             foreach (NodeContext nodeContext in contextsToShutDown)
             {
-                nodeContext?.SendData(new NodeBuildComplete(enableReuse));
+                if (nodeContext is null)
+                {
+                    continue;
+                }
+                nodeContext.SendData(new NodeBuildComplete(enableReuse));
+                if (waitForExit)
+                {
+                    nodeContext.WaitForExit();
+                }
             }
         }
 
@@ -792,14 +806,39 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Closes the node's context, disconnecting it from the node.
             /// </summary>
-            public void Close()
+            private void Close()
             {
+                _processId = -1;
                 _clientToServerStream.Dispose();
                 if (!object.ReferenceEquals(_clientToServerStream, _serverToClientStream))
                 {
                     _serverToClientStream.Dispose();
                 }
                 _terminateDelegate(_nodeId);
+            }
+
+            /// <summary>
+            /// Waits for the child node process to exit.
+            /// </summary>
+            public void WaitForExit()
+            {
+                int processId = _processId;
+                if (processId != -1)
+                {
+                    Process childProcess;
+                    try
+                    {
+                        childProcess = Process.GetProcessById(processId);
+                    }
+                    catch (System.ArgumentException)
+                    {
+                        // The process has terminated already.
+                        return;
+                    }
+                    // Wait for the process to terminate.
+                    CommunicationsUtilities.Trace("Waiting for node with pid = {0} to terminate", processId);
+                    childProcess.WaitForExit();
+                }
             }
 
 #if FEATURE_APM
