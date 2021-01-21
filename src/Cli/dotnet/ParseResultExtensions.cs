@@ -33,8 +33,11 @@ namespace Microsoft.DotNet.Cli
         public static string RootSubCommandResult(this ParseResult parseResult)
         {
             return parseResult.RootCommandResult.Children?
-                .FirstOrDefault(c => c.Token() != null && c.Token().Type.Equals(TokenType.Command))?
-                .Symbol.Name ?? string.Empty;
+                .Select(c => c.Token() == null ?
+                    parseResult.FindResultFor(Parser.DotnetSubCommand)?.GetValueOrDefault<string>() :
+                    c.Token().Type.Equals(TokenType.Command) ? c.Symbol.Name : null)
+                .Where(subcommand => !string.IsNullOrEmpty(subcommand))
+                .FirstOrDefault() ?? string.Empty;
         }
     }
 }
