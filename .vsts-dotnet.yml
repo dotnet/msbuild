@@ -12,7 +12,7 @@ trigger:
 
 variables:
   - name: SourceBranch
-    value: master
+    value: $(IbcSourceBranchName)
   - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}:
     - name: SourceBranch
       value: master
@@ -80,8 +80,8 @@ stages:
     - script: eng/CIBuild.cmd
                 -configuration $(BuildConfiguration)
                 -officialBuildId $(Build.BuildNumber)
-                -officialSkipApplyOptimizationData $(SkipApplyOptimizationData)
-                /p:RepositoryName=https://dnceng@dev.azure.com/dnceng/internal/_git/msbuild
+                -officialSkipApplyOptimizationData true
+                /p:RepositoryName=https://dnceng@dev.azure.com/dnceng/internal/_git/dotnet-msbuild
                 /p:VisualStudioIbcSourceBranchName=$(SourceBranch)
                 /p:VisualStudioDropAccessToken=$(System.AccessToken)
                 /p:VisualStudioDropName=$(VisualStudio.DropName)
@@ -222,7 +222,6 @@ stages:
     parameters:
       # Symbol validation is not entirely reliable as of yet, so should be turned off until
       # https://github.com/dotnet/arcade/issues/2871 is resolved.
-      publishingInfraVersion: 3
       enableSymbolValidation: false
       enableSourceLinkValidation: false
       enableNugetValidation: false
