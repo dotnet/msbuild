@@ -2231,7 +2231,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 <I1 Include='c1' M1='foo/bar.vb' M2='y'/>
                 <I1 Include='d1' M1='foo\foo\foo' M2='b'/>
                 <I1 Include='e1' M1='a/b/../c/./d' M2='1'/>
-                <I1 Include='f1' M1='{ ObjectModelHelpers.TempProjectDir }\b\c' M2='6'/>
+                <I1 Include='f1' M1='{ Environment.CurrentDirectory }\b\c' M2='6'/>
 
                 <I2 Include='a2' M1='FOO.TXT' m2='c'/>
                 <I2 Include='b2' M1='foo/bar.txt' m2='x'/>
@@ -2403,7 +2403,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
-        public void FailWithMatchingMultipleMetadata()
+        public void RemoveMatchingMultipleMetadata()
         {
             string content = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
                 @"<I1 Include='a1' M1='1' M2='a'/>
@@ -2421,10 +2421,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = ObjectModelHelpers.CreateInMemoryProject(content);
             IEnumerable<ProjectItem> items = project.ItemsIgnoringCondition.Where(i => i.ItemType.Equals("I2"));
             items.Count().ShouldBe(3);
+            items.ElementAt(0).EvaluatedInclude.ShouldBe("a2");
+            items.ElementAt(1).EvaluatedInclude.ShouldBe("c2");
+            items.ElementAt(2).EvaluatedInclude.ShouldBe("d2");
         }
 
         [Fact]
-        public void FailWithMultipleItemReferenceOnMatchingMetadata()
+        public void RemoveMultipleItemReferenceOnMatchingMetadata()
         {
             string content = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
                 @"<I1 Include='a1' M1='1' M2='a'/>
@@ -2465,7 +2468,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 <I2 Remove='%(I1.M1)' MatchOnMetadata='M1' />");
             Should.Throw<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content))
-                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
+                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToReferencedItems");
         }
 
         [Fact]

@@ -585,7 +585,7 @@ namespace Microsoft.Build.BackEnd
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                 itemSpec.Fragments.All(f => f is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment),
                 new BuildEventFileInfo(string.Empty),
-                "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem",
+                "OM_MatchOnMetadataIsRestrictedToReferencedItems",
                 child.RemoveLocation,
                 child.Remove);
             MetadataSet<ProjectPropertyInstance, ProjectItemInstance> metadataSet = new(matchingOptions, matchOnMetadata, itemSpec);

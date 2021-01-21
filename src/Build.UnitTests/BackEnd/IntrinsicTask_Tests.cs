@@ -1989,6 +1989,68 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void RemoveWithMatchingMultipleMetadata()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <I1 Include='a1' M1='1' M2='a'/>
+                            <I1 Include='b1' M1='2' M2='x'/>
+                            <I1 Include='c1' M1='3' M2='y'/>
+                            <I1 Include='d1' M1='4' M2='b'/>
+
+                            <I2 Include='a2' M1='x' m2='c'/>
+                            <I2 Include='b2' M1='2' m2='x'/>
+                            <I2 Include='c2' M1='3' m2='Y'/>
+                            <I2 Include='d2' M1='y' m2='d'/>
+
+                            <I2 Remove='@(I1)' MatchOnMetadata='M1;M2' />
+                        </ItemGroup>
+                    </Target></Project>");
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            ExecuteTask(task, lookup);
+            ICollection<ProjectItemInstance> items = lookup.GetItems("I2");
+            items.Count().ShouldBe(3);
+            items.ElementAt(0).EvaluatedInclude.ShouldBe("a2");
+            items.ElementAt(1).EvaluatedInclude.ShouldBe("c2");
+            items.ElementAt(2).EvaluatedInclude.ShouldBe("d2");
+        }
+
+        [Fact]
+        public void RemoveWithMultipleItemReferenceOnMatchingMetadata()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <I1 Include='a1' M1='1' M2='a'/>
+                            <I1 Include='b1' M1='2' M2='x'/>
+                            <I1 Include='c1' M1='3' M2='y'/>
+                            <I1 Include='d1' M1='4' M2='b'/>
+
+                            <I2 Include='a2' M1='x' m2='c'/>
+                            <I2 Include='b2' M1='2' m2='x'/>
+                            <I2 Include='c2' M1='3' m2='Y'/>
+                            <I2 Include='d2' M1='y' m2='d'/>
+
+                            <I3 Include='a3' M1='1' m2='b'/>
+                            <I3 Include='b3' M1='x' m2='a'/>
+                            <I3 Include='c3' M1='3' m2='2'/>
+                            <I3 Include='d3' M1='y' m2='d'/>
+
+                            <I3 Remove='@(I1);@(I2)' MatchOnMetadata='M1' />
+                        </ItemGroup>
+                    </Target></Project>");
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            ExecuteTask(task, lookup);
+            ICollection<ProjectItemInstance> items = lookup.GetItems("I3");
+            items.ShouldBeEmpty();
+        }
+
+        [Fact]
         public void FailWithMetadataItemReferenceOnMatchingMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -2011,7 +2073,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             IntrinsicTask task = CreateIntrinsicTask(content);
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             Assert.ThrowsAny<InvalidProjectFileException>(() => ExecuteTask(task, lookup))
-                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
+                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToReferencedItems");
         }
 
         [Fact]

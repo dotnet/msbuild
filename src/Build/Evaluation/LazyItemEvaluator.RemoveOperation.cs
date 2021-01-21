@@ -23,7 +23,7 @@ namespace Microsoft.Build.Evaluation
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                     _matchOnMetadata.IsEmpty || _itemSpec.Fragments.All(f => f is ItemSpec<ProjectProperty, ProjectItem>.ItemExpressionFragment),
                     new BuildEventFileInfo(string.Empty),
-                    "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
+                    "OM_MatchOnMetadataIsRestrictedToReferencedItems");
 
                 if (!_matchOnMetadata.IsEmpty)
                 {
