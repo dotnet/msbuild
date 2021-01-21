@@ -80,8 +80,8 @@ stages:
     - script: eng/CIBuild.cmd
                 -configuration $(BuildConfiguration)
                 -officialBuildId $(Build.BuildNumber)
-                -officialSkipApplyOptimizationData $(SkipApplyOptimizationData)
-                /p:RepositoryName=$(Build.Repository.Name)
+                -officialSkipApplyOptimizationData true
+                /p:RepositoryName=https://dnceng@dev.azure.com/dnceng/internal/_git/dotnet-msbuild
                 /p:VisualStudioIbcSourceBranchName=$(SourceBranch)
                 /p:VisualStudioDropAccessToken=$(System.AccessToken)
                 /p:VisualStudioDropName=$(VisualStudio.DropName)
