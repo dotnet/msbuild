@@ -13,14 +13,22 @@ namespace Microsoft.Build.Evaluation
         class RemoveOperation : LazyItemOperation
         {
             readonly ImmutableList<string> _matchOnMetadata;
-            readonly MatchOnMetadataOptions _matchOnMetadataOptions;
-            private MetadataSet<P, I> metadataSet;
+            private MetadataSet<P, I> _metadataSet;
 
             public RemoveOperation(RemoveOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
                 : base(builder, lazyEvaluator)
             {
                 _matchOnMetadata = builder.MatchOnMetadata.ToImmutable();
-                _matchOnMetadataOptions = builder.MatchOnMetadataOptions;
+
+                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                    _matchOnMetadata.IsEmpty || _itemSpec.Fragments.All(f => f is ItemSpec<ProjectProperty, ProjectItem>.ItemExpressionFragment),
+                    new BuildEventFileInfo(string.Empty),
+                    "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
+
+                if (!_matchOnMetadata.IsEmpty)
+                {
+                    _metadataSet = new MetadataSet<P, I>(builder.MatchOnMetadataOptions, _matchOnMetadata, _itemSpec);
+                }
             }
 
             /// <summary>
@@ -32,13 +40,6 @@ namespace Microsoft.Build.Evaluation
             /// </remarks>
             protected override void ApplyImpl(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                var matchOnMetadataValid = !_matchOnMetadata.IsEmpty && _itemSpec.Fragments.Count == 1
-                    && _itemSpec.Fragments.First() is ItemSpec<ProjectProperty, ProjectItem>.ItemExpressionFragment;
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                    _matchOnMetadata.IsEmpty || (matchOnMetadataValid && _matchOnMetadata.Count == 1),
-                    new BuildEventFileInfo(string.Empty),
-                    "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
-
                 if (_matchOnMetadata.IsEmpty && ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType) && _conditionResult)
                 {
                     // Perf optimization: If the Remove operation references itself (e.g. <I Remove="@(I)"/>)
@@ -65,12 +66,7 @@ namespace Microsoft.Build.Evaluation
 
             private bool MatchesItemOnMetadata(I item)
             {
-                if (metadataSet == null)
-                {
-                    metadataSet = new MetadataSet<P, I>(_matchOnMetadataOptions, _matchOnMetadata, _itemSpec);
-                }
-
-                return metadataSet.Contains(_matchOnMetadata.Select(m => item.GetMetadataValue(m)));
+                return _metadataSet.Contains(_matchOnMetadata.Select(m => item.GetMetadataValue(m)));
             }
 
             protected override void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder)

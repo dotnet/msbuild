@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
@@ -460,16 +459,16 @@ namespace Microsoft.Build.Evaluation
             && FileUtilities.IsAnySlash(TextFragment[3]);
     }
 
-    internal class MetadataSet<P, I> where P : class, IProperty where I : class, IItem, IMetadataTable
+    internal sealed class MetadataSet<P, I> where P : class, IProperty where I : class, IItem, IMetadataTable
     {
-        private Dictionary<string, MetadataSet<P, I>> children;
-        Func<string, string> normalize;
+        private readonly Dictionary<string, MetadataSet<P, I>> _children;
+        private readonly Func<string, string> _normalize;
 
-        internal MetadataSet(MatchOnMetadataOptions options, ImmutableList<string> metadata, ItemSpec<P, I> itemSpec)
+        internal MetadataSet(MatchOnMetadataOptions options, IEnumerable<string> metadata, ItemSpec<P, I> itemSpec)
         {
             StringComparer comparer = options == MatchOnMetadataOptions.CaseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
-            children = new Dictionary<string, MetadataSet<P, I>>(comparer);
-            normalize = options == MatchOnMetadataOptions.PathLike ? p => FileUtilities.NormalizePathForComparisonNoThrow(p, Environment.CurrentDirectory) : p => p;
+            _children = new Dictionary<string, MetadataSet<P, I>>(comparer);
+            _normalize = options == MatchOnMetadataOptions.PathLike ? p => FileUtilities.NormalizePathForComparisonNoThrow(p, Environment.CurrentDirectory) : p => p;
             foreach (ItemSpec<P, I>.ItemExpressionFragment frag in itemSpec.Fragments)
             {
                 foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)
@@ -481,7 +480,7 @@ namespace Microsoft.Build.Evaluation
 
         private MetadataSet(StringComparer comparer)
         {
-            children = new Dictionary<string, MetadataSet<P, I>>(comparer);
+            _children = new Dictionary<string, MetadataSet<P, I>>(comparer);
         }
 
         // Relies on IEnumerable returning the metadata in a reasonable order. Reasonable?
@@ -490,35 +489,31 @@ namespace Microsoft.Build.Evaluation
             MetadataSet<P, I> current = this;
             foreach (string m in metadata)
             {
-                string normalizedString = normalize(m);
-                if (current.children.TryGetValue(normalizedString, out MetadataSet<P, I> child))
+                string normalizedString = _normalize(m);
+                if (!current._children.TryGetValue(normalizedString, out MetadataSet<P, I> child))
                 {
-                    current = child;
+                    child = new MetadataSet<P, I>(comparer);
+                    current._children.Add(normalizedString, child);
                 }
-                else
-                {
-                    current.children.Add(normalizedString, new MetadataSet<P, I>(comparer));
-                    current = current.children[normalizedString];
-                }
+                current = child;
             }
         }
 
         internal bool Contains(IEnumerable<string> metadata)
         {
-            bool nonEmptyFound = false;
-            MetadataSet<P, I> curr = this;
+            MetadataSet<P, I> current = this;
             foreach (string m in metadata)
             {
-                if (!String.IsNullOrEmpty(m))
+                if (String.IsNullOrEmpty(m))
                 {
-                    nonEmptyFound = true;
+                    return false;
                 }
-                if (!curr.children.TryGetValue(normalize(m), out curr))
+                if (!current._children.TryGetValue(_normalize(m), out current))
                 {
                     return false;
                 }
             }
-            return nonEmptyFound;
+            return true;
         }
     }
 

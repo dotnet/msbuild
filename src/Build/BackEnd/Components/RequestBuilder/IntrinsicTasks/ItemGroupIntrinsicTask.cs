@@ -249,18 +249,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                ImmutableList<string> metadataList = matchOnMetadata.ToImmutableList();
-                ItemSpec<ProjectPropertyInstance, ProjectItemInstance> itemSpec = new(child.Remove, bucket.Expander, child.RemoveLocation, Project.Directory, true);
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                    itemSpec.Fragments.Count == 1
-                    && itemSpec.Fragments.First() is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment
-                    && matchOnMetadata.Count == 1,
-                    new BuildEventFileInfo(string.Empty),
-                    "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem",
-                    child.RemoveLocation,
-                    child.Remove);
-                MetadataSet<ProjectPropertyInstance, ProjectItemInstance> metadataSet = new(matchingOptions, metadataList, itemSpec);
-                itemsToRemove = group.Where(item => metadataSet.Contains(metadataList.Select(m => item.GetMetadataValue(m)))).ToList();
+                itemsToRemove = FindItemsMatchingMetadataSpecification(group, child, bucket.Expander, matchOnMetadata, matchingOptions);
             }
 
             if (itemsToRemove != null)
@@ -583,6 +572,24 @@ namespace Microsoft.Build.BackEnd
             }
 
             return itemsRemoved;
+        }
+
+        private List<ProjectItemInstance> FindItemsMatchingMetadataSpecification(
+            ICollection<ProjectItemInstance> group,
+            ProjectItemGroupTaskItemInstance child,
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
+            HashSet<string> matchOnMetadata,
+            MatchOnMetadataOptions matchingOptions)
+        {
+            ItemSpec<ProjectPropertyInstance, ProjectItemInstance> itemSpec = new(child.Remove, expander, child.RemoveLocation, Project.Directory, true);
+            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                itemSpec.Fragments.All(f => f is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment),
+                new BuildEventFileInfo(string.Empty),
+                "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem",
+                child.RemoveLocation,
+                child.Remove);
+            MetadataSet<ProjectPropertyInstance, ProjectItemInstance> metadataSet = new(matchingOptions, matchOnMetadata, itemSpec);
+            return group.Where(item => metadataSet.Contains(matchOnMetadata.Select(m => item.GetMetadataValue(m)))).ToList();
         }
 
         /// <summary>

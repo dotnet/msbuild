@@ -2418,8 +2418,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 <I2 Remove='@(I1)' MatchOnMetadata='M1;M2'/>");
 
-            Should.Throw<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content))
-                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
+            Project project = ObjectModelHelpers.CreateInMemoryProject(content);
+            IEnumerable<ProjectItem> items = project.ItemsIgnoringCondition.Where(i => i.ItemType.Equals("I2"));
+            items.Count().ShouldBe(3);
         }
 
         [Fact]
@@ -2443,8 +2444,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 <I3 Remove='@(I1);@(I2)' MatchOnMetadata='M1' />");
 
-            Should.Throw<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content))
-                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
+            Project project = ObjectModelHelpers.CreateInMemoryProject(content);
+            IEnumerable<ProjectItem> items = project.ItemsIgnoringCondition.Where(i => i.ItemType.Equals("I3"));
+            items.ShouldBeEmpty();
         }
 
         [Fact]
@@ -2462,7 +2464,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 <I2 Include='d2' M1='y' m2='d'/>
 
                 <I2 Remove='%(I1.M1)' MatchOnMetadata='M1' />");
-
             Should.Throw<InvalidProjectFileException>(() => ObjectModelHelpers.CreateInMemoryProject(content))
                 .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
         }
