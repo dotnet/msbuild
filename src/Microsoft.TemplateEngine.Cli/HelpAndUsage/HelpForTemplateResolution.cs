@@ -11,6 +11,7 @@ using Microsoft.TemplateEngine.Utils;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using System.Text;
 using Microsoft.TemplateEngine.Cli.TableOutput;
+using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
 
 namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
@@ -48,6 +49,53 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 }
 
             }
+        }
+
+        /// <summary>
+        /// Displays the help in case it is not possible to resolve template to use based on user input on template instantiation.
+        /// </summary>
+        /// <param name="resolutionResult">template resolution result</param>
+        /// <param name="environmentSettings"></param>
+        /// <param name="commandInput">command input used in CLI</param>
+        /// <param name="defaultLanguage">default language for the host</param>
+        /// <param name="installUnitDescriptors">the collection of install unit descriptors</param>
+        /// <returns></returns>
+        internal static CreationResultStatus CoordinateAmbiguousTemplateResolutionDisplay(
+            TemplateResolutionResult resolutionResult,
+            IEngineEnvironmentSettings environmentSettings,
+            INewCommandInput commandInput,
+            string defaultLanguage,
+            IEnumerable<IInstallUnitDescriptor> installUnitDescriptors)
+        {
+            switch (resolutionResult.ResolutionStatus)
+            {
+                case TemplateResolutionResult.Status.NoMatch:
+                    Reporter.Error.WriteLine(
+                        string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, GetInputParametersString(commandInput)).Bold().Red());
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.ListTemplatesCommand, commandInput.CommandName).Bold().Red());
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.SearchTemplatesCommand, commandInput.CommandName, commandInput.TemplateName).Bold().Red());
+                    return CreationResultStatus.NotFound;
+                case TemplateResolutionResult.Status.AmbiguousLanguageChoice:
+                    Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHeader.Bold().Red());
+                    DisplayTemplateList(resolutionResult.TemplateGroups, environmentSettings, commandInput, defaultLanguage, useErrorOutput: true);
+                    Reporter.Error.WriteLine(LocalizableStrings.AmbiguousLanguageHint.Bold().Red());
+                    return CreationResultStatus.NotFound;
+                case TemplateResolutionResult.Status.AmbiguousTemplateGroupChoice:
+                    Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHeader.Bold().Red());
+                    DisplayTemplateList(resolutionResult.TemplateGroups, environmentSettings, commandInput, defaultLanguage, useErrorOutput: true);
+                    Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHint.Bold().Red());
+                    return CreationResultStatus.NotFound;
+                case TemplateResolutionResult.Status.AmbiguousParameterValueChoice:
+                    environmentSettings.Host.LogDiagnosticMessage(LocalizableStrings.Authoring_AmbiguousChoiceParameterValue, "Authoring");
+                    return DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput);
+                case TemplateResolutionResult.Status.AmbiguousTemplateChoice:
+                    environmentSettings.Host.LogDiagnosticMessage(LocalizableStrings.Authoring_AmbiguousBestPrecedence, "Authoring");
+                    return DisplayAmbiguousPrecedenceError(resolutionResult.UnambiguousTemplateGroup, environmentSettings, commandInput, installUnitDescriptors);
+                case TemplateResolutionResult.Status.InvalidParameter:
+                    return DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput);
+            }
+
+            return CreationResultStatus.CreateFailed;
         }
 
         private static CreationResultStatus DisplayHelpForUnambiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, ITelemetryLogger telemetryLogger, string defaultLanguage)
@@ -141,7 +189,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             if (templateResolutionResult.HasExactMatches)
             {
                 ShowTemplatesFoundMessage(commandInput);
-                DisplayTemplateList(templateResolutionResult.ExactMatchedTemplates, environmentSettings, commandInput, defaultLanguage);
+                DisplayTemplateList(templateResolutionResult.ExactMatchedTemplateGroups, environmentSettings, commandInput, defaultLanguage);
             }
             else
             {
@@ -167,6 +215,109 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
         }
 
+        /// <summary>
+        /// Displays the help in case <paramref name="commandInput"/> contains invalid parameters for resolved <paramref name="unambiguousTemplateGroup"/>
+        /// </summary>
+        /// <param name="unambiguousTemplateGroup">the unambigious template group to use based on the command input</param>
+        /// <param name="commandInput">the command input</param>
+        /// <returns><see cref="CreationResultStatus.InvalidParamValues"/></returns>
+        /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/>is <see cref="null"/></exception>
+        /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/>is <see cref="null"/></exception>
+        private static CreationResultStatus DisplayInvalidParameterError(TemplateGroup unambiguousTemplateGroup, INewCommandInput commandInput)
+        {
+            _ = unambiguousTemplateGroup ?? throw new ArgumentNullException(paramName: nameof(unambiguousTemplateGroup));
+            _ = unambiguousTemplateGroup ?? throw new ArgumentNullException(paramName: nameof(commandInput));
+
+            var invalidParameters = unambiguousTemplateGroup.GetInvalidParameterList();
+            if (invalidParameters.Any())
+            {
+                Reporter.Error.WriteLine(string.Format(InvalidParameterInfo.InvalidParameterListToString(invalidParameters, unambiguousTemplateGroup).Bold().Red()));
+            }
+            Reporter.Error.WriteLine(
+                    string.Format(LocalizableStrings.InvalidParameterTemplateHint, GetTemplateHelpCommand(commandInput.CommandName, unambiguousTemplateGroup.ShortName)).Bold().Red());
+            return CreationResultStatus.InvalidParamValues;
+        }
+
+        private struct AmbiguousTemplateDetails
+        {
+            internal string TemplateIdentity;
+            internal string TemplateName;
+            internal string TemplateShortName;
+            internal string TemplateLanguage;
+            internal int TemplatePrecedence;
+            internal string TemplateAuthor;
+            internal IInstallUnitDescriptor InstallationDescriptor;
+        }
+
+        /// <summary>
+        /// Displays the help when <paramref name="unambiguousTemplateGroup"/> contains the invokable templates with ambiguous precedence.
+        /// </summary>
+        /// <param name="unambiguousTemplateGroup">resolved unambiguous template group to use based on the command input</param>
+        /// <param name="environmentSettings"></param>
+        /// <param name="commandInput">the command input</param>
+        /// <param name="installUnitDescriptors">the list of install unit descriptors</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/>is <see cref="null"/></exception>
+        /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/>is <see cref="null"/></exception>
+        private static CreationResultStatus DisplayAmbiguousPrecedenceError(
+            TemplateGroup unambiguousTemplateGroup,
+            IEngineEnvironmentSettings environmentSettings,
+            INewCommandInput commandInput,
+            IEnumerable<IInstallUnitDescriptor> installUnitDescriptors)
+        {
+            _ = unambiguousTemplateGroup ?? throw new ArgumentNullException(paramName: nameof(unambiguousTemplateGroup));
+            _ = unambiguousTemplateGroup ?? throw new ArgumentNullException(paramName: nameof(commandInput));
+
+            Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplatesHeader.Bold().Red());
+            List<AmbiguousTemplateDetails> ambiguousTemplateDetails = new List<AmbiguousTemplateDetails>();
+            foreach (ITemplateMatchInfo template in unambiguousTemplateGroup.GetHighestPrecedenceInvokableTemplates(true))
+            {
+                ambiguousTemplateDetails.Add(new AmbiguousTemplateDetails
+                {
+                    TemplateIdentity = template.Info.Identity,
+                    TemplateName = template.Info.Name,
+                    TemplateShortName = template.Info.ShortName,
+                    TemplateLanguage = template.Info.GetLanguage(),
+                    TemplatePrecedence = template.Info.Precedence,
+                    TemplateAuthor = template.Info.Author,
+                    InstallationDescriptor = installUnitDescriptors?.FirstOrDefault(descriptor => descriptor.MountPointId == template.Info.ConfigMountPointId)
+                });
+            }
+
+            HelpFormatter<AmbiguousTemplateDetails> formatter =
+                HelpFormatter
+                    .For(
+                        environmentSettings,
+                        commandInput,
+                        ambiguousTemplateDetails,
+                        columnPadding: 2,
+                        headerSeparator: '-',
+                        blankLineBetweenRows: false)
+                    .DefineColumn(t => t.TemplateIdentity, LocalizableStrings.ColumnNameIdentity, showAlways: true)
+                    .DefineColumn(t => t.TemplateName, LocalizableStrings.ColumnNameTemplateName, shrinkIfNeeded: true, minWidth: 15, showAlways: true)
+                    .DefineColumn(t => t.TemplateShortName, LocalizableStrings.ColumnNameShortName, showAlways: true)
+                    .DefineColumn(t => t.TemplateLanguage, LocalizableStrings.ColumnNameLanguage, showAlways: true)
+                    .DefineColumn(t => t.TemplatePrecedence.ToString(), out object prcedenceColumn, LocalizableStrings.ColumnNamePrecedence, showAlways: true)
+                    .DefineColumn(t => t.TemplateAuthor, LocalizableStrings.ColumnNameAuthor, showAlways: true, shrinkIfNeeded: true, minWidth: 10)
+                    .DefineColumn(t => t.InstallationDescriptor != null ? t.InstallationDescriptor.Identifier : string.Empty, LocalizableStrings.ColumnNamePackage, showAlways: true)
+                    .OrderByDescending(prcedenceColumn, new NullOrEmptyIsLastStringComparer());
+            Reporter.Error.WriteLine(formatter.Layout().Bold().Red());
+
+            string hintMessage = LocalizableStrings.AmbiguousTemplatesMultiplePackagesHint;
+            if (unambiguousTemplateGroup.Templates.AllAreTheSame(t => t.Info.ConfigMountPointId))
+            {
+                IInstallUnitDescriptor descriptor = installUnitDescriptors?.First(descriptor => descriptor.MountPointId == unambiguousTemplateGroup.Templates.First().Info.ConfigMountPointId);
+                if (descriptor?.Details?.ContainsKey("NuGetPackageId") ?? false)
+                {
+                    hintMessage = string.Format(LocalizableStrings.AmbiguousTemplatesSamePackageHint, descriptor.Identifier);
+                }
+            }
+   
+            Reporter.Error.WriteLine(hintMessage.Bold().Red());
+            return CreationResultStatus.NotFound;
+        }
+
+
         // Displays the list of templates in a table, one row per template group.
         //
         // The columns displayed are as follows:
@@ -176,9 +327,9 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         // - Short Name: displays the first short name from the highest precedence template in the group.
         // - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
         // - Tags
-        private static void DisplayTemplateList(IReadOnlyCollection<ITemplateMatchInfo> templates, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string defaultLanguage)
+        private static void DisplayTemplateList(IReadOnlyCollection<TemplateGroup> templateGroups, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string defaultLanguage, bool useErrorOutput = false)
         {
-            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(templates, commandInput.Language, defaultLanguage);
+            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(templateGroups, commandInput.Language, defaultLanguage);
 
             HelpFormatter<TemplateGroupTableRow> formatter =
                 HelpFormatter
@@ -191,14 +342,16 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         blankLineBetweenRows: false)
                     .DefineColumn(t => t.Name, LocalizableStrings.ColumnNameTemplateName, shrinkIfNeeded: true, minWidth: 15, showAlways: true)
                     .DefineColumn(t => t.ShortName, LocalizableStrings.ColumnNameShortName, showAlways: true)
-                    .DefineColumn(t => t.Languages, out object languageColumn,  LocalizableStrings.ColumnNameLanguage, NewCommandInputCli.LanguageColumnFilter, defaultColumn: true)
+                    .DefineColumn(t => t.Languages, out object languageColumn, LocalizableStrings.ColumnNameLanguage, NewCommandInputCli.LanguageColumnFilter, defaultColumn: true)
                     .DefineColumn(t => t.Type, LocalizableStrings.ColumnNameType, NewCommandInputCli.TypeColumnFilter, defaultColumn: false)
-                    .DefineColumn(t => t.Author,  LocalizableStrings.ColumnNameAuthor, NewCommandInputCli.AuthorColumnFilter, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
+                    .DefineColumn(t => t.Author, LocalizableStrings.ColumnNameAuthor, NewCommandInputCli.AuthorColumnFilter, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
                     .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.ColumnNameTags, NewCommandInputCli.TagsColumnFilter, defaultColumn: true)
 
                     .OrderByDescending(languageColumn, new NullOrEmptyIsLastStringComparer())
                     .OrderBy(tagsColumn);
-            Reporter.Output.WriteLine(formatter.Layout());
+
+            Reporter reporter = useErrorOutput ? Reporter.Error : Reporter.Output;
+            reporter.WriteLine(formatter.Layout());
         }
 
         public static void DisplayInvalidParameters(IReadOnlyList<string> invalidParams)
@@ -245,7 +398,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 Reporter.Error.WriteLine(
                     string.Format(
                         LocalizableStrings.TemplatesNotValidGivenTheSpecifiedFilter,
-                        templateResolutionResult.PartiallyMatchedTemplatesGrouped.Count,
+                        templateResolutionResult.PartiallyMatchedTemplateGroups.Count,
                         GetPartialMatchReason(templateResolutionResult, commandInput))
                     .Bold().Red());
             }
@@ -331,7 +484,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
         internal static string GetTemplateHelpCommand(string commandName, ITemplateInfo template)
         {
-            return $"dotnet {commandName} {template.ShortName} --help";
+            return GetTemplateHelpCommand(commandName, template.ShortName);
+        }
+
+        internal static string GetTemplateHelpCommand(string commandName, string shortName)
+        {
+            return $"dotnet {commandName} {shortName} --help";
         }
 
         private static string GetInputParametersString(INewCommandInput commandInput)

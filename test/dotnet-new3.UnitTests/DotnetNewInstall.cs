@@ -13,28 +13,19 @@ namespace dotnet_new3.UnitTests
 {
     public class DotnetNewInstallTests
     {
-        private readonly ITestOutputHelper log;
+        private readonly ITestOutputHelper _log;
 
         public DotnetNewInstallTests(ITestOutputHelper log)
         {
-            this.log = log;
+            _log = log;
         }
 
         [Fact]
         public void OnlyPrintNewlyInstalledTemplates()
         {
             var home = Helpers.CreateTemporaryFolder("Home");
-            // Execute first time so any output printed on first run is printed here...
-            new DotnetNewCommand(log)
-                .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And
-                .NotHaveStdErr();
-
             // Do actual install...
-            new DotnetNewCommand(log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0")
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "--quiet")
                 .WithWorkingDirectory(Helpers.CreateTemporaryFolder())
                 .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
                 .Execute()

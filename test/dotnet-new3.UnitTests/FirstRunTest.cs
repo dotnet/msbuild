@@ -7,18 +7,18 @@ namespace dotnet_new3.UnitTests
 {
     public class FirstRunTest
     {
-        private readonly ITestOutputHelper log;
+        private readonly ITestOutputHelper _log;
 
         public FirstRunTest(ITestOutputHelper log)
         {
-            this.log = log;
+            _log = log;
         }
 
         [Fact]
         public void FirstRunSuccess()
         {
             var home = Helpers.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(log)
+            new DotnetNewCommand(_log)
                 .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
@@ -27,7 +27,7 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdOutContaining("Getting ready")
                 .And.NotHaveStdOutContaining("Error");
 
-            new DotnetNewCommand(log, "-u")
+            new DotnetNewCommand(_log, "-u")
                 .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()

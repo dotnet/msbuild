@@ -18,13 +18,13 @@ namespace dotnet_new3.UnitTests
 {
     public class AllProjectsWork : IClassFixture<SharedHomeDirectory>
     {
-        private readonly SharedHomeDirectory sharedHome;
-        private readonly ITestOutputHelper log;
+        private readonly SharedHomeDirectory _sharedHome;
+        private readonly ITestOutputHelper _log;
 
         public AllProjectsWork(SharedHomeDirectory sharedHome, ITestOutputHelper log)
         {
-            this.sharedHome = sharedHome;
-            this.log = log;
+            _sharedHome = sharedHome;
+            _log = log;
             sharedHome.InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.5.0");
             sharedHome.InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.3.1");
         }
@@ -44,16 +44,16 @@ namespace dotnet_new3.UnitTests
         {
             string workingDir = Helpers.CreateTemporaryFolder(testName);
 
-            new DotnetNewCommand(log, args)
+            new DotnetNewCommand(_log, args)
                 .WithWorkingDirectory(workingDir)
-                .WithEnvironmentVariable(sharedHome.HomeVariable, sharedHome.HomeDirectory)
+                .WithEnvironmentVariable(_sharedHome.HomeVariable, _sharedHome.HomeDirectory)
                 .Execute()
                 .Should()
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr();
 
-            new DotnetCommand(log, "restore")
+            new DotnetCommand(_log, "restore")
                 .WithWorkingDirectory(workingDir)
                 .Execute()
                 .Should()
@@ -61,7 +61,7 @@ namespace dotnet_new3.UnitTests
                 .And
                 .NotHaveStdErr();
 
-            new DotnetCommand(log, "build")
+            new DotnetCommand(_log, "build")
                 .WithWorkingDirectory(workingDir)
                 .Execute()
                 .Should()

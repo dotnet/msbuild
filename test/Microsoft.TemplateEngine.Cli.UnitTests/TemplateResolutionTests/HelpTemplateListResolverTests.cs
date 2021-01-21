@@ -64,7 +64,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
-            Assert.Equal(1, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(1, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(3, matchResult.ExactMatchedTemplates.Count);
             Assert.True(matchResult.HasUnambiguousTemplateGroup);
             Assert.Equal(3, matchResult.UnambiguousTemplateGroup.Count);
@@ -84,7 +84,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
-            Assert.Equal(2, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(2, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(5, matchResult.ExactMatchedTemplates.Count);
             Assert.False(matchResult.HasUnambiguousTemplateGroup);
         }
@@ -139,7 +139,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
-            Assert.Equal(1, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(1, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(3, matchResult.ExactMatchedTemplates.Count);
             Assert.True(matchResult.HasUnambiguousTemplateGroup);
             Assert.Equal(3, matchResult.UnambiguousTemplateGroup.Count);
@@ -158,7 +158,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
-            Assert.Equal(1, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(1, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(3, matchResult.ExactMatchedTemplates.Count);
             Assert.True(matchResult.HasUnambiguousTemplateGroup);
             Assert.Equal(3, matchResult.UnambiguousTemplateGroup.Count);
@@ -179,10 +179,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);
-            Assert.Equal(0, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
             Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.PartiallyMatchedTemplatesGrouped.Count);
+            Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
             Assert.True(matchResult.HasLanguageMismatch);
             Assert.False(matchResult.HasContextMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
@@ -205,10 +205,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);
-            Assert.Equal(0, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
             Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.PartiallyMatchedTemplatesGrouped.Count);
+            Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
             Assert.False(matchResult.HasLanguageMismatch);
             Assert.True (matchResult.HasContextMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
@@ -230,10 +230,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);
-            Assert.Equal(0, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
             Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.PartiallyMatchedTemplatesGrouped.Count);
+            Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
             Assert.False(matchResult.HasLanguageMismatch);
             Assert.False(matchResult.HasContextMismatch);
             Assert.True(matchResult.HasBaselineMismatch);
@@ -256,10 +256,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);
-            Assert.Equal(0, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
             Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.PartiallyMatchedTemplatesGrouped.Count);
+            Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
             Assert.True(matchResult.HasLanguageMismatch);
             Assert.True(matchResult.HasContextMismatch);
             Assert.True(matchResult.HasBaselineMismatch);
@@ -288,10 +288,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);
-            Assert.Equal(0, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
             Assert.Equal(2, matchResult.PartiallyMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.PartiallyMatchedTemplatesGrouped.Count);
+            Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
             Assert.False(matchResult.HasLanguageMismatch);
             Assert.True(matchResult.HasContextMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
@@ -315,10 +315,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);
             Assert.False(matchResult.HasPartialMatches);
-            Assert.Equal(0, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
             Assert.Equal(0, matchResult.PartiallyMatchedTemplates.Count);
-            Assert.Equal(0, matchResult.PartiallyMatchedTemplatesGrouped.Count);
+            Assert.Equal(0, matchResult.PartiallyMatchedTemplateGroups.Count);
             Assert.False(matchResult.HasLanguageMismatch);
             Assert.False(matchResult.HasContextMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
@@ -356,7 +356,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
-            Assert.Equal(1, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(1, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(1, matchResult.ExactMatchedTemplates.Count);
             Assert.False(matchResult.HasLanguageMismatch);
             Assert.False(matchResult.HasContextMismatch);
@@ -397,7 +397,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
-            Assert.Equal(3, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(3, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(3, matchResult.ExactMatchedTemplates.Count);
             Assert.False(matchResult.HasLanguageMismatch);
             Assert.False(matchResult.HasContextMismatch);
@@ -437,7 +437,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
-            Assert.Equal(3, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(3, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(3, matchResult.ExactMatchedTemplates.Count);
             Assert.False(matchResult.HasLanguageMismatch);
             Assert.False(matchResult.HasContextMismatch);
@@ -465,7 +465,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);
             Assert.False(matchResult.HasPartialMatches);
-            Assert.Equal(0, matchResult.ExactMatchedTemplatesGrouped.Count);
+            Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
             Assert.False(matchResult.HasLanguageMismatch);
             Assert.False(matchResult.HasContextMismatch);
