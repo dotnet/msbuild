@@ -328,11 +328,10 @@ namespace Microsoft.NET.Publish.Tests
             //since the error experience is not good for a developer
             var warnings = result.StdOut.Split('\n', '\r', ')').Where(line => line.StartsWith("ILLink :"));
             var extraWarnings = warnings.Except(expectedOutput);
-            var missingWarnings = expectedOutput.Except(warnings);
 
             StringBuilder errorMessage = new StringBuilder();
 
-            if (missingWarnings.Any() || extraWarnings.Any())
+            if (extraWarnings.Any())
             {
                 // Print additional information to recognize which framework assemblies are being used.
                 errorMessage.Append($"Target framework from test: {targetFramework}{Environment.NewLine}");
@@ -351,20 +350,14 @@ namespace Microsoft.NET.Publish.Tests
                 }
                 errorMessage.Append($"The execution of a hello world app generated a diff in the number of warnings the app produces{Environment.NewLine}{Environment.NewLine}");
             }
-            if (missingWarnings.Any())
-            {
-                errorMessage.Append($"This is a list of missing linker warnings generated with your change using a console app, if you are working on make things linker" +
-                    $" friendly please also submit a PR deleting these warnings:{Environment.NewLine}");
-                foreach (var missingWarning in missingWarnings)
-                    errorMessage.Append("-  " + missingWarning + Environment.NewLine);
-            }
+            // Intentionally do not fail for missing warnings. That's an improvement.
             if (extraWarnings.Any())
             {
                 errorMessage.Append($"This is a list of extra linker warnings generated with your change using a console app:{Environment.NewLine}");
                 foreach (var extraWarning in extraWarnings)
                     errorMessage.Append("+  " + extraWarning + Environment.NewLine);
             }
-            Assert.True(!missingWarnings.Any() && !extraWarnings.Any(), errorMessage.ToString());
+            Assert.True(!extraWarnings.Any(), errorMessage.ToString());
         }
 
         [Theory]
