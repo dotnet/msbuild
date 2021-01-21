@@ -971,6 +971,11 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string[] DirectoryGetFiles(string path, string pattern = "*", IFileSystem fileSystem = null)
         {
+            if (path is null)
+                throw new ArgumentNullException(nameof(path));
+            if (path.Length == 0)
+                throw new ArgumentException("Unexpected empty string", nameof(path));
+
             path = AttemptToShortenPath(path);
             return (fileSystem ?? DefaultFileSystem).EnumerateFiles(path, pattern).ToArray();
         }

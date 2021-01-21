@@ -601,6 +601,12 @@ namespace Microsoft.Build.Tasks
         /// <returns>true if file exists</returns>
         private bool FileExistsInDirectory(string path, string fileName)
         {
+            // to behave same as File.Exists(Path.Combine("","file.cs") we have to map empty string to current directory
+            if (path.Length == 0)
+            {
+                path = ".";
+            }
+
             instanceLocalDirectoryFiles.TryGetValue(path, out HashSet<string> cached);
             if (cached == null)
             {
