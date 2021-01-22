@@ -3,22 +3,18 @@ Param(
     [string] $CoreRootDirectory,
     [string] $BaselineCoreRootDirectory,
     [string] $Architecture="x64",
-    [string] $Framework="net5.0",
+    [string] $Framework="netcoreapp5.0",
     [string] $CompilationMode="Tiered",
     [string] $Repository=$env:BUILD_REPOSITORY_NAME,
     [string] $Branch=$env:BUILD_SOURCEBRANCH,
     [string] $CommitSha=$env:BUILD_SOURCEVERSION,
     [string] $BuildNumber=$env:BUILD_BUILDNUMBER,
-    [string] $RunCategories="Libraries Runtime",
+    [string] $RunCategories="coreclr corefx",
     [string] $Csproj="src\benchmarks\micro\MicroBenchmarks.csproj",
     [string] $Kind="micro",
-    [switch] $LLVM,
-    [switch] $MonoInterpreter,
-    [switch] $MonoAOT, 
     [switch] $Internal,
     [switch] $Compare,
-    [string] $MonoDotnet="",
-    [string] $Configurations="CompilationMode=$CompilationMode RunKind=$Kind"
+    [string] $Configurations="CompilationMode=$CompilationMode"
 )
 
 $RunFromPerformanceRepo = ($Repository -eq "dotnet/performance") -or ($Repository -eq "dotnet-performance")
@@ -35,8 +31,7 @@ $HelixSourcePrefix = "pr"
 
 $Queue = "Windows.10.Amd64.ClientRS4.DevEx.15.8.Open"
 
-# TODO: Implement a better logic to determine if Framework is .NET Core or >= .NET 5.
-if ($Framework.StartsWith("netcoreapp") -or ($Framework -eq "net5.0")) {
+if ($Framework.StartsWith("netcoreapp")) {
     $Queue = "Windows.10.Amd64.ClientRS5.Open"
 }
 
@@ -54,36 +49,8 @@ if ($Internal) {
     $HelixSourcePrefix = "official"
 }
 
-if($MonoInterpreter)
-{
-    $ExtraBenchmarkDotNetArguments = "--category-exclusion-filter NoInterpreter"
-}
-
-if($MonoDotnet -ne "")
-{
-    $Configurations += " LLVM=$LLVM MonoInterpreter=$MonoInterpreter MonoAOT=$MonoAOT"
-    if($ExtraBenchmarkDotNetArguments -eq "")
-    {
-        #FIX ME: We need to block these tests as they don't run on mono for now
-        $ExtraBenchmarkDotNetArguments = "--exclusion-filter *Perf_Image* *Perf_NamedPipeStream*"
-    }
-    else
-    {
-        #FIX ME: We need to block these tests as they don't run on mono for now
-        $ExtraBenchmarkDotNetArguments += " --exclusion-filter *Perf_Image* *Perf_NamedPipeStream*"
-    }
-}
-
-# FIX ME: This is a workaround until we get this from the actual pipeline
-$CommonSetupArguments="--channel master --queue $Queue --build-number $BuildNumber --build-configs $Configurations --architecture $Architecture"
+$CommonSetupArguments="--frameworks $Framework --queue $Queue --build-number $BuildNumber --build-configs $Configurations"
 $SetupArguments = "--repository https://github.com/$Repository --branch $Branch --get-perf-hash --commit-sha $CommitSha $CommonSetupArguments"
-
-
-#This grabs the LKG version number of dotnet and passes it to our scripts
-$VersionJSON = Get-Content global.json | ConvertFrom-Json
-$DotNetVersion = $VersionJSON.tools.dotnet
-$SetupArguments = "--dotnet-versions $DotNetVersion $SetupArguments"
-
 
 if ($RunFromPerformanceRepo) {
     $SetupArguments = "--perf-hash $CommitSha $CommonSetupArguments"
@@ -92,13 +59,6 @@ if ($RunFromPerformanceRepo) {
 }
 else {
     git clone --branch master --depth 1 --quiet https://github.com/dotnet/performance $PerformanceDirectory
-}
-
-if($MonoDotnet -ne "")
-{
-    $UsingMono = "true"
-    $MonoDotnetPath = (Join-Path $PayloadDirectory "dotnet-mono")
-    Move-Item -Path $MonoDotnet -Destination $MonoDotnetPath
 }
 
 if ($UseCoreRun) {
@@ -136,7 +96,6 @@ Write-PipelineSetVariable -Name 'UseCoreRun' -Value "$UseCoreRun" -IsMultiJobVar
 Write-PipelineSetVariable -Name 'UseBaselineCoreRun' -Value "$UseBaselineCoreRun" -IsMultiJobVariable $false
 Write-PipelineSetVariable -Name 'RunFromPerfRepo' -Value "$RunFromPerformanceRepo" -IsMultiJobVariable $false
 Write-PipelineSetVariable -Name 'Compare' -Value "$Compare" -IsMultiJobVariable $false
-Write-PipelineSetVariable -Name 'MonoDotnet' -Value "$UsingMono" -IsMultiJobVariable $false
 
 # Helix Arguments
 Write-PipelineSetVariable -Name 'Creator' -Value "$Creator" -IsMultiJobVariable $false
