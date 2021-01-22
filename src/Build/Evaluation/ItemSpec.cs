@@ -505,7 +505,7 @@ namespace Microsoft.Build.Evaluation
                 options == MatchOnMetadataOptions.CaseInsensitive || FileUtilities.PathComparison == StringComparison.OrdinalIgnoreCase ? StringComparer.OrdinalIgnoreCase :
                 StringComparer.Ordinal;
             _children = new Dictionary<string, MetadataTrie<P, I>>(comparer);
-            _normalize = options == MatchOnMetadataOptions.PathLike ? p => FileUtilities.NormalizePathForComparisonNoThrow(p, Environment.CurrentDirectory) : p => p;
+            _normalize = options == MatchOnMetadataOptions.PathLike ? (Func<string, string>) (p => FileUtilities.NormalizePathForComparisonNoThrow(p, Environment.CurrentDirectory)) : p => p;
             foreach (ItemSpec<P, I>.ItemExpressionFragment frag in itemSpec.Fragments)
             {
                 foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)
