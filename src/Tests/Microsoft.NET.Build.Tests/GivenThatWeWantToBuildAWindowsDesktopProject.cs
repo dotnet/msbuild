@@ -237,5 +237,43 @@ namespace Microsoft.NET.Build.Tests
                 .And
                 .NotHaveStdOutContaining("NETSDK1140");
         }
+
+        [WindowsOnlyFact]
+        public void UseWPFCanBeSpecifiedInDirectoryBuildTargets()
+        {
+            var testDir = _testAssetsManager.CreateTestDirectory();
+
+            var newCommand = new DotnetCommand(Log);
+            newCommand.WorkingDirectory = testDir.Path;
+
+            newCommand.Execute("new", "wpf", "--debug:ephemeral-hive").Should().Pass();
+
+            var projectPath = Path.Combine(testDir.Path, Path.GetFileName(testDir.Path) + ".csproj");
+
+            var project = XDocument.Load(projectPath);
+            var ns = project.Root.Name.Namespace;
+
+            project.Root.Element(ns + "PropertyGroup")
+                .Element(ns + "UseWPF")
+                .Remove();
+
+            project.Save(projectPath);
+
+            string DirectoryBuildTargetsContent = @"
+<Project>
+  <PropertyGroup>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+</Project>
+";
+
+            File.WriteAllText(Path.Combine(testDir.Path, "Directory.Build.targets"), DirectoryBuildTargetsContent);
+
+            var buildCommand = new BuildCommand(Log, testDir.Path);
+
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+        }
     }
 }
