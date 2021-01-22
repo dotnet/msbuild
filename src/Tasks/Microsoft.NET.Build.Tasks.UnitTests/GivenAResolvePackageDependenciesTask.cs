@@ -828,6 +828,17 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             others.Where(t => t.ItemSpec == "ProjF/1.0.0").Count().Should().Be(1);
         }
 
+        [Fact]
+        public void ItDoesNotThrowOnCrossTargetingWithTargetPlatforms()
+        {
+            string lockFileContent = CreateCrossTargetingLockFileSnippet(
+                targets: new string[] { CreateTarget(".NETFramework,Version=v4.6.1"), CreateTarget("net5.0"), CreateTarget("net5.0-windows7.0") },
+                originalTargetFrameworks: new string[] { "\"net461\"", "\"net5.0\"", "\"net5.0-windows\"" },
+                targetFrameworks: new string[] { CreateTargetFramework("net5.0"), CreateTargetFramework("net5.0-windows7.0", "net5.0-windows"), CreateTargetFramework("net461") });
+
+            GetExecutedTaskFromContents(lockFileContent, out _); // Task should not fail on matching framework names
+        }
+
         private static ResolvePackageDependencies GetExecutedTaskFromPrefix(string lockFilePrefix, out LockFile lockFile, bool emitLegacyAssetsFileItems = true, string target = null)
         {
             lockFile = TestLockFiles.GetLockFile(lockFilePrefix);
