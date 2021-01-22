@@ -197,6 +197,7 @@ namespace Microsoft.DotNet.Cli
             TelemetryEventEntry.SendFiltered(parseResult);
             PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
 
+            var topLevelCommands = new string[] { "dotnet", parseResult.RootSubCommandResult() }.Concat(Parser.DiagOption.Aliases);
             int exitCode;
             if (parseResult.CommandResult.Command.Name.Equals("dotnet") && string.IsNullOrEmpty(parseResult.ValueForArgument<string>(Parser.DotnetSubCommand)))
             {
@@ -213,7 +214,6 @@ namespace Microsoft.DotNet.Cli
                 }
 
                 PerformanceLogEventSource.Log.BuiltInCommandStart();
-                var topLevelCommands = new string[] { "dotnet", parseResult.RootSubCommandResult() }.Concat(Parser.DiagOption.Aliases);
 
                 exitCode = builtIn.Command(args.Where(t => !topLevelCommands.Contains(t)).ToArray());
 				PerformanceLogEventSource.Log.BuiltInCommandStop();
@@ -223,14 +223,14 @@ namespace Microsoft.DotNet.Cli
                 PerformanceLogEventSource.Log.ExtensibleCommandResolverStart();
                 var resolvedCommand = CommandFactoryUsingResolver.Create(
                         "dotnet-" + parseResult.ValueForArgument<string>(Parser.DotnetSubCommand),
-                        parseResult.UnmatchedTokens,
+                        args.Where(t => !topLevelCommands.Contains(t)).ToArray(),
                         FrameworkConstants.CommonFrameworks.NetStandardApp15);
                 PerformanceLogEventSource.Log.ExtensibleCommandResolverStop();
 
                 PerformanceLogEventSource.Log.ExtensibleCommandStart();
                 var result = resolvedCommand.Execute();
                 PerformanceLogEventSource.Log.ExtensibleCommandStop();
-                
+
                 exitCode = result.ExitCode;
             }
 

@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(SdkTargetFramework)</TargetFramework>
+    <RootNamespace>Microsoft.AspNetCore.Watch.BrowserRefresh</RootNamespace>
+    <Nullable>enable</Nullable>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)src\BuiltInTools\BrowserRefresh\Microsoft.AspNetCore.Watch.BrowserRefresh.csproj" />
+    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="$(MicrosoftAspNetCoreTestHostPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="wwwroot\*" CopyToOutputDirectory="PreserveNewest" Pack="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="wwwroot\favicon.ico" />
+  </ItemGroup>
+
+</Project>

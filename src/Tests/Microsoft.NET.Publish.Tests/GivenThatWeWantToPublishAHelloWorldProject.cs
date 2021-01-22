@@ -687,5 +687,25 @@ public static class Program
                 .Should()
                 .Pass();
         }
+
+        [Fact]
+        public void IsPublishableIsRespectedWhenMultitargeting()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "PublishMultitarget",
+                TargetFrameworks = "net472;net5.0"
+            };
+            testProject.AdditionalProperties.Add("IsPublishable", "false");
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(testAsset);
+            publishCommand
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("The 'Publish' target is not supported without specifying a target framework.");
+        }
     }
 }

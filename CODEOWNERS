@@ -47,3 +47,9 @@
 /src/Tests/Microsoft.NET.Publish.Tests/GivenThatWeWantToPublishReadyToRun.cs @AntonLapounov
 # Publish.targets related to ILLink and ReadyToRun is own by both runtime and SDK team
 /src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.Publish.targets clrappmodel@microsoft.com @AntonLapounov @dotnet/dotnet-cli
+/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.ClickOnce.targets @sujitnayak
+
+/src/Assets/TestProjects/Watch*     @captainsafia, @pranavkm, @mkArtakMSFT
+/src/Tests/dotnet-watch.Tests       @captainsafia, @pranavkm, @mkArtakMSFT
+/src/Tests/Microsoft.AspNetCore.Watch.BrowserRefresh.Tests       @captainsafia, @pranavkm, mkArtakMSFT
+/src/BuiltInTools/   @captainsafia, @pranavkm, mkArtakMSFT

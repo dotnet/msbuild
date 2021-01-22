@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "dotnet-watch": {
+      "commandName": "Project",
+      "commandLineArgs": "--verbose --quiet"
+    }
+  }
+}
