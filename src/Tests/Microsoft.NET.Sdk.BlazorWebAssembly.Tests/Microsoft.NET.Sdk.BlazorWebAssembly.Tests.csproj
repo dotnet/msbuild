@@ -10,8 +10,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <!-- Strip the '-parallel none' flag here -->
-    <XUnitRunnerAdditionalArguments></XUnitRunnerAdditionalArguments>
     <PackageId>testSdkBlazorWasm</PackageId>
   </PropertyGroup>
 

@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <Copyright>© Microsoft</Copyright>
+    <Product>Razor Test</Product>
+    <Company>Microsoft</Company>
+    <Description>PackageLibraryDirectDependency Description</Description>
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
+    <PackageOutputPath>$(MSBuildThisFileDirectory)..\AppWithPackageAndP2PReference\TestPackages</PackageOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- We don't want to run build server when not running as tests. -->
+    <UseRazorBuildServer>false</UseRazorBuildServer>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App"/> 
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- <Content Include="build\**" Pack="true" PackagePath="build" /> -->
+    <!-- We will remove the line below when we do the item to support packing -->
+    <!-- <Content Update="wwwroot\**" Pack="true" PackagePath="razorContent" /> -->
+    <ProjectReference Include="..\PackageLibraryTransitiveDependency\PackageLibraryTransitiveDependency.csproj" />
+  </ItemGroup>
+
+
+</Project>

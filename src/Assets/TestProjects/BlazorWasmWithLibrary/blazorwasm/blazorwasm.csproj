@@ -31,4 +31,10 @@
     <ServiceWorker Include="wwwroot\serviceworkers\my-service-worker.js" PublishedContent="wwwroot\serviceworkers\my-prod-service-worker.js" />
   </ItemGroup>
 
+  <!-- Enabling compression increases build time. We want to avoid this for tests so we
+  disable it here. This doesn't affect any test assertions. -->
+  <PropertyGroup>
+    <_BlazorBrotliCompressionLevel>NoCompression</_BlazorBrotliCompressionLevel>
+  </PropertyGroup>
+
 </Project>

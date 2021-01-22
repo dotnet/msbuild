@@ -77,6 +77,7 @@
       <NETSdkWebProjectSystemSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Web.ProjectSystem</NETSdkWebProjectSystemSourceRoot>
       <NETSdkWorkerSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Worker</NETSdkWorkerSourceRoot>
       <NETSdkBlazorWasmSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.BlazorWebAssembly</NETSdkBlazorWasmSourceRoot>
+      <NETSdkRazorSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor</NETSdkRazorSourceRoot>
     </PropertyGroup>
     <ItemGroup>
       <NETSdksContent Include="$(NETSdkSourceRoot)\**\*.*" 
@@ -91,6 +92,8 @@
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Worker"/>
       <NETSdksContent Include="$(NETSdkBlazorWasmSourceRoot)\**\*.*" 
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.BlazorWebAssembly"/>
+      <NETSdksContent Include="$(NETSdkRazorSourceRoot)\**\*.*" 
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Razor"/>
     </ItemGroup>
     <Copy SourceFiles="@(NETSdksContent)"
       DestinationFiles="@(NETSdksContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
@@ -200,6 +203,30 @@
     <Copy
       SourceFiles="@(_WebAssemblyToolsOutput)"
       DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.BlazorWebAssembly\tools\$(SdkTargetFramework)\"
+      SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="PublishRazorSdkTools"
+          BeforeTargets="PublishNetSdks">
+    <MSBuild
+      Targets="Publish"
+      Projects="$(RepoRoot)/src/RazorSdk/Tool/Microsoft.NET.Sdk.Razor.Tool.csproj"
+      Properties="Configuration=$(Configuration)" />
+  </Target>
+
+  <Target Name="MoveRazorSdkTools" AfterTargets="PublishRazorSdkTools">
+    <ItemGroup>
+      <_RazorToolOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.Tool\$(Configuration)\$(SdkTargetFramework)\publish\*.*" />
+      <_MvcRazorExtensionOutput Include="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor\tasks\$(SdkTargetFramework)\Microsoft.AspNetCore.Mvc.Razor.Extensions.dll" />
+    </ItemGroup>
+
+    <Copy
+      SourceFiles="@(_RazorToolOutput)"
+      DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor\tools\"
+      SkipUnchangedFiles="true" />
+      <Copy
+      SourceFiles="@(_MvcRazorExtensionOutput)"
+      DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor\extensions\mvc-3-0\"
       SkipUnchangedFiles="true" />
   </Target>
 

@@ -16,6 +16,11 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new FileInfoAssertions(file);
         }
 
+        public static AssemblyAssertions AssemblyShould(this FileInfo file)
+        {
+            return new AssemblyAssertions(file);
+        }
+
         public static IDisposable Lock(this FileInfo subject)
         {
             return new FileInfoLock(subject);
