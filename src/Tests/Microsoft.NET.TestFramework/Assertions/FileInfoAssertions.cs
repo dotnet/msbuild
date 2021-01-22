@@ -73,5 +73,16 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<FileInfoAssertions>(this);
         }
 
+        public AndConstraint<FileInfoAssertions> NotContain(string expectedContent)
+        {
+            var actualContent = File.ReadAllText(_fileInfo.FullName);
+
+            Execute.Assertion
+                .ForCondition(!actualContent.Contains(expectedContent))
+                .FailWith($"File {_fileInfo.FullName} had content: {expectedContent}.");
+
+            return new AndConstraint<FileInfoAssertions>(this);
+        }
+
     }
 }
