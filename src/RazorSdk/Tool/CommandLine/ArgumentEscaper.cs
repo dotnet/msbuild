@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Microsoft.NET.Sdk.Razor.Tool
+namespace Microsoft.NET.Sdk.Razor.Tool.CommandLineUtils
 {
     /// <summary>
     /// A utility for escaping arguments for new processes.

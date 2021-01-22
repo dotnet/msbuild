@@ -71,6 +71,9 @@
 
   <ItemGroup>
     <Compile Include="**\*.cs" />
+    <Compile Include="..\Tool\CommandLine\ArgumentEscaper.cs">
+      <Link>Shared\CommandLine\%(FileName)</Link>
+    </Compile>
     <Compile Include="..\Tool\ServerProtocol\*.cs">
       <Link>Shared\ServerProtocol\%(FileName)</Link>
     </Compile>

@@ -27,6 +27,38 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         public WasmPublishIntegrationTest(ITestOutputHelper log) : base(log) { }
 
         [Fact]
+        public void Publish_MinimalApp_Works()
+        {
+            // Arrange
+            var testAppName = "BlazorWasmMinimal";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource();
+
+            var publishCommand = new PublishCommand(Log, testInstance.TestRoot);
+            publishCommand.Execute().Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+
+            var expectedFiles = new[]
+            {
+                "wwwroot/_framework/blazor.boot.json",
+                "wwwroot/_framework/blazor.webassembly.js",
+                "wwwroot/_framework/dotnet.wasm",
+                "wwwroot/_framework/blazorwasm-minimal.dll",
+                "wwwroot/index.html",
+                "web.config"
+            };
+
+            publishDirectory.Should().HaveFiles(expectedFiles);
+
+            // Verify web.config
+            var content = File.ReadAllText(Path.Combine(publishDirectory.ToString(), "web.config"));
+            content.Should().Contain("<remove fileExtension=\".blat\" />");
+
+            VerifyBootManifestHashes(testInstance, Path.Combine(publishDirectory.ToString(), "wwwroot"));
+        }
+
+        [Fact]
         public void Publish_WithDefaultSettings_Works()
         {
             // Arrange
@@ -54,10 +86,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 "web.config"
             };
 
-            // Verify web.config
-            var content = File.ReadAllText(Path.Combine(publishDirectory.ToString(), "web.config"));
-            content.Should().Contain("<remove fileExtension=\".blat\" />");
-
             publishDirectory.Should().HaveFiles(expectedFiles);
 
             var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
@@ -74,6 +102,86 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 assetsManifestPath: "custom-service-worker-assets.js");
 
             VerifyTypeGranularTrimming(blazorPublishDirectory);
+        }
+
+        [Fact]
+        public void Publish_WithScopedCss_Works()
+        {
+            // Arrange
+            var testAppName = "BlazorWasmWithLibrary";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource();
+            File.WriteAllText(Path.Combine(testInstance.TestRoot, "blazorwasm", "App.razor.css"), "h1 { font-size: 16px; }");
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            publishCommand.Execute().Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+
+            var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
+
+            var expectedFiles = new[]
+            {
+                "wwwroot/_framework/blazor.boot.json",
+                "wwwroot/_framework/blazor.webassembly.js",
+                "wwwroot/_framework/dotnet.wasm",
+                "wwwroot/_framework/blazorwasm.dll",
+                "wwwroot/_framework/System.Text.Json.dll",
+                "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
+                "wwwroot/_content/RazorClassLibrary/styles.css",
+                "wwwroot/index.html",
+                "wwwroot/js/LinkedScript.js",
+                "wwwroot/blazorwasm.styles.css",
+                "wwwroot/css/app.css",
+                "web.config"
+            };
+
+            publishDirectory.Should().HaveFiles(expectedFiles);
+
+            new FileInfo(Path.Combine(blazorPublishDirectory, "css", "app.css")).Should().Contain(".publish");
+
+            VerifyBootManifestHashes(testInstance, blazorPublishDirectory);
+            VerifyServiceWorkerFiles(testInstance, blazorPublishDirectory,
+                serviceWorkerPath: Path.Combine("serviceworkers", "my-service-worker.js"),
+                serviceWorkerContent: "// This is the production service worker",
+                assetsManifestPath: "custom-service-worker-assets.js");
+        }
+
+        [Fact]
+        public void Publish_InRelease_Works()
+        {
+            // Arrange
+            var testAppName = "BlazorWasmWithLibrary";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource();
+            File.WriteAllText(Path.Combine(testInstance.TestRoot, "blazorwasm", "App.razor.css"), "h1 { font-size: 16px; }");
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            publishCommand.Execute("/p:Configuration=Release").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory("net5.0", "Release");
+
+            var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
+
+            var expectedFiles = new[]
+            {
+                "wwwroot/_framework/blazor.boot.json",
+                "wwwroot/_framework/blazor.webassembly.js",
+                "wwwroot/_framework/dotnet.wasm",
+                "wwwroot/_framework/blazorwasm.dll",
+                "wwwroot/_framework/System.Text.Json.dll",
+                "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
+                "wwwroot/_content/RazorClassLibrary/styles.css",
+                "wwwroot/index.html",
+                "wwwroot/js/LinkedScript.js",
+                "wwwroot/blazorwasm.styles.css",
+                "wwwroot/css/app.css",
+                "web.config"
+            };
+
+            publishDirectory.Should().HaveFiles(expectedFiles);
+            
+            new FileInfo(Path.Combine(blazorPublishDirectory, "css", "app.css")).Should().Contain(".publish");
         }
 
         [Fact]
@@ -142,8 +250,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         }
 
         [Theory]
-        [InlineData("different-path/")]
-        [InlineData("/different-path/")]
+        [InlineData("different-path")]
+        [InlineData("/different-path")]
         public void Publish_WithStaticWebBasePathWorks(string basePath)
         {
             // Arrange
@@ -160,6 +268,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                     itemGroup.Add(new XElement("StaticWebAssetBasePath", basePath));
                     project.Root.Add(itemGroup);
                 }
+
             });
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
@@ -204,13 +313,13 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         }
 
         [Theory]
-        [InlineData("different-path")]
-        [InlineData("/different-path")]
+        [InlineData("different-path/")]
+        [InlineData("/different-path/")]
         public void Publish_Hosted_WithStaticWebBasePathWorks(string basePath)
         {
             var testAppName = "BlazorHosted";
             var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+                            .WithSource();;
 
             testInstance.WithProjectChanges((path, project) =>
             {
@@ -221,6 +330,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                     itemGroup.Add(new XElement("StaticWebAssetBasePath", basePath));
                     project.Root.Add(itemGroup);
                 }
+
             });
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
@@ -271,6 +381,78 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         }
 
         [Fact]
+        public void Publish_WithTrimmingdDisabled_Works()
+        {
+            // Arrange
+            var testAppName = "BlazorWasmWithLibrary";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource();
+
+            testInstance.WithProjectChanges((path, project) =>
+            {
+                if (path.Contains("blazorwasm"))
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var itemGroup = new XElement(ns + "PropertyGroup");
+                    itemGroup.Add(new XElement("PublishTrimmed", false));
+                    project.Root.Add(itemGroup);
+                }
+
+            });
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            publishCommand.Execute().Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
+
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_framework/blazor.boot.json",
+                "wwwroot/_framework/blazor.webassembly.js",
+                "wwwroot/_framework/dotnet.wasm",
+                "wwwroot/_framework/blazorwasm.dll",
+                "wwwroot/_framework/System.Text.Json.dll"
+            });
+
+            // Verify compression works
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_framework/dotnet.wasm.br",
+                "wwwroot/_framework/System.Text.Json.dll.br"
+            });
+
+            // Verify static assets are in the publish directory
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/index.html"
+            });
+
+            // Verify referenced static web assets
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
+                "wwwroot/_content/RazorClassLibrary/styles.css",
+            });
+
+            // Verify web.config
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "web.config"
+            });
+
+            VerifyBootManifestHashes(testInstance, blazorPublishDirectory);
+            VerifyServiceWorkerFiles(testInstance, blazorPublishDirectory,
+                serviceWorkerPath: Path.Combine("serviceworkers", "my-service-worker.js"),
+                serviceWorkerContent: "// This is the production service worker",
+                assetsManifestPath: "custom-service-worker-assets.js");
+
+            // Verify assemblies are not trimmed
+            var loggingAssemblyPath = Path.Combine(blazorPublishDirectory, "_framework", "Microsoft.Extensions.Logging.Abstractions.dll");
+            VerifyAssemblyHasTypes(loggingAssemblyPath, new[] { "Microsoft.Extensions.Logging.Abstractions.NullLogger" });
+        }
+
+        [Fact]
         public void Publish_SatelliteAssemblies_AreCopiedToBuildOutput()
         {
             // Arrange
@@ -311,6 +493,126 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         }
 
         [Fact]
+        public void Publish_HostedApp_DefaultSettings_Works()
+        {
+            // Arrange
+            var testAppName = "BlazorHosted";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource();
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
+            publishCommand.Execute().Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            // Make sure the main project exists
+            new FileInfo(Path.Combine(publishDirectory.ToString(), "blazorhosted.dll")).Should().Exist();
+
+            // Verification for https://github.com/dotnet/aspnetcore/issues/19926. Verify binaries for projects
+            // referenced by the Hosted project appear in the publish directory
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "RazorClassLibrary.dll",
+                "blazorwasm.dll"
+            });
+
+            var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_framework/blazor.boot.json",
+                "wwwroot/_framework/blazor.webassembly.js",
+                "wwwroot/_framework/dotnet.wasm",
+                "wwwroot/_framework/blazorwasm.dll",
+                "wwwroot/_framework/System.Text.Json.dll"
+            });
+
+            // Verify project references appear as static web assets
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_framework/RazorClassLibrary.dll",
+                "RazorClassLibrary.dll"
+            });
+
+            // Verify static assets are in the publish directory
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/index.html"
+            });
+
+            // Verify static web assets from referenced projects are copied.
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
+                "wwwroot/_content/RazorClassLibrary/styles.css",
+            });
+
+            // Verify web.config
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "web.config"
+            });
+
+            VerifyBootManifestHashes(testInstance, blazorPublishDirectory);
+
+            // Verify compression works
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_framework/dotnet.wasm.br",
+                "wwwroot/_framework/blazorwasm.dll.br",
+                "wwwroot/_framework/RazorClassLibrary.dll.br",
+                "wwwroot/_framework/System.Text.Json.dll.br"
+            });
+
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_framework/dotnet.wasm.gz",
+                "wwwroot/_framework/blazorwasm.dll.gz",
+                "wwwroot/_framework/RazorClassLibrary.dll.gz",
+                "wwwroot/_framework/System.Text.Json.dll.gz"
+            });
+
+            VerifyServiceWorkerFiles(testInstance, blazorPublishDirectory,
+                serviceWorkerPath: Path.Combine("serviceworkers", "my-service-worker.js"),
+                serviceWorkerContent: "// This is the production service worker",
+                assetsManifestPath: "custom-service-worker-assets.js");
+
+            VerifyTypeGranularTrimming(blazorPublishDirectory);
+        }
+
+        [Fact]
+        public void Publish_HostedApp_ProducesBootJsonDataWithExpectedContent()
+        {
+            // Arrange
+            var testAppName = "BlazorHosted";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource();
+
+            var wwwroot = Path.Combine(testInstance.TestRoot, "blazorwasm", "wwwroot");
+            File.WriteAllText(Path.Combine(wwwroot, "appsettings.json"), "Default settings");
+            File.WriteAllText(Path.Combine(wwwroot, "appsettings.development.json"), "Development settings");
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
+            publishCommand.Execute().Should().Pass();
+
+            var buildOutputDirectory = publishCommand.GetOutputDirectory("net5.0").ToString();
+
+            var bootJsonPath = Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
+            var bootJsonData = ReadBootJsonData(bootJsonPath);
+
+            var runtime = bootJsonData.resources.runtime;
+            runtime.Should().ContainKey("dotnet.wasm");
+
+            var assemblies = bootJsonData.resources.assembly;
+            assemblies.Should().ContainKey("blazorwasm.dll");
+            assemblies.Should().ContainKey("RazorClassLibrary.dll");
+            assemblies.Should().ContainKey("System.Text.Json.dll");
+
+            bootJsonData.resources.satelliteResources.Should().BeNull();
+
+            bootJsonData.config.Should().Contain("appsettings.json");
+            bootJsonData.config.Should().Contain("appsettings.development.json");
+        }
+
+        [Fact]
         public void Publish_HostedApp_WithSatelliteAssemblies()
         {
             // Arrange
@@ -344,87 +646,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var publishOutputDirectory = publishCommand.GetOutputDirectory("net5.0");
 
-            // Verification for https://github.com/dotnet/aspnetcore/issues/19926. Verify binaries for projects
-            // referenced by the Hosted project appear in the publish directory
-            publishOutputDirectory.Should().HaveFiles(new[]
-            {
-                "RazorClassLibrary.dll",
-                "blazorwasm.dll"
-            });
-
-            var blazorPublishDirectory = Path.Combine(publishOutputDirectory.ToString(), "wwwroot");
-            publishOutputDirectory.Should().HaveFiles(new[]
-            {
-                "wwwroot/_framework/blazor.boot.json",
-                "wwwroot/_framework/blazor.webassembly.js",
-                "wwwroot/_framework/dotnet.wasm",
-                "wwwroot/_framework/blazorwasm.dll",
-                "wwwroot/_framework/System.Text.Json.dll"
-            });
-
-            // Verify project references appear as static web assets
-            publishOutputDirectory.Should().HaveFiles(new[]
-            {
-                "wwwroot/_framework/RazorClassLibrary.dll",
-                "RazorClassLibrary.dll"
-            });
-
-            // Verify static assets are in the publish directory
-            publishOutputDirectory.Should().HaveFiles(new[]
-            {
-                "wwwroot/index.html"
-            });
-
-            // Verify static web assets from referenced projects are copied.
-            publishOutputDirectory.Should().HaveFiles(new[]
-            {
-                "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
-                "wwwroot/_content/RazorClassLibrary/styles.css",
-            });
-
-            // Verify web.config
-            publishOutputDirectory.Should().HaveFiles(new[]
-            {
-                "web.config"
-            });
-
-            VerifyBootManifestHashes(testInstance, blazorPublishDirectory);
-
-            // Verify compression works
-            publishOutputDirectory.Should().HaveFiles(new[]
-            {
-                "wwwroot/_framework/dotnet.wasm.br",
-                "wwwroot/_framework/blazorwasm.dll.br",
-                "wwwroot/_framework/RazorClassLibrary.dll.br",
-                "wwwroot/_framework/System.Text.Json.dll.br"
-            });
-
-            publishOutputDirectory.Should().HaveFiles(new[]
-            {
-                "wwwroot/_framework/dotnet.wasm.gz",
-                "wwwroot/_framework/blazorwasm.dll.gz",
-                "wwwroot/_framework/RazorClassLibrary.dll.gz",
-                "wwwroot/_framework/System.Text.Json.dll.gz"
-            });
-
-            // Verify that Blazor bootJSON contains the right contents
-            var bootJsonPath = Path.Combine(blazorPublishDirectory, "_framework", "blazor.boot.json");
-            var bootJsonData = ReadBootJsonData(bootJsonPath);
-
-            var runtime = bootJsonData.resources.runtime;
-            runtime.Should().ContainKey("dotnet.wasm");
-
-            var assemblies = bootJsonData.resources.assembly;
-            assemblies.Should().ContainKey("blazorwasm.dll");
-            assemblies.Should().ContainKey("RazorClassLibrary.dll");
-            assemblies.Should().ContainKey("System.Text.Json.dll");
-
-            VerifyServiceWorkerFiles(testInstance, blazorPublishDirectory,
-                serviceWorkerPath: Path.Combine("serviceworkers", "my-service-worker.js"),
-                serviceWorkerContent: "// This is the production service worker",
-                assetsManifestPath: "custom-service-worker-assets.js");
-
-            VerifyTypeGranularTrimming(blazorPublishDirectory);
+            var bootJsonData = new FileInfo(Path.Combine(publishOutputDirectory.ToString(), "wwwroot", "_framework", "blazor.boot.json"));
 
             publishOutputDirectory.Should().HaveFiles(new[]
             {
@@ -434,9 +656,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 "wwwroot/_framework/fr/Microsoft.CodeAnalysis.CSharp.resources.dll",
             });
 
-            var bootJsonFile = new FileInfo(Path.Combine(blazorPublishDirectory, "_framework", "blazor.boot.json"));
-            bootJsonFile.Should().Contain("\"Microsoft.CodeAnalysis.CSharp.dll\"");
-            bootJsonFile.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.dll\"");
+            bootJsonData.Should().Contain("\"Microsoft.CodeAnalysis.CSharp.dll\"");
+            bootJsonData.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.dll\"");
         }
 
         [Fact]
@@ -466,7 +687,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             // Publish
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
-            publishCommand.Execute("/p:BuildDependencies=false").Should().Pass();
+            publishCommand.Execute("/p:BuildDependencies=false /bl").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
             // Make sure the main project exists
@@ -595,30 +816,97 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         }
 
         [Fact]
-        public void Publish_HostedAppWithScopedCssAndSatelliteAssemblies_VisualStudio()
+        public void Publish_HostedApp_VisualStudio()
+        {
+            // Simulates publishing the same way VS does by setting BuildProjectReferences=false.
+            // Arrange
+            var testAppName = "BlazorHosted";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource();
+
+            // VS builds projects individually and then a publish with BuildDependencies=false, but building the main project is a close enough approximation for this test.
+            var buildCommand = new BuildCommand(testInstance, "blazorwasm");
+            buildCommand.Execute("/p:BuildInsideVisualStudio=true").Should().Pass();
+
+            // Publish
+            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
+            publishCommand.Execute("/p:BuildProjectReferences=false /p:BuildInsideVisualStudio=true").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            // Make sure the main project exists
+            new FileInfo(Path.Combine(publishDirectory.ToString(), "blazorhosted.dll")).Should().Exist();
+
+            // Verification for https://github.com/dotnet/aspnetcore/issues/19926. Verify binaries for projects
+            // referenced by the Hosted project appear in the publish directory
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "RazorClassLibrary.dll",
+                "blazorwasm.dll"
+            });
+
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_framework/blazor.boot.json",
+                "wwwroot/_framework/blazor.webassembly.js",
+                "wwwroot/_framework/dotnet.wasm",
+                "wwwroot/_framework/blazorwasm.dll",
+                "wwwroot/_framework/System.Text.Json.dll"
+            });
+
+            // Verify project references appear as static web assets
+            // Also verify project references to the server project appear in the publish output
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_framework/RazorClassLibrary.dll",
+                "RazorClassLibrary.dll"
+            });
+
+            // Verify static assets are in the publish directory
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/index.html"
+            });
+
+            // Verify static web assets from referenced projects are copied.
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
+                "wwwroot/_content/RazorClassLibrary/styles.css",
+            });
+
+            // Verify web.config
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "web.config"
+            });
+
+            VerifyBootManifestHashes(testInstance, Path.Combine(publishDirectory.ToString(), "wwwroot"));
+
+            // Verify compression works
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_framework/dotnet.wasm.br",
+                "wwwroot/_framework/blazorwasm.dll.br",
+                "wwwroot/_framework/RazorClassLibrary.dll.br",
+                "wwwroot/_framework/System.Text.Json.dll.br"
+            });
+
+            var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
+
+            VerifyBootManifestHashes(testInstance, blazorPublishDirectory);
+            VerifyServiceWorkerFiles(testInstance, blazorPublishDirectory,
+                serviceWorkerPath: Path.Combine("serviceworkers", "my-service-worker.js"),
+                serviceWorkerContent: "// This is the production service worker",
+                assetsManifestPath: "custom-service-worker-assets.js");
+        }
+
+        [Fact]
+        public void Publish_HostedAppWithScopedCss_VisualStudio()
         {
             // Simulates publishing the same way VS does by setting BuildProjectReferences=false.
             var testAppName = "BlazorHosted";
             var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
                             .WithSource();
-
-            testInstance.WithProjectChanges((path, project) =>
-            {
-                if (path.Contains("blazorwasm"))
-                {
-                    var ns = project.Root.Name.Namespace;
-                    var propertyGroup = new XElement(ns + "PropertyGroup");
-                    propertyGroup.Add(new XElement("DefineConstants", @"$(DefineConstants);REFERENCE_classlibrarywithsatelliteassemblies"));
-                    var itemGroup = new XElement(ns + "ItemGroup");
-                    itemGroup.Add(new XElement("ProjectReference", new XAttribute("Include", @"..\classlibrarywithsatelliteassemblies\classlibrarywithsatelliteassemblies.csproj")));
-                    project.Root.Add(propertyGroup);
-                    project.Root.Add(itemGroup);
-                }
-            });
-
-            var resxfileInProject = Path.Combine(testInstance.TestRoot, "blazorwasm", "Resources.ja.resx.txt");
-            File.Move(resxfileInProject, Path.Combine(testInstance.TestRoot, "blazorwasm", "Resource.ja.resx"));
-
             File.WriteAllText(Path.Combine(testInstance.TestRoot, "blazorwasm", "App.razor.css"), "h1 { font-size: 16px; }");
 
             // VS builds projects individually and then a publish with BuildDependencies=false, but building the main project is a close enough approximation for this test.
@@ -630,23 +918,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             publishCommand.Execute("/p:BuildProjectReferences=false /p:BuildInsideVisualStudio=true").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
-            var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
-
             // Make sure the main project exists
             new FileInfo(Path.Combine(publishDirectory.ToString(), "blazorhosted.dll")).Should().Exist();
-
-            // Verification for satelitte assemblies
-            publishDirectory.Should().HaveFiles(new[]
-            {
-                "wwwroot/_framework/blazor.boot.json",
-                "wwwroot/_framework/ja/blazorwasm.resources.dll",
-                "wwwroot/_framework/fr/Microsoft.CodeAnalysis.CSharp.resources.dll"
-            });
-
-            var bootJsonData = new FileInfo(Path.Combine(blazorPublishDirectory, "_framework", "blazor.boot.json"));
-            bootJsonData.Should().Contain("\"es-ES\\/classlibrarywithsatelliteassemblies.resources.dll\"");
-            bootJsonData.Should().Contain("\"ja\\/blazorwasm.resources.dll\"");
-            bootJsonData.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.dll\"");
 
             // Verification for https://github.com/dotnet/aspnetcore/issues/19926. Verify binaries for projects
             // referenced by the Hosted project appear in the publish directory
@@ -709,11 +982,62 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 "wwwroot/_framework/System.Text.Json.dll.br"
             });
 
+            var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
+
             VerifyBootManifestHashes(testInstance, blazorPublishDirectory);
             VerifyServiceWorkerFiles(testInstance, blazorPublishDirectory,
                 serviceWorkerPath: Path.Combine("serviceworkers", "my-service-worker.js"),
                 serviceWorkerContent: "// This is the production service worker",
                 assetsManifestPath: "custom-service-worker-assets.js");
+        }
+
+        // Regression test to verify satellite assemblies from the blazor app are copied to the published app's wwwroot output directory as
+        // part of publishing in VS
+        [Fact]
+        public void Publish_HostedApp_VisualStudio_WithSatelliteAssemblies()
+        {
+            var testAppName = "BlazorWasmWithLibrary";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName).WithSource();
+
+            testInstance.WithProjectChanges((path, project) =>
+            {
+                if (path.Contains("blazorwasm"))
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var propertyGroup = new XElement(ns + "PropertyGroup");
+                    propertyGroup.Add(new XElement("DefineConstants", @"$(DefineConstants);REFERENCE_classlibrarywithsatelliteassemblies"));
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    itemGroup.Add(new XElement("ProjectReference", new XAttribute("Include", @"..\classlibrarywithsatelliteassemblies\classlibrarywithsatelliteassemblies.csproj")));
+                    project.Root.Add(propertyGroup);
+                    project.Root.Add(itemGroup);
+                }
+            });
+
+            var resxfileInProject = Path.Combine(testInstance.TestRoot, "blazorwasm", "Resources.ja.resx.txt");
+            File.Move(resxfileInProject, Path.Combine(testInstance.TestRoot, "blazorwasm", "Resource.ja.resx"));
+
+            var buildCommand = new BuildCommand(testInstance, "blazorwasm");
+            buildCommand.Execute().Should().Pass();
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
+            publishCommand.Execute("/p:BuildProjectReferences=false").Should().Pass();
+
+            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
+
+            publishDirectory.Should().HaveFiles(new[]
+            {
+                "wwwroot/_framework/blazor.boot.json",
+                "wwwroot/_framework/ja/blazorwasm.resources.dll",
+                "wwwroot/_framework/fr/Microsoft.CodeAnalysis.CSharp.resources.dll"
+            });
+
+            var bootJsonData = new FileInfo(Path.Combine(blazorPublishDirectory, "_framework", "blazor.boot.json"));
+            bootJsonData.Should().Contain("\"es-ES\\/classlibrarywithsatelliteassemblies.resources.dll\"");
+            bootJsonData.Should().Contain("\"ja\\/blazorwasm.resources.dll\"");
+            bootJsonData.Should().Contain("\"fr\\/Microsoft.CodeAnalysis.CSharp.resources.dll\"");
+
+            VerifyBootManifestHashes(testInstance, blazorPublishDirectory);
         }
 
         [Fact]
@@ -726,6 +1050,19 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute("/p:RuntimeIdentifier=linux-x64").Should().Pass();
+
+            AssertRIDPublishOuput(publishCommand, testInstance);
+        }
+
+        [Fact]
+        public void Publish_HostedApp_WithRid_Works()
+        {
+            // Arrange
+            var testAppName = "BlazorHostedRID";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName).WithSource();
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
+            publishCommand.Execute().Should().Pass();
 
             AssertRIDPublishOuput(publishCommand, testInstance);
         }
@@ -837,11 +1174,70 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             runtime.Should().NotContainKey("icudt.dat");
             runtime.Should().NotContainKey("icudt_EFIGS.dat");
 
+
             new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "dotnet.wasm")).Should().Exist();
             new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt.dat")).Should().NotExist();
             new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt_CJK.dat")).Should().NotExist();
             new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt_EFIGS.dat")).Should().NotExist();
             new FileInfo(Path.Combine(publishOutputDirectory, "wwwroot", "_framework", "icudt_no_CJK.dat")).Should().NotExist();
+        }
+
+        [Fact]
+        public void Publish_HostingMultipleBlazorWebApps_Works()
+        {
+            // Regression test for https://github.com/dotnet/aspnetcore/issues/29264
+            // Arrange
+            var testAppName = "BlazorMultiApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                            .WithSource();
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "BlazorMultipleApps.Server"));
+            publishCommand.Execute().Should().Pass();
+
+            var publishOutputDirectory = publishCommand.GetOutputDirectory("net5.0").ToString();
+
+            new FileInfo(Path.Combine(publishOutputDirectory, "BlazorMultipleApps.Server.dll")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "BlazorMultipleApps.FirstClient.dll")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputDirectory, "BlazorMultipleApps.SecondClient.dll")).Should().Exist();
+
+            var firstAppPublishDirectory = Path.Combine(publishOutputDirectory, "wwwroot", "FirstApp");
+
+            var firstCss = Path.Combine(firstAppPublishDirectory, "css", "app.css");
+            new FileInfo(firstCss).Should().Exist();
+            new FileInfo(firstCss).Should().Exist("/* First app.css */");
+
+            var firstBootJsonPath = Path.Combine(firstAppPublishDirectory, "_framework", "blazor.boot.json");
+            var firstBootJson = ReadBootJsonData(firstBootJsonPath);
+
+            // Do a sanity check that the boot json has files.
+            firstBootJson.resources.assembly.Keys.Should().Contain("System.Text.Json.dll");
+
+            VerifyBootManifestHashes(testInstance, firstAppPublishDirectory);
+
+            // Verify compression works
+            new FileInfo(Path.Combine(firstAppPublishDirectory, "_framework", "dotnet.wasm.br")).Should().Exist();
+            new FileInfo(Path.Combine(firstAppPublishDirectory, "_framework", "BlazorMultipleApps.FirstClient.dll.br")).Should().Exist();
+            new FileInfo(Path.Combine(firstAppPublishDirectory, "_framework", "Newtonsoft.Json.dll.br")).Should().Exist();
+
+            var secondAppPublishDirectory = Path.Combine(publishOutputDirectory, "wwwroot", "SecondApp");
+
+            var secondCss = Path.Combine(secondAppPublishDirectory, "css", "app.css");
+            new FileInfo(secondCss).Should().Exist();
+            new FileInfo(secondCss).Should().Exist("/* Second app.css */");
+
+            var secondBootJsonPath = Path.Combine(secondAppPublishDirectory, "_framework", "blazor.boot.json");
+            var secondBootJson = ReadBootJsonData(secondBootJsonPath);
+
+            // Do a sanity check that the boot json has files.
+            secondBootJson.resources.assembly.Keys.Should().Contain("System.Private.CoreLib.dll");
+
+            VerifyBootManifestHashes(testInstance, secondAppPublishDirectory);
+
+            // Verify compression works
+            new FileInfo(Path.Combine(secondAppPublishDirectory, "_framework", "dotnet.wasm.br")).Should().Exist();
+            new FileInfo(Path.Combine(secondAppPublishDirectory, "_framework", "BlazorMultipleApps.SecondClient.dll.br")).Should().Exist();
+            new FileInfo(Path.Combine(secondAppPublishDirectory, "_framework", "System.Private.CoreLib.dll.br")).Should().Exist();
+            new FileInfo(Path.Combine(secondAppPublishDirectory, "_framework", "Newtonsoft.Json.dll.br")).Should().NotExist();
         }
 
         private static void VerifyBootManifestHashes(TestAsset testAsset, string blazorPublishDirectory)

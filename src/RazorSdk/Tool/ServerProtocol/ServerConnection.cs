@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.NET.Sdk.Razor.Tool.CommandLineUtils;
 
 namespace Microsoft.NET.Sdk.Razor.Tool
 {
@@ -296,8 +297,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
                 "-p",
                 pipeName
             };
-            // var processArguments = ArgumentEscaper.EscapeAndConcatenate(argumentList);
-            var processArguments = argumentList.ToString();
+            var processArguments = ArgumentEscaper.EscapeAndConcatenate(argumentList);
 
             if (!File.Exists(expectedCompilerPath))
             {

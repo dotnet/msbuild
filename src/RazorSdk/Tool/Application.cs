@@ -88,7 +88,7 @@ namespace Microsoft.NET.Sdk.Razor.Tool
 
         private string GetInformationalVersion()
         {
-            var assembly = typeof(Application).GetTypeInfo().Assembly;
+            var assembly = typeof(Application).Assembly;
             var attribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
             return attribute.InformationalVersion;
         }
