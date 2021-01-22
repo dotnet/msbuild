@@ -294,24 +294,15 @@ namespace Microsoft.NET.Publish.Tests
 
             // Please keep list below sorted and de-duplicated
             List<string> expectedOutput = new List<string> () {
-                    "ILLink : Trim analysis warning IL2026: System.Runtime.Serialization.Formatters.Binary.ObjectReader.TopLevelAssemblyTypeResolver.ResolveType(Assembly,String,Boolean",
-                    "ILLink : Trim analysis warning IL2026: System.Runtime.Serialization.FormatterServices.GetTypeFromAssembly(Assembly,String",
                     "ILLink : Trim analysis warning IL2057: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
                     "ILLink : Trim analysis warning IL2057: System.Resources.ResourceReader.FindType(Int32",
-                    "ILLink : Trim analysis warning IL2057: System.Runtime.Serialization.Formatters.Binary.ObjectReader.GetSimplyNamedTypeFromAssembly(Assembly,String,Type&",
                     "ILLink : Trim analysis warning IL2060: System.Resources.ResourceReader.InitializeBinaryFormatter(",
                     "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.NullableTypeInfo.NullableTypeInfo(Type,List<Type>",
                     "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.TypeAnalysis.TypeAnalysis(Type,EventDataAttribute,List<Type>",
-                    "ILLink : Trim analysis warning IL2070: System.Runtime.Serialization.FormatterServices.GetSerializableFields(Type",
-                    "ILLink : Trim analysis warning IL2070: System.Runtime.Serialization.ObjectManager.GetDeserializationConstructor(Type",
-                    "ILLink : Trim analysis warning IL2070: System.Runtime.Serialization.SerializationEvents.GetMethodsWithAttribute(Type,Type",
                     "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(",
                     "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.NullableTypeInfo.WriteData(PropertyValue",
                     "ILLink : Trim analysis warning IL2072: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
-                    "ILLink : Trim analysis warning IL2075: System.Runtime.Serialization.FormatterServices.InternalGetSerializableMembers(Type",
-                    "ILLink : Trim analysis warning IL2075: System.Runtime.Serialization.ObjectManager.DoValueTypeFixup(FieldInfo,ObjectHolder,Object",
                     "ILLink : Trim analysis warning IL2077: System.Resources.ResourceReader.InitializeBinaryFormatter(",
-                    "ILLink : Trim analysis warning IL2077: System.Runtime.Serialization.Formatters.Binary.ObjectReader.ParseObject(ParseRecord",
             };
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
