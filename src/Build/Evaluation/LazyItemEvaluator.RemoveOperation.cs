@@ -13,7 +13,7 @@ namespace Microsoft.Build.Evaluation
         class RemoveOperation : LazyItemOperation
         {
             readonly ImmutableList<string> _matchOnMetadata;
-            private MetadataSet<P, I> _metadataSet;
+            private MetadataTrie<P, I> _metadataSet;
 
             public RemoveOperation(RemoveOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
                 : base(builder, lazyEvaluator)
@@ -27,7 +27,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (!_matchOnMetadata.IsEmpty)
                 {
-                    _metadataSet = new MetadataSet<P, I>(builder.MatchOnMetadataOptions, _matchOnMetadata, _itemSpec);
+                    _metadataSet = new MetadataTrie<P, I>(builder.MatchOnMetadataOptions, _matchOnMetadata, _itemSpec);
                 }
             }
 

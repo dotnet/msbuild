@@ -459,15 +459,52 @@ namespace Microsoft.Build.Evaluation
             && FileUtilities.IsAnySlash(TextFragment[3]);
     }
 
-    internal sealed class MetadataSet<P, I> where P : class, IProperty where I : class, IItem, IMetadataTable
+    /// <summary>
+    /// A Trie representing the sets of values of specified metadata taken on by the referenced items.
+    /// A single flat list or set of metadata values would not work in this case because we are matching
+    /// on multiple metadata. If one item specifies NotTargetFramework to be net46 and TargetFramework to
+    /// be netcoreapp3.1, we wouldn't want to match that to an item with TargetFramework 46 and
+    /// NotTargetFramework netcoreapp3.1.
+    /// 
+    /// Implementing this as a list of sets where each metadatum key has its own set also would not work
+    /// because different items could match on different metadata, and we want to check to see if any
+    /// single item matches on all the metadata. As an example, consider this scenario:
+    /// Item Baby has metadata GoodAt="eating" BadAt="talking" OkAt="sleeping"
+    /// Item Child has metadata GoodAt="sleeping" BadAt="eating" OkAt="talking"
+    /// Item Adolescent has metadata GoodAt="talking" BadAt="sleeping" OkAt="eating"
+    /// Specifying these three metadata:
+    /// Item Forgind with metadata GoodAt="sleeping" BadAt="talking" OkAt="eating"
+    /// should match none of them because Forgind doesn't match all three metadata of any of the items.
+    /// With a list of sets, Forgind would match Baby on BadAt, Child on GoodAt, and Adolescent on OkAt,
+    /// and Forgind would be erroneously removed.
+    /// 
+    /// With a Trie as below, Items specify paths in the tree, so going to any child node eliminates all
+    /// items that don't share that metadatum. This ensures the match is proper.
+    /// 
+    /// Todo: Tries naturally can have different shapes depending on in what order the metadata are considered.
+    /// Specifically, if all the items share a single metadata value for the one metadatum and have different
+    /// values for a second metadatum, it will have only one node more than the number of items if the first
+    /// metadatum is considered first. If the metadatum is considered first, it will have twice that number.
+    /// Users can theoretically specify the order in which metadata should be considered by reordering them
+    /// on the line invoking this, but that is extremely nonobvious from a user's perspective.
+    /// It would be nice to detect poorly-ordered metadata and account for it to avoid making more nodes than
+    /// necessary. This would need to order if appropriately both in creating the MetadataTrie and in using it,
+    /// so it could best be done as a preprocessing step. For now, wait to find out if it's necessary (users'
+    /// computers run out of memory) before trying to implement it.
+    /// </summary>
+    /// <typeparam name="P">Property type</typeparam>
+    /// <typeparam name="I">Item type</typeparam>
+    internal sealed class MetadataTrie<P, I> where P : class, IProperty where I : class, IItem, IMetadataTable
     {
-        private readonly Dictionary<string, MetadataSet<P, I>> _children;
+        private readonly Dictionary<string, MetadataTrie<P, I>> _children;
         private readonly Func<string, string> _normalize;
 
-        internal MetadataSet(MatchOnMetadataOptions options, IEnumerable<string> metadata, ItemSpec<P, I> itemSpec)
+        internal MetadataTrie(MatchOnMetadataOptions options, IEnumerable<string> metadata, ItemSpec<P, I> itemSpec)
         {
-            StringComparer comparer = options == MatchOnMetadataOptions.CaseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
-            _children = new Dictionary<string, MetadataSet<P, I>>(comparer);
+            StringComparer comparer = options == MatchOnMetadataOptions.CaseSensitive ? StringComparer.Ordinal :
+                options == MatchOnMetadataOptions.CaseInsensitive || FileUtilities.PathComparison == StringComparison.OrdinalIgnoreCase ? StringComparer.OrdinalIgnoreCase :
+                StringComparer.Ordinal;
+            _children = new Dictionary<string, MetadataTrie<P, I>>(comparer);
             _normalize = options == MatchOnMetadataOptions.PathLike ? p => FileUtilities.NormalizePathForComparisonNoThrow(p, Environment.CurrentDirectory) : p => p;
             foreach (ItemSpec<P, I>.ItemExpressionFragment frag in itemSpec.Fragments)
             {
@@ -478,21 +515,21 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private MetadataSet(StringComparer comparer)
+        private MetadataTrie(StringComparer comparer)
         {
-            _children = new Dictionary<string, MetadataSet<P, I>>(comparer);
+            _children = new Dictionary<string, MetadataTrie<P, I>>(comparer);
         }
 
         // Relies on IEnumerable returning the metadata in a reasonable order. Reasonable?
         private void Add(IEnumerable<string> metadata, StringComparer comparer)
         {
-            MetadataSet<P, I> current = this;
+            MetadataTrie<P, I> current = this;
             foreach (string m in metadata)
             {
                 string normalizedString = _normalize(m);
-                if (!current._children.TryGetValue(normalizedString, out MetadataSet<P, I> child))
+                if (!current._children.TryGetValue(normalizedString, out MetadataTrie<P, I> child))
                 {
-                    child = new MetadataSet<P, I>(comparer);
+                    child = new MetadataTrie<P, I>(comparer);
                     current._children.Add(normalizedString, child);
                 }
                 current = child;
@@ -501,7 +538,7 @@ namespace Microsoft.Build.Evaluation
 
         internal bool Contains(IEnumerable<string> metadata)
         {
-            MetadataSet<P, I> current = this;
+            MetadataTrie<P, I> current = this;
             foreach (string m in metadata)
             {
                 if (String.IsNullOrEmpty(m))
