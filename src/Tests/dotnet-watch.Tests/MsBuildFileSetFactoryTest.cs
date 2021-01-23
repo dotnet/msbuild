@@ -166,6 +166,83 @@ namespace Microsoft.DotNet.Watcher.Tools
         }
 
         [Fact]
+        public async Task IncludesContentFiles()
+        {
+            var testDir = _testAssets.CreateTestDirectory();
+
+            var project = WriteFile(testDir, Path.Combine("Project1.csproj"),
+@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+    </PropertyGroup>
+</Project>");
+            WriteFile(testDir, Path.Combine("Program.cs"));
+
+            WriteFile(testDir, Path.Combine("wwwroot", "css", "app.css"));
+            WriteFile(testDir, Path.Combine("wwwroot", "js", "site.js"));
+            WriteFile(testDir, Path.Combine("wwwroot", "favicon.ico"));
+
+            var fileset = await GetFileSet(project);
+
+            AssertEx.EqualFileList(
+                testDir.Path,
+                new[]
+                {
+                    "Project1.csproj",
+                    "Program.cs",
+                    "wwwroot/css/app.css",
+                    "wwwroot/js/site.js",
+                    "wwwroot/favicon.ico",
+                },
+                fileset
+            );
+        }
+
+        [Fact]
+        public async Task IncludesContentFilesFromRCL()
+        {
+            var testDir = _testAssets.CreateTestDirectory();
+            WriteFile(testDir, Path.Combine("RCL1", "RCL1.csproj"),
+@"<Project Sdk=""Microsoft.NET.Sdk.Razor"">
+    <PropertyGroup>
+        <TargetFramework>netcoreapp5.0</TargetFramework>
+    </PropertyGroup>
+</Project>
+");
+            WriteFile(testDir, Path.Combine("RCL1", "wwwroot", "css", "app.css"));
+            WriteFile(testDir, Path.Combine("RCL1", "wwwroot", "js", "site.js"));
+            WriteFile(testDir, Path.Combine("RCL1", "wwwroot", "favicon.ico"));
+
+            var projectPath = WriteFile(testDir, Path.Combine("Project1", "Project1.csproj"),
+@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include=""..\RCL1\RCL1.csproj"" />
+    </ItemGroup>
+</Project>");
+            WriteFile(testDir, Path.Combine("Project1", "Program.cs"));
+
+
+            var fileset = await GetFileSet(projectPath);
+
+            AssertEx.EqualFileList(
+                testDir.Path,
+                new[]
+                {
+                    "Project1/Project1.csproj",
+                    "Project1/Program.cs",
+                    "RCL1/RCL1.csproj",
+                    "RCL1/wwwroot/css/app.css",
+                    "RCL1/wwwroot/js/site.js",
+                    "RCL1/wwwroot/favicon.ico",
+                },
+                fileset
+            );
+        }
+
+        [Fact]
         public async Task ProjectReferences_OneLevel()
         {
             var project2 = _testAssets.CreateTestProject(new TestProject("Project2")
@@ -229,6 +306,8 @@ namespace Microsoft.DotNet.Watcher.Tools
                 },
                 fileset
             );
+
+            Assert.All(fileset, f => Assert.False(f.IsStaticFile, $"File {f.FilePath} should not be a static file."));
         }
 
         [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/29213")]
@@ -248,7 +327,8 @@ namespace Microsoft.DotNet.Watcher.Tools
             var projectA = Path.Combine(testDirectory, "A", "A.csproj");
 
             var output = new OutputSink();
-            var filesetFactory = new MsBuildFileSetFactory(DotNetHostPath, _reporter, projectA, output, waitOnError: false, trace: true);
+            var options = GetWatchOptions();
+            var filesetFactory = new MsBuildFileSetFactory(options, DotNetHostPath, _reporter, projectA, output, waitOnError: false, trace: true);
 
             var fileset = await GetFileSet(filesetFactory);
 
@@ -274,26 +354,46 @@ namespace Microsoft.DotNet.Watcher.Tools
             );
         }
 
-        private Task<IFileSet> GetFileSet(TestAsset target)
+        private Task<FileSet> GetFileSet(TestAsset target)
         {
-            string projectPath = GetTestProjectPath(target);
-            return GetFileSet(new MsBuildFileSetFactory(DotNetHostPath, _reporter, projectPath, new OutputSink(), waitOnError: false, trace: false));
+            var projectPath = GetTestProjectPath(target);
+            return GetFileSet(projectPath);
         }
+
+        private Task<FileSet> GetFileSet(string projectPath)
+        {
+            DotNetWatchOptions options = GetWatchOptions();
+            return GetFileSet(new MsBuildFileSetFactory(options, DotNetHostPath, _reporter, projectPath, new OutputSink(), waitOnError: false, trace: false));
+        }
+
+        private static DotNetWatchOptions GetWatchOptions() => 
+            new DotNetWatchOptions(false, false, false, false, false);
 
         private static string GetTestProjectPath(TestAsset target) => Path.Combine(GetTestProjectDirectory(target), target.TestProject.Name + ".csproj");
 
-        private async Task<IFileSet> GetFileSet(MsBuildFileSetFactory filesetFactory)
+        private async Task<FileSet> GetFileSet(MsBuildFileSetFactory filesetFactory)
         {
             return await filesetFactory
                 .CreateAsync(CancellationToken.None)
                 .TimeoutAfter(TimeSpan.FromSeconds(30));
         }
 
-        private static void WriteFile(TestAsset testAsset, string name, string contents = "")
+        private static string WriteFile(TestAsset testAsset, string name, string contents = "")
         {
             var path = Path.Combine(GetTestProjectDirectory(testAsset), name);
             Directory.CreateDirectory(Path.GetDirectoryName(path));
             File.WriteAllText(path, contents);
+
+            return path;
+        }
+
+        private static string WriteFile(TestDirectory testAsset, string name, string contents = "")
+        {
+            var path = Path.Combine(testAsset.Path, name);
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            File.WriteAllText(path, contents);
+
+            return path;
         }
 
         private static string GetTestProjectDirectory(TestAsset testAsset)
