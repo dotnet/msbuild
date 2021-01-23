@@ -53,16 +53,9 @@ jobs:
         downloadPath: '$(Build.StagingDirectory)/Download'
       condition: ${{ parameters.condition }}
       continueOnError: ${{ parameters.continueOnError }}
-
+    
     - ${{ if and(eq(parameters.runAsPublic, 'false'), ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
       - task: NuGetAuthenticate@0
-
-    - task: PowerShell@2
-      inputs: # This is a temporary fix to get msbuild onboarded with v3 publishing. This will be resolved soon ->https://github.com/dotnet/arcade/issues/6827
-        targetType: 'inline'
-        script: |
-          Write-Host "Overwriting BUILD_REPOSITORY_URI."
-          Write-Host "##vso[task.setvariable variable=BUILD_REPOSITORY_URI;]https://dnceng@dev.azure.com/dnceng/internal/_git/dotnet-msbuild"
 
     - task: PowerShell@2
       displayName: Publish Build Assets
@@ -77,7 +70,7 @@ jobs:
           /p:OfficialBuildId=$(Build.BuildNumber)
       condition: ${{ parameters.condition }}
       continueOnError: ${{ parameters.continueOnError }}
-
+    
     - task: powershell@2
       displayName: Create ReleaseConfigs Artifact
       inputs:
@@ -86,15 +79,15 @@ jobs:
           Add-Content -Path "$(Build.StagingDirectory)/ReleaseConfigs.txt" -Value $(BARBuildId)
           Add-Content -Path "$(Build.StagingDirectory)/ReleaseConfigs.txt" -Value "$(DefaultChannels)"
           Add-Content -Path "$(Build.StagingDirectory)/ReleaseConfigs.txt" -Value $(IsStableBuild)
-
+    
     - task: PublishBuildArtifacts@1
       displayName: Publish ReleaseConfigs Artifact
       inputs:
         PathtoPublish: '$(Build.StagingDirectory)/ReleaseConfigs.txt'
         PublishLocation: Container
         ArtifactName: ReleaseConfigs
-
+    
     - ${{ if eq(parameters.enablePublishBuildArtifacts, 'true') }}:
       - template: /eng/common/templates/steps/publish-logs.yml
         parameters:
-          JobLabel: 'Publish_Artifacts_Logs'
+          JobLabel: 'Publish_Artifacts_Logs'     

@@ -26,7 +26,6 @@
                     Overwrite="$(PublishOverwrite)"
                     ManifestBranch="$(ManifestBranch)"
                     ManifestBuildId="$(ManifestBuildId)"
-                    ManifestRepoUri="https://dnceng@dev.azure.com/dnceng/internal/_git/dotnet-msbuild"
                     ManifestCommit="$(ManifestCommit)"
                     ManifestName="msbuild"
                     SkipCreateManifest="false" />
