@@ -239,7 +239,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyFact]
-        public void UseWPFCanBeSpecifiedInDirectoryBuildTargets()
+        public void UseWPFCanBeSetInDirectoryBuildTargets()
         {
             var testDir = _testAssetsManager.CreateTestDirectory();
 
@@ -275,5 +275,82 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
         }
+
+        [WindowsOnlyFact]
+        public void TargetPlatformVersionCanBeSetInDirectoryBuildTargets()
+        {
+            var testProject = new TestProject()
+            {
+                TargetFrameworks = "net5.0-windows"
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            string targetPlatformVersion = "10.0.18362.0";
+
+            string DirectoryBuildTargetsContent = $@"
+<Project>
+  <PropertyGroup>
+    <TargetPlatformVersion>{targetPlatformVersion}</TargetPlatformVersion>
+  </PropertyGroup>
+</Project>
+";
+
+            File.WriteAllText(Path.Combine(testAsset.TestRoot, "Directory.Build.targets"), DirectoryBuildTargetsContent);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            GetPropertyValue(testAsset, "SupportedOSPlatformVersion").Should().Be(targetPlatformVersion);
+            GetPropertyValue(testAsset, "TargetPlatformMinVersion").Should().Be(targetPlatformVersion);
+            GetPropertyValue(testAsset, "TargetPlatformMoniker").Should().Be($"Windows,Version={targetPlatformVersion}");
+        }
+
+        [WindowsOnlyFact]
+        public void SupportedOSPlatformVersionCanBeSetInDirectoryBuildTargets()
+        {
+            var testProject = new TestProject()
+            {
+                TargetFrameworks = "net5.0-windows10.0.19041.0"
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            string supportedOSPlatformVersion = "10.0.18362.0";
+
+            string DirectoryBuildTargetsContent = $@"
+<Project>
+  <PropertyGroup>
+    <SupportedOSPlatformVersion>{supportedOSPlatformVersion}</SupportedOSPlatformVersion>
+  </PropertyGroup>
+</Project>
+";
+
+            File.WriteAllText(Path.Combine(testAsset.TestRoot, "Directory.Build.targets"), DirectoryBuildTargetsContent);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            GetPropertyValue(testAsset, "SupportedOSPlatformVersion").Should().Be(supportedOSPlatformVersion);
+            GetPropertyValue(testAsset, "TargetPlatformMinVersion").Should().Be(supportedOSPlatformVersion);
+            GetPropertyValue(testAsset, "TargetPlatformVersion").Should().Be("10.0.19041.0");
+            GetPropertyValue(testAsset, "TargetPlatformMoniker").Should().Be("Windows,Version=10.0.19041.0");
+        }
+
+
+        private string GetPropertyValue(TestAsset testAsset, string propertyName)
+        {
+            var getValueCommand = new GetValuesCommand(testAsset, propertyName);
+            getValueCommand.Execute()
+                .Should()
+                .Pass();
+
+            return getValueCommand.GetValues().Single();
+        }
+
     }
 }
