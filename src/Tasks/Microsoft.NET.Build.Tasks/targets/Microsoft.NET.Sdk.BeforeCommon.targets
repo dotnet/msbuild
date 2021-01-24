@@ -70,19 +70,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Import workload targets -->
   <Import Project="Microsoft.NET.Sdk.ImportWorkloads.targets" Condition="'$(MSBuildEnableWorkloadResolver)' == 'true'" />
 
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Windows.targets" Condition="'$(TargetPlatformIdentifier)' == 'Windows'" />
- 
-  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' != ''">
-    <!-- Set TargetPlatformVersion if it isn't set.  This is so that we have a valid TargetPlatformMoniker for Restore.
-         This avoids an issue where projects with multitargeted unknown platforms would fail to restore because the platforms
-         weren't included in the TargetPlatformMoniker for restore, obscuring the errors about unknown platforms or missing
-         workloads. -->
-    <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == ''">0.0</TargetPlatformVersion>
-    
-    <!-- Default SupportedOSPlatformVersion to TargetPlatformVersion -->
-    <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == ''">$(TargetPlatformVersion)</SupportedOSPlatformVersion>
-  </PropertyGroup>
-
   <!-- Checks for EOL frameworks -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.EolTargetFrameworks.targets" />
 
