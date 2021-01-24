@@ -17,7 +17,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
-    public class WasmBuildLazyLoadTest : SdkTest
+    public class WasmBuildLazyLoadTest : BlazorWasmSdkTest
     {
         public WasmBuildLazyLoadTest(ITestOutputHelper log) : base(log) {}
 
@@ -26,8 +26,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((project) =>
             {
@@ -43,7 +42,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             buildCommand.Execute()
                 .Should().Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("net5.0");
+            var outputDirectory = buildCommand.GetOutputDirectory(DefaultTfm);
 
             // Assert
             var expectedFiles = new[]
@@ -75,8 +74,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((project) =>
             {
@@ -92,7 +90,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             buildCommand.Execute("/p:Configuration=Release")
                 .Should().Pass();
 
-            var outputDirectory = buildCommand.GetOutputDirectory("net5.0", "Release");
+            var outputDirectory = buildCommand.GetOutputDirectory(DefaultTfm, "Release");
 
             // Assert
             var expectedFiles = new[]
@@ -124,8 +122,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((project) =>
             {
@@ -141,7 +138,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             publishCommand.Execute()
                 .Should().Pass();
 
-            var outputDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var outputDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
             // Assert
             var expectedFiles = new[]
@@ -173,8 +170,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((project) =>
             {
@@ -190,7 +186,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             publishCommand.Execute("/p:Configuration=Release")
                 .Should().Pass();
 
-            var outputDirectory = publishCommand.GetOutputDirectory("net5.0", "Release");
+            var outputDirectory = publishCommand.GetOutputDirectory(DefaultTfm, "Release");
 
             // Assert
             var expectedFiles = new[]
@@ -222,8 +218,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((project) =>
             {
@@ -244,8 +239,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((project) =>
             {

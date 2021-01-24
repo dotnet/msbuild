@@ -22,7 +22,7 @@ using ResourceHashesByNameDictionary = System.Collections.Generic.Dictionary<str
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
-    public class WasmPublishIntegrationTest : SdkTest
+    public class WasmPublishIntegrationTest : BlazorWasmSdkTest
     {
         public WasmPublishIntegrationTest(ITestOutputHelper log) : base(log) { }
 
@@ -31,13 +31,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmMinimal";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, testInstance.TestRoot);
             publishCommand.Execute().Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
             var expectedFiles = new[]
             {
@@ -63,13 +62,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
             publishCommand.Execute().Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
             var expectedFiles = new[]
             {
@@ -109,14 +107,13 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
             File.WriteAllText(Path.Combine(testInstance.TestRoot, "blazorwasm", "App.razor.css"), "h1 { font-size: 16px; }");
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
             publishCommand.Execute().Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
             var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
 
@@ -152,14 +149,13 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
             File.WriteAllText(Path.Combine(testInstance.TestRoot, "blazorwasm", "App.razor.css"), "h1 { font-size: 16px; }");
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
             publishCommand.Execute("/p:Configuration=Release").Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0", "Release");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm, "Release");
 
             var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
 
@@ -189,8 +185,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             var webConfigContents = "test webconfig contents";
             File.WriteAllText(Path.Combine(testInstance.TestRoot, "blazorwasm", "web.config"), webConfigContents);
@@ -198,7 +193,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
             publishCommand.Execute("/p:Configuration=Release").Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0", "Release");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm, "Release");
 
             // Verify web.config
             new FileInfo(Path.Combine(publishDirectory.ToString(), "..", "web.config")).Should().Exist();
@@ -210,8 +205,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             var buildCommand = new BuildCommand(testInstance, "blazorwasm");
             buildCommand.Execute()
@@ -220,7 +214,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
             publishCommand.Execute("/p:NoBuild=true").Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
             var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
 
             var expectedFiles = new[]
@@ -256,8 +250,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((path, project) =>
             {
@@ -274,7 +267,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
             publishCommand.Execute().Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
             var expectedFiles = new[]
             {
@@ -318,8 +311,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         public void Publish_Hosted_WithStaticWebBasePathWorks(string basePath)
         {
             var testAppName = "BlazorHosted";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();;
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((path, project) =>
             {
@@ -336,7 +328,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute().Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
             var expectedFiles = new[]
             {
@@ -385,8 +377,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((path, project) =>
             {
@@ -403,7 +394,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
             publishCommand.Execute().Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
             var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
 
             publishDirectory.Should().HaveFiles(new[]
@@ -456,8 +447,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         public void Publish_SatelliteAssemblies_AreCopiedToBuildOutput()
         {
             // Arrange
-            var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName).WithSource();
+            var testAppName = "BlazorHosted";
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((path, project) =>
             {
@@ -476,7 +467,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
             publishCommand.Execute().Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
             var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
 
             publishDirectory.Should().HaveFiles(new[]
@@ -497,26 +488,23 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorHosted";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute().Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
-            // Make sure the main project exists
-            new FileInfo(Path.Combine(publishDirectory.ToString(), "blazorhosted.dll")).Should().Exist();
+            var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
             // Verification for https://github.com/dotnet/aspnetcore/issues/19926. Verify binaries for projects
             // referenced by the Hosted project appear in the publish directory
-            publishDirectory.Should().HaveFiles(new[]
+            publishOutputDirectory.Should().HaveFiles(new[]
             {
                 "RazorClassLibrary.dll",
                 "blazorwasm.dll"
             });
 
-            var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
-            publishDirectory.Should().HaveFiles(new[]
+            var blazorPublishDirectory = Path.Combine(publishOutputDirectory.ToString(), "wwwroot");
+            publishOutputDirectory.Should().HaveFiles(new[]
             {
                 "wwwroot/_framework/blazor.boot.json",
                 "wwwroot/_framework/blazor.webassembly.js",
@@ -526,27 +514,27 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             });
 
             // Verify project references appear as static web assets
-            publishDirectory.Should().HaveFiles(new[]
+            publishOutputDirectory.Should().HaveFiles(new[]
             {
                 "wwwroot/_framework/RazorClassLibrary.dll",
                 "RazorClassLibrary.dll"
             });
 
             // Verify static assets are in the publish directory
-            publishDirectory.Should().HaveFiles(new[]
+            publishOutputDirectory.Should().HaveFiles(new[]
             {
                 "wwwroot/index.html"
             });
 
             // Verify static web assets from referenced projects are copied.
-            publishDirectory.Should().HaveFiles(new[]
+            publishOutputDirectory.Should().HaveFiles(new[]
             {
                 "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
                 "wwwroot/_content/RazorClassLibrary/styles.css",
             });
 
             // Verify web.config
-            publishDirectory.Should().HaveFiles(new[]
+            publishOutputDirectory.Should().HaveFiles(new[]
             {
                 "web.config"
             });
@@ -554,7 +542,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             VerifyBootManifestHashes(testInstance, blazorPublishDirectory);
 
             // Verify compression works
-            publishDirectory.Should().HaveFiles(new[]
+            publishOutputDirectory.Should().HaveFiles(new[]
             {
                 "wwwroot/_framework/dotnet.wasm.br",
                 "wwwroot/_framework/blazorwasm.dll.br",
@@ -562,7 +550,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 "wwwroot/_framework/System.Text.Json.dll.br"
             });
 
-            publishDirectory.Should().HaveFiles(new[]
+            publishOutputDirectory.Should().HaveFiles(new[]
             {
                 "wwwroot/_framework/dotnet.wasm.gz",
                 "wwwroot/_framework/blazorwasm.dll.gz",
@@ -583,8 +571,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorHosted";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             var wwwroot = Path.Combine(testInstance.TestRoot, "blazorwasm", "wwwroot");
             File.WriteAllText(Path.Combine(wwwroot, "appsettings.json"), "Default settings");
@@ -593,7 +580,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute().Should().Pass();
 
-            var buildOutputDirectory = publishCommand.GetOutputDirectory("net5.0").ToString();
+            var buildOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
 
             var bootJsonPath = Path.Combine(buildOutputDirectory, "wwwroot", "_framework", "blazor.boot.json");
             var bootJsonData = ReadBootJsonData(bootJsonPath);
@@ -617,8 +604,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorHosted";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((path, project) =>
             {
@@ -644,7 +630,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute().Should().Pass();
 
-            var publishOutputDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
             var bootJsonData = new FileInfo(Path.Combine(publishOutputDirectory.ToString(), "wwwroot", "_framework", "blazor.boot.json"));
 
@@ -666,8 +652,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorHosted";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((path, project) =>
             {
@@ -689,7 +674,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute("/p:BuildDependencies=false /bl").Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
             // Make sure the main project exists
             new FileInfo(Path.Combine(publishDirectory.ToString(), "blazorhosted.dll")).Should().Exist();
 
@@ -767,8 +752,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorHosted";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             var buildCommand = new BuildCommand(testInstance, "blazorhosted");
             buildCommand.Execute().Should().Pass();
@@ -776,7 +760,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute("/p:NoBuild=true").Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
             // Make sure the main project exists
             new FileInfo(Path.Combine(publishDirectory.ToString(), "blazorhosted.dll")).Should().Exist();
 
@@ -821,8 +805,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Simulates publishing the same way VS does by setting BuildProjectReferences=false.
             // Arrange
             var testAppName = "BlazorHosted";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             // VS builds projects individually and then a publish with BuildDependencies=false, but building the main project is a close enough approximation for this test.
             var buildCommand = new BuildCommand(testInstance, "blazorwasm");
@@ -832,7 +815,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute("/p:BuildProjectReferences=false /p:BuildInsideVisualStudio=true").Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
             // Make sure the main project exists
             new FileInfo(Path.Combine(publishDirectory.ToString(), "blazorhosted.dll")).Should().Exist();
 
@@ -905,8 +888,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Simulates publishing the same way VS does by setting BuildProjectReferences=false.
             var testAppName = "BlazorHosted";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
             File.WriteAllText(Path.Combine(testInstance.TestRoot, "blazorwasm", "App.razor.css"), "h1 { font-size: 16px; }");
 
             // VS builds projects individually and then a publish with BuildDependencies=false, but building the main project is a close enough approximation for this test.
@@ -917,7 +899,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute("/p:BuildProjectReferences=false /p:BuildInsideVisualStudio=true").Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
+            var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
+
             // Make sure the main project exists
             new FileInfo(Path.Combine(publishDirectory.ToString(), "blazorhosted.dll")).Should().Exist();
 
@@ -982,8 +966,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 "wwwroot/_framework/System.Text.Json.dll.br"
             });
 
-            var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
-
             VerifyBootManifestHashes(testInstance, blazorPublishDirectory);
             VerifyServiceWorkerFiles(testInstance, blazorPublishDirectory,
                 serviceWorkerPath: Path.Combine("serviceworkers", "my-service-worker.js"),
@@ -997,7 +979,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         public void Publish_HostedApp_VisualStudio_WithSatelliteAssemblies()
         {
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName).WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((path, project) =>
             {
@@ -1022,7 +1004,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
             publishCommand.Execute("/p:BuildProjectReferences=false").Should().Pass();
 
-            var publishDirectory = publishCommand.GetOutputDirectory("net5.0");
+            var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
             var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
 
             publishDirectory.Should().HaveFiles(new[]
@@ -1045,8 +1027,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorHostedRID";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute("/p:RuntimeIdentifier=linux-x64").Should().Pass();
@@ -1059,7 +1040,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorHostedRID";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName).WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute().Should().Pass();
@@ -1067,9 +1048,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             AssertRIDPublishOuput(publishCommand, testInstance);
         }
 
-        private static void AssertRIDPublishOuput(PublishCommand command, TestAsset testInstance)
+        private void AssertRIDPublishOuput(PublishCommand command, TestAsset testInstance)
         {
-            var publishDirectory = command.GetOutputDirectory("net5.0", "Debug", "linux-x64");
+            var publishDirectory = command.GetOutputDirectory(DefaultTfm, "Debug", "linux-x64");
 
             // Make sure the main project exists
             publishDirectory.Should().HaveFiles(new[]
@@ -1148,8 +1129,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmMinimal";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((project) =>
             {
@@ -1162,7 +1142,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var publishCommand = new PublishCommand(Log, testInstance.TestRoot);
             publishCommand.Execute().Should().Pass();
 
-            var publishOutputDirectory = publishCommand.GetOutputDirectory("net5.0").ToString();
+            var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
 
             var bootJsonPath = Path.Combine(publishOutputDirectory.ToString(), "wwwroot", "_framework", "blazor.boot.json");
             var bootJsonData = ReadBootJsonData(bootJsonPath);
@@ -1188,13 +1168,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Regression test for https://github.com/dotnet/aspnetcore/issues/29264
             // Arrange
             var testAppName = "BlazorMultiApp";
-            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
-                            .WithSource();
+            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "BlazorMultipleApps.Server"));
             publishCommand.Execute().Should().Pass();
 
-            var publishOutputDirectory = publishCommand.GetOutputDirectory("net5.0").ToString();
+            var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm).ToString();
 
             new FileInfo(Path.Combine(publishOutputDirectory, "BlazorMultipleApps.Server.dll")).Should().Exist();
             new FileInfo(Path.Combine(publishOutputDirectory, "BlazorMultipleApps.FirstClient.dll")).Should().Exist();

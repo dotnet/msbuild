@@ -16,6 +16,14 @@
   <ItemGroup>
     <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
   </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>DefaultBlazorTestTfm</_Parameter1>
+      <_Parameter2>$(SdkTargetFramework)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+  
   
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />

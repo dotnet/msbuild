@@ -16,7 +16,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
-    public class WasmBuildIncrementalismTest : SdkTest
+    public class WasmBuildIncrementalismTest : BlazorWasmSdkTest
     {
         public WasmBuildIncrementalismTest(ITestOutputHelper log) : base(log) {}
 
@@ -25,16 +25,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAsset = "BlazorWasmWithLibrary";
-            var projectDirectory = _testAssetsManager
-                .CopyTestAsset(testAsset)
-                .WithSource();
+            var projectDirectory = CreateBlazorWasmSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory, "blazorwasm");
             build.Execute()
                 .Should()
                 .Pass();
 
-            var buildOutputDirectory = build.GetOutputDirectory("net5.0").ToString();
+            var buildOutputDirectory = build.GetOutputDirectory(DefaultTfm).ToString();
 
             // Act
             var thumbPrint = FileThumbPrint.CreateFolderThumbprint(projectDirectory, buildOutputDirectory);
@@ -59,16 +57,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAsset = "BlazorWasmWithLibrary";
-            var projectDirectory = _testAssetsManager
-                .CopyTestAsset(testAsset)
-                .WithSource();
+            var projectDirectory = CreateBlazorWasmSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory, "blazorwasm");
             build.Execute()
                 .Should()
                 .Pass();
 
-            var gzipCompressionDirectory = Path.Combine(projectDirectory.TestRoot, "blazorwasm", "obj", "Debug", "net5.0", "build-gz");
+            var gzipCompressionDirectory = Path.Combine(projectDirectory.TestRoot, "blazorwasm", "obj", "Debug", DefaultTfm, "build-gz");
             new DirectoryInfo(gzipCompressionDirectory).Should().Exist();
 
             // Act
@@ -96,9 +92,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAsset = "BlazorWasmWithLibrary";
-            var projectDirectory = _testAssetsManager
-                .CopyTestAsset(testAsset)
-                .WithSource();
+            var projectDirectory = CreateBlazorWasmSdkTestAsset(testAsset);
             File.Move(Path.Combine(projectDirectory.TestRoot, "blazorwasm", "Resources.ja.resx.txt"), Path.Combine(projectDirectory.TestRoot, "blazorwasm", "Resource.ja.resx"));
             
             var build = new BuildCommand(projectDirectory, "blazorwasm");
@@ -106,9 +100,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 .Should()
                 .Pass();
 
-            var satelliteAssemblyCacheFile = Path.Combine(projectDirectory.TestRoot, "blazorwasm", "obj", "Debug", "net5.0", "blazor.satelliteasm.props");
-            var satelliteAssemblyFile = Path.Combine(build.GetOutputDirectory("net5.0").ToString(), "wwwroot", "_framework", "ja", "blazorwasm.resources.dll");
-            var bootJson = Path.Combine(build.GetOutputDirectory("net5.0").ToString(), "wwwroot", "_framework", "blazor.boot.json");
+            var satelliteAssemblyCacheFile = Path.Combine(projectDirectory.TestRoot, "blazorwasm", "obj", "Debug", DefaultTfm, "blazor.satelliteasm.props");
+            var satelliteAssemblyFile = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "ja", "blazorwasm.resources.dll");
+            var bootJson = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "blazor.boot.json");
 
             // Assert
             for (var i = 0; i < 3; i++)
@@ -155,18 +149,16 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAsset = "BlazorWasmWithLibrary";
-            var projectDirectory = _testAssetsManager
-                .CopyTestAsset(testAsset)
-                .WithSource();
+            var projectDirectory = CreateBlazorWasmSdkTestAsset(testAsset);
             
             var build = new BuildCommand(projectDirectory, "blazorwasm");
             build.Execute()
                 .Should()
                 .Pass();
 
-            var satelliteAssemblyCacheFile = Path.Combine(projectDirectory.TestRoot, "blazorwasm", "obj", "Debug", "net5.0", "blazor.satelliteasm.props");
-            var satelliteAssemblyFile = Path.Combine(build.GetOutputDirectory("net5.0").ToString(), "wwwroot", "_framework", "ja", "blazorwasm.resources.dll");
-            var bootJson = Path.Combine(build.GetOutputDirectory("net5.0").ToString(), "wwwroot", "_framework", "blazor.boot.json");
+            var satelliteAssemblyCacheFile = Path.Combine(projectDirectory.TestRoot, "blazorwasm", "obj", "Debug", DefaultTfm, "blazor.satelliteasm.props");
+            var satelliteAssemblyFile = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "ja", "blazorwasm.resources.dll");
+            var bootJson = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "blazor.boot.json");
 
             build = new BuildCommand(projectDirectory, "blazorwasm");
             build.Execute()
@@ -203,9 +195,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAsset = "BlazorWasmWithLibrary";
-            var projectDirectory = _testAssetsManager
-                .CopyTestAsset(testAsset)
-                .WithSource();
+            var projectDirectory = CreateBlazorWasmSdkTestAsset(testAsset);
             File.Move(Path.Combine(projectDirectory.TestRoot, "blazorwasm", "Resources.ja.resx.txt"), Path.Combine(projectDirectory.TestRoot, "blazorwasm", "Resource.ja.resx"));
             
             var build = new BuildCommand(projectDirectory, "blazorwasm");
@@ -213,9 +203,9 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 .Should()
                 .Pass();
 
-            var satelliteAssemblyCacheFile = Path.Combine(projectDirectory.TestRoot, "blazorwasm", "obj", "Debug", "net5.0", "blazor.satelliteasm.props");
-            var satelliteAssemblyFile = Path.Combine(build.GetOutputDirectory("net5.0").ToString(), "wwwroot", "_framework", "ja", "blazorwasm.resources.dll");
-            var bootJson = Path.Combine(build.GetOutputDirectory("net5.0").ToString(), "wwwroot", "_framework", "blazor.boot.json");
+            var satelliteAssemblyCacheFile = Path.Combine(projectDirectory.TestRoot, "blazorwasm", "obj", "Debug", DefaultTfm, "blazor.satelliteasm.props");
+            var satelliteAssemblyFile = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "ja", "blazorwasm.resources.dll");
+            var bootJson = Path.Combine(build.GetOutputDirectory(DefaultTfm).ToString(), "wwwroot", "_framework", "blazor.boot.json");
             
             build = new BuildCommand(projectDirectory, "blazorwasm");
             build.Execute()
