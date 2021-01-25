@@ -8,6 +8,6 @@ namespace Microsoft.DotNet.Watcher
 {
     public interface IFileSetFactory
     {
-        Task<IFileSet> CreateAsync(CancellationToken cancellationToken);
+        Task<FileSet> CreateAsync(CancellationToken cancellationToken);
     }
 }

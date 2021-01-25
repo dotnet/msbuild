@@ -32,11 +32,13 @@ Some configuration options can be passed to `dotnet watch` through environment v
 | DOTNET_WATCH_SUPPRESS_MSBUILD_INCREMENTALISM   | By default, `dotnet watch` optimizes the build by avoiding certain operations such as running restore or re-evaluating the set of watched files on every file change. If set to "1" or "true",  these optimizations are disabled. |
 | DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER   | `dotnet watch run` will attempt to launch browsers for web apps with `launchBrowser` configured in `launchSettings.json`. If set to "1" or "true", this behavior is suppressed. |
 | DOTNET_WATCH_SUPPRESS_MSBUILD_INCREMENTALISM   | `dotnet watch run` will attempt to refresh browsers when it detects file changes. If set to "1" or "true", this behavior is suppressed. This behavior is also suppressed if DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER is set. |
+| DOTNET_WATCH_SUPPRESS_STATIC_FILE_HANDLING | If set to "1", or "true", `dotnet watch` will not perform special handling for static content file
+
 ### MSBuild
 
 dotnet-watch can be configured from the MSBuild project file being watched.
 
-#### Watch items
+**Watch items**
 
 dotnet-watch will watch all items in the **Watch** item group.
 By default, this group inclues all items in **Compile** and **EmbeddedResource**.
@@ -76,7 +78,7 @@ dotnet-watch will ignore project references with the `Watch="false"` attribute.
 ```
 
 
-#### Advanced configuration
+**Advanced configuration**
 
 dotnet-watch performs a design-time build to find items to watch.
 When this build is run, dotnet-watch will set the property `DotNetWatchBuild=true`.
@@ -88,6 +90,7 @@ Example:
     <!-- only included in the project when dotnet-watch is running -->
   </ItemGroup>
 ```
+
 ## Contribution
 
 Follow the contribution steps for the dotnet SDK: /documentation/project-docs/developer-guide.md. If developing from Visual Studio, open the dotnet-watch.slnf.
