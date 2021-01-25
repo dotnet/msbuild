@@ -732,7 +732,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (identity?.IsInFramework(Constants.DotNetCoreIdentifier, null) == true)
                 {
-                    return true;
+                    return !GetItemCopyLocal(item);
                 }
             }
             else if (identity?.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion) == true)
