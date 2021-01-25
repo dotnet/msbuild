@@ -620,11 +620,6 @@ namespace Microsoft.Build.BackEnd
             private MemoryStream _writeBufferMemoryStream;
 
             /// <summary>
-            /// A BinaryWriter to assist writing bytes to the buffer.
-            /// </summary>
-            private BinaryWriter _writeBufferBinaryWriter;
-
-            /// <summary>
             /// Event indicating the node has terminated.
             /// </summary>
             private ManualResetEvent _nodeTerminated;
@@ -653,10 +648,8 @@ namespace Microsoft.Build.BackEnd
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
 
-                // packets get this large so avoid reallocations
                 _readBufferMemoryStream = new MemoryStream();
                 _writeBufferMemoryStream = new MemoryStream();
-                _writeBufferBinaryWriter = new BinaryWriter(_writeBufferMemoryStream);
                 _nodeTerminated = new ManualResetEvent(false);
                 _terminateDelegate = terminateDelegate;
                 _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
@@ -735,6 +728,14 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
+            private void WriteInt32(MemoryStream stream, int value)
+            {
+                stream.WriteByte((byte)value);
+                stream.WriteByte((byte)(value >> 8));
+                stream.WriteByte((byte)(value >> 16));
+                stream.WriteByte((byte)(value >> 24));
+            }
+
             /// <summary>
             /// Sends the specified packet to this node.
             /// </summary>
@@ -750,14 +751,14 @@ namespace Microsoft.Build.BackEnd
                     _writeBufferMemoryStream.WriteByte((byte)packet.Type);
 
                     // Pad for the packet length
-                    _writeBufferBinaryWriter.Write(0);
+                    WriteInt32(_writeBufferMemoryStream, 0);
                     packet.Translate(writeTranslator);
 
                     int writeStreamLength = (int)_writeBufferMemoryStream.Position;
 
                     // Now plug in the real packet length
                     _writeBufferMemoryStream.Position = 1;
-                    _writeBufferBinaryWriter.Write(writeStreamLength - 5);
+                    WriteInt32(_writeBufferMemoryStream, writeStreamLength - 5);
 
                     byte[] writeStreamBuffer = _writeBufferMemoryStream.GetBuffer();
 
