@@ -622,7 +622,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// A BinaryWriter to assist writing bytes to the buffer.
             /// </summary>
-            private BinaryWriter _writeBufferStreamWriter;
+            private BinaryWriter _writeBufferBinaryWriter;
 
             /// <summary>
             /// Event indicating the node has terminated.
@@ -654,9 +654,9 @@ namespace Microsoft.Build.BackEnd
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
 
                 // packets get this large so avoid reallocations
-                _readBufferMemoryStream = new MemoryStream(MaxPacketWriteSize);
-                _writeBufferMemoryStream = new MemoryStream(MaxPacketWriteSize);
-                _writeBufferStreamWriter = new BinaryWriter(_writeBufferMemoryStream);
+                _readBufferMemoryStream = new MemoryStream();
+                _writeBufferMemoryStream = new MemoryStream();
+                _writeBufferBinaryWriter = new BinaryWriter(_writeBufferMemoryStream);
                 _nodeTerminated = new ManualResetEvent(false);
                 _terminateDelegate = terminateDelegate;
                 _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
@@ -750,14 +750,14 @@ namespace Microsoft.Build.BackEnd
                     _writeBufferMemoryStream.WriteByte((byte)packet.Type);
 
                     // Pad for the packet length
-                    _writeBufferStreamWriter.Write(0);
+                    _writeBufferBinaryWriter.Write(0);
                     packet.Translate(writeTranslator);
 
                     int writeStreamLength = (int)_writeBufferMemoryStream.Position;
 
                     // Now plug in the real packet length
                     _writeBufferMemoryStream.Position = 1;
-                    _writeBufferStreamWriter.Write(writeStreamLength - 5);
+                    _writeBufferBinaryWriter.Write(writeStreamLength - 5);
 
                     byte[] writeStreamBuffer = _writeBufferMemoryStream.GetBuffer();
 
