@@ -51,6 +51,11 @@ namespace Microsoft.Build.BackEnd
         private const int TimeoutForNewNodeCreation = 30000;
 
         /// <summary>
+        /// The amount of time to wait for an out-of-proc node to exit.
+        /// </summary>
+        private const int TimeoutForWaitForExit = 30000;
+
+        /// <summary>
         /// The build component host.
         /// </summary>
         private IBuildComponentHost _componentHost;
@@ -102,6 +107,8 @@ namespace Microsoft.Build.BackEnd
                                 !Console.IsInputRedirected &&
                                 Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout;
 
+            Task[] waitForExitTasks = waitForExit && contextsToShutDown.Count > 0? new Task[contextsToShutDown.Count] : null;
+            int i = 0;
             foreach (NodeContext nodeContext in contextsToShutDown)
             {
                 if (nodeContext is null)
@@ -111,8 +118,12 @@ namespace Microsoft.Build.BackEnd
                 nodeContext.SendData(new NodeBuildComplete(enableReuse));
                 if (waitForExit)
                 {
-                    nodeContext.WaitForExit();
+                    waitForExitTasks[i++] = nodeContext.WaitForExitAsync();
                 }
+            }
+            if (waitForExitTasks != null)
+            {
+                Task.WaitAll(waitForExitTasks);
             }
         }
 
@@ -627,14 +638,14 @@ namespace Microsoft.Build.BackEnd
             private byte[] _smallReadBuffer;
 
             /// <summary>
-            /// Event indicating the node has terminated.
-            /// </summary>
-            private ManualResetEvent _nodeTerminated;
-
-            /// <summary>
             /// Delegate called when the context terminates.
             /// </summary>
             private NodeContextTerminateDelegate _terminateDelegate;
+
+            /// <summary>
+            /// Node was requested to terminate.
+            /// </summary>
+            private bool _closeSent;
 
             /// <summary>
             /// Per node read buffers
@@ -655,7 +666,6 @@ namespace Microsoft.Build.BackEnd
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
                 _smallReadBuffer = new byte[1000]; // 1000 was just an average seen on one profile run.
-                _nodeTerminated = new ManualResetEvent(false);
                 _terminateDelegate = terminateDelegate;
                 _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
             }
@@ -791,6 +801,7 @@ namespace Microsoft.Build.BackEnd
 #endif
                         }
                     }
+                    _closeSent = packet is NodeBuildComplete buildCompletePacket && !buildCompletePacket.PrepareForReuse;
                 }
                 catch (IOException e)
                 {
@@ -820,7 +831,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Waits for the child node process to exit.
             /// </summary>
-            public void WaitForExit()
+            public async Task WaitForExitAsync()
             {
                 int processId = _processId;
                 if (processId != -1)
@@ -835,8 +846,34 @@ namespace Microsoft.Build.BackEnd
                         // The process has terminated already.
                         return;
                     }
+
                     // Wait for the process to terminate.
                     CommunicationsUtilities.Trace("Waiting for node with pid = {0} to terminate", processId);
+
+                    if (_closeSent)
+                    {
+                        // .NET 5 introduces a real WaitForExitAsyc.
+                        // This is a poor man's implementation that uses polling.
+                        int timeout = TimeoutForWaitForExit;
+                        int delay = 5;
+                        while (timeout > 0)
+                        {
+                            bool exited = childProcess.WaitForExit(milliseconds: 0);
+                            if (exited)
+                            {
+                                return;
+                            }
+                            timeout -= delay;
+                            await Task.Delay(delay).ConfigureAwait(false);
+
+                            // Double delay up to 500ms.
+                            delay = Math.Min(delay * 2, 500);
+                        }
+                    }
+
+                    // Kill the child and do a blocking wait.
+                    CommunicationsUtilities.Trace("Killing node with pid = {0}", processId);
+                    childProcess.Kill();
                     childProcess.WaitForExit();
                 }
             }
