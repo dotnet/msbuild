@@ -764,25 +764,27 @@ namespace Microsoft.Build.BackEnd
 
             private void SendDataCore(INodePacket packet)
             {
-                // clear the buffer but keep the underlying capacity to avoid reallocations
-                _writeBufferMemoryStream.SetLength(0);
+                MemoryStream writeStream = _writeBufferMemoryStream;
 
-                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(_writeBufferMemoryStream);
+                // clear the buffer but keep the underlying capacity to avoid reallocations
+                writeStream.SetLength(0);
+
+                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
                 try
                 {
-                    _writeBufferMemoryStream.WriteByte((byte)packet.Type);
+                    writeStream.WriteByte((byte)packet.Type);
 
                     // Pad for the packet length
-                    WriteInt32(_writeBufferMemoryStream, 0);
+                    WriteInt32(writeStream, 0);
                     packet.Translate(writeTranslator);
 
-                    int writeStreamLength = (int)_writeBufferMemoryStream.Position;
+                    int writeStreamLength = (int)writeStream.Position;
 
                     // Now plug in the real packet length
-                    _writeBufferMemoryStream.Position = 1;
-                    WriteInt32(_writeBufferMemoryStream, writeStreamLength - 5);
+                    writeStream.Position = 1;
+                    WriteInt32(writeStream, writeStreamLength - 5);
 
-                    byte[] writeStreamBuffer = _writeBufferMemoryStream.GetBuffer();
+                    byte[] writeStreamBuffer = writeStream.GetBuffer();
 
                     for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
                     {
