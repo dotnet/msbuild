@@ -1886,7 +1886,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void ReadStateFile()
         {
-            _cache = (SystemState)StateFileBase.DeserializeCache(_stateFile, Log, typeof(SystemState));
+            _cache = SystemState.DeserializeCacheByTranslator(_stateFile, Log);
 
             // Construct the cache if necessary.
             if (_cache == null)
@@ -1899,6 +1899,32 @@ namespace Microsoft.Build.Tasks
         /// Write out the state file if a state name was supplied and the cache is dirty.
         /// </summary>
         private void WriteStateFile()
+        {
+            if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
+            {
+                _cache.SerializeCacheByTranslator(_stateFile, Log);
+            }
+        }
+
+        /// <summary>
+        /// TODO: to be deleted
+        /// </summary>
+        private void ReadStateFileBinaryFormatter()
+        {
+            _cache = (SystemState)StateFileBase.DeserializeCache(_stateFile, Log, typeof(SystemState));
+
+            // Construct the cache if necessary.
+            if (_cache == null)
+            {
+                _cache = new SystemState();
+            }
+        }
+
+        /// <summary>
+        /// Write out the state file if a state name was supplied and the cache is dirty.
+        /// TODO: to be deleted
+        /// </summary>
+        private void WriteStateFileBinaryFormatter()
         {
             if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {

@@ -8,11 +8,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Versioning;
 using System.Security.Permissions;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -20,8 +24,11 @@ namespace Microsoft.Build.Tasks
     /// Class is used to cache system state.
     /// </summary>
     [Serializable]
-    internal sealed class SystemState : StateFileBase, ISerializable
+    internal sealed class SystemState : StateFileBase, ISerializable, ITranslatable
     {
+        private static readonly byte[] TranslateContractSignature = new []{(byte)'M', (byte)'B', (byte)'R', (byte)'S', (byte)'C', }; // Microsoft Build Rar State Cache
+        private static readonly byte TranslateContractVersion = 0x01;
+
         /// <summary>
         /// Cache at the SystemState instance level. Has the same contents as <see cref="instanceLocalFileStateCache"/>.
         /// It acts as a flag to enforce that an entry has been checked for staleness only once.
@@ -31,7 +38,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache at the SystemState instance level. It is serialized and reused between instances.
         /// </summary>
-        private Hashtable instanceLocalFileStateCache = new Hashtable(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, FileState> instanceLocalFileStateCache = new Dictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// LastModified information is purely instance-local. It doesn't make sense to
@@ -108,7 +115,7 @@ namespace Microsoft.Build.Tasks
         /// Class that holds the current file state.
         /// </summary>
         [Serializable]
-        private sealed class FileState : ISerializable
+        private sealed class FileState : ISerializable, ITranslatable
         {
             /// <summary>
             /// The last modified time for this file.
@@ -146,6 +153,14 @@ namespace Microsoft.Build.Tasks
             internal FileState(DateTime lastModified)
             {
                 this.lastModified = lastModified;
+            }
+
+            /// <summary>
+            /// Ctor for translator deserialization
+            /// </summary>
+            internal FileState(ITranslator translator)
+            {
+                Translate(translator);
             }
 
             /// <summary>
@@ -190,6 +205,23 @@ namespace Microsoft.Build.Tasks
                     info.AddValue("fnId", frameworkName.Identifier);
                     info.AddValue("fmProf", frameworkName.Profile);
                 }
+            }
+
+            /// <summary>
+            /// Reads/writes this class
+            /// </summary>
+            public void Translate(ITranslator translator)
+            {
+                ErrorUtilities.VerifyThrowArgumentNull(translator, nameof(translator));
+
+                translator.Translate(ref lastModified);
+                translator.Translate(ref assemblyName,
+                    (ITranslator t) => new AssemblyNameExtension(t));
+                translator.TranslateArray(ref dependencies,
+                    (ITranslator t) => new AssemblyNameExtension(t));
+                translator.Translate(ref scatterFiles);
+                translator.Translate(ref runtimeVersion);
+                translator.Translate(ref frameworkName);
             }
 
             /// <summary>
@@ -246,7 +278,14 @@ namespace Microsoft.Build.Tasks
         {
             ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
 
-            instanceLocalFileStateCache = (Hashtable)info.GetValue("fileState", typeof(Hashtable));
+            var localFilesAsHashTable = (Hashtable)info.GetValue("fileState", typeof(Hashtable));
+
+            instanceLocalFileStateCache = localFilesAsHashTable.Cast<DictionaryEntry>()
+                .ToDictionary(
+                    kvp => (string)kvp.Key,
+                    kvp => (FileState)kvp.Value,
+                    StringComparer.OrdinalIgnoreCase);
+
             isDirty = false;
         }
 
@@ -265,6 +304,93 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Writes the contents of this object out to the specified file.
+        /// TODO: once all derived classes from StateFileBase adopt new serialization, we shall consider to mode this into base class
+        /// </summary>
+        internal void SerializeCacheByTranslator(string stateFile, TaskLoggingHelper log)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(stateFile))
+                {
+                    if (FileSystems.Default.FileExists(stateFile))
+                    {
+                        File.Delete(stateFile);
+                    }
+
+                    using var s = new FileStream(stateFile, FileMode.CreateNew);
+                    var translator = BinaryTranslator.GetWriteTranslator(s);
+
+                    // write file signature
+                    translator.Writer.Write(TranslateContractSignature); 
+                    translator.Writer.Write(TranslateContractVersion);
+
+                    Translate(translator);
+                }
+            }
+            catch (Exception e)
+            {
+                // If there was a problem writing the file (like it's read-only or locked on disk, for
+                // example), then eat the exception and log a warning.  Otherwise, rethrow.
+                if (ExceptionHandling.NotExpectedSerializationException(e))
+                    throw;
+
+                // Not being able to serialize the cache is not an error, but we let the user know anyway.
+                // Don't want to hold up processing just because we couldn't read the file.
+                log.LogWarningWithCodeFromResources("General.CouldNotWriteStateFile", stateFile, e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Read the contents of this object out to the specified file.
+        /// TODO: once all derived classes from StateFileBase adopt new serialization, we shall consider to mode this into base class
+        /// </summary>
+        internal static SystemState DeserializeCacheByTranslator(string stateFile, TaskLoggingHelper log)
+        {
+            // First, we read the cache from disk if one exists, or if one does not exist
+            // then we create one.
+            try
+            {
+                if (!string.IsNullOrEmpty(stateFile) && FileSystems.Default.FileExists(stateFile))
+                {
+                    using FileStream s = new FileStream(stateFile, FileMode.Open);
+                    var translator = BinaryTranslator.GetReadTranslator(s, buffer:null); // TODO: shared buffering?
+
+                    // verify file signature
+                    var contractSignature = translator.Reader.ReadBytes(TranslateContractSignature.Length);
+                    var contractVersion = translator.Reader.ReadByte();
+
+                    if (!contractSignature.SequenceEqual(TranslateContractSignature) || contractVersion != TranslateContractVersion)
+                    {
+                        log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
+                        return null;
+                    }
+
+                    SystemState systemState = new SystemState();
+                    systemState.Translate(translator);
+
+                    return systemState;
+                }
+            }
+            catch (Exception e)
+            {
+                if (ExceptionHandling.IsCriticalException(e))
+                {
+                    throw;
+                }
+
+                // The deserialization process seems like it can throw just about 
+                // any exception imaginable.  Catch them all here.
+                // Not being able to deserialize the cache is not an error, but we let the user know anyway.
+                // Don't want to hold up processing just because we couldn't read the file.
+                log.LogWarningWithCodeFromResources("General.CouldNotReadStateFile", stateFile, e.Message);
+                return null;
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Serialize the contents of the class.
         /// </summary>
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
@@ -272,7 +398,24 @@ namespace Microsoft.Build.Tasks
         {
             ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
 
-            info.AddValue("fileState", instanceLocalFileStateCache);
+            var localFilesAsHashtable = new Hashtable();
+            foreach (var pair in instanceLocalFileStateCache)
+            {
+                localFilesAsHashtable.Add(pair.Key, pair.Value);
+            }
+
+            info.AddValue("fileState", localFilesAsHashtable);
+        }
+
+        public void Translate(ITranslator translator)
+        {
+            if (instanceLocalFileStateCache is null)
+                throw new NullReferenceException(nameof(instanceLocalFileStateCache));
+
+            translator.TranslateDictionary(
+                ref instanceLocalFileStateCache,
+                StringComparer.OrdinalIgnoreCase,
+                (ITranslator t) => new FileState(t));
         }
 
         /// <summary>
@@ -378,10 +521,8 @@ namespace Microsoft.Build.Tasks
         private FileState ComputeFileStateFromCachesAndDisk(string path)
         {
             DateTime lastModified = GetAndCacheLastModified(path);
-            FileState cachedInstanceFileState = (FileState)instanceLocalFileStateCache[path];
-            bool isCachedInInstance = cachedInstanceFileState != null;
-            bool isCachedInProcess =
-                s_processWideFileStateCache.TryGetValue(path, out FileState cachedProcessFileState);
+            bool isCachedInInstance = instanceLocalFileStateCache.TryGetValue(path, out FileState cachedInstanceFileState);
+            bool isCachedInProcess = s_processWideFileStateCache.TryGetValue(path, out FileState cachedProcessFileState);
             
             bool isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
             bool isProcessFileStateUpToDate = isCachedInProcess && lastModified == cachedProcessFileState.LastModified;
