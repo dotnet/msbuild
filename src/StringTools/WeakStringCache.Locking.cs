@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Build
+namespace Microsoft.NET.StringTools
 {
     /// <summary>
     /// Implements the WeakStringCache functionality on .NET Framework 3.5 where ConcurrentDictionary is not available.
@@ -25,19 +25,19 @@ namespace Microsoft.Build
         /// </summary>
         /// <param name="internable">The internable describing the string we're looking for.</param>
         /// <returns>A string matching the given internable.</returns>
-        public string GetOrCreateEntry<T>(T internable, out bool cacheHit) where T : IInternable
+        public string GetOrCreateEntry(ref InternableString internable, out bool cacheHit)
         {
-            int hashCode = GetInternableHashCode(internable);
+            int hashCode = internable.GetHashCode();
 
             StringWeakHandle handle;
-            string result;
+            string? result;
             bool addingNewHandle = false;
 
             lock (_stringsByHashCode)
             {
                 if (_stringsByHashCode.TryGetValue(hashCode, out handle))
                 {
-                    result = handle.GetString(internable);
+                    result = handle.GetString(ref internable);
                     if (result != null)
                     {
                         cacheHit = true;
@@ -81,7 +81,7 @@ namespace Microsoft.Build
         /// </summary>
         private void ScavengeNoLock()
         {
-            List<int> keysToRemove = null;
+            List<int>? keysToRemove = null;
             foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
             {
                 if (!entry.Value.IsUsed)

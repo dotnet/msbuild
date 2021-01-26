@@ -15,20 +15,14 @@ namespace Microsoft.Build.Shared
     /// A StringBuilder lookalike that reuses its internal storage.
     /// </summary>
     /// <remarks>
-    /// You can add any properties or methods on the real StringBuilder that are needed.
+    /// This class is being deprecated in favor of SpanBasedStringBuilder in StringTools. Avoid adding more uses.
     /// </remarks>
-    internal sealed class ReuseableStringBuilder : IDisposable, IInternable
+    internal sealed class ReuseableStringBuilder : IDisposable
     {
         /// <summary>
         /// Captured string builder.
         /// </summary>
         private StringBuilder _borrowedBuilder;
-
-        /// <summary>
-        /// Profiling showed that the hot code path for large string builder calls first IsOrdinalEqualToStringOfSameLength followed by ExpensiveConvertToString
-        /// when IsOrdinalEqualToStringOfSameLength did return true. We can therefore reduce the costs for large strings by over a factor two. 
-        /// </summary>
-        private string _cachedString;
 
         /// <summary>
         /// Capacity to initialize the builder with.
@@ -59,71 +53,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Indexer into the target. Presumed to be fast.
-        /// </summary>
-        char IInternable.this[int index]
-        {
-            get
-            {
-                LazyPrepare(); // Must have one to call this
-                return _borrowedBuilder[index];
-            }
-        }
-
-        /// <summary>
-        /// Convert target to string. Presumed to be slow (and will be called just once).
-        /// </summary>
-        string IInternable.ExpensiveConvertToString()
-        {
-            if( _cachedString == null)
-            {
-                _cachedString = ((ReuseableStringBuilder)this).ToString();
-            }
-            return _cachedString;
-        }
-
-        /// <summary>
-        /// The number here is arbitrary. For a StringBuilder we have a chunk length of 8000 characters which corresponds to
-        /// 5 StringBuilder chunks which need to be walked before the next character can be fetched (see MaxChunkSize of StringBuilder).
-        /// That should be a good compromise to not allocate to much but still make use of the intern cache. The actual cutoff where it is cheaper
-        /// to allocate a temp string might be well below that limit but that depends on many other factors such as GC Heap size and other allocating threads. 
-        /// </summary>
-        const int MaxByCharCompareLength = 40 * 1000;
-
-        /// <summary>
-        /// Compare target to string. 
-        /// </summary>
-        bool IInternable.StartsWithStringByOrdinalComparison(string other)
-        {
-#if DEBUG
-            ErrorUtilities.VerifyThrow(other.Length <= _borrowedBuilder.Length, "should be at most as long as target");
-#endif
-            if (other.Length > MaxByCharCompareLength)
-            {
-                return ((IInternable) this).ExpensiveConvertToString().StartsWith(other, StringComparison.Ordinal);
-            }
-            // Backwards because the end of the string is (by observation of Australian Government build) more likely to be different earlier in the loop.
-            // For example, C:\project1, C:\project2
-            for (int i = other.Length - 1; i >= 0; --i)
-            {
-                if (_borrowedBuilder[i] != other[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Never reference equals to string.
-        /// </summary>
-        bool IInternable.ReferenceEquals(string other)
-        {
-            return false;
-        }
-
-        /// <summary>
         /// Convert to a string.
         /// </summary>
         public override string ToString()
@@ -144,7 +73,6 @@ namespace Microsoft.Build.Shared
             if (_borrowedBuilder != null)
             {
                 ReuseableStringBuilderFactory.Release(_borrowedBuilder);
-                _cachedString = null;
                 _borrowedBuilder = null;
                 _capacity = -1;
             }
@@ -156,7 +84,6 @@ namespace Microsoft.Build.Shared
         internal ReuseableStringBuilder Append(char value)
         {
             LazyPrepare();
-            _cachedString = null;
             _borrowedBuilder.Append(value);
             return this;
         }
@@ -167,7 +94,6 @@ namespace Microsoft.Build.Shared
         internal ReuseableStringBuilder Append(string value)
         {
             LazyPrepare();
-            _cachedString = null;
             _borrowedBuilder.Append(value);
             return this;
         }
@@ -178,7 +104,6 @@ namespace Microsoft.Build.Shared
         internal ReuseableStringBuilder Append(string value, int startIndex, int count)
         {
             LazyPrepare();
-            _cachedString = null;
             _borrowedBuilder.Append(value, startIndex, count);
             return this;
         }
@@ -186,7 +111,6 @@ namespace Microsoft.Build.Shared
         public ReuseableStringBuilder AppendSeparated(char separator, ICollection<string> strings)
         {
             LazyPrepare();
-            _cachedString = null;
 
             var separatorsRemaining = strings.Count - 1;
 
@@ -208,7 +132,6 @@ namespace Microsoft.Build.Shared
         public ReuseableStringBuilder Clear()
         {
             LazyPrepare();
-            _cachedString = null;
             _borrowedBuilder.Clear();
             return this;
         }
@@ -219,7 +142,6 @@ namespace Microsoft.Build.Shared
         internal ReuseableStringBuilder Remove(int startIndex, int length)
         {
             LazyPrepare();
-            _cachedString = null;
             _borrowedBuilder.Remove(startIndex, length);
             return this;
         }

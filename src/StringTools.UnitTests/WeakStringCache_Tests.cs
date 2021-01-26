@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if NET35_UNITTEST
+extern alias StringToolsNet35;
+#endif
+
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -9,7 +13,11 @@ using System.Text;
 using Shouldly;
 using Xunit;
 
-namespace Microsoft.Build.UnitTests
+#if NET35_UNITTEST
+using StringToolsNet35::Microsoft.NET.StringTools;
+#endif
+
+namespace Microsoft.NET.StringTools.Tests
 {
     public class WeakStringCache_Tests : IDisposable
     {
@@ -35,11 +43,11 @@ namespace Microsoft.Build.UnitTests
         {
             // Compose the string with SB so it doesn't get interned by the runtime.
             string testString = new StringBuilder(strPart1).Append(strPart2).ToString();
-            StringInternTarget testStringTarget = new StringInternTarget(testString);
+            InternableString testStringTarget = new InternableString(testString);
 
-            int hashCode = WeakStringCache.GetInternableHashCode(testStringTarget);
+            int hashCode = testStringTarget.GetHashCode();
 
-            string cachedString = _cache.GetOrCreateEntry(testStringTarget, out bool cacheHit);
+            string cachedString = _cache.GetOrCreateEntry(ref testStringTarget, out bool cacheHit);
             cacheHit.ShouldBeFalse();
             cachedString.ShouldBeSameAs(testString);
 
@@ -47,7 +55,8 @@ namespace Microsoft.Build.UnitTests
 
             // Verify that the string is really in the cache and the cache returns the interned instance.
             string testStringCopy = new StringBuilder(strPart1).Append(strPart2).ToString();
-            cachedString = _cache.GetOrCreateEntry(new StringInternTarget(testStringCopy), out cacheHit);
+            InternableString testStringCopyTarget = new InternableString(testStringCopy);
+            cachedString = _cache.GetOrCreateEntry(ref testStringCopyTarget, out cacheHit);
             cacheHit.ShouldBeTrue();
             cachedString.ShouldBeSameAs(testString);
 
@@ -56,7 +65,8 @@ namespace Microsoft.Build.UnitTests
 
             callbackToRunWithTheStringAlive(cachedString);
 
-            cachedString = _cache.GetOrCreateEntry(new StringInternTarget(testStringCopy), out cacheHit);
+            testStringCopyTarget = new InternableString(testStringCopy);
+            cachedString = _cache.GetOrCreateEntry(ref testStringCopyTarget, out cacheHit);
             cacheHit.ShouldBeTrue();
             cachedString.ShouldBeSameAs(testString);
 
@@ -95,8 +105,8 @@ namespace Microsoft.Build.UnitTests
             // There are no cache hits when iterating over our strings again because the last one always wins and steals the slot.
             for (int i = 0; i < numberOfStrings; i++)
             {
-                StringBuilder sb = new StringBuilder(cachedStrings[i]);
-                string cachedStringFromCache =_cache.GetOrCreateEntry(new StringBuilderInternTarget(sb), out bool cacheHit);
+                InternableString stringCopy = new InternableString(new string(cachedStrings[i].ToCharArray()));
+                string cachedStringFromCache =_cache.GetOrCreateEntry(ref stringCopy, out bool cacheHit);
                 cacheHit.ShouldBeFalse();
                 cachedStringFromCache.ShouldNotBeSameAs(cachedStrings[i]);
             }
@@ -113,7 +123,7 @@ namespace Microsoft.Build.UnitTests
         /// https://www.mono-project.com/docs/advanced/garbage-collector/sgen/#precise-stack-marking
         /// </remarks>
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "doesn't play well with conservative GC scanning")]
+        [Trait("Category", "mono-osx-failing")]
         public void RetainsStringUntilCollected()
         {
             // Add a string to the cache using a non-inlinable method to make sure it's not reachable from a GC root.
