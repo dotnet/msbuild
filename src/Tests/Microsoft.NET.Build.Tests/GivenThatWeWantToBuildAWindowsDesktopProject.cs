@@ -239,6 +239,120 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [WindowsOnlyFact]
+        public void UseWPFCanBeSetInDirectoryBuildTargets()
+        {
+            var testDir = _testAssetsManager.CreateTestDirectory();
+
+            var newCommand = new DotnetCommand(Log);
+            newCommand.WorkingDirectory = testDir.Path;
+
+            newCommand.Execute("new", "wpf", "--debug:ephemeral-hive").Should().Pass();
+
+            var projectPath = Path.Combine(testDir.Path, Path.GetFileName(testDir.Path) + ".csproj");
+
+            var project = XDocument.Load(projectPath);
+            var ns = project.Root.Name.Namespace;
+
+            project.Root.Element(ns + "PropertyGroup")
+                .Element(ns + "UseWPF")
+                .Remove();
+
+            project.Save(projectPath);
+
+            string DirectoryBuildTargetsContent = @"
+<Project>
+  <PropertyGroup>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+</Project>
+";
+
+            File.WriteAllText(Path.Combine(testDir.Path, "Directory.Build.targets"), DirectoryBuildTargetsContent);
+
+            var buildCommand = new BuildCommand(Log, testDir.Path);
+
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+        }
+
+        [WindowsOnlyFact]
+        public void TargetPlatformVersionCanBeSetInDirectoryBuildTargets()
+        {
+            var testProject = new TestProject()
+            {
+                TargetFrameworks = "net5.0-windows"
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            string targetPlatformVersion = "10.0.18362.0";
+
+            string DirectoryBuildTargetsContent = $@"
+<Project>
+  <PropertyGroup>
+    <TargetPlatformVersion>{targetPlatformVersion}</TargetPlatformVersion>
+  </PropertyGroup>
+</Project>
+";
+
+            File.WriteAllText(Path.Combine(testAsset.TestRoot, "Directory.Build.targets"), DirectoryBuildTargetsContent);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            GetPropertyValue(testAsset, "SupportedOSPlatformVersion").Should().Be(targetPlatformVersion);
+            GetPropertyValue(testAsset, "TargetPlatformMinVersion").Should().Be(targetPlatformVersion);
+            GetPropertyValue(testAsset, "TargetPlatformMoniker").Should().Be($"Windows,Version={targetPlatformVersion}");
+        }
+
+        [WindowsOnlyFact]
+        public void SupportedOSPlatformVersionCanBeSetInDirectoryBuildTargets()
+        {
+            var testProject = new TestProject()
+            {
+                TargetFrameworks = "net5.0-windows10.0.19041.0"
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            string supportedOSPlatformVersion = "10.0.18362.0";
+
+            string DirectoryBuildTargetsContent = $@"
+<Project>
+  <PropertyGroup>
+    <SupportedOSPlatformVersion>{supportedOSPlatformVersion}</SupportedOSPlatformVersion>
+  </PropertyGroup>
+</Project>
+";
+
+            File.WriteAllText(Path.Combine(testAsset.TestRoot, "Directory.Build.targets"), DirectoryBuildTargetsContent);
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute()
+                .Should()
+                .Pass();
+
+            GetPropertyValue(testAsset, "SupportedOSPlatformVersion").Should().Be(supportedOSPlatformVersion);
+            GetPropertyValue(testAsset, "TargetPlatformMinVersion").Should().Be(supportedOSPlatformVersion);
+            GetPropertyValue(testAsset, "TargetPlatformVersion").Should().Be("10.0.19041.0");
+            GetPropertyValue(testAsset, "TargetPlatformMoniker").Should().Be("Windows,Version=10.0.19041.0");
+        }
+
+
+        private string GetPropertyValue(TestAsset testAsset, string propertyName)
+        {
+            var getValueCommand = new GetValuesCommand(testAsset, propertyName);
+            getValueCommand.Execute()
+                .Should()
+                .Pass();
+
+            return getValueCommand.GetValues().Single();
+        }
+
+        [WindowsOnlyFact]
         public void It_can_use_source_generators_with_wpf()
         {
             var sourceGenProject = new TestProject()
