@@ -199,7 +199,6 @@ namespace Microsoft.Build.BackEnd
             _asyncDataMonitor = new object();
             _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
 
-            // packets get at least this large
             _packetStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetStream);
 

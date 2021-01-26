@@ -614,9 +614,21 @@ namespace Microsoft.Build.BackEnd
             private MemoryStream _readBufferMemoryStream;
 
             /// <summary>
-            /// A buffer for writing packets.
+            /// A reusable buffer for writing packets.
             /// </summary>
             private MemoryStream _writeBufferMemoryStream;
+
+            /// <summary>
+            /// A queue used for enqueuing packets to write to the stream asynchronously.
+            /// </summary>
+            private BlockingCollection<INodePacket> _packetWriteQueue = new BlockingCollection<INodePacket>();
+
+            /// <summary>
+            /// A task representing the last packet write, so we can chain packet writes one after another.
+            /// We want to queue up writing packets on a separate thread asynchronously, but serially.
+            /// Each task drains the <see cref="_packetWriteQueue"/>
+            /// </summary>
+            private Task _packetWriteDrainTask = Task.CompletedTask;
 
             /// <summary>
             /// Event indicating the node has terminated.
@@ -727,34 +739,40 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            private void WriteInt32(MemoryStream stream, int value)
-            {
-                stream.WriteByte((byte)value);
-                stream.WriteByte((byte)(value >> 8));
-                stream.WriteByte((byte)(value >> 16));
-                stream.WriteByte((byte)(value >> 24));
-            }
-
             /// <summary>
-            /// Sends the specified packet to this node.
+            /// Sends the specified packet to this node asynchronously.
+            /// The method enqueues a task to write the packet and returns
+            /// immediately. This is because SendData() is on a hot path
+            /// under the primary lock and we want to minimize our time there.
             /// </summary>
             /// <param name="packet">The packet to send.</param>
             public void SendData(INodePacket packet)
             {
-                _packetQueue.Add(packet);
+                _packetWriteQueue.Add(packet);
                 DrainPacketQueue();
             }
 
-            private BlockingCollection<INodePacket> _packetQueue = new BlockingCollection<INodePacket>();
-            private Task _packetDrainTask = Task.CompletedTask;
-
+            /// <summary>
+            /// Schedule a task to drain the packet write queue. We could have had a
+            /// dedicated thread that would pump the queue constantly, but
+            /// we don't want to allocate a dedicated thread per node (1MB stack)
+            /// </summary>
+            /// <remarks>Usually there'll be a single packet in the queue, but sometimes
+            /// a burst of SendData comes in, with 10-20 packets scheduled. In this case
+            /// the first scheduled task will drain all of them, and subsequent tasks
+            /// will run on an empty queue. I tried to write logic that avoids queueing
+            /// a new task if the queue is already being drained, but it didn't show any
+            /// improvement and made things more complicated.</remarks>
             private void DrainPacketQueue()
             {
-                lock (_packetQueue)
+                // this lock is only necessary to protect a write to _packetWriteDrainTask field
+                lock (_packetWriteQueue)
                 {
-                    _packetDrainTask = _packetDrainTask.ContinueWith(_ =>
+                    // average latency between the moment this runs and when the delegate starts
+                    // running is about 100-200 microseconds (unless there's thread pool saturation)
+                    _packetWriteDrainTask = _packetWriteDrainTask.ContinueWith(_ =>
                     {
-                        while (_packetQueue.TryTake(out var packet))
+                        while (_packetWriteQueue.TryTake(out var packet))
                         {
                             SendDataCore(packet);
                         }
@@ -762,6 +780,12 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            /// <summary>
+            /// Actually writes and sends the packet. This can't be called in parallel
+            /// because it reuses the _writeBufferMemoryStream, and this is why we use
+            /// the _packetWriteDrainTask to serially chain invocations one after another.
+            /// </summary>
+            /// <param name="packet">The packet to send.</param>
             private void SendDataCore(INodePacket packet)
             {
                 MemoryStream writeStream = _writeBufferMemoryStream;
@@ -801,6 +825,17 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Do nothing here because any exception will be caught by the async read handler
                 }
+            }
+
+            /// <summary>
+            /// Avoid having a BinaryWriter just to write a 4-byte int
+            /// </summary>
+            private void WriteInt32(MemoryStream stream, int value)
+            {
+                stream.WriteByte((byte)value);
+                stream.WriteByte((byte)(value >> 8));
+                stream.WriteByte((byte)(value >> 16));
+                stream.WriteByte((byte)(value >> 24));
             }
 
             /// <summary>
