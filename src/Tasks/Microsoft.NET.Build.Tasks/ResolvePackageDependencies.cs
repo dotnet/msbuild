@@ -150,11 +150,9 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         protected override void ExecuteCore()
         {
-            var targetFrameworkToAliasMap = LockFile.PackageSpec.TargetFrameworks.ToDictionary(tf => tf.FrameworkName.DotNetFrameworkName, tf => tf.TargetAlias);
-
             _targetNameToAliasMap = LockFile.Targets.ToDictionary(t => t.Name, t =>
             {
-                var alias = targetFrameworkToAliasMap[t.TargetFramework.DotNetFrameworkName];
+                var alias = LockFile.GetLockFileTargetAlias(t);
                 if (string.IsNullOrEmpty(t.RuntimeIdentifier))
                 {
                     return alias;

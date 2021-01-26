@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Watcher.Internal;
 using Moq;
 using Xunit;
 
@@ -14,7 +13,7 @@ namespace Microsoft.DotNet.Watcher.Tools
     public class MSBuildEvaluationFilterTest
     {
         private readonly IFileSetFactory _fileSetFactory = Mock.Of<IFileSetFactory>(
-            f => f.CreateAsync(It.IsAny<CancellationToken>()) == Task.FromResult<IFileSet>(FileSet.Empty));
+            f => f.CreateAsync(It.IsAny<CancellationToken>()) == Task.FromResult<FileSet>(FileSet.Empty));
 
         [Fact]
         public async Task ProcessAsync_EvaluatesFileSetIfProjFileChanges()
@@ -29,7 +28,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             await filter.ProcessAsync(context, default);
 
             context.Iteration++;
-            context.ChangedFile = "Test.csproj";
+            context.ChangedFile = new FileItem { FilePath = "Test.csproj" };
             context.RequiresMSBuildRevaluation = false;
 
             // Act
@@ -52,7 +51,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             await filter.ProcessAsync(context, default);
 
             context.Iteration++;
-            context.ChangedFile = "Controller.cs";
+            context.ChangedFile = new FileItem { FilePath = "Controller.cs" };
             context.RequiresMSBuildRevaluation = false;
 
             // Act
@@ -77,7 +76,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             await filter.ProcessAsync(context, default);
 
             context.Iteration++;
-            context.ChangedFile = "Controller.cs";
+            context.ChangedFile = new FileItem { FilePath = "Controller.cs" };
             context.RequiresMSBuildRevaluation = false;
 
             // Act
@@ -96,8 +95,8 @@ namespace Microsoft.DotNet.Watcher.Tools
             // concurrent edits. MSBuildEvaluationFilter uses timestamps to additionally track changes to these files.
 
             // Arrange
-            var fileSet = new FileSet(false, new[] { "Controlller.cs", "Proj.csproj" });
-            var fileSetFactory = Mock.Of<IFileSetFactory>(f => f.CreateAsync(It.IsAny<CancellationToken>()) == Task.FromResult<IFileSet>(fileSet));
+            var fileSet = new FileSet(false, new[] { new FileItem { FilePath = "Controlller.cs" }, new FileItem { FilePath = "Proj.csproj" } });
+            var fileSetFactory = Mock.Of<IFileSetFactory>(f => f.CreateAsync(It.IsAny<CancellationToken>()) == Task.FromResult<FileSet>(fileSet));
 
             var filter = new TestableMSBuildEvaluationFilter(fileSetFactory)
             {
@@ -114,7 +113,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await filter.ProcessAsync(context, default);
             context.RequiresMSBuildRevaluation = false;
-            context.ChangedFile = "Controller.cs";
+            context.ChangedFile = new FileItem { FilePath = "Controller.cs" };
             context.Iteration++;
             filter.Timestamps["Proj.csproj"] = new DateTime(1007);
 

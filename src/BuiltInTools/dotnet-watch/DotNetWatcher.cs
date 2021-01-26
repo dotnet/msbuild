@@ -2,8 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,20 +17,24 @@ namespace Microsoft.DotNet.Watcher
     {
         private readonly IReporter _reporter;
         private readonly ProcessRunner _processRunner;
+        private readonly DotNetWatchOptions _dotnetWatchOptions;
+        private readonly FileChangeHandler _fileChangeHandler;
         private readonly IWatchFilter[] _filters;
 
-        public DotNetWatcher(IReporter reporter, IFileSetFactory fileSetFactory)
+        public DotNetWatcher(IReporter reporter, IFileSetFactory fileSetFactory, DotNetWatchOptions dotNetWatchOptions)
         {
             Ensure.NotNull(reporter, nameof(reporter));
 
             _reporter = reporter;
             _processRunner = new ProcessRunner(reporter);
+            _dotnetWatchOptions = dotNetWatchOptions;
+            _fileChangeHandler = new FileChangeHandler(reporter);
 
             _filters = new IWatchFilter[]
             {
                 new MSBuildEvaluationFilter(fileSetFactory),
                 new NoRestoreFilter(),
-                new LaunchBrowserFilter(),
+                new LaunchBrowserFilter(dotNetWatchOptions),
             };
         }
 
@@ -43,13 +47,12 @@ namespace Microsoft.DotNet.Watcher
                 cancelledTaskSource);
 
             var initialArguments = processSpec.Arguments.ToArray();
-            var suppressMSBuildIncrementalism = Environment.GetEnvironmentVariable("DOTNET_WATCH_SUPPRESS_MSBUILD_INCREMENTALISM");
             var context = new DotNetWatchContext
             {
                 Iteration = -1,
                 ProcessSpec = processSpec,
                 Reporter = _reporter,
-                SuppressMSBuildIncrementalism = suppressMSBuildIncrementalism == "1" || suppressMSBuildIncrementalism == "true",
+                SuppressMSBuildIncrementalism = _dotnetWatchOptions.SuppressMSBuildIncrementalism,
             };
 
             if (context.SuppressMSBuildIncrementalism)
@@ -92,15 +95,31 @@ namespace Microsoft.DotNet.Watcher
                     currentRunCancellationSource.Token))
                 using (var fileSetWatcher = new FileSetWatcher(fileSet, _reporter))
                 {
-                    var fileSetTask = fileSetWatcher.GetChangedFileAsync(combinedCancellationSource.Token);
                     var processTask = _processRunner.RunAsync(processSpec, combinedCancellationSource.Token);
-
                     var args = string.Join(" ", processSpec.Arguments);
                     _reporter.Verbose($"Running {processSpec.ShortDisplayName()} with the following arguments: {args}");
 
                     _reporter.Output("Started");
 
-                    var finishedTask = await Task.WhenAny(processTask, fileSetTask, cancelledTaskSource.Task);
+                    Task<FileItem?> fileSetTask;
+                    Task finishedTask;
+
+                    while (true)
+                    {
+                        fileSetTask = fileSetWatcher.GetChangedFileAsync(combinedCancellationSource.Token);
+                        finishedTask = await Task.WhenAny(processTask, fileSetTask, cancelledTaskSource.Task);
+
+                        if (finishedTask == fileSetTask
+                            && fileSetTask.Result is FileItem fileItem &&
+                            await _fileChangeHandler.TryHandleFileAction(context, fileItem, combinedCancellationSource.Token))
+                        {
+                            // We're able to handle the file change event without doing a full-rebuild.
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
 
                     // Regardless of the which task finished first, make sure everything is cancelled
                     // and wait for dotnet to exit. We don't want orphan processes
@@ -124,7 +143,6 @@ namespace Microsoft.DotNet.Watcher
                         return;
                     }
 
-                    context.ChangedFile = fileSetTask.Result;
                     if (finishedTask == processTask)
                     {
                         // Process exited. Redo evaludation
@@ -132,10 +150,12 @@ namespace Microsoft.DotNet.Watcher
                         // Now wait for a file to change before restarting process
                         context.ChangedFile = await fileSetWatcher.GetChangedFileAsync(cancellationToken, () => _reporter.Warn("Waiting for a file to change before restarting dotnet..."));
                     }
-
-                    if (!string.IsNullOrEmpty(fileSetTask.Result))
+                    else
                     {
-                        _reporter.Output($"File changed: {fileSetTask.Result}");
+                        Debug.Assert(finishedTask == fileSetTask);
+                        var changedFile = fileSetTask.Result;
+                        context.ChangedFile = changedFile;
+                        _reporter.Output($"File changed: {changedFile.Value.FilePath}");
                     }
                 }
             }

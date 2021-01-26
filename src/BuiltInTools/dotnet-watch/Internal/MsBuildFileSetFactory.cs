@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
@@ -21,6 +22,7 @@ namespace Microsoft.DotNet.Watcher.Internal
 
         private readonly string _muxerPath;
         private readonly IReporter _reporter;
+        private readonly DotNetWatchOptions _dotNetWatchOptions;
         private readonly string _projectFile;
         private readonly OutputSink _outputSink;
         private readonly ProcessRunner _processRunner;
@@ -29,15 +31,17 @@ namespace Microsoft.DotNet.Watcher.Internal
 
         public MsBuildFileSetFactory(
             IReporter reporter,
+            DotNetWatchOptions dotNetWatchOptions,
             string projectFile,
             bool waitOnError,
             bool trace)
-            : this(new Muxer().MuxerPath, reporter, projectFile, new OutputSink(), waitOnError, trace)
+            : this(dotNetWatchOptions, new Muxer().MuxerPath, reporter, projectFile, new OutputSink(), waitOnError, trace)
         {
         }
 
         // output sink is for testing
         internal MsBuildFileSetFactory(
+            DotNetWatchOptions dotNetWatchOptions,
             string muxerPath,
             IReporter reporter,
             string projectFile,
@@ -51,14 +55,16 @@ namespace Microsoft.DotNet.Watcher.Internal
 
             _muxerPath = muxerPath;
             _reporter = reporter;
+            _dotNetWatchOptions = dotNetWatchOptions;
             _projectFile = projectFile;
             _outputSink = outputSink;
             _processRunner = new ProcessRunner(reporter);
             _buildFlags = InitializeArgs(FindTargetsFile(), trace);
+
             _waitOnError = waitOnError;
         }
 
-        public async Task<IFileSet> CreateAsync(CancellationToken cancellationToken)
+        public async Task<FileSet> CreateAsync(CancellationToken cancellationToken)
         {
             var watchList = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             try
@@ -70,17 +76,26 @@ namespace Microsoft.DotNet.Watcher.Internal
                     cancellationToken.ThrowIfCancellationRequested();
 
                     var capture = _outputSink.StartCapture();
+                    var arguments = new List<string>
+                    {
+                        "msbuild",
+                        "/nologo",
+                        _projectFile,
+                        $"/p:_DotNetWatchListFile={watchList}",
+                    };
+
+                    if (_dotNetWatchOptions.SuppressHandlingStaticContentFiles)
+                    {
+                        arguments.Add("/p:DotNetWatchContentFiles=false");
+                    }
+
+                    arguments.AddRange(_buildFlags);
+
                     var processSpec = new ProcessSpec
                     {
                         Executable = _muxerPath,
                         WorkingDirectory = projectDir,
-                        Arguments = new[]
-                        {
-                            "msbuild",
-                            "/nologo",
-                            _projectFile,
-                            $"/p:_DotNetWatchListFile={watchList}",
-                        }.Concat(_buildFlags),
+                        Arguments = arguments,
                         OutputCapture = capture
                     };
 
@@ -90,27 +105,51 @@ namespace Microsoft.DotNet.Watcher.Internal
 
                     if (exitCode == 0 && File.Exists(watchList))
                     {
-                        var lines = File.ReadAllLines(watchList);
-                        var isNetCoreApp31OrNewer = lines.FirstOrDefault() == "true";
+                        using var watchFile = File.OpenRead(watchList);
+                        var result = await JsonSerializer.DeserializeAsync<MSBuildFileSetResult>(watchFile, cancellationToken: cancellationToken);
 
-                        var fileset = new FileSet(
-                            isNetCoreApp31OrNewer,
-                            lines.Skip(1)
-                                .Select(l => l?.Trim())
-                                .Where(l => !string.IsNullOrEmpty(l)));
-
-                        _reporter.Verbose($"Watching {fileset.Count} file(s) for changes");
-#if DEBUG
-
-                        foreach (var file in fileset)
+                        var fileItems = new List<FileItem>();
+                        foreach (var project in result.Projects)
                         {
-                            _reporter.Verbose($"  -> {file}");
+                            var value = project.Value;
+                            var fileCount = value.Files.Count;
+
+                            for (var i = 0; i < fileCount; i++)
+                            {
+                                fileItems.Add(new FileItem
+                                {
+                                    FilePath = value.Files[i],
+                                    ProjectPath = project.Key,
+                                });
+                            }
+
+                            var staticItemsCount = value.StaticFiles.Count;
+                            for (var i = 0; i < staticItemsCount; i++)
+                            {
+                                var item = value.StaticFiles[i];
+                                fileItems.Add(new FileItem
+                                {
+                                    FilePath = item.FilePath,
+                                    ProjectPath = project.Key,
+                                    IsStaticFile = true,
+                                    StaticWebAssetPath = item.StaticWebAssetPath,
+                                });
+                            }
                         }
 
-                        Debug.Assert(fileset.All(Path.IsPathRooted), "All files should be rooted paths");
+
+                        _reporter.Verbose($"Watching {fileItems.Count} file(s) for changes");
+#if DEBUG
+
+                        foreach (var file in fileItems)
+                        {
+                            _reporter.Verbose($"  -> {file.FilePath} {(file.IsStaticFile ? file.StaticWebAssetPath : null)}");
+                        }
+
+                        Debug.Assert(fileItems.All(f => Path.IsPathRooted(f.FilePath)), "All files should be rooted paths");
 #endif
 
-                        return fileset;
+                        return new FileSet(result.IsNetCoreApp31OrNewer, fileItems);
                     }
 
                     _reporter.Error($"Error(s) finding watch items project file '{Path.GetFileName(_projectFile)}'");
@@ -133,7 +172,7 @@ namespace Microsoft.DotNet.Watcher.Internal
                     {
                         _reporter.Warn("Fix the error to continue or press Ctrl+C to exit.");
 
-                        var fileSet = new FileSet(false, new[] { _projectFile });
+                        var fileSet = new FileSet(false, new[] { new FileItem { FilePath = _projectFile } });
 
                         using (var watcher = new FileSetWatcher(fileSet, _reporter))
                         {
@@ -180,6 +219,8 @@ namespace Microsoft.DotNet.Watcher.Internal
             var assemblyDir = Path.GetDirectoryName(typeof(MsBuildFileSetFactory).Assembly.Location);
             var searchPaths = new[]
             {
+                Path.Combine(AppContext.BaseDirectory, "assets"),
+                Path.Combine(assemblyDir, "assets"),
                 AppContext.BaseDirectory,
                 assemblyDir,
             };
