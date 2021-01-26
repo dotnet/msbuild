@@ -94,6 +94,7 @@ stages:
                 /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                 /p:TeamName=MSBuild
                 /p:DotNetPublishUsingPipelines=true
+                /p:VisualStudioIbcDrop=$(OptProfDropName)
       displayName: Build
       condition: succeeded()
 
