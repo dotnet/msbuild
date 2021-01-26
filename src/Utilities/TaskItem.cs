@@ -308,12 +308,12 @@ namespace Microsoft.Build.Utilities
                     else if (destinationAsTaskItem.Metadata.Count < _metadata.Count)
                     {
                         copiedMetadata = _metadata.Clone(); // Copy on write!
-                        copiedMetadata.SetItems(destinationAsTaskItem.Metadata);
+                        copiedMetadata.SetItems(destinationAsTaskItem.Metadata.Where(entry => !String.IsNullOrEmpty(entry.Value)));
                     }
                     else
                     {
                         copiedMetadata = destinationAsTaskItem.Metadata.Clone();
-                        copiedMetadata.SetItems(Metadata.Where(entry => !destinationAsTaskItem.Metadata.TryGetValue(entry.Key, out string val) || string.IsNullOrEmpty(val)));
+                        copiedMetadata.SetItems(Metadata.Where(entry => !destinationAsTaskItem.Metadata.TryGetValue(entry.Key, out string val) || String.IsNullOrEmpty(val)));
                     }
                     destinationAsTaskItem.Metadata = copiedMetadata;
                 }
