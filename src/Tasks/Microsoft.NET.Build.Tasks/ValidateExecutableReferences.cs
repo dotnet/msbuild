@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Tasks
@@ -30,13 +31,13 @@ namespace Microsoft.NET.Build.Tasks
             foreach (var project in ReferencedProjects)
             {
                 string nearestTargetFramework = project.GetMetadata("NearestTargetFramework");
-                int targetFrameworkIndex = project.GetMetadata("TargetFrameworks").Split(';').ToList().IndexOf(nearestTargetFramework);
-                string projectAdditionalPropertiesMetadata = project.GetMetadata("AdditionalPropertiesFromProject").Split(new[] { ";;" }, StringSplitOptions.None)[targetFrameworkIndex];
+
+                var additionalPropertiesXml = XElement.Parse(project.GetMetadata("AdditionalPropertiesFromProject"));
+                var targetFrameworkElement = additionalPropertiesXml.Element(nearestTargetFramework);
                 Dictionary<string, string> projectAdditionalProperties = new(StringComparer.OrdinalIgnoreCase);
-                foreach (var propAndValue in projectAdditionalPropertiesMetadata.Split(';'))
+                foreach (var propertyElement in targetFrameworkElement.Elements())
                 {
-                    var split = propAndValue.Split('=');
-                    projectAdditionalProperties[split[0]] = split[1];
+                    projectAdditionalProperties[propertyElement.Name.LocalName] = propertyElement.Value;
                 }
 
                 var referencedProjectIsExecutable = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["_IsExecutable"]);
