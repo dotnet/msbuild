@@ -9,7 +9,7 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Utilities
 {
-    internal static class ProcessExtensions
+    public static class ProcessExtensions
     {
         public static void KillTree(this Process process, int timeout)
         {
@@ -77,10 +77,16 @@ namespace Microsoft.Build.Utilities
 
         private static void KillProcessUnix(int processId)
         {
-            RunProcessAndWaitForExit(
-                "kill",
-                $"-TERM {processId}",
-                out string _);
+            try
+            {
+                using Process process = Process.GetProcessById(processId);
+                process.Kill();
+            }
+            catch (ArgumentException)
+            {
+                // Process already terminated.
+                return;
+            }
         }
 
         private static int RunProcessAndWaitForExit(string fileName, string arguments, out string stdout)
