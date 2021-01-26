@@ -31,6 +31,8 @@ namespace Microsoft.Build.Shared
         private static readonly char[] s_wildcardCharacters = { '*', '?' };
         private static readonly char[] s_wildcardAndSemicolonCharacters = { '*', '?', ';' };
 
+        private static readonly string[] s_propertyReferences = { "$(", "@(" };
+
         // on OSX both System.IO.Path separators are '/', so we have to use the literals
         internal static readonly char[] directorySeparatorCharacters = { '/', '\\' };
         internal static readonly string[] directorySeparatorStrings = directorySeparatorCharacters.Select(c => c.ToString()).ToArray();
@@ -166,8 +168,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Determines whether the given path has any wild card characters.
         /// </summary>
-        /// <param name="filespec"></param>
-        /// <returns></returns>
         internal static bool HasWildcards(string filespec)
         {
             // Perf Note: Doing a [Last]IndexOfAny(...) is much faster than compiling a
@@ -180,16 +180,31 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Determines whether the given path has any wild card characters or any semicolons.
+        /// Determines whether the given path has any wild card characters or semicolons.
+        /// </summary>
+        internal static bool HasWildcardsOrSemicolon(string filespec)
+        {
+            return -1 != filespec.LastIndexOfAny(s_wildcardAndSemicolonCharacters);
+        }
+
+        /// <summary>
+        /// Determines whether the given path has any wild card characters, any semicolons or any property references.
         /// </summary>
         internal static bool HasWildcardsSemicolonItemOrPropertyReferences(string filespec)
         {
             return
 
                 (-1 != filespec.IndexOfAny(s_wildcardAndSemicolonCharacters)) ||
-                filespec.Contains("$(") ||
-                filespec.Contains("@(")
+                HasPropertyReferences(filespec)
                 ;
+        }
+
+        /// <summary>
+        /// Determines whether the given path has any property references.
+        /// </summary>
+        internal static bool HasPropertyReferences(string filespec)
+        {
+            return s_propertyReferences.Aggregate(false, (current, propertyReference) => current | filespec.Contains(propertyReference));
         }
 
         /// <summary>

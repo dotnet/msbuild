@@ -2789,6 +2789,14 @@
     <value>MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</value>
     <comment>{StrBegin="MSB3936: "}</comment>
   </data>
+  <data name="Unzip.ErrorParsingPatternInvalidPath">
+    <value>MSB3937: Failed to parse pattern "{0}" because it contains an invalid path character.</value>
+    <comment>{StrBegin="MSB3937: "}</comment>
+  </data>
+  <data name="Unzip.ErrorParsingPatternPropertyReferences">
+    <value>MSB3938: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</value>
+    <comment>{StrBegin="MSB3938: "}</comment>
+  </data>
   <data name="Unzip.DidNotUnzipBecauseOfFileMatch">
     <value>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</value>
   </data>
