@@ -26,13 +26,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <Error Condition="'$(IsCrossTargetingBuild)' != 'true'"
            Text="Internal MSBuild error: CrossTargeting GetTargetFrameworks target should only be used in cross targeting (outer) build" />
+
+    <CombineXmlElements
+      RootElementName="AdditionalProjectProperties"
+      XmlElements="@(_TargetFrameworkInfo->'%(AdditionalPropertiesFromProject)')">
+      <Output TaskParameter="Result"
+        PropertyName="_AdditionalPropertiesFromProject"/>
+    </CombineXmlElements>
     
     <ItemGroup>
       <_ThisProjectBuildMetadata Include="$(MSBuildProjectFullPath)">
         <TargetFrameworks>@(_TargetFrameworkInfo)</TargetFrameworks>
         <TargetFrameworkMonikers>@(_TargetFrameworkInfo->'%(TargetFrameworkMonikers)')</TargetFrameworkMonikers>
         <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
-        <AdditionalPropertiesFromProject>@(_TargetFrameworkInfo->'%(AdditionalPropertiesFromProject)', ';;')</AdditionalPropertiesFromProject>
+        <AdditionalPropertiesFromProject>$(_AdditionalPropertiesFromProject)</AdditionalPropertiesFromProject>
 
         <HasSingleTargetFramework>false</HasSingleTargetFramework>
 
