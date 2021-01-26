@@ -223,7 +223,10 @@ Examples:
                 return 1;
             }
 
+            var watchOptions = DotNetWatchOptions.Default;
+
             var fileSetFactory = new MsBuildFileSetFactory(reporter,
+                watchOptions,
                 projectFile,
                 waitOnError: true,
                 trace: false);
@@ -243,7 +246,7 @@ Examples:
                 _reporter.Output("Polling file watcher is enabled");
             }
 
-            await using var watcher = new DotNetWatcher(reporter, fileSetFactory);
+            await using var watcher = new DotNetWatcher(reporter, fileSetFactory, watchOptions);
             await watcher.WatchAsync(processInfo, cancellationToken);
 
             return 0;
@@ -266,7 +269,9 @@ Examples:
                 return 1;
             }
 
-            var fileSetFactory = new MsBuildFileSetFactory(reporter,
+            var fileSetFactory = new MsBuildFileSetFactory(
+                reporter,
+                DotNetWatchOptions.Default,
                 projectFile,
                 waitOnError: false,
                 trace: false);
@@ -279,7 +284,7 @@ Examples:
 
             foreach (var file in files)
             {
-                _console.Out.WriteLine(file);
+                _console.Out.WriteLine(file.FilePath);
             }
 
             return 0;
