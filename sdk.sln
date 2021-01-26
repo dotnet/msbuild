@@ -272,6 +272,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-watch.Tests", "src\T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNetCore.Watch.BrowserRefresh.Tests", "src\Tests\Microsoft.AspNetCore.Watch.BrowserRefresh.Tests\Microsoft.AspNetCore.Watch.BrowserRefresh.Tests.csproj", "{81ADA3FA-AC26-4149-8CFC-EC7808ECB820}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetWatchTasks", "src\BuiltInTools\DotNetWatchTasks\DotNetWatchTasks.csproj", "{A41DF752-6F21-4036-AD02-DD37B11A2723}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -498,6 +500,10 @@ Global
 		{81ADA3FA-AC26-4149-8CFC-EC7808ECB820}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81ADA3FA-AC26-4149-8CFC-EC7808ECB820}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81ADA3FA-AC26-4149-8CFC-EC7808ECB820}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A41DF752-6F21-4036-AD02-DD37B11A2723}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A41DF752-6F21-4036-AD02-DD37B11A2723}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A41DF752-6F21-4036-AD02-DD37B11A2723}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A41DF752-6F21-4036-AD02-DD37B11A2723}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -590,6 +596,7 @@ Global
 		{A82EF2B9-24BC-4569-8FE5-9EF51017F4CB} = {71A9F549-0EB6-41F9-BC16-4A6C5007FC91}
 		{CCE1A328-9CFE-44D3-B68F-FE84A039ACEA} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{81ADA3FA-AC26-4149-8CFC-EC7808ECB820} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{A41DF752-6F21-4036-AD02-DD37B11A2723} = {71A9F549-0EB6-41F9-BC16-4A6C5007FC91}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}

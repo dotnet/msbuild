@@ -5,8 +5,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -17,8 +15,6 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     public sealed class LaunchBrowserFilter : IWatchFilter, IAsyncDisposable
     {
-        private readonly byte[] ReloadMessage = Encoding.UTF8.GetBytes("Reload");
-        private readonly byte[] WaitMessage = Encoding.UTF8.GetBytes("Wait");
         private static readonly Regex NowListeningRegex = new Regex(@"^\s*Now listening on: (?<url>.*)$", RegexOptions.None | RegexOptions.Compiled, TimeSpan.FromSeconds(10));
         private readonly bool _runningInTest;
         private readonly bool _suppressLaunchBrowser;
@@ -32,15 +28,12 @@ namespace Microsoft.DotNet.Watcher.Tools
         private string _launchPath;
         private CancellationToken _cancellationToken;
 
-        public LaunchBrowserFilter()
+        public LaunchBrowserFilter(DotNetWatchOptions dotNetWatchOptions)
         {
-            var suppressLaunchBrowser = Environment.GetEnvironmentVariable("DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER");
-            _suppressLaunchBrowser = (suppressLaunchBrowser == "1" || suppressLaunchBrowser == "true");
+            _suppressLaunchBrowser = dotNetWatchOptions.SuppressLaunchBrowser;
+            _suppressBrowserRefresh = dotNetWatchOptions.SuppressBrowserRefresh;
+            _runningInTest = dotNetWatchOptions.RunningAsTest;
 
-            var suppressBrowserRefresh = Environment.GetEnvironmentVariable("DOTNET_WATCH_SUPPRESS_BROWSER_REFRESH");
-            _suppressBrowserRefresh = (suppressBrowserRefresh == "1" || suppressBrowserRefresh == "true");
-
-            _runningInTest = Environment.GetEnvironmentVariable("__DOTNET_WATCH_RUNNING_AS_TEST") == "true";
             _browserPath = Environment.GetEnvironmentVariable("DOTNET_WATCH_BROWSER_PATH");
         }
 
@@ -68,6 +61,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                     if (!_suppressBrowserRefresh)
                     {
                         _refreshServer = new BrowserRefreshServer(context.Reporter);
+                        context.BrowserRefreshServer = _refreshServer;
                         var serverUrl = await _refreshServer.StartAsync(cancellationToken);
 
                         context.Reporter.Verbose($"Refresh server running at {serverUrl}.");
@@ -82,18 +76,8 @@ namespace Microsoft.DotNet.Watcher.Tools
             else if (!_suppressBrowserRefresh)
             {
                 // We've detected a change. Notify the browser.
-                await SendMessage(WaitMessage, cancellationToken);
+                await (_refreshServer?.SendWaitMessageAsync(cancellationToken) ?? default);
             }
-        }
-
-        private Task SendMessage(byte[] message, CancellationToken cancellationToken)
-        {
-            if (_refreshServer is null)
-            {
-                return Task.CompletedTask;
-            }
-
-            return _refreshServer.SendMessage(message, cancellationToken);
         }
 
         private void OnOutput(object sender, DataReceivedEventArgs eventArgs)
@@ -140,7 +124,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 else
                 {
                     _reporter.Verbose("Reloading browser.");
-                    _ = SendMessage(ReloadMessage, _cancellationToken);
+                    _ = _refreshServer?.ReloadAsync(_cancellationToken);
                 }
             }
         }

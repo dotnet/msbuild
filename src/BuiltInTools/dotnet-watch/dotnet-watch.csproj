@@ -27,14 +27,13 @@
       ReferenceOutputAssembly="false"
       SkipGetTargetFrameworkProperties="true"
       UndefineProperties="TargetFramework;TargetFrameworks" />
-  </ItemGroup>
 
-  <Target Name="AddRefreshMiddlewareToNupkg" BeforeTargets="PrepareForRun">
-    <ItemGroup>
-      <None Include="$(ArtifactsBinDir)Microsoft.AspNetCore.Watch.BrowserRefresh\$(Configuration)\netcoreapp3.1\Microsoft.AspNetCore.Watch.BrowserRefresh.dll"
-        Pack="true"
-        PackagePath="tools\$(SdkTargetFramework)\any\middleware" />
-    </ItemGroup>
-  </Target>
+    <ProjectReference
+      Include="..\DotNetWatchTasks\DotNetWatchTasks.csproj"
+      PrivateAssets="All"
+      ReferenceOutputAssembly="false"
+      SkipGetTargetFrameworkProperties="true"
+      UndefineProperties="TargetFramework;TargetFrameworks" />
+  </ItemGroup>
 
 </Project>
