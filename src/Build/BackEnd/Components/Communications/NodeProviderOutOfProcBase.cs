@@ -108,7 +108,7 @@ namespace Microsoft.Build.BackEnd
                                 !Console.IsInputRedirected &&
                                 Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout;
 
-            Task[] waitForExitTasks = waitForExit && contextsToShutDown.Count > 0? new Task[contextsToShutDown.Count] : null;
+            Task[] waitForExitTasks = waitForExit && contextsToShutDown.Count > 0 ? new Task[contextsToShutDown.Count] : null;
             int i = 0;
             foreach (NodeContext nodeContext in contextsToShutDown)
             {
