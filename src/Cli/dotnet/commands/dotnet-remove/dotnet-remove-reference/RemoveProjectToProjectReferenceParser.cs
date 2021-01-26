@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.Linq;
 using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Remove.ProjectToProjectReference.LocalizableStrings;
 
@@ -15,7 +14,7 @@ namespace Microsoft.DotNet.Cli
         {
             Description = LocalizableStrings.ProjectPathArgumentDescription,
             Arity = ArgumentArity.OneOrMore,
-        }.AddSuggestions(Suggest.ProjectReferencesFromProjectFile().ToArray());
+        }.AddSuggestions(Suggest.ProjectReferencesFromProjectFile());
 
         public static readonly Option FrameworkOption = new Option<string>(new string[] { "-f", "--framework" }, LocalizableStrings.CmdFrameworkDescription)
         {

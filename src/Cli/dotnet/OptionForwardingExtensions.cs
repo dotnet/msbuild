@@ -59,10 +59,6 @@ namespace Microsoft.DotNet.Cli
                 {
                     Argument = option.Argument;
                 }
-                if (option.GetSuggestions() != null)
-                {
-                    this.AddSuggestions(option.GetSuggestions().ToArray());
-                }
             }
 
             public ForwardedOption<T> SetForwardingFunction(Func<T, IEnumerable<string>> func)

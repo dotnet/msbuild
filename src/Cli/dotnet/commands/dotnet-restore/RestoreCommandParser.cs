@@ -124,10 +124,10 @@ namespace Microsoft.DotNet.Cli
                         useShortOptions ? new string[] { "-r", "--runtime" } : new string[] { "--runtime" },
                         LocalizableStrings.CmdRuntimeOptionDescription)
                     {
-                        Argument = new Argument<IEnumerable<string>>(LocalizableStrings.CmdRuntimeOption) { Arity = ArgumentArity.OneOrMore },
+                        Argument = new Argument<IEnumerable<string>>(LocalizableStrings.CmdRuntimeOption) { Arity = ArgumentArity.OneOrMore }
+                            .AddSuggestions(Suggest.RunTimesFromProjectFile()),
                         IsHidden = !showHelp
                     }.ForwardAsSingle(o => $"-property:RuntimeIdentifiers={string.Join("%3B", o)}")
-                    .AddSuggestions(Suggest.RunTimesFromProjectFile().ToArray())
                     .AllowSingleArgPerToken()
                 ).ToArray();
             }
