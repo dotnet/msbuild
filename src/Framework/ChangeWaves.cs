@@ -123,7 +123,7 @@ namespace Microsoft.Build.Utilities
                 ConversionState = ChangeWaveConversionState.Valid;
                 _cachedWave = ChangeWaves.EnableAllFeatures;
             }
-            else if (_cachedWave == null && !Version.TryParse(msbuildDisableFeaturesFromVersion, out _cachedWave))
+            else if (!Version.TryParse(msbuildDisableFeaturesFromVersion, out _cachedWave))
             {
                 ConversionState = ChangeWaveConversionState.InvalidFormat;
                 _cachedWave = ChangeWaves.EnableAllFeatures;
