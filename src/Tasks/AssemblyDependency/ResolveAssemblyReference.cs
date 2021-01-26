@@ -1024,8 +1024,8 @@ namespace Microsoft.Build.Tasks
                                 {
                                     { "logMessage", output },
                                     { "logMessageDetails", details },
-                                    { "victorVersionNumber", victor.ReferenceVersion.ToString() },
-                                    { "victimVersionNumber", conflictCandidate.ReferenceVersion.ToString() }
+                                    { "victorVersionNumber", victor.ReferenceVersion?.ToString() },
+                                    { "victimVersionNumber", conflictCandidate.ReferenceVersion?.ToString() }
                                 }));
                             }
                         }
