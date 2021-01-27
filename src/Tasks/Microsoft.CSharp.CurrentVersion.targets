@@ -278,6 +278,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               NoLogo="$(NoLogo)"
               NoStandardLib="$(NoCompilerStandardLib)"
               NoWin32Manifest="$(NoWin32Manifest)"
+              Nullable="$(Nullable)"
               Optimize="$(Optimize)"
               OutputAssembly="@(XamlIntermediateAssembly)"
               PdbFile="$(PdbFile)" 
