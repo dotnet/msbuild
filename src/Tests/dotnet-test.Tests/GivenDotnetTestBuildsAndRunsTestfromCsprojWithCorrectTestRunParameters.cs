@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void GivenAProjectAndMultipleTestRunParametersItPassesThemToVStestConsoleInTheCorrectFormat()
         {
-            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("1");
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("2");
 
             // Call test
             CommandResult result = new DotnetTestCommand(Log)
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         [Fact]
         public void GivenADllAndMultipleTestRunParametersItPassesThemToVStestConsoleInTheCorrectFormat()
         {
-            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("2");
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("3");
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
