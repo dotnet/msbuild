@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.Linq;
 using LocalizableStrings = Microsoft.DotNet.Tools.Add.ProjectToProjectReference.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -19,7 +18,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option FrameworkOption = new Option<string>(new string[] { "-f", "--framework" }, LocalizableStrings.CmdFrameworkDescription)
         {
             Argument = new Argument<string>(Tools.Add.PackageReference.LocalizableStrings.CmdFramework)
-                    .AddSuggestions(Suggest.TargetFrameworksFromProjectFile().ToArray())
+                .AddSuggestions(Suggest.TargetFrameworksFromProjectFile())
         };
 
         public static readonly Option InteractiveOption = CommonOptions.InteractiveOption();

@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli
                 description)
             {
                 Argument = new Argument<string>(CommonLocalizableStrings.FrameworkArgumentName)
-                    .AddSuggestions(Suggest.TargetFrameworksFromProjectFile().ToArray())
+                    .AddSuggestions(Suggest.TargetFrameworksFromProjectFile())
             }.ForwardAsSingle(o => $"-property:TargetFramework={o}");
 
         public static Option RuntimeOption(string description, bool withShortOption = true) =>
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Cli
                 description)
             {
                 Argument = new Argument<string>(CommonLocalizableStrings.RuntimeIdentifierArgumentName)
-                    .AddSuggestions(Suggest.RunTimesFromProjectFile().ToArray())
+                    .AddSuggestions(Suggest.RunTimesFromProjectFile())
             }.ForwardAsSingle(o => $"-property:RuntimeIdentifier={o}");
 
         public static Option CurrentRuntimeOption(string description) =>
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Cli
                 description)
             {
                 Argument = new Argument<string>(CommonLocalizableStrings.ConfigurationArgumentName)
-                    .AddSuggestions(Suggest.ConfigurationsFromProjectFileOrDefaults().ToArray())
+                    .AddSuggestions(Suggest.ConfigurationsFromProjectFileOrDefaults())
             }.ForwardAsSingle(o => $"-property:Configuration={o}");
 
         public static Option VersionSuffixOption() =>
