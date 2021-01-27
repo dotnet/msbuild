@@ -115,7 +115,7 @@
       <Sha>2822a6c94a637d7f5cc5f2c948bde367f3076faf</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.ILLink.Analyzers" Version="6.0.0-alpha.1.21075.2">
-      <Url>https://github.com/mono/linker</Url>
+      <Uri>https://github.com/mono/linker</Uri>
       <Sha>2822a6c94a637d7f5cc5f2c948bde367f3076faf</Sha>
     </Dependency>
     <Dependency Name="System.CodeDom" Version="6.0.0-preview.1.21074.3">
