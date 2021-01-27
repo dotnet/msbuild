@@ -322,7 +322,7 @@ namespace Microsoft.Build.Tasks
                     var translator = BinaryTranslator.GetWriteTranslator(s);
 
                     // write file signature
-                    translator.Writer.Write(TranslateContractSignature); 
+                    translator.Writer.Write(TranslateContractSignature);
                     translator.Writer.Write(TranslateContractVersion);
 
                     Translate(translator);

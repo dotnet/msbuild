@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration.Assemblies;
+using System.Globalization;
 using Microsoft.Build.BackEnd;
 using System.IO;
+using System.Reflection;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -45,8 +48,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializeByte()
         {
             byte val = 0x55;
-            HelperTestSimpleType((byte)0, val);
-            HelperTestSimpleType(val, (byte)0);
+            HelperTestSimpleType((byte) 0, val);
+            HelperTestSimpleType(val, (byte) 0);
         }
 
         /// <summary>
@@ -56,8 +59,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializeShort()
         {
             short val = 0x55AA;
-            HelperTestSimpleType((short)0, val);
-            HelperTestSimpleType(val, (short)0);
+            HelperTestSimpleType((short) 0, val);
+            HelperTestSimpleType(val, (short) 0);
         }
 
         /// <summary>
@@ -67,8 +70,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializeLong()
         {
             long val = 0x55AABBCCDDEE;
-            HelperTestSimpleType((long)0, val);
-            HelperTestSimpleType(val, (long)0);
+            HelperTestSimpleType((long) 0, val);
+            HelperTestSimpleType(val, (long) 0);
         }
 
         /// <summary>
@@ -78,8 +81,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializeDouble()
         {
             double val = 3.1416;
-            HelperTestSimpleType((double)0, val);
-            HelperTestSimpleType(val, (double)0);
+            HelperTestSimpleType((double) 0, val);
+            HelperTestSimpleType(val, (double) 0);
         }
 
         /// <summary>
@@ -100,8 +103,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializeInt()
         {
             int val = 0x55AA55AA;
-            HelperTestSimpleType((int)0, val);
-            HelperTestSimpleType(val, (int)0);
+            HelperTestSimpleType((int) 0, val);
+            HelperTestSimpleType(val, (int) 0);
         }
 
         /// <summary>
@@ -122,7 +125,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializeStringArray()
         {
             HelperTestArray(new string[] { }, StringComparer.Ordinal);
-            HelperTestArray(new string[] { "foo", "bar" }, StringComparer.Ordinal);
+            HelperTestArray(new string[] {"foo", "bar"}, StringComparer.Ordinal);
             HelperTestArray(null, StringComparer.Ordinal);
         }
 
@@ -157,10 +160,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializeEnum()
         {
             TranslationDirection value = TranslationDirection.ReadFromStream;
-            TranslationHelpers.GetWriteTranslator().TranslateEnum(ref value, (int)value);
+            TranslationHelpers.GetWriteTranslator().TranslateEnum(ref value, (int) value);
 
             TranslationDirection deserializedValue = TranslationDirection.WriteToStream;
-            TranslationHelpers.GetReadTranslator().TranslateEnum(ref deserializedValue, (int)deserializedValue);
+            TranslationHelpers.GetReadTranslator().TranslateEnum(ref deserializedValue, (int) deserializedValue);
 
             Assert.Equal(value, deserializedValue);
         }
@@ -262,7 +265,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSerializeArray()
         {
-            DerivedClass[] value = new DerivedClass[] { new DerivedClass(1, 2), new DerivedClass(3, 4) };
+            DerivedClass[] value = new DerivedClass[] {new DerivedClass(1, 2), new DerivedClass(3, 4)};
             TranslationHelpers.GetWriteTranslator().TranslateArray(ref value);
 
             DerivedClass[] deserializedValue = null;
@@ -292,7 +295,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSerializeArrayWithFactory()
         {
-            BaseClass[] value = new BaseClass[] { new BaseClass(1), new BaseClass(2) };
+            BaseClass[] value = new BaseClass[] {new BaseClass(1), new BaseClass(2)};
             TranslationHelpers.GetWriteTranslator().TranslateArray(ref value, BaseClass.FactoryForDeserialization);
 
             BaseClass[] deserializedValue = null;
@@ -429,6 +432,163 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TranslationHelpers.GetReadTranslator().TranslateDictionary<Dictionary<string, BaseClass>, BaseClass>(ref deserializedValue, BaseClass.FactoryForDeserialization);
 
             Assert.Equal(value, deserializedValue);
+        }
+
+        [Theory]
+        [InlineData("en")]
+        [InlineData("en-US")]
+        [InlineData("en-CA")]
+        [InlineData("zh-HK")]
+        [InlineData("sr-Cyrl-CS")]
+        public void CultureInfo(string name)
+        {
+            CultureInfo value = new CultureInfo(name);
+            TranslationHelpers.GetWriteTranslator().Translate(ref value);
+
+            CultureInfo deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
+
+            Assert.Equal(value, deserializedValue);
+        }
+
+        [Fact]
+        public void CultureInfoAsNull()
+        {
+            CultureInfo value = null;
+            TranslationHelpers.GetWriteTranslator().Translate(ref value);
+
+            CultureInfo deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
+
+            Assert.Null(deserializedValue);
+        }
+
+        [Theory]
+        [InlineData("1.2")]
+        [InlineData("1.2.3")]
+        [InlineData("1.2.3.4")]
+        public void Version(string version)
+        {
+            Version value = new Version(version);
+            TranslationHelpers.GetWriteTranslator().Translate(ref value);
+
+            Version deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
+
+            Assert.Equal(value, deserializedValue);
+        }
+
+        [Fact]
+        public void VersionAsNull()
+        {
+            Version value = null;
+            TranslationHelpers.GetWriteTranslator().Translate(ref value);
+
+            Version deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
+
+            Assert.Null(deserializedValue);
+        }
+
+        [Fact]
+        public void HashSetOfT()
+        {
+            HashSet<BaseClass> value = new()
+            {
+                new BaseClass(1),
+                new BaseClass(2),
+                null
+            };
+            TranslationHelpers.GetWriteTranslator().TranslateHashSet(ref value, BaseClass.FactoryForDeserialization, capacity => new ());
+
+            HashSet<BaseClass> deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateHashSet(ref deserializedValue, BaseClass.FactoryForDeserialization, capacity => new ());
+
+            Assert.Equal(value, deserializedValue, BaseClass.EqualityComparer);
+        }
+
+        [Fact]
+        public void HashSetOfTAsNull()
+        {
+            HashSet<BaseClass> value = null;
+            TranslationHelpers.GetWriteTranslator().TranslateHashSet(ref value, BaseClass.FactoryForDeserialization, capacity => new());
+
+            HashSet<BaseClass> deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateHashSet(ref deserializedValue, BaseClass.FactoryForDeserialization, capacity => new());
+
+            Assert.Null(deserializedValue);
+        }
+
+        [Fact]
+        public void AssemblyNameAsNull()
+        {
+            AssemblyName value = null;
+            TranslationHelpers.GetWriteTranslator().Translate(ref value);
+
+            AssemblyName deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
+
+            Assert.Null(deserializedValue);
+        }
+
+        [Fact]
+        public void AssemblyNameWithAllFields()
+        {
+            AssemblyName value = new()
+            {
+                Name = "a",
+                Version = new Version(1, 2, 3),
+                Flags = AssemblyNameFlags.PublicKey,
+                ProcessorArchitecture = ProcessorArchitecture.X86,
+                CultureInfo = new CultureInfo("zh-HK"),
+                HashAlgorithm = System.Configuration.Assemblies.AssemblyHashAlgorithm.SHA256,
+                VersionCompatibility = AssemblyVersionCompatibility.SameMachine,
+                CodeBase = "C:\\src",
+                KeyPair = new StrongNameKeyPair(new byte[] { 4, 3, 2, 1 }),
+                ContentType = AssemblyContentType.WindowsRuntime,
+                CultureName = "zh-HK",
+            };
+            value.SetPublicKey(new byte[]{ 3, 2, 1});
+            value.SetPublicKeyToken(new byte[] { 8, 7, 6, 5, 4, 3, 2, 1 });
+
+            TranslationHelpers.GetWriteTranslator().Translate(ref value);
+
+            AssemblyName deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
+
+            HelperAssertAssemblyNameEqual(value, deserializedValue);
+        }
+
+        [Fact]
+        public void AssemblyNameWithMinimalFields()
+        {
+            AssemblyName value = new();
+
+            TranslationHelpers.GetWriteTranslator().Translate(ref value);
+
+            AssemblyName deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
+
+            HelperAssertAssemblyNameEqual(value, deserializedValue);
+        }
+
+        /// <summary>
+        /// Assert two AssemblyName objects values are same.
+        /// Ignoring KeyPair, ContentType, CultureName as those are not serialized
+        /// </summary>
+        private static void HelperAssertAssemblyNameEqual(AssemblyName expected, AssemblyName actual)
+        {
+            Assert.Equal(expected.Name, actual.Name);
+            Assert.Equal(expected.Version, actual.Version);
+            Assert.Equal(expected.Flags, actual.Flags);
+            Assert.Equal(expected.ProcessorArchitecture, actual.ProcessorArchitecture);
+            Assert.Equal(expected.CultureInfo, actual.CultureInfo);
+            Assert.Equal(expected.HashAlgorithm, actual.HashAlgorithm);
+            Assert.Equal(expected.VersionCompatibility, actual.VersionCompatibility);
+            Assert.Equal(expected.CodeBase, actual.CodeBase);
+
+            Assert.Equal(expected.GetPublicKey(), actual.GetPublicKey());
+            Assert.Equal(expected.GetPublicKeyToken(), actual.GetPublicKeyToken());
         }
 
         /// <summary>
@@ -618,6 +778,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 get { return new BaseClassComparer(); }
             }
 
+            static public IEqualityComparer<BaseClass> EqualityComparer
+            {
+                get { return new BaseClassEqualityComparer(); }
+            }
+
             /// <summary>
             /// Gets the value.
             /// </summary>
@@ -675,6 +840,23 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     return -1;
                 }
                 #endregion
+            }
+
+            private class BaseClassEqualityComparer : IEqualityComparer<BaseClass>
+            {
+                public bool Equals(BaseClass x, BaseClass y)
+                {
+                    if (ReferenceEquals(x, y)) return true;
+                    if (ReferenceEquals(x, null)) return false;
+                    if (ReferenceEquals(y, null)) return false;
+                    if (x.GetType() != y.GetType()) return false;
+                    return x._baseValue == y._baseValue;
+                }
+
+                public int GetHashCode(BaseClass obj)
+                {
+                    return obj._baseValue;
+                }
             }
         }
 

@@ -36,7 +36,6 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
 
-
   <ItemGroup>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

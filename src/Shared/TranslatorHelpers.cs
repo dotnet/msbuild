@@ -116,7 +116,11 @@ namespace Microsoft.Build.BackEnd
             if (!translator.TranslateNullable(hashSet))
                 return;
 
-            int count = hashSet.Count;
+            int count = default;
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                count = hashSet.Count;
+            }
             translator.Translate(ref count);
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
@@ -136,6 +140,66 @@ namespace Microsoft.Build.BackEnd
                 {
                     T value = item;
                     translator.Translate(ref value, valueFactory);
+                }
+            }
+        }
+
+        public static void Translate(this ITranslator translator, ref CultureInfo cultureInfo)
+        {
+            if (!translator.TranslateNullable(cultureInfo))
+                return;
+
+            int lcid = default;
+
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                lcid = cultureInfo.LCID;
+            }
+
+            translator.Translate(ref lcid);
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                cultureInfo = new CultureInfo(lcid);
+            }
+        }
+
+        public static void Translate(this ITranslator translator, ref Version version)
+        {
+            if (!translator.TranslateNullable(version))
+                return;
+
+            int major = 0;
+            int minor = 0;
+            int build = 0;
+            int revision = 0;
+
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                major = version.Major;
+                minor = version.Minor;
+                build = version.Build;
+                revision = version.Revision;
+            }
+
+            translator.Translate(ref major);
+            translator.Translate(ref minor);
+            translator.Translate(ref build);
+            translator.Translate(ref revision);
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                if (build < 0)
+                {
+                    version = new Version(major, minor);
+                }
+                else if (revision < 0)
+                {
+                    version = new Version(major, minor, build);
+                }
+                else
+                {
+                    version = new Version(major, minor, build, revision);
                 }
             }
         }
@@ -203,66 +267,6 @@ namespace Microsoft.Build.BackEnd
 
                 assemblyName.SetPublicKey(publicKey);
                 assemblyName.SetPublicKeyToken(publicKeyToken);
-            }
-        }
-
-        public static void Translate(this ITranslator translator, ref CultureInfo cultureInfo)
-        {
-            if (!translator.TranslateNullable(cultureInfo))
-                return;
-
-            int lcid = default;
-
-            if (translator.Mode == TranslationDirection.ReadFromStream)
-            {
-                lcid = cultureInfo.LCID;
-            }
-
-            translator.Translate(ref lcid);
-
-            if (translator.Mode == TranslationDirection.ReadFromStream)
-            {
-                cultureInfo = new CultureInfo(lcid);
-            }
-        }
-
-        public static void Translate(this ITranslator translator, ref Version version)
-        {
-            if (!translator.TranslateNullable(version))
-                return;
-
-            int major = 0;
-            int minor = 0;
-            int build = 0;
-            int revision = 0;
-
-            if (translator.Mode == TranslationDirection.WriteToStream)
-            {
-                major = version.Major;
-                minor = version.Minor;
-                build = version.Build;
-                revision = version.Revision;
-            }
-
-            translator.Translate(ref major);
-            translator.Translate(ref minor);
-            translator.Translate(ref build);
-            translator.Translate(ref revision);
-
-            if (translator.Mode == TranslationDirection.ReadFromStream)
-            {
-                if (build < 0)
-                {
-                    version = new Version(major, minor);
-                }
-                else if (revision < 0)
-                {
-                    version = new Version(major, minor, build);
-                }
-                else
-                {
-                    version = new Version(major, minor, build, revision);
-                }
             }
         }
     }
