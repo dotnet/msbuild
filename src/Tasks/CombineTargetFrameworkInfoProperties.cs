@@ -19,14 +19,17 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
-            XElement root = new XElement(RootElementName);
-
-            foreach (var item in PropertiesAndValues)
+            if (PropertiesAndValues != null)
             {
-                root.Add(new XElement(item.ItemSpec, item.GetMetadata("Value")));
-            }
+                XElement root = new XElement(RootElementName);
 
-            Result = root.ToString();
+                foreach (var item in PropertiesAndValues)
+                {
+                    root.Add(new XElement(item.ItemSpec, item.GetMetadata("Value")));
+                }
+
+                Result = root.ToString();
+            }            
 
             return true;
         }
