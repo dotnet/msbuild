@@ -329,7 +329,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                                       OverwriteReadOnlyFiles = true,
                                       SkipUnchangedFiles = false,
                                       SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                                      Include = "<BE78A17D30144B549D21F71D5C633F7D>.txt"
+                                      Include = "<BE78A17D30144B549D21F71D5C633F7D/.txt"
                                   };
 
                 unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
@@ -385,7 +385,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                                       OverwriteReadOnlyFiles = true,
                                       SkipUnchangedFiles = false,
                                       SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                                      Exclude = "<BE78A17D30144B549D21F71D5C633F7D>.txt"
+                                      Exclude = "<BE78A17D30144B549D21F71D5C633F7D/.txt"
                                   };
 
                 unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
