@@ -31,7 +31,7 @@ namespace Microsoft.Build.Shared
         private static readonly char[] s_wildcardCharacters = { '*', '?' };
         private static readonly char[] s_wildcardAndSemicolonCharacters = { '*', '?', ';' };
 
-        private static readonly string[] s_propertyReferences = { "$(", "@(" };
+        private static readonly string[] s_propertyAndItemReferences = { "$(", "@(" };
 
         // on OSX both System.IO.Path separators are '/', so we have to use the literals
         internal static readonly char[] directorySeparatorCharacters = { '/', '\\' };
@@ -195,16 +195,16 @@ namespace Microsoft.Build.Shared
             return
 
                 (-1 != filespec.IndexOfAny(s_wildcardAndSemicolonCharacters)) ||
-                HasPropertyReferences(filespec)
+                HasPropertyOrItemReferences(filespec)
                 ;
         }
 
         /// <summary>
         /// Determines whether the given path has any property references.
         /// </summary>
-        internal static bool HasPropertyReferences(string filespec)
+        internal static bool HasPropertyOrItemReferences(string filespec)
         {
-            return s_propertyReferences.Aggregate(false, (current, propertyReference) => current | filespec.Contains(propertyReference));
+            return s_propertyAndItemReferences.Aggregate(false, (current, propertyReference) => current | filespec.Contains(propertyReference));
         }
 
         /// <summary>

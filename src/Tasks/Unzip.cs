@@ -289,7 +289,7 @@ namespace Microsoft.Build.Tasks
             {
                 result = true;
             }
-            else if (FileMatcher.HasPropertyReferences(pattern))
+            else if (FileMatcher.HasPropertyOrItemReferences(pattern))
             {
                 // Supporting property references would require access to Expander which is unavailable in Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternPropertyReferences", pattern);
