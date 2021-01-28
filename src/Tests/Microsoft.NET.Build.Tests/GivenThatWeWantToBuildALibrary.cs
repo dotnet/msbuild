@@ -1008,7 +1008,7 @@ namespace ProjectNameWithSpaces
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("NETSDK1148");
+                .HaveStdOutContaining("NETSDK1149");
         }
     }
 }
