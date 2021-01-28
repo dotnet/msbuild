@@ -3,10 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.NuGet;
@@ -17,21 +17,12 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
     {
         //The file or directory passed down by the command
         private readonly string _fileOrDirectory;
-        private AppliedOption _appliedCommand;
 
         public ListPackageReferencesCommand(
-            AppliedOption appliedCommand,
             ParseResult parseResult) : base(parseResult)
         {
-            if (appliedCommand == null)
-            {
-                throw new ArgumentNullException(nameof(appliedCommand));
-            }
-
             _fileOrDirectory = PathUtility.GetAbsolutePath(PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()),
-                                                           appliedCommand.Arguments.Single());
-
-            _appliedCommand = appliedCommand["package"];
+                parseResult.ValueForArgument<string>(ListCommandParser.SlnOrProjectArgument));
         }
 
         public override int Execute()
@@ -39,12 +30,12 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
             return NuGetCommand.Run(TransformArgs());
         }
 
-        internal static void EnforceOptionRules(AppliedOption appliedCommand)
+        internal static void EnforceOptionRules(ParseResult parseResult)
         {
             var mutexOptionCount = 0;
-            mutexOptionCount += appliedCommand.HasOption("deprecated") ? 1 : 0;
-            mutexOptionCount += appliedCommand.HasOption("outdated") ? 1 : 0;
-            mutexOptionCount += appliedCommand.HasOption("vulnerable") ? 1 : 0;
+            mutexOptionCount += parseResult.HasOption(ListPackageReferencesCommandParser.DepreciatedOption) ? 1 : 0;
+            mutexOptionCount += parseResult.HasOption(ListPackageReferencesCommandParser.OutdatedOption) ? 1 : 0;
+            mutexOptionCount += parseResult.HasOption(ListPackageReferencesCommandParser.VulnerableOption) ? 1 : 0;
             if (mutexOptionCount > 1)
             {
                 throw new GracefulException(LocalizableStrings.OptionsCannotBeCombined);
@@ -61,9 +52,9 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
 
             args.Add(GetProjectOrSolution());
 
-            args.AddRange(_appliedCommand.OptionValuesToBeForwarded());
+            args.AddRange(_parseResult.OptionValuesToBeForwarded(ListPackageReferencesCommandParser.GetCommand()));
 
-            EnforceOptionRules(_appliedCommand);
+            EnforceOptionRules(_parseResult);
 
             return args.ToArray();
         }

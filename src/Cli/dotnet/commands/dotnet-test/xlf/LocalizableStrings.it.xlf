@@ -58,6 +58,36 @@ Per MSTest il timeout viene usato per tutti i test case.
 Questa opzione è attualmente supportata solo in Windows insieme a netcoreapp2.1 e versioni successive, nonché in Linux con netcoreapp3.1 e versioni successive. OSX e la piattaforma UWP non sono supportati.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableDescription">
+        <source>Sets the value of an environment variable. 
+Creates the variable if it does not exist, overrides if it does. 
+This will force the tests to be run in an isolated process. 
+This argument can be specified multiple times to provide multiple variables.
+
+Examples:
+-e VARIABLE=abc
+-e VARIABLE="value with spaces"
+-e VARIABLE="value;seperated with;semicolons"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</source>
+        <target state="translated">Imposta il valore di una variabile di ambiente. 
+Crea la variabile se non esiste e la sostituisce se esiste. 
+In questo modo forza l'esecuzione dei test in un processo isolato. 
+È possibile specificare più volte questo argomento per fornire più variabili.
+
+Esempi:
+-e VARIABLE=abc
+-e VARIABLE="valore con spazi"
+-e VARIABLE="valore;delimitato da;punti e virgola"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableExpression">
+        <source>NAME="VALUE"</source>
+        <target state="translated">NAME="VALORE"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdNoLogo">
         <source>Run test(s), without displaying Microsoft Testplatform banner</source>
         <target state="translated">Esegui test senza visualizzare il banner di Microsoft Testplatform</target>

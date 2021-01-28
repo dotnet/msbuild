@@ -81,7 +81,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="4.7.2" Condition="'$(UseSystemTextJson)'=='True'"/>
+    <!-- No PackageReference to System.Text.Json necessary, because it's included in .NET 5.0 and higher -->
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" Condition="'$(UseSystemTextJson)'!='True'"/>
     
     <!-- Reference this package to avoid package downgrade errors.  See https://github.com/dotnet/sdk/issues/3044 for details -->

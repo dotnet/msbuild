@@ -2,10 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using Microsoft.Build.Construction;
-using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli.CommandLineValidation;
 using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.DotNet.Tools.Common;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -21,27 +20,35 @@ namespace Microsoft.DotNet.Cli.Remove.Reference.Tests
 {
     public class GivenDotnetRemoveReference : SdkTest
     {
-        private const string HelpText = @"Usage: dotnet remove <PROJECT> reference [options] <PROJECT_PATH>
+        private Func<string, string> HelpText = (defaultVal) => $@"reference:
+  Remove a project-to-project reference from the project.
+
+Usage:
+  dotnet remove <PROJECT> reference [options] <PROJECT_PATH>...
 
 Arguments:
-  <PROJECT>        The project file to operate on. If a file is not specified, the command will search the current directory for one.
-  <PROJECT_PATH>   The paths to the referenced projects to remove.
+  <PROJECT>         The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
+  <PROJECT_PATH>    The paths to the referenced projects to remove.
 
 Options:
-  -h, --help                    Show command line help.
-  -f, --framework <FRAMEWORK>   Remove the reference only when targeting a specific framework.";
+  -f, --framework <FRAMEWORK>    Remove the reference only when targeting a specific framework.
+  -?, -h, --help                 Show help and usage information";
 
-        private const string RemoveCommandHelpText = @"Usage: dotnet remove [options] <PROJECT> [command]
-
-Arguments:
-  <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
-
-Options:
-  -h, --help   Show command line help.
-
-Commands:
-  package <PACKAGE_NAME>     Remove a NuGet package reference from the project.
-  reference <PROJECT_PATH>   Remove a project-to-project reference from the project.";
+        private Func<string, string> RemoveCommandHelpText = (defaultVal) => $@"remove:
+      .NET Remove Command
+    
+    Usage:
+      dotnet remove [options] <PROJECT> [command]
+    
+    Arguments:
+      <PROJECT>    The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
+    
+    Options:
+      -?, -h, --help    Show help and usage information
+    
+    Commands:
+      package <PACKAGE_NAME>      Remove a NuGet package reference from the project.
+      reference <PROJECT_PATH>    Remove a project-to-project reference from the project.";
 
         readonly string[] FrameworkNet451Args = new[] { "-f", "net451" };
         const string ConditionFrameworkNet451 = "== 'net451'";
@@ -136,7 +143,7 @@ Commands:
         {
             var cmd = new RemoveReferenceCommand(Log).Execute(helpArg);
             cmd.Should().Pass();
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(Directory.GetCurrentDirectory()));
         }
 
         [Theory]
@@ -155,7 +162,6 @@ Commands:
                 .Execute(args);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(RemoveCommandHelpText);
         }
 
         [Fact]
@@ -164,8 +170,8 @@ Commands:
             var cmd = new DotnetCommand(Log, "add", "one", "two", "three", "reference", "proj.csproj")
                     .Execute();
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "two")}
-{string.Format(CommandLine.LocalizableStrings.UnrecognizedCommandOrArgument, "three")}");
+            cmd.StdErr.Should().BeVisuallyEquivalentTo($@"{string.Format(LocalizableStrings.UnrecognizedCommandOrArgument, "two")}
+{string.Format(LocalizableStrings.UnrecognizedCommandOrArgument, "three")}");
         }
 
         [Theory]
@@ -181,7 +187,7 @@ Commands:
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindProjectOrDirectory, projName));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
         }
 
         [Fact]
@@ -196,7 +202,7 @@ Commands:
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, "Broken/Broken.csproj"));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
         }
 
         [Fact]
@@ -210,7 +216,7 @@ Commands:
                     .Execute(setup.ValidRefCsprojRelToOtherProjPath);
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, workingDir + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(workingDir));
         }
 
         [Fact]
@@ -223,7 +229,7 @@ Commands:
                     .Execute($"\"{setup.ValidRefCsprojPath}\"");
             cmd.ExitCode.Should().NotBe(0);
             cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, setup.TestRoot + Path.DirectorySeparatorChar));
-            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
         }
 
         [Fact]
@@ -550,7 +556,7 @@ Commands:
                     .Execute(reference);
 
             result.Should().Fail();
-            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
             result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory, Path.Combine(setup.TestRoot, reference)));
         }
 
@@ -567,7 +573,7 @@ Commands:
                     .Execute(reference);
 
             result.Should().Fail();
-            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+            result.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
             result.StdErr.Should().Be(string.Format(CommonLocalizableStrings.MoreThanOneProjectInDirectory, Path.Combine(setup.TestRoot, reference)));
         }
     }

@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CommandLine.Parsing;
 using System.Linq;
 using System.Xml.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.List.PackageReferences;
 using Microsoft.NET.TestFramework;
@@ -291,10 +291,8 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         [InlineData(true, "--deprecated", "--outdated")]
         public void ItEnforcesOptionRules(bool throws, params string[] options)
         {
-            var parser = Parser.Instance;
-            var parseResult = parser.ParseFrom($"dotnet list package", options);
-            var appliedCommand = parseResult.AppliedCommand();
-            Action checkRules = () => ListPackageReferencesCommand.EnforceOptionRules(appliedCommand);
+            var parseResult = Parser.Instance.Parse($"dotnet list package {string.Join(' ', options)}");
+            Action checkRules = () => ListPackageReferencesCommand.EnforceOptionRules(parseResult);
 
             if (throws)
             {

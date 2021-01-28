@@ -1,12 +1,8 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Linq;
-using System.Transactions;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Tool.Common;
 
@@ -14,40 +10,37 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
 {
     internal class ToolUninstallCommand : CommandBase
     {
-        private readonly AppliedOption _options;
         private readonly ToolUninstallLocalCommand _toolUninstallLocalCommand;
         private readonly ToolUninstallGlobalOrToolPathCommand _toolUninstallGlobalOrToolPathCommand;
         private readonly bool _global;
         private readonly string _toolPath;
 
         public ToolUninstallCommand(
-            AppliedOption options,
             ParseResult result,
             IReporter reporter = null,
             ToolUninstallGlobalOrToolPathCommand toolUninstallGlobalOrToolPathCommand = null,
             ToolUninstallLocalCommand toolUninstallLocalCommand = null)
             : base(result)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
             _toolUninstallLocalCommand
                 = toolUninstallLocalCommand ??
-                  new ToolUninstallLocalCommand(options, result);
+                  new ToolUninstallLocalCommand(result);
 
             _toolUninstallGlobalOrToolPathCommand =
                 toolUninstallGlobalOrToolPathCommand
-                ?? new ToolUninstallGlobalOrToolPathCommand(options, result);
+                ?? new ToolUninstallGlobalOrToolPathCommand(result);
 
-            _global = options.ValueOrDefault<bool>(ToolAppliedOption.GlobalOption);
-            _toolPath = options.SingleArgumentOrDefault(ToolAppliedOption.ToolPathOption);
+            _global = result.ValueForOption<bool>(ToolUninstallCommandParser.GlobalOption);
+            _toolPath = result.ValueForOption<string>(ToolUninstallCommandParser.ToolPathOption);
         }
 
         public override int Execute()
         {
             ToolAppliedOption.EnsureNoConflictGlobalLocalToolPathOption(
-                _options,
+                _parseResult,
                 LocalizableStrings.UninstallToolCommandInvalidGlobalAndLocalAndToolPath);
 
-            ToolAppliedOption.EnsureToolManifestAndOnlyLocalFlagCombination(_options);
+            ToolAppliedOption.EnsureToolManifestAndOnlyLocalFlagCombination(_parseResult);
 
             if (_global || !string.IsNullOrWhiteSpace(_toolPath))
             {

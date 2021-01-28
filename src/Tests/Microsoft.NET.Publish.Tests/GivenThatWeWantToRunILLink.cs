@@ -2,13 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
+using System.Text;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.DependencyModel;
@@ -17,6 +19,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -242,7 +245,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should().Pass()
                 .And.HaveStdOutMatching("warning IL2075.*Program.IL_2075")
                 .And.HaveStdOutMatching("warning IL2026.*Program.IL_2026.*Testing analysis warning IL2026")
-                .And.HaveStdOutMatching("warning IL2043.*Program.get_IL_2043")
+                .And.HaveStdOutMatching("warning IL2043.*Program.IL_2043.get")
                 .And.HaveStdOutMatching("warning IL2046.*Program.Derived.IL_2046")
                 .And.HaveStdOutMatching("warning IL2093.*Program.Derived.IL_2093");
         }
@@ -280,6 +283,106 @@ namespace Microsoft.NET.Publish.Tests
 
             File.Exists(linkSemaphore).Should().BeFalse();
             File.Exists(publishedDll).Should().BeFalse();
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net6.0")]
+        public void ILLink_verify_analysis_warnings_hello_world_app(string targetFramework)
+        {
+            var projectName = "AnalysisWarningsOnHelloWorldApp";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            // Please keep list below sorted and de-duplicated
+            List<string> expectedOutput = new List<string> () {
+                    "ILLink : Trim analysis warning IL2057: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
+                    "ILLink : Trim analysis warning IL2057: System.Resources.ResourceReader.FindType(Int32",
+                    "ILLink : Trim analysis warning IL2060: System.Resources.ResourceReader.InitializeBinaryFormatter(",
+                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.NullableTypeInfo.NullableTypeInfo(Type,List<Type>",
+                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.TypeAnalysis.TypeAnalysis(Type,EventDataAttribute,List<Type>",
+                    "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(",
+                    "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.NullableTypeInfo.WriteData(PropertyValue",
+                    "ILLink : Trim analysis warning IL2072: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
+                    "ILLink : Trim analysis warning IL2077: System.Resources.ResourceReader.InitializeBinaryFormatter(",
+            };
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false");
+            result.Should().Pass();
+            //This function doesn't use an XML file like the runtime
+            //to silence warnings since will make the test to fail only
+            //with new warnings, we want the test to fail if any 
+            //missing warnings also. It doesn't use BeEquivalentTo
+            //function that warns for any new or missing warnings
+            //since the error experience is not good for a developer
+            var warnings = result.StdOut.Split('\n', '\r', ')').Where(line => line.StartsWith("ILLink :"));
+            var extraWarnings = warnings.Except(expectedOutput);
+
+            StringBuilder errorMessage = new StringBuilder();
+
+            if (extraWarnings.Any())
+            {
+                // Print additional information to recognize which framework assemblies are being used.
+                errorMessage.Append($"Target framework from test: {targetFramework}{Environment.NewLine}");
+                errorMessage.Append($"Runtime identifier: {rid}{Environment.NewLine}");
+
+                // Get the array of runtime assemblies inside the publish folder.
+                string[] runtimeAssemblies = Directory.GetFiles(publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName, "*.dll");
+                var paths = new List<string>(runtimeAssemblies);
+                var resolver = new PathAssemblyResolver(paths);
+                var mlc = new MetadataLoadContext(resolver, "System.Private.CoreLib");
+                using (mlc)
+                {
+                    Assembly assembly = mlc.LoadFromAssemblyPath(Path.Combine(publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName, "System.Private.CoreLib.dll"));
+                    string assemblyVersionInfo = (string)assembly.CustomAttributes.Where(ca => ca.AttributeType.Name == "AssemblyInformationalVersionAttribute").Select(ca => ca.ConstructorArguments[0].Value).FirstOrDefault();
+                    errorMessage.Append($"Runtime Assembly Informational Version: {assemblyVersionInfo}{Environment.NewLine}");
+                }
+                errorMessage.Append($"The execution of a hello world app generated a diff in the number of warnings the app produces{Environment.NewLine}{Environment.NewLine}");
+            }
+            // Intentionally do not fail for missing warnings. That's an improvement.
+            if (extraWarnings.Any())
+            {
+                errorMessage.Append($"This is a list of extra linker warnings generated with your change using a console app:{Environment.NewLine}");
+                foreach (var extraWarning in extraWarnings)
+                    errorMessage.Append("+  " + extraWarning + Environment.NewLine);
+            }
+            Assert.True(!extraWarnings.Any(), errorMessage.ToString());
+        }
+
+        [Theory]
+        [InlineData("net5.0")]
+        [InlineData("net6.0")]
+        public void StartupHookSupport_is_false_by_default_on_trimmed_apps(string targetFramework)
+        {
+            var projectName = "HelloWorld";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: projectName);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true")
+                .Should().Pass();
+
+            string outputDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            string runtimeConfigFile = Path.Combine(outputDirectory, $"{projectName}.runtimeconfig.json");
+            string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
+
+
+            if (Version.TryParse(targetFramework.TrimStart("net".ToCharArray()), out Version parsedVersion) &&
+                parsedVersion.Major >= 6)
+            {
+                JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+                runtimeConfig["runtimeOptions"]["configProperties"]
+                    ["System.StartupHookProvider.IsSupported"].Value<bool>()
+                    .Should().Be(false);
+            }
+            else
+            {
+                runtimeConfigContents.Should().NotContain("System.StartupHookProvider.IsSupported");
+            }
         }
 
         [Theory]
@@ -346,12 +449,13 @@ namespace Microsoft.NET.Publish.Tests
             var targetFramework = "net5.0";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
-            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
-            // Set up a conditional feature substitution for the "FeatureDisabled" property
-            AddFeatureDefinition(testProject, referenceProjectName);
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName,
+                // Reference the classlib to ensure its XML is processed.
+                addAssemblyReference: true,
+                // Set up a conditional feature substitution for the "FeatureDisabled" property
+                modifyReferencedProject: (referencedProject) => AddFeatureDefinition(referencedProject, referenceProjectName));
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(project => EnableNonFrameworkTrimming(project))
-                .WithProjectChanges(project => EmbedSubstitutions(project))
                 // Set a matching RuntimeHostConfigurationOption, with Trim = "true"
                 .WithProjectChanges(project => AddRuntimeConfigOption(project, trim: true))
                 .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"));
@@ -378,12 +482,13 @@ namespace Microsoft.NET.Publish.Tests
             var targetFramework = "net5.0";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
-            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
-            // Set up a conditional feature substitution for the "FeatureDisabled" property
-            AddFeatureDefinition(testProject, referenceProjectName);
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName,
+                // Reference the classlib to ensure its XML is processed.
+                addAssemblyReference: true,
+                // Set up a conditional feature substitution for the "FeatureDisabled" property
+                modifyReferencedProject: (referencedProject) => AddFeatureDefinition(referencedProject, referenceProjectName));
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .WithProjectChanges(project => EnableNonFrameworkTrimming(project))
-                .WithProjectChanges(project => EmbedSubstitutions(project))
                 // Set a matching RuntimeHostConfigurationOption, with Trim = "false"
                 .WithProjectChanges(project => AddRuntimeConfigOption(project, trim: false))
                 .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"));
@@ -781,7 +886,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [Fact(Skip = "https://github.com/aspnet/AspNetCore/issues/12064")]
         public void ILLink_and_crossgen_process_razor_assembly()
-        { 
+        {
             var targetFramework = "netcoreapp3.0";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
@@ -884,7 +989,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Fact]
-        public void It_warns_when_targetting_netcoreapp_2_x()
+        public void It_warns_when_targetting_netcoreapp_2_x_illink()
         {
             var testProject = new TestProject()
             {
@@ -962,44 +1067,39 @@ namespace Microsoft.NET.Publish.Tests
                                    new XElement("Condition", "true"),
                                    new XElement("IsTrimmable", "true")));
             items.Add(new XElement(ns + "TrimmerRootAssembly",
-                                   new XAttribute("Include", "@(IntermediateAssembly->'%(FileName)')")));
+                                   new XAttribute("Include", "@(IntermediateAssembly->'%(FullPath)')")));
         }
 
         static readonly string substitutionsFilename = "ILLink.Substitutions.xml";
 
-        private void EmbedSubstitutions(XDocument project)
-        {
-            var ns = project.Root.Name.Namespace;
-
-            project.Root.Add (new XElement(ns + "ItemGroup",
-                                new XElement("EmbeddedResource",
-                                    new XAttribute("Include", substitutionsFilename),
-                                    new XElement("LogicalName", substitutionsFilename))));
-        }
-
-        private void AddFeatureDefinition(TestProject testProject, string referenceAssemblyName)
+        private void AddFeatureDefinition(TestProject testProject, string assemblyName)
         {
             // Add a feature definition that replaces the FeatureDisabled property when DisableFeature is true.
             testProject.EmbeddedResources[substitutionsFilename] = $@"
 <linker>
-  <assembly fullname=""{referenceAssemblyName}"" feature=""DisableFeature"" featurevalue=""true"">
+  <assembly fullname=""{assemblyName}"" feature=""DisableFeature"" featurevalue=""true"">
     <type fullname=""ClassLib"">
       <method signature=""System.Boolean get_FeatureDisabled()"" body=""stub"" value=""true"" />
     </type>
   </assembly>
 </linker>
 ";
+
+            testProject.AdditionalItems["EmbeddedResource"] = new Dictionary<string, string> {
+                ["Include"] = substitutionsFilename,
+                ["LogicalName"] = substitutionsFilename
+            };
         }
 
         private void AddRuntimeConfigOption(XDocument project, bool trim)
         {
             var ns = project.Root.Name.Namespace;
 
-            project.Root.Add (new XElement(ns + "ItemGroup",
+            project.Root.Add(new XElement(ns + "ItemGroup",
                                 new XElement("RuntimeHostConfigurationOption",
                                     new XAttribute("Include", "DisableFeature"),
                                     new XAttribute("Value", "true"),
-                                    new XAttribute("Trim", trim.ToString ()))));
+                                    new XAttribute("Trim", trim.ToString()))));
         }
 
         private TestProject CreateTestProjectWithAnalysisWarnings(string targetFramework, string projectName)
@@ -1071,7 +1171,9 @@ public class Program
             string referenceProjectName = null,
             bool usePackageReference = true,
             [CallerMemberName] string callingMethod = "",
-            string referenceProjectIdentifier = "")
+            string referenceProjectIdentifier = "",
+            Action<TestProject> modifyReferencedProject = null,
+            bool addAssemblyReference = false)
         {
             var testProject = new TestProject()
             {
@@ -1088,10 +1190,24 @@ public class Program
     {
         Console.WriteLine(""Hello world"");
     }
-}
 ";
 
-            if (referenceProjectName == null) {
+            if (addAssemblyReference)
+            {
+                testProject.SourceFiles[$"{mainProjectName}.cs"] += @"
+    public static void UseClassLib()
+    {
+        ClassLib.UsedMethod();
+    }
+}";
+            } else {
+                testProject.SourceFiles[$"{mainProjectName}.cs"] += @"}";
+            }
+
+            if (referenceProjectName == null)
+            {
+                if (addAssemblyReference)
+                    throw new ArgumentException("Adding an assembly reference requires a project to reference.");
                 return testProject;
             }
 
@@ -1105,8 +1221,13 @@ public class Program
             };
             referenceProject.SourceFiles[$"{referenceProjectName}.cs"] = @"
 using System;
+
 public class ClassLib
 {
+    public static void UsedMethod()
+    {
+    }
+
     public void UnusedMethod()
     {
     }
@@ -1130,6 +1251,8 @@ public class ClassLib
     }
 }
 ";
+            if (modifyReferencedProject != null)
+                modifyReferencedProject(referenceProject);
 
             if (usePackageReference)
             {

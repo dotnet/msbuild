@@ -154,6 +154,26 @@ namespace Microsoft.DotNet.Restore.Test
                  .And.NotHaveStdOut();
         }
 
+        [Fact]
+        public void ItAcceptsArgumentsAfterProperties()
+        {
+            var rootPath = _testAssetsManager.CreateTestDirectory().Path;
+
+            string[] newArgs = new[] { "console", "-o", rootPath, "--no-restore" };
+            new DotnetCommand(Log, "new")
+                .WithWorkingDirectory(rootPath)
+                .Execute(newArgs)
+                .Should()
+                .Pass();
+
+            string[] args = new[] { "/p:prop1=true", "/m:1" };
+            new DotnetRestoreCommand(Log)
+                 .WithWorkingDirectory(rootPath)
+                 .Execute(args)
+                 .Should()
+                 .Pass();
+        }
+
         private static string[] HandleStaticGraphEvaluation(bool useStaticGraphEvaluation, string[] args) =>
             useStaticGraphEvaluation ? 
                 args.Append("/p:RestoreUseStaticGraphEvaluation=true").ToArray() :

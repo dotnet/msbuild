@@ -85,7 +85,7 @@ namespace Microsoft.NET.Publish.Tests
                 .And.Contain(
                     "{\"EventName\":\"ReadyToRun\",\"Properties\":{\"PublishReadyToRunUseCrossgen2\":\"True\",")
                 .And.MatchRegex(
-                    "\"Crossgen2PackVersion\":\"5.+\"")
+                    "\"Crossgen2PackVersion\":\"[5-9]\\..+\"")
                 .And.Contain(
                     "\"CompileListCount\":\"1\",\"FailedCount\":\"0\"");
         }

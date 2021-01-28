@@ -321,11 +321,6 @@ namespace Microsoft.NET.Build.Tasks
 
             if (ReadyToRunEnabled && ReadyToRunUseCrossgen2)
             {
-                if (!SelfContained)
-                {
-                    Log.LogError(Strings.Crossgen2RequiresSelfContained);
-                    return;
-                }
                 if (!AddCrossgen2Package(_normalizedTargetFrameworkVersion, packagesToDownload))
                 {
                     Log.LogError(Strings.ReadyToRunNoValidRuntimePackageError);

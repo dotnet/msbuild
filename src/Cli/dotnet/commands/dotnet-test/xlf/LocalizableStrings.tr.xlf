@@ -58,6 +58,36 @@ MSTest için zaman aşımı süresi tüm test çalışmalarına yönelik olarak 
 Bu seçenek, şu anda yalnızca netcoreapp2.1 ve üzeri bir sürüme sahip Windows ile netcoreapp3.1 ve üzeri bir sürüme sahip Linux'ta desteklenmektedir. OSX ve UWP desteklenmez.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableDescription">
+        <source>Sets the value of an environment variable. 
+Creates the variable if it does not exist, overrides if it does. 
+This will force the tests to be run in an isolated process. 
+This argument can be specified multiple times to provide multiple variables.
+
+Examples:
+-e VARIABLE=abc
+-e VARIABLE="value with spaces"
+-e VARIABLE="value;seperated with;semicolons"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</source>
+        <target state="translated">Bir ortam değişkeninin değerini ayarlar. 
+Değişken yoksa oluşturur, varsa değişkeni geçersiz kılar. 
+Bu, testleri yalıtılmış bir işlemde çalıştırılmaya zorlar. 
+Bu bağımsız değişken, birden çok değişken sağlamak için birden çok kez belirtilebilir.
+
+Örnek:
+-e DEĞİŞKEN=abc
+-e DEĞİŞKEN="boşluk içeren değerler"
+-e DEĞİŞKEN="noktalı virgülle;ayrılmış;değerler"
+-e DEĞ1=abc -e DEĞ2=def -e DEĞ3=ghi
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableExpression">
+        <source>NAME="VALUE"</source>
+        <target state="translated">AD="DEĞER"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdNoLogo">
         <source>Run test(s), without displaying Microsoft Testplatform banner</source>
         <target state="translated">Testleri Microsoft Testplatform bandını görüntülemeden çalıştır</target>

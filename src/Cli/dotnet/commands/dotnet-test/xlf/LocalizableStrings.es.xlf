@@ -58,6 +58,36 @@ Para MSTest, el tiempo de espera se usa para todos los casos de prueba.
 Actualmente, esta opción solo se admite en Windows junto con netcoreapp 2.1 y versiones posteriores. Y en Linux con netcoreapp 3.1 y versiones posteriores. OSX y UWP no son compatibles.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableDescription">
+        <source>Sets the value of an environment variable. 
+Creates the variable if it does not exist, overrides if it does. 
+This will force the tests to be run in an isolated process. 
+This argument can be specified multiple times to provide multiple variables.
+
+Examples:
+-e VARIABLE=abc
+-e VARIABLE="value with spaces"
+-e VARIABLE="value;seperated with;semicolons"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</source>
+        <target state="translated">Establece el valor de una variable de entorno. 
+Crea la variable si no existe o la reemplaza en caso de que exista. 
+Esto forzará la ejecución de las pruebas en un proceso aislado. 
+Este argumento se puede especificar varias veces para proporcionar múltiples variables.
+
+Ejemplos:
+-e VARIABLE=abc
+-e VARIABLE="value with spaces"
+-e VARIABLE="value;seperated with;semicolons"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableExpression">
+        <source>NAME="VALUE"</source>
+        <target state="translated">NAME="VALUE"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdNoLogo">
         <source>Run test(s), without displaying Microsoft Testplatform banner</source>
         <target state="translated">Ejecutar pruebas, sin mostrar la pancarta de Microsoft Testplatform</target>

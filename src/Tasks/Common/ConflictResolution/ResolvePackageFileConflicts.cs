@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
-    public class ResolvePackageFileConflicts : TaskBase
+    public class ResolvePackageFileConflicts : TaskWithAssemblyResolveHooks
     {
         private HashSet<ITaskItem> referenceConflicts = new HashSet<ITaskItem>();
         private HashSet<ITaskItem> copyLocalConflicts = new HashSet<ITaskItem>();

@@ -7,20 +7,17 @@ using System.IO;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Tool.List;
-using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Moq;
 using NuGet.Versioning;
 using Xunit;
-using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.List.LocalizableStrings;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine.Parsing;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {
@@ -95,7 +92,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var toolPath = Path.GetTempPath();
             var result = Parser.Instance.Parse("dotnet tool list " + $"--tool-path {toolPath}");
             var toolListGlobalOrToolPathCommand = new ToolListGlobalOrToolPathCommand(
-                result["dotnet"]["tool"]["list"],
                 result,
                 toolPath1 =>
                 {
@@ -105,7 +101,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 _reporter);
 
             var toolListCommand = new ToolListCommand(
-                result["dotnet"]["tool"]["list"],
                 result,
                 toolListGlobalOrToolPathCommand);
 
@@ -257,9 +252,8 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
         private ToolListGlobalOrToolPathCommand CreateCommand(IToolPackageStoreQuery store, string options = "", string expectedToolPath = null)
         {
-            ParseResult result = Parser.Instance.Parse("dotnet tool list " + options);
+            var result = Parser.Instance.Parse("dotnet tool list " + options);
             return new ToolListGlobalOrToolPathCommand(
-                result["dotnet"]["tool"]["list"],
                 result,
                 toolPath => { AssertExpectedToolPath(toolPath, expectedToolPath); return store; },
                 _reporter);

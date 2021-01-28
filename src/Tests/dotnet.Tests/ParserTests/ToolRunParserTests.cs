@@ -1,10 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Linq;
+using System.CommandLine.Parsing;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Xunit;
 using Xunit.Abstractions;
 using Parser = Microsoft.DotNet.Cli.Parser;
@@ -25,8 +24,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool run dotnetsay");
 
-            var appliedOptions = result["dotnet"]["tool"]["run"];
-            var packageId = appliedOptions.Arguments.Single();
+            var packageId = result.ValueForArgument<string>(ToolRunCommandParser.CommandNameArgument);
 
             packageId.Should().Be("dotnetsay");
         }
@@ -37,7 +35,6 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result = Parser.Instance.Parse("dotnet tool run dotnetsay hi");
             result.UnmatchedTokens.Should().Contain("hi");
             result.UnparsedTokens.Should().BeEmpty();
-            result.Errors.Should().BeEmpty();
         }
 
         [Fact]
@@ -55,7 +52,6 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result = Parser.Instance.Parse("dotnet tool run dotnetsay hi1 -- hi2");
             result.UnmatchedTokens.Should().Contain("hi1");
             result.UnparsedTokens.Should().Contain("hi2");
-            result.Errors.Should().BeEmpty();
         }
     }
 }

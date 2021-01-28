@@ -15,7 +15,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <MicrosoftNETBuildTasksDirectoryRoot>$(MSBuildThisFileDirectory)..\tools\</MicrosoftNETBuildTasksDirectoryRoot>
-    <MicrosoftNETBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">net5.0</MicrosoftNETBuildTasksTFM>
+    <MicrosoftNETBuildTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">net6.0</MicrosoftNETBuildTasksTFM>
     <MicrosoftNETBuildTasksTFM Condition=" '$(MicrosoftNETBuildTasksTFM)' == ''">net472</MicrosoftNETBuildTasksTFM>
     <MicrosoftNETBuildTasksDirectory>$(MicrosoftNETBuildTasksDirectoryRoot)$(MicrosoftNETBuildTasksTFM)/</MicrosoftNETBuildTasksDirectory>
     <MicrosoftNETBuildTasksAssembly>$(MicrosoftNETBuildTasksDirectory)Microsoft.NET.Build.Tasks.dll</MicrosoftNETBuildTasksAssembly>
@@ -48,56 +48,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifiers Condition=" '$(PackAsTool)' == 'true' ">$(RuntimeIdentifiers);$(PackAsToolShimRuntimeIdentifiers)</RuntimeIdentifiers>
   </PropertyGroup>
 
-  <UsingTask TaskName="GetNearestTargetFramework" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="NETSdkError" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="NETSdkWarning" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="NETSdkInformation" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ShowPreviewMessage" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-
-  <!--
-  ============================================================
-                              GetTargetFrameworkProperties
-
-    Invoked by common targets to return the set of properties
-    (in the form  "key1=value1;...keyN=valueN") needed to build
-    against the target framework that best matches the referring
-    project's target framework.
-
-    The referring project's $(TargetFrameworkMoniker) is passed
-    in as $(ReferringTargetFramework).
-
-    This is in the common targets so that it will apply to both
-    cross-targeted and single-targeted projects.  It is run
-    for single-targeted projects so that an error will be
-    generated if the referenced project is not compatible
-    with the referencing project's target framework.
-  ============================================================
-   -->
-  <Target Name="GetTargetFrameworkProperties" Returns="TargetFramework=$(NearestTargetFramework);ProjectHasSingleTargetFramework=$(_HasSingleTargetFramework);ProjectIsRidAgnostic=$(_IsRidAgnostic)">
-
-    <PropertyGroup>
-      <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
-      <_IsRidAgnostic>false</_IsRidAgnostic>
-      <_IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</_IsRidAgnostic>
-
-      <!-- If a ReferringTargetFramework was not specified, and we only have one TargetFramework, then don't try to check compatibility -->
-      <_SkipNearestTargetFrameworkResolution Condition="'$(TargetFramework)' != '' and '$(ReferringTargetFramework)' == ''">true</_SkipNearestTargetFrameworkResolution>
-      <NearestTargetFramework Condition="'$(_SkipNearestTargetFrameworkResolution)' == 'true'">$(TargetFramework)</NearestTargetFramework>
-
-      <!-- A project can only have more than one output if the current global properties are such that the current build is a cross-targeting one. -->
-      <_HasSingleTargetFramework Condition="'$(IsCrossTargetingBuild)' != 'true'">true</_HasSingleTargetFramework>
-      <_HasSingleTargetFramework Condition="'$(_HasSingleTargetFramework)' == ''">false</_HasSingleTargetFramework>
-
-      <_PossibleTargetFrameworks Condition="'$(TargetFramework)' != ''">$(TargetFramework)</_PossibleTargetFrameworks>
-      <_PossibleTargetFrameworks Condition="'$(TargetFramework)' == ''">$(TargetFrameworks)</_PossibleTargetFrameworks>
-    </PropertyGroup>
-
-    <GetNearestTargetFramework ReferringTargetFramework="$(ReferringTargetFramework)"
-                               PossibleTargetFrameworks="$(_PossibleTargetFrameworks)"
-                               ProjectFilePath="$(MSBuildProjectFullPath)"
-                               Condition="'$(_SkipNearestTargetFrameworkResolution)' != 'true'">
-      <Output PropertyName="NearestTargetFramework" TaskParameter="NearestTargetFramework" />
-    </GetNearestTargetFramework>
-  </Target>
 
 </Project>

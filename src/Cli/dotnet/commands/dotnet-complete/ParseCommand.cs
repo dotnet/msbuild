@@ -1,6 +1,6 @@
 ﻿using System;
+using System.CommandLine.Parsing;
 using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli
@@ -30,8 +30,7 @@ namespace Microsoft.DotNet.Cli
                 Console.WriteLine(string.Join(" ", result.UnparsedTokens));
             }
 
-            var optionValuesToBeForwarded = result.AppliedCommand()
-                                                  .OptionValuesToBeForwarded();
+            var optionValuesToBeForwarded = result.OptionValuesToBeForwarded(ParseCommandParser.GetCommand());
             if (optionValuesToBeForwarded.Any())
             {
                 Console.WriteLine("Option values to be forwarded: ");
@@ -44,7 +43,7 @@ namespace Microsoft.DotNet.Cli
                 Console.WriteLine();
                 foreach (var error in result.Errors)
                 {
-                    Console.WriteLine($"[{error?.Option?.Name ?? "???"}] {error?.Message}");
+                    Console.WriteLine(error?.Message);
                 }
             }
 

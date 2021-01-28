@@ -1,48 +1,42 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
+using System.Collections.Generic;
+using System.CommandLine.Parsing;
+using System.IO;
+using System.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli;
 using Xunit;
 using Xunit.Abstractions;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
-namespace Microsoft.DotNet.Tests.ParserTests
+namespace Microsoft.DotNet.Tests.CommandLineParserTests
 {
-    public class RestoreParserTests
+    public class RestoreCommandLineParserTests
     {
         private readonly ITestOutputHelper output;
 
-        public RestoreParserTests(ITestOutputHelper output)
+        public RestoreCommandLineParserTests(ITestOutputHelper output)
         {
             this.output = output;
         }
 
-        [Fact]
+        [Fact] 
         public void RestoreCapturesArgumentsToForwardToMSBuildWhenTargetIsSpecified()
         {
-            var parser = Parser.Instance;
+            var result = Parser.Instance.Parse(@"dotnet restore .\some.csproj --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
 
-            var result = parser.Parse(@"dotnet restore .\some.csproj --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
-
-            result["dotnet"]["restore"]
-                .Arguments
-                .Should()
-                .BeEquivalentTo(@".\some.csproj", @"/p:SkipInvalidConfigurations=true");
+            result.ValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument).Should().BeEquivalentTo(@".\some.csproj");
+            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"-property:SkipInvalidConfigurations=true");
         }
 
         [Fact]
         public void RestoreCapturesArgumentsToForwardToMSBuildWhenTargetIsNotSpecified()
         {
-            var parser = Parser.Instance;
+            var result = Parser.Instance.Parse(@"dotnet restore --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
 
-            var result = parser.Parse(@"dotnet restore --packages c:\.nuget\packages /p:SkipInvalidConfigurations=true");
-
-            result["dotnet"]["restore"]
-                .Arguments
-                .Should()
-                .BeEquivalentTo(@"/p:SkipInvalidConfigurations=true");
+            result.OptionValuesToBeForwarded(RestoreCommandParser.GetCommand()).Should().Contain(@"-property:SkipInvalidConfigurations=true");
         }
 
         [Fact]
@@ -51,16 +45,11 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var restore =
                 Parser.Instance
                       .Parse(
-                          @"dotnet restore --no-cache --packages ""D:\OSS\corefx\packages"" --source https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json --source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json --source https://api.nuget.org/v3/index.json D:\OSS\corefx\external\runtime\runtime.depproj")
-                      .AppliedCommand();
+                          @"dotnet restore --no-cache --packages ""D:\OSS\corefx\packages"" --source https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json --source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json --source https://api.nuget.org/v3/index.json D:\OSS\corefx\external\runtime\runtime.depproj");
 
-            restore
-                .Arguments
-                .Should()
-                .BeEquivalentTo(@"D:\OSS\corefx\external\runtime\runtime.depproj");
+            restore.ValueForArgument<string[]>(RestoreCommandParser.SlnOrProjectArgument);
 
-            restore["--source"]
-                .Arguments
+            restore.ValueForOption<string[]>("--source")
                 .Should()
                 .BeEquivalentTo(
                     "https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json",

@@ -1,49 +1,37 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
+using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
 {
     internal class RemoveProjectToProjectReferenceCommand : CommandBase
     {
-        private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
+        private readonly IReadOnlyCollection<string> _arguments;
 
         public RemoveProjectToProjectReferenceCommand(
-            AppliedOption appliedCommand,
-            string fileOrDirectory,
             ParseResult parseResult) : base(parseResult)
         {
-            if (appliedCommand == null)
-            {
-                throw new ArgumentNullException(nameof(appliedCommand));
-            }
+            _fileOrDirectory = parseResult.ValueForArgument<string>(RemoveCommandParser.ProjectArgument);
+            _arguments = parseResult.ValueForArgument<IReadOnlyCollection<string>>(RemoveProjectToProjectReferenceParser.ProjectPathArgument);
 
-            if (fileOrDirectory == null)
-            {
-                throw new ArgumentNullException(nameof(fileOrDirectory));
-            }
-
-            if (appliedCommand.Arguments.Count == 0)
+            if (_arguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneReferenceToRemove);
             }
-
-            _appliedCommand = appliedCommand;
-            _fileOrDirectory = fileOrDirectory;
         }
 
         public override int Execute()
         {
             var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), _fileOrDirectory, false);
-            var references = _appliedCommand.Arguments.Select(p => {
+            var references = _arguments.Select(p => {
                 var fullPath = Path.GetFullPath(p);
                 if (!Directory.Exists(fullPath))
                 {
@@ -57,7 +45,7 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
             });
 
             int numberOfRemovedReferences = msbuildProj.RemoveProjectToProjectReferences(
-                _appliedCommand.ValueOrDefault<string>("framework"),
+                _parseResult.ValueForOption<string>(RemoveProjectToProjectReferenceParser.FrameworkOption),
                 references);
 
             if (numberOfRemovedReferences != 0)

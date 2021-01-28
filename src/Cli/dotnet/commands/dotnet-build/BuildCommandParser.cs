@@ -2,8 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
+using System.CommandLine;
 using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Build.LocalizableStrings;
 
@@ -11,39 +10,47 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class BuildCommandParser
     {
-        public static Command Build() =>
-            CreateWithRestoreOptions.Command(
-                "build",
-                LocalizableStrings.AppFullName,
-                Accept.ZeroOrMoreArguments()
-                      .With(name: CommonLocalizableStrings.SolutionOrProjectArgumentName,
-                            description: CommonLocalizableStrings.SolutionOrProjectArgumentDescription),
-                CommonOptions.HelpOption(),
-                Create.Option(
-                    "-o|--output",
-                    LocalizableStrings.OutputOptionDescription,
-                    Accept.ExactlyOneArgument()
-                          .With(name: LocalizableStrings.OutputOptionName)
-                          .ForwardAsSingle(o => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
-                CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
-                CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
-                CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
-                CommonOptions.VersionSuffixOption(),
-                Create.Option(
-                    "--no-incremental",
-                    LocalizableStrings.NoIncrementalOptionDescription),
-                Create.Option(
-                    "--no-dependencies",
-                    LocalizableStrings.NoDependenciesOptionDescription,
-                    Accept.NoArguments()
-                          .ForwardAs("-property:BuildProjectReferences=false")),
-                Create.Option(
-                    "--nologo",
-                    LocalizableStrings.CmdNoLogo,
-                    Accept.NoArguments()
-                          .ForwardAs("-nologo")),
-                CommonOptions.NoRestoreOption(),
-                CommonOptions.InteractiveMsBuildForwardOption(),
-                CommonOptions.VerbosityOption());
+        public static readonly Argument SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
+        {
+            Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
+            Arity = ArgumentArity.ZeroOrMore
+        };
+
+        public static readonly Option OutputOption = new Option<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
+        {
+            Argument = new Argument<string>(LocalizableStrings.OutputOptionName)
+        }.ForwardAsSingle(arg => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(arg)}");
+
+        public static readonly Option NoIncrementalOption = new Option<bool>("--no-incremental", LocalizableStrings.NoIncrementalOptionDescription);
+
+        public static readonly Option NoDependenciesOption = new Option<bool>("--no-dependencies", LocalizableStrings.NoDependenciesOptionDescription)
+            .ForwardAs("-property:BuildProjectReferences=false");
+
+        public static readonly Option NoLogoOption = new Option<bool>("--nologo", LocalizableStrings.CmdNoLogo)
+            .ForwardAs("-nologo");
+
+        public static readonly Option NoRestoreOption = CommonOptions.NoRestoreOption();
+
+        public static Command GetCommand()
+        {
+            var command = new Command("build", LocalizableStrings.AppFullName);
+
+            command.AddArgument(SlnOrProjectArgument);
+            RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: false, includeNoDependenciesOption: false);
+            command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
+            command.AddOption(CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription));
+            command.AddOption(CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription));
+            command.AddOption(CommonOptions.VersionSuffixOption());
+            command.AddOption(NoRestoreOption);
+            command.AddOption(CommonOptions.InteractiveMsBuildForwardOption());
+            command.AddOption(CommonOptions.VerbosityOption());
+            command.AddOption(CommonOptions.DebugOption());
+            command.AddOption(OutputOption);
+            command.AddOption(NoIncrementalOption);
+            command.AddOption(NoDependenciesOption);
+            command.AddOption(NoLogoOption);
+
+            return command;
+        }
     }
 }

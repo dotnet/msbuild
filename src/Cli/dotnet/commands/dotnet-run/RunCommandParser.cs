@@ -1,60 +1,55 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.Cli.CommandLine;
-using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Run;
+using System.Collections.Generic;
+using System.CommandLine;
 using LocalizableStrings = Microsoft.DotNet.Tools.Run.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static class RunCommandParser
     {
-        public static Command Run() =>
-            CreateWithRestoreOptions.Command(
-                "run",
-                LocalizableStrings.AppFullName,
-                treatUnmatchedTokensAsErrors: false,
-                arguments: Accept.ZeroOrMoreArguments()
-                    .MaterializeAs(o => new RunCommand
-                    (
-                        configuration: o.SingleArgumentOrDefault("--configuration"),
-                        framework: o.SingleArgumentOrDefault("--framework"),
-                        runtime: o.SingleArgumentOrDefault("--runtime"),
-                        noBuild: o.HasOption("--no-build"),
-                        project: o.SingleArgumentOrDefault("--project"),
-                        launchProfile: o.SingleArgumentOrDefault("--launch-profile"),
-                        noLaunchProfile: o.HasOption("--no-launch-profile"),
-                        noRestore: o.HasOption("--no-restore") || o.HasOption("--no-build"),
-                        interactive: o.HasOption(Utils.Constants.RestoreInteractiveOption),
-                        restoreArgs: o.OptionValuesToBeForwarded(),
-                        args: o.Arguments
-                    )),
-                options: new[]
-                {
-                    CommonOptions.HelpOption(),
-                    CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
-                    CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
-                    CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
-                    Create.Option(
-                        "-p|--project",
-                        LocalizableStrings.CommandOptionProjectDescription,
-                        Accept.ExactlyOneArgument()),
-                    Create.Option(
-                        "--launch-profile",
-                        LocalizableStrings.CommandOptionLaunchProfileDescription,
-                        Accept.ExactlyOneArgument()),
-                    Create.Option(
-                        "--no-launch-profile",
-                        LocalizableStrings.CommandOptionNoLaunchProfileDescription,
-                        Accept.NoArguments()),
-                    Create.Option(
-                        "--no-build",
-                        LocalizableStrings.CommandOptionNoBuildDescription,
-                        Accept.NoArguments()),
-                    CommonOptions.InteractiveMsBuildForwardOption(),
-                    CommonOptions.NoRestoreOption(),
-                    CommonOptions.VerbosityOption()
-                });
+        public static readonly Option ConfigurationOption = CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription);
+
+        public static readonly Option FrameworkOption = CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription);
+
+        public static readonly Option RuntimeOption = CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription);
+
+        public static readonly Option ProjectOption = new Option<string>(new string[] { "-p", "--project" }, LocalizableStrings.CommandOptionProjectDescription)
+        {
+            Argument = new Argument<string>()
+        };
+
+        public static readonly Option LaunchProfileOption = new Option<string>("--launch-profile", LocalizableStrings.CommandOptionLaunchProfileDescription)
+        {
+            Argument = new Argument<string>()
+        };
+
+        public static readonly Option NoLaunchProfileOption = new Option<bool>("--no-launch-profile", LocalizableStrings.CommandOptionNoLaunchProfileDescription);
+
+        public static readonly Option NoBuildOption = new Option<bool>("--no-build", LocalizableStrings.CommandOptionNoBuildDescription);
+
+        public static readonly Option NoRestoreOption = CommonOptions.NoRestoreOption();
+
+        public static readonly Option InteractiveOption = CommonOptions.InteractiveMsBuildForwardOption();
+
+        public static Command GetCommand()
+        {
+            var command = new Command("run", LocalizableStrings.AppFullName);
+
+            command.AddOption(ConfigurationOption);
+            command.AddOption(FrameworkOption);
+            command.AddOption(RuntimeOption);
+            command.AddOption(ProjectOption);
+            command.AddOption(LaunchProfileOption);
+            command.AddOption(NoLaunchProfileOption);
+            command.AddOption(NoBuildOption);
+            command.AddOption(InteractiveOption);
+            command.AddOption(NoRestoreOption);
+            command.AddOption(CommonOptions.VerbosityOption());
+            command.TreatUnmatchedTokensAsErrors = false;
+
+            return command;
+        }
     }
 }

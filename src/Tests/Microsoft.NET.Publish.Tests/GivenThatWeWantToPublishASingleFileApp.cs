@@ -11,7 +11,6 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -498,6 +497,47 @@ namespace Microsoft.NET.Publish.Tests
             var appHostSize = new FileInfo(appHostPath).Length;
 
             appHostSize.Should().BeLessThan(singleFileSize);
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net6.0")]
+        public void ILLink_analyzer_warnings_are_produced(string targetFramework)
+        {
+            var projectName = "ILLinkAnalyzerWarningsApp";
+            var testProject = CreateTestProjectWithAnalyzerWarnings(targetFramework, projectName, true);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand
+                .Execute(RuntimeIdentifier)
+                .Should()
+                .HaveStdOutContaining("(8,13): warning IL3000")
+                .And.HaveStdOutContaining("(9,13): warning IL3001");
+        }
+
+        private TestProject CreateTestProjectWithAnalyzerWarnings(string targetFramework, string projectName, bool isExecutable)
+        {
+            var testProject = new TestProject()
+            {
+                Name = projectName,
+                TargetFrameworks = targetFramework,
+                IsExe = isExecutable
+            };
+
+            testProject.SourceFiles[$"{projectName}.cs"] = @"
+using System.Reflection;
+class C
+{
+    static void Main()
+    {
+        var a = Assembly.LoadFrom(""/some/path/not/in/bundle"");
+        _ = a.Location;
+        _ = a.GetFiles();
+    }
+}";
+
+            testProject.AdditionalProperties["PublishSingleFile"] = "true";
+            return testProject;
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]

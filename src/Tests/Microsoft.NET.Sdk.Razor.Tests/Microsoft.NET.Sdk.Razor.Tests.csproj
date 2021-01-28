@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>$(SdkTargetFramework)</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <PackageId>testSdkRazor</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="**\*.cs" Exclude="$(GlobalExclude)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>DefaultRazorTestTfm</_Parameter1>
+      <_Parameter2>$(SdkTargetFramework)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
+    <PackageReference Include="Moq" Version="4.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\RazorSdk\Tasks\Microsoft.NET.Sdk.Razor.Tasks.csproj" />
+    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="TestFiles\Generated\*.rz.scp.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestFiles\Generated\*.bundle.scp.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdDeprecatedDescription">
         <source>Lists packages that have been deprecated. Cannot be combined with '--vulnerable' or '--outdated' options.</source>
-        <target state="needs-review-translation">Seznam zastaralých balíčků</target>
+        <target state="translated">Vypíše balíčky, které jsou zastaralé. Nedá se kombinovat s možností --vulnerable ani --outdated.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdOutdatedDescription">
         <source>Lists packages that have newer versions. Cannot be combined with '--deprecated' or '--vulnerable' options.</source>
-        <target state="needs-review-translation">Zobrazí seznam balíčků, které mají novější verze.</target>
+        <target state="translated">Vypíše balíčky, které mají novější verze. Nedá se kombinovat s možností --deprecated ani --vulnerable.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="CmdVulnerableDescription">
         <source>Lists packages that have known vulnerabilities. Cannot be combined with '--deprecated' or '--outdated' options.</source>
-        <target state="new">Lists packages that have known vulnerabilities. Cannot be combined with '--deprecated' or '--outdated' options.</target>
+        <target state="translated">Vypíše balíčky, které mají známá ohrožení zabezpečení. Nedá se kombinovat s možností --deprecated ani --outdated.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsOrSolutions">
@@ -49,22 +49,22 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>The path to the NuGet config file to use. Requires the '--outdated', '--deprecated' or '--vulnerable' option.</source>
-        <target state="needs-review-translation">Cesta ke konfiguračnímu souboru NuGet, který se má použít. Vyžaduje přepínač --outdated nebo --deprecated.</target>
+        <target state="translated">Cesta ke konfiguračnímu souboru NuGet, který se má použít. Vyžaduje přepínač --outdated, --deprecated nebo --vulnerable.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
         <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">Při hledání novějších balíčků se budou brát v úvahu jen balíčky s odpovídajícím číslem hlavní verze. Vyžaduje přepínač --outdated nebo --deprecated.</target>
+        <target state="translated">Při hledání novějších balíčků se budou brát v úvahu jenom balíčky s odpovídajícím číslem hlavní verze. Vyžaduje přepínač --outdated.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
         <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">Při hledání novějších balíčků se budou brát v úvahu jen balíčky s odpovídajícími čísly hlavní verze a podverze. Vyžaduje přepínač --outdated nebo --deprecated.</target>
+        <target state="translated">Při hledání novějších balíčků se budou brát v úvahu jenom balíčky s odpovídajícími čísly hlavní verze a podverze. Vyžaduje přepínač --outdated.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
         <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">Při hledání novějších balíčků se budou brát v úvahu i balíčky v předběžných verzích. Vyžaduje přepínač --outdated nebo --deprecated.</target>
+        <target state="translated">Při hledání novějších balíčků se budou brát v úvahu i balíčky v předběžných verzích. Vyžaduje přepínač --outdated.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated', '--deprecated' or '--vulnerable' option.</source>
-        <target state="needs-review-translation">Zdroje NuGet, které se mají použít při hledání novějších balíčků. Vyžaduje přepínač --outdated nebo --deprecated.</target>
+        <target state="translated">Zdroje NuGet, které se mají použít při hledání novějších balíčků. Vyžaduje možnost --outdated, --deprecated nebo --vulnerable.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="OptionsCannotBeCombined">
         <source>Options '--outdated', '--deprecated' and '--vulnerable' cannot be combined.</source>
-        <target state="new">Options '--outdated', '--deprecated' and '--vulnerable' cannot be combined.</target>
+        <target state="translated">Možnosti --outdated, --deprecated a --vulnerable se nedají kombinovat.</target>
         <note />
       </trans-unit>
     </body>

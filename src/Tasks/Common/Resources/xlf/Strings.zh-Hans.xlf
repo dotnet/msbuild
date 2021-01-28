@@ -284,6 +284,11 @@
         <target state="translated">NETSDK1015: 已向预处理器标记“{0}”提供多个值。选择“{1}”作为值。</target>
         <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
+      <trans-unit id="DuplicatePublishOutputFiles">
+        <source>NETSDK1148: Found multiple publish output files with the same relative path: {0}.</source>
+        <target state="translated">NETSDK1148: 找到了多个具有相同相对路径的发布输出文件: {0}。</target>
+        <note>{StrBegin="NETSDK1148: "}</note>
+      </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
         <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
         <target state="translated">NETSDK1110: 运行时包中的多个资产具有“{0}”的相同目标子路径。请在此处将此错误报告给 .NET 团队: https://aka.ms/dotnet-sdk-issue。</target>
@@ -742,7 +747,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: The following workload packs were not installed: {0}</source>
-        <target state="new">NETSDK1147: The following workload packs were not installed: {0}</target>
+        <target state="translated">NETSDK1147: 未安装以下工作负载包: {0}</target>
         <note>{StrBegin="NETSDK1147: "}</note>
       </trans-unit>
     </body>

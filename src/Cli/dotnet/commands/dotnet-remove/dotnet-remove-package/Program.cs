@@ -3,10 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.NuGet;
 
@@ -14,29 +14,22 @@ namespace Microsoft.DotNet.Tools.Remove.PackageReference
 {
     internal class RemovePackageReferenceCommand : CommandBase
     {
-        private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
+        private readonly IReadOnlyCollection<string> _arguments;
 
         public RemovePackageReferenceCommand(
-            AppliedOption appliedCommand,
-            string fileOrDirectory,
             ParseResult parseResult) : base(parseResult)
         {
-            if (appliedCommand == null)
+            _fileOrDirectory = parseResult.ValueForArgument<string>(RemoveCommandParser.ProjectArgument);
+            _arguments = parseResult.ValueForArgument<IReadOnlyCollection<string>>(RemovePackageParser.CmdPackageArgument);
+            if (_fileOrDirectory == null)
             {
-                throw new ArgumentNullException(nameof(appliedCommand));
+                throw new ArgumentNullException(nameof(_fileOrDirectory));
             }
-            if (fileOrDirectory == null)
-            {
-                throw new ArgumentNullException(nameof(fileOrDirectory));
-            }
-            if (appliedCommand.Arguments.Count != 1)
+            if (_arguments.Count != 1)
             {
                 throw new GracefulException(LocalizableStrings.SpecifyExactlyOnePackageReference);
             }
-
-            _appliedCommand = appliedCommand;
-            _fileOrDirectory = fileOrDirectory;
         }
 
         public override int Execute()
@@ -52,7 +45,7 @@ namespace Microsoft.DotNet.Tools.Remove.PackageReference
                 projectFilePath = _fileOrDirectory;
             }
 
-            var packageToRemove = _appliedCommand.Arguments.Single();
+            var packageToRemove = _arguments.Single();
             var result = NuGetCommand.Run(TransformArgs(packageToRemove, projectFilePath));
 
             return result;
@@ -70,8 +63,8 @@ namespace Microsoft.DotNet.Tools.Remove.PackageReference
                 projectFilePath
             };
 
-            args.AddRange(_appliedCommand
-                .OptionValuesToBeForwarded()
+            args.AddRange(_parseResult
+                .OptionValuesToBeForwarded(RemovePackageParser.GetCommand())
                 .SelectMany(a => a.Split(' ')));
 
             return args.ToArray();

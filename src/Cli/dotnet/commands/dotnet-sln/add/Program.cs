@@ -3,10 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
@@ -16,7 +16,6 @@ namespace Microsoft.DotNet.Tools.Sln.Add
 {
     internal class AddProjectToSolutionCommand : CommandBase
     {
-        private readonly AppliedOption _appliedCommand;
         private readonly string _fileOrDirectory;
         private readonly bool _inRoot;
         private readonly IList<string> _relativeRootSolutionFolders;
@@ -25,20 +24,12 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         private const string SolutionFolderOption = "solution-folder";
 
         public AddProjectToSolutionCommand(
-            AppliedOption appliedCommand,
-            string fileOrDirectory,
             ParseResult parseResult) : base(parseResult)
         {
-            if (appliedCommand == null)
-            {
-                throw new ArgumentNullException(nameof(appliedCommand));
-            }
-            _appliedCommand = appliedCommand;
+            _fileOrDirectory = parseResult.ValueForArgument<string>(SlnCommandParser.SlnArgument);
 
-            _fileOrDirectory = fileOrDirectory;
-
-            _inRoot = appliedCommand.ValueOrDefault<bool>(InRootOption);
-            string relativeRoot = _appliedCommand.ValueOrDefault<string>(SolutionFolderOption);
+            _inRoot = parseResult.ValueForOption<bool>(SlnAddParser.InRootOption);
+            string relativeRoot = parseResult.ValueForOption<string>(SlnAddParser.SolutionFolderOption);
 
             if (_inRoot && !string.IsNullOrEmpty(relativeRoot))
             {
@@ -53,14 +44,15 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         {
             SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
 
-            if (_appliedCommand.Arguments.Count == 0)
+            var arguments = _parseResult.ValueForArgument<IReadOnlyCollection<string>>(SlnAddParser.ProjectPathArgument) ?? Array.Empty<string>();
+            if (arguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd);
             }
 
-            PathUtility.EnsureAllPathsExist(_appliedCommand.Arguments, CommonLocalizableStrings.CouldNotFindProjectOrDirectory, true);
+            PathUtility.EnsureAllPathsExist(arguments, CommonLocalizableStrings.CouldNotFindProjectOrDirectory, true);
 
-            var fullProjectPaths = _appliedCommand.Arguments.Select(p =>
+            var fullProjectPaths = arguments.Select(p =>
             {
                 var fullPath = Path.GetFullPath(p);
                 return Directory.Exists(fullPath) ?

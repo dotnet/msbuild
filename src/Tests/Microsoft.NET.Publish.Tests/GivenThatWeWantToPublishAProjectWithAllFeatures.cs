@@ -77,6 +77,7 @@ namespace Microsoft.NET.Publish.Tests
             ""System.Runtime.TieredCompilation"": true,
             ""System.Runtime.TieredCompilation.QuickJit"": true,
             ""System.Runtime.TieredCompilation.QuickJitForLoops"": true,
+            ""System.StartupHookProvider.IsSupported"": false,
             ""System.Text.Encoding.EnableUnsafeUTF7Encoding"": false,
             ""System.Threading.ThreadPool.MinThreads"": 2,
             ""System.Threading.ThreadPool.MaxThreads"": 9,

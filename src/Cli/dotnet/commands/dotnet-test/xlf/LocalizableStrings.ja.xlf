@@ -58,6 +58,36 @@ MSTest の場合、タイムアウトはすべてのテスト ケースに使用
 このオプションは現在、netcoreapp2.1 以降がインストールされた Windows、netcoreapp3.1 以降がインストールされた Linux でのみサポートされています。OSX および UWP はサポートされていません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableDescription">
+        <source>Sets the value of an environment variable. 
+Creates the variable if it does not exist, overrides if it does. 
+This will force the tests to be run in an isolated process. 
+This argument can be specified multiple times to provide multiple variables.
+
+Examples:
+-e VARIABLE=abc
+-e VARIABLE="value with spaces"
+-e VARIABLE="value;seperated with;semicolons"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</source>
+        <target state="translated">環境変数の値を設定します。
+変数が存在しない場合は作成され、存在する場合はオーバーライドされます。
+これにより、テストは強制的に分離プロセスで実行されます。
+この引数は、複数の変数を指定するために複数回指定できます。
+
+例:
+-e VARIABLE=abc
+-e VARIABLE="value with spaces"
+-e VARIABLE="value;seperated with;semicolons"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableExpression">
+        <source>NAME="VALUE"</source>
+        <target state="translated">NAME="VALUE"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdNoLogo">
         <source>Run test(s), without displaying Microsoft Testplatform banner</source>
         <target state="translated">Microsoft Testplatform バナーを表示せずにテストを実行する</target>

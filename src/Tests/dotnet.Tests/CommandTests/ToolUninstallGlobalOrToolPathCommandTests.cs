@@ -2,28 +2,25 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using FluentAssertions;
-using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.DotNet.Tools.Tool.Uninstall;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Xunit;
-using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Uninstall.LocalizableStrings;
 using InstallLocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine.Parsing;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {
@@ -146,7 +143,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             }
 
             var toolUninstallGlobalOrToolPathCommand = new ToolUninstallGlobalOrToolPathCommand(
-                result["dotnet"]["tool"]["uninstall"],
                 result,
                 CreateToolPackageStoreAndUninstaller,
                 (_) => new ShellShimRepository(
@@ -157,7 +153,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             
             var uninstallCommand 
                 = new ToolUninstallCommand(
-                    result["dotnet"]["tool"]["uninstall"], 
                     result, 
                     toolUninstallGlobalOrToolPathCommand: toolUninstallGlobalOrToolPathCommand) ;
 
@@ -248,7 +243,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                     _reporter));
 
             return new ToolInstallGlobalOrToolPathCommand(
-                result["dotnet"]["tool"]["install"],
                 result,
                 (location, forwardArguments) => (store, store, packageInstallerMock),
                 (_) => new ShellShimRepository(
@@ -274,7 +268,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             }
 
             return new ToolUninstallGlobalOrToolPathCommand(
-                result["dotnet"]["tool"]["uninstall"],
                 result,
                 createToolPackageStoreAndUninstaller,
                 (_) => new ShellShimRepository(

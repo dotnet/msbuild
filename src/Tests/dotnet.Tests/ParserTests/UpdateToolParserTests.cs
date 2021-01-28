@@ -1,10 +1,11 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.CommandLine.Parsing;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Xunit;
 using Xunit.Abstractions;
 using Parser = Microsoft.DotNet.Cli.Parser;
@@ -23,12 +24,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void UpdateGlobaltoolParserCanGetPackageId()
         {
-            var command = Parser.Instance;
-            var result = command.Parse("dotnet tool update -g console.test.app");
+            var result = Parser.Instance.Parse("dotnet tool update -g console.test.app");
 
-            var parseResult = result["dotnet"]["tool"]["update"];
-
-            var packageId = parseResult.Arguments.Single();
+            var packageId = result.ValueForArgument<string>(ToolUpdateCommandParser.PackageIdArgument);
 
             packageId.Should().Be("console.test.app");
         }
@@ -38,22 +36,18 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool update -g console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["update"];
-            appliedOptions.ValueOrDefault<bool>("global").Should().Be(true);
+            result.ValueForOption<bool>(ToolUpdateCommandParser.GlobalOption).Should().Be(true);
         }
 
         [Fact]
         public void UpdateToolParserCanGetFollowingArguments()
         {
-            var command = Parser.Instance;
             var result =
-                command.Parse(
+                Parser.Instance.Parse(
                     @"dotnet tool update -g console.test.app --version 1.0.1 --framework netcoreapp2.0 --configfile C:\TestAssetLocalNugetFeed");
 
-            var parseResult = result["dotnet"]["tool"]["update"];
-
-            parseResult.ValueOrDefault<string>("configfile").Should().Be(@"C:\TestAssetLocalNugetFeed");
-            parseResult.ValueOrDefault<string>("framework").Should().Be("netcoreapp2.0");
+            result.ValueForOption<string>(ToolUpdateCommandParser.ConfigOption).Should().Be(@"C:\TestAssetLocalNugetFeed");
+            result.ValueForOption<string>(ToolUpdateCommandParser.FrameworkOption).Should().Be("netcoreapp2.0");
         }
 
         [Fact]
@@ -64,8 +58,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse($"dotnet tool update -g --add-source {expectedSourceValue} console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["update"];
-            appliedOptions.ValueOrDefault<string[]>("add-source").First().Should().Be(expectedSourceValue);
+            result.ValueForOption<string[]>(ToolUpdateCommandParser.AddSourceOption).First().Should().Be(expectedSourceValue);
         }
 
         [Fact]
@@ -80,10 +73,8 @@ namespace Microsoft.DotNet.Tests.ParserTests
                     $"--add-source {expectedSourceValue1} " +
                     $"--add-source {expectedSourceValue2} console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["update"];
-
-            appliedOptions.ValueOrDefault<string[]>("add-source")[0].Should().Be(expectedSourceValue1);
-            appliedOptions.ValueOrDefault<string[]>("add-source")[1].Should().Be(expectedSourceValue2);
+            result.ValueForOption<string[]>(ToolUpdateCommandParser.AddSourceOption)[0].Should().Be(expectedSourceValue1);
+            result.ValueForOption<string[]>(ToolUpdateCommandParser.AddSourceOption)[1].Should().Be(expectedSourceValue2);
         }
 
         [Fact]
@@ -94,8 +85,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse($"dotnet tool update -g --verbosity:{expectedVerbosityLevel} console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["update"];
-            appliedOptions.SingleArgumentOrDefault("verbosity").Should().Be(expectedVerbosityLevel);
+            Enum.GetName(result.ValueForOption<VerbosityOptions>(ToolUpdateCommandParser.VerbosityOption)).Should().Be(expectedVerbosityLevel);
         }
 
         [Fact]
@@ -104,8 +94,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool update --tool-path C:\TestAssetLocalNugetFeed console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["update"];
-            appliedOptions.SingleArgumentOrDefault("tool-path").Should().Be(@"C:\TestAssetLocalNugetFeed");
+            result.ValueForOption<string>(ToolUpdateCommandParser.ToolPathOption).Should().Be(@"C:\TestAssetLocalNugetFeed");
         }
 
         [Fact]
@@ -114,8 +103,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool update -g console.test.app --no-cache");
 
-            var appliedOptions = result["dotnet"]["tool"]["update"];
-            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--no-cache");
+            result.OptionValuesToBeForwarded(ToolUpdateCommandParser.GetCommand()).Should().ContainSingle("--no-cache");
         }
 
         [Fact]
@@ -124,8 +112,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool update -g console.test.app --ignore-failed-sources");
 
-            var appliedOptions = result["dotnet"]["tool"]["update"];
-            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--ignore-failed-sources");
+            result.OptionValuesToBeForwarded(ToolUpdateCommandParser.GetCommand()).Should().ContainSingle("--ignore-failed-sources");
         }
 
         [Fact]
@@ -134,8 +121,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool update -g console.test.app --disable-parallel");
 
-            var appliedOptions = result["dotnet"]["tool"]["update"];
-            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--disable-parallel");
+            result.OptionValuesToBeForwarded(ToolUpdateCommandParser.GetCommand()).Should().ContainSingle("--disable-parallel");
         }
 
         [Fact]
@@ -144,9 +130,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool update -g console.test.app --interactive");
 
-            var appliedOptions = result["dotnet"]["tool"]["update"];
-
-            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--interactive");
+            result.OptionValuesToBeForwarded(ToolUpdateCommandParser.GetCommand()).Should().ContainSingle("--interactive");
         }
 
         [Fact]
@@ -155,9 +139,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool update -g console.test.app --version 1.2");
 
-            var appliedOptions = result["dotnet"]["tool"]["update"];
-
-            appliedOptions.SingleArgumentOrDefault("version").Should().Be("1.2");
+            result.ValueForOption<string>(ToolUpdateCommandParser.VersionOption).Should().Be("1.2");
         }
 
         [Fact]
@@ -166,8 +148,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool update --local console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["update"];
-            appliedOptions.ValueOrDefault<bool>("local").Should().Be(true);
+            result.ValueForOption<bool>(ToolUpdateCommandParser.LocalOption).Should().Be(true);
         }
 
         [Fact]
@@ -176,8 +157,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool update --tool-manifest folder/my-manifest.format console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["update"];
-            appliedOptions.SingleArgumentOrDefault("tool-manifest").Should().Be(@"folder/my-manifest.format");
+            result.ValueForOption<string>(ToolUpdateCommandParser.ToolManifestOption).Should().Be(@"folder/my-manifest.format");
         }
     }
 }

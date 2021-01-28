@@ -448,6 +448,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Condition="'$(TieredCompilationQuickJitForLoops)' != ''"
                                     Value="$(TieredCompilationQuickJitForLoops)" />
 
+    <RuntimeHostConfigurationOption Include="System.StartupHookProvider.IsSupported"
+                                    Condition="'$(StartupHookSupport)' != ''"
+                                    Value="$(StartupHookSupport)"
+                                    Trim="true" />
+
     <RuntimeHostConfigurationOption Include="System.Text.Encoding.EnableUnsafeUTF7Encoding"
                                     Condition="'$(EnableUnsafeUTF7Encoding)' != ''"
                                     Value="$(EnableUnsafeUTF7Encoding)"
@@ -460,7 +465,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeHostConfigurationOption Include="System.Threading.ThreadPool.MaxThreads"
                                     Condition="'$(ThreadPoolMaxThreads)' != ''"
                                     Value="$(ThreadPoolMaxThreads)" />
-
   </ItemGroup>
 
   <!--

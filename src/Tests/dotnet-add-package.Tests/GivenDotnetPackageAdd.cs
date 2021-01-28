@@ -219,8 +219,7 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
                 .WithWorkingDirectory(projectDirectory)
                 .Execute("add", "package", "package1", "package2", "package3")
                 .Should()
-                .Fail()
-                .And.HaveStdErrContaining(LocalizableStrings.SpecifyExactlyOnePackageReference);
+                .Fail();
         }
 
         [Fact]
@@ -235,8 +234,7 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
                 .WithWorkingDirectory(projectDirectory)
                 .Execute($"add", "package")
                 .Should()
-                .Fail()
-                .And.HaveStdErrContaining(LocalizableStrings.SpecifyExactlyOnePackageReference);
+                .Fail();
         }
 
 

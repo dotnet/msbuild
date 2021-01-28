@@ -1,10 +1,12 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.CommandLine.Parsing;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools.Tool.Common;
 using Xunit;
 using Xunit.Abstractions;
 using Parser = Microsoft.DotNet.Cli.Parser;
@@ -23,13 +25,10 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void InstallGlobaltoolParserCanGetPackageIdAndPackageVersion()
         {
-            var command = Parser.Instance;
-            var result = command.Parse("dotnet tool install -g console.test.app --version 1.0.1");
+            var result = Parser.Instance.Parse("dotnet tool install -g console.test.app --version 1.0.1");
 
-            var parseResult = result["dotnet"]["tool"]["install"];
-
-            var packageId = parseResult.Arguments.Single();
-            var packageVersion = parseResult.ValueOrDefault<string>("version");
+            var packageId = result.ValueForArgument<string>(ToolInstallCommandParser.PackageIdArgument);
+            var packageVersion = result.ValueForOption<string>(ToolInstallCommandParser.VersionOption);
 
             packageId.Should().Be("console.test.app");
             packageVersion.Should().Be("1.0.1");
@@ -38,15 +37,12 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [Fact]
         public void InstallGlobaltoolParserCanGetFollowingArguments()
         {
-            var command = Parser.Instance;
             var result =
-                command.Parse(
+                Parser.Instance.Parse(
                     @"dotnet tool install -g console.test.app --version 1.0.1 --framework netcoreapp2.0 --configfile C:\TestAssetLocalNugetFeed");
 
-            var parseResult = result["dotnet"]["tool"]["install"];
-
-            parseResult.ValueOrDefault<string>("configfile").Should().Be(@"C:\TestAssetLocalNugetFeed");
-            parseResult.ValueOrDefault<string>("framework").Should().Be("netcoreapp2.0");
+            result.ValueForOption<string>(ToolInstallCommandParser.ConfigOption).Should().Be(@"C:\TestAssetLocalNugetFeed");
+            result.ValueForOption<string>(ToolInstallCommandParser.FrameworkOption).Should().Be("netcoreapp2.0");
         }
 
         [Fact]
@@ -57,8 +53,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse($"dotnet tool install -g --add-source {expectedSourceValue} console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["install"];
-            appliedOptions.ValueOrDefault<string[]>("add-source").First().Should().Be(expectedSourceValue);
+            result.ValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption).First().Should().Be(expectedSourceValue);
         }
 
         [Fact]
@@ -73,10 +68,9 @@ namespace Microsoft.DotNet.Tests.ParserTests
                     $"--add-source {expectedSourceValue1} " +
                     $"--add-source {expectedSourceValue2} console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["install"];
-
-            appliedOptions.ValueOrDefault<string[]>("add-source")[0].Should().Be(expectedSourceValue1);
-            appliedOptions.ValueOrDefault<string[]>("add-source")[1].Should().Be(expectedSourceValue2);
+            
+            result.ValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption)[0].Should().Be(expectedSourceValue1);
+            result.ValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption)[1].Should().Be(expectedSourceValue2);
         }
 
         [Fact]
@@ -84,8 +78,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool install -g console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["install"];
-            appliedOptions.ValueOrDefault<bool>("global").Should().Be(true);
+            result.ValueForOption<bool>(ToolAppliedOption.GlobalOptionAliases.First()).Should().Be(true);
         }
         
         [Fact]
@@ -93,8 +86,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool install --local console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["install"];
-            appliedOptions.ValueOrDefault<bool>("local").Should().Be(true);
+            result.ValueForOption<bool>(ToolAppliedOption.LocalOptionAlias).Should().Be(true);
         }
 
         [Fact]
@@ -104,8 +96,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
                 Parser.Instance.Parse(
                     "dotnet tool install --local console.test.app --tool-manifest folder/my-manifest.format");
 
-            var appliedOptions = result["dotnet"]["tool"]["install"];
-            appliedOptions.ValueOrDefault<string>("tool-manifest").Should().Be("folder/my-manifest.format");
+            result.ValueForOption<string>(ToolAppliedOption.ToolManifestOptionAlias).Should().Be("folder/my-manifest.format");
         }
 
         [Fact]
@@ -115,8 +106,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
 
             var result = Parser.Instance.Parse($"dotnet tool install -g --verbosity:{expectedVerbosityLevel} console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["install"];
-            appliedOptions.SingleArgumentOrDefault("verbosity").Should().Be(expectedVerbosityLevel);
+            Enum.GetName(result.ValueForOption<VerbosityOptions>(ToolInstallCommandParser.VerbosityOption)).Should().Be(expectedVerbosityLevel);
         }
 
         [Fact]
@@ -125,8 +115,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool install --tool-path C:\Tools console.test.app");
 
-            var appliedOptions = result["dotnet"]["tool"]["install"];
-            appliedOptions.SingleArgumentOrDefault("tool-path").Should().Be(@"C:\Tools");
+            result.ValueForOption<string>(ToolAppliedOption.ToolPathOptionAlias).Should().Be(@"C:\Tools");
         }
 
         [Fact]
@@ -135,8 +124,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool install -g console.test.app --no-cache");
 
-            var appliedOptions = result["dotnet"]["tool"]["install"];
-            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--no-cache");
+            result.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand()).Should().ContainSingle("--no-cache");
         }
 
         [Fact]
@@ -145,8 +133,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool install -g console.test.app --ignore-failed-sources");
 
-            var appliedOptions = result["dotnet"]["tool"]["install"];
-            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--ignore-failed-sources");
+            result.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand()).Should().ContainSingle("--ignore-failed-sources");
         }
 
         [Fact]
@@ -155,8 +142,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool install -g console.test.app --disable-parallel");
 
-            var appliedOptions = result["dotnet"]["tool"]["install"];
-            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--disable-parallel");
+            result.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand()).Should().ContainSingle("--disable-parallel");
         }
 
         [Fact]
@@ -165,8 +151,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool install -g console.test.app --interactive");
 
-            var appliedOptions = result["dotnet"]["tool"]["install"];
-            appliedOptions.OptionValuesToBeForwarded().Should().ContainSingle("--interactive");
+            result.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand()).Should().ContainSingle("--interactive");
         }
     }
 }

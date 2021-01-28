@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Remove.PackageReference;
 using Microsoft.DotNet.Tools.Remove.ProjectToProjectReference;
@@ -18,19 +18,15 @@ namespace Microsoft.DotNet.Tools.Remove
         protected override string ArgumentName => Constants.ProjectArgumentName;
         protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ProjectArgumentDescription;
 
-        internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
-            new Dictionary<string, Func<AppliedOption, CommandBase>>
+        internal override Dictionary<string, Func<ParseResult, CommandBase>> SubCommands =>
+            new Dictionary<string, Func<ParseResult, CommandBase>>
             {
                 ["reference"] =
                 remove => new RemoveProjectToProjectReferenceCommand(
-                    remove["reference"],
-                    remove.Value<string>(),
                     ParseResult),
 
                 ["package"] =
                 remove => new RemovePackageReferenceCommand(
-                    remove["package"],
-                    remove.Value<string>(),
                     ParseResult)
             };
 

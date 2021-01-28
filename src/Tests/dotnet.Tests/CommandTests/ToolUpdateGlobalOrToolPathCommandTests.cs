@@ -5,21 +5,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.Tools.Tool.Update;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Xunit;
-using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Update.LocalizableStrings;
 using Microsoft.DotNet.ShellShim;
 using System.IO;
 using Microsoft.NET.TestFramework.Utilities;
+using System.CommandLine.Parsing;
+using Parser = Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {
@@ -121,9 +120,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             ParseResult result = Parser.Instance.Parse("dotnet tool update " + $"-g {_packageId}");
 
-            AppliedOption appliedCommand = result["dotnet"]["tool"]["update"];
             var toolUpdateGlobalOrToolPathCommand = new ToolUpdateGlobalOrToolPathCommand(
-                appliedCommand,
                 result,
                 (location, forwardArguments) => (_store, _store, new ToolPackageInstallerMock(
                     _fileSystem,
@@ -138,11 +135,10 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 _reporter);
 
             var toolUpdateCommand = new ToolUpdateCommand(
-                 appliedCommand,
                  result,
                  _reporter,
                  toolUpdateGlobalOrToolPathCommand,
-                 new ToolUpdateLocalCommand(appliedCommand, result));
+                 new ToolUpdateLocalCommand(result));
 
             toolUpdateCommand.Execute();
 
@@ -223,7 +219,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             ParseResult result = Parser.Instance.Parse("dotnet tool update " + $"-g {_packageId}");
             var command = new ToolUpdateGlobalOrToolPathCommand(
-                result["dotnet"]["tool"]["update"],
                 result,
                 (location, forwardArguments) => (_store, _store,
                     new ToolPackageInstallerMock(
@@ -253,7 +248,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             ParseResult result = Parser.Instance.Parse("dotnet tool update " + $"-g {_packageId}");
             var command = new ToolUpdateGlobalOrToolPathCommand(
-                result["dotnet"]["tool"]["update"],
                 result,
                 (location, forwardArguments) => (_store, _store,
                     new ToolPackageInstallerMock(
@@ -280,7 +274,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             ParseResult result = Parser.Instance.Parse("dotnet tool install " + options);
 
             return new ToolInstallGlobalOrToolPathCommand(
-                result["dotnet"]["tool"]["install"],
                 result,
                 (location, forwardArguments) => (_store, _store, new ToolPackageInstallerMock(
                     _fileSystem,
@@ -300,7 +293,6 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             ParseResult result = Parser.Instance.Parse("dotnet tool update " + options);
 
             return new ToolUpdateGlobalOrToolPathCommand(
-                result["dotnet"]["tool"]["update"],
                 result,
                 (location, forwardArguments) => (_store, _store, new ToolPackageInstallerMock(
                     _fileSystem,

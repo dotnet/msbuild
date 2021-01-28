@@ -3,10 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Parser = Microsoft.DotNet.Cli.Parser;
 
@@ -27,13 +26,9 @@ namespace Microsoft.DotNet.Tools.Test
         public static TestCommand FromArgs(string[] args, string[] settings, string msbuildPath = null)
         {
             var parser = Parser.Instance;
-
             var result = parser.ParseFrom("dotnet test", args);
 
-            UpdateRunSettingsArgumentsText();
             result.ShowHelpOrErrorIfAppropriate();
-
-            var parsedTest = result["dotnet"]["test"];
 
             var msbuildArgs = new List<string>()
             {
@@ -42,9 +37,9 @@ namespace Microsoft.DotNet.Tools.Test
                 "-nologo"
             };
 
-            msbuildArgs.AddRange(parsedTest.OptionValuesToBeForwarded());
+            msbuildArgs.AddRange(result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(parsedTest.Arguments);
+            msbuildArgs.AddRange(result.ValueForArgument<IReadOnlyCollection<string>>(TestCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             if (settings.Any())
             {
@@ -55,7 +50,7 @@ namespace Microsoft.DotNet.Tools.Test
                 msbuildArgs.Add($"-property:VSTestCLIRunSettings=\"{runSettingsArg}\"");
             }
 
-            var verbosityArg = parsedTest.ForwardedOptionValues("verbosity").SingleOrDefault();
+            var verbosityArg = result.ForwardedOptionValues<IReadOnlyCollection<string>>(TestCommandParser.GetCommand(), "verbosity")?.SingleOrDefault() ?? null;
             if (verbosityArg != null)
             {
                 var verbosity = verbosityArg.Split(':', 2);
@@ -65,14 +60,17 @@ namespace Microsoft.DotNet.Tools.Test
                 }
             }
 
-            bool noRestore = parsedTest.HasOption("--no-restore") || parsedTest.HasOption("--no-build");
+            bool noRestore = result.HasOption(TestCommandParser.NoRestoreOption) || result.HasOption(TestCommandParser.NoBuildOption);
 
             TestCommand testCommand = new TestCommand(
                 msbuildArgs,
-                parsedTest.OptionValuesToBeForwarded(),
-                parsedTest.Arguments,
+                result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()),
+                result.ValueForArgument<IReadOnlyCollection<string>>(TestCommandParser.SlnOrProjectArgument),
                 noRestore,
                 msbuildPath);
+
+            // Apply environment variables provided by the user via --environment (-e) parameter, if present
+            SetEnvironmentVariablesFromParameters(testCommand, result);
 
             // Set DOTNET_PATH if it isn't already set in the environment as it is required
             // by the testhost which uses the apphost feature (Windows only).
@@ -129,7 +127,7 @@ namespace Microsoft.DotNet.Tools.Test
         private static bool ContainsBuiltTestSources(string[] args)
         {
             foreach (var arg in args)
-            {               
+            {
                 if (!arg.StartsWith("-") &&
                     (arg.EndsWith("dll", StringComparison.OrdinalIgnoreCase) || arg.EndsWith("exe", StringComparison.OrdinalIgnoreCase)))
                 {
@@ -139,33 +137,29 @@ namespace Microsoft.DotNet.Tools.Test
             return false;
         }
 
-        private static string GetSemiColonEscapedString(string arg)
+        private static void SetEnvironmentVariablesFromParameters(TestCommand testCommand, ParseResult parseResult)
         {
-            if (arg.IndexOf(";") != -1)
+            var option = TestCommandParser.EnvOption;
+
+            if (!parseResult.HasOption(option))
             {
-                return arg.Replace(";", "%3b");
+                return;
             }
 
-            return arg;
-        }
-
-        private static string[] GetSemiColonEscapedArgs(List<string> args)
-        {
-            int counter = 0;
-            string[] array = new string[args.Count];
-
-            foreach (string arg in args)
+            foreach (var env in parseResult.ValueForOption<IReadOnlyCollection<string>>(option))
             {
-                array[counter++] = GetSemiColonEscapedString(arg);
+                var name = env;
+                var value = string.Empty;
+
+                var equalsIndex = env.IndexOf('=');
+                if (equalsIndex > 0)
+                {
+                    name = env.Substring(0, equalsIndex);
+                    value = env.Substring(equalsIndex + 1);
+                }
+
+                testCommand.EnvironmentVariable(name, value);
             }
-
-            return array;
-        }
-
-        private static void UpdateRunSettingsArgumentsText()
-        {
-            DefaultHelpViewText.Synopsis.AdditionalArguments = " [[--] <RunSettings arguments>...]]";
-            DefaultHelpViewText.AdditionalArgumentsSection = LocalizableStrings.RunSettingsArgumentsDescription;
         }
     }
 }

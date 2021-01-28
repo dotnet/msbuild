@@ -58,6 +58,36 @@ Para o MSTest, o tempo limite é usado para todos os casos teste.
 No momento, há suporte para essa opção somente no Windows juntamente com o netcoreapp2.1 e mais recentes. E no Linux com o netcoreapp3.1 e mais recentes. Não há suporte para OSX e UWP.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableDescription">
+        <source>Sets the value of an environment variable. 
+Creates the variable if it does not exist, overrides if it does. 
+This will force the tests to be run in an isolated process. 
+This argument can be specified multiple times to provide multiple variables.
+
+Examples:
+-e VARIABLE=abc
+-e VARIABLE="value with spaces"
+-e VARIABLE="value;seperated with;semicolons"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</source>
+        <target state="translated">Define o valor de uma variável de ambiente. 
+Criará a variável quando ela não existir e a substituirá quando existir. 
+Isso forçará a execução dos testes em um processo isolado. 
+Esse argumento pode ser especificado várias vezes para fornecer várias variáveis.
+
+Exemplos:
+-e VARIABLE=abc
+-e VARIABLE="valor com espaços"
+-e VARIABLE="valor;separado com;ponto e vírgula"
+-e VAR1=abc -e VAR2=def -e VAR3=ghi
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdEnvironmentVariableExpression">
+        <source>NAME="VALUE"</source>
+        <target state="translated">NAME="VALUE"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CmdNoLogo">
         <source>Run test(s), without displaying Microsoft Testplatform banner</source>
         <target state="translated">Executar testes, sem exibir a faixa do Microsoft Testplatform</target>

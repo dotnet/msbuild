@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tasks
     /// <summary>
     /// Generates the $(project).deps.json file.
     /// </summary>
-    public class GenerateDepsFile : TaskBase
+    public class GenerateDepsFile : TaskWithAssemblyResolveHooks
     {
         [Required]
         public string ProjectPath { get; set; }

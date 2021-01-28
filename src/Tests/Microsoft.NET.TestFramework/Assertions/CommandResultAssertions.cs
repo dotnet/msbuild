@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
+using System.IO.Compression;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -158,7 +160,7 @@ namespace Microsoft.NET.TestFramework.Assertions
                        $"StdErr:{Environment.NewLine}{_commandResult.StdErr}{Environment.NewLine}"; ;
         }
 
-    public AndConstraint<CommandResultAssertions> HaveSkippedProjectCompilation(string skippedProject, string frameworkFullName)
+        public AndConstraint<CommandResultAssertions> HaveSkippedProjectCompilation(string skippedProject, string frameworkFullName)
         {
             _commandResult.StdOut.Should().Contain($"Project {skippedProject} ({frameworkFullName}) was previously compiled. Skipping compilation.");
 
@@ -168,6 +170,96 @@ namespace Microsoft.NET.TestFramework.Assertions
         public AndConstraint<CommandResultAssertions> HaveCompiledProject(string compiledProject, string frameworkFullName)
         {
             _commandResult.StdOut.Should().Contain($"Project {compiledProject} ({frameworkFullName}) will be compiled");
+
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
+        public AndConstraint<CommandResultAssertions> NuPkgContain(string nupkgPath, params string[] filePaths)
+        {
+            var unzipped = ReadNuPkg(nupkgPath, filePaths);
+
+            foreach (var filePath in filePaths)
+            {
+                Execute.Assertion.ForCondition(File.Exists(Path.Combine(unzipped, filePath)))
+                    .FailWith(AppendDiagnosticsTo($"NuGet Package did not contain file {filePath}."));
+            }
+
+            return new AndConstraint<CommandResultAssertions>(this);
+
+        }
+
+        public AndConstraint<CommandResultAssertions> NuPkgDoesNotContain(string nupkgPath, params string[] filePaths)
+        {
+            var unzipped = ReadNuPkg(nupkgPath, filePaths);
+
+            foreach (var filePath in filePaths)
+            {
+                Execute.Assertion.ForCondition(!File.Exists(Path.Combine(unzipped, filePath)))
+                    .FailWith(AppendDiagnosticsTo($"NuGet Package contained file: {filePath}."));
+            }
+
+            return new AndConstraint<CommandResultAssertions>(this);
+
+        }
+
+        private string ReadNuPkg(string nupkgPath, params string[] filePaths) 
+        {
+            if (nupkgPath == null)
+            {
+                throw new ArgumentNullException(nameof(nupkgPath));
+            }
+
+            if (filePaths == null)
+            {
+                throw new ArgumentNullException(nameof(filePaths));
+            }
+
+            new FileInfo(nupkgPath).Should().Exist();
+
+            var unzipped = Path.Combine(nupkgPath, "..", Path.GetFileNameWithoutExtension(nupkgPath));
+            ZipFile.ExtractToDirectory(nupkgPath, unzipped);
+
+            return unzipped;
+        }
+
+        public AndConstraint<CommandResultAssertions> NuSpecDoesNotContain(string nuspecPath, string expected)
+        {
+            if (nuspecPath == null)
+            {
+                throw new ArgumentNullException(nameof(nuspecPath));
+            }
+
+            if (expected == null)
+            {
+                throw new ArgumentNullException(nameof(expected));
+            }    
+
+            new FileInfo(nuspecPath).Should().Exist();
+            var content = File.ReadAllText(nuspecPath);
+
+            Execute.Assertion.ForCondition(!content.Contains(expected))
+                    .FailWith(AppendDiagnosticsTo($"NuSpec contains string: {expected}."));
+
+            return new AndConstraint<CommandResultAssertions>(this);
+        }
+
+        public AndConstraint<CommandResultAssertions> NuSpecContain(string nuspecPath, string expected)
+        {
+            if (nuspecPath == null)
+            {
+                throw new ArgumentNullException(nameof(nuspecPath));
+            }
+
+            if (expected == null)
+            {
+                throw new ArgumentNullException(nameof(expected));
+            }    
+
+            new FileInfo(nuspecPath).Should().Exist();
+            var content = File.ReadAllText(nuspecPath);
+
+            Execute.Assertion.ForCondition(content.Contains(expected))
+                    .FailWith(AppendDiagnosticsTo($"NuSpec does not contain string: {expected}."));
 
             return new AndConstraint<CommandResultAssertions>(this);
         }

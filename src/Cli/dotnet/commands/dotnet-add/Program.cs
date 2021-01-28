@@ -3,9 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Add.PackageReference;
 using Microsoft.DotNet.Tools.Add.ProjectToProjectReference;
@@ -19,19 +18,15 @@ namespace Microsoft.DotNet.Tools.Add
         protected override string ArgumentName => Constants.ProjectArgumentName;
         protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ProjectArgumentDescription;
 
-        internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
-            new Dictionary<string, Func<AppliedOption, CommandBase>>
+        internal override Dictionary<string, Func<ParseResult, CommandBase>> SubCommands =>
+            new Dictionary<string, Func<ParseResult, CommandBase>>
             {
                 ["reference"] =
                 add => new AddProjectToProjectReferenceCommand(
-                    add["reference"],
-                    add.Value<string>(),
                     ParseResult),
 
                 ["package"] =
                 add => new AddPackageReferenceCommand(
-                    add["package"],
-                    add.Value<string>(),
                     ParseResult)
             };
 

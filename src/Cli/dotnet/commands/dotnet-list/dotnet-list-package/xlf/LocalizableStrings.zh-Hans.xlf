@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdDeprecatedDescription">
         <source>Lists packages that have been deprecated. Cannot be combined with '--vulnerable' or '--outdated' options.</source>
-        <target state="needs-review-translation">列出已弃用的包。</target>
+        <target state="translated">列出已被弃用的包。不能与 "--vulnerable" 或 "--outdated" 选项结合使用。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdOutdatedDescription">
         <source>Lists packages that have newer versions. Cannot be combined with '--deprecated' or '--vulnerable' options.</source>
-        <target state="needs-review-translation">列出具有较新版本的包。</target>
+        <target state="translated">列出具有较新版本的包。不能与 "--deprecated" 或 "--vulnerable" 选项结合使用。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="CmdVulnerableDescription">
         <source>Lists packages that have known vulnerabilities. Cannot be combined with '--deprecated' or '--outdated' options.</source>
-        <target state="new">Lists packages that have known vulnerabilities. Cannot be combined with '--deprecated' or '--outdated' options.</target>
+        <target state="translated">列出具有已知漏洞的包。不能与 "--deprecated" 或 "--outdated" 选项结合使用。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsOrSolutions">
@@ -49,22 +49,22 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>The path to the NuGet config file to use. Requires the '--outdated', '--deprecated' or '--vulnerable' option.</source>
-        <target state="needs-review-translation">要使用的 NuGet 配置文件的路径。需要 "--outdated" 或 "--deprecated" 选项。</target>
+        <target state="translated">要使用的 NuGet 配置文件的路径。需要 "--outdated"、"--deprecated" 或 "--vulnerable" 选项。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
         <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">在搜索较新的包时，仅考虑具有匹配的主版本号的包。需要 "--outdated" 或 "--deprecated" 选项。</target>
+        <target state="translated">在搜索较新的包时，仅考虑具有匹配的主要版本号的包。需要 "--outdated" 选项。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
         <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">在搜索较新的包时，仅考虑具有匹配的主要和次要版本号的包。需要 "--outdated" 或 "--deprecated" 选项。</target>
+        <target state="translated">在搜索较新的包时，仅考虑具有匹配的主要和次要版本号的包。需要 "--outdated" 选项。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
         <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">在搜索较新的包时，请考虑使用具有预发行版本的包。需要 "--outdated" 或 "--deprecated" 选项。</target>
+        <target state="translated">在搜索较新的包时，请考虑使用具有预发行版本的包。需要 "--outdated" 选项。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated', '--deprecated' or '--vulnerable' option.</source>
-        <target state="needs-review-translation">搜索较新的包时要使用的 NuGet 源。需要 "--outdated" 或 "--deprecated" 选项。</target>
+        <target state="translated">搜索较新的包时要使用的 NuGet 源。需要 "--outdated"、"--deprecated" 或 "--vulnerable" 选项。</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="OptionsCannotBeCombined">
         <source>Options '--outdated', '--deprecated' and '--vulnerable' cannot be combined.</source>
-        <target state="new">Options '--outdated', '--deprecated' and '--vulnerable' cannot be combined.</target>
+        <target state="translated">不能将 "--outdated'"、"--deprecated" 和 "--vulnerable" 选项结合使用。</target>
         <note />
       </trans-unit>
     </body>

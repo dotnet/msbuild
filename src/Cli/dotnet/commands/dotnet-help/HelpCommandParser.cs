@@ -1,20 +1,26 @@
-﻿using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.CommandLine;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.Help
 {
     internal static class HelpCommandParser
     {
-        public static Command Help()
+        public static readonly Argument Argument = new Argument<string>(LocalizableStrings.CommandArgumentName)
         {
-            return Create.Command(
-                "help",
-                LocalizableStrings.AppFullName,
-                Accept.ZeroOrOneArgument()
-                    .With(
-                        LocalizableStrings.CommandArgumentDescription,
-                        LocalizableStrings.CommandArgumentName),
-                         CommonOptions.HelpOption());
+            Description = LocalizableStrings.CommandArgumentDescription,
+            Arity = ArgumentArity.ZeroOrOne
+        };
+
+        public static Command GetCommand()
+        {
+            var command = new Command("help", LocalizableStrings.AppFullName);
+
+            command.AddArgument(Argument);
+
+            return command;
         }
     }
 }

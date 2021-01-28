@@ -2,10 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.CommandLine.Parsing;
 using System.IO;
-using System.Linq;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -25,19 +24,14 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly string _verbosity;
 
         public ToolInstallLocalInstaller(
-            AppliedOption appliedOption,
+            ParseResult parseResult,
             IToolPackageInstaller toolPackageInstaller = null)
         {
-            if (appliedOption == null)
-            {
-                throw new ArgumentNullException(nameof(appliedOption));
-            }
-
-            _packageId = new PackageId(appliedOption.Arguments.Single());
-            _packageVersion = appliedOption.ValueOrDefault<string>("version");
-            _configFilePath = appliedOption.ValueOrDefault<string>("configfile");
-            _sources = appliedOption.ValueOrDefault<string[]>("add-source");
-            _verbosity = appliedOption.SingleArgumentOrDefault("verbosity");
+            _packageId = new PackageId(parseResult.ValueForArgument<string>(ToolInstallCommandParser.PackageIdArgument));
+            _packageVersion = parseResult.ValueForOption<string>(ToolInstallCommandParser.VersionOption);
+            _configFilePath = parseResult.ValueForOption<string>(ToolInstallCommandParser.ConfigOption);
+            _sources = parseResult.ValueForOption<string[]>(ToolInstallCommandParser.AddSourceOption);
+            _verbosity = Enum.GetName(parseResult.ValueForOption<VerbosityOptions>(ToolInstallCommandParser.VerbosityOption));
 
             if (toolPackageInstaller == null)
             {
@@ -45,7 +39,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                     IToolPackageStoreQuery,
                     IToolPackageInstaller installer) toolPackageStoresAndInstaller
                         = ToolPackageFactory.CreateToolPackageStoresAndInstaller(
-                            additionalRestoreArguments: appliedOption.OptionValuesToBeForwarded());
+                            additionalRestoreArguments: parseResult.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand()));
                 _toolPackageInstaller = toolPackageStoresAndInstaller.installer;
             }
             else

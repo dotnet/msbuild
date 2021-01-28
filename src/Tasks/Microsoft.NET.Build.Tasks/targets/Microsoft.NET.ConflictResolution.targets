@@ -15,6 +15,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="Microsoft.NET.DefaultPackageConflictOverrides.targets" />
 
   <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="CheckForDuplicateItemMetadata" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!--
     _HandlePackageFileConflicts
@@ -86,6 +87,27 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ResolvedCopyLocalPublishAssets Remove="@(_ResolvedCopyLocalPublishAssets)" />
       <_ResolvedCopyLocalPublishAssets Include="@(_ResolvedCopyLocalPublishAssetsWithoutConflicts)" />
     </ItemGroup>
+
+  </Target>
+
+  <!--
+  _HandleFileConflictsForPublish
+  Ensures there are no duplicate files being written to the publish output.
+  -->
+  <Target Name="_HandleFileConflictsForPublish"
+          AfterTargets="ComputeFilesToPublish"
+          Condition="'$(ErrorOnDuplicatePublishOutputFiles)' != 'false'">
+
+    <CheckForDuplicateItemMetadata
+      Items="@(ResolvedFileToPublish->Distinct())"
+      MetadataName="RelativePath">
+      <Output TaskParameter="DuplicatesExist" PropertyName="_ResolvedFileToPublishContainsDuplicates" />
+      <Output TaskParameter="DuplicateItems" ItemName="_ResolvedFileToPublishDuplicatedItems" />
+    </CheckForDuplicateItemMetadata>
+
+    <NETSdkError Condition="'$(_ResolvedFileToPublishContainsDuplicates)' == 'true'"
+                 ResourceName="DuplicatePublishOutputFiles"
+                 FormatArguments="@(_ResolvedFileToPublishDuplicatedItems, ', ')" />
 
   </Target>
 

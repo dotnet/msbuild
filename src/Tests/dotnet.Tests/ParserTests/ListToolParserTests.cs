@@ -1,10 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Linq;
+using System.CommandLine.Parsing;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
-using Microsoft.DotNet.Cli.CommandLine;
 using Xunit;
 using Xunit.Abstractions;
 using Parser = Microsoft.DotNet.Cli.Parser;
@@ -25,8 +24,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool list -g");
 
-            var appliedOptions = result["dotnet"]["tool"]["list"];
-            appliedOptions.ValueOrDefault<bool>("global").Should().Be(true);
+            result.ValueForOption<bool>(ToolListCommandParser.GlobalOption).Should().Be(true);
         }
 
         [Fact]
@@ -34,8 +32,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         {
             var result = Parser.Instance.Parse("dotnet tool list --local");
 
-            var appliedOptions = result["dotnet"]["tool"]["list"];
-            appliedOptions.ValueOrDefault<bool>("local").Should().Be(true);
+            result.ValueForOption<bool>(ToolListCommandParser.LocalOption).Should().Be(true);
         }
 
         [Fact]
@@ -44,8 +41,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var result =
                 Parser.Instance.Parse(@"dotnet tool list --tool-path C:\Tools ");
 
-            var appliedOptions = result["dotnet"]["tool"]["list"];
-            appliedOptions.SingleArgumentOrDefault("tool-path").Should().Be(@"C:\Tools");
+            result.ValueForOption<string>(ToolListCommandParser.ToolPathOption).Should().Be(@"C:\Tools");
         }
     }
 }

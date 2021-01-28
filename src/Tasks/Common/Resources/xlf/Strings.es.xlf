@@ -284,6 +284,11 @@
         <target state="translated">NETSDK1015: Se han dado varios valores para el token de preprocesador "{0}". Se va a elegir "{1}" como valor.</target>
         <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
+      <trans-unit id="DuplicatePublishOutputFiles">
+        <source>NETSDK1148: Found multiple publish output files with the same relative path: {0}.</source>
+        <target state="translated">NETSDK1148: Se encontraron varios archivos de salida de publicación con la misma ruta de acceso relativa: {0}.</target>
+        <note>{StrBegin="NETSDK1148: "}</note>
+      </trans-unit>
       <trans-unit id="DuplicateRuntimePackAsset">
         <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
         <target state="translated">NETSDK1110: Más de un recurso del paquete del entorno de ejecución tiene la misma subruta de acceso de destino de "{0}". Notifique este error al equipo de .NET aquí: https://aka.ms/dotnet-sdk-issue.</target>
@@ -742,7 +747,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: The following workload packs were not installed: {0}</source>
-        <target state="new">NETSDK1147: The following workload packs were not installed: {0}</target>
+        <target state="translated">NETSDK1147: No se instalaron los paquetes de carga de trabajo siguientes: {0}</target>
         <note>{StrBegin="NETSDK1147: "}</note>
       </trans-unit>
     </body>

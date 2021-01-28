@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.DotNet.Cli.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli.Telemetry
@@ -21,13 +21,12 @@ namespace Microsoft.DotNet.Cli.Telemetry
         public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult)
         {
             var result = new List<ApplicationInsightsEntryFormat>();
-            var topLevelCommandNameFromParse = parseResult["dotnet"]?.AppliedOptions?.FirstOrDefault()?.Name;
+            var topLevelCommandNameFromParse = parseResult.RootCommandResult.Children.FirstOrDefault()?.Symbol.Name;
             if (topLevelCommandNameFromParse != null)
             {
                 if (_topLevelCommandNameAllowList.Contains(topLevelCommandNameFromParse))
                 {
-                    var firstArgument = parseResult["dotnet"][topLevelCommandNameFromParse].Arguments
-                        ?.FirstOrDefault();
+                    var firstArgument = parseResult.RootCommandResult.Children.FirstOrDefault()?.Tokens.Where(t => t.Type.Equals(TokenType.Argument)).FirstOrDefault()?.Value ?? null;
                     if (firstArgument != null)
                     {
                         result.Add(new ApplicationInsightsEntryFormat(

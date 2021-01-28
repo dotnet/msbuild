@@ -8,7 +8,7 @@
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <DebugSymbols>true</DebugSymbols>
     <IsShippingPackage>false</IsShippingPackage>
-    <SdkTargetFramework>net5.0</SdkTargetFramework>
+    <SdkTargetFramework>net6.0</SdkTargetFramework>
     <ToolsetTargetFramework>$(SdkTargetFramework)</ToolsetTargetFramework>
 
     <!-- Disable implict package target fallback, and disable warning for when we explicitly add it (currently needed for
@@ -22,7 +22,7 @@
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateProgramFile>false</GenerateProgramFile>
-    <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments>
+    <!-- <TestRunnerAdditionalArguments>-parallel none</TestRunnerAdditionalArguments> -->
   </PropertyGroup>
 
   <Import Project="build/GenerateResxSource.targets" />

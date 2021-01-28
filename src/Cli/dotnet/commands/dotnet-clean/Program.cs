@@ -2,11 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Cli;
-using Parser = Microsoft.DotNet.Cli.Parser;
+using System;
 
 namespace Microsoft.DotNet.Tools.Clean
 {
@@ -30,13 +29,11 @@ namespace Microsoft.DotNet.Tools.Clean
 
             result.ShowHelpOrErrorIfAppropriate();
 
-            var parsedClean = result["dotnet"]["clean"];
-
-            msbuildArgs.AddRange(parsedClean.Arguments);
+            msbuildArgs.AddRange(result.ValueForArgument<IEnumerable<string>>(CleanCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             msbuildArgs.Add("-target:Clean");
 
-            msbuildArgs.AddRange(parsedClean.OptionValuesToBeForwarded());
+            msbuildArgs.AddRange(result.OptionValuesToBeForwarded(CleanCommandParser.GetCommand()));
 
             return new CleanCommand(msbuildArgs, msbuildPath);
         }

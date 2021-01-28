@@ -45,18 +45,24 @@
       <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/Microsoft.CodeAnalysis.NetAnalyzers.props" />
       <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/Microsoft.CodeAnalysis.NetAnalyzers.targets" />
       <AnalyzerTargets Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/config/**/*" />
+      <ILLinkAnalyzersTargets Include="$(PkgMicrosoft_NET_ILLink_Analyzers)/build/Microsoft.NET.ILLink.Analyzers.props" />
       <CodeStyleCSharpAssemblies Include="$(PkgMicrosoft_CodeAnalysis_CSharp_CodeStyle)/analyzers/dotnet/cs/**/*.dll" />
       <CodeStyleVisualBasicAssemblies Include="$(PkgMicrosoft_CodeAnalysis_VisualBasic_CodeStyle)/analyzers/dotnet/vb/**/*.dll" />
+      <ILLinkAnalyzersAssemblies Include="$(PkgMicrosoft_NET_ILLink_Analyzers)/analyzers/dotnet/cs/**/*.dll" />
       <AnalyzerConfig Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)/build/config/**/*" />
     </ItemGroup>
     <Error Condition="'@(AnalyzerAssemblies)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
     <Error Condition="'@(AnalyzerTargets)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
     <Error Condition="'@(CodeStyleCSharpAssemblies)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
     <Error Condition="'@(CodeStyleVisualBasicAssemblies)' == ''" Text="Something moved around in Analyzer package, adjust code here accordingly. TFM change?" />
+    <Error Condition="'@(ILLinkAnalyzersTargets)' == ''" Text="Something moved around in ILLink Analyzers package, adjust code accordingly." />
+    <Error Condition="'@(ILLinkAnalyzersAssemblies)' == ''" Text="Something moved around in ILLink Analyzers package, adjust code accordingly." />
     <Copy SourceFiles="@(AnalyzerAssemblies)" DestinationFiles="@(AnalyzerAssemblies->'$(AnalyzerAssembliesDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(AnalyzerTargets)" DestinationFiles="@(AnalyzerTargets->'$(AnalyzerTargetsDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(CodeStyleCSharpAssemblies)" DestinationFiles="@(CodeStyleCSharpAssemblies->'$(CodeStyleAssembliesCSharpDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(CodeStyleVisualBasicAssemblies)" DestinationFiles="@(CodeStyleVisualBasicAssemblies->'$(CodeStyleAssembliesVisualBasicDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(ILLinkAnalyzersTargets)" DestinationFiles="@(ILLinkAnalyzersTargets->'$(AnalyzerTargetsDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(ILLinkAnalyzersAssemblies)" DestinationFiles="@(ILLinkAnalyzersAssemblies->'$(AnalyzerAssembliesDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(AnalyzerConfig)" DestinationFiles="@(AnalyzerConfig->'$(AnalyzerConfigDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
@@ -76,6 +82,8 @@
       <NETSdkPublishSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Publish</NETSdkPublishSourceRoot>
       <NETSdkWebProjectSystemSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Web.ProjectSystem</NETSdkWebProjectSystemSourceRoot>
       <NETSdkWorkerSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Worker</NETSdkWorkerSourceRoot>
+      <NETSdkBlazorWasmSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.BlazorWebAssembly</NETSdkBlazorWasmSourceRoot>
+      <NETSdkRazorSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor</NETSdkRazorSourceRoot>
     </PropertyGroup>
     <ItemGroup>
       <NETSdksContent Include="$(NETSdkSourceRoot)\**\*.*"
@@ -88,6 +96,10 @@
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Web.ProjectSystem"/>
       <NETSdksContent Include="$(NETSdkWorkerSourceRoot)\**\*.*"
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Worker"/>
+      <NETSdksContent Include="$(NETSdkBlazorWasmSourceRoot)\**\*.*" 
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.BlazorWebAssembly"/>
+      <NETSdksContent Include="$(NETSdkRazorSourceRoot)\**\*.*" 
+                     DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Razor"/>
     </ItemGroup>
     <Copy SourceFiles="@(NETSdksContent)"
       DestinationFiles="@(NETSdksContent->'$(OutputPath)\%(DeploymentSubpath)\%(RecursiveDir)%(Filename)%(Extension)')" />
@@ -193,6 +205,53 @@
     <Delete Files="$(FSharpDirectory)/tool_fsc.pdb" />
     <Delete Files="$(FSharpDirectory)/tool_fsc.runtimeconfig.json" />
     <Delete Files="$(FSharpDirectory)/tool_fsc.deps.json" />
+  </Target>
+
+  <Target Name="PublishBlazorWasmTools"
+          BeforeTargets="PublishNetSdks">
+    <MSBuild
+      Targets="Publish"
+      Projects="$(RepoRoot)/src/BlazorWasmSdk/Tool/Microsoft.NET.Sdk.BlazorWebAssembly.Tool.csproj"
+      Properties="Configuration=$(Configuration)" />
+  </Target>
+
+  <Target Name="MoveBlazorWasmTools" AfterTargets="PublishBlazorWasmTools">
+    <ItemGroup>
+      <_WebAssemblyToolsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.BlazorWebAssembly.Tool\$(Configuration)\$(SdkTargetFramework)\publish\*.*" />
+    </ItemGroup>
+
+    <Error
+      Text="WebAssembly SDK tools outputs were not found in $(ArtifactsBinDir)Microsoft.NET.Sdk.BlazorWebAssembly.Tool\$(Configuration)\$(SdkTargetFramework)\publish"
+      Condition="'@(_WebAssemblyToolsOutput->Count())' == '0'" />
+    
+    <Copy
+      SourceFiles="@(_WebAssemblyToolsOutput)"
+      DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.BlazorWebAssembly\tools\$(SdkTargetFramework)\"
+      SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="PublishRazorSdkTools"
+          BeforeTargets="PublishNetSdks">
+    <MSBuild
+      Targets="Publish"
+      Projects="$(RepoRoot)/src/RazorSdk/Tool/Microsoft.NET.Sdk.Razor.Tool.csproj"
+      Properties="Configuration=$(Configuration)" />
+  </Target>
+
+  <Target Name="MoveRazorSdkTools" AfterTargets="PublishRazorSdkTools">
+    <ItemGroup>
+      <_RazorToolOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.Tool\$(Configuration)\$(SdkTargetFramework)\publish\*.*" />
+      <_MvcRazorExtensionOutput Include="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor\tasks\$(SdkTargetFramework)\Microsoft.AspNetCore.Mvc.Razor.Extensions.dll" />
+    </ItemGroup>
+
+    <Copy
+      SourceFiles="@(_RazorToolOutput)"
+      DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor\tools\"
+      SkipUnchangedFiles="true" />
+      <Copy
+      SourceFiles="@(_MvcRazorExtensionOutput)"
+      DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor\extensions\mvc-3-0\"
+      SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="PublishTargetExtensions"
@@ -306,6 +365,7 @@
                             PublishRoslyn;
                             PublishMSBuildExtensions;
                             PublishFSharp;
+                            PublishBlazorWasmTools;
                             GenerateCliRuntimeConfigurationFiles;
                             MakeFscRunnableAndMoveToPublishDir;
                             RemoveFscFilesAfterPublish;
