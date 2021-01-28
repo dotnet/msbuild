@@ -743,7 +743,8 @@ namespace Microsoft.Build.BackEnd
             /// Sends the specified packet to this node asynchronously.
             /// The method enqueues a task to write the packet and returns
             /// immediately. This is because SendData() is on a hot path
-            /// under the primary lock and we want to minimize our time there.
+            /// under the primary lock (BuildManager's _syncLock)
+            /// and we want to minimize our time there.
             /// </summary>
             /// <param name="packet">The packet to send.</param>
             public void SendData(INodePacket packet)
