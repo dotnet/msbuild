@@ -7,9 +7,9 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Utilities
+namespace Microsoft.Build.Shared
 {
-    public static class ProcessExtensions
+    internal static class ProcessExtensions
     {
         public static void KillTree(this Process process, int timeout)
         {
@@ -87,6 +87,11 @@ namespace Microsoft.Build.Utilities
                 // Process already terminated.
                 return;
             }
+            catch (InvalidOperationException)
+            {
+                // Process already terminated.
+                return;
+            }
         }
 
         private static int RunProcessAndWaitForExit(string fileName, string arguments, out string stdout)
@@ -108,8 +113,13 @@ namespace Microsoft.Build.Utilities
             }
             else
             {
-                process.Kill();
-                
+                try
+                {
+                    process.Kill();
+                }
+                catch (InvalidOperationException)
+                { }
+
                 // Kill is asynchronous so we should still wait a little
                 //
                 process.WaitForExit((int) TimeSpan.FromSeconds(1).TotalMilliseconds);
