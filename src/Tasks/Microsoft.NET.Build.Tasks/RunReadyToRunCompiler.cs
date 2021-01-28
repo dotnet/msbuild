@@ -216,7 +216,11 @@ namespace Microsoft.NET.Build.Tasks
                 result.AppendLine($"--out:\"{_outputR2RImage}\"");
                 if (!String.IsNullOrEmpty(Crossgen2ExtraCommandLineArgs))
                 {
-                    result.AppendLine(Crossgen2ExtraCommandLineArgs);
+                    foreach (string extraArg in Crossgen2ExtraCommandLineArgs.Split(';'))
+                    {
+                        if (!String.IsNullOrEmpty(extraArg))
+                            result.AppendLine(extraArg);
+                    }
                 }
 
                 // Note: do not add double quotes around the input assembly, even if the file path contains spaces. The command line 
@@ -232,7 +236,11 @@ namespace Microsoft.NET.Build.Tasks
                 result.AppendLine($"--out:\"{_outputR2RImage}\"");
                 if (!String.IsNullOrEmpty(Crossgen2ExtraCommandLineArgs))
                 {
-                    result.AppendLine(Crossgen2ExtraCommandLineArgs);
+                    foreach (string extraArg in Crossgen2ExtraCommandLineArgs.Split(';'))
+                    {
+                        if (!String.IsNullOrEmpty(extraArg))
+                            result.AppendLine(extraArg);
+                    }
                 }
                 // Note: do not add double quotes around the input assembly, even if the file path contains spaces. The command line 
                 // parsing logic will append this string to the working directory if it's a relative path, so any double quotes will result in errors.
