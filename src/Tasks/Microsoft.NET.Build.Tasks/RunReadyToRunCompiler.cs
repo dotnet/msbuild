@@ -211,9 +211,10 @@ namespace Microsoft.NET.Build.Tasks
 
             if (!String.IsNullOrEmpty(Crossgen2ExtraCommandLineArgs))
             {
-                foreach (string extraArg in Crossgen2ExtraCommandLineArgs.Split(';', StringSplitOptions.RemoveEmptyEntries))
+                foreach (string extraArg in Crossgen2ExtraCommandLineArgs.Split(';'))
                 {
-                    result.AppendLine(extraArg);
+                    if (!String.IsNullOrEmpty(extraArg))
+                        result.AppendLine(extraArg);
                 }
             }
 
