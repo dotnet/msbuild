@@ -213,8 +213,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 foreach (string extraArg in Crossgen2ExtraCommandLineArgs.Split(';', StringSplitOptions.RemoveEmptyEntries))
                 {
-                    if (!String.IsNullOrEmpty(extraArg))
-                        result.AppendLine(extraArg);
+                    result.AppendLine(extraArg);
                 }
             }
 
