@@ -246,12 +246,7 @@ namespace Microsoft.Build.Tasks
 
             if (_excludePatterns.Length > 0)
             {
-                result |= _excludePatterns.Aggregate(
-                    false,
-                    (current, pattern) => current | FileMatcher.IsMatch(
-                                              FileMatcher.Normalize(zipArchiveEntry.FullName),
-                                              pattern,
-                                              true));
+                result |= _excludePatterns.Any(pattern => FileMatcher.IsMatch(FileMatcher.Normalize(zipArchiveEntry.FullName), pattern, true));
             }
 
             return result;
