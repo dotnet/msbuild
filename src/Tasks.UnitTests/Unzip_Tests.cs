@@ -310,7 +310,6 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
         public void LogsErrorIfIncludeContainsInvalidPathCharacters()
         {
@@ -367,7 +366,6 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)] 
         [Fact]
         public void LogsErrorIfExcludeContainsInvalidPathCharacters()
         {
