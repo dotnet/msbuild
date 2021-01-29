@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [Fact]
+        [Fact(Skip = "flaky")]
         public void GivenADllAndMultipleTestRunParametersItPassesThemToVStestConsoleInTheCorrectFormat()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("1");

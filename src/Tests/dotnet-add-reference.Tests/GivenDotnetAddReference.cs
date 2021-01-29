@@ -65,7 +65,7 @@ Commands:
         private TestSetup Setup([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(Setup), string identifier = "")
         {
             return new TestSetup(
-                _testAssetsManager.CopyTestAsset(TestSetup.ProjectName, callingMethod, identifier, testAssetSubdirectory: TestSetup.TestGroup)
+                _testAssetsManager.CopyTestAsset(TestSetup.ProjectName, callingMethod + nameof(GivenDotnetAddReference), identifier, testAssetSubdirectory: TestSetup.TestGroup)
                     .WithSource()
                     .Path);
         }

@@ -63,7 +63,7 @@ Options:
         private TestSetup Setup([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(Setup), string identifier = "")
         {
             return new TestSetup(
-                _testAssetsManager.CopyTestAsset(TestSetup.ProjectName, callingMethod: callingMethod, identifier: identifier, testAssetSubdirectory: TestAssetSubdirectories.NonRestoredTestProjects)
+                _testAssetsManager.CopyTestAsset(TestSetup.ProjectName, callingMethod: callingMethod + nameof(GivenDotnetRemoveReference), identifier: identifier, testAssetSubdirectory: TestAssetSubdirectories.NonRestoredTestProjects)
                     .WithSource()
                     .Path);
         }
