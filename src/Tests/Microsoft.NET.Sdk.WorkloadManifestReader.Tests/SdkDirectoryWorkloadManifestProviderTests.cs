@@ -14,9 +14,7 @@ using System.Runtime.CompilerServices;
 
 namespace ManifestReaderTests
 {
-    //  Don't run in parallel with any other tests which set DOTNETSDK_WORKLOAD_MANIFEST_ROOTS in-process
-    //  (they also need to be annotated with this Collection)
-    [Collection("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS")]
+
     public class SdkDirectoryWorkloadManifestProviderTests : SdkTest
     {
         private string _testDirectory;
@@ -101,34 +99,27 @@ namespace ManifestReaderTests
         {
             Initialize();
 
-            string oldTestHookValue = Environment.GetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS");
-            try
-            {
-                var additionalManifestDirectory = Path.Combine(_testDirectory, "AdditionalManifests");
-                Directory.CreateDirectory(additionalManifestDirectory);
-                Environment.SetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory);
+            var additionalManifestDirectory = Path.Combine(_testDirectory, "AdditionalManifests");
+            Directory.CreateDirectory(additionalManifestDirectory);
 
-                //  Manifest in test hook directory
-                Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, "Android"));
-                File.WriteAllText(Path.Combine(additionalManifestDirectory, "Android", "WorkloadManifest.json"), "AndroidContent");
+            var environmentMock = new EnvironmentMock();
+            environmentMock.Add("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory);
 
-                //  Manifest in default directory
-                Directory.CreateDirectory(Path.Combine(_manifestDirectory, "iOS"));
-                File.WriteAllText(Path.Combine(_manifestDirectory, "iOS", "WorkloadManifest.json"), "iOSContent");
+            //  Manifest in test hook directory
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, "Android"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory, "Android", "WorkloadManifest.json"), "AndroidContent");
+
+            //  Manifest in default directory
+            Directory.CreateDirectory(Path.Combine(_manifestDirectory, "iOS"));
+            File.WriteAllText(Path.Combine(_manifestDirectory, "iOS", "WorkloadManifest.json"), "iOSContent");
 
 
-                var sdkDirectoryWorkloadManifestProvider
-                    = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100");
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", environmentMock.GetEnvironmentVariable);
 
-                GetManifestContents(sdkDirectoryWorkloadManifestProvider)
-                    .Should()
-                    .BeEquivalentTo("AndroidContent", "iOSContent");
-
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", oldTestHookValue);
-            }
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("AndroidContent", "iOSContent");
         }
 
         [Fact]
@@ -136,33 +127,27 @@ namespace ManifestReaderTests
         {
             Initialize();
 
-            string oldTestHookValue = Environment.GetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS");
-            try
-            {
-                var additionalManifestDirectory = Path.Combine(_testDirectory, "AdditionalManifests");
-                Directory.CreateDirectory(additionalManifestDirectory);
-                Environment.SetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory);
+            var additionalManifestDirectory = Path.Combine(_testDirectory, "AdditionalManifests");
+            Directory.CreateDirectory(additionalManifestDirectory);
 
-                //  Manifest in test hook directory
-                Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, "Android"));
-                File.WriteAllText(Path.Combine(additionalManifestDirectory, "Android", "WorkloadManifest.json"), "OverridingAndroidContent");
+            var environmentMock = new EnvironmentMock();
+            environmentMock.Add("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory);
 
-                //  Manifest in default directory
-                Directory.CreateDirectory(Path.Combine(_manifestDirectory, "Android"));
-                File.WriteAllText(Path.Combine(_manifestDirectory, "Android", "WorkloadManifest.json"), "OverriddenAndroidContent");
+            //  Manifest in test hook directory
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, "Android"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory, "Android", "WorkloadManifest.json"), "OverridingAndroidContent");
 
-                var sdkDirectoryWorkloadManifestProvider
-                    = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100");
+            //  Manifest in default directory
+            Directory.CreateDirectory(Path.Combine(_manifestDirectory, "Android"));
+            File.WriteAllText(Path.Combine(_manifestDirectory, "Android", "WorkloadManifest.json"), "OverriddenAndroidContent");
 
-                GetManifestContents(sdkDirectoryWorkloadManifestProvider)
-                    .Should()
-                    .BeEquivalentTo("OverridingAndroidContent");
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", environmentMock.GetEnvironmentVariable);
 
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", oldTestHookValue);
-            }
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("OverridingAndroidContent");
+
         }
 
         [Fact]
@@ -170,44 +155,40 @@ namespace ManifestReaderTests
         {
             Initialize();
 
-            string oldTestHookValue = Environment.GetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS");
-            try
-            {
-                var additionalManifestDirectory1 = Path.Combine(_testDirectory, "AdditionalManifests1");
-                Directory.CreateDirectory(additionalManifestDirectory1);
-                var additionalManifestDirectory2 = Path.Combine(_testDirectory, "AdditionalManifests2");
-                Directory.CreateDirectory(additionalManifestDirectory2);
-                Environment.SetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory1 + Path.PathSeparator + additionalManifestDirectory2);
+            var additionalManifestDirectory1 = Path.Combine(_testDirectory, "AdditionalManifests1");
+            Directory.CreateDirectory(additionalManifestDirectory1);
+            var additionalManifestDirectory2 = Path.Combine(_testDirectory, "AdditionalManifests2");
+            Directory.CreateDirectory(additionalManifestDirectory2);
 
-                //  Manifests in default directory
-                Directory.CreateDirectory(Path.Combine(_manifestDirectory, "iOS"));
-                File.WriteAllText(Path.Combine(_manifestDirectory, "iOS", "WorkloadManifest.json"), "iOSContent");
+            var environmentMock = new EnvironmentMock();
+            environmentMock.Add("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory1 + Path.PathSeparator + additionalManifestDirectory2);
 
-                Directory.CreateDirectory(Path.Combine(_manifestDirectory, "Android"));
-                File.WriteAllText(Path.Combine(_manifestDirectory, "Android", "WorkloadManifest.json"), "DefaultAndroidContent");
 
-                //  Manifests in first additional directory
-                Directory.CreateDirectory(Path.Combine(additionalManifestDirectory1, "Android"));
-                File.WriteAllText(Path.Combine(additionalManifestDirectory1, "Android", "WorkloadManifest.json"), "AndroidContent1");
+            //  Manifests in default directory
+            Directory.CreateDirectory(Path.Combine(_manifestDirectory, "iOS"));
+            File.WriteAllText(Path.Combine(_manifestDirectory, "iOS", "WorkloadManifest.json"), "iOSContent");
 
-                //  Manifests in second additional directory
-                Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, "Android"));
-                File.WriteAllText(Path.Combine(additionalManifestDirectory2, "Android", "WorkloadManifest.json"), "AndroidContent2");
+            Directory.CreateDirectory(Path.Combine(_manifestDirectory, "Android"));
+            File.WriteAllText(Path.Combine(_manifestDirectory, "Android", "WorkloadManifest.json"), "DefaultAndroidContent");
 
-                Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, "Test"));
-                File.WriteAllText(Path.Combine(additionalManifestDirectory2, "Test", "WorkloadManifest.json"), "TestContent2");
+            //  Manifests in first additional directory
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory1, "Android"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory1, "Android", "WorkloadManifest.json"), "AndroidContent1");
 
-                var sdkDirectoryWorkloadManifestProvider
-                    = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100");
+            //  Manifests in second additional directory
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, "Android"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory2, "Android", "WorkloadManifest.json"), "AndroidContent2");
 
-                GetManifestContents(sdkDirectoryWorkloadManifestProvider)
-                    .Should()
-                    .BeEquivalentTo("AndroidContent1", "iOSContent", "TestContent2");
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", oldTestHookValue);
-            }
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, "Test"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory2, "Test", "WorkloadManifest.json"), "TestContent2");
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", environmentMock.GetEnvironmentVariable);
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("AndroidContent1", "iOSContent", "TestContent2");
+         
         }
 
         [Fact]
@@ -215,32 +196,46 @@ namespace ManifestReaderTests
         {
             Initialize();
 
-            string oldTestHookValue = Environment.GetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS");
-            try
-            {
-                var additionalManifestDirectory = Path.Combine(_testDirectory, "AdditionalManifests");
-                Environment.SetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory);
+            var additionalManifestDirectory = Path.Combine(_testDirectory, "AdditionalManifests");
+                
+            var environmentMock = new EnvironmentMock();
+            environmentMock.Add("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory);
 
-                //  Manifest in default directory
-                Directory.CreateDirectory(Path.Combine(_manifestDirectory, "Android"));
-                File.WriteAllText(Path.Combine(_manifestDirectory, "Android", "WorkloadManifest.json"), "AndroidContent");
+            //  Manifest in default directory
+            Directory.CreateDirectory(Path.Combine(_manifestDirectory, "Android"));
+            File.WriteAllText(Path.Combine(_manifestDirectory, "Android", "WorkloadManifest.json"), "AndroidContent");
 
-                var sdkDirectoryWorkloadManifestProvider
-                    = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100");
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", environmentMock.GetEnvironmentVariable);
 
-                GetManifestContents(sdkDirectoryWorkloadManifestProvider)
-                    .Should()
-                    .BeEquivalentTo("AndroidContent");
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", oldTestHookValue);
-            }
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("AndroidContent");
+         
         }
 
         private IEnumerable<string> GetManifestContents(SdkDirectoryWorkloadManifestProvider manifestProvider)
         {
             return manifestProvider.GetManifests().Select(stream => new StreamReader(stream).ReadToEnd());
+        }
+
+        private class EnvironmentMock
+        {
+            Dictionary<string, string> _mockedEnvironmentVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            public void Add(string variable, string value)
+            {
+                _mockedEnvironmentVariables[variable] = value;
+            }
+
+            public string GetEnvironmentVariable(string variable)
+            {
+                if (_mockedEnvironmentVariables.TryGetValue(variable, out string value))
+                {
+                    return value;
+                }
+                return Environment.GetEnvironmentVariable(variable);
+            }
         }
     }
 }

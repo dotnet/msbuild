@@ -15,6 +15,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private readonly string [] _manifestDirectories;
 
         public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion)
+            : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable)
+        {
+
+        }
+
+        internal SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, Func<string, string?> getEnvironmentVariable)
         {
             if (string.IsNullOrWhiteSpace(sdkVersion))
             {
@@ -45,8 +51,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             var manifestDirectory = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
 
-            var manifestDirectoryEnvironmentVariable = Environment.GetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS");
-            if (!string.IsNullOrEmpty(manifestDirectoryEnvironmentVariable))
+            var manifestDirectoryEnvironmentVariable = getEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS");
+            if (manifestDirectoryEnvironmentVariable != null)
             {
                 _manifestDirectories = manifestDirectoryEnvironmentVariable.Split(Path.PathSeparator).Append(manifestDirectory).ToArray();
             }

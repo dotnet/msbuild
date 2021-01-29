@@ -140,21 +140,20 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            foreach (var property in new[] { "WinTestWorkloadAutoImportPropsImported", "UnixTestWorkloadAutoImportPropsImported" })
-            {
-                var getValuesCommand = new GetValuesCommand(testAsset, property);
+            var expectedProperty = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "WinTestWorkloadAutoImportPropsImported" : "UnixTestWorkloadAutoImportPropsImported";
 
-                getValuesCommand
-                    .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "true")
-                    .Execute()
-                    .Should()
-                    .Pass();
+            var getValuesCommand = new GetValuesCommand(testAsset, expectedProperty);
 
-                getValuesCommand
-                    .GetValues()
-                    .Should()
-                    .BeEquivalentTo("true");
-            }
+            getValuesCommand
+                .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "true")
+                .Execute()
+                .Should()
+                .Pass();
+
+            getValuesCommand
+                .GetValues()
+                .Should()
+                .BeEquivalentTo("true");
         }
 
         [Fact]
