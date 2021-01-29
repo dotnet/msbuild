@@ -698,4 +698,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1148: Found multiple publish output files with the same relative path: {0}.</value>
     <comment>{StrBegin="NETSDK1148: "}</comment>
   </data>
+  <data name="WindowsSDKVersionConflicts" xml:space="preserve">
+    <value>NETSDK1149: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</value>
+    <comment>{StrBegin="NETSDK1149: "}</comment>
+  </data>
 </root>

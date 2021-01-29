@@ -740,6 +740,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1136: La plataforma de destino debe establecerse en Windows (normalmente, se incluye "-windows" en la propiedad TargetFramework) cuando se use Windows Forms o WPF, o bien cuando se haga referencia a proyectos o paquetes que lo usen.</target>
         <note>{StrBegin="NETSDK1136: "}</note>
       </trans-unit>
+      <trans-unit id="WindowsSDKVersionConflicts">
+        <source>NETSDK1149: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</source>
+        <target state="new">NETSDK1149: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</target>
+        <note>{StrBegin="NETSDK1149: "}</note>
+      </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: The following workload packs were not installed: {0}</source>
         <target state="translated">NETSDK1147: No se instalaron los paquetes de carga de trabajo siguientes: {0}</target>

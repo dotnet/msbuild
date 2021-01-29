@@ -39,4 +39,15 @@ Copyright (c) .NET Foundation. All rights reserved.
     <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == ''">$(TargetPlatformVersion)</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">$(TargetPlatformVersion)</TargetPlatformMinVersion>    
   </PropertyGroup>
+
+  <Target Name="_ErrorOnUnresolvedWindowsSDKAssemblyConflict"
+          AfterTargets="ResolveAssemblyReferences"
+          Condition=" '@(ResolveAssemblyReferenceUnresolvedAssemblyConflicts)' != '' ">
+    <ItemGroup>
+      <_WindowsSDKUnresolvedRef Include="@(ResolveAssemblyReferenceUnresolvedAssemblyConflicts)" Condition="'%(Identity)' == 'Microsoft.Windows.SDK.NET' " />
+    </ItemGroup>
+    
+    <NETSdkError ResourceName="WindowsSDKVersionConflicts"
+                 Condition="@(_WindowsSDKUnresolvedRef) != ''"/>
+  </Target>
 </Project>
