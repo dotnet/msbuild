@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Utilities
+namespace Microsoft.Build.Shared
 {
     internal static class ProcessExtensions
     {
@@ -77,10 +77,21 @@ namespace Microsoft.Build.Utilities
 
         private static void KillProcessUnix(int processId)
         {
-            RunProcessAndWaitForExit(
-                "kill",
-                $"-TERM {processId}",
-                out string _);
+            try
+            {
+                using Process process = Process.GetProcessById(processId);
+                process.Kill();
+            }
+            catch (ArgumentException)
+            {
+                // Process already terminated.
+                return;
+            }
+            catch (InvalidOperationException)
+            {
+                // Process already terminated.
+                return;
+            }
         }
 
         private static int RunProcessAndWaitForExit(string fileName, string arguments, out string stdout)
@@ -102,8 +113,13 @@ namespace Microsoft.Build.Utilities
             }
             else
             {
-                process.Kill();
-                
+                try
+                {
+                    process.Kill();
+                }
+                catch (InvalidOperationException)
+                { }
+
                 // Kill is asynchronous so we should still wait a little
                 //
                 process.WaitForExit((int) TimeSpan.FromSeconds(1).TotalMilliseconds);
