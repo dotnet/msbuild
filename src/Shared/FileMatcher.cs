@@ -204,7 +204,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool HasPropertyOrItemReferences(string filespec)
         {
-            return s_propertyAndItemReferences.Any(ref=> filespec.Contains(ref));
+            return s_propertyAndItemReferences.Any(filespec.Contains);
         }
 
         /// <summary>

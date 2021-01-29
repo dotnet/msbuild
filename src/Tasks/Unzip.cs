@@ -96,7 +96,9 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                if (ParseIncludeExclude())
+                ParseIncludeExclude();
+
+                if (!Log.HasLoggedErrors)
                 {
                     foreach (ITaskItem sourceFile in SourceFiles.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
                     {
@@ -266,38 +268,33 @@ namespace Microsoft.Build.Tasks
                    && zipArchiveEntry.Length == fileInfo.Length;
         }
 
-        private bool ParseIncludeExclude()
+        private void ParseIncludeExclude()
         {
-            return ParsePattern(Include, out _includePatterns) && ParsePattern(Exclude, out _excludePatterns);
+            ParsePattern(Include, out _includePatterns);
+            ParsePattern(Exclude, out _excludePatterns);
         }
 
-        private bool ParsePattern(string pattern, out string[] patterns)
+        private void ParsePattern(string pattern, out string[] patterns)
         {
-            bool result = false;
             patterns = Array.Empty<string>();
-            if (string.IsNullOrWhiteSpace(pattern))
+            if (!string.IsNullOrWhiteSpace(pattern))
             {
-                result = true;
+                if (FileMatcher.HasPropertyOrItemReferences(pattern))
+                {
+                    // Supporting property references would require access to Expander which is unavailable in Microsoft.Build.Tasks
+                    Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternPropertyReferences", pattern);
+                }
+                else if (pattern.IndexOfAny(FileUtilities.InvalidPathChars) != -1)
+                {
+                    Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternInvalidPath", pattern);
+                }
+                else
+                {
+                    patterns = pattern.Contains(';')
+                                   ? pattern.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(FileMatcher.Normalize).ToArray()
+                                   : new[] { pattern };
+                }
             }
-            else if (FileMatcher.HasPropertyOrItemReferences(pattern))
-            {
-                // Supporting property references would require access to Expander which is unavailable in Microsoft.Build.Tasks
-                Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternPropertyReferences", pattern);
-            }
-            else if (pattern.IndexOfAny(FileUtilities.InvalidPathChars) != -1)
-            {
-                Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternInvalidPath", pattern);
-            }
-            else
-            {
-                patterns = pattern.Contains(';')
-                               ? pattern.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(FileMatcher.Normalize).ToArray()
-                               : new[] { pattern };
-
-                result = true;
-            }
-
-            return result;
         }
     }
 }
