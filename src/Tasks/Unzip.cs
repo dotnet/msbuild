@@ -67,7 +67,7 @@ namespace Microsoft.Build.Tasks
         public string Include { get; set; }
 
         /// <summary>
-        /// Gets or sets a glob expression that will be used to determine which files to exclude from being unzipped from the archive.
+        /// Gets or sets an MSBuild glob expression that will be used to determine which files to exclude from being unzipped from the archive.
         /// </summary>
         public string Exclude { get; set; }
 
