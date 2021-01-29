@@ -134,7 +134,7 @@ namespace Microsoft.Build.Tasks
                             // Should only be thrown if the archive could not be opened (Access denied, corrupt file, etc)
                             Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotOpenFile", sourceFile.ItemSpec, e.Message);
                         }
-                    } 
+                    }
                 }
             }
             finally
@@ -294,19 +294,17 @@ namespace Microsoft.Build.Tasks
                 // Supporting property references would require access to Expander which is unavailable in Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternPropertyReferences", pattern);
             }
+            else if (pattern.IndexOfAny(FileUtilities.InvalidPathChars) != -1)
+            {
+                Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternInvalidPath", pattern);
+            }
             else
             {
                 patterns = pattern.Contains(';')
                                ? pattern.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(FileMatcher.Normalize).ToArray()
                                : new[] { pattern };
-                if (patterns.Any(p => p.IndexOfAny(Path.GetInvalidPathChars()) != -1))
-                {
-                    Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternInvalidPath", pattern);
-                }
-                else
-                {
-                    result = true;
-                }
+
+                result = true;
             }
 
             return result;
