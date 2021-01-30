@@ -23,6 +23,8 @@ namespace Microsoft.NET.Publish.Tests
 
         [Theory]
         [InlineData("netcoreapp3.0")]
+        [InlineData("net5.0")]
+        [InlineData("net6.0")]
         public void It_only_runs_readytorun_compiler_when_switch_is_enabled(string targetFramework)
         {
             var projectName = "CrossgenTest1";
@@ -50,6 +52,8 @@ namespace Microsoft.NET.Publish.Tests
 
         [Theory]
         [InlineData("netcoreapp3.0")]
+        [InlineData("net5.0")]
+        [InlineData("net6.0")]
         public void It_creates_readytorun_images_for_all_assemblies_except_excluded_ones(string targetFramework)
         {
             var projectName = "CrossgenTest2";
@@ -91,6 +95,8 @@ namespace Microsoft.NET.Publish.Tests
 
         [Theory]
         [InlineData("netcoreapp3.0")]
+        [InlineData("net5.0")]
+        [InlineData("net6.0")]
         public void It_creates_readytorun_symbols_when_switch_is_used(string targetFramework)
         {
             TestProjectPublishing_Internal("CrossgenTest3", targetFramework, emitNativeSymbols: true);
@@ -98,6 +104,8 @@ namespace Microsoft.NET.Publish.Tests
 
         [Theory]
         [InlineData("netcoreapp3.0")]
+        [InlineData("net5.0")]
+        [InlineData("net6.0")]
         public void It_supports_framework_dependent_publishing(string targetFramework)
         {
             TestProjectPublishing_Internal("FrameworkDependent", targetFramework, isSelfContained: false, emitNativeSymbols:true);
@@ -105,6 +113,8 @@ namespace Microsoft.NET.Publish.Tests
 
         [Theory]
         [InlineData("netcoreapp3.0")]
+        [InlineData("net5.0")]
+        [InlineData("net6.0")]
         public void It_does_not_support_cross_platform_readytorun_compilation(string targetFramework)
         {
             var ridToUse = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -181,6 +191,8 @@ namespace Microsoft.NET.Publish.Tests
 
         [Theory]
         [InlineData("netcoreapp3.0")]
+        [InlineData("net5.0")]
+        [InlineData("net6.0")]
         public void It_can_publish_readytorun_for_library_projects(string targetFramework)
         {
             TestProjectPublishing_Internal("LibraryProject1", targetFramework, isSelfContained: false, makeExeProject: false);
@@ -188,6 +200,8 @@ namespace Microsoft.NET.Publish.Tests
 
         [Theory]
         [InlineData("netcoreapp3.0")]
+        [InlineData("net5.0")]
+        [InlineData("net6.0")]
         public void It_can_publish_readytorun_for_selfcontained_library_projects(string targetFramework)
         {
             TestProjectPublishing_Internal("LibraryProject2", targetFramework, isSelfContained:true, makeExeProject: false);
@@ -195,6 +209,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
+        [InlineData("net6.0")]
         void It_can_publish_readytorun_using_crossgen2(string targetFramework)
         {
             // Crossgen2 only supported for Linux/Windows x64 scenarios for now
@@ -206,6 +221,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
+        [InlineData("net6.0")]
         void It_can_publish_readytorun_using_crossgen2_composite_mode(string targetFramework)
         {
             // Crossgen2 only supported for Linux/Windows x64 scenarios for now
@@ -217,6 +233,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
+        [InlineData("net6.0")]
         public void It_supports_libraries_when_using_crossgen2(string targetFramework)
         {
             // Crossgen2 only supported for Linux/Windows x64 scenarios for now
