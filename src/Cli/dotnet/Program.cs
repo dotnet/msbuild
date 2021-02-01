@@ -125,7 +125,9 @@ namespace Microsoft.DotNet.Cli
                     CommandLineInfo.PrintInfo();
                     return 0;
                 }
-                else if (parseResult.CommandResult.Command.Equals(Parser.RootCommand) && parseResult.HasOption("-h"))
+                else if (parseResult.CommandResult.Command.Equals(Parser.RootCommand) && 
+                         parseResult.HasOption("-h") && 
+                         string.IsNullOrEmpty(parseResult.RootSubCommandResult()))
                 {
                     HelpCommand.PrintHelp();
                     return 0;
