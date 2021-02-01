@@ -202,9 +202,9 @@
       <Uri>https://github.com/aspnet/xdt</Uri>
       <Sha>c01a538851a8ab1a1fbeb2e6243f391fff7587b4</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0-preview1.21070.1">
+    <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0-preview1.21077.3">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>1241b5d637e281b570bfcebc04f9702c13692afa</Sha>
+      <Sha>b08f7e8a338422923c5eb402d97382778d13d145</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
