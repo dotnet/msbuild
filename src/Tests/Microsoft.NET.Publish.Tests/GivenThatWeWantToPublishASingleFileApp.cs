@@ -565,7 +565,9 @@ class C
             };
             testProject.AdditionalProperties.Add("SelfContained", $"{selfContained}");
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(
+                testProject,
+                identifier: targetFramework + "_" + selfContained + "_" + bundleOption);
             var publishCommand = new PublishCommand(testAsset);
 
             publishCommand.Execute(PublishSingleFile, RuntimeIdentifier, bundleOption)
