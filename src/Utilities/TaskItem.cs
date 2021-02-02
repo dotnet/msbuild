@@ -301,21 +301,21 @@ namespace Microsoft.Build.Utilities
                 {
                     CopyOnWriteDictionary<string> copiedMetadata;
                     // Avoid a copy if we can, and if not, minimize the number of items we have to set.
-                    if (destinationAsTaskItem._metadata == null)
+                    if (destinationAsTaskItem.Metadata == null)
                     {
                         copiedMetadata = _metadata.Clone(); // Copy on write!
                     }
-                    else if (destinationAsTaskItem._metadata.Count < _metadata.Count)
+                    else if (destinationAsTaskItem.Metadata.Count < _metadata.Count)
                     {
                         copiedMetadata = _metadata.Clone(); // Copy on write!
-                        copiedMetadata.SetItems(destinationAsTaskItem._metadata.Where(entry => !String.IsNullOrEmpty(entry.Value)));
+                        copiedMetadata.SetItems(destinationAsTaskItem.Metadata.Where(entry => !String.IsNullOrEmpty(entry.Value)));
                     }
                     else
                     {
-                        copiedMetadata = destinationAsTaskItem._metadata.Clone();
-                        copiedMetadata.SetItems(_metadata.Where(entry => !destinationAsTaskItem._metadata.TryGetValue(entry.Key, out string val) || String.IsNullOrEmpty(val)));
+                        copiedMetadata = destinationAsTaskItem.Metadata.Clone();
+                        copiedMetadata.SetItems(_metadata.Where(entry => !destinationAsTaskItem.Metadata.TryGetValue(entry.Key, out string val) || String.IsNullOrEmpty(val)));
                     }
-                    destinationAsTaskItem._metadata = copiedMetadata;
+                    destinationAsTaskItem.Metadata = copiedMetadata;
                 }
                 else
                 {
