@@ -136,19 +136,8 @@ namespace Microsoft.Build.UnitTests
             // ToolTask does not log an error on timeout.
             mockEngine.Errors.ShouldBe(0);
 
-            if (NativeMethodsShared.IsMono)
-            {
-                // The standard check for SIGTERM fails intermittently on macOS Mono
-                // https://github.com/dotnet/msbuild/issues/5506
-                // To avoid test flakiness, allow 259 even though I can't justify it.
-                exec.ExitCode.ShouldBeOneOf(137, 259);
-            }
-            else
-            {
-                // On non-Windows the exit code of a killed process is generally 128 + SIGKILL = 137
-                // though this isn't 100% guaranteed, see https://unix.stackexchange.com/a/99134
-                exec.ExitCode.ShouldBe(NativeMethodsShared.IsWindows ? -1 : 137);
-            }
+            // On non-Windows the exit code of a killed process is 128 + SIGKILL = 137
+            exec.ExitCode.ShouldBe(NativeMethodsShared.IsWindows ? -1 : 137);
         }
 
         [Fact]
