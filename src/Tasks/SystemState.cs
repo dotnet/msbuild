@@ -39,6 +39,7 @@ namespace Microsoft.Build.Tasks
         /// Cache at the SystemState instance level. It is serialized and reused between instances.
         /// </summary>
         private Dictionary<string, FileState> instanceLocalFileStateCache = new Dictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
+        private Hashtable instanceLocalFileStateCacheForBfDeserialize = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// LastModified information is purely instance-local. It doesn't make sense to
@@ -278,15 +279,35 @@ namespace Microsoft.Build.Tasks
         {
             ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
 
-            var localFilesAsHashTable = (Hashtable)info.GetValue("fileState", typeof(Hashtable));
-
-            instanceLocalFileStateCache = localFilesAsHashTable.Cast<DictionaryEntry>()
-                .ToDictionary(
-                    kvp => (string)kvp.Key,
-                    kvp => (FileState)kvp.Value,
-                    StringComparer.OrdinalIgnoreCase);
+            instanceLocalFileStateCacheForBfDeserialize = (Hashtable)info.GetValue("fileState", typeof(Hashtable));
 
             isDirty = false;
+        }
+
+        /// <summary>
+        /// Deserialize cache of this class using BinaryFormatter
+        /// </summary>
+        internal static SystemState DeserializeCacheByBinaryFormatter(string stateFile, TaskLoggingHelper log)
+        {
+            SystemState systemSate  = (SystemState)StateFileBase.DeserializeCache(stateFile, log, typeof(SystemState));
+
+            // Construct the cache if necessary.
+            if (systemSate == null)
+            {
+                systemSate = new SystemState();
+            }
+
+            if (systemSate.instanceLocalFileStateCacheForBfDeserialize != null)
+            {
+                foreach (DictionaryEntry entry in systemSate.instanceLocalFileStateCacheForBfDeserialize)
+                {
+                    systemSate.instanceLocalFileStateCache.Add((string)entry.Key, (FileState)entry.Value);
+                }
+
+                systemSate.instanceLocalFileStateCacheForBfDeserialize = null;
+            }
+
+            return systemSate;
         }
 
         /// <summary>

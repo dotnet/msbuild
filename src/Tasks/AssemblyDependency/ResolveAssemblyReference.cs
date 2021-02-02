@@ -1911,13 +1911,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void ReadStateFileBinaryFormatter()
         {
-            _cache = (SystemState)StateFileBase.DeserializeCache(_stateFile, Log, typeof(SystemState));
-
-            // Construct the cache if necessary.
-            if (_cache == null)
-            {
-                _cache = new SystemState();
-            }
+            _cache = SystemState.DeserializeCacheByBinaryFormatter(_stateFile, Log);
         }
 
         /// <summary>

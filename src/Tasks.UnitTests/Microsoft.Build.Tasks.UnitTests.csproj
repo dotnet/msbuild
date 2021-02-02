@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Xml.XPath" />
     <PackageReference Include="Shouldly" />
@@ -138,6 +139,21 @@
 
   <ItemGroup>
     <None Update="ResourceHandling\*.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="AssemblyDependency\CacheFileSamples\BinaryFormatter\Microsoft.CodeAnalysis.csprojAssemblyReference.cache">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="AssemblyDependency\CacheFileSamples\BinaryFormatter\Microsoft.CodeAnalysis.VisualBasic.Emit.UnitTests.vbprojAssemblyReference.cache">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="AssemblyDependency\CacheFileSamples\BinaryFormatter\Microsoft.VisualStudio.LanguageServices.Implementation.csprojAssemblyReference.cache">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="AssemblyDependency\CacheFileSamples\BinaryFormatter\Roslyn.Compilers.Extension.csprojAssemblyReference.cache">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="AssemblyDependency\CacheFileSamples\Microsoft.VisualStudio.LanguageServices.Implementation.csprojAssemblyReference.cache">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestResources\lorem.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
