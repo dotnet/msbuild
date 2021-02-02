@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
 using System.Reflection;
+using AssemblyHashAlgorithm = System.Configuration.Assemblies.AssemblyHashAlgorithm;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -214,7 +215,7 @@ namespace Microsoft.Build.BackEnd
             AssemblyNameFlags flags = default;
             ProcessorArchitecture processorArchitecture = default;
             CultureInfo cultureInfo = null;
-            System.Configuration.Assemblies.AssemblyHashAlgorithm hashAlgorithm = default;
+            AssemblyHashAlgorithm hashAlgorithm = default;
             AssemblyVersionCompatibility versionCompatibility = default;
             string codeBase = null;
 

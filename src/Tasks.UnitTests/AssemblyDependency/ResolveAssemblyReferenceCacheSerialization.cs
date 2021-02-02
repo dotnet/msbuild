@@ -5,7 +5,6 @@ using System.Runtime.Versioning;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
@@ -13,17 +12,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     public class ResolveAssemblyReferenceCacheSerialization : IDisposable
     {
         // Maintain this two in sync with the constant in SystemState
-        private static readonly byte[] TranslateContractSignature = new[] { (byte)'M', (byte)'B', (byte)'R', (byte)'S', (byte)'C', }; // Microsoft Build Rar State Cache
+        private static readonly byte[] TranslateContractSignature = { (byte)'M', (byte)'B', (byte)'R', (byte)'S', (byte)'C' }; // Microsoft Build RAR State Cache
         private static readonly byte TranslateContractVersion = 0x01;
 
-        private string _tempPath;
-        private string _rarCacheFile;
-        private TaskLoggingHelper _taskLoggingHelper;
+        private readonly string _rarCacheFile;
+        private readonly TaskLoggingHelper _taskLoggingHelper;
 
         public ResolveAssemblyReferenceCacheSerialization()
         {
-            _tempPath = Path.GetTempPath();
-            _rarCacheFile = Path.Combine(_tempPath, Guid.NewGuid() + ".UnitTest.RarCache");
+            var tempPath = Path.GetTempPath();
+            _rarCacheFile = Path.Combine(tempPath, Guid.NewGuid() + ".UnitTest.RarCache");
             _taskLoggingHelper = new TaskLoggingHelper(new MockEngine(), "TaskA")
             {
                 TaskResources = AssemblyResources.PrimaryResources
@@ -124,26 +122,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.NotNull(deserialized);
         }
 
-        [Theory]
-        [InlineData("Microsoft.VisualStudio.LanguageServices.Implementation.csprojAssemblyReference.cache")]
-        [InlineData("Microsoft.CodeAnalysis.csprojAssemblyReference.cache")]
-        [InlineData("Microsoft.CodeAnalysis.VisualBasic.Emit.UnitTests.vbprojAssemblyReference.cache")]
-        [InlineData("Roslyn.Compilers.Extension.csprojAssemblyReference.cache")]
-        public void RoundTripSampleFileState(string sampleName)
-        {
-            var fileSample = GetTestPayloadFileName($@"AssemblyDependency\CacheFileSamples\BinaryFormatter\{sampleName}");
-            // read old file
-            var deserialized = SystemState.DeserializeCacheByBinaryFormatter(fileSample, _taskLoggingHelper);
-            // white as TR
-            deserialized.SerializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
-            // read as TR
-            var deserializedByTranslator = SystemState.DeserializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
-
-            var sOld = JsonConvert.SerializeObject(deserialized, Formatting.Indented);
-            var sNew = JsonConvert.SerializeObject(deserializedByTranslator, Formatting.Indented);
-            Assert.Equal(sOld, sNew);
-        }
-
         [Fact]
         public void VerifySampleStateDeserialization()
         {
@@ -228,7 +206,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         private static string GetTestPayloadFileName(string name)
         {
-            var codeBaseUrl = new Uri(Assembly.GetExecutingAssembly().CodeBase);
+            var codeBaseUrl = new Uri(Assembly.GetExecutingAssembly().Location);
             var codeBasePath = Uri.UnescapeDataString(codeBaseUrl.AbsolutePath);
             var dirPath = Path.GetDirectoryName(codeBasePath) ?? string.Empty;
             return Path.Combine(dirPath, name);

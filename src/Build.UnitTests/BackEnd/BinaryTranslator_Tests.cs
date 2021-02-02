@@ -48,8 +48,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializeByte()
         {
             byte val = 0x55;
-            HelperTestSimpleType((byte) 0, val);
-            HelperTestSimpleType(val, (byte) 0);
+            HelperTestSimpleType((byte)0, val);
+            HelperTestSimpleType(val, (byte)0);
         }
 
         /// <summary>
@@ -59,8 +59,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializeShort()
         {
             short val = 0x55AA;
-            HelperTestSimpleType((short) 0, val);
-            HelperTestSimpleType(val, (short) 0);
+            HelperTestSimpleType((short)0, val);
+            HelperTestSimpleType(val, (short)0);
         }
 
         /// <summary>
@@ -70,8 +70,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializeLong()
         {
             long val = 0x55AABBCCDDEE;
-            HelperTestSimpleType((long) 0, val);
-            HelperTestSimpleType(val, (long) 0);
+            HelperTestSimpleType((long)0, val);
+            HelperTestSimpleType(val, (long)0);
         }
 
         /// <summary>
@@ -81,8 +81,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializeDouble()
         {
             double val = 3.1416;
-            HelperTestSimpleType((double) 0, val);
-            HelperTestSimpleType(val, (double) 0);
+            HelperTestSimpleType((double)0, val);
+            HelperTestSimpleType(val, (double)0);
         }
 
         /// <summary>
@@ -103,8 +103,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializeInt()
         {
             int val = 0x55AA55AA;
-            HelperTestSimpleType((int) 0, val);
-            HelperTestSimpleType(val, (int) 0);
+            HelperTestSimpleType((int)0, val);
+            HelperTestSimpleType(val, (int)0);
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializeStringArray()
         {
             HelperTestArray(new string[] { }, StringComparer.Ordinal);
-            HelperTestArray(new string[] {"foo", "bar"}, StringComparer.Ordinal);
+            HelperTestArray(new string[] { "foo", "bar" }, StringComparer.Ordinal);
             HelperTestArray(null, StringComparer.Ordinal);
         }
 
@@ -160,10 +160,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializeEnum()
         {
             TranslationDirection value = TranslationDirection.ReadFromStream;
-            TranslationHelpers.GetWriteTranslator().TranslateEnum(ref value, (int) value);
+            TranslationHelpers.GetWriteTranslator().TranslateEnum(ref value, (int)value);
 
             TranslationDirection deserializedValue = TranslationDirection.WriteToStream;
-            TranslationHelpers.GetReadTranslator().TranslateEnum(ref deserializedValue, (int) deserializedValue);
+            TranslationHelpers.GetReadTranslator().TranslateEnum(ref deserializedValue, (int)deserializedValue);
 
             Assert.Equal(value, deserializedValue);
         }
@@ -265,7 +265,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSerializeArray()
         {
-            DerivedClass[] value = new DerivedClass[] {new DerivedClass(1, 2), new DerivedClass(3, 4)};
+            DerivedClass[] value = new DerivedClass[] { new DerivedClass(1, 2), new DerivedClass(3, 4) };
             TranslationHelpers.GetWriteTranslator().TranslateArray(ref value);
 
             DerivedClass[] deserializedValue = null;
@@ -295,7 +295,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSerializeArrayWithFactory()
         {
-            BaseClass[] value = new BaseClass[] {new BaseClass(1), new BaseClass(2)};
+            BaseClass[] value = new BaseClass[] { new BaseClass(1), new BaseClass(2) };
             TranslationHelpers.GetWriteTranslator().TranslateArray(ref value, BaseClass.FactoryForDeserialization);
 
             BaseClass[] deserializedValue = null;

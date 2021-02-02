@@ -2,16 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Runtime.Versioning;
-using System.Security.Permissions;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -24,9 +21,9 @@ namespace Microsoft.Build.Tasks
     /// Class is used to cache system state.
     /// </summary>
     [Serializable]
-    internal sealed class SystemState : StateFileBase, ISerializable, ITranslatable
+    internal sealed class SystemState : StateFileBase, ITranslatable
     {
-        private static readonly byte[] TranslateContractSignature = new []{(byte)'M', (byte)'B', (byte)'R', (byte)'S', (byte)'C', }; // Microsoft Build Rar State Cache
+        private static readonly byte[] TranslateContractSignature = { (byte) 'M', (byte) 'B', (byte) 'R', (byte) 'S', (byte) 'C'}; // Microsoft Build RAR State Cache
         private static readonly byte TranslateContractVersion = 0x01;
 
         /// <summary>
@@ -39,7 +36,6 @@ namespace Microsoft.Build.Tasks
         /// Cache at the SystemState instance level. It is serialized and reused between instances.
         /// </summary>
         private Dictionary<string, FileState> instanceLocalFileStateCache = new Dictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
-        private Hashtable instanceLocalFileStateCacheForBfDeserialize = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// LastModified information is purely instance-local. It doesn't make sense to
@@ -116,7 +112,7 @@ namespace Microsoft.Build.Tasks
         /// Class that holds the current file state.
         /// </summary>
         [Serializable]
-        private sealed class FileState : ISerializable, ITranslatable
+        private sealed class FileState : ITranslatable
         {
             /// <summary>
             /// The last modified time for this file.
@@ -162,50 +158,6 @@ namespace Microsoft.Build.Tasks
             internal FileState(ITranslator translator)
             {
                 Translate(translator);
-            }
-
-            /// <summary>
-            /// Deserializing constuctor.
-            /// </summary>
-            internal FileState(SerializationInfo info, StreamingContext context)
-            {
-                ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
-
-                lastModified = new DateTime(info.GetInt64("mod"), (DateTimeKind)info.GetInt32("modk"));
-                assemblyName = (AssemblyNameExtension)info.GetValue("an", typeof(AssemblyNameExtension));
-                dependencies = (AssemblyNameExtension[])info.GetValue("deps", typeof(AssemblyNameExtension[]));
-                scatterFiles = (string[])info.GetValue("sfiles", typeof(string[]));
-                runtimeVersion = (string)info.GetValue("rtver", typeof(string));
-                if (info.GetBoolean("fn"))
-                {
-                    var frameworkNameVersion = (Version) info.GetValue("fnVer", typeof(Version));
-                    var frameworkIdentifier = info.GetString("fnId");
-                    var frameworkProfile = info.GetString("fmProf");
-                    frameworkName = new FrameworkName(frameworkIdentifier, frameworkNameVersion, frameworkProfile);
-                }
-            }
-
-            /// <summary>
-            /// Serialize the contents of the class.
-            /// </summary>
-            [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-            public void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
-
-                info.AddValue("mod", lastModified.Ticks);
-                info.AddValue("modk", (int)lastModified.Kind);
-                info.AddValue("an", assemblyName);
-                info.AddValue("deps", dependencies);
-                info.AddValue("sfiles", scatterFiles);
-                info.AddValue("rtver", runtimeVersion);
-                info.AddValue("fn", frameworkName != null);
-                if (frameworkName != null)
-                {
-                    info.AddValue("fnVer", frameworkName.Version);
-                    info.AddValue("fnId", frameworkName.Identifier);
-                    info.AddValue("fmProf", frameworkName.Profile);
-                }
             }
 
             /// <summary>
@@ -273,44 +225,6 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Deserialize the contents of the class.
-        /// </summary>
-        internal SystemState(SerializationInfo info, StreamingContext context)
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
-
-            instanceLocalFileStateCacheForBfDeserialize = (Hashtable)info.GetValue("fileState", typeof(Hashtable));
-
-            isDirty = false;
-        }
-
-        /// <summary>
-        /// Deserialize cache of this class using BinaryFormatter
-        /// </summary>
-        internal static SystemState DeserializeCacheByBinaryFormatter(string stateFile, TaskLoggingHelper log)
-        {
-            SystemState systemSate  = (SystemState)StateFileBase.DeserializeCache(stateFile, log, typeof(SystemState));
-
-            // Construct the cache if necessary.
-            if (systemSate == null)
-            {
-                systemSate = new SystemState();
-            }
-
-            if (systemSate.instanceLocalFileStateCacheForBfDeserialize != null)
-            {
-                foreach (DictionaryEntry entry in systemSate.instanceLocalFileStateCacheForBfDeserialize)
-                {
-                    systemSate.instanceLocalFileStateCache.Add((string)entry.Key, (FileState)entry.Value);
-                }
-
-                systemSate.instanceLocalFileStateCacheForBfDeserialize = null;
-            }
-
-            return systemSate;
-        }
-
-        /// <summary>
         /// Set the target framework paths.
         /// This is used to optimize IO in the case of files requested from one
         /// of the FX folders.
@@ -347,6 +261,7 @@ namespace Microsoft.Build.Tasks
                     translator.Writer.Write(TranslateContractVersion);
 
                     Translate(translator);
+                    isDirty = false;
                 }
             }
             catch (Exception e)
@@ -389,6 +304,7 @@ namespace Microsoft.Build.Tasks
 
                     SystemState systemState = new SystemState();
                     systemState.Translate(translator);
+                    systemState.isDirty = false;
 
                     return systemState;
                 }
@@ -412,22 +328,9 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Serialize the contents of the class.
+        /// Reads/writes this class.
+        /// Used for serialization and deserialization of this class persistent cache.
         /// </summary>
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
-
-            var localFilesAsHashtable = new Hashtable();
-            foreach (var pair in instanceLocalFileStateCache)
-            {
-                localFilesAsHashtable.Add(pair.Key, pair.Value);
-            }
-
-            info.AddValue("fileState", localFilesAsHashtable);
-        }
-
         public void Translate(ITranslator translator)
         {
             if (instanceLocalFileStateCache is null)

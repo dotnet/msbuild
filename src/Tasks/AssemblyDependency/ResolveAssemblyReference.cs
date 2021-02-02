@@ -1905,26 +1905,6 @@ namespace Microsoft.Build.Tasks
                 _cache.SerializeCacheByTranslator(_stateFile, Log);
             }
         }
-
-        /// <summary>
-        /// TODO: to be deleted
-        /// </summary>
-        private void ReadStateFileBinaryFormatter()
-        {
-            _cache = SystemState.DeserializeCacheByBinaryFormatter(_stateFile, Log);
-        }
-
-        /// <summary>
-        /// Write out the state file if a state name was supplied and the cache is dirty.
-        /// TODO: to be deleted
-        /// </summary>
-        private void WriteStateFileBinaryFormatter()
-        {
-            if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
-            {
-                _cache.SerializeCache(_stateFile, Log);
-            }
-        }
         #endregion
 
         #region App.config

@@ -1011,6 +1011,10 @@ namespace Microsoft.Build.Shared
             info.AddValue("remapped", remappedFrom);
         }
 
+        /// <summary>
+        /// Reads/writes this class
+        /// </summary>
+        /// <param name="translator"></param>
         public void Translate(ITranslator translator)
         {
             translator.Translate(ref asAssemblyName);
