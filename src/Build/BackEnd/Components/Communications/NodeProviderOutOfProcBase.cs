@@ -860,7 +860,7 @@ namespace Microsoft.Build.BackEnd
 
                 // Kill the child and do a blocking wait.
                 CommunicationsUtilities.Trace("Killing node with pid = {0}", _process.Id);
-                _process.KillTree(timeout: -1);
+                _process.KillTree();
             }
 
 #if FEATURE_APM

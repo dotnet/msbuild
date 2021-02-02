@@ -940,17 +940,7 @@ namespace Microsoft.Build.Utilities
                     LogShared.LogWarningWithCodeFromResources("Shared.KillingProcessByCancellation", processName);
                 }
 
-                int timeout = 5000;
-                string timeoutFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDTOOLTASKCANCELPROCESSWAITTIMEOUT");
-                if (timeoutFromEnvironment != null)
-                {
-                    if (int.TryParse(timeoutFromEnvironment, out int result) && result >= 0)
-                    {
-                        timeout = result;
-                    }
-                }
-
-                proc.KillTree(timeout);
+                proc.KillTree();
             }
         }
 
