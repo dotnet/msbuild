@@ -49,7 +49,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache of system state information, used to optimize performance.
         /// </summary>
-        private SystemState _cache = null;
+        internal SystemState _cache = null;
 
         /// <summary>
         /// Construct
@@ -1884,23 +1884,27 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the state file (if present) into the cache.
         /// </summary>
-        private void ReadStateFile()
+        internal void ReadStateFile(FileExists fileExists)
         {
             _cache = SystemState.DeserializeCacheByTranslator(_stateFile, Log);
 
             // Construct the cache if necessary.
             if (_cache == null)
             {
-                _cache = new SystemState();
+                _cache = SystemState.DeserializePrecomputedCachesByTranslator(AssemblyInformationCachePaths ?? Array.Empty<ITaskItem>(), Log, fileExists);
             }
         }
 
         /// <summary>
         /// Write out the state file if a state name was supplied and the cache is dirty.
         /// </summary>
-        private void WriteStateFile()
+        internal void WriteStateFile()
         {
-            if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
+            if (!String.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
+            {
+                _cache.SerializePrecomputedCacheByTranslator(AssemblyInformationCacheOutputPath, Log);
+            }
+            else if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
                 _cache.SerializeCacheByTranslator(_stateFile, Log);
             }
@@ -2132,7 +2136,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Load any prior saved state.
-                    ReadStateFile();
+                    ReadStateFile(fileExists);
                     _cache.SetGetLastWriteTime(getLastWriteTime);
                     _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
 
