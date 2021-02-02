@@ -582,9 +582,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Loggers that all contained projects will use for their builds.
         /// Loggers are added with the <see cref="RegisterLogger"/>.
-        /// UNDONE: Currently they cannot be removed.
         /// Returns an empty collection if there are no loggers.
         /// </summary>
+        // UNDONE: Currently loggers cannot be removed.
         public ICollection<ILogger> Loggers
         {
             [DebuggerStepThrough]
@@ -1465,10 +1465,10 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Called when a host is completely done with the project collection.
-        /// UNDONE: This is a hack to make sure the logging thread shuts down if the build used the logging service
-        /// off the ProjectCollection. After CTP we need to rationalize this and see if we can remove the logging service from
-        /// the project collection entirely so this isn't necessary.
         /// </summary>
+        // UNDONE: This is a hack to make sure the logging thread shuts down if the build used the logging service
+        // off the ProjectCollection. After CTP we need to rationalize this and see if we can remove the logging service from
+        // the project collection entirely so this isn't necessary.
         public void Dispose()
         {
             Dispose(true);

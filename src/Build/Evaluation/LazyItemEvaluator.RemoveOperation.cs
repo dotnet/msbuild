@@ -38,7 +38,7 @@ namespace Microsoft.Build.Evaluation
                     new BuildEventFileInfo(string.Empty),
                     "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
 
-                if (_matchOnMetadata.IsEmpty && ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType))
+                if (_matchOnMetadata.IsEmpty && ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType) && _conditionResult)
                 {
                     // Perf optimization: If the Remove operation references itself (e.g. <I Remove="@(I)"/>)
                     // then all items are removed and matching is not necessary

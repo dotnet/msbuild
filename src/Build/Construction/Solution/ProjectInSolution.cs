@@ -94,6 +94,7 @@ namespace Microsoft.Build.Construction
         #endregion
         #region Member data
         private string _relativePath;         // Relative from .SLN file.  For example, "WindowsApplication1\WindowsApplication1.csproj"
+        private string _absolutePath;         // Absolute path to the project file
         private readonly List<string> _dependencies;     // A list of strings representing the Guids of the dependent projects.
         private IReadOnlyList<string> _dependenciesAsReadonly;
         private string _uniqueProjectName;    // For example, "MySlnFolder\MySubSlnFolder\Windows_Application1"
@@ -153,8 +154,7 @@ namespace Microsoft.Build.Construction
                 // cases. It caused https://github.com/NuGet/Home/issues/6918.
                 _relativePath = value;
 #else
-                _relativePath = FileUtilities.MaybeAdjustFilePath(value,
-                                                    baseDirectory:ParentSolution.SolutionFileDirectory ?? String.Empty);
+                _relativePath = FileUtilities.MaybeAdjustFilePath(value, ParentSolution.SolutionFileDirectory);
 #endif
             }
         }
@@ -162,7 +162,22 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Returns the absolute path for this project
         /// </summary>
-        public string AbsolutePath => Path.Combine(ParentSolution.SolutionFileDirectory, RelativePath);
+        public string AbsolutePath
+        {
+            get
+            {
+                if (_absolutePath == null)
+                {
+#if NETFRAMEWORK && !MONO
+                    _absolutePath = Path.GetFullPath(Path.Combine(ParentSolution.SolutionFileDirectory, _relativePath));
+#else
+                    _absolutePath = FileUtilities.NormalizePath(Path.Combine(ParentSolution.SolutionFileDirectory, _relativePath));
+#endif
+                }
+
+                return _absolutePath;
+            }
+        }
 
         /// <summary>
         /// The unique guid associated with this project, in "{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" form
@@ -214,9 +229,9 @@ namespace Microsoft.Build.Construction
 
         internal string TargetFrameworkMoniker { get; set; }
 
-        #endregion
+#endregion
 
-        #region Methods
+#region Methods
 
         private bool _checkedIfCanBeMSBuildProjectFile;
         private bool _canBeMSBuildProjectFile;
@@ -514,13 +529,13 @@ namespace Microsoft.Build.Construction
             return false;
         }
 
-        #endregion
+#endregion
 
-        #region Constants
+#region Constants
 
         internal const int DependencyLevelUnknown = -1;
         internal const int DependencyLevelBeingDetermined = -2;
 
-        #endregion
+#endregion
     }
 }

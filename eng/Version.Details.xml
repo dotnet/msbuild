@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.20580.3">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.20621.10">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>7ee8c2b620e66b3762d7a5a688dee8238770c86a</Sha>
+      <Sha>6813f5aa511a7a4498fa217a54219b5704a01f83</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="5.9.0-preview.2.6967">
+    <Dependency Name="NuGet.Build.Tasks" Version="5.9.0-preview.3.7016">
       <Uri>https://github.com/NuGet/NuGet.Client</Uri>
-      <Sha>a4c9d63bf942f1df1ba9486a87bad2e4b6888488</Sha>
+      <Sha>719f110bf31709b7f8bdf1ab74024450936d866c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="3.9.0-2.20574.26">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha />
+      <Sha>e9fd4dc7d74932c0d4b042251bc5a88bb5b3c437</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

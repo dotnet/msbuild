@@ -5,6 +5,7 @@ using System;
 
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -133,7 +134,9 @@ namespace Microsoft.Build.UnitTests
         public void SpacePropertyOptOutWave16_10()
         {
             using TestEnvironment env = TestEnvironment.Create();
-            env.SetChangeWave(ChangeWaves.Wave16_10);
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_10.ToString());
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
             Scanner lexer = new Scanner("$(x )", ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
@@ -142,6 +145,7 @@ namespace Microsoft.Build.UnitTests
             lexer = new Scanner("$( x)", ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
             Assert.Null(lexer.UnexpectedlyFound);
+            ChangeWaves.ResetStateForTests();
         }
 
         /// <summary>

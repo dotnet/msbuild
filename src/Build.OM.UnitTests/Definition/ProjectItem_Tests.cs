@@ -2604,6 +2604,92 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedUpdate, items[0]);
         }
 
+        [Theory]
+        [InlineData("abc", "def", "abc")]
+        [InlineData("abc", "de*", "abc")]
+        [InlineData("a*c", "def", "abc")]
+        [InlineData("abc", "def", "*bc")]
+        [InlineData("abc", "d*f", "*bc")]
+        [InlineData("*c", "d*f", "*bc")]
+        [InlineData("a*", "d*", "abc")]
+        public void UpdatesProceedInOrder(string first, string second, string third)
+        {
+            string contents = $@"
+<i Include='abc'>
+    <m1>m1_contents</m1>
+</i>
+<j Include='def'>
+    <m1>m1_contents</m1>
+</j>
+<i Update='{first}'>
+    <m1>first</m1>
+</i>
+<j Update='{second}'>
+    <m1>second</m1>
+</j>
+<i Update='{third}'>
+    <m1>third</m1>
+</i>
+";
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(contents, allItems: true);
+            Dictionary<string, string> expectedUpdatei = new Dictionary<string, string>
+            {
+                {"m1", "third" }
+            };
+            Dictionary<string, string> expectedUpdatej = new Dictionary<string, string>
+            {
+                {"m1", "second" }
+            };
+
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdatei, items[0]);
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdatej, items[1]);
+        }
+
+        [Fact]
+        public void UpdatingIndividualItemsProceedsInOrder()
+        {
+            string contents = @"
+<i Include='a;b;c'>
+    <m1>m1_contents</m1>
+</i>
+<i Update='a'>
+    <m1>second</m1>
+</i>
+<i Update='b'>
+    <m1>third</m1>
+</i>
+<i Update='c'>
+    <m1>fourth</m1>
+</i>
+<afterFirst Include='@(i)' />
+<i Update='*'>
+    <m1>sixth</m1>
+</i>
+<afterSecond Include='@(i)' />
+<i Update='b'>
+    <m1>seventh</m1>
+</i>
+<afterThird Include='@(i)' />
+<i Update='c'>
+    <m1>eighth</m1>
+</i>
+<afterFourth Include='@(i)' />
+";
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(contents, allItems: true);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "second", items[3]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "third", items[4]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "fourth", items[5]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "sixth", items[6]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "sixth", items[7]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "sixth", items[8]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "sixth", items[9]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "seventh", items[10]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "sixth", items[11]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "sixth", items[12]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "seventh", items[13]);
+            ObjectModelHelpers.AssertItemHasMetadata("m1", "eighth", items[14]);
+        }
+
         [Fact]
         public void UpdateWithNoMetadataShouldNotAffectItems()
         {
@@ -2774,6 +2860,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataC, items[4]);
         }
 
+        [Fact]
+        public void OptimizedRemoveOperationRespectsCondition()
+        {
+            string content = @"<TheItem Include=""InitialValue"" />
+                               <TheItem Remove=""@(TheItem)"" Condition=""false"" />
+                               <TheItem Include=""ReplacedValue"" Condition=""false"" /> ";
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, true);
+
+            items[0].EvaluatedInclude.ShouldBe("InitialValue");
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -2820,7 +2917,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void UpdateFromReferencedItemShouldBeCaseInsensitive()
         {
             string content = @"
-                              <from Include='a'>
+                              <from Include='A'>
                                   <metadata>m1_contents</metadata>
                               </from>
 
@@ -2837,6 +2934,25 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             items[1].ItemType.ShouldBe("to");
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataA, items[1]);
+        }
+
+        [Fact]
+        public void UpdateMetadataWithoutItemReferenceShouldBeCaseInsensitive()
+        {
+            string content = @"
+                              <to Include='a' />
+
+                              <to Update='A' m='m1_contents' />";
+
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, true);
+
+            var expectedMetadataA = new Dictionary<string, string>
+            {
+                {"m", "m1_contents"},
+            };
+
+            items[0].ItemType.ShouldBe("to");
+            ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataA, items[0]);
         }
 
         [Fact]
@@ -3177,28 +3293,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
 
-            if (FileUtilities.GetIsFileSystemCaseSensitive())
+            items.ShouldHaveSingleItem();
+
+            var expectedUpdated = new Dictionary<string, string>
             {
-                var expectedUpdated = new Dictionary<string, string>
-                {
-                    {"m1", "m1_contents"},
-                    {"m2", "m2_contents"},
-                };
+                {"m1", "m1_updated"},
+                {"m2", "m2_updated"},
+            };
 
-                ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
-            }
-            else
-            {
-                items.ShouldHaveSingleItem();
-
-                var expectedUpdated = new Dictionary<string, string>
-                {
-                    {"m1", "m1_updated"},
-                    {"m2", "m2_updated"},
-                };
-
-                ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
-            }
+            ObjectModelHelpers.AssertItemHasMetadata(expectedUpdated, items[0]);
         }
 
         public static IEnumerable<Object[]> UpdateAndRemoveShouldWorkWithEscapedCharactersTestData

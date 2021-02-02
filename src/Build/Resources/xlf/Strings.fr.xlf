@@ -63,18 +63,20 @@
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
-        <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}.</source>
-        <target state="translated">La variable d'environnement MSBUILDDISABLEFEATURESFROMVERSION a un format non valide. Activation de toutes les versions des vagues de changements. Valeur entrée : {0}.</target>
-        <note>
-       Value should be of the format: xx.yy
-    </note>
+        <source>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
+        <target state="translated">MSB4271: la variable d'environnement MSBuildDisableFeaturesFromVersion a un format non valide. Activation de toutes les versions des vagues de changements. Valeur entrée : {0}. Vagues de changements actuelles : {1}.</target>
+        <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
-        <source>Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}.</source>
-        <target state="translated">La variable d'environnement MSBUILDDISABLEFEATURESFROMVERSION a une valeur correspondant à une version hors rotation. Utilisation par défaut de la vague de changements version {0}. Valeur entrée : {1}.</target>
-        <note>
-       Refer to https://github.com/dotnet/msbuild/tree/master/documentation/wiki/ChangeWaves.md to see what the current Change Waves are.
-    </note>
+        <source>MSB4272: Environment variable MSBuildDisableFeaturesFromVersion is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
+        <target state="translated">MSB4272: la variable d'environnement MSBuildDisableFeaturesFromVersion a une valeur correspondant à une version hors rotation. Utilisation par défaut de la vague de changements version {0}. Valeur entrée : {1}. Vagues de changements actuelles : {2}.</target>
+        <note>{StrBegin="MSB4272: "}</note>
+      </trans-unit>
+      <trans-unit id="CircularDependency">
+        <source>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}".</source>
+        <target state="translated">MSB4006: Il existe une dépendance circulaire dans le graphique de dépendance cible qui implique la cible "{0}".</target>
+        <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
+    request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
       <trans-unit id="CircularDependencyInProjectGraph">
         <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
@@ -83,6 +85,12 @@
       {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
       request a target to build itself (perhaps via a chain of other targets)
     </note>
+      </trans-unit>
+      <trans-unit id="CircularDependencyInTargetGraph">
+        <source>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}". Since "{1}" has "{2}" dependence on "{3}", the circular is "{4}".</source>
+        <target state="translated">MSB4006: Il existe une dépendance circulaire dans le graphe des dépendances cibles impliquant la cible "{0}". Dans la mesure où "{1}" a une dépendance "{2}" par rapport à "{3}", la dépendance circulaire est "{4}".</target>
+        <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
+    request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
@@ -106,7 +114,7 @@
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
-        <target state="new">MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</target>
+        <target state="translated">MSB4259: espace inattendu à la position "{1}" de la condition "{0}". Avez-vous oublié de supprimer un espace ?</target>
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
@@ -122,6 +130,13 @@
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
         <target state="translated">"Les objets EvaluationContext créés avec SharingPolicy.Isolated ne prennent pas en charge le passage d'un système de fichiers MSBuildFileSystemBase."</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LoadingProjectCachePlugin">
+        <source>"Loading the following project cache plugin:
+    {0}"</source>
+        <target state="new">"Loading the following project cache plugin:
+    {0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -144,6 +159,16 @@
       <trans-unit id="NoBuildInProgress">
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
         <target state="translated">Impossible d'effectuer l'opération car la méthode BeginBuild n'a pas encore été appelée.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoProjectCachePluginFoundInAssembly">
+        <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
+        <target state="new">MSB4270: No project cache plugins found in assembly "{0}". Expected one.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NotAllNodesDefineACacheItem">
+        <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
+        <target state="new">MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -184,6 +209,26 @@
         <target state="translated">Impossible d'appeler la méthode {0} avec une collection contenant des noms de cibles qui ont une valeur null ou qui sont vides.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OnlyOneCachePluginMustBeSpecified">
+        <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
+        <target state="new">MSB4265: A single project cache plugin must be specified but multiple where found: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheInitializationFailed">
+        <source>MSB4266: Failed to initialize the project cache.</source>
+        <target state="new">MSB4266: Failed to initialize the project cache.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryFailed">
+        <source>MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</source>
+        <target state="new">MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheShutdownFailed">
+        <source>MSB4268: The project cache failed to shut down properly.</source>
+        <target state="new">MSB4268: The project cache failed to shut down properly.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: ProjectGraph ne prend pas en charge les éléments ProjectReference avec l'ensemble de métadonnées ToolsVersion. ProjectReference "{0}" trouvé avec ToolsVersion dans le fichier "{1}"</target>
@@ -203,6 +248,11 @@
         <note>
       LOCALIZATION: {0} and {1} are file paths
     </note>
+      </trans-unit>
+      <trans-unit id="SolutionPathPropertyMustBeSetOnVSSubmissions">
+        <source>"MSB4264: Invalid $(SolutionPath) property: {0}"</source>
+        <target state="new">"MSB4264: Invalid $(SolutionPath) property: {0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
         <source>MSB4261: Multiple entry points with solutions detected: {0}. If static graph is loaded from a solution, that that solution must be the only entry point.</source>
@@ -419,12 +469,6 @@
         <target state="translated">MSB4114: Impossible d'imbriquer les éléments &lt;Choose&gt; de plus de {0} niveaux.</target>
         <note>{StrBegin="MSB4114: "}UE: This message appears if the project file contains unreasonably nested Choose elements.
     LOCALIZATION: Do not localize "Choose" as it is an XML element name.</note>
-      </trans-unit>
-      <trans-unit id="CircularDependency">
-        <source>MSB4006: There is a circular dependency in the target dependency graph involving target "{0}".</source>
-        <target state="translated">MSB4006: Il existe une dépendance circulaire dans le graphique de dépendance cible qui implique la cible "{0}".</target>
-        <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
-    request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
       <trans-unit id="ComparisonOnNonNumericExpression">
         <source>MSB4086: A numeric comparison was attempted on "{1}" that evaluates to "{2}" instead of a number, in condition "{0}".</source>
@@ -1881,7 +1925,8 @@ Id                  : Temps exclusif   Durée totale   Chemin (Cibles)
 ============================== Node Utilization (IDs represent configurations) ====================================================
 Timestamp:            {0} Duration   Cumulative
 -----------------------------------------------------------------------------------------------------------------------------------</source>
-        <target state="translated">============================== Utilisation du nœud (les ID représentent les configurations) ====================================================
+        <target state="translated">
+============================== Utilisation du nœud (les ID représentent les configurations) ====================================================
 Horodateur :            {0} Durée cumulée
 -----------------------------------------------------------------------------------------------------------------------------------</target>
         <note>Spacing is important.  Preserve the number of characters between the start of each word.</note>

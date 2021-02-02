@@ -43,10 +43,10 @@ namespace Microsoft.Build.Utilities
     ///     At this point we will look up the success state of the project finished event for the submission ID and log a build finished event to the logger.
     ///     The event source will be cleaned up.  This may be interesting because the unregister will come from a thread other than what is doing the logging.
     ///     This may create a Synchronization issue, if unregister is called while events are being logged.
-    ///     
-    /// UNDONE: If we can use ErrorUtilities, replace all InvalidOperation and Argument exceptions with the appropriate calls.
-    /// 
     /// </summary>
+    //     
+    // UNDONE: If we can use ErrorUtilities, replace all InvalidOperation and Argument exceptions with the appropriate calls.
+    // 
     public class MuxLogger : INodeLogger
     {
         /// <summary>

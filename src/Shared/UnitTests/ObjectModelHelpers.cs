@@ -424,6 +424,12 @@ namespace Microsoft.Build.UnitTests
             AssertItemHasMetadata(expected, new ProjectItemTestItemAdapter(item));
         }
 
+        internal static void AssertItemHasMetadata(string key, string value, ProjectItem item)
+        {
+            item.DirectMetadataCount.ShouldBe(1, () => $"Expected 1 metadata, ({key}), got {item.DirectMetadataCount}");
+            item.GetMetadataValue(key).ShouldBe(value);
+        }
+
         internal static void AssertItemHasMetadata(Dictionary<string, string> expected, TestItem item)
         {
             expected ??= new Dictionary<string, string>();
@@ -1896,14 +1902,14 @@ namespace Microsoft.Build.UnitTests
         {
             private readonly TestEnvironment _env;
             private readonly BuildManager _buildManager;
+            private bool _disposed;
 
             public MockLogger Logger { get; set; }
 
             public BuildManagerSession(
                 TestEnvironment env,
-                BuildParameters buildParametersPrototype = null,
+                BuildParameters buildParameters = null,
                 bool enableNodeReuse = false,
-                bool shutdownInProcNode = true,
                 IEnumerable<BuildManager.DeferredBuildMessage> deferredMessages = null)
             {
                 _env = env;
@@ -1911,24 +1917,27 @@ namespace Microsoft.Build.UnitTests
                 Logger = new MockLogger(_env.Output);
                 var loggers = new[] {Logger};
 
-                var actualBuildParameters = buildParametersPrototype?.Clone() ?? new BuildParameters();
+                var actualBuildParameters = buildParameters ?? new BuildParameters();
 
                 actualBuildParameters.Loggers = actualBuildParameters.Loggers == null
                     ? loggers
                     : actualBuildParameters.Loggers.Concat(loggers).ToArray();
 
-                actualBuildParameters.ShutdownInProcNodeOnBuildFinish = shutdownInProcNode;
+                actualBuildParameters.ShutdownInProcNodeOnBuildFinish = true;
                 actualBuildParameters.EnableNodeReuse = enableNodeReuse;
 
                 _buildManager = new BuildManager();
                 _buildManager.BeginBuild(actualBuildParameters, deferredMessages);
             }
 
-            public BuildResult BuildProjectFile(string projectFile, string[] entryTargets = null)
+            public BuildResult BuildProjectFile(
+                string projectFile,
+                string[] entryTargets = null,
+                Dictionary<string, string> globalProperties = null)
             {
                 var buildResult = _buildManager.BuildRequest(
                     new BuildRequestData(projectFile,
-                        new Dictionary<string, string>(),
+                        globalProperties ?? new Dictionary<string, string>(),
                         MSBuildConstants.CurrentToolsVersion,
                         entryTargets ?? new string[0],
                         null));
@@ -1938,8 +1947,20 @@ namespace Microsoft.Build.UnitTests
 
             public void Dispose()
             {
+                if (_disposed)
+                {
+                    return;
+                }
+
+                _disposed = true;
+
                 _buildManager.EndBuild();
                 _buildManager.Dispose();
+            }
+
+            public GraphBuildResult BuildGraph(ProjectGraph graph, string[] entryTargets = null)
+            {
+                return _buildManager.BuildRequest(new GraphBuildRequestData(graph, entryTargets ?? new string[0]));
             }
         }
 

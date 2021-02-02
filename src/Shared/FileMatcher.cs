@@ -2390,7 +2390,7 @@ namespace Microsoft.Build.Shared
                 // Set to use only half processors when we have 4 or more of them, in order to not be too aggresive
                 // By setting MaxTasksPerIteration to the maximum amount of tasks, which means that only one
                 // Parallel.ForEach will run at once, we get a stable number of threads being created.
-                var maxTasks = Math.Max(1, Environment.ProcessorCount / 2);
+                var maxTasks = Math.Max(1, NativeMethodsShared.GetLogicalCoreCount() / 2);
                 var taskOptions = new TaskOptions(maxTasks)
                 {
                     AvailableTasks = maxTasks,

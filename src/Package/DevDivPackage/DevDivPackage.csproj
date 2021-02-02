@@ -18,7 +18,7 @@
 
   <Import Project="..\NuspecProject.targets" />
 
-  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
+  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="! $([MSBuild]::IsOSPlatform('windows'))" />
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 

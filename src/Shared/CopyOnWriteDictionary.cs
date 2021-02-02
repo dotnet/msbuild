@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -91,11 +91,11 @@ namespace Microsoft.Build.Collections
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "context", Justification = "Not needed")]
         protected CopyOnWriteDictionary(SerializationInfo info, StreamingContext context)
         {
-            object v = info.GetValue(nameof(_backing), typeof(KeyValuePair<string, V>[]));
+            object v = info.GetValue(nameof(_backing), typeof(KeyValuePair<string, V>[]))!;
 
-            object comparer = info.GetValue(nameof(Comparer), typeof(IEqualityComparer<string>));
+            object comparer = info.GetValue(nameof(Comparer), typeof(IEqualityComparer<string>))!;
 
-            var b = GetInitialDictionary((IEqualityComparer<string>)comparer);
+            var b = GetInitialDictionary((IEqualityComparer<string>?)comparer);
 
             _backing = b.AddRange((KeyValuePair<string, V>[])v);
         }

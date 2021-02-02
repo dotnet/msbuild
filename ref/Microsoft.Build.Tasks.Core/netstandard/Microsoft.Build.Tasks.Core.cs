@@ -671,6 +671,7 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] InstalledAssemblySubsetTables { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] InstalledAssemblyTables { get { throw null; } set { } }
         public string[] LatestTargetFrameworkDirectories { get { throw null; } set { } }
+        public bool OutputUnresolvedAssemblyConflicts { get { throw null; } set { } }
         public string ProfileName { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] RelatedFiles { get { throw null; } }
@@ -699,6 +700,8 @@ namespace Microsoft.Build.Tasks
         public string[] TargetFrameworkSubsets { get { throw null; } set { } }
         public string TargetFrameworkVersion { get { throw null; } set { } }
         public string TargetProcessorArchitecture { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] UnresolvedAssemblyConflicts { get { throw null; } }
         public bool UnresolveFrameworkAssembliesFromHigherFrameworks { get { throw null; } set { } }
         public string WarnOrErrorOnTargetArchitectureMismatch { get { throw null; } set { } }
         public override bool Execute() { throw null; }

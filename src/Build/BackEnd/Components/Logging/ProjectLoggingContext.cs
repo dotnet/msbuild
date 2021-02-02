@@ -41,7 +41,8 @@ namespace Microsoft.Build.BackEnd.Logging
             requestEntry.RequestConfiguration.ToolsVersion,
             requestEntry.RequestConfiguration.Project.PropertiesToBuildWith,
             requestEntry.RequestConfiguration.Project.ItemsToBuildWith,
-            parentBuildEventContext
+            parentBuildEventContext,
+            requestEntry.RequestConfiguration.Project.EvaluationId
             )
         {
         }
@@ -49,7 +50,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Constructs a project logging context.
         /// </summary>
-        internal ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, BuildRequest request, string projectFullPath, string toolsVersion, BuildEventContext parentBuildEventContext)
+        internal ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, BuildRequest request, string projectFullPath, string toolsVersion, BuildEventContext parentBuildEventContext, int evaluationId = BuildEventContext.InvalidEvaluationId)
             : this
             (
             nodeLoggingContext,
@@ -60,7 +61,8 @@ namespace Microsoft.Build.BackEnd.Logging
             toolsVersion,
             null,
             null,
-            parentBuildEventContext
+            parentBuildEventContext,
+            evaluationId
             )
         {
         }
@@ -68,7 +70,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Constructs a project logging contexts.
         /// </summary>
-        private ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, int submissionId, int configurationId, string projectFullPath, List<string> targets, string toolsVersion, PropertyDictionary<ProjectPropertyInstance> projectProperties, ItemDictionary<ProjectItemInstance> projectItems, BuildEventContext parentBuildEventContext)
+        private ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, int submissionId, int configurationId, string projectFullPath, List<string> targets, string toolsVersion, PropertyDictionary<ProjectPropertyInstance> projectProperties, ItemDictionary<ProjectItemInstance> projectItems, BuildEventContext parentBuildEventContext, int evaluationId = BuildEventContext.InvalidEvaluationId)
             : base(nodeLoggingContext)
         {
             _nodeLoggingContext = nodeLoggingContext;
@@ -125,8 +127,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 projectFullPath,
                 String.Join(";", targets),
                 properties,
-                items
-                );
+                items,
+                evaluationId);
             LoggingService.LogComment(this.BuildEventContext, MessageImportance.Low, "ToolsVersionInEffectForBuild", toolsVersion);
 
             this.IsValid = true;

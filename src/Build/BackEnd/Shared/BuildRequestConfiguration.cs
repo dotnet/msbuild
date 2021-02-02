@@ -10,7 +10,9 @@ using Microsoft.Build.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -417,7 +419,74 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        public void InitializeProject(BuildParameters buildParameters, Func<ProjectInstance> loadProjectFromFile)
+        /// <summary>
+        /// Loads the project specified by the configuration's parameters into the configuration block.
+        /// </summary>
+        internal void LoadProjectIntoConfiguration(
+            IBuildComponentHost componentHost,
+            BuildRequestDataFlags buildRequestDataFlags,
+            int submissionId,
+            int nodeId)
+        {
+            ErrorUtilities.VerifyThrow(!IsLoaded, "Already loaded the project for this configuration id {0}.", ConfigurationId);
+
+            InitializeProject(componentHost.BuildParameters, () =>
+            {
+                if (componentHost.BuildParameters.SaveOperatingEnvironment)
+                {
+                    try
+                    {
+                        NativeMethodsShared.SetCurrentDirectory(BuildParameters.StartupDirectory);
+                    }
+                    catch (DirectoryNotFoundException)
+                    {
+                        // Somehow the startup directory vanished. This can happen if build was started from a USB Key and it was removed.
+                        NativeMethodsShared.SetCurrentDirectory(
+                            BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+                    }
+                }
+
+                Dictionary<string, string> globalProperties = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+
+                foreach (ProjectPropertyInstance property in GlobalProperties)
+                {
+                    globalProperties.Add(property.Name, ((IProperty)property).EvaluatedValueEscaped);
+                }
+
+                string toolsVersionOverride = ExplicitToolsVersionSpecified ? ToolsVersion : null;
+
+                // Get the hosted ISdkResolverService.  This returns either the MainNodeSdkResolverService or the OutOfProcNodeSdkResolverService depending on who created the current RequestBuilder
+                ISdkResolverService sdkResolverService = componentHost.GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
+
+                // Use different project load settings if the build request indicates to do so
+                ProjectLoadSettings projectLoadSettings = componentHost.BuildParameters.ProjectLoadSettings;
+
+                if (buildRequestDataFlags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
+                {
+                    projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
+                }
+
+                return new ProjectInstance(
+                    ProjectFullPath,
+                    globalProperties,
+                    toolsVersionOverride,
+                    componentHost.BuildParameters,
+                    componentHost.LoggingService,
+                    new BuildEventContext(
+                        submissionId,
+                        nodeId,
+                        BuildEventContext.InvalidEvaluationId,
+                        BuildEventContext.InvalidProjectInstanceId,
+                        BuildEventContext.InvalidProjectContextId,
+                        BuildEventContext.InvalidTargetId,
+                        BuildEventContext.InvalidTaskId),
+                    sdkResolverService,
+                    submissionId,
+                    projectLoadSettings);
+            });
+        }
+
+        private void InitializeProject(BuildParameters buildParameters, Func<ProjectInstance> loadProjectFromFile)
         {
             if (_project == null || // building from file. Load project from file
                 _transferredProperties != null // need to overwrite particular properties, so load project from file and overwrite properties
@@ -663,6 +732,13 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(request.ConfigurationId == ConfigurationId, "Request does not match configuration.");
             ErrorUtilities.VerifyThrow(_projectInitialTargets != null, "Initial targets have not been set.");
             ErrorUtilities.VerifyThrow(_projectDefaultTargets != null, "Default targets have not been set.");
+
+            if (request.ProxyTargets != null)
+            {
+                ErrorUtilities.VerifyThrow(
+                    CollectionHelpers.SetEquivalent(request.Targets, request.ProxyTargets.ProxyTargetToRealTargetMap.Keys),
+                    "Targets must be same as proxy targets");
+            }
 
             List<string> initialTargets = _projectInitialTargets;
             List<string> nonInitialTargets = (request.Targets.Count == 0) ? _projectDefaultTargets : request.Targets;

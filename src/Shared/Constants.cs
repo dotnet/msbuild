@@ -60,8 +60,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal const string CurrentToolsVersion = "Current";
 
-        // if you change the key also change the following clones
-        // Microsoft.Build.OpportunisticIntern.BucketedPrioritizedStringList.TryIntern
         internal const string MSBuildDummyGlobalPropertyHeader = "MSBuildProjectInstance";
 
         /// <summary>
@@ -97,6 +95,7 @@ namespace Microsoft.Build.Shared
         internal static readonly char[] ForwardSlash = { '/' };
         internal static readonly char[] ForwardSlashBackslash = { '/', '\\' };
         internal static readonly char[] WildcardChars = { '*', '?' };
+        internal static readonly string[] CharactersForExpansion = { "*", "?", "$(", "@(", "%" };
         internal static readonly char[] CommaChar = { ',' };
         internal static readonly char[] HyphenChar = { '-' };
         internal static readonly char[] DirectorySeparatorChar = { Path.DirectorySeparatorChar };
@@ -117,6 +116,13 @@ namespace Microsoft.Build.Shared
         internal const string InnerBuildPropertyValues = nameof(InnerBuildPropertyValues);
     }
 
+    // TODO: Remove these when VS gets updated to setup project cache plugins.
+    internal static class DesignTimeProperties
+    {
+        internal const string DesignTimeBuild = nameof(DesignTimeBuild);
+        internal const string BuildingProject = nameof(BuildingProject);
+    }
+
     internal static class ItemTypeNames
     {
         /// <summary>
@@ -130,6 +136,11 @@ namespace Microsoft.Build.Shared
         internal const string ProjectReferenceTargets = nameof(ProjectReferenceTargets);
 
         internal const string GraphIsolationExemptReference = nameof(GraphIsolationExemptReference);
+
+        /// <summary>
+        /// Declares a project cache plugin and its configuration.
+        /// </summary>
+        internal const string ProjectCachePlugin = nameof(ProjectCachePlugin);
     }
 
     /// <summary>
@@ -149,6 +160,7 @@ namespace Microsoft.Build.Shared
         internal const string redist = "Redist";
         internal const string resolvedFrom = "ResolvedFrom";
         internal const string destinationSubDirectory = "DestinationSubDirectory";
+        internal const string destinationSubPath = "DestinationSubPath";
         internal const string specificVersion = "SpecificVersion";
         internal const string link = "Link";
         internal const string subType = "SubType";

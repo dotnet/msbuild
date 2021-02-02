@@ -1,13 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
-    <!-- Node reuse requires an API new to .NET Core 2.1 not yet available
-         in .NETStandard. -->
-    <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OsEnvironment)'=='windows'">$(FullFrameworkTFM);netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(FullFrameworkTFM);net5.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>
     <AssemblyName>Microsoft.Build</AssemblyName>
@@ -30,10 +28,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\StringTools\StringTools.csproj" />
 
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
     <PackageReference Include="System.Memory" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe"/>
     <PackageReference Include="System.Text.Json" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
@@ -54,9 +54,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\ChangeWaves.cs">
-      <Link>SharedUtilities\ChangeWaves.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\EncodingUtilities.cs">
       <Link>SharedUtilities\EncodingUtilities.cs</Link>
     </Compile>
@@ -159,8 +156,9 @@
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
+    <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
-    <Compile Include="FileSystem\MSBuildFileSystemBase.cs" />
+    <Compile Include="FileSystem\*.cs" />
     <Compile Include="Utilities\NuGetFrameworkWrapper.cs" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectUsingTaskParameterElementLink.cs" />
     <Compile Include="ObjectModelRemoting\ExternalProjectsProvider.cs" />
@@ -267,7 +265,6 @@
     <Compile Include="Evaluation\LazyItemEvaluator.ItemFactoryWrapper.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperation.cs" />
     <Compile Include="Evaluation\MetadataReference.cs" />
-    <Compile Include="FileSystem\MSBuildFileSystemAdapter.cs" />
     <Compile Include="Graph\ProjectGraphEntryPoint.cs" />
     <Compile Include="Graph\ProjectGraph.cs" />
     <Compile Include="Graph\ProjectGraphNode.cs" />
@@ -360,10 +357,6 @@
     <Compile Include="..\Shared\CollectionHelpers.cs" />
     <Compile Include="Collections\ConvertingEnumerable.cs" />
     <Compile Include="Collections\CopyOnReadEnumerable.cs" />
-    <Compile Include="..\Shared\IInternable.cs" />
-    <Compile Include="..\Shared\WeakStringCache.cs" />
-    <Compile Include="..\Shared\WeakStringCache.Concurrent.cs" />
-    <Compile Include="..\Shared\OpportunisticIntern.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
       <Link>Collections\CopyOnWriteDictionary.cs</Link>
     </Compile>

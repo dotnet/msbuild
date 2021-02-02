@@ -1333,7 +1333,7 @@
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.OutOfDateSDK">
         <source>MSB3971: The reference assemblies for "{0}" were not found. You might be using an older .NET SDK to target .NET 5.0 or higher. Update Visual Studio and/or your .NET SDK.</source>
-        <target state="new">MSB3971: The reference assemblies for "{0}" were not found. You might be using an older .NET SDK to target .NET 5.0 or higher. Update Visual Studio and/or your .NET SDK.</target>
+        <target state="translated">MSB3971: gli assembly di riferimento per "{0}" non sono stati trovati. È possibile che si usi una versione precedente di .NET SDK mentre la destinazione è .NET 5.0 o versione successiva. Aggiornare Visual Studio e/o .NET SDK.</target>
         <note>{StrBegin="MSB3971: "}</note>
       </trans-unit>
       <trans-unit id="MakeDir.Comment">
@@ -1834,7 +1834,7 @@
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
         <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
 {1}</source>
-        <target state="new">MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+        <target state="translated">MSB3277: sono stati rilevati conflitti non risolvibili tra versioni diverse di "{0}".
 {1}</target>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>

@@ -889,6 +889,10 @@ namespace Microsoft.Build.Exceptions
         [System.Security.Permissions.SecurityPermissionAttribute(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter=true)]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
+    public partial class CircularDependencyException : System.Exception
+    {
+        protected CircularDependencyException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+    }
     public sealed partial class InternalLoggerException : System.Exception
     {
         public InternalLoggerException() { }
@@ -994,6 +998,7 @@ namespace Microsoft.Build.Execution
         public string NodeExeLocation { get { throw null; } set { } }
         public bool OnlyLogCriticalEvents { get { throw null; } set { } }
         public string OutputResultsCacheFile { get { throw null; } set { } }
+        public Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor ProjectCacheDescriptor { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.ProjectLoadSettings ProjectLoadSettings { get { throw null; } set { } }
         public bool ResetCaches { get { throw null; } set { } }
         public bool SaveOperatingEnvironment { get { throw null; } set { } }
@@ -1401,6 +1406,73 @@ namespace Microsoft.Build.Execution
         Failure = (byte)2,
         Skipped = (byte)0,
         Success = (byte)1,
+    }
+}
+namespace Microsoft.Build.Experimental.ProjectCache
+{
+    public partial class CacheContext
+    {
+        public CacheContext(System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings, Microsoft.Build.FileSystem.MSBuildFileSystemBase fileSystem, Microsoft.Build.Graph.ProjectGraph graph=null, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> graphEntryPoints=null) { }
+        public Microsoft.Build.FileSystem.MSBuildFileSystemBase FileSystem { get { throw null; } }
+        public Microsoft.Build.Graph.ProjectGraph Graph { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> GraphEntryPoints { get { throw null; } }
+        public string MSBuildExePath { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyDictionary<string, string> PluginSettings { get { throw null; } }
+    }
+    public partial class CacheResult
+    {
+        internal CacheResult() { }
+        public static Microsoft.Build.Experimental.ProjectCache.CacheResult IndicateCacheHit(Microsoft.Build.Execution.BuildResult buildResult) { throw null; }
+        public static Microsoft.Build.Experimental.ProjectCache.CacheResult IndicateCacheHit(Microsoft.Build.Experimental.ProjectCache.ProxyTargets proxyTargets) { throw null; }
+        public static Microsoft.Build.Experimental.ProjectCache.CacheResult IndicateCacheHit(System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.ProjectCache.PluginTargetResult> targetResults) { throw null; }
+        public static Microsoft.Build.Experimental.ProjectCache.CacheResult IndicateNonCacheHit(Microsoft.Build.Experimental.ProjectCache.CacheResultType resultType) { throw null; }
+    }
+    public enum CacheResultType
+    {
+        CacheHit = 1,
+        CacheMiss = 2,
+        CacheNotApplicable = 3,
+        None = 0,
+    }
+    public abstract partial class PluginLoggerBase
+    {
+        protected PluginLoggerBase(Microsoft.Build.Framework.LoggerVerbosity verbosity) { }
+        public abstract bool HasLoggedErrors { get; protected set; }
+        public abstract void LogError(string error);
+        public abstract void LogMessage(string message, System.Nullable<Microsoft.Build.Framework.MessageImportance> messageImportance=default(System.Nullable<Microsoft.Build.Framework.MessageImportance>));
+        public abstract void LogWarning(string warning);
+    }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct PluginTargetResult
+    {
+        public PluginTargetResult(string targetName, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Framework.ITaskItem2> taskItems, Microsoft.Build.Execution.BuildResultCode resultCode) { throw null;}
+        public Microsoft.Build.Execution.BuildResultCode ResultCode { get { throw null; } }
+        public string TargetName { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Framework.ITaskItem2> TaskItems { get { throw null; } }
+    }
+    public partial class ProjectCacheDescriptor
+    {
+        internal ProjectCacheDescriptor() { }
+        public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> EntryPoints { get { throw null; } }
+        public string PluginAssemblyPath { get { throw null; } }
+        public Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase PluginInstance { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyDictionary<string, string> PluginSettings { get { throw null; } }
+        public Microsoft.Build.Graph.ProjectGraph ProjectGraph { get { throw null; } }
+        public static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor FromAssemblyPath(string pluginAssemblyPath, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings=null) { throw null; }
+        public static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor FromInstance(Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase pluginInstance, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings=null) { throw null; }
+        public string GetDetailedDescription() { throw null; }
+    }
+    public abstract partial class ProjectCachePluginBase
+    {
+        protected ProjectCachePluginBase() { }
+        public abstract System.Threading.Tasks.Task BeginBuildAsync(Microsoft.Build.Experimental.ProjectCache.CacheContext context, Microsoft.Build.Experimental.ProjectCache.PluginLoggerBase logger, System.Threading.CancellationToken cancellationToken);
+        public abstract System.Threading.Tasks.Task EndBuildAsync(Microsoft.Build.Experimental.ProjectCache.PluginLoggerBase logger, System.Threading.CancellationToken cancellationToken);
+        public abstract System.Threading.Tasks.Task<Microsoft.Build.Experimental.ProjectCache.CacheResult> GetCacheResultAsync(Microsoft.Build.Execution.BuildRequestData buildRequest, Microsoft.Build.Experimental.ProjectCache.PluginLoggerBase logger, System.Threading.CancellationToken cancellationToken);
+    }
+    public partial class ProxyTargets
+    {
+        public ProxyTargets(System.Collections.Generic.IReadOnlyDictionary<string, string> proxyTargetToRealTargetMap) { }
+        public System.Collections.Generic.IReadOnlyDictionary<string, string> ProxyTargetToRealTargetMap { get { throw null; } }
     }
 }
 namespace Microsoft.Build.FileSystem
@@ -2046,22 +2118,5 @@ namespace Microsoft.Build.ObjectModelRemoting
         public string LocalName { get { throw null; } }
         public string NamespaceURI { get { throw null; } }
         public string Value { get { throw null; } }
-    }
-}
-namespace Microsoft.Build.Utilities
-{
-    public partial class ChangeWaves
-    {
-        public static readonly string[] AllWaves;
-        public static readonly System.Version[] AllWavesAsVersion;
-        public const string EnableAllFeatures = "999.999";
-        public const string Wave16_10 = "16.10";
-        public const string Wave16_8 = "16.8";
-        public const string Wave17_0 = "17.0";
-        public ChangeWaves() { }
-        public static string DisabledWave { get { throw null; } set { } }
-        public static bool AreFeaturesEnabled(string wave) { throw null; }
-        public static bool AreFeaturesEnabled(System.Version wave) { throw null; }
-        public static void ResetStateForTests() { }
     }
 }

@@ -93,7 +93,7 @@ namespace Microsoft.Build.Shared.Concurrent
         /// </summary>
         public ConcurrentDictionary(IEqualityComparer<TKey> comparer = null)
         {
-            int concurrencyLevel = Environment.ProcessorCount;
+            int concurrencyLevel = NativeMethodsShared.GetLogicalCoreCount();
             int capacity = DefaultCapacity;
 
             // The capacity should be at least as large as the concurrency level. Otherwise, we would have locks that don't guard
