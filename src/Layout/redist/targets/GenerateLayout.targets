@@ -76,6 +76,12 @@
 
   <Target Name="PublishNetSdks"
           BeforeTargets="Build">
+    <ItemGroup>
+      <WebSdkProjectFile Include="$(RepoRoot)src\WebSdk\**\*.csproj" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(WebSdkProjectFile)" />
+
     <PropertyGroup>
       <NETSdkSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk</NETSdkSourceRoot>
       <NETSdkWebSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Web</NETSdkWebSourceRoot>
