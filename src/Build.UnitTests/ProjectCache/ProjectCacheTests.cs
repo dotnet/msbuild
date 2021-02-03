@@ -818,16 +818,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         </Target>
                     </Project>".Cleanup());
 
-            foreach (var enumValue in Enum.GetValues(typeof(ExceptionLocations)))
-            {
-                var typedValue = (ExceptionLocations) enumValue;
-                if (exceptionLocations.HasFlag(typedValue))
-                {
-                    var exceptionLocation = typedValue.ToString();
-                    _env.SetEnvironmentVariable(exceptionLocation, "1");
-                    _output.WriteLine($"Set exception location: {exceptionLocation}");
-                }
-            }
+            SetEnvironmentForExceptionLocations(exceptionLocations);
 
             using var buildSession = new Helpers.BuildManagerSession(
                 _env,
@@ -878,6 +869,63 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             {
                 logger.FullLog.ShouldContain($"{AssemblyMockCache}: GetCacheResultAsync for");
                 logger.FullLog.ShouldContain($"{AssemblyMockCache}: EndBuildAsync");
+            }
+        }
+
+        [Fact]
+        public void EndBuildShouldGetCalledOnceWhenItThrowsExceptionsFromGraphBuilds()
+        {
+            _env.DoNotLaunchDebugger();
+
+            var project = _env.CreateFile(
+                "1.proj",
+                @$"
+                    <Project>
+                        <ItemGroup>
+                            <{ItemTypeNames.ProjectCachePlugin} Include=`{SamplePluginAssemblyPath.Value}` />
+                        </ItemGroup>
+                        <Target Name=`Build`>
+                            <Message Text=`Hello EngineShouldHandleExceptionsFromCachePlugin` Importance=`High` />
+                        </Target>
+                    </Project>".Cleanup());
+
+            SetEnvironmentForExceptionLocations(ExceptionLocations.EndBuildAsync);
+
+            using var buildSession = new Helpers.BuildManagerSession(
+                _env,
+                new BuildParameters
+                {
+                    UseSynchronousLogging = true
+                });
+
+            var logger = buildSession.Logger;
+
+            GraphBuildResult? buildResult = null;
+            Should.NotThrow(
+                () =>
+                {
+                    buildResult = buildSession.BuildGraph(new ProjectGraph(project.Path));
+                });
+
+            buildResult!.OverallResult.ShouldBe(BuildResultCode.Failure);
+            buildResult.Exception.Message.ShouldContain("Cache plugin exception from EndBuildAsync");
+
+            buildSession.Dispose();
+
+            Regex.Matches(logger.FullLog, $"{nameof(AssemblyMockCache)}: EndBuildAsync").Count.ShouldBe(1);
+        }
+
+        private void SetEnvironmentForExceptionLocations(ExceptionLocations exceptionLocations)
+        {
+            foreach (var enumValue in Enum.GetValues(typeof(ExceptionLocations)))
+            {
+                var typedValue = (ExceptionLocations) enumValue;
+                if (exceptionLocations.HasFlag(typedValue))
+                {
+                    var exceptionLocation = typedValue.ToString();
+                    _env.SetEnvironmentVariable(exceptionLocation, "1");
+                    _output.WriteLine($"Set exception location: {exceptionLocation}");
+                }
             }
         }
     }
