@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
+    <ProjectReference Include="..\StringTools\StringTools.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
@@ -43,10 +44,6 @@
     <Compile Include="..\Shared\ExceptionHandling.cs" />
     <Compile Include="..\Shared\VisualStudioLocationHelper.cs" />
     <Compile Include="..\Shared\StringBuilderCache.cs" />
-    <Compile Include="..\Shared\IInternable.cs" />
-    <Compile Include="..\Shared\WeakStringCache.cs" />
-    <Compile Include="..\Shared\WeakStringCache.Concurrent.cs" />
-    <Compile Include="..\Shared\OpportunisticIntern.cs" />
     <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
     <Compile Include="..\Shared\UnitTests\AssemblyResources.cs" />
     <Compile Include="..\Shared\Traits.cs" />

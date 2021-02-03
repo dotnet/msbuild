@@ -96,5 +96,5 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
-  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
+  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="! $([MSBuild]::IsOSPlatform('windows'))" />
 </Project>

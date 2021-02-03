@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
+using Microsoft.NET.StringTools;
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -181,7 +183,7 @@ namespace Microsoft.Build.Shared
                 return StringBuilderCache.GetStringAndRelease(escapedStringBuilder);
             }
 
-            string escapedString = OpportunisticIntern.StringBuilderToString(escapedStringBuilder);
+            string escapedString = Strings.WeakIntern(escapedStringBuilder.ToString());
             StringBuilderCache.Release(escapedStringBuilder);
 
             lock (s_unescapedToEscapedStrings)
