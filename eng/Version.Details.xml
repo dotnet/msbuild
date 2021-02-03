@@ -97,9 +97,9 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
       <Sha>2670c128d522473e146ff9f8159bfffdfe694cd9</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="5.9.0-rc.7046">
+    <Dependency Name="NuGet.Build.Tasks" Version="5.9.0-rc.7097">
       <Uri>https://dev.azure.com/devdiv/DevDiv/_git/NuGet-NuGet.Client-Trusted</Uri>
-      <Sha>e90588d4ec63e966360eec817c80d0758ff05b30</Sha>
+      <Sha>ed9af679b4425c1ff4d41d2302d73f6e580a2839</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.9.0-release-20201130-02">
       <Uri>https://github.com/microsoft/vstest</Uri>
