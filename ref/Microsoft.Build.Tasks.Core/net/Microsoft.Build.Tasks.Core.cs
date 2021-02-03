@@ -157,6 +157,24 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] Paths { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    public partial class CombineTargetFrameworkInfoProperties : Microsoft.Build.Tasks.TaskExtension
+    {
+        public CombineTargetFrameworkInfoProperties() { }
+        public Microsoft.Build.Framework.ITaskItem[] PropertiesAndValues { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public string Result { get { throw null; } set { } }
+        public string RootElementName { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
+    public partial class CombineXmlElements : Microsoft.Build.Tasks.TaskExtension
+    {
+        public CombineXmlElements() { }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public string Result { get { throw null; } set { } }
+        public string RootElementName { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] XmlElements { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
     public partial class CommandLineBuilderExtension : Microsoft.Build.Utilities.CommandLineBuilder
     {
         public CommandLineBuilderExtension() { }
