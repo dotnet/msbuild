@@ -183,6 +183,11 @@ namespace Microsoft.Build.Utilities
         public string ToolPath { set; get; }
 
         /// <summary>
+        /// Project-visible property to allow users to override the encoding method.
+        /// </summary>
+        public string UseUtf8Encoding { get; set; } = EncodingUtilities.UseUtf8Detect;
+
+        /// <summary>
         /// Array of equals-separated pairs of environment
         /// variables that should be passed to the spawned executable,
         /// in addition to (or selectively overriding) the regular environment block.
@@ -1373,7 +1378,7 @@ namespace Microsoft.Build.Utilities
                         }
                         else
                         {
-                            encoding = EncodingUtilities.BatchFileEncoding(commandLineCommands + _temporaryBatchFile, EncodingUtilities.UseUtf8Detect);
+                            encoding = EncodingUtilities.BatchFileEncoding(commandLineCommands + _temporaryBatchFile, UseUtf8Encoding);
 
                             if (encoding.CodePage != EncodingUtilities.CurrentSystemOemEncoding.CodePage)
                             {
