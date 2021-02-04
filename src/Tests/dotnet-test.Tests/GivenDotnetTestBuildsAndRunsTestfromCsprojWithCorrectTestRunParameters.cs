@@ -24,6 +24,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
         private readonly string[] ConsoleLoggerOutputNormal = new[] { "--logger", "console;verbosity=normal" };
 
+        [Fact]
         public void GivenAProjectAndMultipleTestRunParametersItPassesThemToVStestConsoleInTheCorrectFormat()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("2");
@@ -53,6 +54,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(0);
         }
 
+        [Fact]
         public void GivenADllAndMultipleTestRunParametersItPassesThemToVStestConsoleInTheCorrectFormat()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("3");
