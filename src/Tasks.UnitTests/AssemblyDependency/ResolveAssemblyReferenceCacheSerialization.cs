@@ -172,11 +172,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
 
-            var fileSample = GetTestPayloadFileName($@"AssemblyDependency\CacheFileSamples\{sampleName}");
-            if (!File.Exists(fileSample))
-                throw new InvalidOperationException($"File '{fileSample}' needed for this test case does not exists.");
+            CopyResourceSampleFileIntoRarCacheFile($@"AssemblyDependency\CacheFileSamples\{sampleName}");
 
-            var deserializedByTranslator = SystemState.DeserializeCacheByTranslator(fileSample, _taskLoggingHelper);
+            var deserializedByTranslator = SystemState.DeserializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
             deserializedByTranslator.ShouldNotBeNull();
 
             deserializedByTranslator.SetGetLastWriteTime(path =>
@@ -205,12 +203,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             expectedDependencies.ShouldBe(expectedDependencies, ignoreOrder: true);
         }
 
-        private static string GetTestPayloadFileName(string name)
+        private void CopyResourceSampleFileIntoRarCacheFile(string name)
         {
-            var codeBaseUrl = new Uri(Assembly.GetExecutingAssembly().Location);
-            var codeBasePath = Uri.UnescapeDataString(codeBaseUrl.AbsolutePath);
-            var dirPath = Path.GetDirectoryName(codeBasePath) ?? string.Empty;
-            return Path.Combine(dirPath, name);
+            Assembly asm = this.GetType().Assembly;
+            var resource = string.Format($"{asm.GetName().Name}.{name.Replace("\\", ".")}");
+            using Stream resourceStream = asm.GetManifestResourceStream(resource);
+            if (resourceStream == null)
+                throw new InvalidOperationException($"Resource '{resource}' has not been found.");
+
+            using FileStream rarCacheFile = new FileStream(_rarCacheFile, FileMode.CreateNew);
+
+            resourceStream.CopyTo(rarCacheFile);
         }
     }
 }
