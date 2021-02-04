@@ -88,6 +88,12 @@ namespace Microsoft.DotNet.Cli
             return rootCommand;
         }
 
+        private static CommandLineBuilder DisablePosixBinding(this CommandLineBuilder builder)
+        {
+            builder.EnablePosixBundling = false;
+            return builder;
+        }
+
         public static System.CommandLine.Parsing.Parser Instance { get; } = new CommandLineBuilder(ConfigureCommandLine(RootCommand))
             .UseExceptionHandler(ExceptionHandler)
             .UseHelp()
@@ -95,6 +101,7 @@ namespace Microsoft.DotNet.Cli
             .UseValidationMessages(new CommandLineValidationMessages())
             .UseParseDirective()
             .UseSuggestDirective()
+            .DisablePosixBinding()
             .Build();
 
         private static void ExceptionHandler(Exception exception, InvocationContext context)
@@ -118,7 +125,7 @@ namespace Microsoft.DotNet.Cli
                 context.Console.Error.WriteLine(exception.ToString());
             }
             context.ParseResult.ShowHelp();
-            context.ResultCode = 1;
+            context.ExitCode = 1;
         }
 
         internal class CommandLineConsole : IConsole
