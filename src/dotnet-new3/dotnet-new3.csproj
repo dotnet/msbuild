@@ -3,6 +3,7 @@
         <Description>Template Instantiation Commands for .NET Core CLI.</Description>
         <TargetFramework>$(NETCoreTargetFramework)</TargetFramework>
         <OutputType>Exe</OutputType>
+        <EnableAnalyzers>true</EnableAnalyzers>
     </PropertyGroup>
 
     <ItemGroup>

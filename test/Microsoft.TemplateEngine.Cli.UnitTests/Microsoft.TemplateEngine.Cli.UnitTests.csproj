@@ -2,6 +2,7 @@
     <PropertyGroup>
         <TargetFramework>$(NETCoreTargetFramework)</TargetFramework>
         <TestProject>true</TestProject>
+        <EnableAnalyzers>true</EnableAnalyzers>
     </PropertyGroup>
 
     <ItemGroup>
