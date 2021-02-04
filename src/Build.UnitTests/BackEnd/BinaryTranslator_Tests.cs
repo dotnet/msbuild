@@ -8,6 +8,7 @@ using System.Globalization;
 using Microsoft.Build.BackEnd;
 using System.IO;
 using System.Reflection;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -448,7 +449,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             CultureInfo deserializedValue = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.Equal(value, deserializedValue);
+            deserializedValue.ShouldBe(value);
         }
 
         [Fact]
@@ -460,7 +461,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             CultureInfo deserializedValue = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.Null(deserializedValue);
+            deserializedValue.ShouldBeNull();
         }
 
         [Theory]
@@ -475,7 +476,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Version deserializedValue = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.Equal(value, deserializedValue);
+            deserializedValue.ShouldBe(value);
         }
 
         [Fact]
@@ -487,24 +488,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Version deserializedValue = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.Null(deserializedValue);
+            deserializedValue.ShouldBeNull();
         }
 
         [Fact]
         public void HashSetOfT()
         {
-            HashSet<BaseClass> value = new()
+            HashSet<BaseClass> values = new()
             {
                 new BaseClass(1),
                 new BaseClass(2),
                 null
             };
-            TranslationHelpers.GetWriteTranslator().TranslateHashSet(ref value, BaseClass.FactoryForDeserialization, capacity => new ());
+            TranslationHelpers.GetWriteTranslator().TranslateHashSet(ref values, BaseClass.FactoryForDeserialization, capacity => new());
 
-            HashSet<BaseClass> deserializedValue = null;
-            TranslationHelpers.GetReadTranslator().TranslateHashSet(ref deserializedValue, BaseClass.FactoryForDeserialization, capacity => new ());
+            HashSet<BaseClass> deserializedValues = null;
+            TranslationHelpers.GetReadTranslator().TranslateHashSet(ref deserializedValues, BaseClass.FactoryForDeserialization, capacity => new());
 
-            Assert.Equal(value, deserializedValue, BaseClass.EqualityComparer);
+            deserializedValues.ShouldBe(values, ignoreOrder: true);
         }
 
         [Fact]
@@ -516,7 +517,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             HashSet<BaseClass> deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateHashSet(ref deserializedValue, BaseClass.FactoryForDeserialization, capacity => new());
 
-            Assert.Null(deserializedValue);
+            deserializedValue.ShouldBeNull();
         }
 
         [Fact]
@@ -528,7 +529,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             AssemblyName deserializedValue = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
-            Assert.Null(deserializedValue);
+            deserializedValue.ShouldBeNull();
         }
 
         [Fact]
@@ -578,17 +579,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private static void HelperAssertAssemblyNameEqual(AssemblyName expected, AssemblyName actual)
         {
-            Assert.Equal(expected.Name, actual.Name);
-            Assert.Equal(expected.Version, actual.Version);
-            Assert.Equal(expected.Flags, actual.Flags);
-            Assert.Equal(expected.ProcessorArchitecture, actual.ProcessorArchitecture);
-            Assert.Equal(expected.CultureInfo, actual.CultureInfo);
-            Assert.Equal(expected.HashAlgorithm, actual.HashAlgorithm);
-            Assert.Equal(expected.VersionCompatibility, actual.VersionCompatibility);
-            Assert.Equal(expected.CodeBase, actual.CodeBase);
+            actual.Name.ShouldBe(expected.Name);
+            actual.Version.ShouldBe(expected.Version);
+            actual.Flags.ShouldBe(expected.Flags);
+            actual.ProcessorArchitecture.ShouldBe(expected.ProcessorArchitecture);
+            actual.CultureInfo.ShouldBe(expected.CultureInfo);
+            actual.HashAlgorithm.ShouldBe(expected.HashAlgorithm);
+            actual.VersionCompatibility.ShouldBe(expected.VersionCompatibility);
+            actual.CodeBase.ShouldBe(expected.CodeBase);
 
-            Assert.Equal(expected.GetPublicKey(), actual.GetPublicKey());
-            Assert.Equal(expected.GetPublicKeyToken(), actual.GetPublicKeyToken());
+            actual.GetPublicKey().ShouldBe(expected.GetPublicKey());
+            actual.GetPublicKeyToken().ShouldBe(expected.GetPublicKeyToken());
         }
 
         /// <summary>
@@ -770,17 +771,30 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
             }
 
+            protected bool Equals(BaseClass other)
+            {
+                return _baseValue == other._baseValue;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+                if (obj.GetType() != this.GetType()) return false;
+                return Equals((BaseClass) obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return _baseValue;
+            }
+
             /// <summary>
             /// Gets a comparer.
             /// </summary>
             static public IComparer<BaseClass> Comparer
             {
                 get { return new BaseClassComparer(); }
-            }
-
-            static public IEqualityComparer<BaseClass> EqualityComparer
-            {
-                get { return new BaseClassEqualityComparer(); }
             }
 
             /// <summary>
@@ -840,23 +854,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     return -1;
                 }
                 #endregion
-            }
-
-            private class BaseClassEqualityComparer : IEqualityComparer<BaseClass>
-            {
-                public bool Equals(BaseClass x, BaseClass y)
-                {
-                    if (ReferenceEquals(x, y)) return true;
-                    if (ReferenceEquals(x, null)) return false;
-                    if (ReferenceEquals(y, null)) return false;
-                    if (x.GetType() != y.GetType()) return false;
-                    return x._baseValue == y._baseValue;
-                }
-
-                public int GetHashCode(BaseClass obj)
-                {
-                    return obj._baseValue;
-                }
             }
         }
 

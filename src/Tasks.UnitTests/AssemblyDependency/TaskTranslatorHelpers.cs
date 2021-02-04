@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.Versioning;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Tasks;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
@@ -20,7 +21,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             GetWriteTranslator().Translate(ref value);
             GetReadTranslator().Translate(ref value);
 
-            Assert.Null(value);
+            value.ShouldBeNull();
         }
 
         [Theory]
@@ -32,8 +33,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             GetWriteTranslator().Translate(ref value);
             GetReadTranslator().Translate(ref deserialized);
 
-            Assert.NotNull(deserialized);
-            Assert.Equal(value, deserialized);
+            deserialized.ShouldNotBeNull();
+            deserialized.ShouldBe(value);
         }
 
         public static IEnumerable<object[]> SampleFrameworkNames =>

@@ -129,7 +129,7 @@ namespace Microsoft.Build.BackEnd
                 hashSet = collectionFactory(count);
                 for (int i = 0; i < count; i++)
                 {
-                    T value = default(T);
+                    T value = default;
                     translator.Translate(ref value, valueFactory);
                     hashSet.Add(value);
                 }

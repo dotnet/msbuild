@@ -68,8 +68,7 @@ namespace Microsoft.Build.Tasks
         {
             StateFileBase retVal = null;
 
-            // First, we read the cache from disk if one exists, or if one does not exist
-            // then we create one.  
+            // First, we read the cache from disk if one exists, or if one does not exist, we create one.
             try
             {
                 if (!string.IsNullOrEmpty(stateFile) && FileSystems.Default.FileExists(stateFile))

@@ -5,6 +5,7 @@ using System.Runtime.Versioning;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
@@ -45,7 +46,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             var deserialized = SystemState.DeserializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
 
-            Assert.NotNull(deserialized);
+            deserialized.ShouldNotBeNull();
         }
 
         [Fact]
@@ -64,7 +65,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
 
                 var deserialized = SystemState.DeserializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
-                Assert.Null(deserialized);
+
+                deserialized.ShouldBeNull();
             }
         }
 
@@ -82,7 +84,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
             var deserialized = SystemState.DeserializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
-            Assert.Null(deserialized);
+
+            deserialized.ShouldBeNull();
         }
 
         [Fact]
@@ -101,7 +104,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
 
                 var deserialized = SystemState.DeserializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
-                Assert.NotNull(deserialized);
+
+                deserialized.ShouldNotBeNull();
             }
         }
 
@@ -119,7 +123,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
             var deserialized = SystemState.DeserializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
-            Assert.NotNull(deserialized);
+
+            deserialized.ShouldNotBeNull();
         }
 
         [Fact]
@@ -169,6 +174,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             var fileSample = GetTestPayloadFileName($@"AssemblyDependency\CacheFileSamples\{sampleName}");
             var deserializedByTranslator = SystemState.DeserializeCacheByTranslator(fileSample, _taskLoggingHelper);
+            deserializedByTranslator.ShouldNotBeNull();
 
             deserializedByTranslator.SetGetLastWriteTime(path =>
             {
@@ -187,21 +193,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 out string[] scatterFiles,
                 out FrameworkName frameworkNameAttribute);
 
-            Assert.NotNull(assemblyName);
-            Assert.Equal(
-                new AssemblyNameExtension(expectedAssemblyName, false),
-                assemblyName);
-            Assert.Empty(scatterFiles);
-            Assert.Equal(
-                new FrameworkName(expectedFrameworkName),
-                frameworkNameAttribute);
 
-            Assert.NotNull(dependencies);
-            Assert.Equal(expectedDependencies.Length, dependencies.Length);
-            foreach (var expectedDependency in expectedDependencies)
-            {
-                Assert.Contains(new AssemblyNameExtension(expectedDependency), dependencies);
-            }
+            assemblyName.ShouldNotBeNull();
+            assemblyName.ShouldBe(new AssemblyNameExtension(expectedAssemblyName, false));
+            scatterFiles.ShouldBeEmpty();
+            frameworkNameAttribute.ShouldBe(new FrameworkName(expectedFrameworkName));
+            dependencies.ShouldNotBeNull();
+            expectedDependencies.ShouldBe(expectedDependencies, ignoreOrder: true);
         }
 
         private static string GetTestPayloadFileName(string name)

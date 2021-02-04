@@ -264,13 +264,8 @@ namespace Microsoft.Build.Tasks
                     isDirty = false;
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.NotExpectedSerializationException(e))
             {
-                // If there was a problem writing the file (like it's read-only or locked on disk, for
-                // example), then eat the exception and log a warning.  Otherwise, rethrow.
-                if (ExceptionHandling.NotExpectedSerializationException(e))
-                    throw;
-
                 // Not being able to serialize the cache is not an error, but we let the user know anyway.
                 // Don't want to hold up processing just because we couldn't read the file.
                 log.LogWarningWithCodeFromResources("General.CouldNotWriteStateFile", stateFile, e.Message);
@@ -279,12 +274,11 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Read the contents of this object out to the specified file.
-        /// TODO: once all derived classes from StateFileBase adopt new serialization, we shall consider to mode this into base class
+        /// TODO: once all classes derived from StateFileBase adopt the new serialization, we should consider moving this into the base class
         /// </summary>
         internal static SystemState DeserializeCacheByTranslator(string stateFile, TaskLoggingHelper log)
         {
-            // First, we read the cache from disk if one exists, or if one does not exist
-            // then we create one.
+            // First, we read the cache from disk if one exists, or if one does not exist, we create one.
             try
             {
                 if (!string.IsNullOrEmpty(stateFile) && FileSystems.Default.FileExists(stateFile))
@@ -309,19 +303,13 @@ namespace Microsoft.Build.Tasks
                     return systemState;
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 // The deserialization process seems like it can throw just about 
                 // any exception imaginable.  Catch them all here.
                 // Not being able to deserialize the cache is not an error, but we let the user know anyway.
                 // Don't want to hold up processing just because we couldn't read the file.
                 log.LogWarningWithCodeFromResources("General.CouldNotReadStateFile", stateFile, e.Message);
-                return null;
             }
 
             return null;
