@@ -294,6 +294,7 @@ namespace Microsoft.NET.Publish.Tests
 
             // Please keep list below sorted and de-duplicated
             List<string> expectedOutput = new List<string> () {
+                    "ILLink : Trim analysis warning IL2026: System.Resources.ResourceReader.InitializeBinaryFormatter(",
                     "ILLink : Trim analysis warning IL2057: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
                     "ILLink : Trim analysis warning IL2057: System.Resources.ResourceReader.FindType(Int32",
                     "ILLink : Trim analysis warning IL2060: System.Resources.ResourceReader.InitializeBinaryFormatter(",
