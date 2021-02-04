@@ -173,6 +173,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
             var fileSample = GetTestPayloadFileName($@"AssemblyDependency\CacheFileSamples\{sampleName}");
+            if (!File.Exists(fileSample))
+                throw new InvalidOperationException($"File '{fileSample}' needed for this test case does not exists.");
+
             var deserializedByTranslator = SystemState.DeserializeCacheByTranslator(fileSample, _taskLoggingHelper);
             deserializedByTranslator.ShouldNotBeNull();
 
