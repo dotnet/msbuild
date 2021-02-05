@@ -4,17 +4,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-#if FEATURE_SYSTEM_CONFIGURATION
-using System.Configuration;
-#endif
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.Win32;
 
-#if FEATURE_SYSTEM_CONFIGURATION
-using PropertyElement = Microsoft.Build.Evaluation.ToolsetElement.PropertyElement;
-#endif
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
