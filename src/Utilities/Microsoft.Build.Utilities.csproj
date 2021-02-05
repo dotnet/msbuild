@@ -22,12 +22,11 @@
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
 
     <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
-
-    <Reference Include="System.Configuration" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">

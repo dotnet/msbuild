@@ -18,14 +18,15 @@
     <PackageReference Update="SourceLink.Create.CommandLine" Version="2.1.2" />
     <PackageReference Update="System.CodeDom" Version="4.4.0" />
     <PackageReference Update="System.Collections.Immutable" Version="5.0.0" />
+    <PackageReference Update="System.Configuration.ConfigurationManager" Version="5.0.0" />
     <PackageReference Update="System.Memory" Version="4.5.4" />
     <PackageReference Update="System.Reflection.Metadata" Version="1.6.0" />
     <PackageReference Update="System.Resources.Extensions" Version="4.6.0" />
     <PackageReference Update="System.Runtime.CompilerServices.Unsafe" Version="5.0.0"/>
     <PackageReference Update="System.Security.Cryptography.Pkcs" Version="4.7.0" />
     <PackageReference Update="System.Security.Cryptography.Xml" Version="4.7.0" />
-    <PackageReference Update="System.Security.Permissions" Version="4.7.0" />
-    <PackageReference Update="System.Security.Principal.Windows" Version="4.7.0" />
+    <PackageReference Update="System.Security.Permissions" Version="5.0.0" />
+    <PackageReference Update="System.Security.Principal.Windows" Version="5.0.0" />
     <PackageReference Update="System.Text.Encoding.CodePages" Version="4.0.1" />
     <PackageReference Update="System.Text.Json" Version="4.7.0" />
     <PackageReference Update="System.Threading.Tasks.Dataflow" Version="4.9.0" />
