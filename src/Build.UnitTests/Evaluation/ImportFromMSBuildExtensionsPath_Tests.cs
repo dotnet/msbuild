@@ -1,10 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#if FEATURE_SYSTEM_CONFIGURATION
-
-using System.Configuration;
-using Microsoft.Win32;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
@@ -15,7 +11,6 @@ using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.UnitTests;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -977,4 +972,3 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
     }
 }
-#endif
