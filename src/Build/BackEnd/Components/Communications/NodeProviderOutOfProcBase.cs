@@ -28,6 +28,8 @@ using Microsoft.Build.Utilities;
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 using Task = System.Threading.Tasks.Task;
 using DotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
+using Microsoft.Build.Framework;
+using Microsoft.Build.BackEnd.Logging;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -111,6 +113,7 @@ namespace Microsoft.Build.BackEnd
 
             Task[] waitForExitTasks = waitForExit && contextsToShutDown.Count > 0 ? new Task[contextsToShutDown.Count] : null;
             int i = 0;
+            var loggingService = _componentHost.LoggingService;
             foreach (NodeContext nodeContext in contextsToShutDown)
             {
                 if (nodeContext is null)
@@ -120,7 +123,7 @@ namespace Microsoft.Build.BackEnd
                 nodeContext.SendData(new NodeBuildComplete(enableReuse));
                 if (waitForExit)
                 {
-                    waitForExitTasks[i++] = nodeContext.WaitForExitAsync();
+                    waitForExitTasks[i++] = nodeContext.WaitForExitAsync(loggingService);
                 }
             }
             if (waitForExitTasks != null)
@@ -832,7 +835,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Waits for the child node process to exit.
             /// </summary>
-            public async Task WaitForExitAsync()
+            public async Task WaitForExitAsync(ILoggingService loggingService)
             {
                 // Wait for the process to exit.
                 if (_isExiting)
@@ -859,7 +862,15 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Kill the child and do a blocking wait.
+                loggingService?.LogWarningFromText(
+                    BuildEventContext.Invalid,
+                    null,
+                    null,
+                    null,
+                    BuildEventFileInfo.Empty,
+                    $"Killing node with pid = {_process.Id}");
                 CommunicationsUtilities.Trace("Killing node with pid = {0}", _process.Id);
+
                 _process.KillTree();
             }
 
