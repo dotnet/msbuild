@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;

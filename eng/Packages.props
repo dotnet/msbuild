@@ -1,5 +1,6 @@
 <Project>
   <ItemGroup>
+    <PackageReference Update="BenchmarkDotNet" Version="0.12.1" />
     <PackageReference Update="jnm2.ReferenceAssemblies.net35" Version="1.0.1" />
     <PackageReference Update="LargeAddressAware" Version="1.0.3" />
     <PackageReference Update="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
@@ -30,6 +31,10 @@
     <PackageReference Update="xunit.assert" Version="$(XUnitVersion)" />
     <PackageReference Update="xunit.console" Version="$(XUnitVersion)" />
     <PackageReference Update="xunit.core" Version="$(XUnitVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(MonoBuild)' == 'true' or $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1'))">
+    <PackageReference Update="Microsoft.Extensions.DependencyModel" Version="5.0.0"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">

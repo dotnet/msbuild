@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UseAppHost>false</UseAppHost>
+    <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
+    <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
+    
+    <IsPackable>false</IsPackable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <AssemblyName>StringTools.Benchmark</AssemblyName>
+    <StartupObject>Microsoft.NET.StringTools.Benchmark.Program</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\StringTools\StringTools.csproj" />
+  </ItemGroup>
+</Project>

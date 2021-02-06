@@ -2103,7 +2103,17 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a set of project instances which represent the project dependency graph for a solution build.
         /// </summary>
-        internal static ProjectInstance[] LoadSolutionForBuild(string projectFile, PropertyDictionary<ProjectPropertyInstance> globalPropertiesInstances, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext projectBuildEventContext, bool isExplicitlyLoaded, IReadOnlyCollection<string> targetNames, ISdkResolverService sdkResolverService, int submissionId)
+        internal static ProjectInstance[] LoadSolutionForBuild(
+            string projectFile,
+            PropertyDictionary<ProjectPropertyInstance> globalPropertiesInstances,
+            string toolsVersion,
+            BuildParameters buildParameters,
+            ILoggingService loggingService,
+            BuildEventContext projectBuildEventContext,
+            bool isExplicitlyLoaded,
+            IReadOnlyCollection<string> targetNames,
+            ISdkResolverService sdkResolverService,
+            int submissionId)
         {
             ErrorUtilities.VerifyThrowArgumentLength(projectFile, nameof(projectFile));
             ErrorUtilities.VerifyThrowArgumentNull(globalPropertiesInstances, nameof(globalPropertiesInstances));

@@ -19,6 +19,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Experimental.ProjectCache;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 
@@ -1019,7 +1020,12 @@ namespace Microsoft.Build.BackEnd
                 // Load the project
                 if (!_requestEntry.RequestConfiguration.IsLoaded)
                 {
-                    LoadProjectIntoConfiguration();
+                    _requestEntry.RequestConfiguration.LoadProjectIntoConfiguration(
+                        _componentHost,
+                        RequestEntry.Request.BuildRequestDataFlags,
+                        RequestEntry.Request.SubmissionId,
+                        _nodeLoggingContext.BuildEventContext.NodeId
+                    );
                 }
             }
             catch
@@ -1078,77 +1084,45 @@ namespace Microsoft.Build.BackEnd
             // Build the targets
             BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this, allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
 
+            result = _requestEntry.Request.ProxyTargets == null
+                ? result
+                : CopyTargetResultsFromProxyTargetsToRealTargets(result);
+
             if (MSBuildEventSource.Log.IsEnabled())
             {
                 MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath, string.Join(", ", allTargets));
             }
 
             return result;
-        }
 
-        /// <summary>
-        /// Loads the project specified by the configuration's parameters into the configuration block.
-        /// </summary>
-        private void LoadProjectIntoConfiguration()
-        {
-            ErrorUtilities.VerifyThrow(!_requestEntry.RequestConfiguration.IsLoaded, "Already loaded the project for this configuration id {0}.", _requestEntry.RequestConfiguration.ConfigurationId);
-
-            _requestEntry.RequestConfiguration.InitializeProject(_componentHost.BuildParameters, LoadProjectFromFile);
-        }
-
-        private ProjectInstance LoadProjectFromFile()
-        {
-            if (_componentHost.BuildParameters.SaveOperatingEnvironment)
+            BuildResult CopyTargetResultsFromProxyTargetsToRealTargets(BuildResult resultFromTargetBuilder)
             {
-                try
+                var proxyTargetMapping = _requestEntry.Request.ProxyTargets.ProxyTargetToRealTargetMap;
+
+                var resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
+                var cachedResult = resultsCache.GetResultsForConfiguration(_requestEntry.Request.ConfigurationId);
+
+                // Some proxy targets do not point to real targets. Exclude those.
+                foreach (var proxyMapping in proxyTargetMapping.Where(kvp => kvp.Value != null))
                 {
-                    NativeMethodsShared.SetCurrentDirectory(BuildParameters.StartupDirectory);
+                    var proxyTarget = proxyMapping.Key;
+                    var realTarget = proxyMapping.Value;
+
+                    var proxyTargetResult = resultFromTargetBuilder.ResultsByTarget[proxyTarget];
+
+                    // Update the results cache.
+                    cachedResult.AddResultsForTarget(
+                        realTarget,
+                        proxyTargetResult);
+
+                    // Update and return this one because TargetBuilder.BuildTargets did some mutations on it not present in the cached result.
+                    resultFromTargetBuilder.AddResultsForTarget(
+                        realTarget,
+                        proxyTargetResult);
                 }
-                catch (DirectoryNotFoundException)
-                {
-                    // Somehow the startup directory vanished. This can happen if build was started from a USB Key and it was removed.
-                    NativeMethodsShared.SetCurrentDirectory(
-                        BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
-                }
+
+                return resultFromTargetBuilder;
             }
-
-            Dictionary<string, string> globalProperties = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
-
-            foreach (ProjectPropertyInstance property in _requestEntry.RequestConfiguration.GlobalProperties)
-            {
-                globalProperties.Add(property.Name, ((IProperty)property).EvaluatedValueEscaped);
-            }
-
-            string toolsVersionOverride = _requestEntry.RequestConfiguration.ExplicitToolsVersionSpecified ? _requestEntry.RequestConfiguration.ToolsVersion : null;
-
-            // Get the hosted ISdkResolverService.  This returns either the MainNodeSdkResolverService or the OutOfProcNodeSdkResolverService depending on who created the current RequestBuilder
-            ISdkResolverService sdkResolverService = _componentHost.GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
-
-            // Use different project load settings if the build request indicates to do so
-            ProjectLoadSettings projectLoadSettings = _componentHost.BuildParameters.ProjectLoadSettings;
-
-            if (_requestEntry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
-            {
-                projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
-            }
-
-            return new ProjectInstance(
-                _requestEntry.RequestConfiguration.ProjectFullPath,
-                globalProperties,
-                toolsVersionOverride,
-                _componentHost.BuildParameters,
-                _nodeLoggingContext.LoggingService,
-                new BuildEventContext(
-                    _requestEntry.Request.SubmissionId,
-                    _nodeLoggingContext.BuildEventContext.NodeId,
-                    BuildEventContext.InvalidEvaluationId,
-                    BuildEventContext.InvalidProjectInstanceId,
-                    BuildEventContext.InvalidProjectContextId,
-                    BuildEventContext.InvalidTargetId,
-                    BuildEventContext.InvalidTaskId),
-                sdkResolverService,
-                _requestEntry.Request.SubmissionId,
-                projectLoadSettings);
         }
 
         /// <summary>

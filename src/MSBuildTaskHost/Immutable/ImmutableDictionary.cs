@@ -138,6 +138,17 @@ namespace System.Collections.Immutable
             return clone;
         }
 
+        internal ImmutableDictionary<K, V> SetItems(IEnumerable<KeyValuePair<K, V>> items)
+        {
+            var clone = new ImmutableDictionary<K, V>(_backing);
+            foreach (KeyValuePair<K, V> item in items)
+            {
+                clone._backing[item.Key] = item.Value;
+            }
+
+            return clone;
+        }
+
         internal ImmutableDictionary<K, V> Remove(K key)
         {
             if (!ContainsKey(key))

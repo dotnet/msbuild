@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -61,7 +62,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             TestParallelWorkSet(new ParallelWorkSetTestCase
             {
-                DegreeOfParallelism = Environment.ProcessorCount,
+                DegreeOfParallelism = NativeMethodsShared.GetLogicalCoreCount(),
                 WorkItemsToAdd = new List<WorkItem>
                 {
                     new WorkItem
@@ -89,7 +90,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             TestParallelWorkSet(new ParallelWorkSetTestCase
             {
-                DegreeOfParallelism = Environment.ProcessorCount
+                DegreeOfParallelism = NativeMethodsShared.GetLogicalCoreCount()
             });
         }
 
@@ -104,7 +105,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             TestParallelWorkSet(new ParallelWorkSetTestCase
             {
-                DegreeOfParallelism = Environment.ProcessorCount,
+                DegreeOfParallelism = NativeMethodsShared.GetLogicalCoreCount(),
                 WorkItemsToAdd = new List<WorkItem>
                 {
                     new WorkItem
@@ -168,7 +169,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             TestParallelWorkSet(new ParallelWorkSetTestCase
             {
-                DegreeOfParallelism = Environment.ProcessorCount,
+                DegreeOfParallelism = NativeMethodsShared.GetLogicalCoreCount(),
                 WorkItemsToAdd = new List<WorkItem>
                 {
                     new WorkItem

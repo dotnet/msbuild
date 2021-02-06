@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
@@ -33,8 +33,9 @@ namespace Microsoft.Build.Shared
 
 
         public MSBuildLoadContext(string assemblyPath)
+            : base($"MSBuild plugin {assemblyPath}")
         {
-            _directory = Directory.GetParent(assemblyPath).FullName;
+            _directory = Directory.GetParent(assemblyPath)!.FullName;
         }
 
         protected override Assembly? Load(AssemblyName assemblyName)
@@ -82,7 +83,7 @@ namespace Microsoft.Build.Shared
             //   into the default ALC (so it's shared with other uses).
 
             var assemblyNameInExecutableDirectory = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
-                assemblyName.Name);
+                assemblyName.Name!);
 
             if (FileSystems.Default.FileExists(assemblyNameInExecutableDirectory))
             {

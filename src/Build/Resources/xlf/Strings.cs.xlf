@@ -132,6 +132,13 @@
         <target state="translated">Objekty EvaluationContext vytvořené pomocí SharingPolicy.Isolated nepodporují předávání souborového systému MSBuildFileSystemBase.</target>
         <note />
       </trans-unit>
+      <trans-unit id="LoadingProjectCachePlugin">
+        <source>"Loading the following project cache plugin:
+    {0}"</source>
+        <target state="translated">Načítá se následující modul plug-in mezipaměti projektu:
+    {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">Podrobnost protokolování je nastavená na: {0}.</target>
@@ -152,6 +159,16 @@
       <trans-unit id="NoBuildInProgress">
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
         <target state="translated">Operaci nelze dokončit, protože funkce BeginBuild ještě nebyla zavolána.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoProjectCachePluginFoundInAssembly">
+        <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
+        <target state="translated">MSB4270: V sestavení {0} se nenašly žádné moduly plug-in mezipaměti projektu. Modul plug-in se očekával.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NotAllNodesDefineACacheItem">
+        <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
+        <target state="translated">MSB4269: Pokud jakýkoli uzel statického grafu definuje mezipaměť projektu, musí všechny uzly definovat stejnou mezipaměť projektu. Následující projekty neobsahují deklaraci položky {0}: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -192,6 +209,26 @@
         <target state="translated">Metoda {0} se nedá zavolat s kolekcí, která obsahuje prázdné cílové názvy nebo názvy null.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OnlyOneCachePluginMustBeSpecified">
+        <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
+        <target state="translated">MSB4265: Musí se zadat jeden modul plug-in mezipaměti projektu, ale našlo se jich více: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheInitializationFailed">
+        <source>MSB4266: Failed to initialize the project cache.</source>
+        <target state="translated">MSB4266: Nepovedlo se inicializovat mezipaměť projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryFailed">
+        <source>MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</source>
+        <target state="translated">MSB4267: Při dotazování na následující projekt selhala jeho mezipaměť: {0}. Na mezipaměť se dotazy posílají paralelně pro několik projektů, takže tento konkrétní projekt nemusí být příčinou.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheShutdownFailed">
+        <source>MSB4268: The project cache failed to shut down properly.</source>
+        <target state="translated">MSB4268: Mezipaměť projektu se nepovedlo správně vypnout.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: ProjectGraph nepodporuje položky ProjectReference s nastavenými metadaty ToolsVersion. V souboru {1} byla nalezena položka ProjectReference {0} s metadaty ToolsVersion.</target>
@@ -211,6 +248,11 @@
         <note>
       LOCALIZATION: {0} and {1} are file paths
     </note>
+      </trans-unit>
+      <trans-unit id="SolutionPathPropertyMustBeSetOnVSSubmissions">
+        <source>"MSB4264: Invalid $(SolutionPath) property: {0}"</source>
+        <target state="translated">MSB4264: Neplatná vlastnost $(SolutionPath): {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
         <source>MSB4261: Multiple entry points with solutions detected: {0}. If static graph is loaded from a solution, that that solution must be the only entry point.</source>

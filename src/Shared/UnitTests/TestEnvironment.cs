@@ -467,6 +467,21 @@ namespace Microsoft.Build.UnitTests
         }
     }
 
+    public class CustomConditionInvariant : TestInvariant
+    {
+        private readonly Func<bool> _condition;
+
+        public CustomConditionInvariant(Func<bool> condition)
+        {
+            _condition = condition;
+        }
+
+        public override void AssertInvariant(ITestOutputHelper output)
+        {
+            _condition().ShouldBeTrue();
+        }
+    }
+
     public class TransientTempPath : TransientTestState
     {
         private const string TMP = "TMP";
