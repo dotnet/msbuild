@@ -556,24 +556,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static int ScanForClosingQuote(char quoteChar, string expression, int index)
         {
-            unsafe
-            {
-                fixed (char* pchar = expression)
-                {
-                    // Scan for our closing quoteChar
-                    while (index < expression.Length)
-                    {
-                        if (pchar[index] == quoteChar)
-                        {
-                            return index;
-                        }
-
-                        index++;
-                    }
-                }
-            }
-
-            return -1;
+            // Scan for our closing quoteChar
+            return expression.IndexOf(quoteChar, index);
         }
 
         /// <summary>
