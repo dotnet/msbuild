@@ -488,19 +488,6 @@ namespace Microsoft.Build.Evaluation
         /// essentially, pushes and pops on a stack of parentheses to do this.
         /// Takes the expression and the index to start at.
         /// Returns the index of the matching parenthesis, or -1 if it was not found.
-        /// </summary>
-        private static int ScanForClosingParenthesis(string expression, int index)
-        {
-            bool potentialPropertyFunction;
-            bool potentialRegistryFunction;
-            return ScanForClosingParenthesis(expression, index, out potentialPropertyFunction, out potentialRegistryFunction);
-        }
-
-        /// <summary>
-        /// Scan for the closing bracket that matches the one we've already skipped;
-        /// essentially, pushes and pops on a stack of parentheses to do this.
-        /// Takes the expression and the index to start at.
-        /// Returns the index of the matching parenthesis, or -1 if it was not found.
         /// Also returns flags to indicate if a propertyfunction or registry property is likely
         /// to be found in the expression.
         /// </summary>
@@ -512,16 +499,15 @@ namespace Microsoft.Build.Evaluation
             potentialPropertyFunction = false;
             potentialRegistryFunction = false;
 
-            unsafe
+            // Scan for our closing ')'
+            while (index < length && nestLevel > 0)
             {
-                fixed (char* pchar = expression)
+                char character = expression[index];
+                switch (character)
                 {
-                    // Scan for our closing ')'
-                    while (index < length && nestLevel > 0)
-                    {
-                        char character = pchar[index];
-
-                        if (character == '\'' || character == '`' || character == '"')
+                    case '\'':
+                    case '`':
+                    case '"':
                         {
                             index++;
                             index = ScanForClosingQuote(character, expression, index);
@@ -530,27 +516,33 @@ namespace Microsoft.Build.Evaluation
                             {
                                 return -1;
                             }
+                            break;
                         }
-                        else if (character == '(')
+                    case '(':
                         {
                             nestLevel++;
+                            break;
                         }
-                        else if (character == ')')
+                    case ')':
                         {
                             nestLevel--;
+                            break;
                         }
-                        else if (character == '.' || character == '[' || character == '$')
+                    case '.':
+                    case '[':
+                    case '$':
                         {
                             potentialPropertyFunction = true;
+                            break;
                         }
-                        else if (character == ':')
+                    case ':':
                         {
                             potentialRegistryFunction = true;
+                            break;
                         }
-
-                        index++;
-                    }
                 }
+
+                index++;
             }
 
             // We will have parsed past the ')', so step back one character
@@ -666,7 +658,7 @@ namespace Microsoft.Build.Evaluation
                     n += 2; // skip over the opening '$('
 
                     // Scan for the matching closing bracket, skipping any nested ones
-                    n = ScanForClosingParenthesis(argumentsString, n);
+                    n = ScanForClosingParenthesis(argumentsString, n, out _, out _);
 
                     if (n == -1)
                     {
@@ -1034,13 +1026,11 @@ namespace Microsoft.Build.Evaluation
                         results.Add(expression.Substring(sourceIndex, propertyStartIndex - sourceIndex));
                     }
 
-                    bool tryExtractPropertyFunction;
-                    bool tryExtractRegistryFunction;
                     // Following the "$(" we need to locate the matching ')'
                     // Scan for the matching closing bracket, skipping any nested ones
                     // This is a very complete, fast validation of parenthesis matching including for nested
                     // function calls.
-                    propertyEndIndex = ScanForClosingParenthesis(expression, propertyStartIndex + 2, out tryExtractPropertyFunction, out tryExtractRegistryFunction);
+                    propertyEndIndex = ScanForClosingParenthesis(expression, propertyStartIndex + 2, out bool tryExtractPropertyFunction, out bool tryExtractRegistryFunction);
 
                     if (propertyEndIndex == -1)
                     {
@@ -4736,7 +4726,7 @@ namespace Microsoft.Build.Evaluation
                     argumentStartIndex++;
 
                     // Scan for the matching closing bracket, skipping any nested ones
-                    int argumentsEndIndex = ScanForClosingParenthesis(expressionFunction, argumentStartIndex);
+                    int argumentsEndIndex = ScanForClosingParenthesis(expressionFunction, argumentStartIndex, out _, out _);
 
                     if (argumentsEndIndex == -1)
                     {
