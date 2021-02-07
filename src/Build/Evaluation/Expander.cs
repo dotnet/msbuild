@@ -1106,7 +1106,7 @@ namespace Microsoft.Build.Evaluation
                 // so that we can either maintain the object's type in the event
                 // that we have a single component, or convert to a string
                 // if concatenation is required.
-                List<object> results = new List<object>();
+                using Expander<P, I>.SpanBasedConcatenator results = new Expander<P, I>.SpanBasedConcatenator();
 
                 // The sourceIndex is the zero-based index into the expression,
                 // where we've essentially read up to and copied into the target string.
@@ -1120,7 +1120,7 @@ namespace Microsoft.Build.Evaluation
                     // (but not including) the "$(", and advance the sourceIndex pointer.
                     if (propertyStartIndex - sourceIndex > 0)
                     {
-                        results.Add(expression.Substring(sourceIndex, propertyStartIndex - sourceIndex));
+                        results.Add(expression.AsMemory(sourceIndex, propertyStartIndex - sourceIndex));
                     }
 
                     // Following the "$(" we need to locate the matching ')'
@@ -1135,7 +1135,7 @@ namespace Microsoft.Build.Evaluation
                         // isn't really a well-formed property tag.  Just literally
                         // copy the remainder of the expression (starting with the "$("
                         // that we found) into the result, and quit.
-                        results.Add(expression.Substring(propertyStartIndex, expression.Length - propertyStartIndex));
+                        results.Add(expression.AsMemory(propertyStartIndex, expression.Length - propertyStartIndex));
                         sourceIndex = expression.Length;
                     }
                     else
@@ -1219,43 +1219,13 @@ namespace Microsoft.Build.Evaluation
                     propertyStartIndex = s_invariantCompareInfo.IndexOf(expression, "$(", sourceIndex, CompareOptions.Ordinal);
                 }
 
-                // If we have only a single result, then just return it
-                if (results.Count == 1 && expression.Length == sourceIndex)
+                // If we couldn't find any more property tags in the expression just copy the remainder into the result.
+                if (expression.Length - sourceIndex > 0)
                 {
-                    var resultString = results[0] as string;
-                    return resultString != null ? FileUtilities.MaybeAdjustFilePath(resultString) : results[0];
+                    results.Add(expression.AsMemory(sourceIndex, expression.Length - sourceIndex));
                 }
-                else
-                {
-                    // The expression is constant, return it as is
-                    if (sourceIndex == 0)
-                    {
-                        return expression;
-                    }
 
-                    // We have more than one result collected, therefore we need to concatenate
-                    // into the final result string. This does mean that we will lose type information.
-                    // However since the user wanted contatenation, then they clearly wanted that to happen.
-
-                    // Initialize our output string to empty string.
-                    // This method is called very often - of the order of 3,000 times per project.
-                    using SpanBasedStringBuilder result = Strings.GetSpanBasedStringBuilder();
-
-                    // Create a combined result string from the result components that we've gathered
-                    foreach (object component in results)
-                    {
-                        result.Append(FileUtilities.MaybeAdjustFilePath(component.ToString()));
-                    }
-
-                    // And if we couldn't find anymore property tags in the expression,
-                    // so just literally copy the remainder into the result.
-                    if (expression.Length - sourceIndex > 0)
-                    {
-                        result.Append(expression, sourceIndex, expression.Length - sourceIndex);
-                    }
-
-                    return result.ToString();
-                }
+                return results.GetResult();
             }
 
             /// <summary>
