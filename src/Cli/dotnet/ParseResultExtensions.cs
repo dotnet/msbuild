@@ -37,6 +37,16 @@ namespace Microsoft.DotNet.Cli
                 .FirstOrDefault(subcommand => !string.IsNullOrEmpty(subcommand)) ?? string.Empty;
         }
 
+        public static bool IsDotnetBuiltInCommand(this ParseResult parseResult)
+        {
+            return string.IsNullOrEmpty(parseResult.RootSubCommandResult()) || BuiltInCommandsCatalog.Commands.ContainsKey(parseResult.RootSubCommandResult());
+        }
+
+        public static bool IsTopLevelDotnetCommand(this ParseResult parseResult)
+        {
+            return parseResult.CommandResult.Command.Equals(RootCommand) && string.IsNullOrEmpty(parseResult.RootSubCommandResult());
+        }
+
         private static string GetSymbolResultValue(ParseResult parseResult, SymbolResult symbolResult)
         {
             if (symbolResult.Token() == null)
