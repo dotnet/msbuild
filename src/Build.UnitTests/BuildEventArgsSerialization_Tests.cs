@@ -513,7 +513,7 @@ namespace Microsoft.Build.UnitTests
                 memoryStream.Position = 0;
 
                 var binaryReader = new BinaryReader(memoryStream);
-                var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+                using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
 
                 Assert.Throws<EndOfStreamException>(() => buildEventArgsReader.Read());
             }
@@ -570,7 +570,7 @@ namespace Microsoft.Build.UnitTests
             memoryStream.Position = 0;
 
             var binaryReader = new BinaryReader(memoryStream);
-            var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+            using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
             var deserializedArgs = (T)buildEventArgsReader.Read();
 
             Assert.Equal(length, memoryStream.Position);

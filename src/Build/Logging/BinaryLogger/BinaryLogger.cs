@@ -35,7 +35,13 @@ namespace Microsoft.Build.Logging
         //   - This was used in a now-reverted change but is the same as 9.
         // version 9:
         //   - new record kinds: EnvironmentVariableRead, PropertyReassignment, UninitializedPropertyRead
-        internal const int FileFormatVersion = 9;
+        // version 10:
+        //   - new record kinds:
+        //      * String - deduplicate strings by hashing and write a string record before it's used
+        //      * NameValueList - deduplicate arrays of name-value pairs such as properties, items and metadata
+        //                        in a separate record and refer to those records from regular records
+        //                        where a list used to be written in-place
+        internal const int FileFormatVersion = 10;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
@@ -137,6 +143,11 @@ namespace Microsoft.Build.Logging
             }
 
             stream = new GZipStream(stream, CompressionLevel.Optimal);
+
+            // wrapping the GZipStream in a buffered stream significantly improves performance
+            // and the max throughput is reached with a 32K buffer. See details here:
+            // https://github.com/dotnet/runtime/issues/39233#issuecomment-745598847
+            stream = new BufferedStream(stream, bufferSize: 32768);
             binaryWriter = new BinaryWriter(stream);
             eventArgsWriter = new BuildEventArgsWriter(binaryWriter);
 
@@ -175,8 +186,8 @@ namespace Microsoft.Build.Logging
                 {
                     eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, projectImportsCollector.GetAllBytes());
                 }
-                projectImportsCollector.Close();
 
+                projectImportsCollector.Close();
                 projectImportsCollector = null;
             }
 
