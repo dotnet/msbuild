@@ -212,6 +212,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 .ShouldBe(3);
         }
 
+        [Fact]
+        public void GraphBuildOptionsDefaults()
+        {
+            var options = new GraphBuildOptions();
+
+            options.Build.ShouldBeTrue();
+        }
+
         /// <summary>
         /// A simple successful graph build.
         /// </summary>
@@ -4278,6 +4286,36 @@ $@"<Project InitialTargets=`Sleep`>
             GraphBuildResult result = _buildManager.Build(_parameters, data);
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
             result.CircularDependency.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void GraphBuildShouldBeAbleToConstructGraphButSkipBuild()
+        {
+            var graph = Helpers.CreateProjectGraph(env: _env, dependencyEdges: new Dictionary<int, int[]> {{1, new[] {2, 3}}});
+
+            MockLogger logger = null;
+
+            using (var buildSession = new Helpers.BuildManagerSession(_env))
+            {
+                var graphResult = buildSession.BuildGraphSubmission(
+                    new GraphBuildRequestData(
+                        projectGraphEntryPoints: new[] {new ProjectGraphEntryPoint(graph.GraphRoots.First().ProjectInstance.FullPath)},
+                        targetsToBuild: new string[0],
+                        hostServices: null,
+                        flags: BuildRequestDataFlags.None,
+                        graphBuildOptions: new GraphBuildOptions {Build = false}));
+
+                graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                logger = buildSession.Logger;
+            }
+
+            logger.EvaluationStartedEvents.Count.ShouldBe(3);
+            logger.ProjectStartedEvents.ShouldBeEmpty();
+            logger.TargetStartedEvents.ShouldBeEmpty();
+            logger.BuildStartedEvents.ShouldHaveSingleItem();
+            logger.BuildFinishedEvents.ShouldHaveSingleItem();
+            logger.FullLog.ShouldContain("Static graph loaded in");
+            logger.FullLog.ShouldContain("3 nodes, 2 edges");
         }
     }
 }
