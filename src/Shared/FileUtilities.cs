@@ -4,6 +4,8 @@
 using System;
 #if !CLR2COMPATIBILITY
 using System.Collections.Concurrent;
+#else
+using Microsoft.Build.Shared.Concurrent;
 #endif
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -107,11 +109,8 @@ namespace Microsoft.Build.Shared
 
         internal static readonly string DirectorySeparatorString = Path.DirectorySeparatorChar.ToString();
 
-#if !CLR2COMPATIBILITY
         private static readonly ConcurrentDictionary<string, bool> FileExistenceCache = new ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-#else
-        private static readonly Microsoft.Build.Shared.Concurrent.ConcurrentDictionary<string, bool> FileExistenceCache = new Microsoft.Build.Shared.Concurrent.ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-#endif
+
         private static readonly IFileSystem DefaultFileSystem = FileSystems.Default;
 
         /// <summary>
