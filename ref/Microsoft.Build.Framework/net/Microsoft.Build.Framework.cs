@@ -211,6 +211,10 @@ namespace Microsoft.Build.Framework
     {
         bool AllowFailureWithoutError { get; set; }
     }
+    public partial interface IBuildEngine8 : Microsoft.Build.Framework.IBuildEngine, Microsoft.Build.Framework.IBuildEngine2, Microsoft.Build.Framework.IBuildEngine3, Microsoft.Build.Framework.IBuildEngine4, Microsoft.Build.Framework.IBuildEngine5, Microsoft.Build.Framework.IBuildEngine6, Microsoft.Build.Framework.IBuildEngine7
+    {
+        System.Collections.Generic.HashSet<string> WarningsAsErrors { get; set; }
+    }
     public partial interface ICancelableTask : Microsoft.Build.Framework.ITask
     {
         void Cancel();
