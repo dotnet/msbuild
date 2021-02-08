@@ -127,7 +127,6 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' or '$(TargetFramework)' == 'net5.0'">
     <DefineConstants>$(DefineConstants);FEATURE_PIPEOPTIONS_CURRENTUSERONLY</DefineConstants>
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_SPAN</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' != 'true'">
