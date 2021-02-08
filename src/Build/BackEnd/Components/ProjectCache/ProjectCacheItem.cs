@@ -26,25 +26,25 @@ namespace Microsoft.Build.Experimental.ProjectCache
         public string PluginPath { get; }
         public IReadOnlyDictionary<string, string> PluginSettings { get; }
 
-        public bool Equals(ProjectCacheItem other)
+        public bool Equals(ProjectCacheItem? other)
         {
             if (ReferenceEquals(this, other))
             {
                 return true;
             }
 
-            return PluginPath == other.PluginPath &&
+            return PluginPath == other?.PluginPath &&
                    CollectionHelpers.DictionaryEquals(PluginSettings, other.PluginSettings);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(this, obj))
             {
                 return true;
             }
 
-            if (obj.GetType() != GetType())
+            if (obj?.GetType() != GetType())
             {
                 return false;
             }

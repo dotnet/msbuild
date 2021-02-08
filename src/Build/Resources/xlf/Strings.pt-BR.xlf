@@ -128,14 +128,14 @@
         <note />
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
-        <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
-        <target state="translated">"Os objetos EvaluationContext criados com SharingPolicy.Isolable não são compatíveis com o recebimento de um sistema de arquivos MSBuildFileSystemBase."</target>
+        <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
+        <target state="needs-review-translation">"Os objetos EvaluationContext criados com SharingPolicy.Isolable não são compatíveis com o recebimento de um sistema de arquivos MSBuildFileSystemBase."</target>
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
         <source>"Loading the following project cache plugin:
     {0}"</source>
-        <target state="new">"Loading the following project cache plugin:
+        <target state="translated">"Carregando o seguinte plug-in de cache do projeto:
     {0}"</target>
         <note />
       </trans-unit>
@@ -163,12 +163,12 @@
       </trans-unit>
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
         <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
-        <target state="new">MSB4270: No project cache plugins found in assembly "{0}". Expected one.</target>
+        <target state="translated">MSB4270: não foi encontrado nenhum plug-in de cache do projeto no assembly "{0}". Era esperado um plug-in.</target>
         <note />
       </trans-unit>
       <trans-unit id="NotAllNodesDefineACacheItem">
         <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
-        <target state="new">MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</target>
+        <target state="translated">MSB4269: quando algum nó de grafo estático define um cache do projeto, todos os nós precisam definir o mesmo cache do projeto. Os seguintes projetos não contêm uma declaração de item "{0}": {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -211,22 +211,22 @@
       </trans-unit>
       <trans-unit id="OnlyOneCachePluginMustBeSpecified">
         <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
-        <target state="new">MSB4265: A single project cache plugin must be specified but multiple where found: {0}</target>
+        <target state="translated">MSB4265: é necessário especificar só um plug-in de cache do projeto, mas foram encontrados vários: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
         <source>MSB4266: Failed to initialize the project cache.</source>
-        <target state="new">MSB4266: Failed to initialize the project cache.</target>
+        <target state="translated">MSB4266: falha ao inicializar o cache do projeto.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheQueryFailed">
         <source>MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</source>
-        <target state="new">MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</target>
+        <target state="translated">MSB4267: falha no cache do projeto durante a consulta do seguinte projeto: {0}. O cache é consultado em paralelo quanto a vários projetos, portanto, esse projeto específico pode não ser a causa.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">
         <source>MSB4268: The project cache failed to shut down properly.</source>
-        <target state="new">MSB4268: The project cache failed to shut down properly.</target>
+        <target state="translated">MSB4268: falha ao desligar o cache do projeto corretamente.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
@@ -251,7 +251,7 @@
       </trans-unit>
       <trans-unit id="SolutionPathPropertyMustBeSetOnVSSubmissions">
         <source>"MSB4264: Invalid $(SolutionPath) property: {0}"</source>
-        <target state="new">"MSB4264: Invalid $(SolutionPath) property: {0}"</target>
+        <target state="translated">"MSB4264: propriedade $(SolutionPath) inválida: {0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
@@ -262,8 +262,8 @@
     </note>
       </trans-unit>
       <trans-unit id="StaticGraphConstructionMetrics">
-        <source>"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</source>
-        <target state="translated">"Grafo estático carregado em {0} segundos: {1} nós, {2} bordas"</target>
+        <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
+        <target state="needs-review-translation">"Grafo estático carregado em {0} segundos: {1} nós, {2} bordas"</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">

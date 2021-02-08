@@ -2480,6 +2480,11 @@
         <target state="translated">Projede "{2}" parametresi "{3}" olarak ayarlandığından ve dosya boyutlarıyla zaman damgaları eşleştiğinden "{0}" dosyasını "{1}" dosyasına çıkarma işlemi gerçekleştirilmedi.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFilter">
+        <source>Did not unzip file "{0}" because it didn't match the include filter or because it matched the exclude filter.</source>
+        <target state="new">Did not unzip file "{0}" because it didn't match the include filter or because it matched the exclude filter.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
         <target state="translated">MSB3931: "{0}" dizini oluşturulamadığından bu dizine çıkarılamadı. {1}</target>
@@ -2509,6 +2514,16 @@
         <source>MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</source>
         <target state="translated">MSB3932: Dosya mevcut olmadığından veya erişilebilir olmadığından "{0}" dosyasının sıkıştırması açılamadı.</target>
         <note>{StrBegin="MSB3932: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorParsingPatternInvalidPath">
+        <source>MSB3937: Failed to parse pattern "{0}" because it contains an invalid path character.</source>
+        <target state="new">MSB3937: Failed to parse pattern "{0}" because it contains an invalid path character.</target>
+        <note>{StrBegin="MSB3937: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorParsingPatternPropertyReferences">
+        <source>MSB3938: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</source>
+        <target state="new">MSB3938: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</target>
+        <note>{StrBegin="MSB3938: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.FileComment">
         <source>Unzipping file "{0}" to "{1}".</source>

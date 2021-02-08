@@ -1778,11 +1778,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Error Condition="'$(IsCrossTargetingBuild)' == 'true'"
            Text="Internal MSBuild error: Non-CrossTargeting GetTargetFrameworks target should not be used in cross targeting (outer) build" />
 
+    <CombineXmlElements
+      RootElementName="AdditionalProjectProperties"
+      XmlElements="@(_TargetFrameworkInfo->'%(AdditionalPropertiesFromProject)')">
+      <Output TaskParameter="Result"
+        PropertyName="_AdditionalPropertiesFromProject"/>
+    </CombineXmlElements>
+    
     <ItemGroup>
       <_ThisProjectBuildMetadata Include="$(MSBuildProjectFullPath)">
         <TargetFrameworks>@(_TargetFrameworkInfo)</TargetFrameworks>
         <TargetFrameworkMonikers>@(_TargetFrameworkInfo->'%(TargetFrameworkMonikers)')</TargetFrameworkMonikers>
         <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
+        <AdditionalPropertiesFromProject>$(_AdditionalPropertiesFromProject)</AdditionalPropertiesFromProject>
 
         <HasSingleTargetFramework>true</HasSingleTargetFramework>
 
@@ -1797,11 +1805,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Returns="@(_TargetFrameworkInfo)">
 
     <ItemGroup>
+      <_AdditionalTargetFrameworkInfoPropertyWithValue Include="@(AdditionalTargetFrameworkInfoProperty)">
+        <Value>$(%(AdditionalTargetFrameworkInfoProperty.Identity))</Value>
+      </_AdditionalTargetFrameworkInfoPropertyWithValue>
+    </ItemGroup>
+
+    <CombineTargetFrameworkInfoProperties
+        RootElementName="$(TargetFramework)"
+        PropertiesAndValues="@(_AdditionalTargetFrameworkInfoPropertyWithValue)">
+      <Output TaskParameter="Result"
+              PropertyName="_AdditionalTargetFrameworkInfoProperties"/>
+    </CombineTargetFrameworkInfoProperties>
+
+    <ItemGroup>
       <_TargetFrameworkInfo Include="$(TargetFramework)">
         <TargetFrameworks>$(TargetFramework)</TargetFrameworks>
         <TargetFrameworkMonikers>$(TargetFrameworkMoniker)</TargetFrameworkMonikers>
         <TargetPlatformMonikers>$(TargetPlatformMoniker)</TargetPlatformMonikers>
         <TargetPlatformMonikers Condition="'$(TargetPlatformMoniker)' == ''">None</TargetPlatformMonikers>
+        <AdditionalPropertiesFromProject>$(_AdditionalTargetFrameworkInfoProperties)</AdditionalPropertiesFromProject>
       </_TargetFrameworkInfo>
     </ItemGroup>
 

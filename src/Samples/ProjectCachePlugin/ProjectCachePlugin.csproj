@@ -4,8 +4,8 @@
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
-    <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OsEnvironment)'=='windows'">$(FullFrameworkTFM);netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(FullFrameworkTFM);net5.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
