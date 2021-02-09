@@ -871,7 +871,7 @@ namespace Microsoft.Build.BackEnd
                     $"Killing node with pid = {_process.Id}");
                 CommunicationsUtilities.Trace("Killing node with pid = {0}", _process.Id);
 
-                _process.KillTree();
+                _process.KillTree(timeout: 5000);
             }
 
 #if FEATURE_APM

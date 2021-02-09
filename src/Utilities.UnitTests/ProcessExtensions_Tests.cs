@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests
             p.HasExited.ShouldBe(false);
 
             // Kill the process.
-            p.KillTree();
+            p.KillTree(timeout: 5000);
             p.HasExited.ShouldBe(true);
             p.ExitCode.ShouldNotBe(0);
         }
