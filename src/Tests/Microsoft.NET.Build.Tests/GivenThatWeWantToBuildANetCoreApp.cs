@@ -33,6 +33,15 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
+        private BuildCommand GetBuildCommand()
+        {
+            var testAsset = _testAssetsManager
+               .CopyTestAsset("HelloWorldWithSubDirs")
+               .WithSource();
+
+            return new BuildCommand(testAsset);
+        }
+
         [Theory]
         //  TargetFramework, RuntimeFrameworkVersion, ExpectedPackageVersion, ExpectedRuntimeFrameworkVersion
         [InlineData("netcoreapp1.0", null, "1.0.5", "1.0.5")]
@@ -206,7 +215,7 @@ namespace Microsoft.NET.Build.Tests
 
             string runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(testProject.TargetFrameworks);
 
-            testProject.AdditionalProperties["RuntimeIdentifiers"] = runtimeIdentifier;            
+            testProject.AdditionalProperties["RuntimeIdentifiers"] = runtimeIdentifier;
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
@@ -777,5 +786,24 @@ class Program
             depsFileLastWriteTime.Should().NotBe(File.GetLastWriteTimeUtc(depsFilePath));
             runtimeConfigLastWriteTime.Should().NotBe(File.GetLastWriteTimeUtc(runtimeConfigPath));
         }
+
+        [Fact]
+        public void It_passes_when_building_single_file_app_without_rid()
+        {
+            GetBuildCommand()
+                .Execute("/p:PublishSingleFile=true")
+                .Should()
+                .Pass();
+        }
+
+        [Fact]
+        public void It_errors_when_publishing_single_file_without_apphost()
+        {
+            GetBuildCommand()
+                .Execute("/p:PublishSingleFile=true", "/p:SelfContained=false", "/p:UseAppHost=false")
+                .Should()
+                .Pass();
+        }
+
     }
 }
