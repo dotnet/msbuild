@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdDeprecatedDescription">
         <source>Lists packages that have been deprecated. Cannot be combined with '--vulnerable' or '--outdated' options.</source>
-        <target state="needs-review-translation">사용되지 않는 패키지를 나열합니다.</target>
+        <target state="translated">사용되지 않는 패키지를 나열합니다. '--vulnerable' 또는 '--outdated' 옵션과 함께 사용할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdOutdatedDescription">
         <source>Lists packages that have newer versions. Cannot be combined with '--deprecated' or '--vulnerable' options.</source>
-        <target state="needs-review-translation">최신 버전이 있는 패키지를 나열합니다.</target>
+        <target state="translated">최신 버전이 포함된 패키지를 나열합니다. '--deprecated' 또는 '--vulnerable' 옵션과 함께 사용할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="CmdVulnerableDescription">
         <source>Lists packages that have known vulnerabilities. Cannot be combined with '--deprecated' or '--outdated' options.</source>
-        <target state="new">Lists packages that have known vulnerabilities. Cannot be combined with '--deprecated' or '--outdated' options.</target>
+        <target state="translated">알려진 취약성이 있는 패키지를 나열합니다. '--deprecated' 또는 '--outdated' 옵션과 함께 사용할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsOrSolutions">
@@ -49,22 +49,22 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>The path to the NuGet config file to use. Requires the '--outdated', '--deprecated' or '--vulnerable' option.</source>
-        <target state="needs-review-translation">사용할 NuGet 구성 파일의 경로입니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
+        <target state="translated">사용할 NuGet 구성 파일의 경로입니다. '--outdated', '--deprecated' 또는 '--vulnerable' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
         <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">최신 패키지를 검색할 때 주 버전 번호가 일치하는 패키지만 고려합니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
+        <target state="translated">최신 패키지를 검색할 때 주 버전 번호가 일치하는 패키지만 고려합니다. '--outdated' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
         <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">최신 패키지를 검색할 때 주 버전 번호와 부 버전 번호가 일치하는 패키지만 고려합니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
+        <target state="translated">최신 패키지를 검색할 때 주 버전 번호와 부 버전 번호가 일치하는 패키지만 고려합니다. '--outdated' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
         <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">최신 패키지를 검색할 때 시험판 버전이 있는 패키지를 고려합니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
+        <target state="translated">최신 패키지를 검색할 때 시험판 버전이 있는 패키지를 고려합니다. '--outdated' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated', '--deprecated' or '--vulnerable' option.</source>
-        <target state="needs-review-translation">최신 패키지를 검색할 때 사용하는 NuGet 소스입니다. '--outdated' 또는 '--deprecated' 옵션이 필요합니다.</target>
+        <target state="translated">최신 패키지를 검색할 때 사용하는 NuGet 소스입니다. '--outdated', '--deprecated' 또는 '--vulnerable' 옵션이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="OptionsCannotBeCombined">
         <source>Options '--outdated', '--deprecated' and '--vulnerable' cannot be combined.</source>
-        <target state="new">Options '--outdated', '--deprecated' and '--vulnerable' cannot be combined.</target>
+        <target state="translated">'--outdated', '--deprecated' 및 '--vulnerable' 옵션은 함께 사용할 수 없습니다.</target>
         <note />
       </trans-unit>
     </body>

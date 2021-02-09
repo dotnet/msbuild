@@ -1151,7 +1151,7 @@ For more information on this deploy script visit:	https://go.microsoft.com/fwlin
       </trans-unit>
       <trans-unit id="PublishLocalizedString_ErrorCannotDeployFromIIS7AboveToLowerIIS">
         <source>Deploy with IIS Setting from a IIS 7 or above to a lower verstion of IIS server is not supported. To fix the problem, please set the %24(IncludeIisSettings) to false. Your current setting are $(IncludeIisSettings) is {0}, $(DestinationIisVersion) is {1} and $(LocalIisVersion) is  {2}.</source>
-        <target state="translated">Le déploiement en utilisant les paramètre IIS d'un serveur IIS 7 ou plus récent vers une version de serveur IIS plus ancienne n'est pas pris en charge. Pour résoudre le problème, veuillez configurer le % 24 (IncludeIisSettings) sur false. Votre réglage actuel est $(IncludeIisSettings) est {0}, $(DestinationIisVersion) est {1} et $(LocalIisVersion) est {2}.</target>
+        <target state="translated">Le déploiement en utilisant les paramètre IIS d'un serveur IIS 7 ou plus récent vers une version de serveur IIS plus ancienne n'est pas pris en charge. Pour résoudre le problème, veuillez configurer le %24(IncludeIisSettings) sur false. Votre réglage actuel est $(IncludeIisSettings) est {0}, $(DestinationIisVersion) est {1} et $(LocalIisVersion) est {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="PublishLocalizedString_ErrorInvalidMSBuildItemCollectionCount">
@@ -1278,7 +1278,7 @@ Pour cet exemple de script, vous pouvez changer les paramètres de déploiement 
       </trans-unit>
       <trans-unit id="PublishLocalizedString_MsBuildPropertySettingValue">
         <source>$({0}) is {1}</source>
-        <target state="translated">$({0}) est {1}</target>
+        <target state="translated">$({0}) a la valeur {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="PublishLocalizedString_PackagingIntoLocation">
@@ -1855,7 +1855,7 @@ Détails de l'erreur :</target>
       </trans-unit>
       <trans-unit id="WEBDEPLOY_AssemblyInfo_Start">
         <source>Generating AssemblyInfo.</source>
-        <target state="translated">Génération de AssemblyInfo.</target>
+        <target state="translated">Génération des informations d'assembly.</target>
         <note />
       </trans-unit>
       <trans-unit id="WEBDEPLOY_AssemblyInfo_Succeeded">

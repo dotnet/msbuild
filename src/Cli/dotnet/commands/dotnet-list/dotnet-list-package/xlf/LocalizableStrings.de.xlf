@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="CmdDeprecatedDescription">
         <source>Lists packages that have been deprecated. Cannot be combined with '--vulnerable' or '--outdated' options.</source>
-        <target state="needs-review-translation">Listet Pakete auf, die veraltet sind.</target>
+        <target state="translated">Listet Pakete auf, die veraltet sind. Kann nicht mit den Optionen "--vulnerable" oder "--outdated" kombiniert werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdFramework">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CmdOutdatedDescription">
         <source>Lists packages that have newer versions. Cannot be combined with '--deprecated' or '--vulnerable' options.</source>
-        <target state="needs-review-translation">Listet Pakete mit neueren Versionen auf.</target>
+        <target state="translated">Listet Pakete mit neueren Versionen auf. Kann nicht mit den Optionen "--deprecated" oder "--vulnerable" kombiniert werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTransitiveDescription">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="CmdVulnerableDescription">
         <source>Lists packages that have known vulnerabilities. Cannot be combined with '--deprecated' or '--outdated' options.</source>
-        <target state="new">Lists packages that have known vulnerabilities. Cannot be combined with '--deprecated' or '--outdated' options.</target>
+        <target state="translated">Listet Pakete auf, die bekannte Sicherheitsrisiken aufweisen. Kann nicht mit den Optionen "--deprecated" oder "--outdated" kombiniert werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsOrSolutions">
@@ -49,22 +49,22 @@
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
         <source>The path to the NuGet config file to use. Requires the '--outdated', '--deprecated' or '--vulnerable' option.</source>
-        <target state="needs-review-translation">Der Pfad zu der NuGet-Konfigurationsdatei, die verwendet werden soll. Erfordert die Option "--outdated" oder "--deprecated".</target>
+        <target state="translated">Der Pfad zurNuGet-Konfigurationsdatei, die verwendet werden soll. Erfordert die Option "--outdated", "--deprecated" oder "--vulnerable".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
         <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">Hiermit werden bei der Suche nach neueren Paketen nur Pakete mit übereinstimmender Hauptversionsnummer berücksichtigt. Erfordert die Option "--outdated" oder "--deprecated".</target>
+        <target state="translated">Hiermit werden bei der Suche nach neueren Paketen nur die Pakete mit übereinstimmender Hauptversionsnummer berücksichtigt. Hierfür ist die Option "--outdated" erforderlich.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
         <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">Hiermit werden bei der Suche nach neueren Paketen nur Pakete mit übereinstimmender Haupt- und Nebenversionsnummer berücksichtigt. Erfordert die Option "--outdated" oder "--deprecated".</target>
+        <target state="translated">Hiermit werden bei der Suche nach neueren Paketen nur die Pakete mit übereinstimmender Haupt- und Nebenversionsnummer berücksichtigt. Hierfür ist die Option "--outdated" erforderlich.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
         <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</source>
-        <target state="needs-review-translation">Hiermit werden bei der Suche nach neueren Paketen auch Pakete mit Vorabversionen berücksichtigt. Erfordert die Option "--outdated" oder "--deprecated".</target>
+        <target state="translated">Hiermit werden bei der Suche nach neueren Pakete auch Pakete mit Vorabversionen berücksichtigt. Hierfür ist die Option "--outdated" erforderlich.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated', '--deprecated' or '--vulnerable' option.</source>
-        <target state="needs-review-translation">Die bei der Suche nach neueren Paketen zu verwendenden NuGet-Quellen. Erfordert die Option "--outdated" oder "--deprecated".</target>
+        <target state="translated">Die bei der Suche nach neueren Paketen zu verwendenden NuGet-Quellen. Erfordert die Option "--outdated", "--deprecated" oder "--vulnerable".</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="OptionsCannotBeCombined">
         <source>Options '--outdated', '--deprecated' and '--vulnerable' cannot be combined.</source>
-        <target state="new">Options '--outdated', '--deprecated' and '--vulnerable' cannot be combined.</target>
+        <target state="translated">Die Optionen "--outdated", "--deprecated" und "--vulnerable" können nicht kombiniert werden.</target>
         <note />
       </trans-unit>
     </body>
