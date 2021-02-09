@@ -1225,7 +1225,7 @@
     <comment>{StrBegin="MSB4091: "}</comment>
   </data>
   <data name="UnexpectedTaskAttribute" xml:space="preserve">
-    <value>MSB4064: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a settable public instance property.</value>
+    <value>MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</value>
     <comment>{StrBegin="MSB4064: "}</comment>
   </data>
   <data name="UnexpectedTaskOutputAttribute" xml:space="preserve">

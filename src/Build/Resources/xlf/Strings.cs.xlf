@@ -1670,8 +1670,8 @@
         <note>{StrBegin="MSB4091: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
-        <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a settable public instance property.</source>
-        <target state="translated">MSB4064: Parametr {0} není podporován úlohou {1}. Zkontrolujte, zda parametr úlohy existuje a zda se jedná o nastavitelnou vlastnost veřejné instance.</target>
+        <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</source>
+        <target state="new">MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</target>
         <note>{StrBegin="MSB4064: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">

@@ -1098,13 +1098,30 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     // flag an error if we find a parameter that has no .NET property equivalent
-                    _taskLoggingContext.LogError
-                        (
-                        new BuildEventFileInfo(parameterLocation),
-                        "UnexpectedTaskAttribute",
-                        parameterName,
-                        _taskName
-                        );
+                    if (_taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssembly is null)
+                    {
+                        _taskLoggingContext.LogError
+                            (
+                            new BuildEventFileInfo( parameterLocation ),
+                            "UnexpectedTaskAttribute",
+                            parameterName,
+                            _taskName,
+                            _taskFactoryWrapper.TaskFactoryLoadedType.Type.Assembly.FullName,
+                            _taskFactoryWrapper.TaskFactoryLoadedType.Type.Assembly.Location
+                            );
+                    }
+                    else
+                    {
+                        _taskLoggingContext.LogError
+                            (
+                            new BuildEventFileInfo( parameterLocation ),
+                            "UnexpectedTaskAttribute",
+                            parameterName,
+                            _taskName,
+                            _taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssembly.FullName,
+                            _taskFactoryWrapper.TaskFactoryLoadedType.LoadedAssembly.Location
+                            );
+                    }
                 }
             }
             catch (AmbiguousMatchException)
