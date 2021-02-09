@@ -110,18 +110,20 @@ namespace Microsoft.Build.Utilities
         internal static void ApplyChangeWave()
         {
             // Once set, change wave should not need to be set again.
-            string mSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
             if (!ShouldApplyChangeWave)
             {
                 return;
             }
+
+            string msbuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
+
             // Most common case, `MSBuildDisableFeaturesFromVersion` unset
-            else if (string.IsNullOrEmpty(mSBuildDisableFeaturesFromVersion))
+            if (string.IsNullOrEmpty(msbuildDisableFeaturesFromVersion))
             {
                 ConversionState = ChangeWaveConversionState.Valid;
                 _cachedWave = ChangeWaves.EnableAllFeatures;
             }
-            else if (_cachedWave == null && !Version.TryParse(mSBuildDisableFeaturesFromVersion, out _cachedWave))
+            else if (!Version.TryParse(msbuildDisableFeaturesFromVersion, out _cachedWave))
             {
                 ConversionState = ChangeWaveConversionState.InvalidFormat;
                 _cachedWave = ChangeWaves.EnableAllFeatures;

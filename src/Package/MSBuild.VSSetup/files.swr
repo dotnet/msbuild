@@ -8,7 +8,6 @@ package name=Microsoft.Build
 vs.dependencies
   vs.dependency id=Microsoft.Build.UnGAC
   vs.dependency id=Microsoft.VisualStudio.PackageGroup.NuGet
-                version=[15.0,17.0)
 
 vs.relatedProcessFiles
   vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\Microsoft.Build.dll"

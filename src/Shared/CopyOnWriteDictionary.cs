@@ -228,6 +228,18 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
+        /// Adds several value to the dictionary.
+        /// </summary>
+        public void SetItems(IEnumerable<KeyValuePair<string, V>> items)
+        {
+            _backing = _backing.SetItems(items);
+        }
+
+        public IEnumerable<KeyValuePair<string, V>> Where(Func<KeyValuePair<string, V>, bool> predicate)
+        {
+            return _backing.Where(predicate);
+        }
+        /// <summary>
         /// Returns true if the dictionary contains the specified key.
         /// </summary>
         public bool ContainsKey(string key)

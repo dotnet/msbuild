@@ -1024,8 +1024,8 @@ namespace Microsoft.Build.Tasks
                                 {
                                     { "logMessage", output },
                                     { "logMessageDetails", details },
-                                    { "victorVersionNumber", victor.ReferenceVersion.ToString() },
-                                    { "victimVersionNumber", conflictCandidate.ReferenceVersion.ToString() }
+                                    { "victorVersionNumber", victor.ReferenceVersion?.ToString() },
+                                    { "victimVersionNumber", conflictCandidate.ReferenceVersion?.ToString() }
                                 }));
                             }
                         }
@@ -1934,6 +1934,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="fileExists">Delegate used for checking for the existence of a file.</param>
         /// <param name="directoryExists">Delegate used for checking for the existence of a directory.</param>
         /// <param name="getDirectories">Delegate used for finding directories.</param>
+        /// <param name="getDirectoryFiles">Delegate used to get files from directories.</param>
         /// <param name="getAssemblyName">Delegate used for finding fusion names of assemblyFiles.</param>
         /// <param name="getAssemblyMetadata">Delegate used for finding dependencies of a file.</param>
         /// <param name="getRegistrySubKeyNames">Used to get registry subkey names.</param>
@@ -1952,6 +1953,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="fileExists">Delegate used for checking for the existence of a file.</param>
         /// <param name="directoryExists">Delegate used for checking for the existence of a directory.</param>
         /// <param name="getDirectories">Delegate used for finding directories.</param>
+        /// <param name="getDirectoryFiles">Delegate used to get files from directories.</param>
         /// <param name="getAssemblyName">Delegate used for finding fusion names of assemblyFiles.</param>
         /// <param name="getAssemblyMetadata">Delegate used for finding dependencies of a file.</param>
         /// <param name="getLastWriteTime">Delegate used to get the last write time.</param>
@@ -1966,6 +1968,7 @@ namespace Microsoft.Build.Tasks
             FileExists fileExists,
             DirectoryExists directoryExists,
             GetDirectories getDirectories,
+            DirectoryGetFiles getDirectoryFiles,
             GetAssemblyName getAssemblyName,
             GetAssemblyMetadata getAssemblyMetadata,
 #if FEATURE_WIN32_REGISTRY
@@ -2141,6 +2144,7 @@ namespace Microsoft.Build.Tasks
                     getAssemblyMetadata = _cache.CacheDelegate(getAssemblyMetadata);
                     fileExists = _cache.CacheDelegate(fileExists);
                     directoryExists = _cache.CacheDelegate(directoryExists);
+                    FileExistsInDirectory fileExistsInDirectory = _cache.CacheDelegate(getDirectoryFiles);
                     getDirectories = _cache.CacheDelegate(getDirectories);
                     getRuntimeVersion = _cache.CacheDelegate(getRuntimeVersion);
 
@@ -2188,6 +2192,7 @@ namespace Microsoft.Build.Tasks
                         installedAssemblies,
                         processorArchitecture,
                         fileExists,
+                        fileExistsInDirectory,
                         directoryExists,
                         getDirectories,
                         getAssemblyName,
@@ -3023,6 +3028,7 @@ namespace Microsoft.Build.Tasks
                 new FileExists(p => FileUtilities.FileExistsNoThrow(p)),
                 new DirectoryExists(p => FileUtilities.DirectoryExistsNoThrow(p)),
                 new GetDirectories(Directory.GetDirectories),
+                new DirectoryGetFiles((d, p) => FileUtilities.DirectoryGetFiles(d, p)),
                 new GetAssemblyName(AssemblyNameExtension.GetAssemblyNameEx),
                 new GetAssemblyMetadata(AssemblyInformation.GetAssemblyMetadata),
 #if FEATURE_WIN32_REGISTRY

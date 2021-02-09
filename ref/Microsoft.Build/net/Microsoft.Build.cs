@@ -1545,6 +1545,21 @@ namespace Microsoft.Build.Globbing.Extensions
 }
 namespace Microsoft.Build.Graph
 {
+    public partial class GraphBuildOptions : System.IEquatable<Microsoft.Build.Graph.GraphBuildOptions>
+    {
+        public GraphBuildOptions() { }
+        protected GraphBuildOptions(Microsoft.Build.Graph.GraphBuildOptions original) { }
+        public bool Build { get { throw null; } set { } }
+        protected virtual System.Type EqualityContract { get { throw null; } }
+        public virtual bool Equals(Microsoft.Build.Graph.GraphBuildOptions other) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public static bool operator ==(Microsoft.Build.Graph.GraphBuildOptions r1, Microsoft.Build.Graph.GraphBuildOptions r2) { throw null; }
+        public static bool operator !=(Microsoft.Build.Graph.GraphBuildOptions r1, Microsoft.Build.Graph.GraphBuildOptions r2) { throw null; }
+        protected virtual bool PrintMembers(System.Text.StringBuilder builder) { throw null; }
+        public override string ToString() { throw null; }
+        public virtual Microsoft.Build.Graph.GraphBuildOptions <Clone>$() { throw null; }
+    }
     public sealed partial class GraphBuildRequestData
     {
         public GraphBuildRequestData(Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.ICollection<string> targetsToBuild) { }
@@ -1556,9 +1571,11 @@ namespace Microsoft.Build.Graph
         public GraphBuildRequestData(System.Collections.Generic.IEnumerable<Microsoft.Build.Graph.ProjectGraphEntryPoint> projectGraphEntryPoints, System.Collections.Generic.ICollection<string> targetsToBuild) { }
         public GraphBuildRequestData(System.Collections.Generic.IEnumerable<Microsoft.Build.Graph.ProjectGraphEntryPoint> projectGraphEntryPoints, System.Collections.Generic.ICollection<string> targetsToBuild, Microsoft.Build.Execution.HostServices hostServices) { }
         public GraphBuildRequestData(System.Collections.Generic.IEnumerable<Microsoft.Build.Graph.ProjectGraphEntryPoint> projectGraphEntryPoints, System.Collections.Generic.ICollection<string> targetsToBuild, Microsoft.Build.Execution.HostServices hostServices, Microsoft.Build.Execution.BuildRequestDataFlags flags) { }
+        public GraphBuildRequestData(System.Collections.Generic.IEnumerable<Microsoft.Build.Graph.ProjectGraphEntryPoint> projectGraphEntryPoints, System.Collections.Generic.ICollection<string> targetsToBuild, Microsoft.Build.Execution.HostServices hostServices, Microsoft.Build.Execution.BuildRequestDataFlags flags, Microsoft.Build.Graph.GraphBuildOptions graphBuildOptions) { }
         public GraphBuildRequestData(string projectFullPath, System.Collections.Generic.IDictionary<string, string> globalProperties, System.Collections.Generic.ICollection<string> targetsToBuild, Microsoft.Build.Execution.HostServices hostServices) { }
         public GraphBuildRequestData(string projectFullPath, System.Collections.Generic.IDictionary<string, string> globalProperties, System.Collections.Generic.ICollection<string> targetsToBuild, Microsoft.Build.Execution.HostServices hostServices, Microsoft.Build.Execution.BuildRequestDataFlags flags) { }
         public Microsoft.Build.Execution.BuildRequestDataFlags Flags { get { throw null; } }
+        public Microsoft.Build.Graph.GraphBuildOptions GraphBuildOptions { get { throw null; } }
         public Microsoft.Build.Execution.HostServices HostServices { get { throw null; } }
         public Microsoft.Build.Graph.ProjectGraph ProjectGraph { get { throw null; } }
         public System.Collections.Generic.IEnumerable<Microsoft.Build.Graph.ProjectGraphEntryPoint> ProjectGraphEntryPoints { get { throw null; } }
@@ -1659,9 +1676,10 @@ namespace Microsoft.Build.Logging
         public void Replay(string sourceFilePath) { }
         public void Replay(string sourceFilePath, System.Threading.CancellationToken cancellationToken) { }
     }
-    public partial class BuildEventArgsReader
+    public partial class BuildEventArgsReader : System.IDisposable
     {
         public BuildEventArgsReader(System.IO.BinaryReader binaryReader, int fileFormatVersion) { }
+        public void Dispose() { }
         public Microsoft.Build.Framework.BuildEventArgs Read() { throw null; }
     }
     public delegate void ColorResetter();

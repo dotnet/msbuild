@@ -128,14 +128,14 @@
         <note />
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
-        <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
-        <target state="translated">"Les objets EvaluationContext créés avec SharingPolicy.Isolated ne prennent pas en charge le passage d'un système de fichiers MSBuildFileSystemBase."</target>
+        <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
+        <target state="needs-review-translation">"Les objets EvaluationContext créés avec SharingPolicy.Isolated ne prennent pas en charge le passage d'un système de fichiers MSBuildFileSystemBase."</target>
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
         <source>"Loading the following project cache plugin:
     {0}"</source>
-        <target state="new">"Loading the following project cache plugin:
+        <target state="translated">"Chargement du plug-in de cache de projet suivant :
     {0}"</target>
         <note />
       </trans-unit>
@@ -163,12 +163,12 @@
       </trans-unit>
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
         <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
-        <target state="new">MSB4270: No project cache plugins found in assembly "{0}". Expected one.</target>
+        <target state="translated">MSB4270: plug-ins de cache de projet introuvables dans l'assembly "{0}". Un plug-in est attendu.</target>
         <note />
       </trans-unit>
       <trans-unit id="NotAllNodesDefineACacheItem">
         <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
-        <target state="new">MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</target>
+        <target state="translated">MSB4269: quand un nœud de graphe statique définit un cache de projet, tous les nœuds doivent définir le même cache de projet. Le ou les projets suivants ne contiennent pas de déclaration d'élément "{0}" : {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -211,22 +211,22 @@
       </trans-unit>
       <trans-unit id="OnlyOneCachePluginMustBeSpecified">
         <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
-        <target state="new">MSB4265: A single project cache plugin must be specified but multiple where found: {0}</target>
+        <target state="translated">MSB4265: un seul plug-in de cache de projet doit être spécifié, mais plusieurs plug-ins ont été trouvés : {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
         <source>MSB4266: Failed to initialize the project cache.</source>
-        <target state="new">MSB4266: Failed to initialize the project cache.</target>
+        <target state="translated">MSB4266: échec de l'initialisation du cache de projet.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheQueryFailed">
         <source>MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</source>
-        <target state="new">MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</target>
+        <target state="translated">MSB4267: échec du cache de projet au moment où il a été interrogé pour le projet suivant : {0}. Dans la mesure où le cache est interrogé en parallèle pour plusieurs projets, ce projet spécifique n'est peut-être pas à l'origine du problème.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">
         <source>MSB4268: The project cache failed to shut down properly.</source>
-        <target state="new">MSB4268: The project cache failed to shut down properly.</target>
+        <target state="translated">MSB4268: le cache de projet ne s'est pas arrêté correctement.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
@@ -251,7 +251,7 @@
       </trans-unit>
       <trans-unit id="SolutionPathPropertyMustBeSetOnVSSubmissions">
         <source>"MSB4264: Invalid $(SolutionPath) property: {0}"</source>
-        <target state="new">"MSB4264: Invalid $(SolutionPath) property: {0}"</target>
+        <target state="translated">"MSB4264: propriété $(SolutionPath) non valide : {0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
@@ -262,8 +262,8 @@
     </note>
       </trans-unit>
       <trans-unit id="StaticGraphConstructionMetrics">
-        <source>"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</source>
-        <target state="translated">"Graphe statique chargé en {0} secondes : {1} nœuds, {2} arêtes"</target>
+        <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
+        <target state="needs-review-translation">"Graphe statique chargé en {0} secondes : {1} nœuds, {2} arêtes"</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
@@ -1670,8 +1670,8 @@
         <note>{StrBegin="MSB4091: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
-        <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a settable public instance property.</source>
-        <target state="translated">MSB4064: Le paramètre "{0}" n'est pas pris en charge par la tâche "{1}". Vérifiez que le paramètre existe pour la tâche et qu'il représente une propriété d'instance publique définissable.</target>
+        <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</source>
+        <target state="new">MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</target>
         <note>{StrBegin="MSB4064: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">

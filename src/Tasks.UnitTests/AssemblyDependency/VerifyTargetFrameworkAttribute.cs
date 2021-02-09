@@ -372,6 +372,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     fileExists,
                     directoryExists,
                     getDirectories,
+                    getDirectoryFiles,
                     getAssemblyName,
                     getAssemblyMetadata,
 #if FEATURE_WIN32_REGISTRY

@@ -679,22 +679,22 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void FindOnPathSucceeds()
         {
-            string expectedCmdPath;
+            string[] expectedCmdPath;
             string shellName;
             if (NativeMethodsShared.IsWindows)
             {
-                expectedCmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
+                expectedCmdPath = new[] { Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe") };
                 shellName = "cmd.exe";
             }
             else
             {
-                expectedCmdPath = "/bin/sh";
+                expectedCmdPath = new[] { "/bin/sh", "/usr/bin/sh" };
                 shellName = "sh";
             }
 
             string cmdPath = ToolTask.FindOnPath(shellName);
 
-            cmdPath.ShouldBe(expectedCmdPath, StringCompareShould.IgnoreCase);
+            cmdPath.ShouldBeOneOf(expectedCmdPath);
         }
 
         /// <summary>

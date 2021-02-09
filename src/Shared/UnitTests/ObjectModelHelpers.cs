@@ -1944,6 +1944,11 @@ namespace Microsoft.Build.UnitTests
 
                 return buildResult;
             }
+			
+			public GraphBuildResult BuildGraphSubmission(GraphBuildRequestData requestData)
+            {
+                return _buildManager.BuildRequest(requestData);
+            }
 
             public void Dispose()
             {

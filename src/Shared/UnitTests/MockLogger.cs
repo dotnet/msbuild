@@ -84,6 +84,16 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// List of ProjectStarted events
         /// </summary>
+        internal List<ProjectEvaluationStartedEventArgs> EvaluationStartedEvents { get; } = new List<ProjectEvaluationStartedEventArgs>();
+
+        /// <summary>
+        /// List of ProjectFinished events
+        /// </summary>
+        internal List<ProjectEvaluationFinishedEventArgs> EvaluationFinishedEvents { get; } = new List<ProjectEvaluationFinishedEventArgs>();
+
+        /// <summary>
+        /// List of ProjectStarted events
+        /// </summary>
         internal List<ProjectStartedEventArgs> ProjectStartedEvents { get; } = new List<ProjectStartedEventArgs>();
 
         /// <summary>
@@ -291,6 +301,16 @@ namespace Microsoft.Build.UnitTests
                     case ExternalProjectFinishedEventArgs finishedEventArgs:
                     {
                         ExternalProjectFinishedEvents.Add(finishedEventArgs);
+                        break;
+                    }
+                    case ProjectEvaluationStartedEventArgs evaluationStartedEventArgs:
+                    {
+                        EvaluationStartedEvents.Add(evaluationStartedEventArgs);
+                        break;
+                    }
+                    case ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs:
+                    {
+                        EvaluationFinishedEvents.Add(evaluationFinishedEventArgs);
                         break;
                     }
                     case ProjectStartedEventArgs startedEventArgs:

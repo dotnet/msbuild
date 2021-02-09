@@ -32,8 +32,6 @@
 
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
-    <PackageReference Include="System.Memory" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe"/>
     <PackageReference Include="System.Text.Json" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
@@ -43,6 +41,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.IO.Compression" />
+    <PackageReference Include="System.Memory" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
