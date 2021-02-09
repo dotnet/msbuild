@@ -450,6 +450,7 @@ namespace Microsoft.Build.Shared
             return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/');//.Replace("//", "/");
         }
 
+#if !CLR2COMPATIBILITY
         /// <summary>
         /// If on Unix, convert backslashes to slashes for strings that resemble paths.
         /// The heuristic is if something resembles paths (contains slashes) check if the
@@ -473,60 +474,13 @@ namespace Microsoft.Build.Shared
             }
 
             // For Unix-like systems, we may want to convert backslashes to slashes
-#if FEATURE_SPAN
             Span<char> newValue = ConvertToUnixSlashes(value.ToCharArray());
-#else
-            string newValue = ConvertToUnixSlashes(value);
-#endif
 
             // Find the part of the name we want to check, that is remove quotes, if present
             bool shouldAdjust = newValue.IndexOf('/') != -1 && LooksLikeUnixFilePath(RemoveQuotes(newValue), baseDirectory);
             return shouldAdjust ? newValue.ToString() : value;
         }
 
-#if !FEATURE_SPAN
-        private static string ConvertToUnixSlashes(string path)
-        {
-            if (path.IndexOf('\\') == -1)
-            {
-                return path;
-            }
-            StringBuilder unixPath = StringBuilderCache.Acquire(path.Length);
-            CopyAndCollapseSlashes(path, unixPath);
-            return StringBuilderCache.GetStringAndRelease(unixPath);
-        }
-
-#if !CLR2COMPATIBILITY && !FEATURE_SPAN
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        private static void CopyAndCollapseSlashes(string str, StringBuilder copy)
-        {
-            // Performs Regex.Replace(str, @"[\\/]+", "/")
-            for (int i = 0; i < str.Length; i++)
-            {
-                bool isCurSlash = IsAnySlash(str[i]);
-                bool isPrevSlash = i > 0 && IsAnySlash(str[i - 1]);
-
-                if (!isCurSlash || !isPrevSlash)
-                {
-                    copy.Append(str[i] == '\\' ? '/' : str[i]);
-                }
-            }
-        }
-
-        private static string RemoveQuotes(string path)
-        {
-            int endId = path.Length - 1;
-            char singleQuote = '\'';
-            char doubleQuote = '\"';
-
-            bool hasQuotes = path.Length > 2
-                && ((path[0] == singleQuote && path[endId] == singleQuote)
-                || (path[0] == doubleQuote && path[endId] == doubleQuote));
-
-            return hasQuotes ? path.Substring(1, endId - 1) : path;
-        }
-#else
         private static Span<char> ConvertToUnixSlashes(Span<char> path)
         {
             return path.IndexOf('\\') == -1 ? path : CollapseSlashes(path);
@@ -572,6 +526,7 @@ namespace Microsoft.Build.Shared
 #endif
         internal static bool IsAnySlash(char c) => c == '/' || c == '\\';
 
+#if !CLR2COMPATIBILITY
         /// <summary>
         /// If on Unix, check if the string looks like a file path.
         /// The heuristic is if something resembles paths (contains slashes) check if the
@@ -581,24 +536,8 @@ namespace Microsoft.Build.Shared
         /// that
         /// </summary>
         internal static bool LooksLikeUnixFilePath(string value, string baseDirectory = "")
-        {
-            if (NativeMethodsShared.IsWindows)
-            {
-                return false;
-            }
+            => LooksLikeUnixFilePath(value.AsSpan(), baseDirectory);
 
-            // The first slash will either be at the beginning of the string or after the first directory name
-            int directoryLength = value.IndexOf('/', 1) + 1;
-            bool shouldCheckDirectory = directoryLength != 0;
-
-            // Check for actual files or directories under / that get missed by the above logic
-            bool shouldCheckFileOrDirectory = !shouldCheckDirectory && value.Length > 0 && value[0] == '/';
-
-            return (shouldCheckDirectory && DefaultFileSystem.DirectoryExists(Path.Combine(baseDirectory, value.Substring(0, directoryLength))))
-                || (shouldCheckFileOrDirectory && DefaultFileSystem.DirectoryEntryExists(value));
-        }
-
-#if FEATURE_SPAN
         internal static bool LooksLikeUnixFilePath(ReadOnlySpan<char> value, string baseDirectory = "")
         {
             if (NativeMethodsShared.IsWindows)
