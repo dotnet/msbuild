@@ -737,12 +737,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WindowsSDKVersionConflicts">
         <source>NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</source>
-        <target state="new">NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</target>
+        <target state="translated">NETSDK1148: Başvurulan bütünleştirilmiş kod, Microsoft.Windows.SDK.NET.dll'nin daha yeni bir sürümü kullanılarak derlendi. Bu bütünleştirilmiş koda başvurmak için lütfen daha yeni bir .NET SDK'ya güncelleştirin.</target>
         <note>{StrBegin="NETSDK1148: "}</note>
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: The following workload packs were not installed: {0}</source>
-        <target state="new">NETSDK1147: The following workload packs were not installed: {0}</target>
+        <target state="translated">NETSDK1147: Şu iş yükü paketleri yüklenmedi: {0}</target>
         <note>{StrBegin="NETSDK1147: "}</note>
       </trans-unit>
     </body>

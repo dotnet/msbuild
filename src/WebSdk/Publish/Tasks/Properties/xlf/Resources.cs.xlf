@@ -1855,7 +1855,7 @@ Podrobné informace o chybě:</target>
       </trans-unit>
       <trans-unit id="WEBDEPLOY_AssemblyInfo_Start">
         <source>Generating AssemblyInfo.</source>
-        <target state="translated">Generuje se AssemblyInfo.</target>
+        <target state="translated">Generují se informace o sestavení.</target>
         <note />
       </trans-unit>
       <trans-unit id="WEBDEPLOY_AssemblyInfo_Succeeded">

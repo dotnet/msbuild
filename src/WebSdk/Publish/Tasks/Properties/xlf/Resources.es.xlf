@@ -81,7 +81,7 @@
       </trans-unit>
       <trans-unit id="BUILDTASK_MapURIToIisWebServer_AdminRequired">
         <source>Retrieving local IIS properties from the URI requires Administrator permission.  Please elevate to Administrator before executing the program.</source>
-        <target state="translated">Para recuperar las propiedades de IIS locales del URI se necesitan permisos de administrador. Eleve sus permisos a administrador antes de ejecutar el programa."</target>
+        <target state="translated">Para recuperar las propiedades de IIS locales del URI se necesitan permisos de administrador. Eleve sus permisos a administrador antes de ejecutar el programa.</target>
         <note />
       </trans-unit>
       <trans-unit id="BUILDTASK_RemoveEmptyDirectories_Deleting">
@@ -1855,7 +1855,7 @@ Detalles del error:</target>
       </trans-unit>
       <trans-unit id="WEBDEPLOY_AssemblyInfo_Start">
         <source>Generating AssemblyInfo.</source>
-        <target state="translated">Generando AssemblyInfo.</target>
+        <target state="translated">Generando información del ensamblado.</target>
         <note />
       </trans-unit>
       <trans-unit id="WEBDEPLOY_AssemblyInfo_Succeeded">

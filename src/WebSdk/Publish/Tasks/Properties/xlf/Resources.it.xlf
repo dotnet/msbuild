@@ -1278,7 +1278,7 @@ Per questo script di esempio, è possibile modificare i parametri di distribuzio
       </trans-unit>
       <trans-unit id="PublishLocalizedString_MsBuildPropertySettingValue">
         <source>$({0}) is {1}</source>
-        <target state="translated">$({0}) è {1}</target>
+        <target state="translated">Il valore della proprietà $({0}) è {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="PublishLocalizedString_PackagingIntoLocation">
@@ -1855,7 +1855,7 @@ Dettagli errore:</target>
       </trans-unit>
       <trans-unit id="WEBDEPLOY_AssemblyInfo_Start">
         <source>Generating AssemblyInfo.</source>
-        <target state="translated">Generazione di AssemblyInfo.</target>
+        <target state="translated">Generazione delle informazioni sull'assembly.</target>
         <note />
       </trans-unit>
       <trans-unit id="WEBDEPLOY_AssemblyInfo_Succeeded">

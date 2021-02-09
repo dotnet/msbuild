@@ -737,12 +737,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WindowsSDKVersionConflicts">
         <source>NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</source>
-        <target state="new">NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</target>
+        <target state="translated">NETSDK1148: 참조된 어셈블리가 최신 버전의 Microsoft.Windows.SDK.NET.dll을 사용하여 컴파일되었습니다. 이 어셈블리를 참조하려면 최신 .NET SDK로 업데이트하세요.</target>
         <note>{StrBegin="NETSDK1148: "}</note>
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
         <source>NETSDK1147: The following workload packs were not installed: {0}</source>
-        <target state="new">NETSDK1147: The following workload packs were not installed: {0}</target>
+        <target state="translated">NETSDK1147: 다음 워크로드 팩이 설치되지 않았습니다. {0}</target>
         <note>{StrBegin="NETSDK1147: "}</note>
       </trans-unit>
     </body>
