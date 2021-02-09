@@ -24,11 +24,9 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal static class IntrinsicFunctions
     {
-#if FEATURE_WIN32_REGISTRY
         private static readonly object[] DefaultRegistryViews = new object[] { RegistryView.Default };
 
         private static readonly Lazy<Regex> RegistrySdkRegex = new Lazy<Regex>(() => new Regex(@"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$", RegexOptions.IgnoreCase));
-#endif // FEATURE_WIN32_REGISTRY
 
         private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => new NuGetFrameworkWrapper());
 
@@ -160,7 +158,6 @@ namespace Microsoft.Build.Evaluation
             return ~first;
         }
 
-#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Get the value of the registry key and value, default value is null
         /// </summary>
@@ -258,33 +255,6 @@ namespace Microsoft.Build.Evaluation
             // We will have either found a result or defaultValue if one wasn't found at this point
             return result;
         }
-
-#else // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
-
-        /// <summary>
-        /// Get the value of the registry key and value, default value is null
-        /// </summary>
-        internal static object GetRegistryValue(string keyName, string valueName)
-        {
-            return null; // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
-        }
-
-        /// <summary>
-        /// Get the value of the registry key and value
-        /// </summary>
-        internal static object GetRegistryValue(string keyName, string valueName, object defaultValue)
-        {
-            return defaultValue; // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
-        }
-
-        /// <summary>
-        /// Get the value of the registry key from one of the RegistryView's specified
-        /// </summary>
-        internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, params object[] views)
-        {
-            return defaultValue; // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
-        }
-#endif
 
         /// <summary>
         /// Given the absolute location of a file, and a disc location, returns relative file path to that disk location.
@@ -571,7 +541,6 @@ namespace Microsoft.Build.Evaluation
 
 #endregion
 
-#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Following function will parse a keyName and returns the basekey for it.
         /// It will also store the subkey name in the out parameter.
@@ -640,6 +609,5 @@ namespace Microsoft.Build.Evaluation
 
             return basekey;
         }
-#endif
     }
 }
