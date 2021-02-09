@@ -515,6 +515,18 @@ namespace Microsoft.Build.BackEnd.Logging
             return _buildSubmissionIdsThatHaveLoggedErrors?.Contains(submissionId) == true;
         }
 
+        public HashSet<string> GetWarningsAsErrors(BuildEventContext context)
+        {
+            int key = GetWarningsAsErrorOrMessageKey(context);
+
+            if (_warningsAsErrorsByProject.ContainsKey(key))
+            {
+                return _warningsAsErrorsByProject[key] as HashSet<string>;
+            }
+
+            return null;
+        }
+
         public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
         {
             lock (_lockObject)

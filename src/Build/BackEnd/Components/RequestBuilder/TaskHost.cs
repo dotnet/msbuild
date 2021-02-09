@@ -680,7 +680,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Contains all warnings that should be logged as errors.
         /// </summary>
-        public HashSet<string> WarningsAsErrors { get; set; }
+        public HashSet<string> WarningsAsErrors { get => _taskLoggingContext.LoggingService.GetWarningsAsErrors(_taskLoggingContext.BuildEventContext); }
         #endregion
 
         /// <summary>

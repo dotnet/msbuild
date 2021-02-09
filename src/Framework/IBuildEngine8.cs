@@ -11,6 +11,6 @@ namespace Microsoft.Build.Framework
     /// </summary>
     public interface IBuildEngine8 : IBuildEngine7
     {
-        public HashSet<string> WarningsAsErrors { get; set; }
+        public HashSet<string> WarningsAsErrors { get; }
     }
 }

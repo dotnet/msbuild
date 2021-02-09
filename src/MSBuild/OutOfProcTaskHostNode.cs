@@ -271,7 +271,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Contains all warnings that should be logged as errors.
         /// </summary>
-        public HashSet<string> WarningsAsErrors { get; set; }
+        public HashSet<string> WarningsAsErrors { get; }
         #endregion
 
         #region IBuildEngine Implementation (Methods)

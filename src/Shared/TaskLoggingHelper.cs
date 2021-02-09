@@ -1016,6 +1016,30 @@ namespace Microsoft.Build.Utilities
             // that gives the user something.
             bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
 
+            if ((BuildEngine as IBuildEngine8).WarningsAsErrors.Contains(warningCode))
+            {
+                var err = new BuildErrorEventArgs
+                (
+                    subcategory,
+                    warningCode,
+                    fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                    fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                    fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                    endLineNumber,
+                    endColumnNumber,
+                    message,
+                    helpKeyword,
+                    TaskName,
+                    helpLink,
+                    DateTime.UtcNow,
+                    messageArgs
+                );
+
+                BuildEngine.LogErrorEvent(err);
+                HasLoggedErrors = true;
+                return;
+            }
+
             var e = new BuildWarningEventArgs
                 (
                     subcategory,

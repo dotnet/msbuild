@@ -219,6 +219,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <returns><code>true</code> if the build submission logged an errors, otherwise <code>false</code>.</returns>
         bool HasBuildSubmissionLoggedErrors(int submissionId);
 
+        HashSet<string> GetWarningsAsErrors(BuildEventContext context);
+
         #region Register
 
         /// <summary>

@@ -557,6 +557,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return false;
         }
 
+        public HashSet<string> GetWarningsAsErrors(BuildEventContext context)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }
