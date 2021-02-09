@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Telemetry;
@@ -109,25 +108,23 @@ namespace Microsoft.DotNet.Cli
                         Path.Combine(
                             CliFolderPathCalculator.DotnetUserProfileFolderPath,
                             ToolPathSentinelFileName)));
-                if (parseResult.ValueForOption<bool>(Parser.DiagOption))
+                if (parseResult.ValueForOption<bool>(Parser.DiagOption) && parseResult.IsDotnetBuiltInCommand())
                 {
                     Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, bool.TrueString);
                     CommandContext.SetVerbose(true);
                     Reporter.Reset();
                 }
-                if (parseResult.HasOption(Parser.VersionOption))
+                if (parseResult.HasOption(Parser.VersionOption) && parseResult.IsTopLevelDotnetCommand())
                 {
                     CommandLineInfo.PrintVersion();
                     return 0;
                 }
-                else if (parseResult.HasOption(Parser.InfoOption))
+                else if (parseResult.HasOption(Parser.InfoOption) && parseResult.IsTopLevelDotnetCommand())
                 {
                     CommandLineInfo.PrintInfo();
                     return 0;
                 }
-                else if (parseResult.CommandResult.Command.Equals(Parser.RootCommand) && 
-                         parseResult.HasOption("-h") && 
-                         string.IsNullOrEmpty(parseResult.RootSubCommandResult()))
+                else if (parseResult.HasOption("-h") && parseResult.IsTopLevelDotnetCommand())
                 {
                     HelpCommand.PrintHelp();
                     return 0;
