@@ -86,7 +86,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and $([MSBuild]::IsOSPlatform('windows'))">
-    <PackageReference Include="Microsoft.DotNet.BuildTools.GenAPI" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.DotNet.GenAPI" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
