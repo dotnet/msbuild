@@ -11,8 +11,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="Sdk.props" Sdk="Microsoft.NET.ILLink.Tasks" />
-
   <!-- These properties should be set even if PublishTrimmed != true, to allow SDK components to
        set PublishTrimmed in targets which are imported after these targets. -->
   <PropertyGroup>
