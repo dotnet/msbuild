@@ -30,11 +30,6 @@ namespace Microsoft.Build.Tasks
         protected FileExists fileExists;
 
         /// <summary>
-        /// Delegate.
-        /// </summary>
-        private readonly FileExistsInDirectory fileExistsInDirectory;
-
-        /// <summary>
         /// Delegate
         /// </summary>
         protected GetAssemblyRuntimeVersion getRuntimeVersion;
@@ -57,12 +52,11 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, FileExistsInDirectory fileExistsInDirectory, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
+        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
         {
             this.searchPathElement = searchPathElement;
             this.getAssemblyName = getAssemblyName;
             this.fileExists = fileExists;
-            this.fileExistsInDirectory = fileExistsInDirectory;
             this.getRuntimeVersion = getRuntimeVersion;
             this.targetedRuntimeVersion = targetedRuntimeVesion;
             this.targetProcessorArchitecture = targetedProcessorArchitecture;
@@ -115,10 +109,7 @@ namespace Microsoft.Build.Tasks
             bool isPrimaryProjectReference,
             bool wantSpecificVersion,
             bool allowMismatchBetweenFusionNameAndFileName,
-            List<ResolutionSearchLocation> assembliesConsideredAndRejected,
-            bool useDirectoryCache = false,
-            string directory = null,
-            string fileName = null
+            List<ResolutionSearchLocation> assembliesConsideredAndRejected
         )
         {
             ResolutionSearchLocation considered = null;
@@ -131,7 +122,7 @@ namespace Microsoft.Build.Tasks
                 };
             }
 
-            if (FileMatchesAssemblyName(assemblyName, isPrimaryProjectReference, wantSpecificVersion, allowMismatchBetweenFusionNameAndFileName, fullPath, considered, useDirectoryCache, directory, fileName))
+            if (FileMatchesAssemblyName(assemblyName, isPrimaryProjectReference, wantSpecificVersion, allowMismatchBetweenFusionNameAndFileName, fullPath, considered))
             {
                 return true;
             }
@@ -151,9 +142,6 @@ namespace Microsoft.Build.Tasks
         /// <param name="allowMismatchBetweenFusionNameAndFileName">Whether to allow naming mismatch.</param>
         /// <param name="pathToCandidateAssembly">Path to a possible file.</param>
         /// <param name="searchLocation">Information about why the candidate file didn't match</param>
-        /// <param name="useDirectoryCache">Set it to true if file existence is verified by cached list of files in directory.</param>
-        /// <param name="directory">Directory of directory cache. Required if useDirectoryCache.</param>
-        /// <param name="fileName">Name of file in directory cache. Required if useDirectoryCache.</param>
         protected bool FileMatchesAssemblyName
         (
             AssemblyNameExtension assemblyName,
@@ -161,10 +149,7 @@ namespace Microsoft.Build.Tasks
             bool wantSpecificVersion,
             bool allowMismatchBetweenFusionNameAndFileName,
             string pathToCandidateAssembly,
-            ResolutionSearchLocation searchLocation,
-            bool useDirectoryCache = false,
-            string directory = null,
-            string fileName = null
+            ResolutionSearchLocation searchLocation
         )
         {
             if (searchLocation != null)
@@ -196,27 +181,7 @@ namespace Microsoft.Build.Tasks
 
             bool isSimpleAssemblyName = assemblyName?.IsSimpleName == true;
 
-            bool fileFound;
-            if (useDirectoryCache && Utilities.ChangeWaves.AreFeaturesEnabled(Utilities.ChangeWaves.Wave16_10))
-            {
-                // this verifies file existence using fileExistsInDirectory delegate which internally used cached set of all files in a particular directory
-                // if some cases it render better performance than one by one FileExists
-                try
-                {
-                    fileFound = fileExistsInDirectory(directory, fileName);
-                }
-                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-                {
-                    // Assuming it's the search path that's bad. But combine them both so the error is visible if it's the reference itself.
-                    throw new InvalidParameterValueException("SearchPaths", $"{directory.TrimEnd(Path.DirectorySeparatorChar)}{Path.DirectorySeparatorChar}{fileName}", e.Message);
-                }
-            }
-            else
-            {
-                fileFound = fileExists(pathToCandidateAssembly);
-            }
-
-            if (fileFound)
+            if (fileExists(pathToCandidateAssembly))
             {
                 // If the resolver we are using is targeting a given processor architecture then we must crack open the assembly and make sure the architecture is compatible
                 // We cannot do these simple name matches.
@@ -347,25 +312,23 @@ namespace Microsoft.Build.Tasks
             if (directory != null)
             {
                 string weakNameBase = assemblyName.Name;
-
                 foreach (string executableExtension in executableExtensions)
                 {
-                    string fileName = weakNameBase + executableExtension;
+                    string baseName = weakNameBase + executableExtension;
                     string fullPath;
 
                     try
                     {
-                        fullPath = Path.Combine(directory, fileName);
+                        fullPath = Path.Combine(directory, baseName);
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
                         // Assuming it's the search path that's bad. But combine them both so the error is visible if it's the reference itself.
-                        throw new InvalidParameterValueException("SearchPaths", $"{directory.TrimEnd(Path.DirectorySeparatorChar)}{Path.DirectorySeparatorChar}{fileName}", e.Message);
+                        throw new InvalidParameterValueException("SearchPaths", directory + (directory.EndsWith("\\", StringComparison.OrdinalIgnoreCase) ? String.Empty : "\\") + baseName, e.Message);
                     }
 
-                    // We have a full path returned
-                    if (ResolveAsFile(fullPath, assemblyName, isPrimaryProjectReference, wantSpecificVersion, false, assembliesConsideredAndRejected,
-                        useDirectoryCache: true, directory: directory, fileName: fileName))
+                    // We have a full path returned 
+                    if (ResolveAsFile(fullPath, assemblyName, isPrimaryProjectReference, wantSpecificVersion, false, assembliesConsideredAndRejected))
                     {
                         if (candidateFullPath == null)
                         {
@@ -378,7 +341,7 @@ namespace Microsoft.Build.Tasks
                          * If targeting AMD64 / X86 / IA64 / ARM /NONE we will return the first assembly which has a matching processor architecture OR is an assembly with a processor architecture of MSIL or NONE
                          * 
                          * If targeting MSIL we will first look through all of the assemblies, if an MSIL assembly is found we will return that. If no MSIL assembly is found we will return 
-                         * the first assembly which matches regardless of its processor architecture.
+                         * the first assembly which matches reguardless of its processor architecture.
                          */
 
                         if (targetProcessorArchitecture == ProcessorArchitecture.MSIL)
@@ -415,8 +378,7 @@ namespace Microsoft.Build.Tasks
                                 string fullPath = Path.Combine(directory, weakNameBase);
                                 var extensionlessAssemblyName = new AssemblyNameExtension(weakNameBaseFileName);
 
-                                if (ResolveAsFile(fullPath, extensionlessAssemblyName, isPrimaryProjectReference, wantSpecificVersion, false, assembliesConsideredAndRejected,
-                                    useDirectoryCache: true, directory: directory, fileName: weakNameBase))
+                                if (ResolveAsFile(fullPath, extensionlessAssemblyName, isPrimaryProjectReference, wantSpecificVersion, false, assembliesConsideredAndRejected))
                                 {
                                     return fullPath;
                                 }

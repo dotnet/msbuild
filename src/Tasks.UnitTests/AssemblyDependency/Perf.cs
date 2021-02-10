@@ -76,7 +76,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 Assert.True(succeeded);
                 
-                uniqueGetDirectoryFiles[s_dependsOnNuGet_Path].ShouldBe(1);
+                uniqueFileExists[s_dependsOnNuGet_NWinMdPath].ShouldBe(1);
+                uniqueFileExists[s_dependsOnNuGet_NDllPath].ShouldBe(1);
+                uniqueFileExists[s_dependsOnNuGet_NExePath].ShouldBe(1);
             }
             finally
             {
@@ -119,7 +121,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 Assert.True(succeeded);
 
-                uniqueGetDirectoryFiles.ShouldNotContainKey(s_dependsOnNuGet_Path);
+                uniqueFileExists.ShouldNotContainKey(@"C:\DependsOnNuget\N.winmd");
+                uniqueFileExists.ShouldNotContainKey(@"C:\DependsOnNuget\N.dll");
+                uniqueFileExists.ShouldNotContainKey(@"C:\DependsOnNuget\N.exe");
             }
             finally
             {

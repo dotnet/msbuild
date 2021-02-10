@@ -905,20 +905,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Get all files from directory matching pattern
-        /// </summary>
-        internal static string[] DirectoryGetFiles(string path, string pattern = "*", IFileSystem fileSystem = null)
-        {
-            if (path is null)
-                throw new ArgumentNullException(nameof(path));
-            if (path.Length == 0)
-                throw new ArgumentException("Unexpected empty string", nameof(path));
-
-            path = AttemptToShortenPath(path);
-            return (fileSystem ?? DefaultFileSystem).EnumerateFiles(path, pattern).ToArray();
-        }
-
-        /// <summary>
         /// If there is a directory or file at the specified path, returns true.
         /// Otherwise, returns false.
         /// Does not throw IO exceptions, to match Directory.Exists and File.Exists.

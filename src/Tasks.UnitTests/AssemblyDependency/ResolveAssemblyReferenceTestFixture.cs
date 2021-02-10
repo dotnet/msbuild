@@ -13,7 +13,6 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Xunit;
 using Xunit.Abstractions;
-using System.Linq;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -21,9 +20,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     {
         // Create the mocks.
         internal static Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
-        internal static Microsoft.Build.Shared.FileExistsInDirectory fileExistsInDirectory = new Microsoft.Build.Shared.FileExistsInDirectory(FileExistsInDirectory);
         internal static Microsoft.Build.Shared.DirectoryExists directoryExists = new Microsoft.Build.Shared.DirectoryExists(DirectoryExists);
-        internal static Microsoft.Build.Shared.DirectoryGetFiles getDirectoryFiles = new Microsoft.Build.Shared.DirectoryGetFiles(GetDirectoryFiles);
         internal static Microsoft.Build.Tasks.GetDirectories getDirectories = new Microsoft.Build.Tasks.GetDirectories(GetDirectories);
         internal static Microsoft.Build.Tasks.GetAssemblyName getAssemblyName = new Microsoft.Build.Tasks.GetAssemblyName(GetAssemblyName);
         internal static Microsoft.Build.Tasks.GetAssemblyMetadata getAssemblyMetadata = new Microsoft.Build.Tasks.GetAssemblyMetadata(GetAssemblyMetadata);
@@ -44,7 +41,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         // Performance checks.
         internal static Dictionary<string, int> uniqueFileExists = null;
         internal static Dictionary<string, int> uniqueGetAssemblyName = null;
-        internal static Dictionary<string, int> uniqueGetDirectoryFiles = null;
 
         internal static bool useFrameworkFileExists = false;
         internal const string REDISTLIST = @"<FileList  Redist=""Microsoft-Windows-CLRCoreComp.4.0"" Name="".NET Framework 4"" RuntimeVersion=""4.0"" ToolsVersion=""12.0"">
@@ -260,7 +256,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         protected static readonly string s_portableDllPath = Path.Combine(s_rootPathPrefix, "SystemRuntime", "Portable.dll");
         protected static readonly string s_systemRuntimeDllPath = Path.Combine(s_rootPathPrefix, "SystemRuntime", "System.Runtime.dll");
 
-        protected static readonly string s_dependsOnNuGet_Path = Path.Combine(s_rootPathPrefix, "DependsOnNuget");
         protected static readonly string s_dependsOnNuGet_ADllPath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "A.dll");
         protected static readonly string s_dependsOnNuGet_NDllPath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "N.dll");
         protected static readonly string s_dependsOnNuGet_NExePath = Path.Combine(s_rootPathPrefix, "DependsOnNuget", "N.exe");
@@ -305,7 +300,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // If tables are present then the corresponding IO function will do some monitoring.
             uniqueFileExists = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             uniqueGetAssemblyName = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-            uniqueGetDirectoryFiles = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -865,47 +859,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // Everything else doesn't exist.
             return false;
-        }
-
-        /// <summary>
-        /// Mock the Directory.GetFiles method.
-        /// </summary>
-        /// <param name="path">The path to directory.</param>
-        /// <returns>'true' if the file is supposed to exist</returns>
-        internal static string[] GetDirectoryFiles(string path, string pattern)
-        {
-            if (!Path.IsPathRooted(path))
-            {
-                path = Path.GetFullPath(path);
-            }
-
-            // remove trailing path separator
-            path = Path.GetDirectoryName(Path.Combine(path, "a.txt"));
-
-            if (pattern != "*")
-            {
-                throw new InvalidOperationException("In this context, directory listing with pattern is neither supported not expected to be used.");
-            }
-
-            // Do IO monitoring if needed.
-            if (uniqueGetDirectoryFiles != null)
-            {
-                uniqueGetDirectoryFiles.TryGetValue(path, out int count);
-                uniqueGetDirectoryFiles[path] = count + 1;
-            }
-
-            return s_existentFiles
-                .Where(fn => Path.GetDirectoryName(fn).Equals(path, StringComparison.OrdinalIgnoreCase))
-                .Select(fn => Path.Combine(path, Path.GetFileName(fn)))
-                .Distinct()
-                .ToArray();
-        }
-
-        internal static bool FileExistsInDirectory(string path, string fileName)
-        {
-            string fullName = Path.Combine(path, fileName);
-
-            return FileExists(fullName);
         }
 
         /// <summary>
@@ -3048,27 +3001,26 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     t.FindSerializationAssemblies = false;
                     t.FindRelatedFiles = false;
                     t.StateFile = null;
-                    t.Execute
-                    (
-                        fileExists,
-                        directoryExists,
-                        getDirectories,
-                        getDirectoryFiles,
-                        getAssemblyName,
-                        getAssemblyMetadata,
-    #if FEATURE_WIN32_REGISTRY
-                        getRegistrySubKeyNames,
-                        getRegistrySubKeyDefaultValue,
-    #endif
-                        getLastWriteTime,
-                        getRuntimeVersion,
-    #if FEATURE_WIN32_REGISTRY
-                        openBaseKey,
-    #endif
-                        checkIfAssemblyIsInGac,
-                        isWinMDFile,
-                        readMachineTypeFromPEHeader
-                );
+	                t.Execute
+	                (
+	                    fileExists,
+	                    directoryExists,
+	                    getDirectories,
+	                    getAssemblyName,
+	                    getAssemblyMetadata,
+	#if FEATURE_WIN32_REGISTRY
+	                    getRegistrySubKeyNames,
+	                    getRegistrySubKeyDefaultValue,
+	#endif
+	                    getLastWriteTime,
+	                    getRuntimeVersion,
+	#if FEATURE_WIN32_REGISTRY
+	                    openBaseKey,
+	#endif
+	                    checkIfAssemblyIsInGac,
+	                    isWinMDFile,
+	                    readMachineTypeFromPEHeader
+	                );
 
                     // A few checks. These should always be true or it may be a perf issue for project load.
                     ITaskItem[] loadModeResolvedFiles = new TaskItem[0];
@@ -3110,28 +3062,27 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     string cache = rarCacheFile;
                     t.StateFile = cache;
                     File.Delete(t.StateFile);
-                    succeeded =
-                        t.Execute
-                        (
-                            fileExists,
-                            directoryExists,
-                            getDirectories,
-                            getDirectoryFiles,
-                            getAssemblyName,
-                            getAssemblyMetadata,
-    #if FEATURE_WIN32_REGISTRY
-                            getRegistrySubKeyNames,
-                            getRegistrySubKeyDefaultValue,
-    #endif
-                            getLastWriteTime,
-                            getRuntimeVersion,
-    #if FEATURE_WIN32_REGISTRY
-                            openBaseKey,
-    #endif
-                            checkIfAssemblyIsInGac,
-                            isWinMDFile,
-                            readMachineTypeFromPEHeader
-                        );
+	                succeeded =
+	                    t.Execute
+	                    (
+	                        fileExists,
+	                        directoryExists,
+	                        getDirectories,
+	                        getAssemblyName,
+	                        getAssemblyMetadata,
+	#if FEATURE_WIN32_REGISTRY
+	                        getRegistrySubKeyNames,
+	                        getRegistrySubKeyDefaultValue,
+	#endif
+	                        getLastWriteTime,
+	                        getRuntimeVersion,
+	#if FEATURE_WIN32_REGISTRY
+	                        openBaseKey,
+	#endif
+	                        checkIfAssemblyIsInGac,
+	                        isWinMDFile,
+	                        readMachineTypeFromPEHeader
+	                    );
                     if (FileUtilities.FileExistsNoThrow(t.StateFile))
                     {
                         Assert.Single(t.FilesWritten);

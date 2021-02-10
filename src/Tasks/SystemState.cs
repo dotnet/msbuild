@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Versioning;
 using System.Security.Permissions;
@@ -56,13 +55,6 @@ namespace Microsoft.Build.Tasks
         private Dictionary<string, string[]> instanceLocalDirectories = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// List of all files in directory is also purely instance-local. This information
-        /// is only considered good for the lifetime of the task (or whatever) that owns 
-        /// this instance.
-        /// </summary>
-        private Dictionary<string, HashSet<string>> instanceLocalDirectoryFiles = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
         /// Additional level of caching kept at the process level.
         /// </summary>
         private static ConcurrentDictionary<string, FileState> s_processWideFileStateCache = new ConcurrentDictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
@@ -101,11 +93,6 @@ namespace Microsoft.Build.Tasks
         /// Cached delegate.
         /// </summary>
         private DirectoryExists directoryExists;
-
-        /// <summary>
-        /// Cached delegate.
-        /// </summary>
-        private DirectoryGetFiles getFiles;
 
         /// <summary>
         /// Cached delegate.
@@ -343,12 +330,6 @@ namespace Microsoft.Build.Tasks
         {
             directoryExists = directoryExistsValue;
             return DirectoryExists;
-        }
-
-        public FileExistsInDirectory CacheDelegate(DirectoryGetFiles getFilesValue)
-        {
-            getFiles = getFilesValue;
-            return FileExistsInDirectory;
         }
 
         /// <summary>
@@ -590,42 +571,6 @@ namespace Microsoft.Build.Tasks
             Debug.Assert(false, "Using slow-path in SystemState.GetDirectories, was this intentional?");
 
             return getDirectories(path, pattern);
-        }
-
-        /// <summary>
-        /// Cached implementation of GetFiles aimed to verify existence of a file in a directory.
-        /// It does not throw if directory does not exists.
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="fileName"></param>
-        /// <returns>true if file exists</returns>
-        private bool FileExistsInDirectory(string path, string fileName)
-        {
-            // to behave same as File.Exists(Path.Combine("","file.cs") we have to map empty string to current directory
-            if (path.Length == 0)
-            {
-                path = ".";
-            }
-
-            instanceLocalDirectoryFiles.TryGetValue(path, out HashSet<string> cached);
-            if (cached == null)
-            {
-                string[] files;
-                try
-                {
-                    files = getFiles(path, "*");
-                }
-                catch (DirectoryNotFoundException)
-                {
-                    files = Array.Empty<string>();
-                }
-
-                cached = new HashSet<string>(files.Select(Path.GetFileName), StringComparer.OrdinalIgnoreCase);
-
-                instanceLocalDirectoryFiles[path] = cached;
-            }
-
-            return cached.Contains(fileName);
         }
 
         /// <summary>
