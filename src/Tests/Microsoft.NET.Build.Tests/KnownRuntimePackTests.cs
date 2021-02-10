@@ -115,7 +115,7 @@ namespace Microsoft.NET.Build.Tests
                         new XAttribute("DefaultRuntimeFrameworkVersion", "5.0.0-preview1"),
                         new XAttribute("LatestRuntimeFrameworkVersion", "5.0.0-preview1.1"),
                         new XAttribute("RuntimePackNamePatterns", "Microsoft.NETCore.App.Runtime.Mono.**RID**"),
-                        new XAttribute("RuntimePackRuntimeIdentifiers", "linux-arm;linux-arm64;linux-musl-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86;ios-arm64;ios-arm;ios-x64;ios-x86;tvos-arm64;tvos-x64;android-arm64;android-arm;android-x64;android-x86;browser-wasm"),
+                        new XAttribute("RuntimePackRuntimeIdentifiers", "linux-arm;linux-arm64;linux-musl-arm64;linux-musl-x64;linux-x64;osx-x64;rhel.6-x64;tizen.4.0.0-armel;tizen.5.0.0-armel;win-arm;win-arm64;win-x64;win-x86;ios-arm64;ios-arm;ios-x64;ios-x86;tvos-arm64;tvos-x64;android-arm64;android-arm;android-x64;android-x86;browser-wasm;maccatalyst-x64;maccatalyst-arm64"),
                         new XAttribute("IsTrimmable", "true"),
                         new XAttribute("RuntimePackLabels", "Mono"));
 
