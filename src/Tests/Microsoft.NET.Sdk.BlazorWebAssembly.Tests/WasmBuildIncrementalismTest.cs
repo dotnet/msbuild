@@ -16,7 +16,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
-    public class WasmBuildIncrementalismTest : BlazorWasmSdkTest
+    public class WasmBuildIncrementalismTest : AspNetSdkTest
     {
         public WasmBuildIncrementalismTest(ITestOutputHelper log) : base(log) {}
 
@@ -25,7 +25,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAsset = "BlazorWasmWithLibrary";
-            var projectDirectory = CreateBlazorWasmSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory, "blazorwasm");
             build.Execute()
@@ -57,7 +57,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAsset = "BlazorWasmWithLibrary";
-            var projectDirectory = CreateBlazorWasmSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory, "blazorwasm");
             build.Execute()
@@ -92,7 +92,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAsset = "BlazorWasmWithLibrary";
-            var projectDirectory = CreateBlazorWasmSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
             File.Move(Path.Combine(projectDirectory.TestRoot, "blazorwasm", "Resources.ja.resx.txt"), Path.Combine(projectDirectory.TestRoot, "blazorwasm", "Resource.ja.resx"));
             
             var build = new BuildCommand(projectDirectory, "blazorwasm");
@@ -149,7 +149,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAsset = "BlazorWasmWithLibrary";
-            var projectDirectory = CreateBlazorWasmSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
             
             var build = new BuildCommand(projectDirectory, "blazorwasm");
             build.Execute()
@@ -195,7 +195,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAsset = "BlazorWasmWithLibrary";
-            var projectDirectory = CreateBlazorWasmSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
             File.Move(Path.Combine(projectDirectory.TestRoot, "blazorwasm", "Resources.ja.resx.txt"), Path.Combine(projectDirectory.TestRoot, "blazorwasm", "Resource.ja.resx"));
             
             var build = new BuildCommand(projectDirectory, "blazorwasm");

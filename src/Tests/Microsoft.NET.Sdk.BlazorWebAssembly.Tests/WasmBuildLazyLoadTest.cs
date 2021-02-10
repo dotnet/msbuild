@@ -17,7 +17,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
-    public class WasmBuildLazyLoadTest : BlazorWasmSdkTest
+    public class WasmBuildLazyLoadTest : AspNetSdkTest
     {
         public WasmBuildLazyLoadTest(ITestOutputHelper log) : base(log) {}
 
@@ -26,7 +26,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((project) =>
             {
@@ -74,7 +74,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((project) =>
             {
@@ -122,7 +122,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((project) =>
             {
@@ -170,7 +170,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((project) =>
             {
@@ -218,7 +218,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((project) =>
             {
@@ -239,7 +239,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             testInstance.WithProjectChanges((project) =>
             {

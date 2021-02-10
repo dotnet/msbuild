@@ -19,7 +19,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
-    public class PackIntegrationTest : RazorSdkTest
+    public class PackIntegrationTest : AspNetSdkTest
     {
 
         public PackIntegrationTest(ITestOutputHelper log) : base(log) {}
@@ -28,7 +28,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Pack_NoBuild_Works_IncludesRazorAssembly()
         {
             var testAsset = "RazorClassLibrary";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute().Should().Pass();
@@ -66,7 +66,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Pack_Works_IncludesRazorAssembly()
         {
             var testAsset = "RazorClassLibrary";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             var result = pack.Execute();
@@ -104,7 +104,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Pack_FailsWhenStaticWebAssetsHaveConflictingPaths()
         {
             var testAsset = "PackageLibraryDirectDependency";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset, subdirectory: "TestPackages")
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset, subdirectory: "TestPackages")
                 .WithProjectChanges(project =>
                 {
                     var ns = project.Root.Name.Namespace;
@@ -131,7 +131,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Pack_IncludesStaticWebAssets()
         {
             var testAsset = "PackageLibraryDirectDependency";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset, subdirectory: "TestPackages");
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset, subdirectory: "TestPackages");
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path, "PackageLibraryDirectDependency");
             var result = pack.Execute();
@@ -160,7 +160,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Pack_DoesNotInclude_TransitiveBundleOrScopedCssAsStaticWebAsset()
         {
             var testAsset = "PackageLibraryDirectDependency";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset, subdirectory: "TestPackages");
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset, subdirectory: "TestPackages");
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path, "PackageLibraryDirectDependency");
             var result = pack.Execute();
@@ -185,7 +185,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Pack_DoesNotIncludeStaticWebAssetsAsContent()
         {
             var testAsset = "PackageLibraryDirectDependency";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset, subdirectory: "TestPackages");
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset, subdirectory: "TestPackages");
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path, "PackageLibraryDirectDependency");
             var result = pack.Execute();
@@ -217,7 +217,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Pack_NoBuild_IncludesStaticWebAssets()
         {
             var testAsset = "PackageLibraryDirectDependency";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset, subdirectory: "TestPackages");
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset, subdirectory: "TestPackages");
 
             var build = new BuildCommand(projectDirectory, "PackageLibraryDirectDependency");
             build.Execute().Should().Pass();
@@ -247,7 +247,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Pack_DoesNotIncludeAnyCustomPropsFiles_WhenNoStaticAssetsAreAvailable()
         {
             var testAsset = "RazorComponentLibrary";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
             var result = pack.Execute();

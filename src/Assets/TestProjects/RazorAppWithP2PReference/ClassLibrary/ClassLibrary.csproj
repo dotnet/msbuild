@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>$(DefaultRazorTestTfm)</TargetFramework>
+    <TargetFramework>$(AspNetTestTfm)</TargetFramework>
     <Copyright>© Microsoft</Copyright>
     <Product>Razor Test</Product>
     <Company>Microsoft</Company>

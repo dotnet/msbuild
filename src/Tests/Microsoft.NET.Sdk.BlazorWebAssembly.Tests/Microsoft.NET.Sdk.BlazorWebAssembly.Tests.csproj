@@ -19,11 +19,10 @@
 
   <ItemGroup>
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-      <_Parameter1>DefaultBlazorTestTfm</_Parameter1>
+      <_Parameter1>AspNetTestTfm</_Parameter1>
       <_Parameter2>$(SdkTargetFramework)</_Parameter2>
     </AssemblyAttribute>
   </ItemGroup>
-  
   
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />

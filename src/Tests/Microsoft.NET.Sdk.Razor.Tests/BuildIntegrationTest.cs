@@ -19,7 +19,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
-    public class BuildIntegrationTest : RazorSdkTest
+    public class BuildIntegrationTest : AspNetSdkTest
     {
         public BuildIntegrationTest(ITestOutputHelper log) : base(log) {}
 
@@ -34,7 +34,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         private void Build_SimpleMvc_WithoutBuildServer_CanBuildSuccessfully()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
@@ -54,7 +54,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_SimpleMvc_NoopsWithRazorCompileOnBuild_False()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute("/p:RazorCompileOnBuild=false").Should().Pass();
@@ -71,7 +71,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_ErrorInGeneratedCode_ReportsMSBuildError()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var filePath = Path.Combine(projectDirectory.Path, "Views", "Home", "Index.cshtml");
             File.WriteAllText(filePath, "@{ var foo = \"\".Substring(\"bleh\"); }");
@@ -97,7 +97,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_WithP2P_CopiesRazorAssembly()
         {
             var testAsset = "RazorAppWithP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory, "AppWithP2PReference");
             build.Execute().Should().Pass();
@@ -118,9 +118,9 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_WithViews_ProducesDepsFileWithCompilationContext_ButNoReferences()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
-            var customDefine = "RazorSdkTest";
+            var customDefine = "AspNetSdkTest";
             var build = new BuildCommand(projectDirectory);
             build.Execute($"/p:DefineConstants={customDefine}").Should().Pass();
 
@@ -147,7 +147,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_WithPreserveCompilationReferencesEnabled_ProducesRefsDirectory()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset)
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset)
                 .WithProjectChanges(project => {
                     var ns = project.Root.Name.Namespace;
                     var itemGroup = new XElement(ns + "PropertyGroup");
@@ -167,7 +167,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_AddsApplicationPartAttributes()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute().Should().Pass();
@@ -189,7 +189,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_DoesNotAddRelatedAssemblyPart_IfViewCompilationIsDisabled()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
             
             var build = new BuildCommand(projectDirectory);
             build.Execute("/p:RazorCompileOnBuild=false", "/p:RazorCompileOnPublish=false").Should().Pass();
@@ -205,7 +205,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_AddsRelatedAssemblyPart_IfGenerateAssemblyInfoIsFalse()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
             
             var build = new BuildCommand(projectDirectory);
             build.Execute("/p:GenerateAssemblyInfo=false").Should().Pass();
@@ -221,7 +221,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_WithP2P_WorksWhenBuildProjectReferencesIsDisabled()
         {
             var testAsset = "RazorAppWithP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset)
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset)
                 .WithProjectChanges((path, project) =>
                 {
                     if (path.Contains("AppWithP2PReference")) {
@@ -259,7 +259,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // Verifies building with different versions of Razor.Tasks works. Loosely modeled after the repro
             // scenario listed in https://github.com/Microsoft/msbuild/issues/3572
             var testAsset = "RazorAppWithP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset)
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset)
                 .WithProjectChanges((path, project) =>
                 {
                     if (path.Contains("AppWithP2PReference"))
@@ -288,7 +288,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_WithStartupObjectSpecified_Works()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute("/p:StartupObject=SimpleMvc.Program").Should().Pass();
@@ -303,7 +303,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_WithDeterministicFlagSet_OutputsDeterministicViewsAssembly()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
             
             var build = new BuildCommand(projectDirectory);
             build.Execute($"/p:Deterministic=true").Should().Pass();

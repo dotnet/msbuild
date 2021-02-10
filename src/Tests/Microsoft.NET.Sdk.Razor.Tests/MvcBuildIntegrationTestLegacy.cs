@@ -15,7 +15,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
-    public abstract class MvcBuildIntegrationTestLegacy : RazorSdkTest
+    public abstract class MvcBuildIntegrationTestLegacy : AspNetSdkTest
     {
         public abstract string TestProjectName { get; }
         public abstract string TargetFramework { get; }
@@ -29,7 +29,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public virtual void Building_Project()
         {
             var testAsset = $"Razor{TestProjectName}";
-            var project = CreateRazorSdkTestAsset(testAsset);
+            var project = CreateAspNetSdkTestAsset(testAsset);
 
             // Build
             var build = new BuildCommand(project);
@@ -56,7 +56,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public virtual void BuildingProject_CopyToOutputDirectoryFiles()
         {
             var testAsset = $"Razor{TestProjectName}";
-            var project = CreateRazorSdkTestAsset(testAsset);
+            var project = CreateAspNetSdkTestAsset(testAsset);
 
             // Build
             var build = new BuildCommand(project);
@@ -76,7 +76,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public virtual void Publish_Project()
         {
             var testAsset = $"Razor{TestProjectName}";
-            var project = CreateRazorSdkTestAsset(testAsset);
+            var project = CreateAspNetSdkTestAsset(testAsset);
 
             var publish = new PublishCommand(Log, project.TestRoot);
             publish.Execute().Should().Pass();
@@ -98,7 +98,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public virtual void Publish_IncludesRefAssemblies_WhenCopyRefAssembliesToPublishDirectoryIsSet()
         {
             var testAsset = $"Razor{TestProjectName}";
-            var project = CreateRazorSdkTestAsset(testAsset);
+            var project = CreateAspNetSdkTestAsset(testAsset);
 
             var publish = new PublishCommand(Log, project.TestRoot);
             publish.Execute("/p:CopyRefAssembliesToPublishDirectory=true").Should().Pass();

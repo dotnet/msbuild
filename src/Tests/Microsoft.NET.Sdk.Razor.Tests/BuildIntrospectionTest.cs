@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
-    public class BuildIntrospectionTest : RazorSdkTest
+    public class BuildIntrospectionTest : AspNetSdkTest
     {
         public BuildIntrospectionTest(ITestOutputHelper log) : base(log) {}
 
@@ -22,7 +22,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void RazorSdk_AddsCshtmlFilesToUpToDateCheckInput()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
             
             var build = new BuildCommand(projectDirectory);
             build.Execute("/t:_IntrospectUpToDateCheck")
@@ -37,7 +37,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void UpToDateReloadFileTypes_Default()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
             
             var build = new BuildCommand(projectDirectory);
             build.Execute("/t:_IntrospectUpToDateReloadFileTypes")
@@ -50,7 +50,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void UpToDateReloadFileTypes_WithRuntimeCompilation()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset)
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset)
                 .WithProjectChanges(p =>
                 {
                     var ns = p.Root.Name.Namespace;
@@ -72,7 +72,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void UpToDateReloadFileTypes_WithwWorkAroundRemoved()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
             
             var build = new BuildCommand(projectDirectory);
             build.Execute("/t:_IntrospectUpToDateReloadFileTypes")
@@ -85,7 +85,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void UpToDateReloadFileTypes_WithRuntimeCompilationAndWorkaroundRemoved()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset)
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset)
                 .WithProjectChanges(p =>
                 {
                     var ns = p.Root.Name.Namespace;
@@ -107,7 +107,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void IntrospectRazorSdkWatchItems()
         {
             var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new MSBuildCommand(Log, "_IntrospectWatchItems", projectDirectory.Path);
             build.Execute()

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
-    <TargetFramework>$(DefaultBlazorTestTfm)</TargetFramework>
+    <TargetFramework>$(AspNetTestTfm)</TargetFramework>
     <StaticWebAssetBasePath>SecondApp</StaticWebAssetBasePath>
   </PropertyGroup>
 

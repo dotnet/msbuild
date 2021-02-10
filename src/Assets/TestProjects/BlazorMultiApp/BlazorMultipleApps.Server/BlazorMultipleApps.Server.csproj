@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>$(DefaultBlazorTestTfm)</TargetFramework>
+    <TargetFramework>$(AspNetTestTfm)</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>

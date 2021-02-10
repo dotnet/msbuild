@@ -19,7 +19,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
-    public class StaticWebAssetsIntegrationTest : RazorSdkTest
+    public class StaticWebAssetsIntegrationTest : AspNetSdkTest
     {
         public StaticWebAssetsIntegrationTest(ITestOutputHelper log) : base(log) {}
 
@@ -27,7 +27,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_GeneratesStaticWebAssetsManifest_Success_CreatesManifest()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory, "AppWithPackageAndP2PReference");
             build.Execute().Should().Pass();
@@ -52,7 +52,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Publish_CopiesStaticWebAssetsToDestinationFolder()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var publish = new PublishCommand(Log, Path.Combine(projectDirectory.TestRoot, "AppWithPackageAndP2PReference"));
             publish.Execute().Should().Pass();
@@ -82,7 +82,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         {
             var tfm = "net5.0";
             var testAsset = "RazorAppWithPackageAndP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset, overrideTfm: tfm)
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset, overrideTfm: tfm)
                 .WithProjectChanges((path, project) =>
                 {
                     if (path.Contains("AppWithPackageAndP2PReference"))
@@ -121,7 +121,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Publish_WithBuildReferencesDisabled_CopiesStaticWebAssetsToDestinationFolder()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory, "AppWithPackageAndP2PReference");
             build.Execute().Should().Pass();
@@ -146,7 +146,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Publish_NoBuild_CopiesStaticWebAssetsToDestinationFolder()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory, "AppWithPackageAndP2PReference");
             build.Execute().Should().Pass();
@@ -171,7 +171,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_DoesNotEmbedManifestWhen_NoStaticResourcesAvailable()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute().Should().Pass();
@@ -192,7 +192,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_Fails_WhenConflictingAssetsFoundBetweenAStaticWebAssetAndAFileInTheWebRootFolder()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             Directory.CreateDirectory(Path.Combine(projectDirectory.Path, "AppWithPackageAndP2PReference", "wwwroot", "_content", "ClassLibrary", "js"));
             File.WriteAllText(Path.Combine(projectDirectory.Path, "AppWithPackageAndP2PReference", "wwwroot", "_content", "ClassLibrary", "js", "project-transitive-dep.js"), "console.log('transitive-dep');");
@@ -205,7 +205,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Clean_Success_RemovesManifestAndCache()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory, "AppWithPackageAndP2PReference");
             build.Execute().Should().Pass();
@@ -228,7 +228,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Rebuild_Success_RecreatesManifestAndCache()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             // Arrange
             var build = new BuildCommand(projectDirectory, "AppWithPackageAndP2PReference");
@@ -277,7 +277,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void GenerateStaticWebAssetsManifest_IncrementalBuild_ReusesManifest()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var command = new MSBuildCommand(Log, "GenerateStaticWebAssetsManifest", projectDirectory.Path, "AppWithPackageAndP2PReference");
             command.Execute().Should().Pass();

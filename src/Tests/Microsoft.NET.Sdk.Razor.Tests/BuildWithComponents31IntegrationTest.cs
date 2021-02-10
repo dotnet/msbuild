@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
-    public class BuildWithComponents31IntegrationTest : RazorSdkTest
+    public class BuildWithComponents31IntegrationTest : AspNetSdkTest
     {
         public BuildWithComponents31IntegrationTest(ITestOutputHelper log) : base(log) {}
 
@@ -21,7 +21,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_Components_WithDotNetCoreMSBuild_Works()
         {
             var testAsset = "Razorblazor31";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute().Should().Pass();

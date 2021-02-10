@@ -18,7 +18,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
-    public class ScopedCssIntegrationTest : RazorSdkTest
+    public class ScopedCssIntegrationTest : AspNetSdkTest
     {
         public ScopedCssIntegrationTest(ITestOutputHelper log) : base(log) {}
 
@@ -26,7 +26,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_NoOps_WhenScopedCssIsDisabled()
         {
             var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute("/p:ScopedCssEnabled=false").Should().Pass();
@@ -43,7 +43,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void CanDisableDefaultDiscoveryConvention()
         {
             var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute("/p:EnableDefaultScopedCssItems=false").Should().Pass();
@@ -60,7 +60,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void CanOverrideScopeIdentifiers()
         {
             var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset)
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset)
                 .WithProjectChanges(project =>
                 {
                     var ns = project.Root.Name.Namespace;
@@ -95,7 +95,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_GeneratesTransformedFilesAndBundle_ForComponentsWithScopedCss()
         {
             var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute().Should().Pass();
@@ -113,7 +113,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_ScopedCssFiles_ContainsUniqueScopesPerFile()
         {
             var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute().Should().Pass();
@@ -142,7 +142,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Publish_PublishesBundleToTheRightLocation()
         {
             var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var publish = new PublishCommand(Log, projectDirectory.TestRoot);
             publish.Execute().Should().Pass();
@@ -158,7 +158,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Publish_NoBuild_PublishesBundleToTheRightLocation()
         {
             var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute().Should().Pass();
@@ -177,7 +177,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Publish_DoesNotPublishAnyFile_WhenThereAreNoScopedCssFiles()
         {
             var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             File.Delete(Path.Combine(projectDirectory.Path, "Components", "Pages", "Counter.razor.css"));
             File.Delete(Path.Combine(projectDirectory.Path, "Components", "Pages", "Index.razor.css"));
@@ -194,7 +194,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Publish_Publishes_IndividualScopedCssFiles_WhenNoBundlingIsEnabled()
         {
             var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var publish = new PublishCommand(Log, projectDirectory.TestRoot);
             publish.Execute("/p:DisableScopedCssBundling=true").Should().Pass();
@@ -212,7 +212,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_GeneratedComponentContainsScope()
         {
             var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute().Should().Pass();
@@ -236,7 +236,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_RemovingScopedCssAndBuilding_UpdatesGeneratedCodeAndBundle()
         {
             var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute().Should().Pass();
@@ -273,7 +273,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Does_Nothing_WhenThereAreNoScopedCssFiles()
         {
             var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             File.Delete(Path.Combine(projectDirectory.Path, "Components", "Pages", "Counter.razor.css"));
             File.Delete(Path.Combine(projectDirectory.Path, "Components", "Pages", "Index.razor.css"));
@@ -295,7 +295,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var thumbprintLookup = new Dictionary<string, FileThumbPrint>();
 
             var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             // Act & Assert 1
             var build = new BuildCommand(projectDirectory);

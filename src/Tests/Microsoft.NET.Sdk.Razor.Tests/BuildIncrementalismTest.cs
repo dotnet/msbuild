@@ -19,7 +19,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
-    public class BuildIncrementalismTest : RazorSdkTest
+    public class BuildIncrementalismTest : AspNetSdkTest
     {
         public BuildIncrementalismTest(ITestOutputHelper log) : base(log) {}
 
@@ -31,7 +31,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             // Act 1
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             var result = build.Execute();
@@ -76,7 +76,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void RazorGenerate_RegeneratesTagHelperInputs_IfFileChanges()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             // Act - 1
             var build = new BuildCommand(projectDirectory);
@@ -111,7 +111,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_ErrorInGeneratedCode_ReportsMSBuildError_OnIncrementalBuild()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             // Introducing a Razor semantic error
             var indexPage = Path.Combine(projectDirectory.Path, "Views", "Home", "Index.cshtml");
@@ -145,7 +145,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void BuildComponents_ErrorInGeneratedCode_ReportsMSBuildError_OnIncrementalBuild()
         {
             var testAsset = "RazorMvcWithComponents";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
                 
             // Introducing a Razor semantic error
             var indexPage = Path.Combine(projectDirectory.Path, "Views", "Shared", "NavMenu.razor");
@@ -179,7 +179,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void BuildComponents_DoesNotRegenerateComponentDefinition_WhenDefinitionIsUnchanged()
         {
             var testAsset = "RazorMvcWithComponents";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             // Act - 1
             var build = new BuildCommand(projectDirectory);
@@ -236,7 +236,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void BuildComponents_RegeneratesComponentDefinition_WhenFilesChange()
         {
             var testAsset = "RazorMvcWithComponents";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
 
@@ -296,7 +296,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void BuildComponents_DoesNotModifyFiles_IfFilesDoNotChange()
         {
             var testAsset = "RazorMvcWithComponents";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
 
@@ -353,7 +353,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // With this flag, the only target called is GetCopyToOutputDirectoryItems on the referenced project.
             // We need to ensure that we continue providing Razor binaries and symbols as files to be copied over.
             var testAsset = "RazorAppWithP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
             
             var build = new BuildCommand(projectDirectory, "AppWithP2PReference");
             build.Execute().Should().Pass();
@@ -390,7 +390,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_TouchesUpToDateMarkerFile()
         {
             var testAsset = "RazorClassLibrary";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             // Remove the components so that they don't interfere with these tests
             Directory.Delete(Path.Combine(projectDirectory.Path, "Components"), recursive: true);

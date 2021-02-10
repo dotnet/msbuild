@@ -16,7 +16,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
-    public class PublishIntegrationTest : RazorSdkTest
+    public class PublishIntegrationTest : AspNetSdkTest
     {
         public PublishIntegrationTest(ITestOutputHelper log) : base(log) {}
 
@@ -24,7 +24,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Publish_RazorCompileOnPublish_IsDefault()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var publish = new PublishCommand(Log, projectDirectory.TestRoot);
             publish.Execute().Should().Pass();
@@ -59,7 +59,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Publish_WithRazorCompileOnBuildFalse_PublishesAssembly()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var publish = new PublishCommand(Log, projectDirectory.TestRoot);
             publish.Execute("/p:RazorCompileOnBuild=false").Should().Pass();
@@ -85,7 +85,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Publish_NoopsWith_RazorCompileOnPublishFalse()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             Directory.Delete(Path.Combine(projectDirectory.Path, "Views"), recursive: true);
 
@@ -105,7 +105,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Publish_IncludeCshtmlAndRefAssemblies_CopiesFiles()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var publish = new PublishCommand(Log, projectDirectory.TestRoot);
             publish.Execute("/p:CopyRazorGenerateFilesToPublishDirectory=true", "/p:CopyRefAssembliesToPublishDirectory=true").Should().Pass();
@@ -127,7 +127,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Publish_WithPreserveCompilationReferencesSetInProjectFile_CopiesRefs()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset)
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset)
                 .WithProjectChanges(project =>
                 {
                     var ns = project.Root.Name.Namespace;
@@ -155,7 +155,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Publish_WithP2P_AndRazorCompileOnBuild_CopiesRazorAssembly()
         {
             var testAsset = "RazorAppWithP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var publish = new PublishCommand(Log, Path.Combine(projectDirectory.TestRoot, "AppWithP2PReference"));
             publish.Execute().Should().Pass();
@@ -185,7 +185,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // any target that uses References as inputs to not be incremental. This test verifies no Razor Sdk work
             // is performed at this time.
             var testAsset = "RazorAppWithP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset)
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset)
                 .WithProjectChanges((path, project) =>
                 {
                     if (path.Contains("AppWithP2PReference"))
@@ -236,7 +236,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Publish_WithNoBuild_CopiesAlreadyCompiledViews()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             // Build
             var build = new BuildCommand(projectDirectory);

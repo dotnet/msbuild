@@ -18,7 +18,7 @@ using static Microsoft.NET.Sdk.BlazorWebAssembly.Tests.ServiceWorkerAssert;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
-    public class WasmPwaManifestTests : BlazorWasmSdkTest
+    public class WasmPwaManifestTests : AspNetSdkTest
     {
         public WasmPwaManifestTests(ITestOutputHelper log) : base(log) {}
 
@@ -28,7 +28,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Arrange
             var expectedExtensions = new[] { ".dll", ".pdb", ".js", ".wasm" };
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             var buildCommand = new BuildCommand(testInstance, "blazorwasm");
             buildCommand.Execute("/p:ServiceWorkerAssetsManifest=service-worker-assets.js")
@@ -67,7 +67,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Arrange
             var expectedExtensions = new[] { ".dll", ".pdb", ".js", ".wasm" };
             var testAppName = "BlazorHosted";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             var buildCommand = new BuildCommand(testInstance, "blazorhosted");
             buildCommand.Execute()
@@ -96,7 +96,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Arrange
             var expectedExtensions = new[] { ".dll", ".pdb", ".js", ".wasm" };
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
             publishCommand.Execute().Should().Pass();
@@ -124,7 +124,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Arrange
             var expectedExtensions = new[] { ".dll", ".pdb", ".js", ".wasm" };
             var testAppName = "BlazorHosted";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute().Should().Pass();
@@ -151,7 +151,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
             publishCommand.Execute("/p:ServiceWorkerAssetsManifest=service-worker-assets.js").Should().Pass();
@@ -192,7 +192,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
             publishCommand.Execute("/p:ServiceWorkerAssetsManifest=service-worker-assets.js").Should().Pass();

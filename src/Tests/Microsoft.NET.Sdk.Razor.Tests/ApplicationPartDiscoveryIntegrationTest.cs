@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
-    public class ApplicationPartDiscoveryIntegrationTest : RazorSdkTest
+    public class ApplicationPartDiscoveryIntegrationTest : AspNetSdkTest
     {
         public ApplicationPartDiscoveryIntegrationTest(ITestOutputHelper log) : base(log) {}
 
@@ -24,7 +24,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         private void Build_ProjectWithDependencyThatReferencesMvc_AddsAttribute()
         {
             var testAsset = "RazorAppWithP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory, "AppWithP2PReference");
             build.Execute().Should().Pass();
@@ -41,7 +41,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void Build_ProjectWithoutMvcReferencingDependencies_DoesNotGenerateAttribute()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
             build.Execute().Should().Pass();
@@ -59,7 +59,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public void BuildIncrementalism_CausingRecompilation_WhenApplicationPartAttributeIsGenerated()
         {
             var testAsset = "RazorAppWithP2PReference";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
             
             var build = new BuildCommand(projectDirectory, "AppWithP2PReference");
             build.Execute().Should().Pass();

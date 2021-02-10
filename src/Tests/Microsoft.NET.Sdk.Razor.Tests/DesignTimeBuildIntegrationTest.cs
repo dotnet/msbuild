@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.AspNetCore.Razor.Design.IntegrationTests
 {
-    public class DesignTimeBuildIntegrationTest : RazorSdkTest
+    public class DesignTimeBuildIntegrationTest : AspNetSdkTest
     {
         public DesignTimeBuildIntegrationTest(ITestOutputHelper log) : base(log) {}
 
@@ -22,7 +22,7 @@ namespace Microsoft.AspNetCore.Razor.Design.IntegrationTests
         public void DesignTimeBuild_DoesNotRunRazorTargets()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             // Using Compile here instead of CompileDesignTime because the latter is only defined when using
             // the VS targets. This is a close enough simulation for an SDK project
@@ -46,7 +46,7 @@ namespace Microsoft.AspNetCore.Razor.Design.IntegrationTests
         public void RazorGenerateDesignTime_ReturnsRazorGenerateWithTargetPath()
         {
             var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var command = new MSBuildCommand(Log, "RazorGenerateDesignTime;_IntrospectRazorGenerateWithTargetPath", projectDirectory.Path);
             var result = command.Execute();
@@ -77,7 +77,7 @@ namespace Microsoft.AspNetCore.Razor.Design.IntegrationTests
         public void RazorGenerateComponentDesignTime_ReturnsRazorComponentWithTargetPath()
         {
             var testAsset = "RazorComponentLibrary";
-            var projectDirectory = CreateRazorSdkTestAsset(testAsset);
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var command = new MSBuildCommand(Log, "RazorGenerateComponentDesignTime;_IntrospectRazorComponentWithTargetPath", projectDirectory.Path);
             var result = command.Execute();

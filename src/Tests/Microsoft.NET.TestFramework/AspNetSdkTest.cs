@@ -10,16 +10,20 @@ using System.Xml.Linq;
 using Microsoft.NET.TestFramework;
 using Xunit.Abstractions;
 
-namespace Microsoft.NET.Sdk.Razor.Tests
+namespace Microsoft.NET.TestFramework
 {
-    public abstract class RazorSdkTest : SdkTest
+    public abstract class AspNetSdkTest : SdkTest
     {
-        private static readonly IEnumerable<System.Reflection.AssemblyMetadataAttribute> TestAssemblyMetadata = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyMetadataAttribute>();
-        public readonly string DefaultTfm = TestAssemblyMetadata.SingleOrDefault(a => a.Key == "DefaultRazorTestTfm").Value;
+        public readonly string DefaultTfm;
 
-        protected RazorSdkTest(ITestOutputHelper log) : base(log) {}
+        protected AspNetSdkTest(ITestOutputHelper log) : base(log)
+        {
+            var assembly = Assembly.GetCallingAssembly();
+            var testAssemblyMetadata = assembly.GetCustomAttributes<AssemblyMetadataAttribute>();
+            DefaultTfm = testAssemblyMetadata.SingleOrDefault(a => a.Key == "AspNetTestTfm").Value;
+        }
 
-        public TestAsset CreateRazorSdkTestAsset(
+        public TestAsset CreateAspNetSdkTestAsset(
             string testAsset,
             [CallerMemberName] string callerName = "",
             string subdirectory = "",
@@ -33,7 +37,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                     var ns = project.Root.Name.Namespace;
                     var targetFramework = project.Descendants()
                        .Single(e => e.Name.LocalName == "TargetFramework");
-                    if (targetFramework.Value == "$(DefaultRazorTestTfm)")
+                    if (targetFramework.Value == "$(AspNetTestTfm)")
                     {
                         targetFramework.Value = overrideTfm ?? DefaultTfm;
                     }

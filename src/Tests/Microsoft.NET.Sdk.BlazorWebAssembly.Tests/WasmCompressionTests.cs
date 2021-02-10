@@ -12,7 +12,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
-    public class WasmCompressionTests : BlazorWasmSdkTest
+    public class WasmCompressionTests : AspNetSdkTest
     {
         public WasmCompressionTests(ITestOutputHelper log) : base(log) {}
 
@@ -21,7 +21,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorHosted";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
             
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute().Should().Pass();
@@ -62,7 +62,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorHosted";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
             
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute("/p:BlazorWebAssemblyEnableLinking=false").Should().Pass();
@@ -95,7 +95,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorHosted";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
             
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute().Should().Pass();
@@ -126,7 +126,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorHosted";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
             publishCommand.Execute("/p:BlazorWebAssemblyEnableLinking=false")
@@ -158,7 +158,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateBlazorWasmSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName);
             
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
             publishCommand.Execute().Should().Pass();
