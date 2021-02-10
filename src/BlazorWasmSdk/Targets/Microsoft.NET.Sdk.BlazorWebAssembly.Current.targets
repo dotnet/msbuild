@@ -50,11 +50,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <SelfContained>true</SelfContained>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 
-    <!-- Trimmer defaults -->
-    <PublishTrimmed Condition="'$(PublishTrimmed)' == ''">true</PublishTrimmed>
-    <TrimMode Condition="'$(TrimMode)' == ''">link</TrimMode>
-    <TrimmerRemoveSymbols Condition="'$(TrimmerRemoveSymbols)' == ''">false</TrimmerRemoveSymbols>
-
     <!-- Runtime feature defaults to trim unnecessary code -->
     <InvariantGlobalization Condition="'$(InvariantGlobalization)' == ''">false</InvariantGlobalization>
     <EventSourceSupport Condition="'$(EventSourceSupport)' == ''">false</EventSourceSupport>

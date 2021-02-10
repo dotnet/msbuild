@@ -18,6 +18,7 @@
     <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
     <TieredCompilationQuickJitForLoops>true</TieredCompilationQuickJitForLoops>
     <StartupHookSupport>false</StartupHookSupport>
+    <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
     <EventSourceSupport>false</EventSourceSupport>
     <UseSystemResourceKeys>true</UseSystemResourceKeys>
     <EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>

@@ -25,6 +25,11 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Turn off symbol publishing by default -->
     <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
+
+    <!-- Trimmer defaults -->
+    <PublishTrimmed Condition="'$(PublishTrimmed)' == ''">true</PublishTrimmed>
+    <TrimMode Condition="'$(TrimMode)' == ''">link</TrimMode>
+    <TrimmerRemoveSymbols Condition="'$(TrimmerRemoveSymbols)' == ''">false</TrimmerRemoveSymbols>
   </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.props" />

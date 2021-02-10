@@ -379,10 +379,14 @@ namespace Microsoft.NET.Publish.Tests
                 runtimeConfig["runtimeOptions"]["configProperties"]
                     ["System.StartupHookProvider.IsSupported"].Value<bool>()
                     .Should().Be(false);
+                runtimeConfig["runtimeOptions"]["configProperties"]
+                    ["System.Resources.ResourceManager.AllowCustomResourceTypes"].Value<bool>()
+                    .Should().Be(false);
             }
             else
             {
                 runtimeConfigContents.Should().NotContain("System.StartupHookProvider.IsSupported");
+                runtimeConfigContents.Should().NotContain("System.Resources.ResourceManager.AllowCustomResourceTypes");
             }
         }
 

@@ -426,6 +426,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Value="$(HttpActivityPropagationSupport)"
                                     Trim="true" />
 
+    <RuntimeHostConfigurationOption Include="System.Resources.ResourceManager.AllowCustomResourceTypes"
+                                    Condition="'$(CustomResourceTypesSupport)' != ''"
+                                    Value="$(CustomResourceTypesSupport)"
+                                    Trim="true" />
+
     <RuntimeHostConfigurationOption Include="System.Resources.UseSystemResourceKeys"
                                     Condition="'$(UseSystemResourceKeys)' != ''"
                                     Value="$(UseSystemResourceKeys)"
