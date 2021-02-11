@@ -32,16 +32,20 @@ namespace Microsoft.TemplateEngine.Cli
 
         public virtual IReadOnlyList<KeyValuePair<Guid, Func<Type>>> BuiltInComponents => _baseHost.BuiltInComponents;
 
-        public virtual void LogMessage(string message) => _baseHost.LogMessage(message);
+        public virtual void LogMessage(string message)
+        {
+            Reporter.Output.WriteLine(message);
+        }
 
         public virtual void OnCriticalError(string code, string message, string currentFile, long currentPosition)
         {
-            _baseHost.OnCriticalError(code, message, currentFile, currentPosition);
+            Reporter.Error.WriteLine(string.Format(LocalizableStrings.GenericError, message));
         }
 
         public virtual bool OnNonCriticalError(string code, string message, string currentFile, long currentPosition)
         {
-            return _baseHost.OnNonCriticalError(code, message, currentFile, currentPosition);
+            Reporter.Error.WriteLine(string.Format(LocalizableStrings.GenericWarning, message));
+            return false;
         }
 
         public virtual bool OnParameterError(ITemplateParameter parameter, string receivedValue, string message, out string newValue)

@@ -944,11 +944,29 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error: {0}.
+        /// </summary>
+        public static string GenericError {
+            get {
+                return ResourceManager.GetString("GenericError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot retrieve the type for {0}..
         /// </summary>
         public static string GenericPlaceholderTemplateContextError {
             get {
                 return ResourceManager.GetString("GenericPlaceholderTemplateContextError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warning: {0}.
+        /// </summary>
+        public static string GenericWarning {
+            get {
+                return ResourceManager.GetString("GenericWarning", resourceCulture);
             }
         }
         
