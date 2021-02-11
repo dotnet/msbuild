@@ -49,7 +49,6 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             new FileInfo(
                 Path.Combine(intermediateOutputPath, $"{TestProjectName}.TagHelpers.output.cache")).Should().Contain(
                 @"""Name"":""SimpleMvc.SimpleTagHelper""");
-
         }
 
         [CoreMSBuildOnlyFact]

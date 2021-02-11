@@ -55,7 +55,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             new DirectoryInfo(Path.Combine(publishOutputPath, "Views")).Should().NotExist();
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/28781")]
         public void Publish_WithRazorCompileOnBuildFalse_PublishesAssembly()
         {
             var testAsset = "RazorSimpleMvc";

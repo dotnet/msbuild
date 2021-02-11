@@ -78,7 +78,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             File.Move(Path.Combine(projectDirectory.Path, "Components", "Pages", "Counter.razor.css"), styles);
 
             var build = new BuildCommand(projectDirectory);
-            build.Execute("/p:EnableDefaultScopedCssItems=false").Should().Pass();
+            build.Execute("/p:EnableDefaultScopedCssItems=false", "/p:_RazorSourceGeneratorWriteGeneratedOutput=true").Should().Pass();
 
             var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
 
@@ -215,7 +215,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
-            build.Execute().Should().Pass();
+            build.Execute("/p:_RazorSourceGeneratorWriteGeneratedOutput=true").Should().Pass();
 
             var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
 
@@ -239,7 +239,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
-            build.Execute().Should().Pass();
+            build.Execute("/p:_RazorSourceGeneratorWriteGeneratedOutput=true").Should().Pass();
 
             var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
 
@@ -257,7 +257,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             File.Delete(Path.Combine(projectDirectory.Path, "Components", "Pages", "Counter.razor.css"));
 
             build = new BuildCommand(projectDirectory);
-            build.Execute().Should().Pass();
+            build.Execute("/p:_RazorSourceGeneratorWriteGeneratedOutput=true").Should().Pass();
 
             new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "Components", "Pages", "Counter.razor.rz.scp.css")).Should().NotExist();
             new FileInfo(generatedCounter).Should().Exist();
@@ -299,7 +299,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             // Act & Assert 1
             var build = new BuildCommand(projectDirectory);
-            build.Execute().Should().Pass();
+            build.Execute("/p:_RazorSourceGeneratorWriteGeneratedOutput=true").Should().Pass();
 
             var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
             var directoryPath = Path.Combine(intermediateOutputPath, "scopedcss");

@@ -18,6 +18,6 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         public MvcBuildIntegrationTest50(ITestOutputHelper log) : base(log) {}
 
         public override string TestProjectName => "SimpleMvc50";
-        public override string TargetFramework => DefaultTfm;
+        public override string TargetFramework => "net5.0";
     }
 }

@@ -264,15 +264,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.WorkloadM
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuiltInTools", "BuiltInTools", "{71A9F549-0EB6-41F9-BC16-4A6C5007FC91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-watch", "src\BuiltInTools\dotnet-watch\dotnet-watch.csproj", "{445EFBD5-6730-4F09-943D-278E77501FFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-watch", "src\BuiltInTools\dotnet-watch\dotnet-watch.csproj", "{445EFBD5-6730-4F09-943D-278E77501FFD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNetCore.Watch.BrowserRefresh", "src\BuiltInTools\BrowserRefresh\Microsoft.AspNetCore.Watch.BrowserRefresh.csproj", "{A82EF2B9-24BC-4569-8FE5-9EF51017F4CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Watch.BrowserRefresh", "src\BuiltInTools\BrowserRefresh\Microsoft.AspNetCore.Watch.BrowserRefresh.csproj", "{A82EF2B9-24BC-4569-8FE5-9EF51017F4CB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-watch.Tests", "src\Tests\dotnet-watch.Tests\dotnet-watch.Tests.csproj", "{CCE1A328-9CFE-44D3-B68F-FE84A039ACEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-watch.Tests", "src\Tests\dotnet-watch.Tests\dotnet-watch.Tests.csproj", "{CCE1A328-9CFE-44D3-B68F-FE84A039ACEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNetCore.Watch.BrowserRefresh.Tests", "src\Tests\Microsoft.AspNetCore.Watch.BrowserRefresh.Tests\Microsoft.AspNetCore.Watch.BrowserRefresh.Tests.csproj", "{81ADA3FA-AC26-4149-8CFC-EC7808ECB820}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Watch.BrowserRefresh.Tests", "src\Tests\Microsoft.AspNetCore.Watch.BrowserRefresh.Tests\Microsoft.AspNetCore.Watch.BrowserRefresh.Tests.csproj", "{81ADA3FA-AC26-4149-8CFC-EC7808ECB820}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetWatchTasks", "src\BuiltInTools\DotNetWatchTasks\DotNetWatchTasks.csproj", "{A41DF752-6F21-4036-AD02-DD37B11A2723}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetWatchTasks", "src\BuiltInTools\DotNetWatchTasks\DotNetWatchTasks.csproj", "{A41DF752-6F21-4036-AD02-DD37B11A2723}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.BlazorWebAssembly.Tasks", "src\BlazorWasmSdk\Tasks\Microsoft.NET.Sdk.BlazorWebAssembly.Tasks.csproj", "{4AE60971-C960-4DDF-B671-8B3E32C1AFD2}"
 EndProject
@@ -329,6 +329,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Rules", "Rules", "{A117DF29
 		src\RazorSdk\Targets\Rules\RazorGeneral.xaml = src\RazorSdk\Targets\Rules\RazorGeneral.xaml
 		src\RazorSdk\Targets\Rules\RazorGenerateWithTargetPath.xaml = src\RazorSdk\Targets\Rules\RazorGenerateWithTargetPath.xaml
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SourceGenerators", "SourceGenerators", "{C2B15A41-A9C0-456A-A9FF-649E9237D850}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Razor.SourceGenerators", "src\RazorSdk\SourceGenerators\Microsoft.NET.Sdk.Razor.SourceGenerators.csproj", "{56C34654-DE8F-4F14-B2F8-6C37285B786E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -588,6 +592,10 @@ Global
 		{08C9E634-39F3-4B24-BCEA-D0B21971EBBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08C9E634-39F3-4B24-BCEA-D0B21971EBBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08C9E634-39F3-4B24-BCEA-D0B21971EBBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56C34654-DE8F-4F14-B2F8-6C37285B786E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56C34654-DE8F-4F14-B2F8-6C37285B786E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56C34654-DE8F-4F14-B2F8-6C37285B786E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56C34654-DE8F-4F14-B2F8-6C37285B786E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -696,6 +704,8 @@ Global
 		{4ACCAC39-8ECD-45F8-B5AF-EB7E37CD36CC} = {E9BDA8A6-1AD2-4D0E-A37C-9EC10D7FE773}
 		{D64884FD-A3F3-4082-A814-A9377B661509} = {E9BDA8A6-1AD2-4D0E-A37C-9EC10D7FE773}
 		{A117DF29-1D72-453B-A24C-3B53F47609F2} = {D64884FD-A3F3-4082-A814-A9377B661509}
+		{C2B15A41-A9C0-456A-A9FF-649E9237D850} = {E9BDA8A6-1AD2-4D0E-A37C-9EC10D7FE773}
+		{56C34654-DE8F-4F14-B2F8-6C37285B786E} = {C2B15A41-A9C0-456A-A9FF-649E9237D850}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}

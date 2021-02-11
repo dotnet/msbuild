@@ -168,7 +168,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var capture = match.Groups[1].Value;
 
             // Act
-            System.Console.WriteLine(testInstance.TestRoot);
             var cssFile = Path.Combine(testInstance.TestRoot, "blazorwasm", "LinkToWebRoot", "css", "app.css");
             File.WriteAllText(cssFile, ".updated { }");
 

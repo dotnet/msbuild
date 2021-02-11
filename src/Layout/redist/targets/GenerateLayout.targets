@@ -236,21 +236,30 @@
       Targets="Publish"
       Projects="$(RepoRoot)/src/RazorSdk/Tool/Microsoft.NET.Sdk.Razor.Tool.csproj"
       Properties="Configuration=$(Configuration)" />
+    <MSBuild
+      Targets="Publish"
+      Projects="$(RepoRoot)/src/RazorSdk/SourceGenerators/Microsoft.NET.Sdk.Razor.SourceGenerators.csproj"
+      Properties="Configuration=$(Configuration)" />
   </Target>
 
   <Target Name="MoveRazorSdkTools" AfterTargets="PublishRazorSdkTools">
     <ItemGroup>
       <_RazorToolOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.Tool\$(Configuration)\$(SdkTargetFramework)\publish\*.*" />
       <_MvcRazorExtensionOutput Include="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor\tasks\$(SdkTargetFramework)\Microsoft.AspNetCore.Mvc.Razor.Extensions.dll" />
+      <_RazorSourceGeneratorsOutput Include="$(ArtifactsBinDir)Microsoft.NET.Sdk.Razor.SourceGenerators\$(Configuration)\netstandard2.0\publish\*.*" />
     </ItemGroup>
 
     <Copy
       SourceFiles="@(_RazorToolOutput)"
       DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor\tools\"
       SkipUnchangedFiles="true" />
-      <Copy
+    <Copy
       SourceFiles="@(_MvcRazorExtensionOutput)"
       DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor\extensions\mvc-3-0\"
+      SkipUnchangedFiles="true" />
+    <Copy
+      SourceFiles="@(_RazorSourceGeneratorsOutput)"
+      DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Razor\source-generators\"
       SkipUnchangedFiles="true" />
   </Target>
 
