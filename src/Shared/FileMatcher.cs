@@ -1671,26 +1671,20 @@ namespace Microsoft.Build.Shared
             bool CompareIgnoreCase(char inputChar, char patternChar, int iIndex, int pIndex)
 #endif
             {
-                // We will mostly be comparing ASCII characters, check this first
-                if (inputChar < 128 && patternChar < 128)
+                // We will mostly be comparing ASCII characters, check English letters first.
+                char inputCharLower = (char)(inputChar | 0x20);
+                if (inputCharLower >= 'a' && inputCharLower <= 'z')
                 {
-                    if (inputChar >= 'A' && inputChar <= 'Z' && patternChar >= 'a' && patternChar <= 'z')
-                    {
-                        return inputChar + 32 == patternChar;
-                    }
-                    if (inputChar >= 'a' && inputChar <= 'z' && patternChar >= 'A' && patternChar <= 'Z')
-                    {
-                        return inputChar == patternChar + 32;
-                    }
+                    // This test covers all combinations of lower/upper as both sides are converted to lower case.
+                    return inputCharLower == (patternChar | 0x20);
+                }
+                if (inputChar < 128 || patternChar < 128)
+                {
+                    // We don't need to compare, an ASCII character cannot have its lowercase/uppercase outside the ASCII table
+                    // and a non ASCII character cannot have its lowercase/uppercase inside the ASCII table
                     return inputChar == patternChar;
                 }
-                if (inputChar > 128 && patternChar > 128)
-                {
-                    return string.Compare(input, iIndex, pattern, pIndex, 1, StringComparison.OrdinalIgnoreCase) == 0;
-                }
-                // We don't need to compare, an ASCII character cannot have its lowercase/uppercase outside the ASCII table
-                // and a non ASCII character cannot have its lowercase/uppercase inside the ASCII table
-                return false;
+                return string.Compare(input, iIndex, pattern, pIndex, 1, StringComparison.OrdinalIgnoreCase) == 0;
             }
 #if MONO
             ; // The end of the CompareIgnoreCase anonymous function
