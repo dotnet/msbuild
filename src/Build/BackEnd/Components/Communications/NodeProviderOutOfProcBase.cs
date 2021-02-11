@@ -612,6 +612,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal class NodeContext
         {
+            enum ExitPacketState
+            {
+                None,
+                ExitPacketQueued,
+                ExitPacketSent
+            }
+
             // The pipe(s) used to communicate with the node.
             private Stream _clientToServerStream;
             private Stream _serverToClientStream;
@@ -666,9 +673,9 @@ namespace Microsoft.Build.BackEnd
             private NodeContextTerminateDelegate _terminateDelegate;
 
             /// <summary>
-            /// Node was requested to terminate.
+            /// Tracks the state of the packet sent to terminate the node.
             /// </summary>
-            private bool _isExiting;
+            private ExitPacketState _exitPacketState;
 
             /// <summary>
             /// Per node read buffers
@@ -777,6 +784,10 @@ namespace Microsoft.Build.BackEnd
             /// <param name="packet">The packet to send.</param>
             public void SendData(INodePacket packet)
             {
+                if (IsExitPacket(packet))
+                {
+                    _exitPacketState = ExitPacketState.ExitPacketQueued;
+                }
                 _packetWriteQueue.Add(packet);
                 DrainPacketQueue();
             }
@@ -844,7 +855,10 @@ namespace Microsoft.Build.BackEnd
                         int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
                         _serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
                     }
-                    _isExiting = packet is NodeBuildComplete buildCompletePacket && !buildCompletePacket.PrepareForReuse;
+                    if (IsExitPacket(packet))
+                    {
+                        _exitPacketState = ExitPacketState.ExitPacketSent;
+                    }
                 }
                 catch (IOException e)
                 {
@@ -855,6 +869,11 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Do nothing here because any exception will be caught by the async read handler
                 }
+            }
+
+            private static bool IsExitPacket(INodePacket packet)
+            {
+                return packet is NodeBuildComplete buildCompletePacket && !buildCompletePacket.PrepareForReuse;
             }
 
             /// <summary>
@@ -886,8 +905,13 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public async Task WaitForExitAsync(ILoggingService loggingService)
             {
-                // Wait for the process to exit.
-                if (_isExiting)
+                if (_exitPacketState == ExitPacketState.ExitPacketQueued)
+                {
+                    // Wait up to 100ms until all remaining packets are sent.
+                    // We don't need to wait long, just long enough for the Task to start running on the ThreadPool.
+                    await Task.WhenAny(_packetWriteDrainTask, Task.Delay(100));
+                }
+                if (_exitPacketState == ExitPacketState.ExitPacketSent)
                 {
                     CommunicationsUtilities.Trace("Waiting for node with pid = {0} to exit", _process.Id);
 
