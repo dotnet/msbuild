@@ -524,10 +524,9 @@ namespace Microsoft.Build.UnitTests
             {
                 try
                 {
-                    Assert.Equal(input.Item3, FileMatcher.IsMatch(input.Item1, input.Item2, false));
-                    Assert.Equal(input.Item3, FileMatcher.IsMatch(input.Item1, input.Item2, true));
-                    Assert.Equal(input.Item3, FileMatcher.IsMatch(input.Item1.ToUpperInvariant(), input.Item2, true));
-                    Assert.Equal(input.Item3, FileMatcher.IsMatch(input.Item1, input.Item2.ToUpperInvariant(), true));
+                    Assert.Equal(input.Item3, FileMatcher.IsMatch(input.Item1, input.Item2));
+                    Assert.Equal(input.Item3, FileMatcher.IsMatch(input.Item1.ToUpperInvariant(), input.Item2));
+                    Assert.Equal(input.Item3, FileMatcher.IsMatch(input.Item1, input.Item2.ToUpperInvariant()));
                 }
                 catch (Exception)
                 {

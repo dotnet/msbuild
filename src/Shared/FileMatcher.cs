@@ -239,7 +239,7 @@ namespace Microsoft.Build.Shared
                 {
                     return (ShouldEnforceMatching(pattern)
                         ? fileSystem.EnumerateFileSystemEntries(path, pattern)
-                            .Where(o => IsMatch(Path.GetFileName(o), pattern, true))
+                            .Where(o => IsMatch(Path.GetFileName(o), pattern))
                         : fileSystem.EnumerateFileSystemEntries(path, pattern)
                         ).ToImmutableArray();
                 }
@@ -322,7 +322,7 @@ namespace Microsoft.Build.Shared
                     files = fileSystem.EnumerateFiles(dir, filespec);
                     if (ShouldEnforceMatching(filespec))
                     {
-                        files = files.Where(o => IsMatch(Path.GetFileName(o), filespec, true));
+                        files = files.Where(o => IsMatch(Path.GetFileName(o), filespec));
                     }
                 }
                 // If the Item is based on a relative path we need to strip
@@ -385,7 +385,7 @@ namespace Microsoft.Build.Shared
                     directories = fileSystem.EnumerateDirectories((path.Length == 0) ? s_thisDirectory : path, pattern);
                     if (ShouldEnforceMatching(pattern))
                     {
-                        directories = directories.Where(o => IsMatch(Path.GetFileName(o), pattern, true));
+                        directories = directories.Where(o => IsMatch(Path.GetFileName(o), pattern));
                     }
                 }
 
@@ -901,7 +901,7 @@ namespace Microsoft.Build.Shared
                     for (int i = 0; i < excludeNextSteps.Length; i++)
                     {
                         if (excludeNextSteps[i].NeedsDirectoryRecursion &&
-                            (excludeNextSteps[i].DirectoryPattern == null || IsMatch(Path.GetFileName(subdir), excludeNextSteps[i].DirectoryPattern, true)))
+                            (excludeNextSteps[i].DirectoryPattern == null || IsMatch(Path.GetFileName(subdir), excludeNextSteps[i].DirectoryPattern)))
                         {
                             RecursionState thisExcludeStep = searchesToExclude[i];
                             thisExcludeStep.BaseDirectory = subdir;
@@ -1017,7 +1017,7 @@ namespace Microsoft.Build.Shared
         {
             if (recursionState.SearchData.Filespec != null)
             {
-                return IsMatch(Path.GetFileName(file), recursionState.SearchData.Filespec, true);
+                return IsMatch(Path.GetFileName(file), recursionState.SearchData.Filespec);
             }
 
             // if no file-spec provided, match the file to the regular expression
@@ -1596,8 +1596,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="input">String which is matched against the pattern.</param>
         /// <param name="pattern">Pattern against which string is matched.</param>
-        /// <param name="ignoreCase">Determines whether ignoring case when comparing two characters</param>
-        internal static bool IsMatch(string input, string pattern, bool ignoreCase)
+        internal static bool IsMatch(string input, string pattern)
         {
             if (input == null)
             {
@@ -1695,10 +1694,7 @@ namespace Microsoft.Build.Shared
                                     break;
                                 }
                                 // If the tail doesn't match, we can safely return e.g. ("aaa", "*b")
-                                if ((
-                                        (!ignoreCase && input[inputTailIndex] != pattern[patternTailIndex]) ||
-                                        (ignoreCase && !CompareIgnoreCase(input[inputTailIndex], pattern[patternTailIndex], patternTailIndex, inputTailIndex))
-                                    ) &&
+                                if (!CompareIgnoreCase(input[inputTailIndex], pattern[patternTailIndex], patternTailIndex, inputTailIndex) &&
                                     pattern[patternTailIndex] != '?')
                                 {
                                     return false;
@@ -1718,9 +1714,7 @@ namespace Microsoft.Build.Shared
                         // The ? wildcard cannot be skipped as we will have a wrong result for e.g. ("aab" "*?b")
                         if (pattern[patternIndex] != '?')
                         {
-                            while (
-                                (!ignoreCase && input[inputIndex] != pattern[patternIndex]) ||
-                                (ignoreCase && !CompareIgnoreCase(input[inputIndex], pattern[patternIndex], inputIndex, patternIndex)))
+                            while (!CompareIgnoreCase(input[inputIndex], pattern[patternIndex], inputIndex, patternIndex))
                             {
                                 // Return if there is no character that match e.g. ("aa", "*b")
                                 if (++inputIndex >= inputLength)
@@ -1735,9 +1729,7 @@ namespace Microsoft.Build.Shared
                     }
 
                     // If we have a match, step to the next character
-                    if (
-                        (!ignoreCase && input[inputIndex] == pattern[patternIndex]) ||
-                        (ignoreCase && CompareIgnoreCase(input[inputIndex], pattern[patternIndex], inputIndex, patternIndex)) ||
+                    if (CompareIgnoreCase(input[inputIndex], pattern[patternIndex], inputIndex, patternIndex) ||
                         pattern[patternIndex] == '?')
                     {
                         patternIndex++;
