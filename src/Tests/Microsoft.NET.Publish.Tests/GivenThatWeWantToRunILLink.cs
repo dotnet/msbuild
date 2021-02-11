@@ -294,16 +294,11 @@ namespace Microsoft.NET.Publish.Tests
 
             // Please keep list below sorted and de-duplicated
             List<string> expectedOutput = new List<string> () {
-                    "ILLink : Trim analysis warning IL2026: System.Resources.ResourceReader.InitializeBinaryFormatter(",
-                    "ILLink : Trim analysis warning IL2057: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
-                    "ILLink : Trim analysis warning IL2057: System.Resources.ResourceReader.FindType(Int32",
-                    "ILLink : Trim analysis warning IL2060: System.Resources.ResourceReader.InitializeBinaryFormatter(",
-                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.NullableTypeInfo.NullableTypeInfo(Type,List<Type>",
-                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.TypeAnalysis.TypeAnalysis(Type,EventDataAttribute,List<Type>",
                     "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(",
+                    "ILLink : Trim analysis warning IL2026: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
+                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.NullableTypeInfo.NullableTypeInfo(Type,List<Type>",
                     "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.NullableTypeInfo.WriteData(PropertyValue",
-                    "ILLink : Trim analysis warning IL2072: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
-                    "ILLink : Trim analysis warning IL2077: System.Resources.ResourceReader.InitializeBinaryFormatter(",
+                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.TypeAnalysis.TypeAnalysis(Type,EventDataAttribute,List<Type>",
             };
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
