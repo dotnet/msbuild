@@ -179,14 +179,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Determines whether the given path has any wild card characters or semicolons.
-        /// </summary>
-        internal static bool HasWildcardsOrSemicolon(string filespec)
-        {
-            return -1 != filespec.LastIndexOfAny(s_wildcardAndSemicolonCharacters);
-        }
-
-        /// <summary>
         /// Determines whether the given path has any wild card characters, any semicolons or any property references.
         /// </summary>
         internal static bool HasWildcardsSemicolonItemOrPropertyReferences(string filespec)
