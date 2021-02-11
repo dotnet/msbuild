@@ -935,13 +935,12 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Kill the child and do a blocking wait.
-                loggingService?.LogWarningFromText(
+                loggingService?.LogWarning(
                     BuildEventContext.Invalid,
                     null,
-                    null,
-                    null,
                     BuildEventFileInfo.Empty,
-                    $"Killing node with pid = {_process.Id}");
+                    "KillingProcessWithPid",
+                    _process.Id);
                 CommunicationsUtilities.Trace("Killing node with pid = {0}", _process.Id);
 
                 _process.KillTree(timeout: 5000);
