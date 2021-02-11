@@ -750,11 +750,13 @@ namespace Microsoft.Build.Shared
         {
             public FilesSearchData(
                 string filespec,                // can be null
+                string directoryPattern,        // can be null
                 Regex regexFileMatch,           // can be null
                 bool needsRecursion
                 )
             {
                 Filespec = filespec;
+                DirectoryPattern = directoryPattern;
                 RegexFileMatch = regexFileMatch;
                 NeedsRecursion = needsRecursion;
             }
@@ -763,6 +765,13 @@ namespace Microsoft.Build.Shared
             /// The filespec.
             /// </summary>
             public string Filespec { get; }
+            /// <summary>
+            /// Holds the directory pattern for globs like **/{pattern}/**, i.e. when we're looking for a matching directory name
+            /// regardless of where on the path it is. This field is used only if the wildcard directory part has this shape. In
+            /// other cases such as **/{pattern1}/**/{pattern2}/**, we don't use this optimization and instead rely on
+            /// <see cref="RegexFileMatch"/> to test if a file path matches the glob or not.
+            /// </summary>
+            public string DirectoryPattern { get; }
             /// <summary>
             /// Wild-card matching.
             /// </summary>
@@ -784,9 +793,18 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public string RemainingWildcardDirectory;
             /// <summary>
+            /// True if SearchData.DirectoryPattern is non-null and we have descended into a directory that matches the pattern.
+            /// </summary>
+            public bool IsInsideMatchingDirectory;
+            /// <summary>
             /// Data about a search that does not change as the search recursively traverses directories
             /// </summary>
             public FilesSearchData SearchData;
+
+            /// <summary>
+            /// True if a SearchData.DirectoryPattern is specified but we have not descended into a matching directory.
+            /// </summary>
+            public bool IsLookingForMatchingDirectory => (SearchData.DirectoryPattern != null && !IsInsideMatchingDirectory);
         }
 
         /// <summary>
@@ -832,6 +850,8 @@ namespace Microsoft.Build.Shared
 
                     //  We can exclude all results in this folder if:
                     if (
+                        //  We are not looking for a directory matching the pattern given in SearchData.DirectoryPattern
+                        !searchToExclude.IsLookingForMatchingDirectory &&
                         //  We are matching files based on a filespec and not a regular expression
                         searchToExclude.SearchData.Filespec != null &&
                         //  The wildcard path portion of the excluded search matches the include search
@@ -892,6 +912,12 @@ namespace Microsoft.Build.Shared
                 newRecursionState.BaseDirectory = subdir;
                 newRecursionState.RemainingWildcardDirectory = nextStep.RemainingWildcardDirectory;
 
+                if (newRecursionState.IsLookingForMatchingDirectory &&
+                    DirectoryEndsWithPattern(subdir, recursionState.SearchData.DirectoryPattern))
+                {
+                    newRecursionState.IsInsideMatchingDirectory = true;
+                }
+
                 List<RecursionState> newSearchesToExclude = null;
 
                 if (excludeNextSteps != null)
@@ -906,6 +932,11 @@ namespace Microsoft.Build.Shared
                             RecursionState thisExcludeStep = searchesToExclude[i];
                             thisExcludeStep.BaseDirectory = subdir;
                             thisExcludeStep.RemainingWildcardDirectory = excludeNextSteps[i].RemainingWildcardDirectory;
+                            if (thisExcludeStep.IsLookingForMatchingDirectory &&
+                                DirectoryEndsWithPattern(subdir, thisExcludeStep.SearchData.DirectoryPattern))
+                            {
+                                thisExcludeStep.IsInsideMatchingDirectory = true;
+                            }
                             newSearchesToExclude.Add(thisExcludeStep);
                         }
                     }
@@ -1038,9 +1069,14 @@ namespace Microsoft.Build.Shared
             bool considerFiles = false;
 
             // Only consider files if...
-            if (recursionState.RemainingWildcardDirectory.Length == 0)
+            if (recursionState.SearchData.DirectoryPattern != null)
             {
-                // We've reached the end of the wildcard directory elements.
+                // We are looking for a directory pattern and have descended into a matching directory,
+                considerFiles = recursionState.IsInsideMatchingDirectory;
+            }
+            else if (recursionState.RemainingWildcardDirectory.Length == 0)
+            {
+                // or we've reached the end of the wildcard directory elements,
                 considerFiles = true;
             }
             else if (recursionState.RemainingWildcardDirectory.IndexOf(recursiveDirectoryMatch, StringComparison.Ordinal) == 0)
@@ -2042,11 +2078,37 @@ namespace Microsoft.Build.Shared
                 return SearchAction.ReturnEmptyList;
             }
 
+            string directoryPattern = null;
+            if (wildcardDirectoryPart.Length > 0)
+            {
+                // If the wildcard directory part looks like "**/{pattern}/**", we are essentially looking for files that have
+                // a matching directory anywhere on their path. This is commonly used when excluding hidden directories using
+                // "**/.*/**" for example, and is worth special-casing so it doesn't fall into the slow regex logic.
+                string wildcard = wildcardDirectoryPart.TrimTrailingSlashes();
+                int wildcardLength = wildcard.Length;
+                if (wildcardLength > 6 &&
+                    wildcard[0] == '*' &&
+                    wildcard[1] == '*' &&
+                    FileUtilities.IsAnySlash(wildcard[2]) &&
+                    FileUtilities.IsAnySlash(wildcard[wildcardLength - 3]) &&
+                    wildcard[wildcardLength - 2] == '*' &&
+                    wildcard[wildcardLength - 1] == '*')
+                {
+                    // Check that there are no other slashes in the wildcard.
+                    if (wildcard.IndexOfAny(FileUtilities.Slashes, 3, wildcardLength - 6) == -1)
+                    {
+                        directoryPattern = wildcard.Substring(3, wildcardLength - 6);
+                    }
+                }
+            }
+
             // determine if we need to use the regular expression to match the files
             // PERF NOTE: Constructing a Regex object is expensive, so we avoid it whenever possible
             bool matchWithRegex =
                 // if we have a directory specification that uses wildcards, and
                 (wildcardDirectoryPart.Length > 0) &&
+                // the directory pattern is not a simple "**/{pattern}/**", and
+                directoryPattern == null &&
                 // the specification is not a simple "**"
                 !IsRecursiveDirectoryMatch(wildcardDirectoryPart);
             // then we need to use the regular expression
@@ -2054,6 +2116,7 @@ namespace Microsoft.Build.Shared
             var searchData = new FilesSearchData(
                 // if using the regular expression, ignore the file pattern
                 matchWithRegex ? null : filenamePart,
+                directoryPattern,
                 // if using the file pattern, ignore the regular expression
                 matchWithRegex ? new Regex(matchFileExpression, RegexOptions.IgnoreCase) : null,
                 needsRecursion);
@@ -2338,7 +2401,8 @@ namespace Microsoft.Build.Shared
                                 //  BaseDirectory to be the same as the exclude BaseDirectory, and change the wildcard part to be "**\"
                                 //  because we don't know where the different parts of the exclude wildcard part would be matched.
                                 //  Example: include="c:\git\msbuild\src\Framework\**\*.*" exclude="c:\git\msbuild\**\bin\**\*.*"
-                                Debug.Assert(excludeState.SearchData.RegexFileMatch != null, "Expected Regex to be used for exclude file matching");
+                                Debug.Assert(excludeState.SearchData.RegexFileMatch != null || excludeState.SearchData.DirectoryPattern != null,
+                                    "Expected Regex or directory pattern to be used for exclude file matching");
                                 excludeState.BaseDirectory = state.BaseDirectory;
                                 excludeState.RemainingWildcardDirectory = recursiveDirectoryMatch + s_directorySeparator;
                                 searchesToExclude.Add(excludeState);
@@ -2456,6 +2520,19 @@ namespace Microsoft.Build.Shared
             {
                 return directorySeparatorCharacters.Contains(possibleChild[possibleParent.Length]);
             }
+        }
+
+        /// <summary>
+        /// Returns true if the last component of the given directory path (assumed to not have any trailing slashes)
+        /// matches the given pattern.
+        /// </summary>
+        /// <param name="directoryPath">The path to test.</param>
+        /// <param name="pattern">The pattern to test against.</param>
+        /// <returns>True in case of a match (e.g. directoryPath = "dir/subdir" and pattern = "s*"), false otherwise.</returns>
+        private static bool DirectoryEndsWithPattern(string directoryPath, string pattern)
+        {
+            int index = directoryPath.LastIndexOfAny(FileUtilities.Slashes);
+            return (index != -1 && IsMatch(directoryPath.Substring(index + 1), pattern));
         }
 
         private static bool IsRecursiveDirectoryMatch(string path) => path.TrimTrailingSlashes() == recursiveDirectoryMatch;
