@@ -2102,7 +2102,7 @@ namespace Microsoft.Build.Shared
                 sb.Append(aString[0]);
                 sb.Append(aString[1]);
 
-                var i = SkipCharacters(aString, 2, c => FileUtilities.IsAnySlash(c));
+                var i = SkipSlashes(aString, 2);
 
                 if (index != i)
                 {
@@ -2114,22 +2114,22 @@ namespace Microsoft.Build.Shared
             else if (aString.StartsWith("/", StringComparison.Ordinal))
             {
                 sb.Append('/');
-                index = SkipCharacters(aString, 1, c => FileUtilities.IsAnySlash(c));
+                index = SkipSlashes(aString, 1);
             }
             else if (aString.StartsWith(@"\\", StringComparison.Ordinal))
             {
                 sb.Append(@"\\");
-                index = SkipCharacters(aString, 2, c => FileUtilities.IsAnySlash(c));
+                index = SkipSlashes(aString, 2);
             }
             else if (aString.StartsWith(@"\", StringComparison.Ordinal))
             {
                 sb.Append(@"\");
-                index = SkipCharacters(aString, 1, c => FileUtilities.IsAnySlash(c));
+                index = SkipSlashes(aString, 1);
             }
 
             while (index < aString.Length)
             {
-                var afterSlashesIndex = SkipCharacters(aString, index, c => FileUtilities.IsAnySlash(c));
+                var afterSlashesIndex = SkipSlashes(aString, index);
 
                 // do not append separator at the end of the string
                 if (afterSlashesIndex >= aString.Length)
@@ -2142,7 +2142,9 @@ namespace Microsoft.Build.Shared
                     sb.Append(s_directorySeparator);
                 }
 
-                var afterNonSlashIndex = SkipCharacters(aString, afterSlashesIndex, c => !FileUtilities.IsAnySlash(c));
+                // skip non-slashes
+                var indexOfAnySlash = aString.IndexOfAny(directorySeparatorCharacters, afterSlashesIndex);
+                var afterNonSlashIndex = indexOfAnySlash == -1 ? aString.Length : indexOfAnySlash;
 
                 sb.Append(aString, afterSlashesIndex, afterNonSlashIndex - afterSlashesIndex);
 
@@ -2153,16 +2155,16 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Skips characters that satisfy the condition <param name="jumpOverCharacter"></param>
+        /// Skips slash characters in a string.
         /// </summary>
         /// <param name="aString">The working string</param>
         /// <param name="startingIndex">Offset in string to start the search in</param>
-        /// <returns>First index that does not satisfy the condition. Returns the string's length if end of string is reached</returns>
-        private static int SkipCharacters(string aString, int startingIndex, Func<char, bool> jumpOverCharacter)
+        /// <returns>First index that is not a slash. Returns the string's length if end of string is reached</returns>
+        private static int SkipSlashes(string aString, int startingIndex)
         {
             var index = startingIndex;
 
-            while (index < aString.Length && jumpOverCharacter(aString[index]))
+            while (index < aString.Length && FileUtilities.IsAnySlash(aString[index]))
             {
                 index++;
             }
