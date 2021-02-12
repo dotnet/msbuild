@@ -59,4 +59,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
+  <!-- We will reference newer analyzer packages that what can be referenced by the SDK we build with
+       To break the cycle we remove all analyzers before this compiles. -->
+  <Target Name="RemoveAnalyzers" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <Analyzer Remove="@(Analyzer)"/>
+    </ItemGroup>
+  </Target>
 </Project>
