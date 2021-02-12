@@ -163,7 +163,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             {
                 if (_started && !_process.HasExited)
                 {
-                    _process.KillTree();
+                    _process.Kill(entireProcessTree: true);
                 }
 
                 _process.CancelErrorRead();
