@@ -82,9 +82,9 @@
     <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('netcoreapp'))">netstandard</GenAPIShortFrameworkIdentifier>
     <GenAPITargetPath>$(RepoRoot)ref\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\$(GenAPIAssemblyName).cs</GenAPITargetPath>
   </PropertyGroup>
-  
-  <ItemGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and '$(OsEnvironment)'=='windows'">
-    <PackageReference Include="Microsoft.DotNet.BuildTools.GenAPI" PrivateAssets="All" />
+
+  <ItemGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and $([MSBuild]::IsOSPlatform('windows'))">
+    <PackageReference Include="Microsoft.DotNet.GenAPI" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
