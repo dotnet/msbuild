@@ -2363,7 +2363,25 @@ namespace Microsoft.Build.Shared
                     }
                     else
                     {
-                        searchesToExclude.Add(excludeState);
+                        // Optimization: ignore excludes whose file names can never match our filespec. For example, if we're looking
+                        // for "**/*.cs", we don't have to worry about excluding "{anything}/*.sln" as the intersection of the two will
+                        // always be empty.
+                        string includeFilespec = state.SearchData.Filespec ?? string.Empty;
+                        string excludeFilespec = excludeState.SearchData.Filespec ?? string.Empty;
+                        int compareLength = Math.Min(
+                            includeFilespec.Length - includeFilespec.LastIndexOfAny(s_wildcardCharacters) - 1,
+                            excludeFilespec.Length - excludeFilespec.LastIndexOfAny(s_wildcardCharacters) - 1);
+                        if (string.Compare(
+                                includeFilespec,
+                                includeFilespec.Length - compareLength,
+                                excludeFilespec,
+                                excludeFilespec.Length - compareLength,
+                                compareLength,
+                                StringComparison.OrdinalIgnoreCase) == 0)
+                        {
+                            // The suffix is the same so there is a possibility that the two will match the same files.
+                            searchesToExclude.Add(excludeState);
+                        }
                     }
                 }
             }

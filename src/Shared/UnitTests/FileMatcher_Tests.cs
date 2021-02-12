@@ -409,6 +409,44 @@ namespace Microsoft.Build.UnitTests
                         ExpectNoMatches = NativeMethodsShared.IsLinux,
                     }
                 };
+
+                // Hits the early elimination of exclude file patterns that do not intersect with the include.
+                // The exclude is redundant and can be eliminated before starting the file system walk.
+                yield return new object[]
+                {
+                    new GetFilesComplexGlobbingMatchingInfo
+                    {
+                        Include = @"src\foo\**\*.cs",
+                        Excludes = new[]
+                        {
+                            @"src\foo\**\foo\**",
+                            @"src\foo\**\*.vb" // redundant exclude
+                        },
+                        ExpectedMatches = new[]
+                        {
+                            @"src\foo\foo.cs",
+                            @"src\foo\inner\foo.cs",
+                            @"src\foo\inner\bar\bar.cs"
+                        },
+                        ExpectNoMatches = NativeMethodsShared.IsLinux,
+                    }
+                };
+
+                // Hits the early elimination of exclude file patterns that do not intersect with the include.
+                // The exclude is not redundant and must not be eliminated.
+                yield return new object[]
+                {
+                    new GetFilesComplexGlobbingMatchingInfo
+                    {
+                        Include = @"src\foo\**\*.cs",
+                        Excludes = new[]
+                        {
+                            @"src\foo\**\*.*" // effective exclude
+                        },
+                        ExpectedMatches = Array.Empty<string>(),
+                        ExpectNoMatches = NativeMethodsShared.IsLinux,
+                    }
+                };
             }
         }
 
