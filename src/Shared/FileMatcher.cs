@@ -2529,6 +2529,6 @@ namespace Microsoft.Build.Shared
             return (index != -1 && IsMatch(directoryPath.Substring(index + 1), pattern));
         }
 
-        private static bool IsRecursiveDirectoryMatch(string path) => path.TrimTrailingSlashes() == recursiveDirectoryMatch;
+        internal static bool IsRecursiveDirectoryMatch(string path) => path.TrimTrailingSlashes() == recursiveDirectoryMatch;
     }
 }
