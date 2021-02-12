@@ -8,7 +8,7 @@ parameters:
   inline: true
 
   # Only used if inline==false. When set to true will stall the current build until
-  # the Promotion Pipeline build finishes. Otherwise, the current build will continue
+  # the Promotion Pipeline build finishes. Otherwise, the current build will continue 
   # execution concurrently with the promotion build.
   waitPublishingFinish: true
 
@@ -37,11 +37,11 @@ parameters:
   # Which stages should finish execution before post-build stages start
   validateDependsOn:
   - build
-  publishDependsOn:
+  publishDependsOn: 
   - Validate
 
   # Channel ID's instantiated in this file.
-  # When adding a new channel implementation the call to `check-channel-consistency.ps1`
+  # When adding a new channel implementation the call to `check-channel-consistency.ps1` 
   # needs to be updated with the new channel ID
   NetEngLatestChannelId: 2
   NetEngValidationChannelId: 9
@@ -69,176 +69,179 @@ parameters:
   VS1610ChannelId: 1692
 
 stages:
-- stage: Validate
-  dependsOn: ${{ parameters.validateDependsOn }}
-  displayName: Validate Build Assets
-  variables:
-    - template: common-variables.yml
-  jobs:
-  - template: setup-maestro-vars.yml
-    parameters:
-      BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
-
-  - ${{ if and(le(parameters.publishingInfraVersion, 2), eq(parameters.inline, 'true')) }}:
-    - job:
-      displayName: Post-build Checks
-      dependsOn: setupMaestroVars
-      variables:
-        - name: TargetChannels
-          value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.TargetChannels'] ]
-      pool:
-        vmImage: 'windows-2019'
-      steps:
-        - task: PowerShell@2
-          displayName: Maestro Channels Consistency
-          inputs:
-            filePath: $(Build.SourcesDirectory)/eng/common/post-build/check-channel-consistency.ps1
-            arguments: -PromoteToChannels "$(TargetChannels)"
-              -AvailableChannelIds ${{parameters.NetEngLatestChannelId}},${{parameters.NetEngValidationChannelId}},${{parameters.NetDev5ChannelId}},${{parameters.NetDev6ChannelId}},${{parameters.GeneralTestingChannelId}},${{parameters.NETCoreToolingDevChannelId}},${{parameters.NETCoreToolingReleaseChannelId}},${{parameters.NETInternalToolingChannelId}},${{parameters.NETCoreExperimentalChannelId}},${{parameters.NetEngServicesIntChannelId}},${{parameters.NetEngServicesProdChannelId}},${{parameters.Net5Preview8ChannelId}},${{parameters.Net5RC1ChannelId}},${{parameters.Net5RC2ChannelId}},${{parameters.NetCoreSDK313xxChannelId}},${{parameters.NetCoreSDK313xxInternalChannelId}},${{parameters.NetCoreSDK314xxChannelId}},${{parameters.NetCoreSDK314xxInternalChannelId}},${{parameters.VS166ChannelId}},${{parameters.VS167ChannelId}},${{parameters.VS168ChannelId}},${{parameters.VSMasterChannelId}},${{parameters.VS169ChannelId}},${{parameters.VS1610ChannelId}}
-
-  - job:
-    displayName: NuGet Validation
-    dependsOn: setupMaestroVars
-    condition: eq( ${{ parameters.enableNugetValidation }}, 'true')
-    pool:
-      vmImage: 'windows-2019'
-    variables:
-      - name: AzDOProjectName
-        value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOProjectName'] ]
-      - name: AzDOPipelineId
-        value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOPipelineId'] ]
-      - name: AzDOBuildId
-        value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOBuildId'] ]
-    steps:
-      - task: DownloadBuildArtifacts@0
-        displayName: Download Package Artifacts
-        inputs:
-          buildType: specific
-          buildVersionToDownload: specific
-          project: $(AzDOProjectName)
-          pipeline: $(AzDOPipelineId)
-          buildId: $(AzDOBuildId)
-          artifactName: PackageArtifacts
-
-      - task: PowerShell@2
-        displayName: Validate
-        inputs:
-          filePath: $(Build.SourcesDirectory)/eng/common/post-build/nuget-validation.ps1
-          arguments: -PackagesPath $(Build.ArtifactStagingDirectory)/PackageArtifacts/
-            -ToolDestinationPath $(Agent.BuildDirectory)/Extract/
-
-  - job:
-    displayName: Signing Validation
-    dependsOn: setupMaestroVars
-    condition: eq( ${{ parameters.enableSigningValidation }}, 'true')
+- ${{ if or(and(le(parameters.publishingInfraVersion, 2), eq(parameters.inline, 'true')), eq( parameters.enableNugetValidation, 'true'), eq(parameters.enableSigningValidation, 'true'), eq(parameters.enableSourceLinkValidation, 'true'), eq(parameters.SDLValidationParameters.enable, 'true')) }}:
+  - stage: Validate
+    dependsOn: ${{ parameters.validateDependsOn }}
+    displayName: Validate Build Assets
     variables:
       - template: common-variables.yml
-      - name: AzDOProjectName
-        value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOProjectName'] ]
-      - name: AzDOPipelineId
-        value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOPipelineId'] ]
-      - name: AzDOBuildId
-        value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOBuildId'] ]
-    pool:
-      vmImage: 'windows-2019'
-    steps:
-      - ${{ if eq(parameters.useBuildManifest, true) }}:
+    jobs:
+    - template: setup-maestro-vars.yml
+      parameters:
+        BARBuildId: ${{ parameters.BARBuildId }}
+        PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+
+    - ${{ if and(le(parameters.publishingInfraVersion, 2), eq(parameters.inline, 'true')) }}:
+      - job:
+        displayName: Post-build Checks
+        dependsOn: setupMaestroVars
+        variables:
+          - name: TargetChannels
+            value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.TargetChannels'] ]
+        pool:
+          vmImage: 'windows-2019'
+        steps:
+          - task: PowerShell@2
+            displayName: Maestro Channels Consistency
+            inputs:
+              filePath: $(Build.SourcesDirectory)/eng/common/post-build/check-channel-consistency.ps1
+              arguments: -PromoteToChannels "$(TargetChannels)"
+                -AvailableChannelIds ${{parameters.NetEngLatestChannelId}},${{parameters.NetEngValidationChannelId}},${{parameters.NetDev5ChannelId}},${{parameters.NetDev6ChannelId}},${{parameters.GeneralTestingChannelId}},${{parameters.NETCoreToolingDevChannelId}},${{parameters.NETCoreToolingReleaseChannelId}},${{parameters.NETInternalToolingChannelId}},${{parameters.NETCoreExperimentalChannelId}},${{parameters.NetEngServicesIntChannelId}},${{parameters.NetEngServicesProdChannelId}},${{parameters.Net5Preview8ChannelId}},${{parameters.Net5RC1ChannelId}},${{parameters.Net5RC2ChannelId}},${{parameters.NetCoreSDK313xxChannelId}},${{parameters.NetCoreSDK313xxInternalChannelId}},${{parameters.NetCoreSDK314xxChannelId}},${{parameters.NetCoreSDK314xxInternalChannelId}},${{parameters.VS166ChannelId}},${{parameters.VS167ChannelId}},${{parameters.VS168ChannelId}},${{parameters.VSMasterChannelId}},${{parameters.VS169ChannelId}},${{parameters.VS1610ChannelId}}                
+    - job:
+      displayName: NuGet Validation
+      dependsOn: setupMaestroVars
+      condition: eq( ${{ parameters.enableNugetValidation }}, 'true')
+      pool:
+        vmImage: 'windows-2019'
+      variables:
+        - name: AzDOProjectName
+          value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOProjectName'] ]
+        - name: AzDOPipelineId
+          value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOPipelineId'] ]
+        - name: AzDOBuildId
+          value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOBuildId'] ]
+      steps:
         - task: DownloadBuildArtifacts@0
-          displayName: Download build manifest
+          displayName: Download Package Artifacts
           inputs:
             buildType: specific
             buildVersionToDownload: specific
             project: $(AzDOProjectName)
             pipeline: $(AzDOPipelineId)
             buildId: $(AzDOBuildId)
-            artifactName: BuildManifests
-      - task: DownloadBuildArtifacts@0
-        displayName: Download Package Artifacts
-        inputs:
-          buildType: specific
-          buildVersionToDownload: specific
-          project: $(AzDOProjectName)
-          pipeline: $(AzDOPipelineId)
-          buildId: $(AzDOBuildId)
-          artifactName: PackageArtifacts
+            artifactName: PackageArtifacts
 
-      # This is necessary whenever we want to publish/restore to an AzDO private feed
-      # Since sdk-task.ps1 tries to restore packages we need to do this authentication here
-      # otherwise it'll complain about accessing a private feed.
-      - task: NuGetAuthenticate@0
-        displayName: 'Authenticate to AzDO Feeds'
+        - task: PowerShell@2
+          displayName: Validate
+          inputs:
+            filePath: $(Build.SourcesDirectory)/eng/common/post-build/nuget-validation.ps1
+            arguments: -PackagesPath $(Build.ArtifactStagingDirectory)/PackageArtifacts/ 
+              -ToolDestinationPath $(Agent.BuildDirectory)/Extract/ 
 
-      - task: PowerShell@2
-        displayName: Enable cross-org publishing
-        inputs:
-          filePath: eng\common\enable-cross-org-publishing.ps1
-          arguments: -token $(dn-bot-dnceng-artifact-feeds-rw)
-
-      # Signing validation will optionally work with the buildmanifest file which is downloaded from
-      # Azure DevOps above.
-      - task: PowerShell@2
-        displayName: Validate
-        inputs:
-          filePath: eng\common\sdk-task.ps1
-          arguments: -task SigningValidation -restore -msbuildEngine vs
-            /p:PackageBasePath='$(Build.ArtifactStagingDirectory)/PackageArtifacts'
-            /p:SignCheckExclusionsFile='$(Build.SourcesDirectory)/eng/SignCheckExclusionsFile.txt'
-            ${{ parameters.signingValidationAdditionalParameters }}
-
-      - template: ../steps/publish-logs.yml
-        parameters:
-          StageLabel: 'Validation'
-          JobLabel: 'Signing'
-
-  - job:
-    displayName: SourceLink Validation
-    dependsOn: setupMaestroVars
-    condition: eq( ${{ parameters.enableSourceLinkValidation }}, 'true')
-    variables:
-      - template: common-variables.yml
-      - name: AzDOProjectName
-        value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOProjectName'] ]
-      - name: AzDOPipelineId
-        value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOPipelineId'] ]
-      - name: AzDOBuildId
-        value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOBuildId'] ]
-    pool:
-      vmImage: 'windows-2019'
-    steps:
-      - task: DownloadBuildArtifacts@0
-        displayName: Download Blob Artifacts
-        inputs:
-          buildType: specific
-          buildVersionToDownload: specific
-          project: $(AzDOProjectName)
-          pipeline: $(AzDOPipelineId)
-          buildId: $(AzDOBuildId)
-          artifactName: BlobArtifacts
-
-      - task: PowerShell@2
-        displayName: Validate
-        inputs:
-          filePath: $(Build.SourcesDirectory)/eng/common/post-build/sourcelink-validation.ps1
-          arguments: -InputPath $(Build.ArtifactStagingDirectory)/BlobArtifacts/
-            -ExtractPath $(Agent.BuildDirectory)/Extract/
-            -GHRepoName $(Build.Repository.Name)
-            -GHCommit $(Build.SourceVersion)
-            -SourcelinkCliVersion $(SourceLinkCLIVersion)
-        continueOnError: true
-
-  - template: /eng/common/templates/job/execute-sdl.yml
-    parameters:
-      enable: ${{ parameters.SDLValidationParameters.enable }}
+    - job:
+      displayName: Signing Validation
       dependsOn: setupMaestroVars
-      additionalParameters: ${{ parameters.SDLValidationParameters.params }}
-      continueOnError: ${{ parameters.SDLValidationParameters.continueOnError }}
-      artifactNames: ${{ parameters.SDLValidationParameters.artifactNames }}
-      downloadArtifacts: ${{ parameters.SDLValidationParameters.downloadArtifacts }}
+      condition: eq( ${{ parameters.enableSigningValidation }}, 'true')
+      variables:
+        - template: common-variables.yml
+        - name: AzDOProjectName
+          value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOProjectName'] ]
+        - name: AzDOPipelineId
+          value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOPipelineId'] ]
+        - name: AzDOBuildId
+          value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOBuildId'] ]
+      pool:
+        vmImage: 'windows-2019'
+      steps:
+        - ${{ if eq(parameters.useBuildManifest, true) }}:
+          - task: DownloadBuildArtifacts@0
+            displayName: Download build manifest
+            inputs:
+              buildType: specific
+              buildVersionToDownload: specific
+              project: $(AzDOProjectName)
+              pipeline: $(AzDOPipelineId)
+              buildId: $(AzDOBuildId)
+              artifactName: BuildManifests
+        - task: DownloadBuildArtifacts@0
+          displayName: Download Package Artifacts
+          inputs:
+            buildType: specific
+            buildVersionToDownload: specific
+            project: $(AzDOProjectName)
+            pipeline: $(AzDOPipelineId)
+            buildId: $(AzDOBuildId)
+            artifactName: PackageArtifacts
+
+        # This is necessary whenever we want to publish/restore to an AzDO private feed
+        # Since sdk-task.ps1 tries to restore packages we need to do this authentication here
+        # otherwise it'll complain about accessing a private feed.
+        - task: NuGetAuthenticate@0
+          displayName: 'Authenticate to AzDO Feeds'
+
+        - task: PowerShell@2
+          displayName: Enable cross-org publishing
+          inputs:
+            filePath: eng\common\enable-cross-org-publishing.ps1
+            arguments: -token $(dn-bot-dnceng-artifact-feeds-rw)
+
+        # Signing validation will optionally work with the buildmanifest file which is downloaded from
+        # Azure DevOps above.
+        - task: PowerShell@2
+          displayName: Validate
+          inputs:
+            filePath: eng\common\sdk-task.ps1
+            arguments: -task SigningValidation -restore -msbuildEngine vs
+              /p:PackageBasePath='$(Build.ArtifactStagingDirectory)/PackageArtifacts'
+              /p:SignCheckExclusionsFile='$(Build.SourcesDirectory)/eng/SignCheckExclusionsFile.txt'
+              ${{ parameters.signingValidationAdditionalParameters }}
+
+        - template: ../steps/publish-logs.yml
+          parameters:
+            StageLabel: 'Validation'
+            JobLabel: 'Signing'
+
+    - job:
+      displayName: SourceLink Validation
+      dependsOn: setupMaestroVars
+      condition: eq( ${{ parameters.enableSourceLinkValidation }}, 'true')
+      variables:
+        - template: common-variables.yml
+        - name: AzDOProjectName
+          value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOProjectName'] ]
+        - name: AzDOPipelineId
+          value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOPipelineId'] ]
+        - name: AzDOBuildId
+          value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.AzDOBuildId'] ]
+      pool:
+        vmImage: 'windows-2019'
+      steps:
+        - task: DownloadBuildArtifacts@0
+          displayName: Download Blob Artifacts
+          inputs:
+            buildType: specific
+            buildVersionToDownload: specific
+            project: $(AzDOProjectName)
+            pipeline: $(AzDOPipelineId)
+            buildId: $(AzDOBuildId)
+            artifactName: BlobArtifacts
+
+        - task: PowerShell@2
+          displayName: Validate
+          inputs:
+            filePath: $(Build.SourcesDirectory)/eng/common/post-build/sourcelink-validation.ps1
+            arguments: -InputPath $(Build.ArtifactStagingDirectory)/BlobArtifacts/ 
+              -ExtractPath $(Agent.BuildDirectory)/Extract/ 
+              -GHRepoName $(Build.Repository.Name) 
+              -GHCommit $(Build.SourceVersion)
+              -SourcelinkCliVersion $(SourceLinkCLIVersion)
+          continueOnError: true
+
+    - template: /eng/common/templates/job/execute-sdl.yml
+      parameters:
+        enable: ${{ parameters.SDLValidationParameters.enable }}
+        dependsOn: setupMaestroVars
+        additionalParameters: ${{ parameters.SDLValidationParameters.params }}
+        continueOnError: ${{ parameters.SDLValidationParameters.continueOnError }}
+        artifactNames: ${{ parameters.SDLValidationParameters.artifactNames }}
+        downloadArtifacts: ${{ parameters.SDLValidationParameters.downloadArtifacts }}
 
 - ${{ if or(ge(parameters.publishingInfraVersion, 3), eq(parameters.inline, 'false')) }}:
   - stage: publish_using_darc
-    dependsOn: Validate
+    ${{ if or(eq(parameters.enableNugetValidation, 'true'), eq(parameters.enableSigningValidation, 'true'), eq(parameters.enableSourceLinkValidation, 'true'), eq(parameters.SDLValidationParameters.enable, 'true')) }}:
+      dependsOn: Validate
+    ${{ if and(ne(parameters.enableNugetValidation, 'true'), ne(parameters.enableSigningValidation, 'true'), ne(parameters.enableSourceLinkValidation, 'true'), ne(parameters.SDLValidationParameters.enable, 'true')) }}:
+      dependsOn: ${{ parameters.validateDependsOn }}
     displayName: Publish using Darc
     variables:
       - template: common-variables.yml
@@ -261,7 +264,7 @@ stages:
           displayName: Publish Using Darc
           inputs:
             filePath: $(Build.SourcesDirectory)/eng/common/post-build/publish-using-darc.ps1
-            arguments: -BuildId $(BARBuildId)
+            arguments: -BuildId $(BARBuildId) 
               -PublishingInfraVersion ${{ parameters.PublishingInfraVersion }}
               -AzdoToken '$(publishing-dnceng-devdiv-code-r-build-re)'
               -MaestroToken '$(MaestroApiAccessToken)'
@@ -272,7 +275,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -304,7 +307,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-internal-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -368,7 +371,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -384,7 +387,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -400,7 +403,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -415,7 +418,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -430,7 +433,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-internal-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -445,7 +448,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -460,7 +463,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -475,7 +478,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -490,7 +493,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -505,7 +508,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-internal-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -515,12 +518,12 @@ stages:
       channelId: ${{ parameters.NetCoreSDK314xxInternalChannelId }}
       transportFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal-transport/nuget/v3/index.json'
       shippingFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal/nuget/v3/index.json'
-      symbolsFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal-symbols/nuget/v3/index.json'
+      symbolsFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal-symbols/nuget/v3/index.json' 
 
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -535,7 +538,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-internal-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -545,12 +548,12 @@ stages:
       channelId: ${{ parameters.NetCoreSDK313xxInternalChannelId }}
       transportFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal-transport/nuget/v3/index.json'
       shippingFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal/nuget/v3/index.json'
-      symbolsFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal-symbols/nuget/v3/index.json'
+      symbolsFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal-symbols/nuget/v3/index.json' 
 
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -565,7 +568,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -576,11 +579,11 @@ stages:
       transportFeed: 'https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools-transport/nuget/v3/index.json'
       shippingFeed: 'https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json'
       symbolsFeed: 'https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools-symbols/nuget/v3/index.json'
-
+      
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -595,7 +598,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -610,12 +613,12 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
       symbolPublishingAdditionalParameters: ${{ parameters.symbolPublishingAdditionalParameters }}
-      stageName: 'VS16_9_Publishing'
+      stageName: 'VS_16_9_Publishing'
       channelName: 'VS 16.9'
       channelId: ${{ parameters.VS169ChannelId }}
       transportFeed: 'https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools-transport/nuget/v3/index.json'
@@ -625,12 +628,12 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
       symbolPublishingAdditionalParameters: ${{ parameters.symbolPublishingAdditionalParameters }}
-      stageName: 'VS16_10_Publishing'
+      stageName: 'VS_16_10_Publishing'
       channelName: 'VS 16.10'
       channelId: ${{ parameters.VS1610ChannelId }}
       transportFeed: 'https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools-transport/nuget/v3/index.json'
