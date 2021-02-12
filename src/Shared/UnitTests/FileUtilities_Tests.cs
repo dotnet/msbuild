@@ -549,7 +549,6 @@ namespace Microsoft.Build.UnitTests
 
             Assert.False(FileUtilities.FileOrDirectoryExistsNoThrow("||"));
             Assert.False(FileUtilities.FileOrDirectoryExistsNoThrow(isWindows ? @"c:\doesnot_exist" : "/doesnot_exist"));
-            Assert.False(FileUtilities.FileOrDirectoryExistsNoThrow(string.Empty));
             Assert.True(FileUtilities.FileOrDirectoryExistsNoThrow(isWindows ? @"c:\" : "/"));
             Assert.True(FileUtilities.FileOrDirectoryExistsNoThrow(Path.GetTempPath()));
 
@@ -666,35 +665,6 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(currentDirectory);
             }
         }
-
-        [Fact]
-        public void DirectoryGetFilesThrowsOnNull()
-        {
-            Assert.Throws<ArgumentNullException>(() => FileUtilities.DirectoryGetFiles(null));
-        }
-
-        [Fact]
-        public void DirectoryGetFilesThrowsOnEmpty()
-        {
-            Assert.Throws<ArgumentException>(() => FileUtilities.DirectoryGetFiles(string.Empty));
-        }
-
-        [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
-        public void DirectoryGetFilesTooLongWithDots()
-        {
-            Assert.Throws<ArgumentNullException>(() => FileUtilities.DirectoryGetFiles(null));
-
-            string systemDirectoryPath = Path.Combine(Environment.SystemDirectory) + Path.DirectorySeparatorChar;
-            string longPart = new string('x', NativeMethodsShared.MAX_PATH - systemDirectoryPath.Length); // We want the shortest that is > max path.
-
-            string inputPath = Path.Combine(new[] { Environment.SystemDirectory, longPart, "..", });
-
-            Console.WriteLine(inputPath.Length);
-
-            // "c:\windows\system32\<verylong>\.." > MAX_PATH
-            var files = FileUtilities.DirectoryGetFiles(inputPath);
-            Assert.NotEmpty(files);
-        }     
 
         public static bool RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241()
         {

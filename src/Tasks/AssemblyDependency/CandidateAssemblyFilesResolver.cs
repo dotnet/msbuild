@@ -26,11 +26,10 @@ namespace Microsoft.Build.Tasks
         /// <param name="searchPathElement">The corresponding element from the search path.</param>
         /// <param name="getAssemblyName">Delegate that gets the assembly name.</param>
         /// <param name="fileExists">Delegate that returns if the file exists.</param>
-        /// <param name="fileExistsInDirectory">Delegate to test if file exists in directory and return full file name</param>
         /// <param name="getRuntimeVersion">Delegate that returns the clr runtime version for the file.</param>
         /// <param name="targetedRuntimeVesion">The targeted runtime version.</param>
-        public CandidateAssemblyFilesResolver(string[] candidateAssemblyFiles, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, FileExistsInDirectory fileExistsInDirectory, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
-            : base(searchPathElement, getAssemblyName, fileExists, fileExistsInDirectory, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false)
+        public CandidateAssemblyFilesResolver(string[] candidateAssemblyFiles, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false)
         {
             _candidateAssemblyFiles = candidateAssemblyFiles;
         }

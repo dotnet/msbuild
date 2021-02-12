@@ -79,8 +79,6 @@ namespace Microsoft.Build.Tasks
         private readonly DirectoryExists _directoryExists;
         /// <summary>Delegate used for getting directories.</summary>
         private readonly GetDirectories _getDirectories;
-        /// <summary>Delegate used for checking for the existence of a file in a directory.</summary>
-        private readonly FileExistsInDirectory _fileExistsInDirectory;
         /// <summary>Delegate used for getting assembly names.</summary>
         private readonly GetAssemblyName _getAssemblyName;
         /// <summary>Delegate used for finding dependencies of a file.</summary>
@@ -177,7 +175,6 @@ namespace Microsoft.Build.Tasks
         /// <param name="installedAssemblies">Installed assembly XML tables.</param>
         /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64, the processor architecture being targetted.</param>
         /// <param name="fileExists">Delegate used for checking for the existence of a file.</param>
-        /// <param name="fileExistsInDirectory">Delegate used for checking for the existence of a file in a directory.</param>
         /// <param name="directoryExists">Delegate used for files.</param>
         /// <param name="getDirectories">Delegate used for getting directories.</param>
         /// <param name="getAssemblyName">Delegate used for getting assembly names.</param>
@@ -219,7 +216,6 @@ namespace Microsoft.Build.Tasks
         /// <param name="installedAssemblies">Installed assembly XML tables.</param>
         /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64, the processor architecture being targetted.</param>
         /// <param name="fileExists">Delegate used for checking for the existence of a file.</param>
-        /// <param name="fileExistsInDirectory">Delegate used for checking for the existence of a file in a directory.</param>
         /// <param name="directoryExists">Delegate used for files.</param>
         /// <param name="getDirectories">Delegate used for getting directories.</param>
         /// <param name="getAssemblyName">Delegate used for getting assembly names.</param>
@@ -258,7 +254,6 @@ namespace Microsoft.Build.Tasks
             InstalledAssemblies installedAssemblies,
             System.Reflection.ProcessorArchitecture targetProcessorArchitecture,
             FileExists fileExists,
-            FileExistsInDirectory fileExistsInDirectory,
             DirectoryExists directoryExists,
             GetDirectories getDirectories,
             GetAssemblyName getAssemblyName,
@@ -298,7 +293,6 @@ namespace Microsoft.Build.Tasks
             _fileExists = fileExists;
             _directoryExists = directoryExists;
             _getDirectories = getDirectories;
-            _fileExistsInDirectory = fileExistsInDirectory;
             _getAssemblyName = getAssemblyName;
             _getAssemblyMetadata = getAssemblyMetadata;
             _getRuntimeVersion = getRuntimeVersion;
@@ -354,7 +348,6 @@ namespace Microsoft.Build.Tasks
                     targetProcessorArchitecture,
                     frameworkPaths,
                     fileExists,
-                    fileExistsInDirectory,
                     getAssemblyName,
 #if FEATURE_WIN32_REGISTRY
                     getRegistrySubKeyNames,
@@ -1309,14 +1302,14 @@ namespace Microsoft.Build.Tasks
             // If a reference has the SDKName metadata on it then we will only search using a single resolver, that is the InstalledSDKResolver.
             if (reference.SDKName.Length > 0)
             {
-                jaggedResolvers.Add(new Resolver[] { new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _fileExistsInDirectory, _getRuntimeVersion, _targetedRuntimeVersion) });
+                jaggedResolvers.Add(new Resolver[] { new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion) });
             }
             else
             {
                 // Do not probe near dependees if the reference is primary and resolved externally. If resolved externally, the search paths should have been specified in such a way to point to the assembly file.
                 if (assemblyName == null || !_externallyResolvedPrimaryReferences.Contains(assemblyName.Name))
                 {
-                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _fileExistsInDirectory, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion));
+                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion));
                 }
 
                 jaggedResolvers.Add(Resolvers);

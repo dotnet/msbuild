@@ -24,12 +24,11 @@ namespace Microsoft.Build.Tasks
         /// <param name="searchPathElement">The search path element.</param>
         /// <param name="getAssemblyName">Delegate to get the assembly name object.</param>
         /// <param name="fileExists">Delegate to check if the file exists.</param>
-        /// <param name="fileExistsInDirectory">Delegate to check if the file exists by cached list of files of directory.</param>
         /// <param name="getRuntimeVersion">Delegate to get the runtime version.</param>
         /// <param name="targetedRuntimeVesion">The targeted runtime version.</param>
         /// <param name="getAssemblyPathInGac">Delegate to get assembly path in the GAC.</param>
-        public GacResolver(System.Reflection.ProcessorArchitecture targetProcessorArchitecture, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, FileExistsInDirectory fileExistsInDirectory, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, GetAssemblyPathInGac getAssemblyPathInGac)
-            : base(searchPathElement, getAssemblyName, fileExists, fileExistsInDirectory, getRuntimeVersion, targetedRuntimeVesion, targetProcessorArchitecture, true)
+        public GacResolver(System.Reflection.ProcessorArchitecture targetProcessorArchitecture, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, GetAssemblyPathInGac getAssemblyPathInGac)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, targetProcessorArchitecture, true)
         {
             _getAssemblyPathInGac = getAssemblyPathInGac;
         }
