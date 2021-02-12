@@ -1063,8 +1063,24 @@ namespace Microsoft.Build.Shared
             {
                 return Enumerable.Empty<string>();
             }
+
+            // Back-compat hack: We don't use case-insensitive file enumeration I/O on Linux so the behavior is different depending
+            // on the NeedsToProcessEachFile flag. If the flag is false and matching is done within the _getFileSystemEntries call,
+            // it is case sensitive. If the flag is true and matching is handled with MatchFileRecursionStep, it is case-insensitive.
+            // TODO: Can we fix this by using case-insensitive file I/O on Linux?
+            string filespec;
+            if (NativeMethodsShared.IsLinux && recursionState.SearchData.DirectoryPattern != null)
+            {
+                filespec = "*.*";
+                stepResult.NeedsToProcessEachFile = true;
+            }
+            else
+            {
+                filespec = recursionState.SearchData.Filespec;
+            }
+
             IEnumerable<string> files = _getFileSystemEntries(FileSystemEntity.Files, recursionState.BaseDirectory,
-                recursionState.SearchData.Filespec, projectDirectory, stripProjectDirectory);
+                filespec, projectDirectory, stripProjectDirectory);
 
             if (!stepResult.NeedsToProcessEachFile)
             {
