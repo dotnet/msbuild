@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Shared;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -38,7 +39,7 @@ namespace Microsoft.Build.Internal
             // check if there is a regex matching the file
             if (_regex != null)
             {
-                var normalizedFileToMatch = FileUtilities.GetFullPathNoThrow(Path.Combine(_currentDirectory, fileToMatch));
+                string normalizedFileToMatch = FileUtilities.GetFullPathNoThrow(Path.Combine(_currentDirectory, fileToMatch));
                 return _regex.IsMatch(normalizedFileToMatch);
             }
 

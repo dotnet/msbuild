@@ -34,8 +34,7 @@ namespace Microsoft.Build.Shared
         private static readonly string[] s_propertyAndItemReferences = { "$(", "@(" };
 
         // on OSX both System.IO.Path separators are '/', so we have to use the literals
-        internal static readonly char[] directorySeparatorCharacters = { '/', '\\' };
-        internal static readonly string[] directorySeparatorStrings = directorySeparatorCharacters.Select(c => c.ToString()).ToArray();
+        internal static readonly char[] directorySeparatorCharacters = FileUtilities.Slashes;
 
         // until Cloudbuild switches to EvaluationContext, we need to keep their dependence on global glob caching via an environment variable
         private static readonly Lazy<ConcurrentDictionary<string, ImmutableArray<string>>> s_cachedGlobExpansions = new Lazy<ConcurrentDictionary<string, ImmutableArray<string>>>(() => new ConcurrentDictionary<string, ImmutableArray<string>>(StringComparer.OrdinalIgnoreCase));
@@ -1460,15 +1459,9 @@ namespace Microsoft.Build.Shared
             out bool needsRecursion,
             out bool isLegalFileSpec)
         {
-            string fixedDirectoryPart;
-            string wildcardDirectoryPart;
-            string filenamePart;
-            string matchFileExpression;
-
             GetFileSpecInfo(filespec,
-                out fixedDirectoryPart, out wildcardDirectoryPart, out filenamePart,
-                out matchFileExpression, out needsRecursion, out isLegalFileSpec);
-
+                out _, out _, out _,
+                out string matchFileExpression, out needsRecursion, out isLegalFileSpec);
             
             regexFileMatch = isLegalFileSpec
                 ? new Regex(matchFileExpression, DefaultRegexOptions)
@@ -2012,21 +2005,15 @@ namespace Microsoft.Build.Shared
             stripProjectDirectory = false;
             result = new RecursionState();
 
-            string fixedDirectoryPart;
-            string wildcardDirectoryPart;
-            string filenamePart;
-            string matchFileExpression;
-            bool needsRecursion;
-            bool isLegalFileSpec;
             GetFileSpecInfo
             (
                 filespecUnescaped,
-                out fixedDirectoryPart,
-                out wildcardDirectoryPart,
-                out filenamePart,
-                out matchFileExpression,
-                out needsRecursion,
-                out isLegalFileSpec
+                out string fixedDirectoryPart,
+                out string wildcardDirectoryPart,
+                out string filenamePart,
+                out string matchFileExpression,
+                out bool needsRecursion,
+                out bool isLegalFileSpec
             );
 
             /*
@@ -2110,7 +2097,7 @@ namespace Microsoft.Build.Shared
             var index = 0;
 
             // preserve meaningful roots and their slashes
-            if (aString.Length >= 2 && IsValidDriveChar(aString[0]) && aString[1] == ':')
+            if (aString.Length >= 2 && aString[1] == ':' && IsValidDriveChar(aString[0]))
             {
                 sb.Append(aString[0]);
                 sb.Append(aString[1]);
@@ -2187,12 +2174,12 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Returns true if the given character is a valid drive letter
         /// </summary>
-        internal static bool IsValidDriveChar(char value)
+        private static bool IsValidDriveChar(char value)
         {
             return (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z');
         }
 
-        static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, List<string> excludeSpecsUnescaped)
+        private static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, List<string> excludeSpecsUnescaped)
         {
             if (excludeSpecsUnescaped != null)
             {
@@ -2235,10 +2222,8 @@ namespace Microsoft.Build.Shared
             /*
              * Analyze the file spec and get the information we need to do the matching.
              */
-            bool stripProjectDirectory;
-            RecursionState state;
             var action = GetFileSearchData(projectDirectoryUnescaped, filespecUnescaped,
-                out stripProjectDirectory, out state);
+                out bool stripProjectDirectory, out RecursionState state);
 
             if (action == SearchAction.ReturnEmptyList)
             {
@@ -2267,11 +2252,8 @@ namespace Microsoft.Build.Shared
                 foreach (string excludeSpec in excludeSpecsUnescaped)
                 {
                     //  This is ignored, we always use the include pattern's value for stripProjectDirectory
-                    bool excludeStripProjectDirectory;
-
-                    RecursionState excludeState;
                     var excludeAction = GetFileSearchData(projectDirectoryUnescaped, excludeSpec,
-                        out excludeStripProjectDirectory, out excludeState);
+                        out _, out RecursionState excludeState);
 
                     if (excludeAction == SearchAction.ReturnFileSpec)
                     {
@@ -2455,7 +2437,6 @@ namespace Microsoft.Build.Shared
             }
 
             bool prefixMatch = possibleChild.StartsWith(possibleParent, StringComparison.OrdinalIgnoreCase);
-
             if (!prefixMatch)
             {
                 return false;
