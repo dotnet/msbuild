@@ -5,10 +5,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using System.Security;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -492,7 +493,11 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             MarshalByRefObject,
 #endif
-            ITaskItem, ITaskItem2
+            ITaskItem,
+            ITaskItem2
+#if !TASKHOST
+            ,IMetadataContainer
+#endif
         {
             /// <summary>
             /// The item spec 
@@ -750,6 +755,23 @@ namespace Microsoft.Build.BackEnd
             {
                 IDictionary clonedDictionary = new Dictionary<string, string>(_customEscapedMetadata);
                 return clonedDictionary;
+            }
+
+            public IEnumerable<KeyValuePair<string, string>> Metadata
+            {
+                get
+                {
+                    if (_customEscapedMetadata == null)
+                    {
+                        yield break;
+                    }
+
+                    foreach (var kvp in _customEscapedMetadata)
+                    {
+                        var unescaped = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
+                        yield return unescaped;
+                    }
+                }
             }
         }
     }

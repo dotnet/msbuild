@@ -375,6 +375,7 @@
     <Compile Include="Collections\ReadOnlyConvertingDictionary.cs" />
     <!-- ######################## -->
     <Compile Include="Collections\WeakValueDictionary.cs" />
+    <Compile Include="Collections\SmallDictionary.cs" />
     <!-- #### CONSTRUCTION MODEL ### -->
     <Compile Include="Construction\ProjectElement.cs" />
     <Compile Include="Construction\ProjectElementContainer.cs" />

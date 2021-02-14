@@ -38,6 +38,7 @@ namespace Microsoft.Build.Framework
         public Microsoft.Build.Framework.BuildEventContext BuildEventContext { get { throw null; } set { } }
         public string HelpKeyword { get { throw null; } }
         public virtual string Message { get { throw null; } protected set { } }
+        protected System.DateTime RawTimestamp { get { throw null; } set { } }
         public string SenderName { get { throw null; } }
         public int ThreadId { get { throw null; } }
         public System.DateTime Timestamp { get { throw null; } }
@@ -588,6 +589,22 @@ namespace Microsoft.Build.Framework
         public string TaskName { get { throw null; } }
     }
     public delegate void TaskFinishedEventHandler(object sender, Microsoft.Build.Framework.TaskFinishedEventArgs e);
+    public partial class TaskParameterEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
+    {
+        public TaskParameterEventArgs(Microsoft.Build.Framework.TaskParameterMessageKind kind, string itemName, System.Collections.IList items, bool logItemMetadata, System.DateTime eventTimestamp) { }
+        public string ItemName { get { throw null; } }
+        public System.Collections.IList Items { get { throw null; } }
+        public Microsoft.Build.Framework.TaskParameterMessageKind Kind { get { throw null; } }
+        public bool LogItemMetadata { get { throw null; } }
+        public override string Message { get { throw null; } }
+    }
+    public enum TaskParameterMessageKind
+    {
+        TaskInput = 0,
+        TaskOutput = 1,
+        AddItem = 2,
+        RemoveItem = 3,
+    }
     public partial class TaskPropertyInfo
     {
         public TaskPropertyInfo(string name, System.Type typeOfParameter, bool output, bool required) { }

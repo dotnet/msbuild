@@ -41,7 +41,9 @@ namespace Microsoft.Build.Logging
         //      * NameValueList - deduplicate arrays of name-value pairs such as properties, items and metadata
         //                        in a separate record and refer to those records from regular records
         //                        where a list used to be written in-place
-        internal const int FileFormatVersion = 10;
+        // version 11:
+        //   - new record kind: TaskParameterEventArgs
+        internal const int FileFormatVersion = 11;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
