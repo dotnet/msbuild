@@ -19,39 +19,19 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <!-- 
-    For .NET Core ClickOnce publish in Single File mode, the ClickOnce manifest generation needs to run 
-    after ComputeFilesToPublish. This is so that the bundle EXE which is included in the ClickOnce manifest 
-    is generated before the manifest is created.
+    .NET Core ClickOnce manifest generation needs to run after this list of targets so that all 
+    json files are generated and files to publish are computed.
   -->
-  <PropertyGroup Condition="'$(PublishSingleFile)' == 'true'">
+  <PropertyGroup>
+    <PublishDepsFilePath>$(PublishDir)$(ProjectDepsFileName)</PublishDepsFilePath>
     <DeploymentComputeClickOnceManifestInfoDependsOn>
       $(DeploymentComputeClickOnceManifestInfoDependsOn);
-      ComputeFilesToPublish
+      GenerateBuildDependencyFile;
+      GenerateBuildRuntimeConfigurationFiles;
+      ComputeFilesToPublish;
+      GetNetCoreRuntimeJsonFilesForClickOnce;
     </DeploymentComputeClickOnceManifestInfoDependsOn>
   </PropertyGroup>
-
-  <!-- Ensure runtimeconfig.json is built before clickonce manifest generation -->
-  <PropertyGroup Condition="'$(GenerateRuntimeConfigurationFiles)'=='true'">
-    <GenerateManifestsDependsOn>
-       GenerateBuildRuntimeConfigurationFiles;
-       $(GenerateManifestsDependsOn)
-    </GenerateManifestsDependsOn>
-  </PropertyGroup>
-
-  <!-- Ensure deps.json is available before clickonce manifest generation -->
-  <PropertyGroup Condition="'$(GenerateDependencyFile)' == 'true'">
-    <GenerateManifestsDependsOn>
-      _ComputeUseBuildDependencyFile;
-      GenerateBuildDependencyFile;
-      GeneratePublishDependencyFile;
-      GetNetCoreRuntimeJsonFilesForClickOnce;
-      $(GenerateManifestsDependsOn)
-    </GenerateManifestsDependsOn>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(GenerateRuntimeConfigurationFiles)'=='true'">
-    <ProjectRuntimeConfigFilesForClickOnce Include="$(ProjectRuntimeConfigFilePath)"/>
-  </ItemGroup>
 
   <Target Name="GetNetCoreRuntimeJsonFilesForClickOnce" 
           Condition="'$(GenerateDependencyFile)' == 'true'">
@@ -60,6 +40,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <ProjectDepsFilesForClickOnce Condition="'$(_UseBuildDependencyFile)' == 'true'" Include="$(ProjectDepsFilePath)"/>
       <ProjectDepsFilesForClickOnce Condition="'$(_UseBuildDependencyFile)' != 'true'" Include="$(IntermediateDepsFilePath)"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(GenerateRuntimeConfigurationFiles)'=='true'">
+      <ProjectRuntimeConfigFilesForClickOnce Include="$(ProjectRuntimeConfigFilePath)"/>
     </ItemGroup>
 
     <!-- Add runtimeconfig and deps json file to item group that's included in files for clickonce publishing -->
