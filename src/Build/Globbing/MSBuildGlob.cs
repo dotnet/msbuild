@@ -28,11 +28,10 @@ namespace Microsoft.Build.Globbing
             public string FixedDirectoryPart { get; }
             public string WildcardDirectoryPart { get; }
             public string FilenamePart { get; }
-            public string MatchFileExpression { get; }
             public bool NeedsRecursion { get; }
             public Regex Regex { get; }
 
-            public GlobState(string globRoot, string fileSpec, bool isLegal, string fixedDirectoryPart, string wildcardDirectoryPart, string filenamePart, string matchFileExpression, bool needsRecursion, Regex regex)
+            public GlobState(string globRoot, string fileSpec, bool isLegal, string fixedDirectoryPart, string wildcardDirectoryPart, string filenamePart, bool needsRecursion, Regex regex)
             {
                 GlobRoot = globRoot;
                 FileSpec = fileSpec;
@@ -40,7 +39,6 @@ namespace Microsoft.Build.Globbing
                 FixedDirectoryPart = fixedDirectoryPart;
                 WildcardDirectoryPart = wildcardDirectoryPart;
                 FilenamePart = filenamePart;
-                MatchFileExpression = matchFileExpression;
                 NeedsRecursion = needsRecursion;
                 Regex = regex;
             }
@@ -183,7 +181,6 @@ namespace Microsoft.Build.Globbing
                     out string fixedDirectoryPart,
                     out string wildcardDirectoryPart,
                     out string filenamePart,
-                    out string matchFileExpression,
                     out bool needsRecursion,
                     out bool isLegalFileSpec,
                     (fixedDirPart, wildcardDirPart, filePart) =>
@@ -196,6 +193,8 @@ namespace Microsoft.Build.Globbing
                 Regex regex = null;
                 if (isLegalFileSpec)
                 {
+                    string matchFileExpression = FileMatcher.RegularExpressionFromFileSpec(fixedDirectoryPart, wildcardDirectoryPart, filenamePart);
+
                     lock (s_regexCache)
                     {
                         s_regexCache.TryGetValue(matchFileExpression, out regex);
@@ -215,7 +214,7 @@ namespace Microsoft.Build.Globbing
                         regex ??= newRegex;
                     }
                 }
-                return new GlobState(globRoot, fileSpec, isLegalFileSpec, fixedDirectoryPart, wildcardDirectoryPart, filenamePart, matchFileExpression, needsRecursion, regex);
+                return new GlobState(globRoot, fileSpec, isLegalFileSpec, fixedDirectoryPart, wildcardDirectoryPart, filenamePart, needsRecursion, regex);
             },
             true);
 

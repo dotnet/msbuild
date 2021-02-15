@@ -1625,7 +1625,7 @@ namespace Microsoft.Build.UnitTests
             "",
             "",
             "",
-            null,
+            "",
             false,
             false
         )]
@@ -1635,7 +1635,7 @@ namespace Microsoft.Build.UnitTests
             "",
             "",
             "",
-            null,
+            "",
             false,
             false
         )]
@@ -1876,10 +1876,13 @@ namespace Microsoft.Build.UnitTests
                 out string fixedDirectoryPart,
                 out string wildcardDirectoryPart,
                 out string filenamePart,
-                out string matchFileExpression,
                 out bool needsRecursion,
                 out bool isLegalFileSpec
             );
+            string matchFileExpression = isLegalFileSpec
+                ? FileMatcher.RegularExpressionFromFileSpec(fixedDirectoryPart, wildcardDirectoryPart, filenamePart)
+                : string.Empty;
+
             fixedDirectoryPart.ShouldBe(expectedFixedDirectoryPart);
             wildcardDirectoryPart.ShouldBe(expectedWildcardDirectoryPart);
             filenamePart.ShouldBe(expectedFilenamePart);

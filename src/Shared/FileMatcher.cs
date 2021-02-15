@@ -1148,21 +1148,14 @@ namespace Microsoft.Build.Shared
         /// <param name="fixedDirectoryPart">The fixed directory part.</param>
         /// <param name="wildcardDirectoryPart">The wildcard directory part.</param>
         /// <param name="filenamePart">The filename part.</param>
-        /// <param name="isLegalFileSpec">Receives whether this pattern is legal or not.</param>
         /// <returns>The regular expression string.</returns>
-        private static string RegularExpressionFromFileSpec
+        internal static string RegularExpressionFromFileSpec
         (
             string fixedDirectoryPart,
             string wildcardDirectoryPart,
-            string filenamePart,
-            out bool isLegalFileSpec
+            string filenamePart
         )
         {
-            isLegalFileSpec = IsLegalFileSpec(wildcardDirectoryPart, filenamePart);
-            if (!isLegalFileSpec)
-            {
-                return string.Empty;
-            }
 #if DEBUG
             ErrorUtilities.VerifyThrow(
                 FileSpecRegexMinLength == FileSpecRegexParts.FixedDirGroupStart.Length
@@ -1488,12 +1481,18 @@ namespace Microsoft.Build.Shared
             out bool isLegalFileSpec)
         {
             GetFileSpecInfo(filespec,
-                out _, out _, out _,
-                out string matchFileExpression, out needsRecursion, out isLegalFileSpec);
-            
-            regexFileMatch = isLegalFileSpec
-                ? new Regex(matchFileExpression, DefaultRegexOptions)
-                : null;
+                out string fixedDirectoryPart, out string wildcardDirectoryPart, out string filenamePart,
+                out needsRecursion, out isLegalFileSpec);
+
+            if (isLegalFileSpec)
+            {
+                string matchFileExpression = RegularExpressionFromFileSpec(fixedDirectoryPart, wildcardDirectoryPart, filenamePart);
+                regexFileMatch = new Regex(matchFileExpression, DefaultRegexOptions);
+            }
+            else
+            {
+                regexFileMatch = null;
+            }
         }
 
         internal delegate (string fixedDirectoryPart, string recursiveDirectoryPart, string fileNamePart) FixupParts(
@@ -1508,7 +1507,6 @@ namespace Microsoft.Build.Shared
         /// <param name="fixedDirectoryPart">Receives the fixed directory part.</param>
         /// <param name="wildcardDirectoryPart">Receives the wildcard directory part.</param>
         /// <param name="filenamePart">Receives the filename part.</param>
-        /// <param name="matchFileExpression">Receives the regular expression.</param>
         /// <param name="needsRecursion">Receives the flag that is true if recursion is required.</param>
         /// <param name="isLegalFileSpec">Receives the flag that is true if the filespec is legal.</param>
         /// <param name="fixupParts">hook method to further change the parts</param>
@@ -1517,7 +1515,6 @@ namespace Microsoft.Build.Shared
             out string fixedDirectoryPart,
             out string wildcardDirectoryPart,
             out string filenamePart,
-            out string matchFileExpression,
             out bool needsRecursion,
             out bool isLegalFileSpec,
             FixupParts fixupParts = null)
@@ -1526,7 +1523,6 @@ namespace Microsoft.Build.Shared
             fixedDirectoryPart = String.Empty;
             wildcardDirectoryPart = String.Empty;
             filenamePart = String.Empty;
-            matchFileExpression = null;
 
             if (!RawFileSpecIsValid(filespec))
             {
@@ -1549,13 +1545,9 @@ namespace Microsoft.Build.Shared
             }
 
             /*
-             *  Get a regular expression for matching files that will be found.
-             */
-            matchFileExpression = RegularExpressionFromFileSpec(fixedDirectoryPart, wildcardDirectoryPart, filenamePart, out isLegalFileSpec);
-
-            /*
              * Was the filespec valid? If not, then just return now.
              */
+            isLegalFileSpec = IsLegalFileSpec(wildcardDirectoryPart, filenamePart);
             if (!isLegalFileSpec)
             {
                 return;
@@ -2025,7 +2017,6 @@ namespace Microsoft.Build.Shared
                 out string fixedDirectoryPart,
                 out string wildcardDirectoryPart,
                 out string filenamePart,
-                out string matchFileExpression,
                 out bool needsRecursion,
                 out bool isLegalFileSpec
             );
@@ -2040,11 +2031,11 @@ namespace Microsoft.Build.Shared
 
             // The projectDirectory is not null only if we are running the evaluation from
             // inside the engine (i.e. not from a task)
+            string oldFixedDirectoryPart = fixedDirectoryPart;
             if (projectDirectoryUnescaped != null)
             {
                 if (fixedDirectoryPart != null)
                 {
-                    string oldFixedDirectoryPart = fixedDirectoryPart;
                     try
                     {
                         fixedDirectoryPart = Path.Combine(projectDirectoryUnescaped, fixedDirectoryPart);
@@ -2112,7 +2103,7 @@ namespace Microsoft.Build.Shared
                 matchWithRegex ? null : filenamePart,
                 directoryPattern,
                 // if using the file pattern, ignore the regular expression
-                matchWithRegex ? new Regex(matchFileExpression, RegexOptions.IgnoreCase) : null,
+                matchWithRegex ? new Regex(RegularExpressionFromFileSpec(oldFixedDirectoryPart, wildcardDirectoryPart, filenamePart), RegexOptions.IgnoreCase) : null,
                 needsRecursion);
 
             result.SearchData = searchData;
