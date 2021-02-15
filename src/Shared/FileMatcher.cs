@@ -9,7 +9,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
@@ -37,10 +36,10 @@ namespace Microsoft.Build.Shared
         internal static readonly char[] directorySeparatorCharacters = FileUtilities.Slashes;
 
         // until Cloudbuild switches to EvaluationContext, we need to keep their dependence on global glob caching via an environment variable
-        private static readonly Lazy<ConcurrentDictionary<string, ImmutableArray<string>>> s_cachedGlobExpansions = new Lazy<ConcurrentDictionary<string, ImmutableArray<string>>>(() => new ConcurrentDictionary<string, ImmutableArray<string>>(StringComparer.OrdinalIgnoreCase));
+        private static readonly Lazy<ConcurrentDictionary<string, IReadOnlyList<string>>> s_cachedGlobExpansions = new Lazy<ConcurrentDictionary<string, IReadOnlyList<string>>>(() => new ConcurrentDictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase));
         private static readonly Lazy<ConcurrentDictionary<string, object>> s_cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
 
-        private readonly ConcurrentDictionary<string, ImmutableArray<string>> _cachedGlobExpansions;
+        private readonly ConcurrentDictionary<string, IReadOnlyList<string>> _cachedGlobExpansions;
         private readonly Lazy<ConcurrentDictionary<string, object>> _cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
 
         /// <summary>
@@ -82,7 +81,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         public static FileMatcher Default = new FileMatcher(FileSystems.Default, null);
 
-        public FileMatcher(IFileSystem fileSystem, ConcurrentDictionary<string, ImmutableArray<string>> fileEntryExpansionCache = null) : this(
+        public FileMatcher(IFileSystem fileSystem, ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null) : this(
             fileSystem,
             (entityType, path, pattern, projectDirectory, stripProjectDirectory) => GetAccessibleFileSystemEntries(
                 fileSystem,
@@ -90,12 +89,12 @@ namespace Microsoft.Build.Shared
                 path,
                 pattern,
                 projectDirectory,
-                stripProjectDirectory),
+                stripProjectDirectory).ToArray(),
             fileEntryExpansionCache)
         {
         }
 
-        public FileMatcher(IFileSystem fileSystem, GetFileSystemEntries getFileSystemEntries, ConcurrentDictionary<string, ImmutableArray<string>> getFileSystemDirectoryEntriesCache = null)
+        internal FileMatcher(IFileSystem fileSystem, GetFileSystemEntries getFileSystemEntries, ConcurrentDictionary<string, IReadOnlyList<string>> getFileSystemDirectoryEntriesCache = null)
         {
             if (Traits.Instance.MSBuildCacheFileEnumerations)
             {
@@ -123,7 +122,7 @@ namespace Microsoft.Build.Shared
                                 path,
                                 pattern,
                                 directory,
-                                projectDirectory));
+                                projectDirectory).ToArray());
                     }
                     return getFileSystemEntries(type, path, pattern, directory, projectDirectory);
                 };
@@ -148,8 +147,8 @@ namespace Microsoft.Build.Shared
         /// <param name="pattern">The file pattern.</param>
         /// <param name="projectDirectory"></param>
         /// <param name="stripProjectDirectory"></param>
-        /// <returns>An immutable array of filesystem entries.</returns>
-        internal delegate ImmutableArray<string> GetFileSystemEntries(FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory);
+        /// <returns>An enumerable of filesystem entries.</returns>
+        internal delegate IEnumerable<string> GetFileSystemEntries(FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory);
 
         internal static void ClearFileEnumerationsCache()
         {
@@ -208,7 +207,7 @@ namespace Microsoft.Build.Shared
         /// <param name="stripProjectDirectory">If true the project directory should be stripped</param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns></returns>
-        private static ImmutableArray<string> GetAccessibleFileSystemEntries(IFileSystem fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
+        private static IEnumerable<string> GetAccessibleFileSystemEntries(IFileSystem fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
         {
             path = FileUtilities.FixFilePath(path);
             switch (entityType)
@@ -220,18 +219,18 @@ namespace Microsoft.Build.Shared
                     ErrorUtilities.VerifyThrow(false, "Unexpected filesystem entity type.");
                     break;
             }
-            return ImmutableArray<string>.Empty;
+            return Array.Empty<string>();
         }
 
         /// <summary>
-        /// Returns an immutable array of file system entries matching the specified search criteria. Inaccessible or non-existent file
+        /// Returns an enumerable of file system entries matching the specified search criteria. Inaccessible or non-existent file
         /// system entries are skipped.
         /// </summary>
         /// <param name="path"></param>
         /// <param name="pattern"></param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
-        /// <returns>An immutable array of matching file system entries (can be empty).</returns>
-        private static ImmutableArray<string> GetAccessibleFilesAndDirectories(IFileSystem fileSystem, string path, string pattern)
+        /// <returns>An enumerable of matching file system entries (can be empty).</returns>
+        private static IEnumerable<string> GetAccessibleFilesAndDirectories(IFileSystem fileSystem, string path, string pattern)
         {
             if (fileSystem.DirectoryExists(path))
             {
@@ -241,7 +240,7 @@ namespace Microsoft.Build.Shared
                         ? fileSystem.EnumerateFileSystemEntries(path, pattern)
                             .Where(o => IsMatch(Path.GetFileName(o), pattern))
                         : fileSystem.EnumerateFileSystemEntries(path, pattern)
-                        ).ToImmutableArray();
+                        );
                 }
                 // for OS security
                 catch (UnauthorizedAccessException)
@@ -255,7 +254,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            return ImmutableArray<string>.Empty;
+            return Array.Empty<string>();
         }
 
         /// <summary>
@@ -297,7 +296,7 @@ namespace Microsoft.Build.Shared
         /// <param name="stripProjectDirectory"></param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns>Files that can be accessed.</returns>
-        private static ImmutableArray<string> GetAccessibleFiles
+        private static IEnumerable<string> GetAccessibleFiles
         (
             IFileSystem fileSystem,
             string path,
@@ -341,17 +340,17 @@ namespace Microsoft.Build.Shared
                     files = RemoveInitialDotSlash(files);
                 }
 
-                return files.ToImmutableArray();
+                return files;
             }
             catch (System.Security.SecurityException)
             {
                 // For code access security.
-                return ImmutableArray<string>.Empty;
+                return Array.Empty<string>();
             }
             catch (System.UnauthorizedAccessException)
             {
                 // For OS security.
-                return ImmutableArray<string>.Empty;
+                return Array.Empty<string>();
             }
         }
 
@@ -365,7 +364,7 @@ namespace Microsoft.Build.Shared
         /// <param name="pattern">Pattern to match</param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns>Accessible directories.</returns>
-        private static ImmutableArray<string> GetAccessibleDirectories
+        private static IEnumerable<string> GetAccessibleDirectories
         (
             IFileSystem fileSystem,
             string path,
@@ -399,17 +398,17 @@ namespace Microsoft.Build.Shared
                     directories = RemoveInitialDotSlash(directories);
                 }
 
-                return directories.ToImmutableArray();
+                return directories;
             }
             catch (System.Security.SecurityException)
             {
                 // For code access security.
-                return ImmutableArray<string>.Empty;
+                return Array.Empty<string>();
             }
             catch (System.UnauthorizedAccessException)
             {
                 // For OS security.
-                return ImmutableArray<string>.Empty;
+                return Array.Empty<string>();
             }
         }
 
@@ -500,9 +499,10 @@ namespace Microsoft.Build.Shared
                     else
                     {
                         // getFileSystemEntries(...) returns an empty array if longPath doesn't exist.
-                        ImmutableArray<string> entries = getFileSystemEntries(FileSystemEntity.FilesAndDirectories, longPath, parts[i], null, false);
+                        IEnumerable<string> entries = getFileSystemEntries(FileSystemEntity.FilesAndDirectories, longPath, parts[i], null, false);
 
-                        if (0 == entries.Length)
+                        int entriesCount = entries.Count();
+                        if (0 == entriesCount)
                         {
                             // The next part doesn't exist. Therefore, no more of the path will exist.
                             // Just return the rest.
@@ -514,12 +514,12 @@ namespace Microsoft.Build.Shared
                         }
 
                         // Since we know there are no wild cards, this should be length one.
-                        ErrorUtilities.VerifyThrow(entries.Length == 1,
+                        ErrorUtilities.VerifyThrow(entriesCount == 1,
                             "Unexpected number of entries ({3}) found when enumerating '{0}' under '{1}'. Original path was '{2}'",
-                            parts[i], longPath, path, entries.Length);
+                            parts[i], longPath, path, entriesCount);
 
                         // Entries[0] contains the full path.
-                        longPath = entries[0];
+                        longPath = entries.First();
 
                         // We just want the trailing node.
                         longParts[i - startingElement] = Path.GetFileName(longPath);
@@ -1892,7 +1892,7 @@ namespace Microsoft.Build.Shared
 
             var enumerationKey = ComputeFileEnumerationCacheKey(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
 
-            ImmutableArray<string> files;
+            IReadOnlyList<string> files;
             if (!_cachedGlobExpansions.TryGetValue(enumerationKey, out files))
             {
                 // avoid parallel evaluations of the same wildcard by using a unique lock for each wildcard
@@ -1908,8 +1908,7 @@ namespace Microsoft.Build.Shared
                                     GetFilesImplementation(
                                         projectDirectoryUnescaped,
                                         filespecUnescaped,
-                                        excludeSpecsUnescaped)
-                                        .ToImmutableArray());
+                                        excludeSpecsUnescaped));
                     }
                 }
             }
