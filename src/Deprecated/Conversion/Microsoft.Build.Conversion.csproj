@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>Microsoft.Build.Conversion.Core</AssemblyName>
     <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
-    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <EnableDefaultItems>false</EnableDefaultItems>
     <IsPackable>true</IsPackable>
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which contains logic for converting projects.  NOTE: This assembly is deprecated.</PackageDescription>

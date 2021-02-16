@@ -7,7 +7,7 @@
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS</DefineConstants>
