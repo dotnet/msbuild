@@ -110,21 +110,51 @@ namespace Microsoft.Build.Shared
 
             _getFileSystemEntries = getFileSystemDirectoryEntriesCache == null
                 ? getFileSystemEntries
-                : (type, path, pattern, directory, projectDirectory) =>
+                : (type, path, pattern, directory, stripProjectDirectory) =>
                 {
-                    // Cache only directories, for files we won't hit the cache because the file name patterns tend to be unique
-                    if (type == FileSystemEntity.Directories)
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
                     {
-                        return getFileSystemDirectoryEntriesCache.GetOrAdd(
-                            $"{path};{pattern ?? "*"}",
-                            s => getFileSystemEntries(
-                                type,
-                                path,
-                                pattern,
-                                directory,
-                                projectDirectory).ToArray());
+                        // New behavior:
+                        // Always hit the filesystem with "*" pattern, cache the results, and do the filtering here.
+                        string cacheKey = type switch
+                        {
+                            FileSystemEntity.Files => "F",
+                            FileSystemEntity.Directories => "D",
+                            FileSystemEntity.FilesAndDirectories => "A",
+                            _ => throw new NotImplementedException()
+                        } + ";" + path;
+                        IReadOnlyList<string> allEntriesForPath = getFileSystemDirectoryEntriesCache.GetOrAdd(
+                                cacheKey,
+                                s => getFileSystemEntries(
+                                    type,
+                                    path,
+                                    "*",
+                                    directory,
+                                    false).ToArray());
+                        IEnumerable<string> filteredEntriesForPath = (pattern != null && pattern != "*")
+                            ? allEntriesForPath.Where(o => IsMatch(Path.GetFileName(o), pattern))
+                            : allEntriesForPath;
+                        return stripProjectDirectory
+                            ? RemoveProjectDirectory(filteredEntriesForPath, directory)
+                            : filteredEntriesForPath;
                     }
-                    return getFileSystemEntries(type, path, pattern, directory, projectDirectory);
+                    else
+                    {
+                        // Legacy behavior:
+                        // Cache only directories, for files we won't hit the cache because the file name patterns tend to be unique
+                        if (type == FileSystemEntity.Directories)
+                        {
+                            return getFileSystemDirectoryEntriesCache.GetOrAdd(
+                                $"D;{path};{pattern ?? "*"}",
+                                s => getFileSystemEntries(
+                                    type,
+                                    path,
+                                    pattern,
+                                    directory,
+                                    stripProjectDirectory).ToArray());
+                        }
+                    }
+                    return getFileSystemEntries(type, path, pattern, directory, stripProjectDirectory);
                 };
         }
 
