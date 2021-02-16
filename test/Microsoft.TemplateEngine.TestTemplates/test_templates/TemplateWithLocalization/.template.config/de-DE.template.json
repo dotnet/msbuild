@@ -1,0 +1,46 @@
+{
+    "identity": "TestAssets.TemplateWithLocalization",
+    "name": "name_de-DE:äÄßöÖüÜ",
+    "description": "desc_de-DE:äÄßöÖüÜ",
+    "symbols": {
+        "someSymbol": {
+            "description": "sym0_desc_de-DE:äÄßöÖüÜ"
+        },
+        "someChoice": {
+            "description": "sym1_desc_de-DE:äÄßöÖüÜ",
+            "choices": [
+                {
+                    "choice": "choice0",
+                    "description": "sym1_choice0_de-DE:äÄßöÖüÜ"
+                },
+                {
+                    "choice": "choice1",
+                    "description": "sym1_choice1_de-DE:äÄßöÖüÜ"
+                }
+            ]
+        }
+    },
+    "postActions": [
+        {
+            "description": "pa0_desc_de-DE:äÄßöÖüÜ",
+            "manualInstructions": [
+                {
+                    "text": "pa0_manualInstructions_de-DE:äÄßöÖüÜ"
+                }
+            ],
+            "actionId": "58E1433C-303B-4713-8A47-26E7B03BD8A5"
+        },
+        {
+            "description": "pa1_desc_de-DE:äÄßöÖüÜ",
+            "manualInstructions": [
+                {
+                    "info": "text field is left out intentionally."
+                },
+                {
+                    "text": "pa1_manualInstructions1_de-DE:äÄßöÖüÜ"
+                }
+            ],
+            "actionId": "2B5CDBB7-1FAC-41EC-ADCC-08A73021BC40"
+        }
+    ]
+}
