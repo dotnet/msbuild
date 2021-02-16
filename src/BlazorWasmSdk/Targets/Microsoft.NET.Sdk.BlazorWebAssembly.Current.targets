@@ -70,6 +70,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Internal properties -->
     <_BlazorOutputPath>wwwroot\_framework\</_BlazorOutputPath>
+
+    <!-- Properties for AOT -->
+    <MicrosoftNetCoreAppRuntimePackRidDir>$(NuGetPackageRoot)microsoft.netcore.app.runtime.browser-wasm\$(BundledNETCoreAppPackageVersion)\runtimes\browser-wasm\</MicrosoftNetCoreAppRuntimePackRidDir>
+    <AOTMode>AotInterp</AOTMode>
+    <WasmStripAOTAssemblies>false</WasmStripAOTAssemblies>
+    <WasmGenerateAppBundle>false</WasmGenerateAppBundle>
   </PropertyGroup>
 
   <ItemGroup>
@@ -547,6 +553,42 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResolvedFileToPublish
         Include="@(_BlazorJSFile)"
         RelativePath="$(_BlazorFrameworkPublishPath)%(FileName)%(Extension)" />
+    </ItemGroup>
+  </Target>
+
+  <Target
+      Name="_BlazorWasmAOT"
+      DependsOnTargets="_EnsureWasmAOTWorkload;_GatherWasmFilesToAOT;WasmBuildApp"
+      BeforeTargets="_ProcessPublishFilesForBlazor"
+      Condition="'$(RunAOTCompilation)' == 'true'">
+
+    <!--
+      AOT compilation produces a copy of the dotnet.js and dotnet.wasm file that are required to run the app. Replace the regular js and wams files with the AOTed version.
+      But first, mangle the AOTed dotnet.js file to include the runtime version.
+    -->
+
+    <Copy SourceFiles="@(WasmNativeAsset)" DestinationFiles="%(WasmNativeAsset.Directory)\dotnet.$(_DotNetJsVersion).js" Condition="%(FileName) == 'dotnet' AND %(Extension) == '.js'">
+      <Output TaskParameter="CopiedFiles" ItemName="_PublishAotDotnetJsFile" />
+    </Copy>
+
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="$(_BlazorDotNetJSFilePath)" />
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="%(FileName) == 'dotnet' AND %(Extension) == '.wasm'" />
+
+      <ResolvedFileToPublish Include="@(_PublishAotDotnetJsFile)" AssetType="native" RelativePath="%(FileName)%(Extension)" />
+      <ResolvedFileToPublish Include="@(WasmNativeAsset)" AssetType="native" RelativePath="dotnet.wasm" Condition="%(FileName) == 'dotnet' AND %(Extension) == '.wasm'"/>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_EnsureWasmAOTWorkload" Condition="'$(UsingBlazorAOTWorkloadManifest)' != 'true'">
+    <Error
+      Text="Publishing with AOT enabled requires the .NET WebAssembly AOT workload to be installed. To learn more, visit https://aka.ms/AAb4uzl."
+      Code="BLAZORSDK1002" />
+  </Target>
+
+  <Target Name="_GatherWasmFilesToAOT">
+    <ItemGroup>
+      <WasmAssembliesToBundle Include="%(ResolvedFileToPublish.FullPath)" Exclude="@(_Exclude)" Condition="%(Extension) == '.dll' AND %(FileName) != 'Microsoft.JSInterop.WebAssembly'" />
     </ItemGroup>
   </Target>
 
