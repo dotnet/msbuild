@@ -15,9 +15,9 @@ namespace Microsoft.Build.Construction
     }
     public enum ImplicitImportLocation
     {
-        Bottom = 2,
         None = 0,
         Top = 1,
+        Bottom = 2,
     }
     public partial class ProjectChooseElement : Microsoft.Build.Construction.ProjectElementContainer
     {
@@ -319,10 +319,10 @@ namespace Microsoft.Build.Construction
         public Microsoft.Build.Construction.ProjectRootElement DeepClone() { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Open(string path) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
-        public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, System.Nullable<bool> preserveFormatting) { throw null; }
-        public void Reload(bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=default(System.Nullable<bool>)) { }
-        public void ReloadFrom(string path, bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=default(System.Nullable<bool>)) { }
-        public void ReloadFrom(System.Xml.XmlReader reader, bool throwIfUnsavedChanges=true, System.Nullable<bool> preserveFormatting=default(System.Nullable<bool>)) { }
+        public static Microsoft.Build.Construction.ProjectRootElement Open(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, bool? preserveFormatting) { throw null; }
+        public void Reload(bool throwIfUnsavedChanges = true, bool? preserveFormatting = default(bool?)) { }
+        public void ReloadFrom(string path, bool throwIfUnsavedChanges = true, bool? preserveFormatting = default(bool?)) { }
+        public void ReloadFrom(System.Xml.XmlReader reader, bool throwIfUnsavedChanges = true, bool? preserveFormatting = default(bool?)) { }
         public void Save() { }
         public void Save(System.IO.TextWriter writer) { }
         public void Save(string path) { }
@@ -330,7 +330,7 @@ namespace Microsoft.Build.Construction
         public void Save(System.Text.Encoding saveEncoding) { }
         public static Microsoft.Build.Construction.ProjectRootElement TryOpen(string path) { throw null; }
         public static Microsoft.Build.Construction.ProjectRootElement TryOpen(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { throw null; }
-        public static Microsoft.Build.Construction.ProjectRootElement TryOpen(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, System.Nullable<bool> preserveFormatting) { throw null; }
+        public static Microsoft.Build.Construction.ProjectRootElement TryOpen(string path, Microsoft.Build.Evaluation.ProjectCollection projectCollection, bool? preserveFormatting) { throw null; }
     }
     public partial class ProjectSdkElement : Microsoft.Build.Construction.ProjectElementContainer
     {
@@ -465,13 +465,13 @@ namespace Microsoft.Build.Construction
     }
     public enum SolutionProjectType
     {
-        EtpSubProject = 5,
-        KnownToBeMSBuildFormat = 1,
-        SharedProject = 6,
-        SolutionFolder = 2,
         Unknown = 0,
-        WebDeploymentProject = 4,
+        KnownToBeMSBuildFormat = 1,
+        SolutionFolder = 2,
         WebProject = 3,
+        WebDeploymentProject = 4,
+        EtpSubProject = 5,
+        SharedProject = 6,
     }
     public partial class UsingTaskParameterGroupElement : Microsoft.Build.Construction.ProjectElementContainer
     {
@@ -514,25 +514,25 @@ namespace Microsoft.Build.Evaluation
     }
     public enum MatchOnMetadataOptions
     {
-        CaseInsensitive = 1,
         CaseSensitive = 0,
+        CaseInsensitive = 1,
         PathLike = 2,
     }
     [System.FlagsAttribute]
     public enum NewProjectFileOptions
     {
         IncludeAllOptions = -1,
-        IncludeToolsVersion = 2,
-        IncludeXmlDeclaration = 1,
-        IncludeXmlNamespace = 4,
         None = 0,
+        IncludeXmlDeclaration = 1,
+        IncludeToolsVersion = 2,
+        IncludeXmlNamespace = 4,
     }
     public enum Operation
     {
-        Exclude = 1,
         Include = 0,
-        Remove = 3,
+        Exclude = 1,
         Update = 2,
+        Remove = 3,
     }
     public partial class Project
     {
@@ -719,14 +719,14 @@ namespace Microsoft.Build.Evaluation
     public enum ProjectCollectionChangedState
     {
         DefaultToolsVersion = 0,
-        DisableMarkDirty = 7,
-        GlobalProperties = 3,
-        HostServices = 6,
-        IsBuildEnabled = 4,
-        Loggers = 2,
-        OnlyLogCriticalEvents = 5,
-        SkipEvaluation = 8,
         Toolsets = 1,
+        Loggers = 2,
+        GlobalProperties = 3,
+        IsBuildEnabled = 4,
+        OnlyLogCriticalEvents = 5,
+        HostServices = 6,
+        DisableMarkDirty = 7,
+        SkipEvaluation = 8,
     }
     public partial class ProjectItem
     {
@@ -764,14 +764,14 @@ namespace Microsoft.Build.Evaluation
     public enum ProjectLoadSettings
     {
         Default = 0,
-        DoNotEvaluateElementsWithFalseCondition = 32,
-        IgnoreEmptyImports = 16,
-        IgnoreInvalidImports = 64,
         IgnoreMissingImports = 1,
-        ProfileEvaluation = 128,
         RecordDuplicateButNotCircularImports = 2,
-        RecordEvaluatedItemElements = 8,
         RejectCircularImports = 4,
+        RecordEvaluatedItemElements = 8,
+        IgnoreEmptyImports = 16,
+        DoNotEvaluateElementsWithFalseCondition = 32,
+        IgnoreInvalidImports = 64,
+        ProfileEvaluation = 128,
     }
     public partial class ProjectMetadata : System.IEquatable<Microsoft.Build.Evaluation.ProjectMetadata>
     {
@@ -812,10 +812,10 @@ namespace Microsoft.Build.Evaluation
     [System.FlagsAttribute]
     public enum Provenance
     {
+        Undefined = 0,
+        StringLiteral = 1,
         Glob = 2,
         Inconclusive = 4,
-        StringLiteral = 1,
-        Undefined = 0,
     }
     public partial class ProvenanceResult
     {
@@ -828,6 +828,8 @@ namespace Microsoft.Build.Evaluation
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct ResolvedImport
     {
+        private object _dummy;
+        private int _dummyPrimitive;
         public Microsoft.Build.Construction.ProjectRootElement ImportedProject { get { throw null; } }
         public Microsoft.Build.Construction.ProjectImportElement ImportingElement { get { throw null; } }
         public bool IsImported { get { throw null; } }
@@ -856,11 +858,11 @@ namespace Microsoft.Build.Evaluation
     [System.FlagsAttribute]
     public enum ToolsetDefinitionLocations
     {
+        None = 0,
         ConfigurationFile = 1,
+        Registry = 2,
         Default = 3,
         Local = 4,
-        None = 0,
-        Registry = 2,
     }
 }
 namespace Microsoft.Build.Evaluation.Context
@@ -872,8 +874,8 @@ namespace Microsoft.Build.Evaluation.Context
         public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy, Microsoft.Build.FileSystem.MSBuildFileSystemBase fileSystem) { throw null; }
         public enum SharingPolicy
         {
-            Isolated = 1,
             Shared = 0,
+            Isolated = 1,
         }
     }
 }
@@ -961,9 +963,11 @@ namespace Microsoft.Build.Execution
         public void ResetCaches() { }
         public void ShutdownAllNodes() { }
         [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-        public partial struct DeferredBuildMessage
+        public readonly partial struct DeferredBuildMessage
         {
-            public DeferredBuildMessage(string text, Microsoft.Build.Framework.MessageImportance importance) { throw null;}
+            private readonly object _dummy;
+            private readonly int _dummyPrimitive;
+            public DeferredBuildMessage(string text, Microsoft.Build.Framework.MessageImportance importance) { throw null; }
             public Microsoft.Build.Framework.MessageImportance Importance { get { throw null; } }
             public string Text { get { throw null; } }
         }
@@ -1035,14 +1039,14 @@ namespace Microsoft.Build.Execution
     [System.FlagsAttribute]
     public enum BuildRequestDataFlags
     {
-        ClearCachesAfterBuild = 8,
-        IgnoreExistingProjectState = 4,
-        IgnoreMissingEmptyAndInvalidImports = 64,
         None = 0,
-        ProvideProjectStateAfterBuild = 2,
-        ProvideSubsetOfStateAfterBuild = 32,
         ReplaceExistingProjectInstance = 1,
+        ProvideProjectStateAfterBuild = 2,
+        IgnoreExistingProjectState = 4,
+        ClearCachesAfterBuild = 8,
         SkipNonexistentTargets = 16,
+        ProvideSubsetOfStateAfterBuild = 32,
+        IgnoreMissingEmptyAndInvalidImports = 64,
     }
     public partial class BuildResult
     {
@@ -1064,8 +1068,8 @@ namespace Microsoft.Build.Execution
     }
     public enum BuildResultCode
     {
-        Failure = 1,
         Success = 0,
+        Failure = 1,
     }
     public partial class BuildSubmission
     {
@@ -1099,9 +1103,9 @@ namespace Microsoft.Build.Execution
     }
     public enum NodeAffinity
     {
-        Any = 2,
         InProc = 0,
         OutOfProc = 1,
+        Any = 2,
     }
     public enum NodeEngineShutdownReason
     {
@@ -1113,9 +1117,9 @@ namespace Microsoft.Build.Execution
     public partial class OutOfProcNode
     {
         public OutOfProcNode() { }
-        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool enableReuse, bool lowPriority, out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
-        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool enableReuse, out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
-        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(out System.Exception shutdownException) { shutdownException = default(System.Exception); throw null; }
+        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool enableReuse, bool lowPriority, out System.Exception shutdownException) { throw null; }
+        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(bool enableReuse, out System.Exception shutdownException) { throw null; }
+        public Microsoft.Build.Execution.NodeEngineShutdownReason Run(out System.Exception shutdownException) { throw null; }
     }
     public partial class ProjectInstance
     {
@@ -1152,9 +1156,9 @@ namespace Microsoft.Build.Execution
         public bool Build(string target, System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.ILogger> loggers) { throw null; }
         public bool Build(string target, System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.ILogger> loggers, System.Collections.Generic.IEnumerable<Microsoft.Build.Logging.ForwardingLoggerRecord> remoteLoggers) { throw null; }
         public bool Build(string[] targets, System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.ILogger> loggers) { throw null; }
-        public bool Build(string[] targets, System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.ILogger> loggers, out System.Collections.Generic.IDictionary<string, Microsoft.Build.Execution.TargetResult> targetOutputs) { targetOutputs = default(System.Collections.Generic.IDictionary<string, Microsoft.Build.Execution.TargetResult>); throw null; }
+        public bool Build(string[] targets, System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.ILogger> loggers, out System.Collections.Generic.IDictionary<string, Microsoft.Build.Execution.TargetResult> targetOutputs) { throw null; }
         public bool Build(string[] targets, System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.ILogger> loggers, System.Collections.Generic.IEnumerable<Microsoft.Build.Logging.ForwardingLoggerRecord> remoteLoggers) { throw null; }
-        public bool Build(string[] targets, System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.ILogger> loggers, System.Collections.Generic.IEnumerable<Microsoft.Build.Logging.ForwardingLoggerRecord> remoteLoggers, out System.Collections.Generic.IDictionary<string, Microsoft.Build.Execution.TargetResult> targetOutputs) { targetOutputs = default(System.Collections.Generic.IDictionary<string, Microsoft.Build.Execution.TargetResult>); throw null; }
+        public bool Build(string[] targets, System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.ILogger> loggers, System.Collections.Generic.IEnumerable<Microsoft.Build.Logging.ForwardingLoggerRecord> remoteLoggers, out System.Collections.Generic.IDictionary<string, Microsoft.Build.Execution.TargetResult> targetOutputs) { throw null; }
         public Microsoft.Build.Execution.ProjectInstance DeepCopy() { throw null; }
         public Microsoft.Build.Execution.ProjectInstance DeepCopy(bool isImmutable) { throw null; }
         public bool EvaluateCondition(string condition) { throw null; }
@@ -1181,9 +1185,9 @@ namespace Microsoft.Build.Execution
     [System.FlagsAttribute]
     public enum ProjectInstanceSettings
     {
+        None = 0,
         Immutable = 1,
         ImmutableWithFastItemLookup = 3,
-        None = 0,
     }
     public partial class ProjectItemDefinitionInstance
     {
@@ -1403,16 +1407,16 @@ namespace Microsoft.Build.Execution
     }
     public enum TargetResultCode : byte
     {
-        Failure = (byte)2,
         Skipped = (byte)0,
         Success = (byte)1,
+        Failure = (byte)2,
     }
 }
 namespace Microsoft.Build.Experimental.ProjectCache
 {
     public partial class CacheContext
     {
-        public CacheContext(System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings, Microsoft.Build.FileSystem.MSBuildFileSystemBase fileSystem, Microsoft.Build.Graph.ProjectGraph graph=null, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> graphEntryPoints=null) { }
+        public CacheContext(System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings, Microsoft.Build.FileSystem.MSBuildFileSystemBase fileSystem, Microsoft.Build.Graph.ProjectGraph graph = null, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> graphEntryPoints = null) { }
         public Microsoft.Build.FileSystem.MSBuildFileSystemBase FileSystem { get { throw null; } }
         public Microsoft.Build.Graph.ProjectGraph Graph { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> GraphEntryPoints { get { throw null; } }
@@ -1429,23 +1433,25 @@ namespace Microsoft.Build.Experimental.ProjectCache
     }
     public enum CacheResultType
     {
+        None = 0,
         CacheHit = 1,
         CacheMiss = 2,
         CacheNotApplicable = 3,
-        None = 0,
     }
     public abstract partial class PluginLoggerBase
     {
         protected PluginLoggerBase(Microsoft.Build.Framework.LoggerVerbosity verbosity) { }
         public abstract bool HasLoggedErrors { get; protected set; }
         public abstract void LogError(string error);
-        public abstract void LogMessage(string message, System.Nullable<Microsoft.Build.Framework.MessageImportance> messageImportance=default(System.Nullable<Microsoft.Build.Framework.MessageImportance>));
+        public abstract void LogMessage(string message, Microsoft.Build.Framework.MessageImportance? messageImportance = default(Microsoft.Build.Framework.MessageImportance?));
         public abstract void LogWarning(string warning);
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public partial struct PluginTargetResult
+    public readonly partial struct PluginTargetResult
     {
-        public PluginTargetResult(string targetName, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Framework.ITaskItem2> taskItems, Microsoft.Build.Execution.BuildResultCode resultCode) { throw null;}
+        private readonly object _dummy;
+        private readonly int _dummyPrimitive;
+        public PluginTargetResult(string targetName, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Framework.ITaskItem2> taskItems, Microsoft.Build.Execution.BuildResultCode resultCode) { throw null; }
         public Microsoft.Build.Execution.BuildResultCode ResultCode { get { throw null; } }
         public string TargetName { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Framework.ITaskItem2> TaskItems { get { throw null; } }
@@ -1458,8 +1464,8 @@ namespace Microsoft.Build.Experimental.ProjectCache
         public Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase PluginInstance { get { throw null; } }
         public System.Collections.Generic.IReadOnlyDictionary<string, string> PluginSettings { get { throw null; } }
         public Microsoft.Build.Graph.ProjectGraph ProjectGraph { get { throw null; } }
-        public static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor FromAssemblyPath(string pluginAssemblyPath, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings=null) { throw null; }
-        public static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor FromInstance(Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase pluginInstance, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings=null) { throw null; }
+        public static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor FromAssemblyPath(string pluginAssemblyPath, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings = null) { throw null; }
+        public static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor FromInstance(Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase pluginInstance, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings = null) { throw null; }
         public string GetDetailedDescription() { throw null; }
     }
     public abstract partial class ProjectCachePluginBase
@@ -1481,9 +1487,9 @@ namespace Microsoft.Build.FileSystem
     {
         protected MSBuildFileSystemBase() { }
         public abstract bool DirectoryExists(string path);
-        public abstract System.Collections.Generic.IEnumerable<string> EnumerateDirectories(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
-        public abstract System.Collections.Generic.IEnumerable<string> EnumerateFiles(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
-        public abstract System.Collections.Generic.IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern="*", System.IO.SearchOption searchOption=(System.IO.SearchOption)(0));
+        public abstract System.Collections.Generic.IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", System.IO.SearchOption searchOption = System.IO.SearchOption.TopDirectoryOnly);
+        public abstract System.Collections.Generic.IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", System.IO.SearchOption searchOption = System.IO.SearchOption.TopDirectoryOnly);
+        public abstract System.Collections.Generic.IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern = "*", System.IO.SearchOption searchOption = System.IO.SearchOption.TopDirectoryOnly);
         public abstract bool FileExists(string path);
         public abstract bool FileOrDirectoryExists(string path);
         public abstract System.IO.FileAttributes GetAttributes(string path);
@@ -1521,6 +1527,8 @@ namespace Microsoft.Build.Globbing
         [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
         public partial struct MatchInfoResult
         {
+            private object _dummy;
+            private int _dummyPrimitive;
             public string FilenamePartMatchGroup { get { throw null; } }
             public string FixedDirectoryPartMatchGroup { get { throw null; } }
             public bool IsMatch { get { throw null; } }
@@ -1628,9 +1636,10 @@ namespace Microsoft.Build.Graph
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphNode> ProjectNodesTopologicallySorted { get { throw null; } }
         public System.Collections.Generic.IReadOnlyDictionary<Microsoft.Build.Graph.ProjectGraphNode, System.Collections.Immutable.ImmutableList<string>> GetTargetLists(System.Collections.Generic.ICollection<string> entryProjectTargets) { throw null; }
         [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
-        public partial struct GraphConstructionMetrics
+        public readonly partial struct GraphConstructionMetrics
         {
-            public GraphConstructionMetrics(System.TimeSpan constructionTime, int nodeCount, int edgeCount) { throw null;}
+            private readonly int _dummyPrimitive;
+            public GraphConstructionMetrics(System.TimeSpan constructionTime, int nodeCount, int edgeCount) { throw null; }
             public System.TimeSpan ConstructionTime { get { throw null; } }
             public int EdgeCount { get { throw null; } }
             public int NodeCount { get { throw null; } }
@@ -1640,8 +1649,9 @@ namespace Microsoft.Build.Graph
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct ProjectGraphEntryPoint
     {
-        public ProjectGraphEntryPoint(string projectFile) { throw null;}
-        public ProjectGraphEntryPoint(string projectFile, System.Collections.Generic.IDictionary<string, string> globalProperties) { throw null;}
+        private object _dummy;
+        public ProjectGraphEntryPoint(string projectFile) { throw null; }
+        public ProjectGraphEntryPoint(string projectFile, System.Collections.Generic.IDictionary<string, string> globalProperties) { throw null; }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { get { throw null; } }
         public string ProjectFile { get { throw null; } }
     }
@@ -1665,8 +1675,8 @@ namespace Microsoft.Build.Logging
         public void Shutdown() { }
         public enum ProjectImportsCollectionMode
         {
-            Embed = 1,
             None = 0,
+            Embed = 1,
             ZipFile = 2,
         }
     }
@@ -1806,19 +1816,19 @@ namespace Microsoft.Build.ObjectModelRemoting
         public Microsoft.Build.Construction.ProjectImportGroupElement Create(Microsoft.Build.ObjectModelRemoting.ProjectImportGroupElementLink link) { throw null; }
         public Microsoft.Build.Construction.ProjectItemDefinitionElement Create(Microsoft.Build.ObjectModelRemoting.ProjectItemDefinitionElementLink link) { throw null; }
         public Microsoft.Build.Construction.ProjectItemDefinitionGroupElement Create(Microsoft.Build.ObjectModelRemoting.ProjectItemDefinitionGroupElementLink link) { throw null; }
-        public Microsoft.Build.Evaluation.ProjectItemDefinition Create(Microsoft.Build.ObjectModelRemoting.ProjectItemDefinitionLink link, Microsoft.Build.Evaluation.Project project=null) { throw null; }
+        public Microsoft.Build.Evaluation.ProjectItemDefinition Create(Microsoft.Build.ObjectModelRemoting.ProjectItemDefinitionLink link, Microsoft.Build.Evaluation.Project project = null) { throw null; }
         public Microsoft.Build.Construction.ProjectItemElement Create(Microsoft.Build.ObjectModelRemoting.ProjectItemElementLink link) { throw null; }
         public Microsoft.Build.Construction.ProjectItemGroupElement Create(Microsoft.Build.ObjectModelRemoting.ProjectItemGroupElementLink link) { throw null; }
-        public Microsoft.Build.Evaluation.ProjectItem Create(Microsoft.Build.ObjectModelRemoting.ProjectItemLink link, Microsoft.Build.Evaluation.Project project=null, Microsoft.Build.Construction.ProjectItemElement xml=null) { throw null; }
+        public Microsoft.Build.Evaluation.ProjectItem Create(Microsoft.Build.ObjectModelRemoting.ProjectItemLink link, Microsoft.Build.Evaluation.Project project = null, Microsoft.Build.Construction.ProjectItemElement xml = null) { throw null; }
         public Microsoft.Build.Evaluation.Project Create(Microsoft.Build.ObjectModelRemoting.ProjectLink link) { throw null; }
         public Microsoft.Build.Construction.ProjectMetadataElement Create(Microsoft.Build.ObjectModelRemoting.ProjectMetadataElementLink link) { throw null; }
-        public Microsoft.Build.Evaluation.ProjectMetadata Create(Microsoft.Build.ObjectModelRemoting.ProjectMetadataLink link, object parent=null) { throw null; }
+        public Microsoft.Build.Evaluation.ProjectMetadata Create(Microsoft.Build.ObjectModelRemoting.ProjectMetadataLink link, object parent = null) { throw null; }
         public Microsoft.Build.Construction.ProjectOnErrorElement Create(Microsoft.Build.ObjectModelRemoting.ProjectOnErrorElementLink link) { throw null; }
         public Microsoft.Build.Construction.ProjectOtherwiseElement Create(Microsoft.Build.ObjectModelRemoting.ProjectOtherwiseElementLink link) { throw null; }
         public Microsoft.Build.Construction.ProjectOutputElement Create(Microsoft.Build.ObjectModelRemoting.ProjectOutputElementLink link) { throw null; }
         public Microsoft.Build.Construction.ProjectPropertyElement Create(Microsoft.Build.ObjectModelRemoting.ProjectPropertyElementLink link) { throw null; }
         public Microsoft.Build.Construction.ProjectPropertyGroupElement Create(Microsoft.Build.ObjectModelRemoting.ProjectPropertyGroupElementLink link) { throw null; }
-        public Microsoft.Build.Evaluation.ProjectProperty Create(Microsoft.Build.ObjectModelRemoting.ProjectPropertyLink link, Microsoft.Build.Evaluation.Project project=null) { throw null; }
+        public Microsoft.Build.Evaluation.ProjectProperty Create(Microsoft.Build.ObjectModelRemoting.ProjectPropertyLink link, Microsoft.Build.Evaluation.Project project = null) { throw null; }
         public Microsoft.Build.Construction.ProjectRootElement Create(Microsoft.Build.ObjectModelRemoting.ProjectRootElementLink link) { throw null; }
         public Microsoft.Build.Construction.ProjectSdkElement Create(Microsoft.Build.ObjectModelRemoting.ProjectSdkElementLink link) { throw null; }
         public Microsoft.Build.Construction.ProjectTargetElement Create(Microsoft.Build.ObjectModelRemoting.ProjectTargetElementLink link) { throw null; }
@@ -1830,7 +1840,7 @@ namespace Microsoft.Build.ObjectModelRemoting
         public Microsoft.Build.Construction.UsingTaskParameterGroupElement Create(Microsoft.Build.ObjectModelRemoting.UsingTaskParameterGroupElementLink link) { throw null; }
         public static Microsoft.Build.ObjectModelRemoting.LinkedObjectsFactory Get(Microsoft.Build.Evaluation.ProjectCollection collection) { throw null; }
         public static object GetLink(object obj) { throw null; }
-        public static System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Evaluation.Project> GetLocalProjects(Microsoft.Build.Evaluation.ProjectCollection collection, string projectFile=null) { throw null; }
+        public static System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Evaluation.Project> GetLocalProjects(Microsoft.Build.Evaluation.ProjectCollection collection, string projectFile = null) { throw null; }
         public static bool IsLocal(object obj) { throw null; }
     }
     public abstract partial class ProjectChooseElementLink : Microsoft.Build.ObjectModelRemoting.ProjectElementContainerLink
@@ -2132,7 +2142,8 @@ namespace Microsoft.Build.ObjectModelRemoting
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct XmlAttributeLink
     {
-        public XmlAttributeLink(string localName, string value, string namespaceUri) { throw null;}
+        private object _dummy;
+        public XmlAttributeLink(string localName, string value, string namespaceUri) { throw null; }
         public string LocalName { get { throw null; } }
         public string NamespaceURI { get { throw null; } }
         public string Value { get { throw null; } }

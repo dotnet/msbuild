@@ -93,8 +93,8 @@ namespace Microsoft.Build.BuildEngine
     [System.FlagsAttribute]
     public enum BuildSettings
     {
-        DoNotResetPreviouslyBuiltTargets = 1,
         None = 0,
+        DoNotResetPreviouslyBuiltTargets = 1,
     }
     public partial class BuildTask
     {
@@ -367,13 +367,13 @@ namespace Microsoft.Build.BuildEngine
     [System.FlagsAttribute]
     public enum ProjectLoadSettings
     {
-        IgnoreMissingImports = 1,
         None = 0,
+        IgnoreMissingImports = 1,
     }
     public enum PropertyPosition
     {
-        UseExistingOrCreateAfterLastImport = 1,
         UseExistingOrCreateAfterLastPropertyGroup = 0,
+        UseExistingOrCreateAfterLastImport = 1,
     }
     public sealed partial class RemoteErrorException : System.Exception
     {
@@ -439,8 +439,8 @@ namespace Microsoft.Build.BuildEngine
     [System.FlagsAttribute]
     public enum ToolsetDefinitionLocations
     {
-        ConfigurationFile = 1,
         None = 0,
+        ConfigurationFile = 1,
         Registry = 2,
     }
     public partial class UsingTask
