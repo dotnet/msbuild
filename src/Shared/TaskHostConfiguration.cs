@@ -379,6 +379,7 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
             translator.Translate(ref _continueOnError);
             translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
+            translator.Translate(ref _warningsAsErrors);
         }
 
         /// <summary>
