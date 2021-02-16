@@ -271,7 +271,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Contains all warnings that should be logged as errors.
         /// </summary>
-        public HashSet<string> WarningsAsErrors { get; }
+        public HashSet<string> WarningsAsErrors { get; private set; }
         #endregion
 
         #region IBuildEngine Implementation (Methods)
@@ -800,7 +800,7 @@ namespace Microsoft.Build.CommandLine
             _debugCommunications = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBUILDDEBUGCOMM", "1", StringComparison.OrdinalIgnoreCase);
             _updateEnvironment = !taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostDoNotUpdateEnvironment", "1", StringComparison.OrdinalIgnoreCase);
             _updateEnvironmentAndLog = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostUpdateEnvironmentAndLog", "1", StringComparison.OrdinalIgnoreCase);
-
+            WarningsAsErrors = taskConfiguration.WarningsAsErrors;
             try
             {
                 // Change to the startup directory

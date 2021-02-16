@@ -51,6 +51,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     @"c:\my tasks\mytask.dll",
                     null,
+                    null,
                     null);
             }
            );
@@ -79,6 +80,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     String.Empty,
                     @"c:\my tasks\mytask.dll",
                     null,
+                    null,
                     null);
             }
            );
@@ -105,6 +107,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     @"c:\my project\myproj.proj",
                     _continueOnErrorDefault,
                     "TaskName",
+                    null,
                     null,
                     null,
                     null);
@@ -137,6 +140,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     "TaskName",
                     String.Empty,
                     null,
+                    null,
                     null);
             }
            );
@@ -165,6 +169,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "TaskName",
                 @"c:\MyTasks\MyTask.dll",
                 null,
+                null,
                 null);
 
             TaskHostConfiguration config2 = new TaskHostConfiguration(
@@ -182,6 +187,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _continueOnErrorDefault,
                 "TaskName",
                 @"c:\MyTasks\MyTask.dll",
+                null,
                 null,
                 null);
 
@@ -202,6 +208,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "TaskName",
                 @"c:\MyTasks\MyTask.dll",
                 parameters,
+                null,
                 null);
 
             IDictionary<string, object> parameters2 = new Dictionary<string, object>();
@@ -226,6 +233,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "TaskName",
                 @"c:\MyTasks\MyTask.dll",
                 parameters2,
+                null,
                 null);
         }
 
@@ -257,7 +265,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "TaskName",
                 @"c:\MyTasks\MyTask.dll",
                 null,
-                expectedGlobalProperties);
+                expectedGlobalProperties,
+                null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -295,7 +304,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "TaskName",
                 @"c:\MyTasks\MyTask.dll",
                 new Dictionary<string, object>(),
-                new Dictionary<string, string>());
+                new Dictionary<string, string>(),
+                null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -338,6 +348,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "TaskName",
                 @"c:\MyTasks\MyTask.dll",
                 parameters,
+                null,
                 null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -379,6 +390,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "TaskName",
                 @"c:\MyTasks\MyTask.dll",
                 parameters,
+                null,
                 null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -419,6 +431,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "TaskName",
                 @"c:\MyTasks\MyTask.dll",
                 parameters,
+                null,
                 null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
