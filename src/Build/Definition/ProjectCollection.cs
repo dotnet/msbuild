@@ -1737,7 +1737,6 @@ namespace Microsoft.Build.Evaluation
             InitializeToolsetCollection(configReader:configurationReaderForTestsOnly);
         }
 
-#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Reset the toolsets using the provided toolset reader, used by unit tests
         /// </summary>
@@ -1745,16 +1744,13 @@ namespace Microsoft.Build.Evaluation
         {
             InitializeToolsetCollection(registryReader:registryReaderForTestsOnly);
         }
-#endif
 
         /// <summary>
         /// Populate Toolsets with a dictionary of (toolset version, Toolset)
         /// using information from the registry and config file, if any.
         /// </summary>
         private void InitializeToolsetCollection(
-#if FEATURE_WIN32_REGISTRY
                 ToolsetRegistryReader registryReader = null,
-#endif
                 ToolsetConfigurationReader configReader = null
                 )
         {
@@ -1762,9 +1758,7 @@ namespace Microsoft.Build.Evaluation
 
             // We only want our local toolset (as defined in MSBuild.exe.config) when we're operating locally...
             _defaultToolsVersion = ToolsetReader.ReadAllToolsets(_toolsets,
-#if FEATURE_WIN32_REGISTRY
                     registryReader,
-#endif
                     configReader,
                     EnvironmentProperties, _globalProperties, ToolsetLocations);
 
