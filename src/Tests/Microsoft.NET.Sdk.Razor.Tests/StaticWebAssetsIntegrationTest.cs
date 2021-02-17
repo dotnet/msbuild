@@ -91,7 +91,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                         var itemGroup = new XElement(ns + "PropertyGroup");
                         itemGroup.Add(new XElement("RuntimeIdentifier", "win-x64"));
                         project.Root.Add(itemGroup);
-                    } 
+                    }
                 });
 
             var publish = new PublishCommand(Log, Path.Combine(projectDirectory.TestRoot, "AppWithPackageAndP2PReference"));
@@ -117,7 +117,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             new FileInfo(Path.Combine(publishOutputPathWithRID, "AppWithPackageAndP2PReference.StaticWebAssets.xml")).Should().NotExist();
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/30245")]
         public void Publish_WithBuildReferencesDisabled_CopiesStaticWebAssetsToDestinationFolder()
         {
             var testAsset = "RazorAppWithPackageAndP2PReference";
@@ -233,7 +233,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // Arrange
             var build = new BuildCommand(projectDirectory, "AppWithPackageAndP2PReference");
             build.Execute().Should().Pass();
-            
+
             var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 
