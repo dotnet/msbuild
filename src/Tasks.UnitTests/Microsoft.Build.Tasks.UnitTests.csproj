@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
-    
+
     <IsPackable>false</IsPackable>
 
     <AssemblyName>Microsoft.Build.Tasks.UnitTests</AssemblyName>
@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <PackageReference Include="System.Security.Principal.Windows" />
-    <PackageReference Include="System.Xml.XPath" />
     <PackageReference Include="Shouldly" />
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
@@ -32,7 +31,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
-    <Reference Include="PresentationFramework" Condition="'$(OsEnvironment)' == 'windows'" />
+    <Reference Include="PresentationFramework" Condition="$([MSBuild]::IsOSPlatform('windows'))" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
 
@@ -61,7 +60,7 @@
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
 
     <EmbeddedResource Include="SampleResx" />
-    
+
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>

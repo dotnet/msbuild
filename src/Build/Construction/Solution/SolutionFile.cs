@@ -210,6 +210,8 @@ namespace Microsoft.Build.Construction
                 {
                     _solutionFile = value;
                     _solutionFilter = null;
+
+                    SolutionFileDirectory = Path.GetDirectoryName(_solutionFile);
                 }
             }
         }
@@ -381,6 +383,9 @@ namespace Microsoft.Build.Construction
                         _solutionFile
                     );
                 }
+
+                SolutionFileDirectory = Path.GetDirectoryName(_solutionFile);
+
                 _solutionFilter = new HashSet<string>(NativeMethodsShared.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
                 foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
                 {
@@ -475,8 +480,6 @@ namespace Microsoft.Build.Construction
             {
                 // Open the file
                 fileStream = File.OpenRead(_solutionFile);
-                // Store the directory of the file as the current directory may change while we are processes the file
-                SolutionFileDirectory = Path.GetDirectoryName(_solutionFile);
                 SolutionReader = new StreamReader(fileStream, Encoding.GetEncoding(0)); // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
                 ParseSolution();
             }

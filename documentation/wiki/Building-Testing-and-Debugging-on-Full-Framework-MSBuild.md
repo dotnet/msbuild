@@ -13,13 +13,13 @@ All command lines should be executed from a Visual Studio developer command prom
 1. Clone the repo: `git clone https://github.com/Microsoft/msbuild.git`
 2. Build on the command line: `.\build.cmd`
    1. If you encounter errors, see [Something's wrong in my build](Something's-wrong-in-my-build.md).
-3. Open the solution file in Visual Studio (`MSBuild.Dev.sln`).
+3. Open the solution file in Visual Studio (`MSBuild.Dev.slnf`).
 
 ## Running Unit Tests
 
 To run the unit tests from Visual Studio:
 
-1. Open the MSBuild solution file (`MSBuild.Dev.sln`) in Visual Studio.
+1. Open the MSBuild solution file (`MSBuild.Dev.slnf`) in Visual Studio.
 2. Open the Test menu -> Windows -> Test Explorer.
 3. Click Run All.
 

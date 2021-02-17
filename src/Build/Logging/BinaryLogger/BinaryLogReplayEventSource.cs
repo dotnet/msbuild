@@ -33,7 +33,12 @@ namespace Microsoft.Build.Logging
             using (var stream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 var gzipStream = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: true);
-                var binaryReader = new BinaryReader(gzipStream);
+
+                // wrapping the GZipStream in a buffered stream significantly improves performance
+                // and the max throughput is reached with a 32K buffer. See details here:
+                // https://github.com/dotnet/runtime/issues/39233#issuecomment-745598847
+                var bufferedStream = new BufferedStream(gzipStream, 32768);
+                var binaryReader = new BinaryReader(bufferedStream);
 
                 int fileFormatVersion = binaryReader.ReadInt32();
 
@@ -45,7 +50,7 @@ namespace Microsoft.Build.Logging
                     throw new NotSupportedException(text);
                 }
 
-                var reader = new BuildEventArgsReader(binaryReader, fileFormatVersion);
+                using var reader = new BuildEventArgsReader(binaryReader, fileFormatVersion);
                 while (true)
                 {
                     if (cancellationToken.IsCancellationRequested)

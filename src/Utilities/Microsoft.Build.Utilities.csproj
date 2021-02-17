@@ -19,7 +19,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    
+    <ProjectReference Include="..\StringTools\StringTools.csproj" />
+
     <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
 
@@ -123,18 +124,6 @@
     </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>Shared\InprocTrackingNativeMethods.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\IInternable.cs">
-      <Link>Shared\IInternable.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\WeakStringCache.cs">
-      <Link>Shared\WeakStringCache.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\WeakStringCache.Concurrent.cs">
-      <Link>Shared\WeakStringCache.Concurrent.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\OpportunisticIntern.cs">
-      <Link>Shared\OpportunisticIntern.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
       <Link>Shared\ReadOnlyEmptyCollection.cs</Link>

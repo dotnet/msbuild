@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(MSBuildRuntimeType)' != 'Core' and '$(MonoBuild)' != 'true'">$(LibraryTargetFrameworks);net35</TargetFrameworks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <WarningsAsErrors>true</WarningsAsErrors>
+    <IsPackable>true</IsPackable>
+    <LangVersion>8.0</LangVersion>
+    <PackageId>Microsoft.NET.StringTools</PackageId>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <AssemblyVersion></AssemblyVersion>
+    <SemanticVersioningV1>true</SemanticVersioningV1>
+
+    <AssemblyName>Microsoft.NET.StringTools</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
+    <AssemblyName>Microsoft.NET.StringTools.net35</AssemblyName>
+    <!-- Disable Fx install checks as we're building against jnm2's 3.5 reference assemblies -->
+    <BypassFrameworkInstallChecks>true</BypassFrameworkInstallChecks>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net35'">
+    <PackageReference Include="System.Memory" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="jnm2.ReferenceAssemblies.net35" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net35'">
+    <Compile Remove="SpanBasedStringBuilder.cs" />
+    <Compile Remove="InternableString.cs" />
+    <Compile Remove="WeakStringCache.Concurrent.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'net35'">
+    <Compile Remove="SpanBasedStringBuilder.Simple.cs" />
+    <Compile Remove="InternableString.Simple.cs" />
+    <Compile Remove="WeakStringCache.Locking.cs" />
+  </ItemGroup>
+</Project>

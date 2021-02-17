@@ -740,10 +740,10 @@ EndGlobal
             string solutionConfigurationContents = msbuildProject.GetPropertyValue("CurrentSolutionConfigurationContents");
 
             // Only the specified solution configuration is represented in THE BLOB: nothing for x64 in this case
-            string expected = @"<SolutionConfiguration>
-  <ProjectConfiguration Project=`{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}` AbsolutePath=`##temp##Project1\A.csproj` BuildProjectInSolution=`True`>Debug|AnyCPU</ProjectConfiguration>
-  <ProjectConfiguration Project=`{881C1674-4ECA-451D-85B6-D7C59B7F16FA}` AbsolutePath=`##temp##Project2\B.csproj` BuildProjectInSolution=`True`>Debug|AnyCPU<ProjectDependency Project=`{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}` /></ProjectConfiguration>
-  <ProjectConfiguration Project=`{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}` AbsolutePath=`##temp##Project3\C.csproj` BuildProjectInSolution=`True`>Debug|AnyCPU</ProjectConfiguration>
+            string expected = $@"<SolutionConfiguration>
+  <ProjectConfiguration Project=`{{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}}` AbsolutePath=`##temp##{Path.Combine("Project1", "A.csproj")}` BuildProjectInSolution=`True`>Debug|AnyCPU</ProjectConfiguration>
+  <ProjectConfiguration Project=`{{881C1674-4ECA-451D-85B6-D7C59B7F16FA}}` AbsolutePath=`##temp##{Path.Combine("Project2", "B.csproj")}` BuildProjectInSolution=`True`>Debug|AnyCPU<ProjectDependency Project=`{{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}}` /></ProjectConfiguration>
+  <ProjectConfiguration Project=`{{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}}` AbsolutePath=`##temp##{Path.Combine("Project3", "C.csproj")}` BuildProjectInSolution=`True`>Debug|AnyCPU</ProjectConfiguration>
 </SolutionConfiguration>".Replace("`", "\"").Replace("##temp##", Path.GetTempPath());
 
             Helpers.VerifyAssertLineByLine(expected, solutionConfigurationContents);
@@ -953,14 +953,14 @@ EndGlobal
             msbuildProject.ReevaluateIfNecessary();
 
             string solutionConfigurationContents = msbuildProject.GetPropertyValue("CurrentSolutionConfigurationContents");
-            string tempProjectPath = Path.Combine(Path.GetTempPath(), "ClassLibrary1\\ClassLibrary1.csproj");
+            string tempProjectPath = Path.Combine(Path.GetTempPath(), "ClassLibrary1", "ClassLibrary1.csproj");
 
             Assert.Contains("{6185CC21-BE89-448A-B3C0-D1C27112E595}", solutionConfigurationContents);
             tempProjectPath = Path.GetFullPath(tempProjectPath);
             Assert.True(solutionConfigurationContents.IndexOf(tempProjectPath, StringComparison.OrdinalIgnoreCase) > 0);
             Assert.Contains("CSConfig1|AnyCPU", solutionConfigurationContents);
 
-            tempProjectPath = Path.Combine(Path.GetTempPath(), "MainApp\\MainApp.vcxproj");
+            tempProjectPath = Path.Combine(Path.GetTempPath(), "MainApp", "MainApp.vcxproj");
             tempProjectPath = Path.GetFullPath(tempProjectPath);
             Assert.Contains("{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}", solutionConfigurationContents);
             Assert.True(solutionConfigurationContents.IndexOf(tempProjectPath, StringComparison.OrdinalIgnoreCase) > 0);

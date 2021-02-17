@@ -31,6 +31,8 @@ namespace Microsoft.Build.Shared
         private static readonly char[] s_wildcardCharacters = { '*', '?' };
         private static readonly char[] s_wildcardAndSemicolonCharacters = { '*', '?', ';' };
 
+        private static readonly string[] s_propertyAndItemReferences = { "$(", "@(" };
+
         // on OSX both System.IO.Path separators are '/', so we have to use the literals
         internal static readonly char[] directorySeparatorCharacters = { '/', '\\' };
         internal static readonly string[] directorySeparatorStrings = directorySeparatorCharacters.Select(c => c.ToString()).ToArray();
@@ -166,8 +168,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Determines whether the given path has any wild card characters.
         /// </summary>
-        /// <param name="filespec"></param>
-        /// <returns></returns>
         internal static bool HasWildcards(string filespec)
         {
             // Perf Note: Doing a [Last]IndexOfAny(...) is much faster than compiling a
@@ -180,16 +180,31 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Determines whether the given path has any wild card characters or any semicolons.
+        /// Determines whether the given path has any wild card characters or semicolons.
+        /// </summary>
+        internal static bool HasWildcardsOrSemicolon(string filespec)
+        {
+            return -1 != filespec.LastIndexOfAny(s_wildcardAndSemicolonCharacters);
+        }
+
+        /// <summary>
+        /// Determines whether the given path has any wild card characters, any semicolons or any property references.
         /// </summary>
         internal static bool HasWildcardsSemicolonItemOrPropertyReferences(string filespec)
         {
             return
 
                 (-1 != filespec.IndexOfAny(s_wildcardAndSemicolonCharacters)) ||
-                filespec.Contains("$(") ||
-                filespec.Contains("@(")
+                HasPropertyOrItemReferences(filespec)
                 ;
+        }
+
+        /// <summary>
+        /// Determines whether the given path has any property references.
+        /// </summary>
+        internal static bool HasPropertyOrItemReferences(string filespec)
+        {
+            return s_propertyAndItemReferences.Any(filespec.Contains);
         }
 
         /// <summary>
@@ -2390,7 +2405,7 @@ namespace Microsoft.Build.Shared
                 // Set to use only half processors when we have 4 or more of them, in order to not be too aggresive
                 // By setting MaxTasksPerIteration to the maximum amount of tasks, which means that only one
                 // Parallel.ForEach will run at once, we get a stable number of threads being created.
-                var maxTasks = Math.Max(1, Environment.ProcessorCount / 2);
+                var maxTasks = Math.Max(1, NativeMethodsShared.GetLogicalCoreCount() / 2);
                 var taskOptions = new TaskOptions(maxTasks)
                 {
                     AvailableTasks = maxTasks,

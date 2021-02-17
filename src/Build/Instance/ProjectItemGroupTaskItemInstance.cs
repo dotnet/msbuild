@@ -74,47 +74,47 @@ namespace Microsoft.Build.Execution
         private ElementLocation _location;
 
         /// <summary>
-        /// Location of the include, if any
+        /// Location of the include, if any.
         /// </summary>
         private ElementLocation _includeLocation;
 
         /// <summary>
-        /// Location of the exclude, if any
+        /// Location of the exclude, if any.
         /// </summary>
         private ElementLocation _excludeLocation;
 
         /// <summary>
-        /// Location of the remove, if any
+        /// Location of the remove, if any.
         /// </summary>
         private ElementLocation _removeLocation;
 
         /// <summary>
-        /// Location of matchOnMetadata, if any
+        /// Location of matchOnMetadata, if any.
         /// </summary>
         private ElementLocation _matchOnMetadataLocation;
 
         /// <summary>
-        /// Location of metadataMatchingSchema, if any
+        /// Location of metadataMatchingSchema, if any.
         /// </summary>
         private ElementLocation _matchOnMetadataOptionsLocation;
 
         /// <summary>
-        /// Location of keepMetadata, if any
+        /// Location of keepMetadata, if any.
         /// </summary>
         private ElementLocation _keepMetadataLocation;
 
         /// <summary>
-        /// Location of removeMetadata, if any
+        /// Location of removeMetadata, if any.
         /// </summary>
         private ElementLocation _removeMetadataLocation;
 
         /// <summary>
-        /// Location of keepDuplicates, if any
+        /// Location of keepDuplicates, if any.
         /// </summary>
         private ElementLocation _keepDuplicatesLocation;
 
         /// <summary>
-        /// Location of the condition, if any
+        /// Location of the condition, if any.
         /// </summary>
         private ElementLocation _conditionLocation;
 
@@ -258,7 +258,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Unevaluated MatchOnMetadata value
+        /// Unevaluated MatchOnMetadata value.
         /// </summary>
         public string MatchOnMetadata
         {
@@ -268,7 +268,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Unevaluated MatchOnMetadataOptions value
+        /// Unevaluated MatchOnMetadataOptions value.
         /// </summary>
         public string MatchOnMetadataOptions
         {
@@ -278,7 +278,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Unevaluated keepMetadata value
+        /// Unevaluated keepMetadata value.
         /// </summary>
         public string KeepMetadata
         {
@@ -288,7 +288,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Unevaluated removeMetadata value
+        /// Unevaluated removeMetadata value.
         /// </summary>
         public string RemoveMetadata
         {
@@ -298,7 +298,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Unevaluated keepDuplicates value
+        /// Unevaluated keepDuplicates value.
         /// </summary>
         public string KeepDuplicates
         {
@@ -308,7 +308,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Unevaluated condition value
+        /// Unevaluated condition value.
         /// </summary>
         public string Condition
         {
@@ -333,7 +333,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Location of the element
+        /// Location of the element.
         /// </summary>
         public ElementLocation Location
         {
@@ -343,7 +343,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Location of the include attribute, if any
+        /// Location of the include attribute, if any.
         /// </summary>
         public ElementLocation IncludeLocation
         {
@@ -353,7 +353,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Location of the exclude attribute, if any
+        /// Location of the exclude attribute, if any.
         /// </summary>
         public ElementLocation ExcludeLocation
         {
@@ -363,7 +363,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Location of the remove attribute, if any
+        /// Location of the remove attribute, if any.
         /// </summary>
         public ElementLocation RemoveLocation
         {
@@ -373,7 +373,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Location of the matchOnMetadata attribute, if any
+        /// Location of the matchOnMetadata attribute, if any.
         /// </summary>
         public ElementLocation MatchOnMetadataLocation
         {
@@ -383,7 +383,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Location of the matchOnMetadataOptions attribute, if any
+        /// Location of the matchOnMetadataOptions attribute, if any.
         /// </summary>
         public ElementLocation MatchOnMetadataOptionsLocation
         {
@@ -393,7 +393,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Location of the keepMetadata attribute, if any
+        /// Location of the keepMetadata attribute, if any.
         /// </summary>
         public ElementLocation KeepMetadataLocation
         {
@@ -403,7 +403,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Location of the removeMetadata attribute, if any
+        /// Location of the removeMetadata attribute, if any.
         /// </summary>
         public ElementLocation RemoveMetadataLocation
         {
@@ -413,7 +413,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Location of the keepDuplicates attribute, if any
+        /// Location of the keepDuplicates attribute, if any.
         /// </summary>
         public ElementLocation KeepDuplicatesLocation
         {
@@ -423,7 +423,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Location of the condition attribute if any
+        /// Location of the condition attribute if any.
         /// </summary>
         public ElementLocation ConditionLocation
         {

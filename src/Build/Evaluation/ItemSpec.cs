@@ -414,7 +414,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         ///     Path of the project the itemspec is coming from
         /// </summary>
-        protected string ProjectDirectory { get; }
+        internal string ProjectDirectory { get; }
 
         // not a Lazy to reduce memory
         private ref FileSpecMatcherTester FileMatcher

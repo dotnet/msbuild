@@ -8,6 +8,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
 using static Microsoft.Build.Unittest.BuildResultUtilities;
@@ -279,25 +280,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             aggregatedBuildResult.NodeRequestId.ShouldBe(BuildRequest.InvalidNodeRequestId);
             aggregatedBuildResult.SubmissionId.ShouldBe(BuildEventContext.InvalidSubmissionId);
 
-            inputResult.InitialTargets.ShouldBe(aggregatedBuildResult.InitialTargets);
-            inputResult.DefaultTargets.ShouldBe(aggregatedBuildResult.DefaultTargets);
-            inputResult.CircularDependency.ShouldBe(aggregatedBuildResult.CircularDependency);
-            inputResult.Exception.ShouldBe(aggregatedBuildResult.Exception);
-            inputResult.OverallResult.ShouldBe(aggregatedBuildResult.OverallResult);
-            inputResult.ProjectStateAfterBuild.ShouldBe(aggregatedBuildResult.ProjectStateAfterBuild);
-
-            Helpers.AssertDictionariesEqual(inputResult.ResultsByTarget, aggregatedBuildResult.ResultsByTarget, (a, b) =>
-            {
-                a.Key.ShouldBe(b.Key);
-
-                a.Value.Exception.ShouldBe(b.Value.Exception);
-                a.Value.Items.ShouldBe(b.Value.Items);
-                a.Value.ResultCode.ShouldBe(b.Value.ResultCode);
-
-                a.Value.WorkUnitResult.ActionCode.ShouldBe(b.Value.WorkUnitResult.ActionCode);
-                a.Value.WorkUnitResult.Exception.ShouldBe(b.Value.WorkUnitResult.Exception);
-                a.Value.WorkUnitResult.ResultCode.ShouldBe(b.Value.WorkUnitResult.ResultCode);
-            });
+            SdkUtilities.EngineHelpers.AssertBuildResultsEqual(inputResult, aggregatedBuildResult);
         }
 
         private void AssertConfigurationsEquivalent(BuildRequestConfiguration inputConfiguration, BuildRequestConfiguration aggregatedConfig)

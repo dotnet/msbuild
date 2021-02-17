@@ -1,0 +1,19 @@
+{
+  "solution": {
+    "path": "MSBuild.sln",
+    "projects": [
+      "src\\Build.OM.UnitTests\\Microsoft.Build.Engine.OM.UnitTests.csproj",
+      "src\\Build.UnitTests\\Microsoft.Build.Engine.UnitTests.csproj",
+      "src\\Build\\Microsoft.Build.csproj",
+      "src\\Framework.UnitTests\\Microsoft.Build.Framework.UnitTests.csproj",
+      "src\\Framework\\Microsoft.Build.Framework.csproj",
+      "src\\MSBuild.UnitTests\\Microsoft.Build.CommandLine.UnitTests.csproj",
+      "src\\MSBuild\\MSBuild.csproj",
+      "src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj",
+      "src\\Tasks\\Microsoft.Build.Tasks.csproj",
+      "src\\Utilities.UnitTests\\Microsoft.Build.Utilities.UnitTests.csproj",
+      "src\\Utilities\\Microsoft.Build.Utilities.csproj",
+      "src\\Xunit.NetCore.Extensions\\Xunit.NetCore.Extensions.csproj"
+    ]
+  }
+}

@@ -2850,7 +2850,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void GetItemProvenanceResultsShouldBeInItemElementOrder()
         {
-            var itemElements = Environment.ProcessorCount * 5;
+            var itemElements = NativeMethodsShared.GetLogicalCoreCount() * 5;
             var expected = new ProvenanceResultTupleList();
 
             var project =

@@ -194,7 +194,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Theory(Timeout = 20_000)] // Test hangs intermittently: https://github.com/dotnet/msbuild/issues/5520
+        [Theory(Skip = "hangs in CI, can't repro locally: https://github.com/dotnet/msbuild/issues/5453")]
         [MemberData(nameof(GraphsWithUniformSolutionConfigurations))]
         public void GraphConstructionCanLoadEntryPointsFromSolution(
             Dictionary<int, int[]> edges,

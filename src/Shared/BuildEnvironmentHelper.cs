@@ -440,6 +440,14 @@ namespace Microsoft.Build.Shared
             BuildEnvironmentHelperSingleton.s_instance = Initialize();
         }
 
+        /// <summary>
+        /// Resets the current singleton instance (for testing).
+        /// </summary>
+        internal static void ResetInstance_ForUnitTestsOnly(BuildEnvironment buildEnvironment)
+        {
+            BuildEnvironmentHelperSingleton.s_instance = buildEnvironment;
+        }
+
         private static Func<string> s_getProcessFromRunningProcess = GetProcessFromRunningProcess;
         private static Func<string> s_getExecutingAssemblyPath = GetExecutingAssemblyPath;
         private static Func<string> s_getAppContextBaseDirectory = GetAppContextBaseDirectory;

@@ -6,13 +6,13 @@ For more information on MSBuild, see the [MSBuild documentation](https://docs.mi
 
 ### Build Status
 
-The current development branch is `master`. Changes in `master` will go into a future update of MSBuild, which will release with Visual Studio 16.9 and a corresponding version of the .NET Core SDK.
+The current development branch is `master`. Changes in `master` will go into a future update of MSBuild, which will release with Visual Studio 16.10 and a corresponding version of the .NET Core SDK.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=master)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=master)
 
-We have forked for MSBuild 16.8 in the branch [`vs16.8`](https://github.com/Microsoft/msbuild/tree/vs16.8). Changes to that branch need special approval.
+We have forked for MSBuild 16.9 in the branch [`vs16.9`](https://github.com/Microsoft/msbuild/tree/vs16.9). Changes to that branch need special approval.
 
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.8)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.8)
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.9)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.9)
 
 MSBuild 16.7 builds from the branch [`vs16.7`](https://github.com/Microsoft/msbuild/tree/vs16.7). Only high-priority bugfixes will be considered for servicing 16.7.
 
@@ -21,10 +21,6 @@ MSBuild 16.7 builds from the branch [`vs16.7`](https://github.com/Microsoft/msbu
 MSBuild 16.4 builds from the branch [`vs16.4`](https://github.com/Microsoft/msbuild/tree/vs16.4). Only high-priority bugfixes will be considered for servicing 16.4.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.4)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.4)
-
-MSBuild 16.0 builds from the branch [`vs16.0`](https://github.com/Microsoft/msbuild/tree/vs16.0). Only high-priority bugfixes will be considered for servicing 16.0.
-
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.0)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.0)
 
 MSBuild 15.9 builds from the branch [`vs15.9`](https://github.com/Microsoft/msbuild/tree/vs15.9). Only very-high-priority bugfixes will be considered for servicing 15.9.
 
@@ -43,7 +39,7 @@ To get started on **Visual Studio 2019**:
 3. Clone the source code: `git clone https://github.com/Microsoft/msbuild.git`
   - You may have to [download Git](https://git-scm.com/downloads) first.
 4. Run `.\build.cmd` from the root of the repo to build the code. This also restores packages needed to open the projects in Visual Studio.
-5. Open `MSBuild.sln` or `MSBuild.Dev.sln` in Visual Studio 2019.
+5. Open `MSBuild.sln` or `MSBuild.Dev.slnf` in Visual Studio 2019.
 
 Note: To create a usable MSBuild with your changes, run `.\build.cmd /p:CreateBootstrap=true`.
 

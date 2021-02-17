@@ -24,22 +24,22 @@ The Process:
 6. [Delete the wave as it cycles out](#change-wave-'end-of-lifespan'-procedure)
 
 ## Creating a Change Wave
-1. In the `Microsoft.Build` project, open `SharedUtilities\ChangeWaves.cs`.
-2. Add a const string to identify the new wave, following the format:
+1. In the `Microsoft.Build.Framework` project, open `ChangeWaves.cs`.
+2. Add a static readonly Version to identify the new wave, following the format:
 ```c#
-public const string Wave17_4 = "17.4";
+public static readonly Version Wave17_4 = new Version(17, 4);
 ```
 3. You may need to delete the lowest wave as new waves get added.
 4. Update the AllWaves array appropriately.
 ```c#
-public static readonly string[] AllWaves = { Wave16_10, Wave17_0, Wave17_4 };
+public static readonly Version[] AllWaves = { Wave16_10, Wave17_0, Wave17_4 };
 ```
 
 ## Condition Your Feature On A Change Wave
 Surround your feature with the following:
 ```c#
     // If you pass an incorrectly formatted change wave, this will throw.
-    // Use the const Version that was created in the previous step.
+    // Use the readonly Version that was created in the previous step.
     if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
     {
         <your feature>
@@ -55,11 +55,13 @@ If you need to condition a Task or Target, use the built in `AreFeaturesEnabled`
 ## Test Your Feature
 Create tests as you normally would. Include one test with environment variable `MSBuildDisableFeaturesFromVersion` set to `ChangeWaves.Wave17_4`. Set this like so:
 ```c#
-TestEnvironment env = TestEnvironment.Create()
+using TestEnvironment env = TestEnvironment.Create();
 
-env.SetChangeWave(ChangeWaves.Wave17_4);
+ChangeWaves.ResetStateForTests();
+// Important: use the version here
+env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
+BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 ```
-When the TestEnvironment is disposed, it handles special logic to properly reset Change Waves for future tests.
 
 **Important!** If you need to build a project to test your feature (say, for tasks or targets), build via `ProjectCollection` in your test.
 
@@ -67,8 +69,9 @@ Example:
 ```c#
 using (TestEnvironment env = TestEnvironment.Create())
 {
-    // Important: use the constant here
-    env.SetChangeWave(ChangeWaves.Wave17_4);
+    ChangeWaves.ResetStateForTests();
+    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
+    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
     string projectFile = @"
         <Project>
@@ -90,7 +93,7 @@ using (TestEnvironment env = TestEnvironment.Create())
 
 ## Change Wave 'End-of-Lifespan' Procedure
 These features will eventually become standard functionality. When a change wave rotates out, do the following:
-1. Start by deleting the constant `Wave17_4` that was created in [Creating a Change Wave](#creating-a-change-wave).
+1. Start by deleting the readonly `Wave17_4` that was created in [Creating a Change Wave](#creating-a-change-wave).
 2. Remove `ChangeWave.AreFeaturesEnabled` or `[MSBuild]::AreFeaturesEnabled` conditions surrounding features that were assigned that change wave.
 3. Remove tests associated with ensuring features would not run if this wave were set.
-4. Clear all other issues that arose from deleting the constant.
+4. Clear all other issues that arose from deleting the version.

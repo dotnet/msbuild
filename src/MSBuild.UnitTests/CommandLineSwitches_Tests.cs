@@ -11,6 +11,7 @@ using System.Resources;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -448,7 +449,7 @@ namespace Microsoft.Build.UnitTests
         public void TargetsSwitchParameter()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList() { "/targets:targets.txt" }, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/targets:targets.txt" }, switches);
 
             switches.HaveErrors().ShouldBeFalse();
             switches[CommandLineSwitches.ParameterizedSwitch.Targets].ShouldBe(new[] { "targets.txt" });
@@ -458,7 +459,7 @@ namespace Microsoft.Build.UnitTests
         public void TargetsSwitchDoesNotSupportMultipleOccurrences()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList() { "/targets /targets" }, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/targets /targets" }, switches);
 
             switches.HaveErrors().ShouldBeTrue();
         }
@@ -503,7 +504,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches.IsParameterizedSwitch(graph, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
             parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.GraphBuild);
             duplicateSwitchErrorMessage.ShouldBeNull();
-            multipleParametersAllowed.ShouldBeFalse();
+            multipleParametersAllowed.ShouldBeTrue();
             missingParametersErrorMessage.ShouldBeNull();
             unquoteParameters.ShouldBeTrue();
             emptyParametersAllowed.ShouldBeFalse();
@@ -531,13 +532,36 @@ namespace Microsoft.Build.UnitTests
             emptyParametersAllowed.ShouldBeFalse();
         }
 
+        [Fact]
+        public void GraphBuildSwitchCanHaveParameters()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+
+            MSBuildApp.GatherCommandLineSwitches(new List<string>{ "/graph", "/graph:true;  NoBuild  ;;  ;", "/graph:foo"}, switches);
+
+            switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(new[] {"true", "  NoBuild  ", "  ", "foo"});
+
+            switches.HaveErrors().ShouldBeFalse();
+        }
+
+        [Fact]
+        public void GraphBuildSwitchCanBeParameterless()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+
+            MSBuildApp.GatherCommandLineSwitches(new List<string>{ "/graph" }, switches);
+
+            switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(new string[0]);
+
+            switches.HaveErrors().ShouldBeFalse();
+        }
 
         [Fact]
         public void InputResultsCachesSupportsMultipleOccurrence()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList(){"/irc", "/irc:a;b", "/irc:c;d"}, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/irc", "/irc:a;b", "/irc:c;d"}, switches);
 
             switches[CommandLineSwitches.ParameterizedSwitch.InputResultsCaches].ShouldBe(new []{null, "a", "b", "c", "d"});
 
@@ -549,7 +573,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList(){"/orc:a"}, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/orc:a"}, switches);
 
             switches[CommandLineSwitches.ParameterizedSwitch.OutputResultsCache].ShouldBe(new []{"a"});
 
@@ -561,7 +585,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList(){"/orc:a", "/orc:b"}, switches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(){"/orc:a", "/orc:b"}, switches);
 
             switches.HaveErrors().ShouldBeTrue();
         }
@@ -967,7 +991,7 @@ namespace Microsoft.Build.UnitTests
                                         enableProfiler: false,
                                         interactive: false,
                                         isolateProjects: false,
-                                        graphBuild: false,
+                                        graphBuildOptions: null,
                                         lowPriority: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null
@@ -1041,7 +1065,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[] { "" }), commandLineSwitches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "" }), commandLineSwitches);
 
             Assert.Null(MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches));
         }
@@ -1056,7 +1080,7 @@ namespace Microsoft.Build.UnitTests
 
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[]
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[]
             {
                 "\"/warnaserror: a,B ; c \"", // Leading, trailing, leading and trailing whitespace
                 "/warnaserror:A,b,C",         // Repeats of different case
@@ -1081,7 +1105,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[]
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[]
             {
                 "/warnaserror:a;b;c",
                 "/warnaserror",
@@ -1104,7 +1128,7 @@ namespace Microsoft.Build.UnitTests
 
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[]
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[]
             {
                 "/warnaserror:a;b;c",
                 "/warnaserror",
@@ -1126,7 +1150,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList(new [] { "/warnaserror" }), commandLineSwitches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new [] { "/warnaserror" }), commandLineSwitches);
 
             ISet<string> actualWarningsAsErrors = MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches);
 
@@ -1143,7 +1167,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[] { "/warnasmessage" }), commandLineSwitches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/warnasmessage" }), commandLineSwitches);
 
             VerifySwitchError(commandLineSwitches, "/warnasmessage", AssemblyResources.GetString("MissingWarnAsMessageParameterError"));
         }
@@ -1158,7 +1182,7 @@ namespace Microsoft.Build.UnitTests
 
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[]
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[]
             {
                 "\"/warnasmessage: a,B ; c \"", // Leading, trailing, leading and trailing whitespace
                 "/warnasmessage:A,b,C",         // Repeats of different case
@@ -1183,7 +1207,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
-            MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[] { "/profileevaluation" }), commandLineSwitches);
+            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/profileevaluation" }), commandLineSwitches);
             commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation][0].ShouldBe("no-file");
         }
 
@@ -1201,6 +1225,67 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<CommandLineSwitchException>(() => MSBuildApp.ProcessBooleanSwitch(new[] { "invalid" }, defaultValue: true, resourceName: "InvalidRestoreValue"));
         }
 
+        public static IEnumerable<object[]> ProcessGraphBuildSwitchData()
+        {
+            var emptyOptions = new GraphBuildOptions();
+            var noBuildOptions = new GraphBuildOptions {Build = false};
+
+            yield return new object[] {new string[0], emptyOptions, null};
+
+            yield return new object[] {new[] {"true"}, emptyOptions, null};
+
+            yield return new object[] {new[] {"false"}, null, null};
+
+            yield return new object[] {new[] {"  ", "  "}, emptyOptions, null};
+
+            yield return new object[] {new[] {"NoBuild"}, noBuildOptions, null};
+
+            yield return new object[] {new[] {"noBUILD"}, noBuildOptions, null};
+
+            yield return new object[] {new[] {"noBUILD     "}, noBuildOptions, null};
+
+            yield return new object[] {new[] {"false", "true"}, null, new[] {"false"}};
+
+            yield return new object[] {new[] {"nobuild", "true"}, noBuildOptions, new[] {"true"}};
+
+            yield return new object[] {new[] { "false", "nobuild" }, null, new[] {"false"}};
+
+            yield return new object[] {new[] {"nobuild", "invalid"}, null, new[] {"invalid"}};
+        }
+
+        [Theory]
+        [MemberData(nameof(ProcessGraphBuildSwitchData))]
+        public void ProcessGraphBuildSwitch(string[] parameters, GraphBuildOptions expectedOptions, string[] expectedWordsInException)
+        {
+            CommandLineSwitchException exception = null;
+
+            try
+            {
+                var graphBuildOptions = MSBuildApp.ProcessGraphBuildSwitch(parameters);
+                graphBuildOptions.ShouldBe(expectedOptions);
+            }
+            catch (CommandLineSwitchException e)
+            {
+                exception = e;
+            }
+
+            if (expectedWordsInException != null)
+            {
+                exception.ShouldNotBeNull();
+
+                exception.Message.ShouldContain("Graph build value is not valid");
+
+                foreach (var expectedWord in expectedWordsInException)
+                {
+                    exception.Message.ShouldContain(expectedWord);
+                }
+            }
+            else
+            {
+                exception.ShouldBeNull();
+            }
+        }
+
         /// <summary>
         /// Verifies that when the /profileevaluation switch is used with invalid filenames an error is shown.
         /// </summary>
@@ -1211,7 +1296,7 @@ namespace Microsoft.Build.UnitTests
         {
             bool enableProfiler = false;
             Should.Throw(
-                () => MSBuildApp.ProcessProfileEvaluationSwitch(new[] {filename}, new ArrayList(), out enableProfiler),
+                () => MSBuildApp.ProcessProfileEvaluationSwitch(new[] {filename}, new List<ILogger>(), out enableProfiler),
                 typeof(CommandLineSwitchException));
         }
 

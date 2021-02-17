@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
@@ -25,16 +25,29 @@ namespace Microsoft.Build.Shared
                 "MSBuild",
                 "Microsoft.Build",
                 "Microsoft.Build.Framework",
+                "Microsoft.Build.NuGetSdkResolver",
                 "Microsoft.Build.Tasks.Core",
                 "Microsoft.Build.Utilities.Core",
+                "NuGet.Build.Tasks",
+                "NuGet.Common",
+                "NuGet.Configuration",
+                "NuGet.Credentials",
+                "NuGet.DependencyResolver.Core",
+                "NuGet.Frameworks",
+                "NuGet.LibraryModel",
+                "NuGet.Packaging",
+                "NuGet.Protocol",
+                "NuGet.ProjectModel",
+                "NuGet.Versioning",
             }.ToImmutableHashSet();
 
         internal static readonly string[] Extensions = new[] { "ni.dll", "ni.exe", "dll", "exe" };
 
 
         public MSBuildLoadContext(string assemblyPath)
+            : base($"MSBuild plugin {assemblyPath}")
         {
-            _directory = Directory.GetParent(assemblyPath).FullName;
+            _directory = Directory.GetParent(assemblyPath)!.FullName;
         }
 
         protected override Assembly? Load(AssemblyName assemblyName)
@@ -82,7 +95,7 @@ namespace Microsoft.Build.Shared
             //   into the default ALC (so it's shared with other uses).
 
             var assemblyNameInExecutableDirectory = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
-                assemblyName.Name);
+                assemblyName.Name!);
 
             if (FileSystems.Default.FileExists(assemblyNameInExecutableDirectory))
             {

@@ -17,6 +17,11 @@ namespace Xunit.NetCore.Extensions
         private readonly IXunitTestCase _testCase;
         private readonly string _skippedReason;
 
+        public SkippedTestCase()
+        {
+
+        }
+
         internal SkippedTestCase(IXunitTestCase testCase, string skippedReason)
         {
             _testCase = testCase;
