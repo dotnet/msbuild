@@ -287,7 +287,7 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net6.0")]
-        public void ILLink_verify_analysis_warnings_hello_world_app(string targetFramework)
+        public void ILLink_verify_analysis_warnings_hello_world_app_trim_mode_copyused(string targetFramework)
         {
             var projectName = "AnalysisWarningsOnHelloWorldApp";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -307,6 +307,38 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false");
             result.Should().Pass();
+            ValidateWarningsOnHelloWorldApp(publishCommand, result, expectedOutput, targetFramework, rid);
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net6.0")]
+        public void ILLink_verify_analysis_warnings_hello_world_app_trim_mode_link(string targetFramework)
+        {
+            var projectName = "AnalysisWarningsOnHelloWorldApp";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            // Please keep list below sorted and de-duplicated
+            List<string> expectedOutput = new List<string>() {
+                    "ILLink : Trim analysis warning IL2026: System.ComponentModel.Design.DesigntimeLicenseContextSerializer.Deserialize(Stream,String,RuntimeLicenseContext",
+                    "ILLink : Trim analysis warning IL2067: System.ComponentModel.LicenseManager.CreateWithContext(Type,LicenseContext,Object[]",
+                    "ILLink : Trim analysis warning IL2072: System.ComponentModel.LicenseManager.ValidateInternalRecursive(LicenseContext,Type,Object,Boolean,License&,String&",
+                    "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(",
+                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.NullableTypeInfo.NullableTypeInfo(Type,List<Type>",
+                    "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.NullableTypeInfo.WriteData(PropertyValue",
+                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.TypeAnalysis.TypeAnalysis(Type,EventDataAttribute,List<Type>"
+            };
+
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false", "/p:TrimMode=link");
+            result.Should().Pass();
+            ValidateWarningsOnHelloWorldApp(publishCommand, result, expectedOutput, targetFramework, rid);
+        }
+
+        private void ValidateWarningsOnHelloWorldApp (PublishCommand publishCommand, CommandResult result, List<string> expectedOutput, string targetFramework, string rid)
+        {
             //This function doesn't use an XML file like the runtime
             //to silence warnings since will make the test to fail only
             //with new warnings, we want the test to fail if any 
