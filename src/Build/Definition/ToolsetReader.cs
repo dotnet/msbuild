@@ -84,9 +84,7 @@ namespace Microsoft.Build.Evaluation
         internal static string ReadAllToolsets(Dictionary<string, Toolset> toolsets, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, ToolsetDefinitionLocations locations)
         {
             return ReadAllToolsets(toolsets,
-#if FEATURE_WIN32_REGISTRY
                 null,
-#endif
                 null,
                 environmentProperties, globalProperties, locations);
         }
@@ -98,9 +96,7 @@ namespace Microsoft.Build.Evaluation
         internal static string ReadAllToolsets
             (
             Dictionary<string, Toolset> toolsets,
-#if FEATURE_WIN32_REGISTRY
             ToolsetRegistryReader registryReader,
-#endif
             ToolsetConfigurationReader configurationReader,
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
             PropertyDictionary<ProjectPropertyInstance> globalProperties,
@@ -137,7 +133,6 @@ namespace Microsoft.Build.Evaluation
 
             if ((locations & ToolsetDefinitionLocations.Registry) == ToolsetDefinitionLocations.Registry)
             {
-#if FEATURE_WIN32_REGISTRY
                 if (NativeMethodsShared.IsWindows || registryReader != null)
                 {
                     // If we haven't been provided a registry reader (i.e. unit tests), create one
@@ -151,7 +146,6 @@ namespace Microsoft.Build.Evaluation
                         out defaultOverrideToolsVersionFromRegistry);
                 }
                 else
-#endif
                 {
                     var currentDir = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory.TrimEnd(Path.DirectorySeparatorChar);
                     var props = new PropertyDictionary<ProjectPropertyInstance>();
