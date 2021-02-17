@@ -205,12 +205,12 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             }
             else
             {
-                tagHelperFeature.DiscoveryMode = TagHelperDiscoveryFilter.ReferenceAssemblies;
+                tagHelperFeature.DiscoveryFilter = TagHelperDiscoveryFilter.ReferenceAssemblies;
                 refTagHelpers = tagHelperFeature.GetDescriptors();
                 TagHelperSerializer.Serialize(razorContext.RefsTagHelperOutputCachePath, refTagHelpers);
             }
 
-            tagHelperFeature.DiscoveryMode = TagHelperDiscoveryFilter.CurrentCompilation;
+            tagHelperFeature.DiscoveryFilter = TagHelperDiscoveryFilter.CurrentCompilation;
             var assemblyTagHelpers = tagHelperFeature.GetDescriptors();
 
             var result = new List<TagHelperDescriptor>(refTagHelpers.Count + assemblyTagHelpers.Count);
