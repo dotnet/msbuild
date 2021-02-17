@@ -1,19 +1,19 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.Sdk.Publish.Tasks.MsDeploy;
 using Microsoft.NET.Sdk.Publish.Tasks.Properties;
-using Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy.Http;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
 {
     public class ZipDeploy : Task
     {
-        private const string UserAgentName = "websdk-tools";
+        private const string UserAgentName = "websdk";
 
         [Required]
         public string ZipToPublishPath { get; set; }
@@ -53,7 +53,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
             }
         }
 
-        public async System.Threading.Tasks.Task<bool> ZipDeployAsync(string zipToPublishPath, string username, string password, string publishUrl, string siteName, string userAgentVersion, IHttpClient client, bool logMessages)
+        public async System.Threading.Tasks.Task<bool> ZipDeployAsync(string zipToPublishPath, string userName, string password, string publishUrl, string siteName, string userAgentVersion, IHttpClient client, bool logMessages)
         {
             if (!File.Exists(zipToPublishPath) || client == null)
             {
@@ -90,10 +90,11 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
                 Log.LogMessage(MessageImportance.High, string.Format(Resources.ZIPDEPLOY_PublishingZip, zipToPublishPath, zipDeployPublishUrl));
             }
 
-            Uri uri = new Uri(zipDeployPublishUrl, UriKind.Absolute);
+            // use the async version of the api
+            Uri uri = new Uri($"{zipDeployPublishUrl}?isAsync=true", UriKind.Absolute);
+            string userAgent = $"{UserAgentName}/{userAgentVersion}";
             FileStream stream = File.OpenRead(zipToPublishPath);
-            IHttpResponse response = await client.PostWithBasicAuthAsync(uri, username, password,
-                "application/zip", $"{UserAgentName}/{userAgentVersion}", Encoding.UTF8, stream);
+            IHttpResponse response = await client.PostWithBasicAuthAsync(uri, userName, password, "application/zip", userAgent, Encoding.UTF8, stream);
             if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Accepted)
             {
                 if (logMessages)
@@ -102,6 +103,30 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
                 }
 
                 return false;
+            }
+            else
+            {
+                if (logMessages)
+                {
+                    Log.LogMessage(Resources.ZIPDEPLOY_Uploaded);
+                }
+
+                string deploymentUrl = response.GetHeader("Location").FirstOrDefault();
+                if (!string.IsNullOrEmpty(deploymentUrl))
+                {
+                    ZipDeploymentStatus deploymentStatus = new ZipDeploymentStatus(client, userAgent, Log, logMessages);
+                    DeployStatus status = await deploymentStatus.PollDeploymentStatusAsync(deploymentUrl, userName, password);
+                    if (status == DeployStatus.Success)
+                    {
+                        Log.LogMessage(MessageImportance.High, Resources.ZIPDEPLOY_Succeeded);
+                        return true;
+                    }
+                    else if (status == DeployStatus.Failed || status == DeployStatus.Unknown)
+                    {
+                        Log.LogError(String.Format(Resources.ZIPDEPLOY_Failed, zipDeployPublishUrl, status));
+                        return false;
+                    }
+                }
             }
 
             return true;

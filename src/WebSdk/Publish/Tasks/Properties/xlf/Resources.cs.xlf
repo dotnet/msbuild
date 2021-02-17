@@ -1903,6 +1903,26 @@ Podrobné informace o chybě:</target>
         <target state="translated">V procesu není podporováno hostování pro AspNetCoreModule. Změňte AspNetCoreModule aspoň na AspNetCoreModuleV2.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Check_DeploymentStatus">
+        <source>Checking the deployment status...</source>
+        <target state="new">Checking the deployment status...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_DeploymentStatus">
+        <source>Deployment status is {0}.</source>
+        <target state="new">Deployment status is {0}.</target>
+        <note>{0} - Success or failed</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_DeploymentStatusPolling">
+        <source>Polling for deployment status...</source>
+        <target state="new">Polling for deployment status...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Failed">
+        <source>Zip Deployment failed. </source>
+        <target state="new">Zip Deployment failed. </target>
+        <note />
+      </trans-unit>
       <trans-unit id="ZIPDEPLOY_FailedDeploy">
         <source>The attempt to publish the ZIP file through {0} failed with HTTP status code {1}.</source>
         <target state="translated">Pokus o publikování souboru ZIP prostřednictvím {0} selhal se stavovým kódem HTTP {1}.</target>
@@ -1922,6 +1942,16 @@ Podrobné informace o chybě:</target>
         <source>Publishing {0} to {1}...</source>
         <target state="translated">{0} se publikuje do umístění {1}...</target>
         <note>{0} - Path of zip to publish, {1} - URL to deploy zip</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Succeeded">
+        <source>Zip Deployment succeeded.</source>
+        <target state="new">Zip Deployment succeeded.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Uploaded">
+        <source>Uploaded the Zip file to the target.</source>
+        <target state="new">Uploaded the Zip file to the target.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

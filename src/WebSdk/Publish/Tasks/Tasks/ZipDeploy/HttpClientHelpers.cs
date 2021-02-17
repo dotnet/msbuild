@@ -4,9 +4,10 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy.Http
+namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
 {
     internal static class HttpClientHelpers
     {
@@ -33,6 +34,22 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy.Http
             try
             {
                 HttpResponseMessage responseMessage = await client.PostAsync(uri, content);
+                return new HttpResponseMessageWrapper(responseMessage);
+            }
+            catch (TaskCanceledException)
+            {
+                return new HttpResponseMessageForStatusCode(HttpStatusCode.RequestTimeout);
+            }
+        }
+
+        public static async Task<IHttpResponse> GetWithBasicAuthAsync(this IHttpClient client, Uri uri, string username, string password, string userAgent, CancellationToken cancellationToken)
+        {
+            AddBasicAuthToClient(username, password, client);
+            client.DefaultRequestHeaders.Add("User-Agent", userAgent);
+
+            try
+            {
+                HttpResponseMessage responseMessage = await client.GetAsync(uri, cancellationToken);
                 return new HttpResponseMessageWrapper(responseMessage);
             }
             catch (TaskCanceledException)

@@ -1900,6 +1900,26 @@ Error details:</source>
         <target state="translated">AspNetCoreModule에 In Process 호스팅이 지원되지 않습니다. AspNetCoreModule을 적어도 AspNetCoreModuleV2로 변경하세요.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Check_DeploymentStatus">
+        <source>Checking the deployment status...</source>
+        <target state="new">Checking the deployment status...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_DeploymentStatus">
+        <source>Deployment status is {0}.</source>
+        <target state="new">Deployment status is {0}.</target>
+        <note>{0} - Success or failed</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_DeploymentStatusPolling">
+        <source>Polling for deployment status...</source>
+        <target state="new">Polling for deployment status...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Failed">
+        <source>Zip Deployment failed. </source>
+        <target state="new">Zip Deployment failed. </target>
+        <note />
+      </trans-unit>
       <trans-unit id="ZIPDEPLOY_FailedDeploy">
         <source>The attempt to publish the ZIP file through {0} failed with HTTP status code {1}.</source>
         <target state="translated">{0}을(를) 통해 ZIP 파일을 게시하려는 시도에 실패했습니다. HTTP 상태 코드는 {1}입니다.</target>
@@ -1919,6 +1939,16 @@ Error details:</source>
         <source>Publishing {0} to {1}...</source>
         <target state="translated">{1}에 {0} 게시 중...</target>
         <note>{0} - Path of zip to publish, {1} - URL to deploy zip</note>
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Succeeded">
+        <source>Zip Deployment succeeded.</source>
+        <target state="new">Zip Deployment succeeded.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZIPDEPLOY_Uploaded">
+        <source>Uploaded the Zip file to the target.</source>
+        <target state="new">Uploaded the Zip file to the target.</target>
+        <note />
       </trans-unit>
     </body>
   </file>
