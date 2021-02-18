@@ -210,10 +210,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       WebRootFiles="@(_WebRootFiles)" />
 
     <GenerateStaticWebAssetsManifest
+      Condition="'@(_ExternalStaticWebAsset->Count())' != '0'"
       ContentRootDefinitions="@(_ExternalStaticWebAsset)"
       TargetManifestPath="$(_GeneratedStaticWebAssetsDevelopmentManifest)" />
 
-    <ItemGroup>
+    <ItemGroup Condition="'@(_ExternalStaticWebAsset->Count())' != '0'">
       <FileWrites Include="$(_GeneratedStaticWebAssetsDevelopmentManifest)" />
     </ItemGroup>
 
@@ -224,7 +225,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <ContentWithTargetPath
         Include="$(_GeneratedStaticWebAssetsDevelopmentManifest)"
-        Condition="'@(_ExternalStaticWebAsset->Count())' != '0'">
+        Condition="Exists('$(_GeneratedStaticWebAssetsDevelopmentManifest)')">
         <Pack>false</Pack>
         <TargetPath>$(TargetName).StaticWebAssets.xml</TargetPath>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
