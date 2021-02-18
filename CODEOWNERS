@@ -9,7 +9,7 @@
 /src/WebSdk/ @vijayrkn
 /src/Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests/ @vijayrkn
 
-/src/BlazorWasmSdk @captainsafia, @pranavkm, mkArtakMSFT
+/src/BlazorWasmSdk @captainsafia, @pranavkm, @mkArtakMSFT
 /src/Tests/Microsoft.NET.Sdk.BlazorWebAssembly.Tests @captainsafia, @pranavkm, @mkArtakMSFT
 /src/Assets/TestProjects/BlazorHosted @captainsafia, @pranavkm, @mkArtakMSFT
 /src/Assets/TestProjects/BlazorHostedRID @captainsafia, @pranavkm, @mkArtakMSFT
