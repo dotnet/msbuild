@@ -6,12 +6,9 @@ However, you should be aware what type of information is captured in the binary 
 
 ⚠ NOTE: some build environments make secrets available using environment variables. Before sharing a binary log, make sure it does not expose API tokens or other important secrets.
 
-You can create a binary log by passing the `-bl` parameter to MSBuild.  You can explore the contents of the generated .binlog file using [MSBuild Structured Log Viewer](http://msbuildlog.com/).
+You can create a binary log by passing the `-bl` parameter to MSBuild. You can explore the contents of the generated .binlog file using [MSBuild Structured Log Viewer](http://msbuildlog.com/) or in your browser using [Live Structured Log Viewer](https://live.msbuildlog.com). Note: We don't capture any data from binary logs viewed on your browser.
 
 [More details about binary logs](Binary-Log.md)
 
 ## Capturing Binary Logs Through Visual Studio
 See [this guide](https://github.com/dotnet/project-system-tools) in the Project System Tools repo for capturing binlogs through Visual Studio.
-
-## Viewing Binary Logs Online
-See live.msbuildlog.com to view binary logs through your browser. Note: We don't capture data from binary logs viewed on the browser.
