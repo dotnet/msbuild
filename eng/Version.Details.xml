@@ -5,9 +5,9 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>d8c68c834bcca3f721ad1550404807e301ba7afe</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="5.9.0-rc.7097">
-      <Uri>https://dev.azure.com/devdiv/DevDiv/_git/NuGet-NuGet.Client-Trusted</Uri>
-      <Sha>ed9af679b4425c1ff4d41d2302d73f6e580a2839</Sha>
+    <Dependency Name="NuGet.Build.Tasks" Version="5.9.0-preview.3.7027">
+      <Uri>https://github.com/NuGet/NuGet.Client</Uri>
+      <Sha>cceb05e4ed5910f0609e14c8937c905288520c03</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="3.9.0-2.20574.26">
       <Uri>https://github.com/dotnet/roslyn</Uri>
