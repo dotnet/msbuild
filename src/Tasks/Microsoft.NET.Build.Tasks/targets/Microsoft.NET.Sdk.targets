@@ -428,7 +428,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <RuntimeHostConfigurationOption Include="System.Net.Http.UseNativeHttpHandler"
                                     Condition="'$(UseNativeHttpHandler)' != '' and ($(RuntimeIdentifier.StartsWith('ios')) or $(RuntimeIdentifier.StartsWith('tvos')) or $(RuntimeIdentifier.StartsWith('maccatalyst')) or $(RuntimeIdentifier.StartsWith('android')))"
-                                    Value="$(HttpActivityPropagationSupport)"
+                                    Value="$(UseNativeHttpHandler)"
                                     Trim="true" />
 
     <RuntimeHostConfigurationOption Include="System.Resources.ResourceManager.AllowCustomResourceTypes"
