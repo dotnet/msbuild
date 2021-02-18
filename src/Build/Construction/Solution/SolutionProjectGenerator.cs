@@ -2292,7 +2292,7 @@ namespace Microsoft.Build.Construction
             globalProperties.AddProperty("SolutionExt", EscapingUtilities.Escape(Path.GetExtension(_solutionFile.FullPath)));
             globalProperties.AddProperty("SolutionFileName", EscapingUtilities.Escape(Path.GetFileName(_solutionFile.FullPath)));
             globalProperties.AddProperty("SolutionName", EscapingUtilities.Escape(Path.GetFileNameWithoutExtension(_solutionFile.FullPath)));
-            globalProperties.AddProperty("SolutionFilterName", EscapingUtilities.Escape(Path.GetFileNameWithoutExtension(_solutionFile.SolutionFilterFilePath)));
+            globalProperties.AddProperty("SolutionFilterName", EscapingUtilities.Escape(Path.GetFileNameWithoutExtension(_solutionFile.SolutionFilterFilePath ?? string.Empty)));
 
             globalProperties.AddProperty(SolutionPathPropertyName, EscapingUtilities.Escape(Path.Combine(_solutionFile.SolutionFileDirectory, Path.GetFileName(_solutionFile.FullPath))));
 
