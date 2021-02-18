@@ -21,7 +21,7 @@
 /src/Tests/Microsoft.NET.Sdk.Razor.Tool.Tests @captainsafia, @pranavkm, @mkArtakMSFT
 /src/Assets/TestPackages/PackageLibraryDirectDependency @captainsafia, @pranavkm, @mkArtakMSFT
 /src/Assets/TestPackages/PackageLibraryTransitiveDependency @captainsafia, @pranavkm, @mkArtakMSFT
-/src/src/Assets/TestProjects/Razor* @captainsafia, @pranavkm, mkArtakMSFT
+/src/src/Assets/TestProjects/Razor* @captainsafia, @pranavkm, @mkArtakMSFT
 
 /src/Cli/dotnet/commands/dotnet-add/dotnet-add-package @dotnet/nuget-team
 /src/Tests/dotnet-add-package.Tests @dotnet/nuget-team
