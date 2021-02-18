@@ -21,3 +21,8 @@ Run the [EnumerateMSBuild powershell script](https://github.com/Microsoft/msbuil
     gacutil /u "Microsoft.Build.Utilities.Core, Version=15.1.0.0"
     gacutil /u "Microsoft.Build.Framework, Version=15.1.0.0"
     ```
+
+## Related GAC issues
+https://developercommunity.visualstudio.com/content/problem/311136/update-to-1580-projects-wont-load.html
+https://developercommunity.visualstudio.com/content/problem/953754/after-update-to-1650-no-longer-able-to-loadcreate.html
+https://developercommunity.visualstudio.com/content/problem/208631/unable-to-create-or-open-solution.html
