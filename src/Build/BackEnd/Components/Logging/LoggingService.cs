@@ -519,12 +519,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             int key = GetWarningsAsErrorOrMessageKey(context);
 
-            if (_warningsAsErrorsByProject.ContainsKey(key))
-            {
-                return _warningsAsErrorsByProject[key] as HashSet<string>;
-            }
-
-            return null;
+            return _warningsAsErrorsByProject?[key] as HashSet<string>;
         }
 
         public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
