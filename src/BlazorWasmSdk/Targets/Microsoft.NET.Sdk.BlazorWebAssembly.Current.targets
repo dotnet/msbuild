@@ -567,7 +567,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       But first, mangle the AOTed dotnet.js file to include the runtime version.
     -->
 
-    <Copy SourceFiles="@(WasmNativeAsset)" DestinationFiles="%(WasmNativeAsset.Directory)\dotnet.$(_DotNetJsVersion).js" Condition="%(FileName) == 'dotnet' AND %(Extension) == '.js'">
+    <Copy SourceFiles="@(WasmNativeAsset)" DestinationFiles="%(RootDir)%(Directory)\dotnet.$(_DotNetJsVersion).js" Condition="%(FileName) == 'dotnet' AND %(Extension) == '.js'">
       <Output TaskParameter="CopiedFiles" ItemName="_PublishAotDotnetJsFile" />
     </Copy>
 
