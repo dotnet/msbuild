@@ -168,7 +168,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         }
 
         [Fact]
-        public void Build_DoesNotEmbedManifestWhen_NoStaticResourcesAvailable()
+        public void Build_DoesNotGenerateManifestWhen_NoStaticResourcesAvailable()
         {
             var testAsset = "RazorSimpleMvc";
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
@@ -179,8 +179,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 
-            // GenerateStaticWebAssetsManifest should generate the manifest and the cache.
-            new FileInfo(Path.Combine(intermediateOutputPath, "staticwebassets", "SimpleMvc.StaticWebAssets.xml")).Should().Exist();
+            // GenerateStaticWebAssetsManifest should generate the manifest.
             new FileInfo(Path.Combine(intermediateOutputPath, "staticwebassets", "SimpleMvc.StaticWebAssets.Manifest.cache")).Should().Exist();
             new FileInfo(Path.Combine(outputPath, "SimpleMvc.StaticWebAssets.xml")).Should().NotExist();
 

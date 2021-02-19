@@ -257,11 +257,12 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
         private static ParallelOptions GetParallelOptions(GeneratorExecutionContext generatorExecutionContext)
         {
-            if (Debugger.IsAttached)
-            {
-                return new ParallelOptions { MaxDegreeOfParallelism = 1 };
-            }
             var options = new ParallelOptions { CancellationToken = generatorExecutionContext.CancellationToken };
+            var isConcurrentBuild = generatorExecutionContext.Compilation.Options.ConcurrentBuild;
+            if (Debugger.IsAttached || !isConcurrentBuild)
+            {
+                options.MaxDegreeOfParallelism = 1;
+            }
             return options;
         }
 
