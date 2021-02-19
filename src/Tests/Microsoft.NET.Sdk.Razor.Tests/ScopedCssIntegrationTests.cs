@@ -78,16 +78,13 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             File.Move(Path.Combine(projectDirectory.Path, "Components", "Pages", "Counter.razor.css"), styles);
 
             var build = new BuildCommand(projectDirectory);
-            build.Execute("/p:EnableDefaultScopedCssItems=false", "/p:_RazorSourceGeneratorWriteGeneratedOutput=true").Should().Pass();
+            build.Execute("/p:EnableDefaultScopedCssItems=false").Should().Pass();
 
             var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
 
             var scoped = Path.Combine(intermediateOutputPath, "scopedcss", "Styles", "Pages", "Counter.rz.scp.css");
             new FileInfo(scoped).Should().Exist();
             new FileInfo(scoped).Should().Contain("b-overriden");
-            var generated = Path.Combine(intermediateOutputPath, "Razor", "Components", "Pages", "Counter.razor.g.cs");
-            new FileInfo(generated).Should().Exist();
-            new FileInfo(generated).Should().Contain("b-overriden");
             new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "Components", "Pages", "Index.razor.rz.scp.css")).Should().NotExist();
         }
 
@@ -215,21 +212,16 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
-            build.Execute("/p:_RazorSourceGeneratorWriteGeneratedOutput=true").Should().Pass();
+            build.Execute().Should().Pass();
 
             var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
 
             var generatedCounter = Path.Combine(intermediateOutputPath, "scopedcss", "Components", "Pages", "Counter.razor.rz.scp.css");
-            new FileInfo(generatedCounter).Should().Exist();
-            new FileInfo(Path.Combine(intermediateOutputPath, "Razor", "Components", "Pages", "Counter.razor.g.cs")).Should().Exist();
 
             var counterContent = File.ReadAllText(generatedCounter);
 
             var counterScopeMatch = Regex.Match(counterContent, ".*button\\[(.*)\\].*", RegexOptions.Multiline | RegexOptions.IgnoreCase);
             Assert.True(counterScopeMatch.Success, "Couldn't find a scope id in the generated Counter scoped css file.");
-            var counterScopeId = counterScopeMatch.Groups[1].Captures[0].Value;
-
-            new FileInfo(Path.Combine(intermediateOutputPath, "Razor", "Components", "Pages", "Counter.razor.g.cs")).Should().Contain(counterScopeId);
         }
 
         [Fact]
@@ -239,7 +231,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
-            build.Execute("/p:_RazorSourceGeneratorWriteGeneratedOutput=true").Should().Pass();
+            build.Execute().Should().Pass();
 
             var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
 
@@ -248,24 +240,17 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             new FileInfo(generatedBundle).Should().Exist();
             var generatedProjectBundle = Path.Combine(intermediateOutputPath, "scopedcss", "projectbundle", "ComponentApp.bundle.scp.css");
             new FileInfo(generatedProjectBundle).Should().Exist();
-            var generatedCounter = Path.Combine(intermediateOutputPath, "Razor", "Components", "Pages", "Counter.razor.g.cs");
-            new FileInfo(generatedCounter).Should().Exist();
 
-            var componentThumbprint = FileThumbPrint.Create(generatedCounter);
             var bundleThumbprint = FileThumbPrint.Create(generatedBundle);
 
             File.Delete(Path.Combine(projectDirectory.Path, "Components", "Pages", "Counter.razor.css"));
 
             build = new BuildCommand(projectDirectory);
-            build.Execute("/p:_RazorSourceGeneratorWriteGeneratedOutput=true").Should().Pass();
+            build.Execute().Should().Pass();
 
             new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "Components", "Pages", "Counter.razor.rz.scp.css")).Should().NotExist();
-            new FileInfo(generatedCounter).Should().Exist();
 
-            var newComponentThumbprint = FileThumbPrint.Create(generatedCounter);
             var newBundleThumbprint = FileThumbPrint.Create(generatedBundle);
-
-            Assert.NotEqual(componentThumbprint, newComponentThumbprint);
             Assert.NotEqual(bundleThumbprint, newBundleThumbprint);
         }
 
@@ -299,7 +284,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             // Act & Assert 1
             var build = new BuildCommand(projectDirectory);
-            build.Execute("/p:_RazorSourceGeneratorWriteGeneratedOutput=true").Should().Pass();
+            build.Execute().Should().Pass();
 
             var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
             var directoryPath = Path.Combine(intermediateOutputPath, "scopedcss");
@@ -314,12 +299,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // Act & Assert 2
             for (var i = 0; i < 2; i++)
             {
-                // We want to make sure nothing changed between multiple incremental builds.
-                using (var razorGenDirectoryLock = LockDirectory(Path.Combine(intermediateOutputPath, "Razor")))
-                {
-                    build = new BuildCommand(projectDirectory);
-                    build.Execute().Should().Pass();
-                }
+                build = new BuildCommand(projectDirectory);
+                build.Execute().Should().Pass();
 
                 foreach (var file in files)
                 {
@@ -327,21 +308,6 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                     Assert.Equal(thumbprintLookup[file], thumbprint);
                 }
             }
-        }
-
-        private IDisposable LockDirectory(string directory)
-        {
-            var disposables = new List<IDisposable>();
-            foreach (var file in Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories))
-            {
-                disposables.Add(File.Open(file, FileMode.Open, FileAccess.Read, FileShare.None));
-            }
-
-            var disposable = new Mock<IDisposable>();
-            disposable.Setup(d => d.Dispose())
-                .Callback(() => disposables.ForEach(d => d.Dispose()));
-
-            return disposable.Object;
         }
     }
 }

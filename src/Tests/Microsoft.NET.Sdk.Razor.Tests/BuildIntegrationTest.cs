@@ -39,7 +39,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var build = new BuildCommand(projectDirectory);
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 
-            build.Execute("/p:_RazorSourceGeneratorWriteGeneratedOutput=true")
+            build.Execute()
                 .Should()
                 .Pass()
                 .And.HaveStdOutContaining($"SimpleMvc -> {Path.Combine(projectDirectory.Path, outputPath, "SimpleMvc.Views.dll")}");

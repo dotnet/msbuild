@@ -37,16 +37,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         public bool WaitForDebugger { get; private set; }
 
         /// <summary>
-        /// Gets a flag that determines if generated output is to be written to disk.
-        /// Primarily meant for tests and debugging.
-        /// <para>
-        /// To configure this using MSBuild, use the <c>_RazorSourceGeneratorWriteGeneratedOutput</c> property.
-        /// For instance <c>dotnet msbuild /p:_RazorSourceGeneratorWriteGeneratedOutput=true</c>
-        /// </para>
-        /// </summary>
-        public bool WriteGeneratedContent { get; private set; }
-
-        /// <summary>
         /// Gets a flag that determine if the source generator should log verbose messages.
         /// </summary>
         /// <para>
@@ -87,7 +77,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             }
 
             globalOptions.TryGetValue("build_property._RazorSourceGeneratorDebug", out var waitForDebugger);
-            globalOptions.TryGetValue("build_property._RazorSourceGeneratorWriteGeneratedOutput", out var writeOutput);
             globalOptions.TryGetValue("build_property._RazorSourceGeneratorLog", out var enableLogging);
 
             var razorConfiguration = RazorConfiguration.Create(razorLanguageVersion, configurationName, Enumerable.Empty<RazorExtension>());
@@ -104,7 +93,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 DesignTimeBuild = designTimeBuild == "true",
                 RefsTagHelperOutputCachePath = refsTagHelperOutputCachePath,
                 WaitForDebugger = waitForDebugger == "true",
-                WriteGeneratedContent = writeOutput == "true",
                 EnableLogging = enableLogging == "true"
             };
         }

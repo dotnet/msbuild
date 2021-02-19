@@ -47,7 +47,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <CompilerVisibleProperty Include="DesignTimeBuild" />
       <CompilerVisibleProperty Include="_RazorReferenceAssemblyTagHelpersOutputPath" />
       <CompilerVisibleProperty Include="_RazorSourceGeneratorDebug" />
-      <CompilerVisibleProperty Include="_RazorSourceGeneratorWriteGeneratedOutput" />
       <CompilerVisibleProperty Include="_RazorSourceGeneratorLog" />
     </ItemGroup>
 

@@ -103,13 +103,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 var hint = GetIdentifierFromPath(file.NormalizedPath);
 
                 var generatedCode = csharpDocument.GeneratedCode;
-                if (razorContext.WriteGeneratedContent)
-                {
-                    var path = file.GeneratedOutputPath;
-                    Directory.CreateDirectory(Path.GetDirectoryName(path));
-                    File.WriteAllText(path, generatedCode);
-                }
-
                 outputs[i] = (hint, SourceText.From(generatedCode, Encoding.UTF8));
             });
 
@@ -159,27 +152,13 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             Parallel.For(0, files.Count, GetParallelOptions(GeneratorExecutionContext), i =>
             {
                 var file = files[i];
-                if (File.GetLastWriteTimeUtc(file.GeneratedDeclarationPath) > File.GetLastWriteTimeUtc(file.AdditionalText.Path))
-                {
-                    // Declaration files are invariant to other razor files, tag helpers, assemblies. If we have previously generated
-                    // content that it's still newer than the output file, use it and save time processing the file.
-                    using var outputFileStream = File.OpenRead(file.GeneratedDeclarationPath);
-                    results[i] = CSharpSyntaxTree.ParseText(
-                        SourceText.From(outputFileStream),
-                        options: parseOptions);
-                }
-                else
-                {
-                    var codeGen = discoveryProjectEngine.Process(discoveryProjectEngine.FileSystem.GetItem(file.NormalizedPath, FileKinds.Component));
-                    var generatedCode = codeGen.GetCSharpDocument().GeneratedCode;
+                var codeGen = discoveryProjectEngine.Process(discoveryProjectEngine.FileSystem.GetItem(file.NormalizedPath, FileKinds.Component));
+                var generatedCode = codeGen.GetCSharpDocument().GeneratedCode;
 
-                    Directory.CreateDirectory(Path.GetDirectoryName(file.GeneratedDeclarationPath));
-                    File.WriteAllText(file.GeneratedDeclarationPath, generatedCode);
+                results[i] = CSharpSyntaxTree.ParseText(
+                    generatedCode,
+                    options: parseOptions);
 
-                    results[i] = CSharpSyntaxTree.ParseText(
-                        generatedCode,
-                        options: parseOptions);
-                }
             });
 
             tagHelperFeature.Compilation = GeneratorExecutionContext.Compilation.AddSyntaxTrees(results.Take(files.Count));
