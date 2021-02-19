@@ -259,10 +259,55 @@
         <target state="translated">NETSDK1120: .NET Core를 대상으로 하는 C++/CLI 프로젝트에 'netcoreapp3.1' 이상의 대상 프레임워크가 필요합니다.</target>
         <note>{StrBegin="NETSDK1120: "}</note>
       </trans-unit>
+      <trans-unit id="Crossgen2MissingRequiredMetadata">
+        <source>NETSDK1155: Required '{0}' metadata missing on Crossgen2Tool item.</source>
+        <target state="new">NETSDK1155: Required '{0}' metadata missing on Crossgen2Tool item.</target>
+        <note>{StrBegin="NETSDK1155: "}</note>
+      </trans-unit>
       <trans-unit id="Crossgen2RequiresSelfContained">
         <source>NETSDK1126: Publishing ReadyToRun using Crossgen2 is only supported for self-contained applications.</source>
         <target state="translated">NETSDK1126: Crossgen2를 사용한 ReadyToRun 게시는 자체 포함 애플리케이션에서만 지원됩니다.</target>
         <note>{StrBegin="NETSDK1126: "}</note>
+      </trans-unit>
+      <trans-unit id="Crossgen2ToolExecutableNotFound">
+        <source>NETSDK1152: Crossgen2Tool executable '{0}' not found.</source>
+        <target state="new">NETSDK1152: Crossgen2Tool executable '{0}' not found.</target>
+        <note>{StrBegin="NETSDK1152: "}</note>
+      </trans-unit>
+      <trans-unit id="Crossgen2ToolMissingWhenUseCrossgen2IsSet">
+        <source>NETSDK1151: Crossgen2Tool must be specified when UseCrossgen2 is set to true.</source>
+        <target state="new">NETSDK1151: Crossgen2Tool must be specified when UseCrossgen2 is set to true.</target>
+        <note>{StrBegin="NETSDK1151: "}</note>
+      </trans-unit>
+      <trans-unit id="Crossgen5CannotEmitSymbolsInCompositeMode">
+        <source>NETSDK1163: Cannot emit symbols when publishing for .NET 5 with Crossgen2 using composite mode.</source>
+        <target state="new">NETSDK1163: Cannot emit symbols when publishing for .NET 5 with Crossgen2 using composite mode.</target>
+        <note>{StrBegin="NETSDK1163: "}</note>
+      </trans-unit>
+      <trans-unit id="CrossgenToolExecutableNotFound">
+        <source>NETSDK1157: CrossgenTool executable '{0}' not found.</source>
+        <target state="new">NETSDK1157: CrossgenTool executable '{0}' not found.</target>
+        <note>{StrBegin="NETSDK1157: "}</note>
+      </trans-unit>
+      <trans-unit id="CrossgenToolMissingInPDBCompilationMode">
+        <source>NETSDK1150: CrossgenTool not specified in PDB compilation mode.</source>
+        <target state="new">NETSDK1150: CrossgenTool not specified in PDB compilation mode.</target>
+        <note>{StrBegin="NETSDK1150: "}</note>
+      </trans-unit>
+      <trans-unit id="CrossgenToolMissingWhenUseCrossgen2IsNotSet">
+        <source>NETSDK1156: CrossgenTool must be specified when UseCrossgen2 is set to false.</source>
+        <target state="new">NETSDK1156: CrossgenTool must be specified when UseCrossgen2 is set to false.</target>
+        <note>{StrBegin="NETSDK1156: "}</note>
+      </trans-unit>
+      <trans-unit id="DiaSymReaderLibraryNotFound">
+        <source>NETSDK1158: DiaSymReader library '{0}' not found.</source>
+        <target state="new">NETSDK1158: DiaSymReader library '{0}' not found.</target>
+        <note>{StrBegin="NETSDK1158: "}</note>
+      </trans-unit>
+      <trans-unit id="DotNetHostExecutableNotFound">
+        <source>NETSDK1153: .NET host executable '{0}' not found.</source>
+        <target state="new">NETSDK1153: .NET host executable '{0}' not found.</target>
+        <note>{StrBegin="NETSDK1153: "}</note>
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
         <source>NETSDK1055: DotnetTool does not support target framework lower than netcoreapp2.1.</source>
@@ -394,6 +439,11 @@
         <target state="translated">NETSDK1025: 제공한 대상 매니페스트 {0}이(가) 올바른 형식이 아닙니다.</target>
         <note>{StrBegin="NETSDK1025: "}</note>
       </trans-unit>
+      <trans-unit id="InputAssemblyNotFound">
+        <source>NETSDK1160: Input assembly '{0}' not found.</source>
+        <target state="new">NETSDK1160: Input assembly '{0}' not found.</target>
+        <note>{StrBegin="NETSDK1160: "}</note>
+      </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>NETSDK1003: Invalid framework name: '{0}'.</source>
         <target state="translated">NETSDK1003: 프레임워크 이름 '{0}'이(가) 잘못되었습니다.</target>
@@ -427,6 +477,11 @@ The following are names of parameters or literal values and should not be transl
 {2}</target>
         <note>{StrBegin="NETSDK1140: "}</note>
       </trans-unit>
+      <trans-unit id="JitLibraryNotFound">
+        <source>NETSDK1154: JIT library '{0}' not found.</source>
+        <target state="new">NETSDK1154: JIT library '{0}' not found.</target>
+        <note>{StrBegin="NETSDK1154: "}</note>
+      </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
         <target state="translated">NETSDK1061: {0} 버전 {1}을(를) 사용하여 프로젝트가 복원되었지만, 현재 설정에서는 버전 {2}을(를) 대신 사용합니다. 이 문제를 해결하려면 복원 및 후속 작업(예: 빌드 또는 게시)에 동일한 설정을 사용해야 합니다. 일반적으로 이 문제는 RuntimeIdentifier 속성이 빌드 또는 게시 중에 설정되었지만, 복원 중에는 설정되지 않은 경우에 발생할 수 있습니다. 자세한 내용은 https://aka.ms/dotnet-runtime-patch-selection을 참조하세요.</target>
@@ -439,6 +494,16 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1008: Missing '{0}' metadata on '{1}' item '{2}'.</source>
         <target state="translated">NETSDK1008: '{1}' 항목 '{2}'에 '{0}' 메타데이터가 없습니다.</target>
         <note>{StrBegin="NETSDK1008: "}</note>
+      </trans-unit>
+      <trans-unit id="MissingOutputPDBImagePath">
+        <source>NETSDK1161: Missing output PDB path in PDB generation mode (OutputPDBImage metadata).</source>
+        <target state="new">NETSDK1161: Missing output PDB path in PDB generation mode (OutputPDBImage metadata).</target>
+        <note>{StrBegin="NETSDK1161: "}</note>
+      </trans-unit>
+      <trans-unit id="MissingOutputR2RImageFileName">
+        <source>NETSDK1162: Missing output R2R image path (OutputR2RImage metadata).</source>
+        <target state="new">NETSDK1162: Missing output R2R image path (OutputR2RImage metadata).</target>
+        <note>{StrBegin="NETSDK1162: "}</note>
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
         <source>NETSDK1021: More than one file found for {0}</source>
@@ -509,6 +574,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</source>
         <target state="translated">NETSDK1121: .NET Core를 대상으로 하는 C++/CLI 프로젝트는 SelfContained=true를 사용할 수 없습니다.</target>
         <note>{StrBegin="NETSDK1121: "}</note>
+      </trans-unit>
+      <trans-unit id="PDBGeneratorInputExecutableNotFound">
+        <source>NETSDK1159: PDB generation: R2R executable '{0}' not found.</source>
+        <target state="new">NETSDK1159: PDB generation: R2R executable '{0}' not found.</target>
+        <note>{StrBegin="NETSDK1159: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>

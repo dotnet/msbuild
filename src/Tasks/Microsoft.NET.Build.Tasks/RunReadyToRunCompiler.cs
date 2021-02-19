@@ -28,32 +28,45 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public bool WarningsDetected { get; set; }
 
+        private bool _emitSymbols;
         private string _inputAssembly;
         private string _outputR2RImage;
         private string _outputPDBImage;
         private string _createPDBCommand;
 
         private bool IsPdbCompilation => !String.IsNullOrEmpty(_createPDBCommand);
+        private bool ActuallyUseCrossgen2 => UseCrossgen2 && !IsPdbCompilation;
+
+        private string DotNetHostPath => Crossgen2Tool?.GetMetadata(MetadataKeys.DotNetHostPath);
+
+        private bool Crossgen2IsVersion5
+        {
+            get
+            {
+                string version5 = Crossgen2Tool?.GetMetadata(MetadataKeys.IsVersion5);
+                return !string.IsNullOrEmpty(version5) && bool.Parse(version5);
+            }
+        }
 
         protected override string ToolName
         {
             get
             {
-                // NOTE: Crossgen2 does not yet support emitting native symbols. We use crossgen instead for now.
-                if (UseCrossgen2)
+                if (ActuallyUseCrossgen2)
                 {
-                    return IsPdbCompilation ? CrossgenTool.ItemSpec : Crossgen2Tool.ItemSpec;
+                    string hostPath = DotNetHostPath;
+                    if (!string.IsNullOrEmpty(hostPath))
+                    {
+                        return hostPath;
+                    }
+                    return Crossgen2Tool.ItemSpec;
                 }
-                else
-                {
-                    return CrossgenTool.ItemSpec;
-                }
+                return CrossgenTool.ItemSpec;
             }
         }
 
         protected override string GenerateFullPathToTool() => ToolName;
 
-        // NOTE: Crossgen2 does not yet support emitting native symbols. We use crossgen instead for now.
         private string DiaSymReader => CrossgenTool.GetMetadata(MetadataKeys.DiaSymReader);
 
         public RunReadyToRunCompiler()
@@ -63,52 +76,107 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override bool ValidateParameters()
         {
+            string emitSymbolsMetadata = CompilationEntry.GetMetadata(MetadataKeys.EmitSymbols);
+            _emitSymbols = !string.IsNullOrEmpty(emitSymbolsMetadata) && bool.Parse(emitSymbolsMetadata);
             _createPDBCommand = CompilationEntry.GetMetadata(MetadataKeys.CreatePDBCommand);
 
-            if (CrossgenTool == null && Crossgen2Tool == null)
-            {
-                return false;
-            }
             if (IsPdbCompilation && CrossgenTool == null)
             {
-                // We need the crossgen tool for now to emit native symbols. Crossgen2 does not yet support this feature
+                // PDB compilation is a step specific to Crossgen1 and 5.0 Crossgen2
+                // which didn't support PDB generation. 6.0  Crossgen2 produces symbols
+                // directly during native compilation.
+                Log.LogError(Strings.CrossgenToolMissingInPDBCompilationMode);
                 return false;
             }
 
-            if (CrossgenTool != null)
+            if (ActuallyUseCrossgen2)
             {
-                if (!File.Exists(CrossgenTool.ItemSpec) || !File.Exists(CrossgenTool.GetMetadata(MetadataKeys.JitPath)))
+                if (Crossgen2Tool == null)
                 {
+                    Log.LogError(Strings.Crossgen2ToolMissingWhenUseCrossgen2IsSet);
                     return false;
                 }
-            }
-            if (Crossgen2Tool != null)
-            {
-                // We expect JitPath to be set for .NET 5 and {TargetOS, TargetArch} to be set for .NET 6 and later
+                if (!File.Exists(Crossgen2Tool.ItemSpec))
+                {
+                    Log.LogError(Strings.Crossgen2ToolExecutableNotFound, Crossgen2Tool.ItemSpec);
+                    return false;
+                }
+                string hostPath = DotNetHostPath;
+                if (!string.IsNullOrEmpty(hostPath) && !File.Exists(hostPath))
+                {
+                    Log.LogError(Strings.DotNetHostExecutableNotFound, hostPath);
+                    return false;
+                }
                 string jitPath = Crossgen2Tool.GetMetadata(MetadataKeys.JitPath);
-                if (!File.Exists(Crossgen2Tool.ItemSpec) ||
-                    (!String.IsNullOrEmpty(jitPath) && !File.Exists(jitPath)) ||
-                    (String.IsNullOrEmpty(jitPath) && (
-                        String.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS)) ||
-                        String.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetArch)))))
+                if (!string.IsNullOrEmpty(jitPath))
                 {
+                    if (!File.Exists(jitPath))
+                    {
+                        Log.LogError(Strings.JitLibraryNotFound, jitPath);
+                        return false;
+                    }
+                }
+                else if (Crossgen2IsVersion5)
+                {
+                    // We expect JitPath to be set for .NET 5 and {TargetOS, TargetArch} to be set for .NET 6 and later
+                    Log.LogError(Strings.Crossgen2MissingRequiredMetadata, MetadataKeys.JitPath);
+                    return false;
+                }
+                else
+                {
+                    // For smooth switchover we accept both JitPath and TargetOS / TargetArch in .NET 6 Crossgen2
+                    if (string.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetOS)))
+                    {
+                        Log.LogError(Strings.Crossgen2MissingRequiredMetadata, MetadataKeys.TargetOS);
+                        return false;
+                    }
+                    if (string.IsNullOrEmpty(Crossgen2Tool.GetMetadata(MetadataKeys.TargetArch)))
+                    {
+                        Log.LogError(Strings.Crossgen2MissingRequiredMetadata, MetadataKeys.TargetArch);
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                if (CrossgenTool == null)
+                {
+                    Log.LogError(Strings.CrossgenToolMissingWhenUseCrossgen2IsNotSet);
+                    return false;
+                }
+                if (!File.Exists(CrossgenTool.ItemSpec))
+                {
+                    Log.LogError(Strings.CrossgenToolExecutableNotFound, CrossgenTool.ItemSpec);
+                    return false;
+                }
+                if (!File.Exists(CrossgenTool.GetMetadata(MetadataKeys.JitPath)))
+                {
+                    Log.LogError(Strings.JitLibraryNotFound, MetadataKeys.JitPath);
                     return false;
                 }
             }
+
+            _outputPDBImage = CompilationEntry.GetMetadata(MetadataKeys.OutputPDBImage);
 
             if (IsPdbCompilation)
             {
                 _outputR2RImage = CompilationEntry.ItemSpec;
-                _outputPDBImage = CompilationEntry.GetMetadata(MetadataKeys.OutputPDBImage);
 
                 if (!String.IsNullOrEmpty(DiaSymReader) && !File.Exists(DiaSymReader))
                 {
+                    Log.LogError(Strings.DiaSymReaderLibraryNotFound, DiaSymReader);
                     return false;
                 }
 
                 // R2R image has to be created before emitting native symbols (crossgen needs this as an input argument)
-                if (String.IsNullOrEmpty(_outputPDBImage) || !File.Exists(_outputR2RImage))
+                if (String.IsNullOrEmpty(_outputPDBImage))
                 {
+                    Log.LogError(Strings.MissingOutputPDBImagePath);
+                }
+
+                if (!File.Exists(_outputR2RImage))
+                {
+                    Log.LogError(Strings.PDBGeneratorInputExecutableNotFound, _outputR2RImage);
                     return false;
                 }
             }
@@ -119,7 +187,19 @@ namespace Microsoft.NET.Build.Tasks
 
                 if (!File.Exists(_inputAssembly))
                 {
+                    Log.LogError(Strings.InputAssemblyNotFound, _inputAssembly);
                     return false;
+                }
+                
+                if (string.IsNullOrEmpty(_outputR2RImage))
+                {
+                    Log.LogError(Strings.MissingOutputR2RImageFileName);
+                    return false;
+                }
+                
+                if (_emitSymbols && string.IsNullOrEmpty(_outputPDBImage))
+                {
+                    Log.LogError(Strings.MissingOutputPDBImagePath);
                 }
             }
 
@@ -149,16 +229,25 @@ namespace Microsoft.NET.Build.Tasks
             return result.ToString();
         }
 
+        protected override string GenerateCommandLineCommands()
+        {
+            if (ActuallyUseCrossgen2 && !string.IsNullOrEmpty(DotNetHostPath))
+            {
+                return $"\"{Crossgen2Tool.ItemSpec}\"";
+            }
+            return null;
+        }
+
         protected override string GenerateResponseFileCommands()
         {
-            // NOTE: Crossgen2 does not yet support emitting native symbols. We use crossgen instead for now.
-            if (IsPdbCompilation)
+            // Crossgen2 5.0 doesn't support PDB generation so Crossgen1 is used for that purpose.
+            if (ActuallyUseCrossgen2)
             {
-                return GenerateCrossgenResponseFile();
+                return GenerateCrossgen2ResponseFile();
             }
             else
             {
-                return UseCrossgen2 ? GenerateCrossgen2ResponseFile() : GenerateCrossgenResponseFile();
+                return GenerateCrossgenResponseFile();
             }
         }
 
@@ -195,9 +284,9 @@ namespace Microsoft.NET.Build.Tasks
         private string GenerateCrossgen2ResponseFile()
         {
             StringBuilder result = new StringBuilder();
-
+            
             string jitPath = Crossgen2Tool.GetMetadata(MetadataKeys.JitPath);
-            if (!String.IsNullOrEmpty(jitPath))
+            if (!string.IsNullOrEmpty(jitPath))
             {
                 result.AppendLine($"--jitpath:\"{jitPath}\"");
             }
@@ -208,6 +297,21 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             result.AppendLine("-O");
+            
+            // 5.0 Crossgen2 doesn't support PDB generation.
+            if (!Crossgen2IsVersion5 && _emitSymbols)
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    result.AppendLine("--pdb");
+                    result.AppendLine($"--pdb-path:{_outputPDBImage}");
+                }
+                else
+                {
+                    result.AppendLine("--perfmap");
+                    result.AppendLine($"--perfmap-path:{_outputPDBImage}");
+                }
+            }
 
             if (!String.IsNullOrEmpty(Crossgen2ExtraCommandLineArgs))
             {
@@ -223,7 +327,7 @@ namespace Microsoft.NET.Build.Tasks
                 result.AppendLine("--inputbubble");
                 result.AppendLine($"--out:\"{_outputR2RImage}\"");
 
-                // Note: do not add double quotes around the input assembly, even if the file path contains spaces. The command line 
+                // Note: do not add double quotes around the input assembly, even if the file path contains spaces. The command line
                 // parsing logic will append this string to the working directory if it's a relative path, so any double quotes will result in errors.
                 foreach (var reference in ImplementationAssemblyReferences)
                 {
@@ -235,7 +339,7 @@ namespace Microsoft.NET.Build.Tasks
                 result.Append(GetAssemblyReferencesCommands());
                 result.AppendLine($"--out:\"{_outputR2RImage}\"");
 
-                // Note: do not add double quotes around the input assembly, even if the file path contains spaces. The command line 
+                // Note: do not add double quotes around the input assembly, even if the file path contains spaces. The command line
                 // parsing logic will append this string to the working directory if it's a relative path, so any double quotes will result in errors.
                 result.AppendLine($"{_inputAssembly}");
             }
@@ -245,7 +349,7 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override int ExecuteTool(string pathToTool, string responseFileCommands, string commandLineCommands)
         {
-            // Ensure output sub-directories exists - Crossgen does not create directories for output files. Any relative path used with the 
+            // Ensure output sub-directories exists - Crossgen does not create directories for output files. Any relative path used with the
             // '/out' parameter has to have an existing directory.
             Directory.CreateDirectory(Path.GetDirectoryName(_outputR2RImage));
 

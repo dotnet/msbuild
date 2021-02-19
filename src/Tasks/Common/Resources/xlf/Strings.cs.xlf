@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../Strings.resx">
     <body>
@@ -259,10 +259,55 @@
         <target state="translated">NETSDK1120: Projekty C++/CLI, které cílí na .NET Core, vyžadují cílovou architekturu alespoň netcoreapp3.1.</target>
         <note>{StrBegin="NETSDK1120: "}</note>
       </trans-unit>
+      <trans-unit id="Crossgen2MissingRequiredMetadata">
+        <source>NETSDK1155: Required '{0}' metadata missing on Crossgen2Tool item.</source>
+        <target state="translated">NETSDK1155: Prvek Crossgen2Tool neobsahuje povinná metadata '{0}'.</target>
+        <note>{StrBegin="NETSDK1155: "}</note>
+      </trans-unit>
       <trans-unit id="Crossgen2RequiresSelfContained">
         <source>NETSDK1126: Publishing ReadyToRun using Crossgen2 is only supported for self-contained applications.</source>
         <target state="translated">NETSDK1126: Publikování ReadyToRun pomocí Crossgen2 je podporované jenom pro samostatné (nezávislé) aplikace.</target>
         <note>{StrBegin="NETSDK1126: "}</note>
+      </trans-unit>
+      <trans-unit id="Crossgen2ToolExecutableNotFound">
+        <source>NETSDK1152: Crossgen2Tool executable '{0}' not found.</source>
+        <target state="translated">NETSDK1152: Spustitelný soubor Crossgen2Tool '{0}' nebyl nalezen.</target>
+        <note>{StrBegin="NETSDK1152: "}</note>
+      </trans-unit>
+      <trans-unit id="Crossgen2ToolMissingWhenUseCrossgen2IsSet">
+        <source>NETSDK1151: Crossgen2Tool must be specified when UseCrossgen2 is set to true.</source>
+        <target state="translated">NETSDK1151: Crossgen2Tool musí být specifikován, pokud je UseCrossgen2 nastaven (true).</target>
+        <note>{StrBegin="NETSDK1151: "}</note>
+      </trans-unit>
+      <trans-unit id="Crossgen5CannotEmitSymbolsInCompositeMode">
+        <source>NETSDK1163: Cannot emit symbols when publishing for .NET 5 with Crossgen2 using composite mode.</source>
+        <target state="translated">NETSDK1163: Publikování v .NET 5 s použitím Crossgen2 v kompozitním módu nepodporuje výstup symbolů.</target>
+        <note>{StrBegin="NETSDK1163: "}</note>
+      </trans-unit>
+      <trans-unit id="CrossgenToolExecutableNotFound">
+        <source>NETSDK1157: CrossgenTool executable '{0}' not found.</source>
+        <target state="translated">NETSDK1157: Spustitelný soubor CrossgenTool '{0}' nebyl nalezen.</target>
+        <note>{StrBegin="NETSDK1157: "}</note>
+      </trans-unit>
+      <trans-unit id="CrossgenToolMissingInPDBCompilationMode">
+        <source>NETSDK1150: CrossgenTool not specified in PDB compilation mode.</source>
+        <target state="translated">NETSDK1150: CrossgenTool není zadán v módu generování PDB.</target>
+        <note>{StrBegin="NETSDK1150: "}</note>
+      </trans-unit>
+      <trans-unit id="CrossgenToolMissingWhenUseCrossgen2IsNotSet">
+        <source>NETSDK1156: CrossgenTool must be specified when UseCrossgen2 is set to false.</source>
+        <target state="translated">NETSDK1156: CrossgenTool musí být zadán, pokud je UseCrossgen2 neaktivní (false).</target>
+        <note>{StrBegin="NETSDK1156: "}</note>
+      </trans-unit>
+      <trans-unit id="DiaSymReaderLibraryNotFound">
+        <source>NETSDK1158: DiaSymReader library '{0}' not found.</source>
+        <target state="translated">NETSDK1158: Knihovna DiaSymReader '{0}' nebyla nalezena.</target>
+        <note>{StrBegin="NETSDK1158: "}</note>
+      </trans-unit>
+      <trans-unit id="DotNetHostExecutableNotFound">
+        <source>NETSDK1153: .NET host executable '{0}' not found.</source>
+        <target state="translated">NETSDK1153: Spustitelný soubor hostitele .NET '{0}' nebyl nalezen.</target>
+        <note>{StrBegin="NETSDK1153: "}</note>
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
         <source>NETSDK1055: DotnetTool does not support target framework lower than netcoreapp2.1.</source>
@@ -394,6 +439,11 @@
         <target state="translated">NETSDK1025: Zadaný cílový manifest {0} nemá správný formát.</target>
         <note>{StrBegin="NETSDK1025: "}</note>
       </trans-unit>
+      <trans-unit id="InputAssemblyNotFound">
+        <source>NETSDK1160: Input assembly '{0}' not found.</source>
+        <target state="translated">NETSDK1160: Vstupní modul '{0}' nebyl nalezen.</target>
+        <note>{StrBegin="NETSDK1160: "}</note>
+      </trans-unit>
       <trans-unit id="InvalidFrameworkName">
         <source>NETSDK1003: Invalid framework name: '{0}'.</source>
         <target state="translated">NETSDK1003: Neplatný název architektury: {0}</target>
@@ -427,6 +477,11 @@ The following are names of parameters or literal values and should not be transl
 {2}</target>
         <note>{StrBegin="NETSDK1140: "}</note>
       </trans-unit>
+      <trans-unit id="JitLibraryNotFound">
+        <source>NETSDK1154: JIT library '{0}' not found.</source>
+        <target state="translated">NETSDK1154: Knihovna JIT '{0}' nebyla nalezena.</target>
+        <note>{StrBegin="NETSDK1154: "}</note>
+      </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
         <target state="translated">NETSDK1061: Projekt byl obnoven pomocí aplikace {0} verze {1}, ale s aktuálním nastavením by se místo toho použít verze {2}. Tento problém vyřešíte tak, že zkontrolujete, že se pro obnovení a následné operace, například sestavení nebo publikování, používá stejné nastavení. Obvykle k tomuto problému může dojít, pokud je vlastnost RuntimeIdentifier nastavena při sestavování nebo publikování, ale ne při obnovování. Další informace najdete na stránce https://aka.ms/dotnet-runtime-patch-selection.</target>
@@ -439,6 +494,16 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1008: Missing '{0}' metadata on '{1}' item '{2}'.</source>
         <target state="translated">NETSDK1008: Chybí metadata {0} o {1} položky {2}.</target>
         <note>{StrBegin="NETSDK1008: "}</note>
+      </trans-unit>
+      <trans-unit id="MissingOutputPDBImagePath">
+        <source>NETSDK1161: Missing output PDB path in PDB generation mode (OutputPDBImage metadata).</source>
+        <target state="translated">NETSDK1161: Není zadán název výstupního PDB souboru v módu generování PDB (metadata OutputPDBImage).</target>
+        <note>{StrBegin="NETSDK1161: "}</note>
+      </trans-unit>
+      <trans-unit id="MissingOutputR2RImageFileName">
+        <source>NETSDK1162: Missing output R2R image path (OutputR2RImage metadata).</source>
+        <target state="translated">NETSDK1162: Není zadán název výstupního R2R souboru (metadata OutputR2RImage).</target>
+        <note>{StrBegin="NETSDK1162: "}</note>
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
         <source>NETSDK1021: More than one file found for {0}</source>
@@ -509,6 +574,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1121: C++/CLI projects targeting .NET Core cannot use SelfContained=true.</source>
         <target state="translated">NETSDK1121: Projekty C++/CLI cílené na rozhraní .NET Core nemůžou používat SelfContained=true.</target>
         <note>{StrBegin="NETSDK1121: "}</note>
+      </trans-unit>
+      <trans-unit id="PDBGeneratorInputExecutableNotFound">
+        <source>NETSDK1159: PDB generation: R2R executable '{0}' not found.</source>
+        <target state="translated">NETSDK1159: Generování PDB: spustitelný soubor R2R '{0}' nebyl nalezen.</target>
+        <note>{StrBegin="NETSDK1159: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
         <source>NETSDK1053: Pack as tool does not support self contained.</source>
@@ -742,7 +812,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WindowsSDKVersionConflicts">
         <source>NETSDK1149: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</source>
-        <target state="new">NETSDK1149: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll. Please update to a newer .NET SDK in order to reference this assembly.</target>
+        <target state="translated">NETSDK1149: Závislý modul byl zkompilován novější verzí Microsoft.Windows.SDK.NET.dll. Pro odkazování na tento modul prosím přejděte na novější verzi .NET SDK.</target>
         <note>{StrBegin="NETSDK1149: "}</note>
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">

@@ -434,8 +434,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="_CreateR2RSymbols"
           Inputs="@(_ReadyToRunSymbolsCompileList)"
-          Outputs="%(_ReadyToRunSymbolsCompileList.OutputPDBImage)">
-
+          Outputs="%(_ReadyToRunSymbolsCompileList.OutputPDBImage)"
+          Condition="'$(PublishReadyToRunUseCrossgen2)' != 'true' or '@(Crossgen2Tool -> '%(IsVersion5)')' == 'true'">
     <RunReadyToRunCompiler CrossgenTool="@(CrossgenTool)"
                            Crossgen2Tool="@(Crossgen2Tool)"
                            UseCrossgen2="$(PublishReadyToRunUseCrossgen2)"

@@ -112,6 +112,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string Aliases = "Aliases";
 
         // ReadyToRun
+        public const string DotNetHostPath = "DotNetHostPath";
         public const string JitPath = "JitPath";
         public const string TargetOS = "TargetOS";
         public const string TargetArch = "TargetArch";
@@ -119,5 +120,8 @@ namespace Microsoft.NET.Build.Tasks
         public const string CreatePDBCommand = "CreatePDBCommand";
         public const string OutputR2RImage = "OutputR2RImage";
         public const string OutputPDBImage = "OutputPDBImage";
+        public const string EmitSymbols = "EmitSymbols";
+        public const string IsVersion5 = "IsVersion5";
+        public const string IsVersion6Preview1 = "IsVersion6Preview1";
     }
 }
