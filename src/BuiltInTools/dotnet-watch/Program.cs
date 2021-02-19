@@ -92,9 +92,8 @@ Examples:
             var rootCommand = CreateRootCommand(HandleWatch);
             if (args == null || !args.Any())
             {
-                var help = new HelpBuilder(new SystemConsole());
-                help.Write(rootCommand);
-                return 1;
+                // if no command argument provided, we fall back to dotnet watch run
+                args = new[] { "run" } ;
             }
 
             return await rootCommand.InvokeAsync(args);
