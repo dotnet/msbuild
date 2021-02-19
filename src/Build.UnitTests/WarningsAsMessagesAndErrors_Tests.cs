@@ -273,6 +273,28 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        public void WarningsAsErrors_ExpectTaskFailureWhenLoggingWarningAsError()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName = ""LogWarningReturnHasLoggedError"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <PropertyGroup>
+                        <MSBuildWarningsAsErrors>MSB1234</MSBuildWarningsAsErrors>
+                    </PropertyGroup>
+                    <Target Name='Build'>
+                        <LogWarningReturnHasLoggedError WarningCode=""MSB1234""/>
+                    </Target>
+                </Project>");
+
+                MockLogger logger = proj.BuildProjectExpectFailure();
+
+                logger.AssertLogContains("Build FAILED");
+            }
+        }
+
+        [Fact]
         public void TaskReturnsFailureButDoesNotLogError_ShouldCauseBuildFailure()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
