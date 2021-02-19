@@ -279,18 +279,21 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
                 <Project>
+                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
                     <UsingTask TaskName = ""LogWarningReturnHasLoggedError"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
                     <PropertyGroup>
                         <MSBuildWarningsAsErrors>MSB1234</MSBuildWarningsAsErrors>
                     </PropertyGroup>
                     <Target Name='Build'>
                         <LogWarningReturnHasLoggedError WarningCode=""MSB1234""/>
+                        <ReturnFailureWithoutLoggingErrorTask/>
                     </Target>
                 </Project>");
 
                 MockLogger logger = proj.BuildProjectExpectFailure();
 
-                logger.AssertLogContains("Build FAILED");
+                // The build should STOP when a task logs an error
+                logger.AssertLogDoesntContain("MSB4181");
             }
         }
 
