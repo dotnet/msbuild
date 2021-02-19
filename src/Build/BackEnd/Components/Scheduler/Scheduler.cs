@@ -72,7 +72,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private int _nodeLimitOffset;
 
-        private int _resourceManagedCoresUsed = 0;
+        // private int _resourceManagedCoresUsed = 0;
 
         /// <summary>
         /// { nodeId -> NodeInfo }
@@ -934,7 +934,6 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (CanScheduleRequestToNode(request, nodeId))
                     {
-                        _resourceManager.RequireCores(1); // TODO: is it ok to block here?
                         AssignUnscheduledRequestToNode(request, nodeId, responses);
                         idleNodes.Remove(nodeId);
                         break;
@@ -1286,14 +1285,12 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            int limit = 1;
-
-            if (_componentHost.BuildParameters.MaxNodeCount > 1)
+            int limit = _componentHost.BuildParameters.MaxNodeCount switch
             {
-                // Delegate the oversubscription factor to the resource manager
-                // but continue to support a manual override here
-                limit = _resourceManager.Count + _nodeLimitOffset;
-            }
+                1 => 1,
+                2 => _componentHost.BuildParameters.MaxNodeCount + 1 + _nodeLimitOffset,
+                _ => _componentHost.BuildParameters.MaxNodeCount + 2 + _nodeLimitOffset,
+            };
 
             // We're at our limit of schedulable requests if: 
             // (1) MaxNodeCount requests are currently executing

@@ -13,9 +13,7 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
 {
     class ResourceManagerService : IBuildComponent
     {
-        Semaphore? s = null;
-
-        ILoggingService? _loggingService;
+        //ILoggingService? _loggingService;
 
         public int TotalNumberHeld = -1;
         public int Count = 0;
@@ -29,101 +27,29 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
 
         public void InitializeComponent(IBuildComponentHost host)
         {
-            if (NativeMethodsShared.IsWindows)
-            {
-                string semaphoreName = host.BuildParameters.ResourceManagerSemaphoreName;
-
-                int resourceCount = host.BuildParameters.MaxNodeCount + Traits.Instance.ResourceManagerOversubscription;
-
-                Count = resourceCount;
-
-                _loggingService = host.LoggingService;
-
-                TotalNumberHeld = 0;
-
-                s = new Semaphore(resourceCount, resourceCount, semaphoreName); // TODO: SemaphoreSecurity?
-            }
-            else
-            {
-                // UNDONE: just don't support gathering additional cores on non-Windows
-                s = null;
-            }
 
         }
 
         public void ShutdownComponent()
         {
-            s?.Dispose();
-            s = null;
-
-            _loggingService = null;
+            //_loggingService = null;
 
             TotalNumberHeld = -2;
         }
 
         public int? RequestCores(int requestedCores, TaskLoggingContext _taskLoggingContext)
         {
-            if (s is null)
-            {
-                return null;
-            }
+            return null;
 
-            int i;
-
-            // Keep requesting cores until we can't anymore, or we've gotten the number of cores we wanted.
-            for (i = 0; i < requestedCores; i++)
-            {
-                if (!s.WaitOne(0))
-                {
-                    break;
-                }
-            }
-
-            TotalNumberHeld += i;
-
-            _loggingService?.LogComment(_taskLoggingContext.BuildEventContext, Framework.MessageImportance.Low, "ResourceManagerRequestedCores", requestedCores, i, TotalNumberHeld);
-
-            return i;
+            // _loggingService?.LogComment(_taskLoggingContext.BuildEventContext, Framework.MessageImportance.Low, "ResourceManagerRequestedCores", requestedCores, i, TotalNumberHeld);
         }
 
         public void ReleaseCores(int coresToRelease, TaskLoggingContext _taskLoggingContext)
         {
-            if (s is null)
-            {
-                // Since the current implementation of the cross-process resource count uses
-                // named semaphores, it's not usable on non-Windows, so just continue.
-                return;
-            }
-
             ErrorUtilities.VerifyThrow(coresToRelease > 0, "Tried to release {0} cores", coresToRelease);
+            return;
 
-            if (coresToRelease > TotalNumberHeld)
-            {
-                _loggingService?.LogWarning(_taskLoggingContext.BuildEventContext, null, null, "ResourceManagerExcessRelease", coresToRelease);
-
-                coresToRelease = TotalNumberHeld;
-            }
-
-            s.Release(coresToRelease);
-
-            TotalNumberHeld -= coresToRelease;
-
-            _loggingService?.LogComment(_taskLoggingContext.BuildEventContext, Framework.MessageImportance.Low, "ResourceManagerReleasedCores", coresToRelease, TotalNumberHeld);
-        }
-
-        internal void RequireCores(int requestedCores)
-        {
-            if (s is null)
-            {
-                // Since the current implementation of the cross-process resource count uses
-                // named semaphores, it's not usable on non-Windows, so just continue.
-                return;
-            }
-
-            if (!s.WaitOne())
-            {
-                ErrorUtilities.ThrowInternalError("Couldn't get a core to run a task even with infinite timeout");
-            }
+            //_loggingService?.LogComment(_taskLoggingContext.BuildEventContext, Framework.MessageImportance.Low, "ResourceManagerReleasedCores", coresToRelease, TotalNumberHeld);
         }
     }
 }

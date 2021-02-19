@@ -491,44 +491,13 @@ namespace Microsoft.Build.UnitTests
             return obj;
         }
 
-        int runningTotal = 0;
-        Semaphore cpuCount;
         public int? RequestCores(int requestedCores)
         {
-            cpuCount ??= Semaphore.OpenExisting(ResourceSemaphoreName);
-
-            cpuCount.WaitOne();
-            int coresAcquired = 1;
-
-            // Keep requesting cores until we can't anymore, or we've gotten the number of cores we wanted.
-            for (int i = 1; i < requestedCores; i++)
-            {
-                if (cpuCount.WaitOne(0))
-                {
-                    coresAcquired++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            runningTotal += coresAcquired;
-
-            return coresAcquired;
+            return null;
         }
 
         public void ReleaseCores(int coresToRelease)
         {
-            cpuCount ??= Semaphore.OpenExisting(ResourceSemaphoreName);
-
-            coresToRelease = Math.Min(runningTotal, coresToRelease);
-
-            // if we attempt to release 0 cores, Release throws an exception.
-            if(coresToRelease > 0)
-            {
-                cpuCount.Release(coresToRelease);
-            }
         }
     }
 }
