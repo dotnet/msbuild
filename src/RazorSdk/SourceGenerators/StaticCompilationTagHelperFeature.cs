@@ -26,7 +26,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
             var context = TagHelperDescriptorProviderContext.Create(results);
             context.SetCompilation(Compilation);
-            context.Items.SetTagHelperDiscoveryFilter(DiscoveryFilter);
+            context.Items.SetTargetMetadataReference(TargetReference);
 
             for (var i = 0; i < _providers.Length; i++)
             {
@@ -38,7 +38,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
         public Compilation Compilation { get; set; }
 
-        public TagHelperDiscoveryFilter DiscoveryFilter { get; set; }
+        public MetadataReference TargetReference { get; set; }
 
         protected override void OnInitialized()
         {

@@ -3,6 +3,7 @@
 
 using System;
 using System.Buffers;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -22,6 +23,8 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
     [Generator]
     public partial class RazorSourceGenerator : ISourceGenerator
     {
+        private static readonly ConcurrentDictionary<Guid, IReadOnlyList<TagHelperDescriptor>> _tagHelperCache = new();
+
         public void Initialize(GeneratorInitializationContext context)
         {
         }
@@ -164,31 +167,11 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             tagHelperFeature.Compilation = GeneratorExecutionContext.Compilation.AddSyntaxTrees(results.Take(files.Count));
             ArrayPool<SyntaxTree>.Shared.Return(results);
 
-            var lastUpdatedReferenceUtc = GetLastUpdatedReference(GeneratorExecutionContext.Compilation.References);
-            IReadOnlyList<TagHelperDescriptor> refTagHelpers;
-
-            if (lastUpdatedReferenceUtc is not null && lastUpdatedReferenceUtc < File.GetLastWriteTimeUtc(razorContext.RefsTagHelperOutputCachePath))
-            {
-                // Producing tag helpers from a Compilation every time is surprisingly expensive. So we'll use some caching strategies to mitigate this until
-                // we can improve the perf in that area.
-
-                // TagHelpers can come from two locations - the declaration files
-                // and the assemblies participating in the compilation.
-                // In a typical inner loop, the assemblies referenced by the project do not change. We could cache these separately from the tag helpers produced
-                // by the app to avoid some per-compilation costs.
-                // We determine if any of the reference assemblies have a newer timestamp than the output cache for the tag helpers. If not, we can re-use previously
-                // calculated results.
-                refTagHelpers = TagHelperSerializer.Deserialize(razorContext.RefsTagHelperOutputCachePath);
-            }
-            else
-            {
-                tagHelperFeature.DiscoveryFilter = TagHelperDiscoveryFilter.ReferenceAssemblies;
-                refTagHelpers = tagHelperFeature.GetDescriptors();
-                TagHelperSerializer.Serialize(razorContext.RefsTagHelperOutputCachePath, refTagHelpers);
-            }
-
-            tagHelperFeature.DiscoveryFilter = TagHelperDiscoveryFilter.CurrentCompilation;
+            var currentMetadataReference = GeneratorExecutionContext.Compilation.GetMetadataReference(GeneratorExecutionContext.Compilation.Assembly);
+            tagHelperFeature.TargetReference = currentMetadataReference;
             var assemblyTagHelpers = tagHelperFeature.GetDescriptors();
+
+            var refTagHelpers = GetTagHelperDescriptorsFromReferences(GeneratorExecutionContext.Compilation, tagHelperFeature);
 
             var result = new List<TagHelperDescriptor>(refTagHelpers.Count + assemblyTagHelpers.Count);
             result.AddRange(assemblyTagHelpers);
@@ -197,25 +180,24 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             return result;
         }
 
-        private static DateTime? GetLastUpdatedReference(IEnumerable<MetadataReference> references)
+        private static IReadOnlyList<TagHelperDescriptor> GetTagHelperDescriptorsFromReferences(Compilation compilation, StaticCompilationTagHelperFeature tagHelperFeature)
         {
-            DateTime lastWriteTimeUtc = DateTime.MinValue;
+            List<TagHelperDescriptor> tagHelperDescriptors = new();
 
-            foreach (var reference in references)
+            foreach (var reference in compilation.References)
             {
-                // We expect all references in the compilation context to be backed by a file on disk. If not,
-                // we'll bail out and regenerate the tag helper cache where this is invoked.
-                if (reference is not PortableExecutableReference portableExecutableReference || string.IsNullOrEmpty(portableExecutableReference.FilePath))
+                var guid = reference.GetModuleVersionId(compilation) ?? Guid.NewGuid();
+                if (!_tagHelperCache.TryGetValue(guid, out var descriptors))
                 {
-                    return null;
+                    tagHelperFeature.TargetReference = reference;
+                    descriptors = tagHelperFeature.GetDescriptors();
+                    _tagHelperCache.AddOrUpdate(guid, descriptors, (key, currentValue) => descriptors);
                 }
 
-                var fileWriteTime = File.GetLastWriteTimeUtc(portableExecutableReference.FilePath);
-
-                lastWriteTimeUtc = lastWriteTimeUtc < fileWriteTime ? fileWriteTime : lastWriteTimeUtc;
+                tagHelperDescriptors.AddRange(descriptors);
             }
 
-            return lastWriteTimeUtc;
+            return tagHelperDescriptors;
         }
 
         private static string GetIdentifierFromPath(string filePath)
