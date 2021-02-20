@@ -4,22 +4,22 @@
     <body>
       <trans-unit id="Error_MultipleProjectsFound">
         <source>Multiple MSBuild project files found in '{0}'. Specify which to use with the --project option.</source>
-        <target state="new">Multiple MSBuild project files found in '{0}'. Specify which to use with the --project option.</target>
+        <target state="translated">'{0}'에서 여러 MSBuild 프로젝트 파일을 찾았습니다. --project 옵션을 사용하여 사용할 파일을 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="Error_NoProjectsFound">
         <source>Could not find a MSBuild project file in '{0}'. Specify which project to use with the --project option.</source>
-        <target state="new">Could not find a MSBuild project file in '{0}'. Specify which project to use with the --project option.</target>
+        <target state="translated">'{0}'에서 MSBuild 프로젝트 파일을 찾을 수 없습니다. --project 옵션을 사용하여 사용할 파일을 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="Error_ProjectPath_NotFound">
         <source>The project file '{0}' does not exist.</source>
-        <target state="new">The project file '{0}' does not exist.</target>
+        <target state="translated">프로젝트 파일 '{0}'이(가) 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Error_QuietAndVerboseSpecified">
         <source>Cannot specify both '--quiet' and '--verbose' options.</source>
-        <target state="new">Cannot specify both '--quiet' and '--verbose' options.</target>
+        <target state="translated">'--quiet' 옵션과 '--verbose' 옵션을 둘 다 지정할 수는 없습니다.</target>
         <note />
       </trans-unit>
     </body>
