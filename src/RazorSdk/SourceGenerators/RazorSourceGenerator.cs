@@ -23,8 +23,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
     [Generator]
     public partial class RazorSourceGenerator : ISourceGenerator
     {
+        // Until the compiler supports granular caching for generators, we roll out our own simple caching implementation.
+        // https://github.com/dotnet/roslyn/issues/51257 track the long-term resolution for this.
         private static readonly ConcurrentDictionary<Guid, IReadOnlyList<TagHelperDescriptor>> _tagHelperCache = new();
-
         public void Initialize(GeneratorInitializationContext context)
         {
         }
@@ -186,12 +187,29 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
             foreach (var reference in compilation.References)
             {
-                var guid = reference.GetModuleVersionId(compilation) ?? Guid.NewGuid();
-                if (!_tagHelperCache.TryGetValue(guid, out var descriptors))
+                var guid = reference.GetModuleVersionId(compilation);
+                IReadOnlyList<TagHelperDescriptor> descriptors = default;
+
+                if (guid is Guid _guid)
+                {
+                    if (!_tagHelperCache.TryGetValue(_guid, out descriptors))
+                    {
+                        tagHelperFeature.TargetReference = reference;
+                        descriptors = tagHelperFeature.GetDescriptors();
+                        // Clear out the cache if it is growing too large. A 
+                        // simple compilation can include around ~300 references
+                        // so give a little bit of buffer beyond this.
+                        if (_tagHelperCache.Count > 400)
+                        {
+                            _tagHelperCache.Clear();
+                        }
+                        _tagHelperCache[_guid] = descriptors;
+                    }
+                }
+                else
                 {
                     tagHelperFeature.TargetReference = reference;
                     descriptors = tagHelperFeature.GetDescriptors();
-                    _tagHelperCache.AddOrUpdate(guid, descriptors, (key, currentValue) => descriptors);
                 }
 
                 tagHelperDescriptors.AddRange(descriptors);

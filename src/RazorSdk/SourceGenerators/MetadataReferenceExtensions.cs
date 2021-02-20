@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.NET.Sdk.Razor.SourceGenerators
@@ -14,18 +15,19 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
             if (symbol is IAssemblySymbol assemblySymbol)
             {
-                foreach (var module in assemblySymbol.Modules)
+                var module = assemblySymbol.Modules.SingleOrDefault();
+                if (module is null)
                 {
-                    try
-                    {
-                        return module.GetMetadata().GetModuleVersionId();
-                    }
-                    catch (Exception)
-                    {
-                        continue;
-                    }
+                    return null;
                 }
-                return null;
+                try
+                {
+                    return module.GetMetadata().GetModuleVersionId();
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
             }
 
             if (symbol is IModuleSymbol moduleSymbol)
