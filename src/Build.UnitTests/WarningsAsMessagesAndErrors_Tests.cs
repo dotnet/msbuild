@@ -273,7 +273,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void WarningsAsErrors_ExpectTaskFailureWhenLoggingWarningAsError()
+        public void WarningsAsErrors_ExpectBuildToStopWhenTaskLogsWarningAsError()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
@@ -292,7 +292,10 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 MockLogger logger = proj.BuildProjectExpectFailure();
 
-                // The build should STOP when a task logs an error
+                logger.WarningCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(1);
+
+                // The build should STOP when a task logs an error, make sure ReturnFailureWithoutLoggingErrorTask doesn't run. 
                 logger.AssertLogDoesntContain("MSB4181");
             }
         }

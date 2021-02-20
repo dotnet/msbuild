@@ -515,6 +515,11 @@ namespace Microsoft.Build.BackEnd.Logging
             return _buildSubmissionIdsThatHaveLoggedErrors?.Contains(submissionId) == true;
         }
 
+        /// <summary>
+        /// Returns a hashset of warnings to be logged as errors.
+        /// </summary>
+        /// <param name="context">The build context through which warnings will be logged as errors.</param>
+        /// <returns></returns>
         public HashSet<string> GetWarningsAsErrors(BuildEventContext context)
         {
             int key = GetWarningsAsErrorOrMessageKey(context);

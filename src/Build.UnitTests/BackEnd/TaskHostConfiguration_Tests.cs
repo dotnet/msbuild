@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 
 
@@ -12,7 +13,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -235,6 +236,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 parameters2,
                 null,
                 null);
+
+            HashSet<string> WarningsAsErrors = new HashSet<string>();
+            WarningsAsErrors.Add("MSB1234");
+            WarningsAsErrors.Add("MSB1235");
+            WarningsAsErrors.Add("MSB1236");
+            WarningsAsErrors.Add("MSB1237");
+
+            TaskHostConfiguration config5 = new TaskHostConfiguration(
+                1,
+                Directory.GetCurrentDirectory(),
+                null,
+                Thread.CurrentThread.CurrentCulture,
+                Thread.CurrentThread.CurrentUICulture,
+#if FEATURE_APPDOMAIN
+                null,
+#endif
+                1,
+                1,
+                @"c:\my project\myproj.proj",
+                _continueOnErrorDefault,
+                "TaskName",
+                @"c:\MyTasks\MyTask.dll",
+                parameters2,
+                null,
+                WarningsAsErrors);
         }
 
         /// <summary>
@@ -450,6 +476,50 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ITaskItem[] deserializedItemArray = (ITaskItem[])deserializedConfig.TaskParameters["TaskItemArrayValue"].WrappedParameter;
 
             TaskHostPacketHelpers.AreEqual(itemArray, deserializedItemArray);
+        }
+
+        /// <summary>
+        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array. 
+        /// </summary>
+        [Fact]
+        public void TestTranslationWithWarningsAsErrors()
+        {
+            HashSet<string> WarningsAsErrors = new HashSet<string>();
+            WarningsAsErrors.Add("MSB1234");
+            WarningsAsErrors.Add("MSB1235");
+            WarningsAsErrors.Add("MSB1236");
+            WarningsAsErrors.Add("MSB1237");
+            TaskHostConfiguration config = new TaskHostConfiguration(
+                1,
+                Directory.GetCurrentDirectory(),
+                null,
+                Thread.CurrentThread.CurrentCulture,
+                Thread.CurrentThread.CurrentUICulture,
+#if FEATURE_APPDOMAIN
+                null,
+#endif
+                1,
+                1,
+                @"c:\my project\myproj.proj",
+                _continueOnErrorDefault,
+                "TaskName",
+                @"c:\MyTasks\MyTask.dll",
+                null,
+                null,
+                WarningsAsErrors);
+
+            ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
+
+            Assert.Equal(config.TaskName, deserializedConfig.TaskName);
+#if !FEATURE_ASSEMBLYLOADCONTEXT
+            Assert.Equal(config.TaskLocation, deserializedConfig.TaskLocation);
+#endif
+            Assert.NotNull(deserializedConfig.WarningsAsErrors);
+            config.WarningsAsErrors.SequenceEqual(deserializedConfig.WarningsAsErrors, StringComparer.Ordinal).ShouldBeTrue();
+
         }
 
         /// <summary>
