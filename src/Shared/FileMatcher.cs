@@ -130,13 +130,13 @@ namespace Microsoft.Build.Shared
                                     path,
                                     "*",
                                     directory,
-                                    false).ToArray());
+                                    false));
                         IEnumerable<string> filteredEntriesForPath = (pattern != null && pattern != "*")
                             ? allEntriesForPath.Where(o => IsMatch(Path.GetFileName(o), pattern))
                             : allEntriesForPath;
                         return stripProjectDirectory
-                            ? RemoveProjectDirectory(filteredEntriesForPath, directory)
-                            : filteredEntriesForPath;
+                            ? RemoveProjectDirectory(filteredEntriesForPath, directory).ToArray()
+                            : filteredEntriesForPath.ToArray();
                     }
                     else
                     {
@@ -178,7 +178,7 @@ namespace Microsoft.Build.Shared
         /// <param name="projectDirectory"></param>
         /// <param name="stripProjectDirectory"></param>
         /// <returns>An enumerable of filesystem entries.</returns>
-        internal delegate IEnumerable<string> GetFileSystemEntries(FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory);
+        internal delegate IReadOnlyList<string> GetFileSystemEntries(FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory);
 
         internal static void ClearFileEnumerationsCache()
         {
@@ -237,7 +237,7 @@ namespace Microsoft.Build.Shared
         /// <param name="stripProjectDirectory">If true the project directory should be stripped</param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns></returns>
-        private static IEnumerable<string> GetAccessibleFileSystemEntries(IFileSystem fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
+        private static IReadOnlyList<string> GetAccessibleFileSystemEntries(IFileSystem fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
         {
             path = FileUtilities.FixFilePath(path);
             switch (entityType)
@@ -260,7 +260,7 @@ namespace Microsoft.Build.Shared
         /// <param name="pattern"></param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns>An enumerable of matching file system entries (can be empty).</returns>
-        private static IEnumerable<string> GetAccessibleFilesAndDirectories(IFileSystem fileSystem, string path, string pattern)
+        private static IReadOnlyList<string> GetAccessibleFilesAndDirectories(IFileSystem fileSystem, string path, string pattern)
         {
             if (fileSystem.DirectoryExists(path))
             {
@@ -270,7 +270,7 @@ namespace Microsoft.Build.Shared
                         ? fileSystem.EnumerateFileSystemEntries(path, pattern)
                             .Where(o => IsMatch(Path.GetFileName(o), pattern))
                         : fileSystem.EnumerateFileSystemEntries(path, pattern)
-                        );
+                        ).ToArray();
                 }
                 // for OS security
                 catch (UnauthorizedAccessException)
@@ -326,7 +326,7 @@ namespace Microsoft.Build.Shared
         /// <param name="stripProjectDirectory"></param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns>Files that can be accessed.</returns>
-        private static IEnumerable<string> GetAccessibleFiles
+        private static IReadOnlyList<string> GetAccessibleFiles
         (
             IFileSystem fileSystem,
             string path,
@@ -370,7 +370,7 @@ namespace Microsoft.Build.Shared
                     files = RemoveInitialDotSlash(files);
                 }
 
-                return files;
+                return files.ToArray();
             }
             catch (System.Security.SecurityException)
             {
@@ -394,7 +394,7 @@ namespace Microsoft.Build.Shared
         /// <param name="pattern">Pattern to match</param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns>Accessible directories.</returns>
-        private static IEnumerable<string> GetAccessibleDirectories
+        private static IReadOnlyList<string> GetAccessibleDirectories
         (
             IFileSystem fileSystem,
             string path,
@@ -428,7 +428,7 @@ namespace Microsoft.Build.Shared
                     directories = RemoveInitialDotSlash(directories);
                 }
 
-                return directories;
+                return directories.ToArray();
             }
             catch (System.Security.SecurityException)
             {
@@ -528,11 +528,10 @@ namespace Microsoft.Build.Shared
                     }
                     else
                     {
-                        // getFileSystemEntries(...) returns an empty array if longPath doesn't exist.
-                        IEnumerable<string> entries = getFileSystemEntries(FileSystemEntity.FilesAndDirectories, longPath, parts[i], null, false);
+                        // getFileSystemEntries(...) returns an empty enumerable if longPath doesn't exist.
+                        IReadOnlyList<string> entries = getFileSystemEntries(FileSystemEntity.FilesAndDirectories, longPath, parts[i], null, false);
 
-                        int entriesCount = entries.Count();
-                        if (0 == entriesCount)
+                        if (0 == entries.Count)
                         {
                             // The next part doesn't exist. Therefore, no more of the path will exist.
                             // Just return the rest.
@@ -543,13 +542,13 @@ namespace Microsoft.Build.Shared
                             break;
                         }
 
-                        // Since we know there are no wild cards, this should be length one.
-                        ErrorUtilities.VerifyThrow(entriesCount == 1,
+                        // Since we know there are no wild cards, this should be length one, i.e. MoveNext should return false.
+                        ErrorUtilities.VerifyThrow(entries.Count == 1,
                             "Unexpected number of entries ({3}) found when enumerating '{0}' under '{1}'. Original path was '{2}'",
-                            parts[i], longPath, path, entriesCount);
+                            parts[i], longPath, path, entries.Count);
 
                         // Entries[0] contains the full path.
-                        longPath = entries.First();
+                        longPath = entries[0];
 
                         // We just want the trailing node.
                         longParts[i - startingElement] = Path.GetFileName(longPath);
