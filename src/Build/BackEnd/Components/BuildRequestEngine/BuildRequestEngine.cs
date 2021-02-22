@@ -165,6 +165,11 @@ namespace Microsoft.Build.BackEnd
         public event EngineExceptionDelegate OnEngineException;
 
         /// <summary>
+        /// Raised when resources are requested.
+        /// </summary>
+        public event ResourceRequestDelegate OnResourceRequest;
+
+        /// <summary>
         /// Returns the current engine status.
         /// </summary>
         public BuildRequestEngineStatus Status => _status;
@@ -455,6 +460,21 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Notifies the engine of a resource response granting the node resources.
+        /// </summary>
+        /// <param name="response">The resource response.</param>
+        public void GrantResources(ResourceResponse response)
+        {
+            QueueAction(
+                () =>
+                {
+                    BuildRequestEntry entry = _requestsByGlobalRequestId[response.BlockedRequestId];
+                    entry.Builder.ContinueRequestWithResources(response);
+                },
+                isLastTask: false);
+        }
+
+        /// <summary>
         /// Reports a configuration response to the request, allowing it to satisfy outstanding requests.
         /// <seealso cref="BuildRequestConfigurationResponse"/>
         /// </summary>
@@ -667,6 +687,15 @@ namespace Microsoft.Build.BackEnd
             OnNewConfigurationRequest?.Invoke(config);
         }
 
+        /// <summary>
+        /// Raises OnResourceRequest event.
+        /// </summary>
+        /// <param name="request">The resource request.</param>
+        private void RaiseResourceRequest(ResourceRequest request)
+        {
+            OnResourceRequest?.Invoke(request);
+        }
+
         #endregion
 
         /// <summary>
@@ -773,6 +802,7 @@ namespace Microsoft.Build.BackEnd
                 // Shut it down because we already have enough in reserve.
                 completedEntry.Builder.OnNewBuildRequests -= Builder_OnNewBuildRequests;
                 completedEntry.Builder.OnBuildRequestBlocked -= Builder_OnBlockedRequest;
+                completedEntry.Builder.OnResourceRequest -= Builder_OnResourceRequest;
                 ((IBuildComponent)completedEntry.Builder).ShutdownComponent();
 
                 BuildRequestConfiguration configuration = _configCache[completedEntry.Request.ConfigurationId];
@@ -914,6 +944,7 @@ namespace Microsoft.Build.BackEnd
             // state changes.
             builder.OnNewBuildRequests += Builder_OnNewBuildRequests;
             builder.OnBuildRequestBlocked += Builder_OnBlockedRequest;
+            builder.OnResourceRequest += Builder_OnResourceRequest;
 
             return builder;
         }
@@ -977,6 +1008,14 @@ namespace Microsoft.Build.BackEnd
                     EvaluateRequestStates();
                 },
                 isLastTask: false);
+        }
+
+        /// <summary>
+        /// Called when the request builder needs to request resources.
+        /// </summary>
+        private void Builder_OnResourceRequest(ResourceRequest request)
+        {
+            RaiseResourceRequest(request);
         }
 
         #endregion

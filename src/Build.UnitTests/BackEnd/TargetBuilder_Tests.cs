@@ -1417,6 +1417,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
+        /// <summary>
+        /// Empty impl
+        /// </summary>
+        int? IRequestBuilderCallback.RequestCores(int requestedCores)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Empty impl
+        /// </summary>
+        void IRequestBuilderCallback.ReleaseCores(int coresToRelease)
+        {
+        }
+
         #endregion
 
         /// <summary>

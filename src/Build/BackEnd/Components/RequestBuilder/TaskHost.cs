@@ -686,41 +686,44 @@ namespace Microsoft.Build.BackEnd
 
         public int? RequestCores(int requestedCores)
         {
-            var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
-
-            var coresAcquired = rms.RequestCores(requestedCores, _taskLoggingContext);
-
-            if (coresAcquired.HasValue)
+            lock (_callbackMonitor)
             {
-                runningTotal += coresAcquired.Value;
-            }
+                IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
+                var coresAcquired = builderCallback.RequestCores(requestedCores);
 
-            if (!implicitCoreUsed && coresAcquired == 0)
-            {
-                // If we got nothing back from the actual system, pad it with the one implicit core
-                // you get just for running--that way we never block and always return > 1
-                implicitCoreUsed = true;
-                coresAcquired = 1;
-            }
+                if (coresAcquired.HasValue)
+                {
+                    runningTotal += coresAcquired.Value;
+                }
 
-            return coresAcquired;
+                if (!implicitCoreUsed && coresAcquired == 0)
+                {
+                    // If we got nothing back from the actual system, pad it with the one implicit core
+                    // you get just for running--that way we never block and always return > 1
+                    implicitCoreUsed = true;
+                    coresAcquired = 1;
+                }
+
+                return coresAcquired;
+            }
         }
 
         public void ReleaseCores(int coresToRelease)
         {
-            var rms = _host.GetComponent(BuildComponentType.TaskResourceManager) as ResourceManagerService;
-
-            if (implicitCoreUsed)
+            lock (_callbackMonitor)
             {
-                coresToRelease -= 1;
-                implicitCoreUsed = false;
-            }
+                if (implicitCoreUsed)
+                {
+                    coresToRelease -= 1;
+                    implicitCoreUsed = false;
+                }
 
-            if (coresToRelease >= 1)
-            {
-
-                rms.ReleaseCores(coresToRelease, _taskLoggingContext);
-                runningTotal -= coresToRelease;
+                if (coresToRelease >= 1)
+                {
+                    IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
+                    builderCallback.ReleaseCores(coresToRelease);
+                    runningTotal -= coresToRelease;
+                }
             }
         }
 

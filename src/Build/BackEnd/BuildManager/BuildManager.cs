@@ -462,6 +462,7 @@ namespace Microsoft.Build.Execution
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildResult, BuildResult.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.ResolveSdkRequest, SdkResolverRequest.FactoryForDeserialization, SdkResolverService as INodePacketHandler);
+                _nodeManager.RegisterPacketHandler(NodePacketType.ResourceRequest, ResourceRequest.FactoryForDeserialization, this);
 
                 if (_threadException != null)
                 {
@@ -1537,6 +1538,11 @@ namespace Microsoft.Build.Execution
                         HandleResult(node, result);
                         break;
 
+                    case NodePacketType.ResourceRequest:
+                        ResourceRequest request = ExpectPacketType<ResourceRequest>(packet, NodePacketType.ResourceRequest);
+                        HandleResourceRequest(node, request);
+                        break;
+
                     case NodePacketType.NodeShutdown:
                         // Remove the node from the list of active nodes.  When they are all done, we have shut down fully
                         NodeShutdown shutdownPacket = ExpectPacketType<NodeShutdown>(packet, NodePacketType.NodeShutdown);
@@ -2166,6 +2172,22 @@ namespace Microsoft.Build.Execution
 
             IEnumerable<ScheduleResponse> response = _scheduler.ReportRequestBlocked(node, blocker);
             PerformSchedulingActions(response);
+        }
+
+        private void HandleResourceRequest(int node, ResourceRequest request)
+        {
+            if (request.IsAcquire)
+            {
+                var coresAcquired = _scheduler.RequestCores(request.NumCores);
+                var response = new ResourceResponse(request.BlockedRequestId, coresAcquired ?? -1);
+
+                _nodeManager.SendData(node, response);
+            }
+            else
+            {
+                _scheduler.ReleaseCores(request.NumCores);
+                // No response needed.
+            }
         }
 
         /// <summary>

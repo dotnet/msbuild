@@ -74,6 +74,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             public event BuildRequestBlockedDelegate OnBuildRequestBlocked;
 
+            public event ResourceRequestDelegate OnResourceRequest;
+
             public void BuildRequest(NodeLoggingContext context, BuildRequestEntry entry)
             {
                 Assert.Null(_builderThread); // "Received BuildRequest while one was in progress"
@@ -171,6 +173,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 OnBuildRequestBlocked?.Invoke(entry, blockingId, blockingTarget, null);
             }
 
+            public void RaiseResourceRequest(ResourceRequest request)
+            {
+                OnResourceRequest?.Invoke(request);
+            }
+
             public void ContinueRequest()
             {
                 if (ThrowExceptionOnContinue)
@@ -178,6 +185,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     throw new InvalidOperationException("ThrowExceptionOnContinue set.");
                 }
                 _continueEvent.Set();
+            }
+
+            public void ContinueRequestWithResources(ResourceResponse response)
+            {
+                // TODO
             }
 
             public void CancelRequest()
@@ -305,6 +317,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             engine.OnRequestResumed += this.Engine_RequestResumed;
             engine.OnStatusChanged += this.Engine_EngineStatusChanged;
             engine.OnEngineException += this.Engine_Exception;
+            engine.OnResourceRequest += e => { }; // TODO
         }
 
         /// <summary>

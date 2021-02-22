@@ -521,6 +521,23 @@ namespace Microsoft.Build.BackEnd
             WriteNodeUtilizationGraph(loggingService, context, false /* useConfigurations */);
         }
 
+        /// <summary>
+        /// Requests CPU resources.
+        /// </summary>
+        public int? RequestCores(int requestCores)
+        {
+            // TODO: ladipro
+            return null;
+        }
+
+        /// <summary>
+        /// Returns CPU resources.
+        /// </summary>
+        public void ReleaseCores(int coresToRelease)
+        {
+            // TODO: ladipro
+        }
+
         #endregion
 
         #region IBuildComponent Members

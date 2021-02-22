@@ -333,6 +333,8 @@
     <Compile Include="BackEnd\Shared\BuildRequestBlocker.cs" />
     <Compile Include="BackEnd\Shared\BuildRequestConfiguration.cs" />
     <Compile Include="BackEnd\Shared\BuildResult.cs" />
+    <Compile Include="BackEnd\Shared\ResourceRequest.cs" />
+    <Compile Include="BackEnd\Shared\ResourceResponse.cs" />
     <Compile Include="BackEnd\Shared\CircularDependencyException.cs" />
     <Compile Include="BackEnd\Shared\BuildRequestUnblocker.cs" />
     <Compile Include="BackEnd\Shared\IBuildResults.cs" />

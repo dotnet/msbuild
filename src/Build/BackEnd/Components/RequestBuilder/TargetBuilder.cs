@@ -363,6 +363,22 @@ namespace Microsoft.Build.BackEnd
             _requestBuilderCallback.ExitMSBuildCallbackState();
         }
 
+        /// <summary>
+        /// Requests CPU resources from the scheduler.
+        /// </summary>
+        int? IRequestBuilderCallback.RequestCores(int requestedCores)
+        {
+            return _requestBuilderCallback.RequestCores(requestedCores);
+        }
+
+        /// <summary>
+        /// Returns CPU resources to the scheduler.
+        /// </summary>
+        void IRequestBuilderCallback.ReleaseCores(int coresToRelease)
+        {
+            _requestBuilderCallback.ReleaseCores(coresToRelease);
+        }
+
         #endregion
 
         /// <summary>

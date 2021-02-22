@@ -55,5 +55,18 @@ namespace Microsoft.Build.BackEnd
         /// Exits the previous MSBuild callback state.
         /// </summary>
         void ExitMSBuildCallbackState();
+
+        /// <summary>
+        /// Requests CPU resources from the scheduler.
+        /// </summary>
+        /// <param name="requestedCores">Number of logical cores being requested.</param>
+        /// <returns>Number of logical cores actually granted.</returns>
+        int? RequestCores(int requestedCores);
+
+        /// <summary>
+        /// Returns CPU resources to the scheduler.
+        /// </summary>
+        /// <param name="coresToRelease">Number of logical cores being returned.</param>
+        void ReleaseCores(int coresToRelease);
     }
 }

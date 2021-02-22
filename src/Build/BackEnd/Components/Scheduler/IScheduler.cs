@@ -68,5 +68,15 @@ namespace Microsoft.Build.BackEnd
         /// Writes a detailed summary of the build state which includes informaiton about the scheduling plan.
         /// </summary>
         void WriteDetailedSummary(int submissionId);
+
+        /// <summary>
+        /// Requests CPU resources.
+        /// </summary>
+        int? RequestCores(int requestCores);
+
+        /// <summary>
+        /// Returns CPU resources.
+        /// </summary>
+        void ReleaseCores(int coresToRelease);
     }
 }

@@ -1247,6 +1247,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// Not Implemented
             /// </summary>
             public event BuildRequestBlockedDelegate OnBuildRequestBlocked;
+
+            /// <summary>
+            /// Not Implemented
+            /// </summary>
+            public event ResourceRequestDelegate OnResourceRequest;
 #pragma warning restore
 
             /// <summary>
@@ -1295,6 +1300,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             /// <summary>
+            /// Mock
+            /// </summary>
+            public int? RequestCores(int requestedCores)
+            {
+                return null;
+            }
+
+            /// <summary>
+            /// Mock
+            /// </summary>
+            public void ReleaseCores(int coresToRelease)
+            {
+            }
+
+            /// <summary>
             /// Mock of the Block on target in progress.
             /// </summary>
             public Task BlockOnTargetInProgress(int blockingRequestId, string blockingTarget, BuildResult partialBuildResult)
@@ -1314,6 +1334,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// Not Implemented
             /// </summary>
             public void ContinueRequest()
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <summary>
+            /// Not Implemented
+            /// </summary>
+            public void ContinueRequestWithResources(ResourceResponse response)
             {
                 throw new NotImplementedException();
             }

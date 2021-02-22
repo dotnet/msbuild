@@ -46,9 +46,19 @@ namespace Microsoft.Build.BackEnd
         private AutoResetEvent _continueEvent;
 
         /// <summary>
+        /// The event to signal that this request should wake up from its wait state after granting resources.
+        /// </summary>
+        private AutoResetEvent _continueWithResourcesEvent;
+
+        /// <summary>
         /// The results used when a build request entry continues.
         /// </summary>
         private IDictionary<int, BuildResult> _continueResults;
+
+        /// <summary>
+        /// The resources granted when a build request entry continues.
+        /// </summary>
+        private ResourceResponse _continueResources;
 
         /// <summary>
         /// The task representing the currently-executing build request.
@@ -107,6 +117,7 @@ namespace Microsoft.Build.BackEnd
         {
             _terminateEvent = new ManualResetEvent(false);
             _continueEvent = new AutoResetEvent(false);
+            _continueWithResourcesEvent = new AutoResetEvent(false);
         }
 
         /// <summary>
@@ -123,6 +134,11 @@ namespace Microsoft.Build.BackEnd
         /// The event raised when the build request has completed.
         /// </summary>
         public event BuildRequestBlockedDelegate OnBuildRequestBlocked;
+
+        /// <summary>
+        /// The event raised when resources are requested.
+        /// </summary>
+        public event ResourceRequestDelegate OnResourceRequest;
 
         /// <summary>
         /// The current block type
@@ -218,6 +234,20 @@ namespace Microsoft.Build.BackEnd
 
             // Setting the continue event will wake up the build thread, which is suspended in StartNewBuildRequests.
             _continueEvent.Set();
+        }
+
+        /// <summary>
+        /// Continues a build request after receiving a resource response.
+        /// </summary>
+        public void ContinueRequestWithResources(ResourceResponse response)
+        {
+            ErrorUtilities.VerifyThrow(HasActiveBuildRequest, "Request not building");
+            ErrorUtilities.VerifyThrow(!_terminateEvent.WaitOne(0), "Request already terminated");
+            ErrorUtilities.VerifyThrow(!_continueWithResourcesEvent.WaitOne(0), "Request already continued");
+            VerifyEntryInActiveState();
+
+            _continueResources = response;
+            _continueWithResourcesEvent.Set();
         }
 
         /// <summary>
@@ -458,6 +488,37 @@ namespace Microsoft.Build.BackEnd
             VerifyIsNotZombie();
             ErrorUtilities.VerifyThrow(_inMSBuildCallback, "Not in an MSBuild callback!");
             _inMSBuildCallback = false;
+        }
+
+        /// <summary>
+        /// Requests CPU resources from the scheduler.
+        /// </summary>
+        public int? RequestCores(int requestedCores)
+        {
+            VerifyIsNotZombie();
+            RaiseResourceRequest(new ResourceRequest(_requestEntry.Request.GlobalRequestId, requestedCores));
+
+            WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueWithResourcesEvent };
+
+            int handle = WaitHandle.WaitAny(handles);
+
+            if (handle == 0)
+            {
+                // We've been aborted
+                throw new BuildAbortedException();
+            }
+
+            VerifyEntryInActiveState();
+            return _continueResources.NumCores;
+        }
+
+        /// <summary>
+        /// Returns CPU resources to the scheduler.
+        /// </summary>
+        public void ReleaseCores(int coresToRelease)
+        {
+            VerifyIsNotZombie();
+            RaiseResourceRequest(new ResourceRequest(coresToRelease));
         }
 
         #endregion
@@ -984,6 +1045,15 @@ namespace Microsoft.Build.BackEnd
         private void RaiseOnBlockedRequest(int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult = null)
         {
             OnBuildRequestBlocked?.Invoke(_requestEntry, blockingGlobalRequestId, blockingTarget, partialBuildResult);
+        }
+
+        /// <summary>
+        /// Invokes the OnResourceRequest event
+        /// </summary>
+        /// <param name="request"></param>
+        private void RaiseResourceRequest(ResourceRequest request)
+        {
+            OnResourceRequest?.Invoke(request);
         }
 
         /// <summary>
