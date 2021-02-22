@@ -139,19 +139,22 @@ Integration with static web assets:
 <!-- This target validates that there is at most one scoped css file per component, that there are no scoped css files without a
      matching component, and then adds the associated scope to the razor components that have a matching scoped css file.
 -->
-<Target Name="_ResolveComponentCssScopes" BeforeTargets="AssignRazorComponentTargetPaths" DependsOnTargets="_ComputeCssScope;ResolveRazorComponentInputs">
-  <ApplyCssScopes RazorComponents="@(RazorComponent)" ScopedCss="@(_ScopedCss)">
+<Target Name="_ResolveCssScopes" BeforeTargets="AssignRazorComponentTargetPaths;AssignRazorGenerateTargetPaths" DependsOnTargets="_ComputeCssScope;ResolveRazorComponentInputs;ResolveRazorGenerateInputs">
+  <ApplyCssScopes RazorComponents="@(RazorComponent)" RazorGenerate="@(RazorGenerate)" ScopedCss="@(_ScopedCss)">
     <Output TaskParameter="RazorComponentsWithScopes" ItemName="_RazorComponentsWithScopes" />
+    <Output TaskParameter="RazorGenerateWithScopes" ItemName="_RazorGenerateWithScopes" />
   </ApplyCssScopes>
   <ItemGroup>
     <RazorComponent Remove="@(_RazorComponentsWithScopes)" />
     <RazorComponent Include="@(_RazorComponentsWithScopes)" />
+    <RazorGenerate Remove="@(_RazorGenerateWithScopes)" />
+    <RazorGenerate Include="@(_RazorGenerateWithScopes)" />
   </ItemGroup>
 </Target>
 
 <!-- Sets the output path for the processed scoped css files. They will all have a '.rz.scp.css' extension to flag them as processed
      scoped css files. -->
-<Target Name="_ResolveScopedCssOutputs" DependsOnTargets="_ComputeCssScope">
+<Target Name="_ResolveScopedCssOutputs" DependsOnTargets="_ResolveCssScopes">
   <PropertyGroup>
     <_ScopedCssIntermediatePath>$([System.IO.Path]::GetFullPath($(IntermediateOutputPath)scopedcss\))</_ScopedCssIntermediatePath>
   </PropertyGroup>

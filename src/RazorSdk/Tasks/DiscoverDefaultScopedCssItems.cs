@@ -24,7 +24,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             {
                 var candidate = Content[i];
                 var fullPath = candidate.GetMetadata("FullPath");
-                if (fullPath.EndsWith(".razor.css", StringComparison.OrdinalIgnoreCase) &&
+                if ((fullPath.EndsWith(".razor.css", StringComparison.OrdinalIgnoreCase) || fullPath.EndsWith(".cshtml.css", StringComparison.OrdinalIgnoreCase)) &&
                     !string.Equals("false", candidate.GetMetadata("Scoped"), StringComparison.OrdinalIgnoreCase))
                 {
                     discoveredInputs.Add(candidate);

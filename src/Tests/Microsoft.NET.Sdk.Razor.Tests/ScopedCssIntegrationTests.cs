@@ -20,7 +20,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 {
     public class ScopedCssIntegrationTest : AspNetSdkTest
     {
-        public ScopedCssIntegrationTest(ITestOutputHelper log) : base(log) {}
+        public ScopedCssIntegrationTest(ITestOutputHelper log) : base(log) { }
 
         [Fact]
         public void Build_NoOps_WhenScopedCssIsDisabled()
@@ -37,6 +37,23 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "Components", "Pages", "Index.razor.rz.scp.css")).Should().NotExist();
             new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "bundle", "ComponentApp.styles.css")).Should().NotExist();
             new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "Components", "Pages", "FetchData.razor.rz.scp.css")).Should().NotExist();
+        }
+
+        [Fact]
+        public void Build_NoOps_ForMvcApp_WhenScopedCssIsDisabled()
+        {
+            var testAsset = "RazorSimpleMvc";
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
+
+            var build = new BuildCommand(projectDirectory);
+            build.Execute("/p:ScopedCssEnabled=false").Should().Pass();
+
+            var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
+
+            new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "Views", "Home", "Index.cshtml.rz.scp.css")).Should().NotExist();
+            new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "Views", "Home", "Contact.cshtml.rz.scp.css")).Should().NotExist();
+            new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "bundle", "SimpleMvc.styles.css")).Should().NotExist();
+            new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "Views", "Home", "About.cshtml.rz.scp.css")).Should().NotExist();
         }
 
         [Fact]
@@ -107,6 +124,24 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         }
 
         [Fact]
+        public void Build_GeneratesTransformedFilesAndBundle_ForViewsWithScopedCss()
+        {
+            var testAsset = "RazorSimpleMvc";
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
+
+            var build = new BuildCommand(projectDirectory);
+            build.Execute().Should().Pass();
+
+            var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
+
+            new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "Views", "Home", "Index.cshtml.rz.scp.css")).Should().Exist();
+            new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "Views", "Home", "Contact.cshtml.rz.scp.css")).Should().Exist();
+            new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "bundle", "SimpleMvc.styles.css")).Should().Exist();
+            new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "projectbundle", "SimpleMvc.bundle.scp.css")).Should().Exist();
+            new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "Views", "Home", "About.cshtml.rz.scp.css")).Should().Exist();
+        }
+
+        [Fact]
         public void Build_ScopedCssFiles_ContainsUniqueScopesPerFile()
         {
             var testAsset = "RazorComponentApp";
@@ -133,6 +168,75 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var indexScopeId = indexScopeMatch.Groups[1].Captures[0].Value;
 
             Assert.NotEqual(counterScopeId, indexScopeId);
+        }
+
+        [Fact]
+        public void Build_ScopedCssViews_ContainsUniqueScopesPerView()
+        {
+            var testAsset = "RazorSimpleMvc";
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
+
+            var build = new BuildCommand(projectDirectory);
+            build.Execute().Should().Pass();
+
+            var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
+
+            var generatedIndex = Path.Combine(intermediateOutputPath, "scopedcss", "Views", "Home", "Index.cshtml.rz.scp.css");
+            new FileInfo(generatedIndex).Should().Exist();
+            var generatedAbout = Path.Combine(intermediateOutputPath, "scopedcss", "Views", "Home", "About.cshtml.rz.scp.css");
+            new FileInfo(generatedAbout).Should().Exist();
+            var generatedContact = Path.Combine(intermediateOutputPath, "scopedcss", "Views", "Home", "Contact.cshtml.rz.scp.css");
+            new FileInfo(generatedContact).Should().Exist();
+            var indexContent = File.ReadAllText(generatedIndex);
+            var aboutContent = File.ReadAllText(generatedAbout);
+            var contactContent = File.ReadAllText(generatedContact);
+
+            var indexScopeMatch = Regex.Match(indexContent, ".*p\\[(.*)\\].*", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            Assert.True(indexScopeMatch.Success, "Couldn't find a scope id in the generated Index scoped css file.");
+            var indexScopeId = indexScopeMatch.Groups[1].Captures[0].Value;
+
+            var aboutScopeMatch = Regex.Match(aboutContent, ".*h2\\[(.*)\\].*", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            Assert.True(aboutScopeMatch.Success, "Couldn't find a scope id in the generated About scoped css file.");
+            var aboutScopeId = aboutScopeMatch.Groups[1].Captures[0].Value;
+
+            var contactScopeMatch = Regex.Match(contactContent, ".*a\\[(.*)\\].*", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            Assert.True(contactScopeMatch.Success, "Couldn't find a scope id in the generated Contact scoped css file.");
+            var contactScopeId = contactScopeMatch.Groups[1].Captures[0].Value;
+
+            Assert.NotEqual(indexScopeId, aboutScopeId);
+            Assert.NotEqual(indexScopeId, contactScopeId);
+            Assert.NotEqual(aboutScopeId, contactScopeId);
+        }
+
+        [Fact]
+        public void Build_WorksWhenViewsAndComponentsArePartOfTheSameProject_ContainsUniqueScopesPerFile()
+        {
+            var testAsset = "RazorMvcWithComponents";
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
+
+            var build = new BuildCommand(projectDirectory);
+            build.Execute().Should().Pass();
+
+            var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
+
+            var generatedIndex = Path.Combine(intermediateOutputPath, "scopedcss", "Views", "Home", "Index.cshtml.rz.scp.css");
+            new FileInfo(generatedIndex).Should().Exist();
+
+            var generatedCounter = Path.Combine(intermediateOutputPath, "scopedcss", "Components", "Counter.razor.rz.scp.css");
+            new FileInfo(generatedCounter).Should().Exist();
+
+            var indexContent = File.ReadAllText(generatedIndex);
+            var counterContent = File.ReadAllText(generatedCounter);
+
+            var indexScopeMatch = Regex.Match(indexContent, ".*p\\[(.*)\\].*", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            Assert.True(indexScopeMatch.Success, "Couldn't find a scope id in the generated Index scoped css file.");
+            var indexScopeId = indexScopeMatch.Groups[1].Captures[0].Value;
+
+            var counterScopeMatch = Regex.Match(counterContent, ".*div\\[(.*)\\].*", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            Assert.True(counterScopeMatch.Success, "Couldn't find a scope id in the generated Counter scoped css file.");
+            var counterScopeId = counterScopeMatch.Groups[1].Captures[0].Value;
+
+            Assert.NotEqual(indexScopeId, counterScopeId);
         }
 
         [Fact]
@@ -202,26 +306,6 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             new FileInfo(Path.Combine(publishOutputPath, "wwwroot", "_content", "ComponentApp", "Components", "Pages", "Index.razor.rz.scp.css")).Should().Exist();
             new FileInfo(Path.Combine(publishOutputPath, "wwwroot", "_content", "ComponentApp", "Components", "Pages", "Counter.razor.rz.scp.css")).Should().Exist();
-        }
-
-
-        [Fact]
-        public void Build_GeneratedComponentContainsScope()
-        {
-            var testAsset = "RazorComponentApp";
-            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
-
-            var build = new BuildCommand(projectDirectory);
-            build.Execute().Should().Pass();
-
-            var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
-
-            var generatedCounter = Path.Combine(intermediateOutputPath, "scopedcss", "Components", "Pages", "Counter.razor.rz.scp.css");
-
-            var counterContent = File.ReadAllText(generatedCounter);
-
-            var counterScopeMatch = Regex.Match(counterContent, ".*button\\[(.*)\\].*", RegexOptions.Multiline | RegexOptions.IgnoreCase);
-            Assert.True(counterScopeMatch.Success, "Couldn't find a scope id in the generated Counter scoped css file.");
         }
 
         [Fact]
