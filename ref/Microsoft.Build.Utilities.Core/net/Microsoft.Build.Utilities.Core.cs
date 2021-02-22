@@ -555,6 +555,7 @@ namespace Microsoft.Build.Utilities
         protected abstract string ToolName { get; }
         public string ToolPath { get { throw null; } set { } }
         public bool UseCommandProcessor { get { throw null; } set { } }
+        public string UseUtf8Encoding { get { throw null; } set { } }
         public bool YieldDuringToolExecution { get { throw null; } set { } }
         protected virtual string AdjustCommandsForOperatingSystem(string input) { throw null; }
         protected virtual bool CallHostObjectToExecute() { throw null; }

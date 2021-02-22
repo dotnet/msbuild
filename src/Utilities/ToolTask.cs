@@ -183,7 +183,10 @@ namespace Microsoft.Build.Utilities
         public string ToolPath { set; get; }
 
         /// <summary>
-        /// Project-visible property to allow users to override the encoding method.
+        /// Whether or not to use UTF8 encoding for the cmd file and console window.
+        /// Values: Always, Never, Detect
+        /// If set to Detect, the current code page will be used unless it cannot represent 
+        /// the Command string. In that case, UTF-8 is used.
         /// </summary>
         public string UseUtf8Encoding { get; set; } = EncodingUtilities.UseUtf8Detect;
 
