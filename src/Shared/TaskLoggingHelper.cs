@@ -1016,7 +1016,7 @@ namespace Microsoft.Build.Utilities
             // that gives the user something.
             bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
 
-            if ((BuildEngine as IBuildEngine8).WarningsAsErrors?.Contains(warningCode) == true)
+            if ((BuildEngine as IBuildEngine8)?.WarningsAsErrors?.Contains(warningCode) == true)
             {
                 var err = new BuildErrorEventArgs
                 (
