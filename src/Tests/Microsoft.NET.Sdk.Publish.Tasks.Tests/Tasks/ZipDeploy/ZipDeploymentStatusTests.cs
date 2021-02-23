@@ -16,7 +16,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy.Tests
         private static string UserAgentName = "websdk";
         private static string UserAgentVersion = "1.0";
         private static string userName = "deploymentUser";
-        private static string password = "deploymentPassword";
+        private static string password = "[PLACEHOLDER]";
 
         [Theory]
         [InlineData(HttpStatusCode.Forbidden, DeployStatus.Unknown)]
