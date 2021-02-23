@@ -80,7 +80,6 @@
     <!-- Dependencies from https://github.com/dotnet/runtime -->
     <SystemCodeDomPackageVersion>6.0.0-preview.2.21118.6</SystemCodeDomPackageVersion>
     <SystemTextEncodingCodePagesPackageVersion>6.0.0-preview.2.21118.6</SystemTextEncodingCodePagesPackageVersion>
-    <SystemSecurityCryptographyProtectedDataPackageVersion>5.0.0-preview.7.20307.4</SystemSecurityCryptographyProtectedDataPackageVersion>
     <SystemResourcesExtensionsPackageVersion>6.0.0-preview.2.21118.6</SystemResourcesExtensionsPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
