@@ -63,6 +63,10 @@ namespace Microsoft.DotNet.Cli
             {
                 return symbolResult.Symbol.Name;
             }
+            else if (symbolResult.Token().Type.Equals(TokenType.Argument))
+            {
+                return symbolResult.Token().Value;
+            }
             else
             {
                 return string.Empty;

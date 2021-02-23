@@ -55,5 +55,12 @@ namespace Microsoft.DotNet.Tests.ParserTests
             result.UnparsedTokens.Should().Contain("hi2");
             result.ShowHelpOrErrorIfAppropriate(); // Should not throw error
         }
+
+        [Fact]
+        public void RootSubCommandIsToolCommand()
+        {
+            var result = Parser.Instance.Parse("dotnetsay run -v arg");
+            result.RootSubCommandResult().Should().Be("dotnetsay");
+        }
     }
 }

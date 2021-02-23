@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             ParseResult parseResult,
             string topLevelCommandName)
         {
-            if (parseResult.HasOption("--verbosity"))
+            if (parseResult.IsDotnetBuiltInCommand() && parseResult.HasOption("--verbosity"))
             {
                 result.Add(new ApplicationInsightsEntryFormat(
                     "sublevelparser/command",
