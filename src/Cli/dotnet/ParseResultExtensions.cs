@@ -19,9 +19,15 @@ namespace Microsoft.DotNet.Cli
         {
             if (parseResult.Errors.Any())
             {
-                throw new CommandParsingException(
-                    message: string.Join(Environment.NewLine,
-                                         parseResult.Errors.Select(e => e.Message)));
+                var unrecognizedTokenErrors = parseResult.Errors.Where(error => 
+                    error.Message.Contains(Parser.Instance.Configuration.ValidationMessages.UnrecognizedCommandOrArgument(string.Empty).Replace("'", string.Empty)));
+                if (parseResult.CommandResult.Command.TreatUnmatchedTokensAsErrors ||
+                    parseResult.Errors.Except(unrecognizedTokenErrors).Any())
+                {
+                    throw new CommandParsingException(
+                        message: string.Join(Environment.NewLine,
+                                             parseResult.Errors.Select(e => e.Message)));
+                }
             }
             else if (parseResult.HasOption("--help"))
             {
