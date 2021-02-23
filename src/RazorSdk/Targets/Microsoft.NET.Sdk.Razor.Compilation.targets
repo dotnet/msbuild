@@ -13,7 +13,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project ToolsVersion="14.0">
   <!--
   What follows in this file is based on:
-     https://github.com/dotnet/roslyn/blob/21263069b7e8522441d829fc59a3aa5b3a3cf938/src/Compilers/Core/MSBuildTask/Microsoft.CSharp.Core.targets
+     https://github.com/dotnet/roslyn/blob/efee485eda1c504c4f51d73f81ce0caa574a25be/src/Compilers/Core/MSBuildTask/Microsoft.CSharp.Core.targets
 
   We need to keep this basically up to date, as well as track the set of modifications we've made. Try to keep the formatting
   similar to the original to reduce noise. In general try to only deviate from the CoreCompile target when we need to for
@@ -62,6 +62,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     Add our FileWrites after the call to CSC
 
     Add Condition="'@(RazorCompile)'!=''" as a condition to the RazorCoreCompile target.
+
+    Add GeneratedFilesOutputPath="$(GeneratedFilesOutputPath)"
   -->
   <Target Name="RazorCoreCompile"
           Inputs="$(MSBuildAllProjects);
@@ -144,6 +146,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          Features="$(Features)"
          FileAlignment="$(FileAlignment)"
          GenerateFullPaths="$(GenerateFullPaths)"
+         GeneratedFilesOutputPath="$(GeneratedFilesOutputPath)"
          HighEntropyVA="$(HighEntropyVA)"
          Instrument="$(Instrument)"
          KeyContainer="$(KeyContainerName)"

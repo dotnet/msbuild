@@ -95,13 +95,16 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             File.Move(Path.Combine(projectDirectory.Path, "Components", "Pages", "Counter.razor.css"), styles);
 
             var build = new BuildCommand(projectDirectory);
-            build.Execute("/p:EnableDefaultScopedCssItems=false").Should().Pass();
+            build.Execute("/p:EnableDefaultScopedCssItems=false", "/p:EmitCompilerGeneratedFiles=true").Should().Pass();
 
             var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
 
             var scoped = Path.Combine(intermediateOutputPath, "scopedcss", "Styles", "Pages", "Counter.rz.scp.css");
             new FileInfo(scoped).Should().Exist();
             new FileInfo(scoped).Should().Contain("b-overriden");
+            var generated = Path.Combine(intermediateOutputPath, "generated", "Microsoft.NET.Sdk.Razor.SourceGenerators", "Microsoft.NET.Sdk.Razor.SourceGenerators.RazorSourceGenerator", "_Components_Pages_Counter.razor.cs");	
+            new FileInfo(generated).Should().Exist();	
+            new FileInfo(generated).Should().Contain("b-overriden");
             new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "Components", "Pages", "Index.razor.rz.scp.css")).Should().NotExist();
         }
 
@@ -315,7 +318,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
-            build.Execute().Should().Pass();
+            build.Execute("/p:EmitCompilerGeneratedFiles=true").Should().Pass();
 
             var intermediateOutputPath = Path.Combine(build.GetBaseIntermediateDirectory().ToString(), "Debug", DefaultTfm);
 
@@ -324,17 +327,24 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             new FileInfo(generatedBundle).Should().Exist();
             var generatedProjectBundle = Path.Combine(intermediateOutputPath, "scopedcss", "projectbundle", "ComponentApp.bundle.scp.css");
             new FileInfo(generatedProjectBundle).Should().Exist();
+            var generatedCounter = Path.Combine(intermediateOutputPath, "generated", "Microsoft.NET.Sdk.Razor.SourceGenerators", "Microsoft.NET.Sdk.Razor.SourceGenerators.RazorSourceGenerator", "_Components_Pages_Counter.razor.cs");	
+            new FileInfo(generatedCounter).Should().Exist();	
 
+            var componentThumbprint = FileThumbPrint.Create(generatedCounter);
             var bundleThumbprint = FileThumbPrint.Create(generatedBundle);
 
             File.Delete(Path.Combine(projectDirectory.Path, "Components", "Pages", "Counter.razor.css"));
 
             build = new BuildCommand(projectDirectory);
-            build.Execute().Should().Pass();
+            build.Execute("/p:EmitCompilerGeneratedFiles=true").Should().Pass();
 
             new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "Components", "Pages", "Counter.razor.rz.scp.css")).Should().NotExist();
+            new FileInfo(generatedCounter).Should().Exist();
 
+            var newComponentThumbprint = FileThumbPrint.Create(generatedCounter);
             var newBundleThumbprint = FileThumbPrint.Create(generatedBundle);
+
+            Assert.NotEqual(componentThumbprint, newComponentThumbprint);
             Assert.NotEqual(bundleThumbprint, newBundleThumbprint);
         }
 
