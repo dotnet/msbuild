@@ -677,10 +677,17 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         #region IBuildEngine8 Members
+        private HashSet<string> _warningsAsErrors;
         /// <summary>
         /// Contains all warnings that should be logged as errors.
         /// </summary>
-        public HashSet<string> WarningsAsErrors { get => _taskLoggingContext.LoggingService.GetWarningsAsErrors(_taskLoggingContext.BuildEventContext); }
+        public HashSet<string> WarningsAsErrors
+        {
+            get
+            {
+                return _warningsAsErrors ??= _taskLoggingContext.LoggingService.GetWarningsAsErrorsByProject(_taskLoggingContext.BuildEventContext);
+            }
+        }
         #endregion
 
         /// <summary>

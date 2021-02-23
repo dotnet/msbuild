@@ -557,7 +557,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return false;
         }
 
-        public HashSet<string> GetWarningsAsErrors(BuildEventContext context)
+        public HashSet<string> GetWarningsAsErrorsByProject(BuildEventContext context)
         {
             throw new NotImplementedException();
         }
