@@ -524,18 +524,26 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests CPU resources.
         /// </summary>
-        public int? RequestCores(int requestCores)
+        public int? RequestCores(int requestId, int requestedCores)
         {
-            // TODO: ladipro
-            return null;
+            int grantedCores = Math.Min(requestedCores, GetAvailableCores());
+            SchedulableRequest request = _schedulingData.GetExecutingRequest(requestId);
+            request.AddRequestedCores(grantedCores);
+            return grantedCores;
         }
 
         /// <summary>
         /// Returns CPU resources.
         /// </summary>
-        public void ReleaseCores(int coresToRelease)
+        public List<ScheduleResponse> ReleaseCores(int requestId, int coresToRelease)
         {
-            // TODO: ladipro
+            SchedulableRequest request = _schedulingData.GetExecutingRequest(requestId);
+            request.RemoveRequestedCores(coresToRelease);
+
+            // Releasing cores means that we may be able to schedule more work.
+            List<ScheduleResponse> responses = new List<ScheduleResponse>();
+            ScheduleUnassignedRequests(responses);
+            return responses;
         }
 
         #endregion
@@ -1292,6 +1300,23 @@ namespace Microsoft.Build.BackEnd
             request.ResumeExecution(nodeId);
         }
 
+        private int GetAvailableCores()
+        {
+            if (_schedulingUnlimited)
+            {
+                return int.MaxValue;
+            }
+
+            int limit = _componentHost.BuildParameters.MaxNodeCount switch
+            {
+                1 => 1,
+                2 => _componentHost.BuildParameters.MaxNodeCount + 1 + _nodeLimitOffset,
+                _ => _componentHost.BuildParameters.MaxNodeCount + 2 + _nodeLimitOffset,
+            };
+
+            return Math.Max(0, limit - (_schedulingData.ExecutingRequestsCount + _schedulingData.ExplicitlyRequestedCores + _schedulingData.YieldingRequestsCount));
+        }
+
         /// <summary>
         /// Returns true if we are at the limit of work we can schedule.
         /// </summary>
@@ -1302,18 +1327,11 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            int limit = _componentHost.BuildParameters.MaxNodeCount switch
-            {
-                1 => 1,
-                2 => _componentHost.BuildParameters.MaxNodeCount + 1 + _nodeLimitOffset,
-                _ => _componentHost.BuildParameters.MaxNodeCount + 2 + _nodeLimitOffset,
-            };
-
             // We're at our limit of schedulable requests if: 
             // (1) MaxNodeCount requests are currently executing
             // (2) Fewer than MaxNodeCount requests are currently executing but the sum of executing 
             //     and yielding requests exceeds the limit set out above.  
-            return _schedulingData.ExecutingRequestsCount + _schedulingData.YieldingRequestsCount >= limit ||
+            return GetAvailableCores() == 0 ||
                    _schedulingData.ExecutingRequestsCount >= _componentHost.BuildParameters.MaxNodeCount;
         }
 

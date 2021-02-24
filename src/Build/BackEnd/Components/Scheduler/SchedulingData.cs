@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
+using System.Linq;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -150,6 +151,14 @@ namespace Microsoft.Build.BackEnd
         public int ReadyRequestsCount
         {
             get { return _readyRequests.Count; }
+        }
+
+        /// <summary>
+        /// Gets the total number of cores requested by executing and yielding build requests.
+        /// </summary>
+        public int ExplicitlyRequestedCores
+        {
+            get { return _executingRequests.Sum(kvp => kvp.Value.RequestedCores) + _yieldingRequests.Sum(kvp => kvp.Value.RequestedCores); }
         }
 
         /// <summary>
@@ -492,12 +501,21 @@ namespace Microsoft.Build.BackEnd
         public bool IsNodeWorking(int nodeId)
         {
             SchedulableRequest request;
-            if (!_executingRequestByNode.TryGetValue(nodeId, out request))
+            if (_executingRequestByNode.TryGetValue(nodeId, out request) && request != null)
             {
-                return false;
+                return true;
             }
 
-            return request != null;
+            foreach (KeyValuePair<int, SchedulableRequest> kvp in _yieldingRequests)
+            {
+                if (kvp.Value.AssignedNode == nodeId && kvp.Value.RequestedCores > 0)
+                {
+                    // This node does not have an executing task on it. However, it does have a yielding task
+                    // that has explicitly asked for cores which makes it "working".
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>

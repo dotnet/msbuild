@@ -120,6 +120,11 @@ namespace Microsoft.Build.BackEnd
         private Dictionary<SchedulableRequestState, ScheduleTimeRecord> _timeRecords;
 
         /// <summary>
+        /// Number of cores requested as part of running the build request.
+        /// </summary>
+        private int _requestedCores;
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         public SchedulableRequest(SchedulingData collection, BuildRequest request, SchedulableRequest parent)
@@ -289,6 +294,11 @@ namespace Microsoft.Build.BackEnd
                 _endTime = value;
             }
         }
+
+        public int RequestedCores => _requestedCores;
+
+        public void AddRequestedCores(int cores) => _requestedCores += cores;
+        public int RemoveRequestedCores(int cores) => _requestedCores = Math.Max(0, _requestedCores - cores);
 
         /// <summary>
         /// Gets the amount of time we spent in the specified state.
