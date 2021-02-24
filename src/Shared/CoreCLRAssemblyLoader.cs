@@ -26,9 +26,9 @@ namespace Microsoft.Build.Shared
         private static string _msbuildDirPath;
         private static readonly Version _currentAssemblyVersion = new Version(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion);
 
-        internal CoreClrAssemblyLoader()
+        static CoreClrAssemblyLoader()
         {
-            _msbuildDirPath = FileUtilities.NormalizePath(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath);
+            _msbuildDirPath = FileUtilities.NormalizePath(typeof(CoreClrAssemblyLoader).Assembly.Location);
             _msbuildDirPath = Path.GetDirectoryName(_msbuildDirPath);
         }
 
@@ -63,7 +63,8 @@ namespace Microsoft.Build.Shared
             // the load is part of the platform, and load it using the Default ALC.
             string assemblyDir = Path.GetDirectoryName(fullPath);
 
-            if (Traits.Instance.EscapeHatches.UseSingleLoadContext || string.Equals(assemblyDir, _msbuildDirPath))
+            if (Traits.Instance.EscapeHatches.UseSingleLoadContext ||
+                FileUtilities.ComparePathsNoThrow(assemblyDir, _msbuildDirPath, string.Empty))
             {
                 return LoadUsingLegacyDefaultContext(fullPath);
             }
