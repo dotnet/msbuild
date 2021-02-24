@@ -48,8 +48,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       <FrameworkReference Include="@(_FrameworkReferenceToAdd)" />
     </ItemGroup>
 
-    <PropertyGroup Condition="'$(EnableTargetingPackDownload)' == ''">
-      <EnableTargetingPackDownload>true</EnableTargetingPackDownload>
+    <PropertyGroup>
+      <EnableTargetingPackDownload Condition="'$(EnableTargetingPackDownload)' == ''">true</EnableTargetingPackDownload>
+      <EnableRuntimePackDownload Condition="'$(EnableRuntimePackDownload)' == ''">true</EnableRuntimePackDownload>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -78,6 +79,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 TargetLatestRuntimePatch="$(TargetLatestRuntimePatch)"
                                 TargetLatestRuntimePatchIsDefault="$(_TargetLatestRuntimePatchIsDefault)"
                                 EnableTargetingPackDownload="$(EnableTargetingPackDownload)"
+                                EnableRuntimePackDownload="$(EnableRuntimePackDownload)"
                                 KnownCrossgen2Packs="@(KnownCrossgen2Pack)"
                                 NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)">
 
