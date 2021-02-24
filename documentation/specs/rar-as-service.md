@@ -45,7 +45,8 @@ We will use Mutex (as in [Roslyn](https://github.com/dotnet/roslyn/blob/838874b1
 RAR Node will adopt existing MSBuild infrastructure code, NodeProviderOutOfProcTaskHost and related, used for invoking tasks out of process.
 
 This code already solved many aspect of 'Out of process task invocation':
-- logging
+- serialization of task inputs and outputs
+- distributed logging
 - environmental variables
 - current directory path
 - current culture
@@ -62,9 +63,9 @@ There is already some layer of separation between Task interface and actual exec
 
 There is one big concern and that is how to handle multiple requests at once. As right now, RAR task is not prepared for multi-thread use.
 
-One of the biggest challenges with RAR as service, is to make execution and caching of RAR task thread-safe, since in most cases there will be multiple clients request data from it at once.
+One of the biggest challenges with RAR as service, is to make execution and caching of RAR task thread-safe, since in most cases there will be multiple clients requesting data from it at once.
 
-Following areas has to be addressed to allow concurrent execution of RAR:
+So far, we have identified following areas that have to be addressed to allow concurrent execution of RAR tasks:
 
 - thread safety (static variables, shared data structures, caching, ...)
 - environmental variables virtualization
