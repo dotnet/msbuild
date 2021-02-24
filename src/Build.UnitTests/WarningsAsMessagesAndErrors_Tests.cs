@@ -273,7 +273,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void WarningsAsErrors_ExpectBuildToStopWhenTaskLogsWarningAsError()
+        public void TaskLogsWarningAsError_BuildShouldFinishAndFail()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
@@ -304,7 +304,7 @@ namespace Microsoft.Build.Engine.UnitTests
         /// MSBuild behavior as of 16.10: As long as a task returns true, the build will continue despite logging an error.
         /// </summary>
         [Fact]
-        public void TaskReturnsTrueButLogsError_BuildShouldContinue()
+        public void TaskReturnsTrueButLogsError_BuildShouldFinishAndPass()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
@@ -326,6 +326,73 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 // The build should CONTINUE when a task returns true.
                 logger.AssertLogContains("MSB1234");
+            }
+        }
+
+        /// <summary>
+        /// MSBuild behavior as of 16.10: As long as a task returns true, the build will continue despite logging a warning as error.
+        /// This tests MSBuildWarningsAsErrors
+        /// </summary>
+        [Fact]
+        public void TaskReturnsTrueButLogsWarningAsError_BuildShouldFinishAndFail()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <UsingTask TaskName = ""CustomLogAndReturnTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <UsingTask TaskName = ""LogWarningReturnHasLoggedError"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <PropertyGroup>
+                        <MSBuildWarningsAsErrors>MSB1234</MSBuildWarningsAsErrors>
+                    </PropertyGroup>
+                    <Target Name='Build'>
+                        <CustomLogAndReturnTask Return=""true"" WarningCode=""MSB1234""/>
+                        <LogWarningReturnHasLoggedError WarningCode=""MSB1235""/>
+                    </Target>
+                </Project>");
+
+                MockLogger logger = proj.BuildProjectExpectFailure();
+
+                logger.WarningCount.ShouldBe(1);
+                logger.ErrorCount.ShouldBe(1);
+
+                // The build will continue so we should see the warning MSB1235
+                logger.AssertLogContains("MSB1235");
+            }
+        }
+
+
+        /// <summary>
+        /// MSBuild behavior as of 16.10: As long as a task returns true, the build will continue despite logging warning as error.
+        /// This test specifically tests the MSBuildTreatWarningsAsErrors flag as opposed to MSBuildWarningsAsErrors
+        /// </summary>
+        [Fact]
+        public void TaskReturnsTrueButLogsWarning_TreatWarningsAsErrors_BuildShouldFinishAndFail()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <UsingTask TaskName = ""CustomLogAndReturnTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <UsingTask TaskName = ""LogWarningReturnHasLoggedError"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <PropertyGroup>
+                        <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+                    </PropertyGroup>
+                    <Target Name='Build'>
+                        <CustomLogAndReturnTask Return=""true"" WarningCode=""MSB1234""/>
+                        <CustomLogAndReturnTask Return=""true"" WarningCode=""MSB1235""/>
+                    </Target>
+                </Project>");
+
+                MockLogger logger = proj.BuildProjectExpectFailure();
+
+                logger.WarningCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(2);
+
+                // The build will continue so we should see the error MSB1235
+                logger.AssertLogContains("MSB1235");
             }
         }
 
