@@ -28,7 +28,8 @@ namespace Microsoft.Build.Shared
 
         internal CoreClrAssemblyLoader()
         {
-            _msbuildDirPath = Path.GetDirectoryName(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath);
+            _msbuildDirPath = FileUtilities.NormalizePath(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath);
+            _msbuildDirPath = Path.GetDirectoryName(_msbuildDirPath);
         }
 
         public void AddDependencyLocation(string fullPath)
