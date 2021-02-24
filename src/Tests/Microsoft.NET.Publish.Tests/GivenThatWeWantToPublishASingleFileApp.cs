@@ -510,9 +510,27 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             publishCommand
                 .Execute(RuntimeIdentifier)
-                .Should()
-                .HaveStdOutContaining("(8,13): warning IL3000")
-                .And.HaveStdOutContaining("(9,13): warning IL3001");
+                .Should().Pass()
+                .And.HaveStdOutContaining("(9,13): warning IL3000")
+                .And.HaveStdOutContaining("(10,13): warning IL3001");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net6.0")]
+        public void ILLink_linker_analyzer_warnings_are_not_produced(string targetFramework)
+        {
+            var projectName = "ILLinkAnalyzerWarningsApp";
+            var testProject = CreateTestProjectWithAnalyzerWarnings(targetFramework, projectName, true);
+            // Inactive linker settings should have no effect on the linker analyzer,
+            // unless PublishTrimmed is also set.
+            testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand
+                .Execute(RuntimeIdentifier)
+                .Should().Pass()
+                .And.NotHaveStdOutContaining("IL2026");
         }
 
         private TestProject CreateTestProjectWithAnalyzerWarnings(string targetFramework, string projectName, bool isExecutable)
@@ -526,6 +544,7 @@ namespace Microsoft.NET.Publish.Tests
 
             testProject.SourceFiles[$"{projectName}.cs"] = @"
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 class C
 {
     static void Main()
@@ -533,6 +552,12 @@ class C
         var a = Assembly.LoadFrom(""/some/path/not/in/bundle"");
         _ = a.Location;
         _ = a.GetFiles();
+        ProduceLinkerAnalysisWarning();
+    }
+
+    [RequiresUnreferencedCode(""Linker analysis warning"")]
+    static void ProduceLinkerAnalysisWarning()
+    {
     }
 }";
 

@@ -40,6 +40,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(PublishTrimmed)' == 'true' ">
+    <SuppressTrimAnalysisWarnings Condition=" '$(SuppressTrimAnalysisWarnings)' == '' ">true</SuppressTrimAnalysisWarnings>
+  </PropertyGroup>
+
+  <!-- Suppress warnings produced by the linker or by the ILLink Roslyn analyzer. Warnings produced
+       exclusively by the linker should be set in PrepareForILLink, to avoid polluting the global NoWarn list. -->
+  <PropertyGroup Condition=" '$(PublishTrimmed)' == 'true' and '$(SuppressTrimAnalysisWarnings)' == 'true' ">
+    <!-- RequiresUnreferenceCodeAttribute method called -->
+    <NoWarn>$(NoWarn);IL2026</NoWarn>
+  </PropertyGroup>
+
   <!--
     ============================================================
                      ILLink
@@ -166,14 +177,13 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '5.0')) ">5</ILLinkWarningLevel>
       <ILLinkWarningLevel Condition=" '$(ILLinkWarningLevel)' == '' ">0</ILLinkWarningLevel>
       <ILLinkTreatWarningsAsErrors Condition=" '$(ILLinkTreatWarningsAsErrors)' == '' ">$(TreatWarningsAsErrors)</ILLinkTreatWarningsAsErrors>
-      <SuppressTrimAnalysisWarnings Condition=" '$(SuppressTrimAnalysisWarnings)' == '' ">true</SuppressTrimAnalysisWarnings>
       <_ExtraTrimmerArgs>--skip-unresolved true $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
       <TrimMode Condition=" '$(TrimMode)' == '' ">copyused</TrimMode>
     </PropertyGroup>
     
+    <!-- Suppress warnings produced by the linker. Any warnings shared with the analyzer should be
+         moved to the global PropertyGroup above. -->
     <PropertyGroup Condition=" '$(SuppressTrimAnalysisWarnings)' == 'true' ">
-      <!-- RequiresUnreferenceCodeAttribute method called -->
-      <NoWarn>$(NoWarn);IL2026</NoWarn>
       <!-- Invalid use of DynamicallyAccessedMembersAttribute -->
       <NoWarn>$(NoWarn);IL2041;IL2042;IL2043;IL2056</NoWarn>
       <!-- Reference to removed attribute type -->
