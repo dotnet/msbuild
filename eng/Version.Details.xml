@@ -33,6 +33,10 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>cf258a14b70ad9069470a108f13765e0e5988f51</Sha>
     </Dependency>
+    <Dependency Name="VS.Redist.Common.NetCore.TargetingPack.x64.5.0" Version="5.0.0-rtm.20519.4">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>cf258a14b70ad9069470a108f13765e0e5988f51</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Internal" Version="5.0.4-servicing.21116.14">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
       <Sha>f27d33729518f5aa478aa818b7b4f54a4d50bef1</Sha>
@@ -129,7 +133,7 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
       <Sha>e708867037ec6edbe7965b8f0f1193999785037e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.4-servicing.21117.6">
+    <Dependency Name="Microsoft.WindowsDesktop.App" Version="5.0.4-servicing.21117.9">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-windowsdesktop</Uri>
       <Sha>e708867037ec6edbe7965b8f0f1193999785037e</Sha>
     </Dependency>
