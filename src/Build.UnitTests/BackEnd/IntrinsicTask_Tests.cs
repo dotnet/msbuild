@@ -1989,7 +1989,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void FailWithMatchingMultipleMetadata()
+        public void RemoveWithMatchingMultipleMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
@@ -2010,12 +2010,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Target></Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
-            Assert.ThrowsAny<InvalidProjectFileException>(() => ExecuteTask(task, lookup))
-                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
+            ExecuteTask(task, lookup);
+            ICollection<ProjectItemInstance> items = lookup.GetItems("I2");
+            items.Count().ShouldBe(3);
+            items.ElementAt(0).EvaluatedInclude.ShouldBe("a2");
+            items.ElementAt(1).EvaluatedInclude.ShouldBe("c2");
+            items.ElementAt(2).EvaluatedInclude.ShouldBe("d2");
         }
 
         [Fact]
-        public void FailWithMultipleItemReferenceOnMatchingMetadata()
+        public void RemoveWithMultipleItemReferenceOnMatchingMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
@@ -2041,8 +2045,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Target></Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
-            Assert.ThrowsAny<InvalidProjectFileException>(() => ExecuteTask(task, lookup))
-                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
+            ExecuteTask(task, lookup);
+            ICollection<ProjectItemInstance> items = lookup.GetItems("I3");
+            items.ShouldBeEmpty();
         }
 
         [Fact]
@@ -2068,7 +2073,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             IntrinsicTask task = CreateIntrinsicTask(content);
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             Assert.ThrowsAny<InvalidProjectFileException>(() => ExecuteTask(task, lookup))
-                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem");
+                .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToReferencedItems");
         }
 
         [Fact]

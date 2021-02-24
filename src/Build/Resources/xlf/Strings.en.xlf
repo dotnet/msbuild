@@ -184,9 +184,9 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
-      <trans-unit id="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
-        <source>Only one item type may be referenced when removing with MatchOnMetadata.</source>
-        <target state="new">Only one item type may be referenced when removing with MatchOnMetadata.</target>
+      <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
+        <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
+        <target state="new">Only item types may be referenced when removing with MatchOnMetadata.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
