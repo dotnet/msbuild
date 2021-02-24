@@ -496,7 +496,7 @@ namespace Microsoft.Build.BackEnd
         public int? RequestCores(int requestedCores)
         {
             VerifyIsNotZombie();
-            RaiseResourceRequest(new ResourceRequest(_requestEntry.Request.GlobalRequestId, requestedCores));
+            RaiseResourceRequest(new ResourceRequest(true, _requestEntry.Request.GlobalRequestId, requestedCores));
 
             WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueWithResourcesEvent };
 
@@ -518,7 +518,7 @@ namespace Microsoft.Build.BackEnd
         public void ReleaseCores(int coresToRelease)
         {
             VerifyIsNotZombie();
-            RaiseResourceRequest(new ResourceRequest(coresToRelease));
+            RaiseResourceRequest(new ResourceRequest(false, _requestEntry.Request.GlobalRequestId, coresToRelease));
         }
 
         #endregion

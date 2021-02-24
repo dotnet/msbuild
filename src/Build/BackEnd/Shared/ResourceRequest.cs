@@ -27,21 +27,12 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Acquire
+        /// Constructor
         /// </summary>
-        internal ResourceRequest(int blockedGlobalRequestId, int numCores)
+        internal ResourceRequest(bool acquire, int blockedGlobalRequestId, int numCores)
         {
+            _isAcquire = acquire;
             _blockedGlobalRequestId = blockedGlobalRequestId;
-            _isAcquire = true;
-            _numCores = numCores;
-        }
-
-        /// <summary>
-        /// Release
-        /// </summary>
-        internal ResourceRequest(int numCores)
-        {
-            _isAcquire = false;
             _numCores = numCores;
         }
 

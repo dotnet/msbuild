@@ -72,11 +72,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests CPU resources.
         /// </summary>
-        int? RequestCores(int requestCores);
+        int? RequestCores(int requestId, int requestedCores);
 
         /// <summary>
         /// Returns CPU resources.
         /// </summary>
-        void ReleaseCores(int coresToRelease);
+        List<ScheduleResponse> ReleaseCores(int requestId, int coresToRelease);
     }
 }

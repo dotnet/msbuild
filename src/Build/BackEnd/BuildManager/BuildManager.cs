@@ -2178,14 +2178,15 @@ namespace Microsoft.Build.Execution
         {
             if (request.IsAcquire)
             {
-                var coresAcquired = _scheduler.RequestCores(request.NumCores);
+                var coresAcquired = _scheduler.RequestCores(request.BlockedRequestId, request.NumCores);
                 var response = new ResourceResponse(request.BlockedRequestId, coresAcquired ?? -1);
 
                 _nodeManager.SendData(node, response);
             }
             else
             {
-                _scheduler.ReleaseCores(request.NumCores);
+                IEnumerable<ScheduleResponse> response = _scheduler.ReleaseCores(request.BlockedRequestId, request.NumCores);
+                PerformSchedulingActions(response);
                 // No response needed.
             }
         }
