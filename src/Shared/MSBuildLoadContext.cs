@@ -25,20 +25,8 @@ namespace Microsoft.Build.Shared
                 "MSBuild",
                 "Microsoft.Build",
                 "Microsoft.Build.Framework",
-                "Microsoft.Build.NuGetSdkResolver",
                 "Microsoft.Build.Tasks.Core",
                 "Microsoft.Build.Utilities.Core",
-                "NuGet.Build.Tasks",
-                "NuGet.Common",
-                "NuGet.Configuration",
-                "NuGet.Credentials",
-                "NuGet.DependencyResolver.Core",
-                "NuGet.Frameworks",
-                "NuGet.LibraryModel",
-                "NuGet.Packaging",
-                "NuGet.Protocol",
-                "NuGet.ProjectModel",
-                "NuGet.Versioning",
             }.ToImmutableHashSet();
 
         internal static readonly string[] Extensions = new[] { "ni.dll", "ni.exe", "dll", "exe" };
