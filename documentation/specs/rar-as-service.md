@@ -40,7 +40,7 @@ If the connection is successful, we can use this connection for execution of RAR
 
 This step will create new process which will act as RAR node. It will also pass necessary information to the node to know what its settings are (reusable, ...). Node will be another instance of the MSBuild.exe which will have set parameter **nodeMode** to some specific value (it should be `/nodeMode:3`). 
 
-We will use Mutex (as in [Roslyn](https://github.com/dotnet/roslyn/blob/838874b1b817db84ce146bef690cc95a39c213a5/src/Compilers/Server/VBCSCompiler/BuildServerController.cs#L143)) to ensure we don't create two RAR nodes at once. Its name must encode whether it is the user's only RAR node, including user name, administrator privileges, and some initial settings for the node. Such a name could be: `MSBuild.RAR.ostorc.7`, where **MSBuild.RAR** is its prefix, **ostorc** is the user who called MSBuild, and **7** represents encoded settings (flag enum).
+We will use named-pipe exclusivity to ensure we don't create multiple RAR nodes at once. Its name must encode whether it is the user's only RAR node, including user name, administrator privileges, and some initial settings for the node. Such a name could be: `MSBuild.RAR.ostorc.7`, where **MSBuild.RAR** is its prefix, **ostorc** is the user who called MSBuild, and **7** represents encoded settings (flag enum).
 
 RAR Node will adopt existing MSBuild infrastructure code, NodeProviderOutOfProcTaskHost and related, used for invoking tasks out of process.
 
