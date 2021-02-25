@@ -116,5 +116,21 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 .And.HaveStdOutContaining("Watch: Index.razor")
                 .And.HaveStdOutContaining("Watch: Index.razor.css");
         }
+
+        [Fact]
+        public void IntrospectRazorDesignTimeTargets()
+        {
+            var expected1 = Path.Combine("Components", "App.razor");
+            var expected2 = Path.Combine("Components", "Shared", "MainLayout.razor");
+            var testAsset = "RazorComponentApp";
+            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
+
+            var build = new MSBuildCommand(Log, "_IntrospectRazorGenerateComponentDesignTime", projectDirectory.Path);
+            build.Execute()
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining($"RazorComponentWithTargetPath: App {expected1}")
+                .And.HaveStdOutContaining($"RazorComponentWithTargetPath: MainLayout {expected2}");
+        }
     }
 }
