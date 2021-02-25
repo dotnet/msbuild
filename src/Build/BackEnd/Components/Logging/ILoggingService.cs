@@ -225,7 +225,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as errors.</param>
         /// <returns>A Hashset containing warning codes that should be treated as warnings that will not be treated as messages.</returns>
-        HashSet<string> GetWarningsAsErrorsByProject(BuildEventContext context);
+        HashSet<string> GetWarningsToBeLoggedAsErrorsByProject(BuildEventContext context);
 
         #region Register
 

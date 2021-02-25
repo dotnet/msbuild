@@ -518,10 +518,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Returns a hashset of warnings to be logged as errors for the specified project instance ID.
         /// Note that WarningsAsMessages takes priority over WarningsAsErrors and are excluded from the set.
+        ///
+        /// If all warnings to be treated as errors should also be treated as messages, return null otherwise
+        /// all warnings will be treated as errors. <see cref="RequestBuilder.ConfigureWarningsAsErrorsAndMessages()"/>
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as errors.</param>
-        /// <returns>A Hashset containing warning codes that should be treated as warnings that will not be treated as messages.</returns>
-        public HashSet<string> GetWarningsAsErrorsByProject(BuildEventContext context)
+        /// <returns>A Hashset containing warning codes that should be treated as errors.</returns>
+        public HashSet<string> GetWarningsToBeLoggedAsErrorsByProject(BuildEventContext context)
         {
             if(_warningsAsErrorsByProject == null)
             {
@@ -534,7 +537,13 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if(_warningsAsMessagesByProject != null)
             {
-                warningsAsErrorsExcludingMessages.SymmetricExceptWith(_warningsAsMessagesByProject[key]);
+                warningsAsErrorsExcludingMessages.ExceptWith(_warningsAsMessagesByProject[key]);
+
+                // A non-null empty set means all warnings are errors. Avoid this.
+                if (warningsAsErrorsExcludingMessages.Count == 0)
+                {
+                    warningsAsErrorsExcludingMessages = null;
+                }
             }
 
             return warningsAsErrorsExcludingMessages;
