@@ -76,6 +76,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AOTMode>AotInterp</AOTMode>
     <WasmStripAOTAssemblies>false</WasmStripAOTAssemblies>
     <WasmGenerateAppBundle>false</WasmGenerateAppBundle>
+
+    <_TargetingNET60OrLater Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '6.0'))">true</_TargetingNET60OrLater>
   </PropertyGroup>
 
   <ItemGroup>
@@ -421,7 +423,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     </Copy>
   </Target>
 
-  <Target Name="_BlazorWasmPrepareForLink" BeforeTargets="PrepareForILLink">
+  <!--
+    This target special trimming for Microsoft.Extensions.* and Microsoft.AspNetCore.* assemblies.
+    We only need this for net5.0 projects since trimmablity is declared using assembly attributes in net6.0 and later.
+  -->
+  <Target Name="_BlazorWasmPrepareForLink" BeforeTargets="PrepareForILLink" Condition="'$(_TargetingNET60OrLater)' != 'true'">
     <PropertyGroup>
       <_BlazorTypeGranularTrimmerDescriptorFile>$(IntermediateOutputPath)typegranularity.trimmerdescriptor.xml</_BlazorTypeGranularTrimmerDescriptorFile>
     </PropertyGroup>
