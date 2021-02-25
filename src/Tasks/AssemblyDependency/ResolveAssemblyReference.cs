@@ -1886,7 +1886,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void ReadStateFile()
         {
-            _cache = (SystemState)StateFileBase.DeserializeCache(_stateFile, Log, typeof(SystemState));
+            _cache = SystemState.DeserializeCacheByTranslator(_stateFile, Log);
 
             // Construct the cache if necessary.
             if (_cache == null)
@@ -1902,7 +1902,7 @@ namespace Microsoft.Build.Tasks
         {
             if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
-                _cache.SerializeCache(_stateFile, Log);
+                _cache.SerializeCacheByTranslator(_stateFile, Log);
             }
         }
         #endregion
