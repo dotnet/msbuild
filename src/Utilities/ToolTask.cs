@@ -949,7 +949,6 @@ namespace Microsoft.Build.Utilities
                         timeout = result;
                     }
                 }
-
                 proc.KillTree(timeout);
             }
         }

@@ -629,7 +629,7 @@ namespace Microsoft.Build.Execution
                         }
                     }
 
-                    ShutdownConnectedNodesAsync(true /* abort */);
+                    ShutdownConnectedNodes(true /* abort */);
                     CheckForActiveNodesAndCleanUpSubmissions();
                 }
             }
@@ -774,7 +774,7 @@ namespace Microsoft.Build.Execution
             try
             {
                 _noActiveSubmissionsEvent.WaitOne();
-                ShutdownConnectedNodesAsync(false /* normal termination */);
+                ShutdownConnectedNodes(false /* normal termination */);
                 _noNodesActiveEvent.WaitOne();
 
                 // Wait for all of the actions in the work queue to drain.  Wait() could throw here if there was an unhandled exception
@@ -1955,7 +1955,7 @@ namespace Microsoft.Build.Execution
         /// Asks the nodeManager to tell the currently connected nodes to shut down and sets a flag preventing all non-shutdown-related packets from
         /// being processed.
         /// </summary>
-        private void ShutdownConnectedNodesAsync(bool abort)
+        private void ShutdownConnectedNodes(bool abort)
         {
             _shuttingDown = true;
 

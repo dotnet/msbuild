@@ -132,6 +132,11 @@
         <target state="needs-review-translation">“使用 SharingPolicy.Isolated 创建的 EvaluationContext 对象不支持通过 MSBuildFileSystemBase 文件系统传递。”</target>
         <note />
       </trans-unit>
+      <trans-unit id="KillingProcessWithPid">
+        <source>Killing process with pid = {0}.</source>
+        <target state="new">Killing process with pid = {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
         <source>"Loading the following project cache plugin:
     {0}"</source>

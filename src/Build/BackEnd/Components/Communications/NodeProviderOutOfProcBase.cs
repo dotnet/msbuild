@@ -25,6 +25,10 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
+using Task = System.Threading.Tasks.Task;
+using DotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
+using Microsoft.Build.Framework;
+using Microsoft.Build.BackEnd.Logging;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -48,6 +52,11 @@ namespace Microsoft.Build.BackEnd
         /// The amount of time to wait for an out-of-proc node to spool up before we give up.
         /// </summary>
         private const int TimeoutForNewNodeCreation = 30000;
+
+        /// <summary>
+        /// The amount of time to wait for an out-of-proc node to exit.
+        /// </summary>
+        private const int TimeoutForWaitForExit = 30000;
 
         /// <summary>
         /// The build component host.
@@ -95,9 +104,30 @@ namespace Microsoft.Build.BackEnd
             // Send the build completion message to the nodes, causing them to shutdown or reset.
             _processesToIgnore.Clear();
 
+            // We wait for child nodes to exit to avoid them changing the terminal
+            // after this process terminates.
+            bool waitForExit =  !enableReuse &&
+                                !Console.IsInputRedirected &&
+                                Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout;
+
+            Task[] waitForExitTasks = waitForExit && contextsToShutDown.Count > 0 ? new Task[contextsToShutDown.Count] : null;
+            int i = 0;
+            var loggingService = _componentHost.LoggingService;
             foreach (NodeContext nodeContext in contextsToShutDown)
             {
-                nodeContext?.SendData(new NodeBuildComplete(enableReuse));
+                if (nodeContext is null)
+                {
+                    continue;
+                }
+                nodeContext.SendData(new NodeBuildComplete(enableReuse));
+                if (waitForExit)
+                {
+                    waitForExitTasks[i++] = nodeContext.WaitForExitAsync(loggingService);
+                }
+            }
+            if (waitForExitTasks != null)
+            {
+                Task.WaitAll(waitForExitTasks);
             }
         }
 
@@ -138,7 +168,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If we're able to connect to such a process, send a packet requesting its termination
                     CommunicationsUtilities.Trace("Shutting down node with pid = {0}", nodeProcess.Id);
-                    NodeContext nodeContext = new NodeContext(0, nodeProcess.Id, nodeStream, factory, terminateNode);
+                    NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode);
                     nodeContext.SendData(new NodeBuildComplete(false /* no node reuse */));
                     nodeStream.Dispose();
                 }
@@ -204,7 +234,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         // Connection successful, use this node.
                         CommunicationsUtilities.Trace("Successfully connected to existed node {0} which is PID {1}", nodeId, nodeProcess.Id);
-                        return new NodeContext(nodeId, nodeProcess.Id, nodeStream, factory, terminateNode);
+                        return new NodeContext(nodeId, nodeProcess, nodeStream, factory, terminateNode);
                     }
                 }
             }
@@ -242,20 +272,20 @@ namespace Microsoft.Build.BackEnd
 #endif
 
                 // Create the node process
-                int msbuildProcessId = LaunchNode(msbuildLocation, commandLineArgs);
-                _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, msbuildProcessId));
+                Process msbuildProcess = LaunchNode(msbuildLocation, commandLineArgs);
+                _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id));
 
                 // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
                 // gotten back from CreateProcess is that of the debugger, which causes this to try to connect
                 // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
 
                 // Now try to connect to it.
-                Stream nodeStream = TryConnectToProcess(msbuildProcessId, TimeoutForNewNodeCreation, hostHandshake);
+                Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, hostHandshake);
                 if (nodeStream != null)
                 {
                     // Connection successful, use this node.
-                    CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcessId);
-                    return new NodeContext(nodeId, msbuildProcessId, nodeStream, factory, terminateNode);
+                    CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcess.Id);
+                    return new NodeContext(nodeId, msbuildProcess, nodeStream, factory, terminateNode);
                 }
             }
 
@@ -391,7 +421,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Creates a new MSBuild process
         /// </summary>
-        private int LaunchNode(string msbuildLocation, string commandLineArgs)
+        private Process LaunchNode(string msbuildLocation, string commandLineArgs)
         {
             // Should always have been set already.
             ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
@@ -490,7 +520,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", process.Id, exeName);
-                return process.Id;
+                return process;
             }
             else
             {
@@ -548,7 +578,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", childProcessId, exeName);
-                return childProcessId;
+                return Process.GetProcessById(childProcessId);
             }
         }
 
@@ -582,6 +612,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal class NodeContext
         {
+            enum ExitPacketState
+            {
+                None,
+                ExitPacketQueued,
+                ExitPacketSent
+            }
+
             // The pipe(s) used to communicate with the node.
             private Stream _clientToServerStream;
             private Stream _serverToClientStream;
@@ -597,9 +634,9 @@ namespace Microsoft.Build.BackEnd
             private int _nodeId;
 
             /// <summary>
-            /// The process id
+            /// The node process.
             /// </summary>
-            private int _processId;
+            private readonly Process _process;
 
             /// <summary>
             /// An array used to store the header byte for each packet when read.
@@ -631,14 +668,14 @@ namespace Microsoft.Build.BackEnd
             private Task _packetWriteDrainTask = Task.CompletedTask;
 
             /// <summary>
-            /// Event indicating the node has terminated.
-            /// </summary>
-            private ManualResetEvent _nodeTerminated;
-
-            /// <summary>
             /// Delegate called when the context terminates.
             /// </summary>
             private NodeContextTerminateDelegate _terminateDelegate;
+
+            /// <summary>
+            /// Tracks the state of the packet sent to terminate the node.
+            /// </summary>
+            private ExitPacketState _exitPacketState;
 
             /// <summary>
             /// Per node read buffers
@@ -648,20 +685,18 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Constructor.
             /// </summary>
-            public NodeContext(int nodeId, int processId,
+            public NodeContext(int nodeId, Process process,
                 Stream nodePipe,
                 INodePacketFactory factory, NodeContextTerminateDelegate terminateDelegate)
             {
                 _nodeId = nodeId;
-                _processId = processId;
+                _process = process;
                 _clientToServerStream = nodePipe;
                 _serverToClientStream = nodePipe;
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
-
                 _readBufferMemoryStream = new MemoryStream();
                 _writeBufferMemoryStream = new MemoryStream();
-                _nodeTerminated = new ManualResetEvent(false);
                 _terminateDelegate = terminateDelegate;
                 _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
             }
@@ -749,6 +784,10 @@ namespace Microsoft.Build.BackEnd
             /// <param name="packet">The packet to send.</param>
             public void SendData(INodePacket packet)
             {
+                if (IsExitPacket(packet))
+                {
+                    _exitPacketState = ExitPacketState.ExitPacketQueued;
+                }
                 _packetWriteQueue.Add(packet);
                 DrainPacketQueue();
             }
@@ -816,6 +855,10 @@ namespace Microsoft.Build.BackEnd
                         int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
                         _serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
                     }
+                    if (IsExitPacket(packet))
+                    {
+                        _exitPacketState = ExitPacketState.ExitPacketSent;
+                    }
                 }
                 catch (IOException e)
                 {
@@ -826,6 +869,11 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Do nothing here because any exception will be caught by the async read handler
                 }
+            }
+
+            private static bool IsExitPacket(INodePacket packet)
+            {
+                return packet is NodeBuildComplete buildCompletePacket && !buildCompletePacket.PrepareForReuse;
             }
 
             /// <summary>
@@ -842,7 +890,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Closes the node's context, disconnecting it from the node.
             /// </summary>
-            public void Close()
+            private void Close()
             {
                 _clientToServerStream.Dispose();
                 if (!object.ReferenceEquals(_clientToServerStream, _serverToClientStream))
@@ -850,6 +898,52 @@ namespace Microsoft.Build.BackEnd
                     _serverToClientStream.Dispose();
                 }
                 _terminateDelegate(_nodeId);
+            }
+
+            /// <summary>
+            /// Waits for the child node process to exit.
+            /// </summary>
+            public async Task WaitForExitAsync(ILoggingService loggingService)
+            {
+                if (_exitPacketState == ExitPacketState.ExitPacketQueued)
+                {
+                    // Wait up to 100ms until all remaining packets are sent.
+                    // We don't need to wait long, just long enough for the Task to start running on the ThreadPool.
+                    await Task.WhenAny(_packetWriteDrainTask, Task.Delay(100));
+                }
+                if (_exitPacketState == ExitPacketState.ExitPacketSent)
+                {
+                    CommunicationsUtilities.Trace("Waiting for node with pid = {0} to exit", _process.Id);
+
+                    // .NET 5 introduces a real WaitForExitAsyc.
+                    // This is a poor man's implementation that uses polling.
+                    int timeout = TimeoutForWaitForExit;
+                    int delay = 5;
+                    while (timeout > 0)
+                    {
+                        bool exited = _process.WaitForExit(milliseconds: 0);
+                        if (exited)
+                        {
+                            return;
+                        }
+                        timeout -= delay;
+                        await Task.Delay(delay).ConfigureAwait(false);
+
+                        // Double delay up to 500ms.
+                        delay = Math.Min(delay * 2, 500);
+                    }
+                }
+
+                // Kill the child and do a blocking wait.
+                loggingService?.LogWarning(
+                    BuildEventContext.Invalid,
+                    null,
+                    BuildEventFileInfo.Empty,
+                    "KillingProcessWithPid",
+                    _process.Id);
+                CommunicationsUtilities.Trace("Killing node with pid = {0}", _process.Id);
+
+                _process.KillTree(timeout: 5000);
             }
 
 #if FEATURE_APM
@@ -873,17 +967,16 @@ namespace Microsoft.Build.BackEnd
             {
                 if (bytesRead != _headerByte.Length)
                 {
-                    CommunicationsUtilities.Trace(_nodeId, "COMMUNICATIONS ERROR (HRC) Node: {0} Process: {1} Bytes Read: {2} Expected: {3}", _nodeId, _processId, bytesRead, _headerByte.Length);
+                    CommunicationsUtilities.Trace(_nodeId, "COMMUNICATIONS ERROR (HRC) Node: {0} Process: {1} Bytes Read: {2} Expected: {3}", _nodeId, _process.Id, bytesRead, _headerByte.Length);
                     try
                     {
-                        Process childProcess = Process.GetProcessById(_processId);
-                        if (childProcess?.HasExited != false)
+                        if (_process.HasExited)
                         {
-                            CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} has exited.", _processId);
+                            CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} has exited.", _process.Id);
                         }
                         else
                         {
-                            CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} is still running.", _processId);
+                            CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} is still running.", _process.Id);
                         }
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))

@@ -24,6 +24,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.Build.BackEnd
 {

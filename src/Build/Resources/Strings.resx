@@ -1876,4 +1876,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="NoProjectCachePluginFoundInAssembly" xml:space="preserve">
     <value>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</value>
   </data>
+  <data name="KillingProcessWithPid" xml:space="preserve">
+    <value>Killing process with pid = {0}.</value>
+  </data>
 </root>
