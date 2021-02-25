@@ -5,13 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 #nullable disable
 
-namespace Microsoft.DotNet.DotNetSdkResolver
+namespace Microsoft.DotNet.NativeWrapper
 {
-    internal class EnvironmentProvider
+    public class EnvironmentProvider
     {
         private IEnumerable<string> _searchPaths;
 
@@ -59,6 +58,36 @@ namespace Microsoft.DotNet.DotNetSdkResolver
                 .FirstOrDefault(File.Exists);
 
             return commandPath;
+        }
+
+        public string GetDotnetExeDirectory()
+        {
+            string environmentOverride = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR");
+            if (!string.IsNullOrEmpty(environmentOverride))
+            {
+                return environmentOverride;
+            }
+
+            var dotnetExe = GetCommandPath("dotnet");
+
+            if (dotnetExe != null && !Interop.RunningOnWindows)
+            {
+                // e.g. on Linux the 'dotnet' command from PATH is a symlink so we need to
+                // resolve it to get the actual path to the binary
+                dotnetExe = Interop.Unix.realpath(dotnetExe) ?? dotnetExe;
+            }
+
+            return Path.GetDirectoryName(dotnetExe);
+        }
+
+        public static string GetDotnetExeDirectory(Func<string, string> _getEnvironmentVariable = null)
+        {
+            if (_getEnvironmentVariable == null)
+            {
+                _getEnvironmentVariable = Environment.GetEnvironmentVariable;
+            }
+            var environmentProvider = new EnvironmentProvider(_getEnvironmentVariable);
+            return environmentProvider.GetDotnetExeDirectory();
         }
     }
 }

@@ -1,10 +1,10 @@
 ﻿using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+using Microsoft.DotNet.NativeWrapper;
 
 #if NET
 using Microsoft.DotNet.Cli;
@@ -148,7 +148,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             return sdkDirectory;
 
 #else
-            string dotnetExeDir = _sdkResolver.GetDotnetExeDirectory();
+            string dotnetExeDir = EnvironmentProvider.GetDotnetExeDirectory();
             string globalJsonStartDir = Path.GetDirectoryName(context.SolutionFilePath ?? context.ProjectFilePath);
             var sdkResolutionResult = _sdkResolver.ResolveNETCoreSdkDirectory(globalJsonStartDir, context.MSBuildVersion, context.IsRunningInVisualStudio, dotnetExeDir);
 

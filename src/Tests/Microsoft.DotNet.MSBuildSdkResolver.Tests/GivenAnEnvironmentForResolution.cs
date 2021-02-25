@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         public void ItIgnoresInvalidPath()
         {
             Func<string, string> getPathEnvVarFunc = (string var) => { return $"{Directory.GetCurrentDirectory()}Dir{Path.GetInvalidPathChars().First()}Name"; };
-            var environmentProvider = new DotNetSdkResolver.EnvironmentProvider(getPathEnvVarFunc);
+            var environmentProvider = new NativeWrapper.EnvironmentProvider(getPathEnvVarFunc);
             var pathResult = environmentProvider.GetCommandPath("nonexistantCommand");
             pathResult.Should().BeNull();
         }

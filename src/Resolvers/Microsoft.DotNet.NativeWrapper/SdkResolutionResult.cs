@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #nullable disable
 
-namespace Microsoft.DotNet.DotNetSdkResolver
+namespace Microsoft.DotNet.NativeWrapper
 {
     public class SdkResolutionResult
     {

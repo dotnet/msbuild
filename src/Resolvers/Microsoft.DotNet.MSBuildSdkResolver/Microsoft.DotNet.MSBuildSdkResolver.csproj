@@ -30,6 +30,8 @@
   
   <ItemGroup>
     <EmbeddedResource Include="..\Microsoft.NET.Sdk.WorkloadManifestReader\Strings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.NET.Sdk.Localization"/>
+
+    <ProjectReference Include="..\Microsoft.DotNet.NativeWrapper\Microsoft.DotNet.NativeWrapper.csproj" />
   </ItemGroup>
 
   <!-- We need to use relative path due to if we want to run tests in helix. Since we would need to run the tests in a different helix machine

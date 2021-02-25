@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.DotNetSdkResolver;
+using Microsoft.DotNet.NativeWrapper;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.TemplateLocator
@@ -15,6 +16,7 @@ namespace Microsoft.DotNet.TemplateLocator
         private IWorkloadManifestProvider? _workloadManifestProvider;
         private IWorkloadResolver? _workloadResolver;
         private readonly Lazy<NETCoreSdkResolver> _netCoreSdkResolver;
+        private readonly Func<string, string> _getEnvironmentVariable;
 #nullable disable
         public TemplateLocator()
             : this(Environment.GetEnvironmentVariable, VSSettings.Ambient, null, null)
@@ -33,6 +35,7 @@ namespace Microsoft.DotNet.TemplateLocator
 
             _workloadManifestProvider = workloadManifestProvider;
             _workloadResolver = workloadResolver;
+            _getEnvironmentVariable = getEnvironmentVariable;
         }
 
         public IReadOnlyCollection<IOptionalSdkTemplatePackageInfo> GetDotnetSdkTemplatePackages(
@@ -59,7 +62,7 @@ namespace Microsoft.DotNet.TemplateLocator
 
         public bool TryGetDotnetSdkVersionUsedInVs(string vsVersion, out string? sdkVersion)
         {
-            string dotnetExeDir = _netCoreSdkResolver.Value.GetDotnetExeDirectory();
+            string dotnetExeDir = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable);
 
             if (!Version.TryParse(vsVersion, out var parsedVsVersion))
             {

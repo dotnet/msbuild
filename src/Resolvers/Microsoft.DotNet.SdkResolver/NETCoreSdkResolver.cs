@@ -1,10 +1,11 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using Microsoft.Build.Framework;
+using Microsoft.DotNet.NativeWrapper;
 
 #nullable disable
 
@@ -173,27 +174,6 @@ namespace Microsoft.DotNet.DotNetSdkResolver
             }
 
             return result;
-        }
-
-        public string GetDotnetExeDirectory()
-        {
-            string environmentOverride = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR");
-            if (!string.IsNullOrEmpty(environmentOverride))
-            {
-                return environmentOverride;
-            }
-
-            var environmentProvider = new EnvironmentProvider(_getEnvironmentVariable);
-            var dotnetExe = environmentProvider.GetCommandPath("dotnet");
-
-            if (dotnetExe != null && !Interop.RunningOnWindows)
-            {
-                // e.g. on Linux the 'dotnet' command from PATH is a symlink so we need to
-                // resolve it to get the actual path to the binary
-                dotnetExe = Interop.Unix.realpath(dotnetExe) ?? dotnetExe;
-            }
-
-            return Path.GetDirectoryName(dotnetExe);
         }
     }
 }
