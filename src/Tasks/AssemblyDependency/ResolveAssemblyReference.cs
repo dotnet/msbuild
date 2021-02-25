@@ -1889,7 +1889,7 @@ namespace Microsoft.Build.Tasks
             _cache = SystemState.DeserializeCacheByTranslator(_stateFile, Log);
 
             // Construct the cache only if we can't find any caches.
-            if (_cache == null && !String.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
+            if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
             {
                 _cache = SystemState.DeserializePrecomputedCachesByTranslator(AssemblyInformationCachePaths, Log, fileExists);
             }
