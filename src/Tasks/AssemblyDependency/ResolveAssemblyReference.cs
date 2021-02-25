@@ -1888,10 +1888,15 @@ namespace Microsoft.Build.Tasks
         {
             _cache = SystemState.DeserializeCacheByTranslator(_stateFile, Log);
 
-            // Construct the cache if necessary.
+            // Construct the cache only if we can't find any caches.
+            if (_cache == null && !String.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
+            {
+                _cache = SystemState.DeserializePrecomputedCachesByTranslator(AssemblyInformationCachePaths, Log, fileExists);
+            }
+
             if (_cache == null)
             {
-                _cache = SystemState.DeserializePrecomputedCachesByTranslator(AssemblyInformationCachePaths ?? Array.Empty<ITaskItem>(), Log, fileExists);
+                _cache = new SystemState();
             }
         }
 
@@ -1904,7 +1909,7 @@ namespace Microsoft.Build.Tasks
             {
                 _cache.SerializePrecomputedCacheByTranslator(AssemblyInformationCacheOutputPath, Log);
             }
-            else if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
+            else if (!String.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
                 _cache.SerializeCacheByTranslator(_stateFile, Log);
             }

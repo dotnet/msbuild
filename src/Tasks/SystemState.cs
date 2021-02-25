@@ -654,6 +654,9 @@ namespace Microsoft.Build.Tasks
         /// <param name="log">How to log</param>
         internal void SerializePrecomputedCacheByTranslator(string stateFile, TaskLoggingHelper log)
         {
+            // Save a copy of instanceLocalFileStateCache so we can restore it later. SerializeCacheByTranslator serializes
+            // instanceLocalFileStateCache by default, so change that to the relativized form, then change it back.
+            Dictionary<string, FileState> oldFileStateCache = instanceLocalFileStateCache;
             Dictionary<string, FileState> newInstanceLocalFileStateCache = new Dictionary<string, FileState>(instanceLocalFileStateCache.Count);
             foreach (KeyValuePair<string, FileState> kvp in instanceLocalFileStateCache)
             {
@@ -667,6 +670,8 @@ namespace Microsoft.Build.Tasks
                 log.LogWarningWithCodeFromResources("General.StateFileAlreadyPresent", stateFile);
             }
             SerializeCacheByTranslator(stateFile, log);
+
+            instanceLocalFileStateCache = oldFileStateCache;
         }
 
         /// <summary>
