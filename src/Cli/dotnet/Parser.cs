@@ -44,7 +44,8 @@ namespace Microsoft.DotNet.Cli
             TestCommandParser.GetCommand(),
             ToolCommandParser.GetCommand(),
             VSTestCommandParser.GetCommand(),
-            HelpCommandParser.GetCommand()
+            HelpCommandParser.GetCommand(),
+            CheckUpdateCommandParser.GetCommand()
         };
 
         // Internal commands

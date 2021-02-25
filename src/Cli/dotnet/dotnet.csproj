@@ -28,6 +28,7 @@
     <EmbeddedResource Update="**\dotnet-buildserver\*.resx" Namespace="Microsoft.DotNet.Tools.BuildServer" />
     <EmbeddedResource Update="**\dotnet-buildserver\shutdown\*.resx" Namespace="Microsoft.DotNet.Tools.BuildServer.Shutdown" />
     <EmbeddedResource Update="**\dotnet-clean\*.resx" Namespace="Microsoft.DotNet.Tools.Clean" />
+    <EmbeddedResource Update="**\dotnet-check-update\*.resx" Namespace="Microsoft.DotNet.Tools.CheckUpdate" />
     <EmbeddedResource Update="**\dotnet-help\*.resx" Namespace="Microsoft.DotNet.Tools.Help" />
     <EmbeddedResource Update="**\dotnet-list-package\*.resx" Namespace="Microsoft.DotNet.Tools.List.PackageReferences" />
     <EmbeddedResource Update="**\dotnet-list-reference\*.resx" Namespace="Microsoft.DotNet.Tools.List.ProjectToProjectReferences" />
@@ -61,6 +62,7 @@
     <ProjectReference Include="../Microsoft.DotNet.Cli.Sln.Internal/Microsoft.DotNet.Cli.Sln.Internal.csproj" />
     <!-- override the Microsoft.TemplateEngine.Cli's dependency with the latest Microsoft.DotNet.TemplateLocator -->
     <ProjectReference Include="../../Microsoft.DotNet.TemplateLocator\Microsoft.DotNet.TemplateLocator.csproj" />
+    <ProjectReference Include="../../Resolvers\Microsoft.DotNet.NativeWrapper\Microsoft.DotNet.NativeWrapper.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
@@ -75,6 +77,7 @@
     <PackageReference Include="Microsoft.TemplateSearch.Common" Version="$(MicrosoftTemplateSearchCommonPackageVersion)" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="4.6.0" />
     <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
+    <PackageReference Include="Microsoft.Deployment.DotNet.Releases" Version="$(DeploymentReleasesVersion)" />
   </ItemGroup>
   <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
     <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion)" />
