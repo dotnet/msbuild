@@ -40,7 +40,18 @@ If the connection is successful, we can use this connection for execution of RAR
 
 This step will create new process which will act as RAR node. It will also pass necessary information to the node to know what its settings are (reusable, ...). Node will be another instance of the MSBuild.exe which will have set parameter **nodeMode** to some specific value (it should be `/nodeMode:3`). 
 
-We will use Mutex (as in [Roslyn](https://github.com/dotnet/roslyn/blob/838874b1b817db84ce146bef690cc95a39c213a5/src/Compilers/Server/VBCSCompiler/BuildServerController.cs#L143)) to ensure we don't create two RAR nodes at once. Its name must encode whether it is the user's only RAR node, including user name, administrator privileges, and some initial settings for the node. Such a name could be: `MSBuild.RAR.ostorc.7`, where **MSBuild.RAR** is its prefix, **ostorc** is the user who called MSBuild, and **7** represents encoded settings (flag enum).
+We will use named-pipe exclusivity to ensure we don't create multiple RAR nodes at once. Its name must encode whether it is the user's only RAR node, including user name, administrator privileges, and some initial settings for the node. Such a name could be: `MSBuild.RAR.ostorc.7`, where **MSBuild.RAR** is its prefix, **ostorc** is the user who called MSBuild, and **7** represents encoded settings (flag enum).
+
+RAR Node will adopt existing MSBuild infrastructure code, NodeProviderOutOfProcTaskHost and related, used for invoking tasks out of process.
+
+This code already solved many aspect of 'Out of process task invocation':
+- serialization of task inputs and outputs
+- distributed logging
+- environmental variables
+- current directory path
+- current culture
+- cancellation
+- etc...
 
 ### Execute RAR task
 
@@ -48,7 +59,18 @@ Execution should be the same as it is now.
 
 There is already some layer of separation between Task interface and actual execution method. We will leverage this, and put the decision logic if to run locally or not into the "wrapper" method and so we will not have to modify this and in server-side execution we will directly call the internal execution method.
 
+#### RAR Concurrency
+
 There is one big concern and that is how to handle multiple requests at once. As right now, RAR task is not prepared for multi-thread use.
+
+One of the biggest challenges with RAR as service, is to make execution and caching of RAR task thread-safe, since in most cases there will be multiple clients requesting data from it at once.
+
+So far, we have identified following areas that have to be addressed to allow concurrent execution of RAR tasks:
+
+- thread safety (static variables, shared data structures, caching, ...)
+- environmental variables virtualization
+- current directory virtualization
+- current culture isolation
 
 ### Shutdown RAR node
 
@@ -70,145 +92,18 @@ __NOTE:__ The behavior described above depend on fact that the feature is opt-ou
 
 ## Communication
 
-The communication between nodes should be done over [StreamJsonRpc](https://github.com/microsoft/vs-streamjsonrpc/). The API over which two node will transfer data has to reflect inputs and outputs of RAR task as described in [docs](https://docs.microsoft.com/visualstudio/msbuild/resolveassemblyreference-task?view=vs-2019).
+The communication between nodes should be same as current cross node communication. RAR service will allow multiple net-pipe clients, each client session handled in separate thread.
 
-Note that, the following snippets are probably not final version of the API and are here to give rough idea, what must be transferred.
+## RAR service instrumentation
 
-### RAR Input
+RAR will use same instrumentation infrastructure leveraged by standard MSBuild nodes. We will make sure we log all important events needed to measure, maintain and troubleshoot RAR service.
 
-This is direct representation of all RAR inputs.
-
-```csharp
-public sealed partial class ResolveAssemblyReferenceInput
-{
-
-    public ResolveAssemblyReferenceInput() { }
-
-    public string[] AllowedAssemblyExtensions { get { throw null; } set { } }
-
-    public string[] AllowedRelatedFileExtensions { get { throw null; } set { } }
-
-    public string AppConfigFile { get { throw null; } set { } }
-
-    public Microsoft.Build.Framework.ITaskItem[] Assemblies { get { throw null; } set { } }
-
-    public Microsoft.Build.Framework.ITaskItem[] AssemblyFiles { get { throw null; } set { } }
-
-    public bool AutoUnify { get { throw null; } set { } }
-
-    public string[] CandidateAssemblyFiles { get { throw null; } set { } }
-
-    public bool CopyLocalDependenciesWhenParentReferenceInGac { get { throw null; } set { } }
-
-    public bool DoNotCopyLocalIfInGac { get { throw null; } set { } }
-
-    public bool FindDependencies { get { throw null; } set { } }
-
-    public bool FindDependenciesOfExternallyResolvedReferences { get { throw null; } set { } }
-
-    public bool FindRelatedFiles { get { throw null; } set { } }
-
-    public bool FindSatellites { get { throw null; } set { } }
-
-    public bool FindSerializationAssemblies { get { throw null; } set { } }
-
-    public Microsoft.Build.Framework.ITaskItem[] FullFrameworkAssemblyTables { get { throw null; } set { } }
-
-    public string[] FullFrameworkFolders { get { throw null; } set { } }
-
-    public string[] FullTargetFrameworkSubsetNames { get { throw null; } set { } }
-
-    public bool IgnoreDefaultInstalledAssemblySubsetTables { get { throw null; } set { } }
-
-    public bool IgnoreDefaultInstalledAssemblyTables { get { throw null; } set { } }
-
-    public bool IgnoreTargetFrameworkAttributeVersionMismatch { get { throw null; } set { } }
-
-    public bool IgnoreVersionForFrameworkReferences { get { throw null; } set { } }
-
-    public Microsoft.Build.Framework.ITaskItem[] InstalledAssemblySubsetTables { get { throw null; } set { } }
-
-    public Microsoft.Build.Framework.ITaskItem[] InstalledAssemblyTables { get { throw null; } set { } }
-
-    public string[] LatestTargetFrameworkDirectories { get { throw null; } set { } }
-
-    public string ProfileName { get { throw null; } set { } }
-
-    public Microsoft.Build.Framework.ITaskItem[] ResolvedSDKReferences { get { throw null; } set { } }
-
-    public string[] SearchPaths { get { throw null; } set { } }
-
-    public bool Silent { get { throw null; } set { } }
-
-    public string StateFile { get { throw null; } set { } }
-
-    public bool SupportsBindingRedirectGeneration { get { throw null; } set { } }
-
-    public string TargetedRuntimeVersion { get { throw null; } set { } }
-
-    public string[] TargetFrameworkDirectories { get { throw null; } set { } }
-
-    public string TargetFrameworkMoniker { get { throw null; } set { } }
-
-    public string TargetFrameworkMonikerDisplayName { get { throw null; } set { } }
-
-    public string[] TargetFrameworkSubsets { get { throw null; } set { } }
-
-    public string TargetFrameworkVersion { get { throw null; } set { } }
-
-    public string TargetProcessorArchitecture { get { throw null; } set { } }
-
-    public bool UnresolveFrameworkAssembliesFromHigherFrameworks { get { throw null; } set { } }
-
-    public string WarnOrErrorOnTargetArchitectureMismatch { get { throw null; } set { } }
-}
-```
-
-### RAR Output
-
-Output of RAR node has to also reflect RAR task.
-```csharp
-public sealed partial class ResolveAssemblyReferenceOutput
-{
-    public ResolveAssemblyReferenceOutput() { }
-
-    public Microsoft.Build.Framework.ITaskItem[] CopyLocalFiles { get { throw null; } }
-
-    public string DependsOnNETStandard { get { throw null; } }
-
-    public string DependsOnSystemRuntime { get { throw null; } }
-
-    public Microsoft.Build.Framework.ITaskItem[] FilesWritten { get { throw null; } }
-
-    public Microsoft.Build.Framework.ITaskItem[] RelatedFiles { get { throw null; } }
-
-    public Microsoft.Build.Framework.ITaskItem[] ResolvedDependencyFiles { get { throw null; } }
-
-    public Microsoft.Build.Framework.ITaskItem[] ResolvedFiles { get { throw null; } }
-
-    public Microsoft.Build.Framework.ITaskItem[] SatelliteFiles { get { throw null; } }
-
-    public Microsoft.Build.Framework.ITaskItem[] ScatterFiles { get { throw null; } }
-
-    public Microsoft.Build.Framework.ITaskItem[] SerializationAssemblyFiles { get { throw null; } }
-
-    public Microsoft.Build.Framework.ITaskItem[] SuggestedRedirects { get { throw null; }
-}
-```
-### Logging response
-
-Node also has to return logged data, preferably in stream which will be transferred during the RAR task execution to the client node. This should by done by using IProgress\<T> support in StreamJsonRPC. There is also support for async enumerable, but they must be pulled and are not pushed to the client (comparison can be found [here](https://github.com/microsoft/vs-streamjsonrpc/blob/master/doc/asyncenumerable.md#comparison-with-iprogresst)).
-
-### Concurrency
-
-One of the biggest challenges with RAR as service, is to make execution and caching of RAR task thread-safe, since in most cases there will be multiple clients request data from it at once.
-
-In the first phase of implementation the concurrency will be solved by serializing requests, but this will be replaced by optimal variant with no serializing.
+Instrumentation of RAR task execution will not change and will be handled by Out of process task infrastructure.
 
 # Non-Goals
 
 - File watchers: using them would decrease required IO operations when checking disc changes
-- Aggressive precomputation of results
+- Aggressive pre-computation of results
 - Improved caching of requests
 - Providing verbosity to RAR task:
     As mentioned in original [PR](https://github.com/dotnet/msbuild/pull/3914), there should be some way to determine what thing we should log (by severity), and pass back to the original node.
