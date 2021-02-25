@@ -68,8 +68,12 @@ namespace Microsoft.DotNet.Watcher.Tools
                         context.ProcessSpec.EnvironmentVariables["ASPNETCORE_AUTO_RELOAD_WS_ENDPOINT"] = serverUrl;
 
                         var pathToMiddleware = Path.Combine(AppContext.BaseDirectory, "middleware", "Microsoft.AspNetCore.Watch.BrowserRefresh.dll");
-                        context.ProcessSpec.EnvironmentVariables["DOTNET_STARTUP_HOOKS"] = pathToMiddleware;
-                        context.ProcessSpec.EnvironmentVariables["ASPNETCORE_HOSTINGSTARTUPASSEMBLIES"] = "Microsoft.AspNetCore.Watch.BrowserRefresh";
+                        
+                        const string dotnetStartHooksName = "DOTNET_STARTUP_HOOKS";
+                        context.ProcessSpec.EnvironmentVariables[dotnetStartHooksName] = AddOrAppend(dotnetStartHooksName, pathToMiddleware, Path.PathSeparator);
+
+                        const string hostingStartupAssembliesName = "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES";
+                        context.ProcessSpec.EnvironmentVariables[hostingStartupAssembliesName] = AddOrAppend(hostingStartupAssembliesName, "Microsoft.AspNetCore.Watch.BrowserRefresh", ';');
                     }
                 }
             }
@@ -77,6 +81,20 @@ namespace Microsoft.DotNet.Watcher.Tools
             {
                 // We've detected a change. Notify the browser.
                 await (_refreshServer?.SendWaitMessageAsync(cancellationToken) ?? default);
+            }
+        }
+
+        private string AddOrAppend(string envVarName, string envVarValue, char separator)
+        {
+            var existing = Environment.GetEnvironmentVariable(envVarName);
+
+            if (!string.IsNullOrEmpty(existing))
+            {
+                return $"{existing}{separator}{envVarValue}";
+            }
+            else
+            {
+                return envVarValue;
             }
         }
 
