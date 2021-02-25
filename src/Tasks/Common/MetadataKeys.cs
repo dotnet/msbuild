@@ -122,6 +122,5 @@ namespace Microsoft.NET.Build.Tasks
         public const string OutputPDBImage = "OutputPDBImage";
         public const string EmitSymbols = "EmitSymbols";
         public const string IsVersion5 = "IsVersion5";
-        public const string IsVersion6Preview1 = "IsVersion6Preview1";
     }
 }
