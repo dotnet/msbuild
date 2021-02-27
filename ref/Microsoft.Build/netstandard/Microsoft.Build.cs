@@ -1420,6 +1420,9 @@ namespace Microsoft.Build.Experimental.ProjectCache
     public partial class CacheResult
     {
         internal CacheResult() { }
+        public Microsoft.Build.Execution.BuildResult BuildResult { get { throw null; } }
+        public Microsoft.Build.Experimental.ProjectCache.ProxyTargets ProxyTargets { get { throw null; } }
+        public Microsoft.Build.Experimental.ProjectCache.CacheResultType ResultType { get { throw null; } }
         public static Microsoft.Build.Experimental.ProjectCache.CacheResult IndicateCacheHit(Microsoft.Build.Execution.BuildResult buildResult) { throw null; }
         public static Microsoft.Build.Experimental.ProjectCache.CacheResult IndicateCacheHit(Microsoft.Build.Experimental.ProjectCache.ProxyTargets proxyTargets) { throw null; }
         public static Microsoft.Build.Experimental.ProjectCache.CacheResult IndicateCacheHit(System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.ProjectCache.PluginTargetResult> targetResults) { throw null; }
