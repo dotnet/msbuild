@@ -50,10 +50,6 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>ec21beea1763aa539e1084e595a86a58d444036e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="6.0.0-beta.21081.1">
-      <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>f6ed3308865528c56ed26b85004121fce56bf4f4</Sha>
-    </Dependency>
     <Dependency Name="Microsoft.NET.HostModel" Version="6.0.0-preview.2.21123.7">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>ec21beea1763aa539e1084e595a86a58d444036e</Sha>
