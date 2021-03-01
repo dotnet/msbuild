@@ -235,10 +235,10 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">
-        <source>Switches:            Note that you can specify switches using both
-                     "-switch" and "/switch".
+        <source>Switches:            Note that you can specify switches using
+                     "-switch", "/switch" and "--switch".
 </source>
-        <target state="translated">Commutateurs :            Notez que vous pouvez spécifier des commutateurs avec
+        <target state="needs-review-translation">Commutateurs :            Notez que vous pouvez spécifier des commutateurs avec
                      "-switch" et "/switch".
 </target>
         <note>
