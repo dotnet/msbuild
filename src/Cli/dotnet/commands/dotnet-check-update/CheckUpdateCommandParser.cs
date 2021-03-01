@@ -8,11 +8,6 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class CheckUpdateCommandParser
     {
-        // TODO:
-        //      Add entry to top level help
-        //      Add docs + docs link to BuiltInCommandsCatalog
-
-
         public static Command GetCommand()
         {
             var command = new Command("check-update", LocalizableStrings.AppFullName);

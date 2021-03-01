@@ -50,7 +50,8 @@ namespace Microsoft.DotNet.Cli
             },
             ["check-update"] = new BuiltInCommandMetadata
             {
-                Command = CheckUpdateCommand.Run
+                Command = CheckUpdateCommand.Run,
+                DocLink = "https://aka.ms/dotnet-check-update"
             },
             ["fsi"] = new BuiltInCommandMetadata
             {

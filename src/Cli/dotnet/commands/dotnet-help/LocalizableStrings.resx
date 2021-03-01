@@ -210,6 +210,9 @@
   <data name="CleanDefinition" xml:space="preserve">
     <value>Clean build outputs of a .NET project.</value>
   </data>
+  <data name="CheckUpdateDefinition" xml:space="preserve">
+    <value>Check for .NET SDK and runtime updates.</value>
+  </data>
   <data name="SlnDefinition" xml:space="preserve">
     <value>Modify Visual Studio solution files.</value>
   </data>

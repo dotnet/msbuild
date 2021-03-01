@@ -1,10 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using FluentAssertions;
 using Microsoft.NET.TestFramework;
@@ -50,6 +46,7 @@ SDK commands:
   build             Build a .NET project.
   build-server      Interact with servers started by a build.
   clean             Clean build outputs of a .NET project.
+  check-update      Check for .NET SDK and runtime updates.
   help              Show command line help.
   list              List project references of a .NET project.
   msbuild           Run Microsoft Build Engine (MSBuild) commands.
