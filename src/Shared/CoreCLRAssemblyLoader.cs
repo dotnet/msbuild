@@ -23,7 +23,7 @@ namespace Microsoft.Build.Shared
 
         private bool _resolvingHandlerHookedUp = false;
 
-        private static string _msbuildDirPath;
+        private static readonly string _msbuildDirPath;
         private static readonly Version _currentAssemblyVersion = new Version(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion);
 
         static CoreClrAssemblyLoader()
