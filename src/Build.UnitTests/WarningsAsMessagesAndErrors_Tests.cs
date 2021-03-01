@@ -273,19 +273,19 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void TaskLogsWarningAsError_BuildShouldFinishAndFail()
+        public void TaskReturnsHasLoggedErrorAndLogsWarningAsError_BuildShouldFinishAndFail()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
                 TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
                 <Project>
                     <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
-                    <UsingTask TaskName = ""LogWarningReturnHasLoggedError"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <UsingTask TaskName = ""CustomLogAndReturnTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
                     <PropertyGroup>
                         <MSBuildWarningsAsErrors>MSB1234</MSBuildWarningsAsErrors>
                     </PropertyGroup>
                     <Target Name='Build'>
-                        <LogWarningReturnHasLoggedError WarningCode=""MSB1234""/>
+                        <CustomLogAndReturnTask Return=""true"" ReturnHasLoggedErrors=""true"" WarningCode=""MSB1234""/>
                         <ReturnFailureWithoutLoggingErrorTask/>
                     </Target>
                 </Project>");
@@ -297,33 +297,6 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 // The build should STOP when a task logs an error, make sure ReturnFailureWithoutLoggingErrorTask doesn't run. 
                 logger.AssertLogDoesntContain("MSB4181");
-            }
-        }
-
-        /// <summary>
-        /// MSBuild behavior as of 16.10: As long as a task returns true, the build will continue despite logging an error.
-        /// </summary>
-        [Fact]
-        public void TaskReturnsTrueButLogsError_BuildShouldFinishAndFail()
-        {
-            using (TestEnvironment env = TestEnvironment.Create(_output))
-            {
-                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
-                <Project>
-                    <UsingTask TaskName = ""CustomLogAndReturnTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
-                    <Target Name='Build'>
-                        <CustomLogAndReturnTask Return=""true"" ErrorCode=""MSB1235""/>
-                        <CustomLogAndReturnTask Return=""true"" WarningCode=""MSB1234""/>
-                    </Target>
-                </Project>");
-
-                MockLogger logger = proj.BuildProjectExpectFailure();
-
-                logger.WarningCount.ShouldBe(1);
-                logger.ErrorCount.ShouldBe(1);
-
-                // The build should CONTINUE when a task returns true.
-                logger.AssertLogContains("MSB1234");
             }
         }
 
@@ -346,7 +319,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     </PropertyGroup>
                     <Target Name='Build'>
                         <CustomLogAndReturnTask Return=""true"" WarningCode=""MSB1234""/>
-                        <LogWarningReturnHasLoggedError WarningCode=""MSB1235""/>
+                        <CustomLogAndReturnTask Return=""true"" WarningCode=""MSB1235""/>
                     </Target>
                 </Project>");
 
