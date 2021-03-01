@@ -25,8 +25,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
         public bool DesignTimeBuild { get; private set; }
 
-        public string RefsTagHelperOutputCachePath { get; private set; }
-
         /// <summary>
         /// Gets a flag that determines if the source generator waits for the debugger to attach.
         /// <para>
@@ -55,10 +53,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             }
 
             globalOptions.TryGetValue("build_property.DesignTimeBuild", out var designTimeBuild);
-            if (!globalOptions.TryGetValue("build_property._RazorReferenceAssemblyTagHelpersOutputPath", out var refsTagHelperOutputCachePath))
-            {
-                throw new InvalidOperationException("_RazorReferenceAssemblyTagHelpersOutputPath is not specified.");
-            }
 
             if (!globalOptions.TryGetValue("build_property.RazorLangVersion", out var razorLanguageVersionString) ||
                 !RazorLanguageVersion.TryParse(razorLanguageVersionString, out var razorLanguageVersion))
@@ -91,7 +85,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 RazorFiles = razorFiles,
                 CshtmlFiles = cshtmlFiles,
                 DesignTimeBuild = designTimeBuild == "true",
-                RefsTagHelperOutputCachePath = refsTagHelperOutputCachePath,
                 WaitForDebugger = waitForDebugger == "true",
                 EnableLogging = enableLogging == "true"
             };

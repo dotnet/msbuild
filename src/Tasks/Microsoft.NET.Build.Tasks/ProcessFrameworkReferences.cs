@@ -52,6 +52,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool EnableTargetingPackDownload { get; set; }
 
+        public bool EnableRuntimePackDownload { get; set; }
+
         public ITaskItem[] FrameworkReferences { get; set; } = Array.Empty<ITaskItem>();
 
         public ITaskItem[] KnownFrameworkReferences { get; set; } = Array.Empty<ITaskItem>();
@@ -286,7 +288,7 @@ namespace Microsoft.NET.Build.Tasks
                     }
 
                     ProcessRuntimeIdentifier(hasRuntimePackAlwaysCopyLocal ? "any" : RuntimeIdentifier, runtimePackForRuntimeIDProcessing, runtimePackVersion, additionalFrameworkReferencesForRuntimePack,
-                        unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks, packagesToDownload, isTrimmable, includeInPackageDownload);
+                        unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks, packagesToDownload, isTrimmable, EnableRuntimePackDownload && includeInPackageDownload);
 
                     processedPrimaryRuntimeIdentifier = true;
                 }

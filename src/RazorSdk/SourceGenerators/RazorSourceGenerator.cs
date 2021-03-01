@@ -168,7 +168,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             tagHelperFeature.Compilation = GeneratorExecutionContext.Compilation.AddSyntaxTrees(results.Take(files.Count));
             ArrayPool<SyntaxTree>.Shared.Return(results);
 
-            var currentMetadataReference = GeneratorExecutionContext.Compilation.GetMetadataReference(GeneratorExecutionContext.Compilation.Assembly);
+            var currentMetadataReference = GeneratorExecutionContext.Compilation.ToMetadataReference();
             tagHelperFeature.TargetReference = currentMetadataReference;
             var assemblyTagHelpers = tagHelperFeature.GetDescriptors();
 
