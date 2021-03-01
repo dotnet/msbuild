@@ -11,6 +11,8 @@ namespace Microsoft.Build.UnitTests
 
         public string ErrorCode { get; set; }
 
+        public bool ReturnHasLoggedErrors { get; set; }
+
         [Required]
         public bool Return { get; set; }
 
@@ -28,7 +30,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Log.LogError(null, ErrorCode, null, null, 0, 0, 0, 0, "Error Logged!", null);
             }
-            return Return;
+            return ReturnHasLoggedErrors ? !Log.HasLoggedErrors : Return;
         }
     }
 }
