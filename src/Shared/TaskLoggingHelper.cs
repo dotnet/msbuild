@@ -1016,12 +1016,10 @@ namespace Microsoft.Build.Utilities
             // that gives the user something.
             bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
 
-            IBuildEngine8 be8 = (BuildEngine as IBuildEngine8);
-
             // This warning will be converted to an error if:
             // 1. Its code exists within WarningsAsErrors
             // 2. If WarningsAsErrors is a non-null empty set (treat all warnings as errors)
-            if (be8?.WarningsAsErrors?.Contains(warningCode) == true || be8?.WarningsAsErrors?.Count == 0)
+            if (BuildEngine is IBuildEngine8 be8 && (be8.WarningsAsErrors?.Contains(warningCode) == true || be8.WarningsAsErrors?.Count == 0))
             {
                 var err = new BuildErrorEventArgs
                 (
