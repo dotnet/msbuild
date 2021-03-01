@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -463,20 +463,17 @@ namespace Microsoft.Build.Utilities
 
         #endregion
 
-        IEnumerable<KeyValuePair<string, string>> IMetadataContainer.Metadata
+        IEnumerable<KeyValuePair<string, string>> IMetadataContainer.EnumerateMetadata()
         {
-            get
+            if (_metadata == null)
             {
-                if (_metadata == null)
-                {
-                    yield break;
-                }
+                yield break;
+            }
 
-                foreach (var kvp in _metadata)
-                {
-                    var unescaped = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
-                    yield return unescaped;
-                }
+            foreach (var kvp in _metadata)
+            {
+                var unescaped = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
+                yield return unescaped;
             }
         }
     }

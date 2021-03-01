@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -521,7 +521,7 @@ namespace Microsoft.Build.Execution
             return ((ITaskItem2)_taskItem).CloneCustomMetadataEscaped();
         }
 
-        IEnumerable<KeyValuePair<string, string>> IMetadataContainer.Metadata => _taskItem.Metadata;
+        IEnumerable<KeyValuePair<string, string>> IMetadataContainer.EnumerateMetadata() => _taskItem.EnumerateMetadata();
 
         #region IMetadataTable Members
 
@@ -1061,21 +1061,18 @@ namespace Microsoft.Build.Execution
             /// Efficient way to retrieve metadata used by packet serialization
             /// and binary logger.
             /// </summary>
-            public IEnumerable<KeyValuePair<string, string>> Metadata
+            public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata()
             {
-                get
+                // If we have item definitions, call the expensive property that does the right thing.
+                // Otherwise use _directMetadata to avoid allocations caused by DeepClone().
+                var list = _itemDefinitions != null ? MetadataCollection : _directMetadata;
+                if (list != null)
                 {
-                    // If we have item definitions, call the expensive property that does the right thing.
-                    // Otherwise use _directMetadata to avoid allocations caused by DeepClone().
-                    var list = _itemDefinitions != null ? MetadataCollection : _directMetadata;
-                    if (list != null)
-                    {
-                        return EnumerateMetadata(list);
-                    }
-                    else
-                    {
-                        return Array.Empty<KeyValuePair<string, string>>();
-                    }
+                    return EnumerateMetadata(list);
+                }
+                else
+                {
+                    return Array.Empty<KeyValuePair<string, string>>();
                 }
             }
 

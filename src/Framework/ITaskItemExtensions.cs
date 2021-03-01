@@ -22,7 +22,7 @@ namespace Microsoft.Build.Framework
             if (taskItem is IMetadataContainer container)
             {
                 // This is the common case: most implementations should implement this for quick access
-                return container.Metadata;
+                return container.EnumerateMetadata();
             }
 
             // This runs if ITaskItem is Microsoft.Build.Utilities.TaskItem from Microsoft.Build.Utilities.v4.0.dll

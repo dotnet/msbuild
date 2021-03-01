@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -25,7 +25,7 @@ namespace Microsoft.Build.Framework
             Metadata = metadata ?? _emptyMetadata;
         }
 
-        IEnumerable<KeyValuePair<string, string>> IMetadataContainer.Metadata => Metadata;
+        IEnumerable<KeyValuePair<string, string>> IMetadataContainer.EnumerateMetadata() => Metadata;
 
         public int MetadataCount => Metadata.Count;
 

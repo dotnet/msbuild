@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -757,20 +757,17 @@ namespace Microsoft.Build.BackEnd
                 return clonedDictionary;
             }
 
-            public IEnumerable<KeyValuePair<string, string>> Metadata
+            public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata()
             {
-                get
+                if (_customEscapedMetadata == null)
                 {
-                    if (_customEscapedMetadata == null)
-                    {
-                        yield break;
-                    }
+                    yield break;
+                }
 
-                    foreach (var kvp in _customEscapedMetadata)
-                    {
-                        var unescaped = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
-                        yield return unescaped;
-                    }
+                foreach (var kvp in _customEscapedMetadata)
+                {
+                    var unescaped = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
+                    yield return unescaped;
                 }
             }
         }

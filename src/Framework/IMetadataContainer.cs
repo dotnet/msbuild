@@ -17,6 +17,6 @@ namespace Microsoft.Build.Framework
         /// is used for serialization (in node packet translator) as well as
         /// in the binary logger.
         /// </summary>
-        IEnumerable<KeyValuePair<string, string>> Metadata { get; }
+        IEnumerable<KeyValuePair<string, string>> EnumerateMetadata();
     }
 }
