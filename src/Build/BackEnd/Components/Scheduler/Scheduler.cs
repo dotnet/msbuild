@@ -72,7 +72,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private int _nodeLimitOffset;
 
-        // private int _resourceManagedCoresUsed = 0;
+        /// <summary>
+        /// NativeMethodsShared.GetLogicalCoreCount() or MSBUILDCORELIMIT if set
+        /// </summary>
+        private int _coreLimit;
 
         /// <summary>
         /// { nodeId -> NodeInfo }
@@ -184,6 +187,11 @@ namespace Microsoft.Build.BackEnd
                         _nodeLimitOffset = 0;
                     }
                 }
+            }
+
+            if (!int.TryParse(Environment.GetEnvironmentVariable("MSBUILDCORELIMIT"), out _coreLimit) || _coreLimit <= 0)
+            {
+                _coreLimit = NativeMethodsShared.GetLogicalCoreCount();
             }
 
             if (String.IsNullOrEmpty(_debugDumpPath))
@@ -526,7 +534,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public int? RequestCores(int requestId, int requestedCores)
         {
-            int grantedCores = Math.Min(requestedCores, GetAvailableCores());
+            int grantedCores = Math.Min(requestedCores, GetAvailableCoresForExplicitRequests());
             SchedulableRequest request = _schedulingData.GetExecutingRequest(requestId);
             request.AddRequestedCores(grantedCores);
             return grantedCores;
@@ -1300,7 +1308,7 @@ namespace Microsoft.Build.BackEnd
             request.ResumeExecution(nodeId);
         }
 
-        private int GetAvailableCores()
+        private int GetAvailableCoresForScheduling()
         {
             if (_schedulingUnlimited)
             {
@@ -1317,6 +1325,11 @@ namespace Microsoft.Build.BackEnd
             return Math.Max(0, limit - (_schedulingData.ExecutingRequestsCount + _schedulingData.ExplicitlyRequestedCores + _schedulingData.YieldingRequestsCount));
         }
 
+        private int GetAvailableCoresForExplicitRequests()
+        {
+            return Math.Max(0, _coreLimit - (_schedulingData.ExecutingRequestsCount + _schedulingData.ExplicitlyRequestedCores));
+        }
+
         /// <summary>
         /// Returns true if we are at the limit of work we can schedule.
         /// </summary>
@@ -1331,7 +1344,7 @@ namespace Microsoft.Build.BackEnd
             // (1) MaxNodeCount requests are currently executing
             // (2) Fewer than MaxNodeCount requests are currently executing but the sum of executing 
             //     and yielding requests exceeds the limit set out above.  
-            return GetAvailableCores() == 0 ||
+            return GetAvailableCoresForScheduling() == 0 ||
                    _schedulingData.ExecutingRequestsCount >= _componentHost.BuildParameters.MaxNodeCount;
         }
 
