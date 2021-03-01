@@ -149,7 +149,14 @@ namespace Microsoft.Build.Collections
                             // the string, and not the null terminator etc.
                             if (length == 1)
                             {
-                                val &= 0xFFFF;
+                                if (BitConverter.IsLittleEndian)
+                                {
+                                    val &= 0xFFFF;
+                                }
+                                else
+                                {
+                                    val &= unchecked((int)0xFFFF0000);
+                                }
                             }
 
                             hash1 = ((hash1 << 5) + hash1 + (hash1 >> 27)) ^ val;
@@ -162,7 +169,14 @@ namespace Microsoft.Build.Collections
                             val = pint[1] & 0x00DF00DF;
                             if (length == 3)
                             {
-                                val &= 0xFFFF;
+                                if (BitConverter.IsLittleEndian)
+                                {
+                                    val &= 0xFFFF;
+                                }
+                                else
+                                {
+                                    val &= unchecked((int)0xFFFF0000);
+                                }
                             }
 
                             hash2 = ((hash2 << 5) + hash2 + (hash2 >> 27)) ^ val;
