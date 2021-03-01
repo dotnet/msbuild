@@ -118,6 +118,7 @@ Copyright (c) .NET Foundation. All rights reserved.
             ReferenceAssemblyPaths="@(ReferencePath)"
             RootAssemblyNames="@(TrimmerRootAssembly)"
             TrimMode="$(TrimMode)"
+            DefaultAction="$(_TrimmerDefaultAction)"
             RemoveSymbols="$(TrimmerRemoveSymbols)"
             FeatureSettings="@(_TrimmerFeatureSettings)"
             CustomData="@(_TrimmerCustomData)"
@@ -171,14 +172,20 @@ Copyright (c) .NET Foundation. All rights reserved.
          in some cases. -->
     <NETSdkError Condition="'$(SelfContained)' != 'true'" ResourceName="ILLinkNotSupportedError" />
 
-    <PropertyGroup>
-      <ILLinkWarningLevel Condition=" '$(ILLinkWarningLevel)' == '' And
-                                      '$(EffectiveAnalysisLevel)' != '' And
+    <PropertyGroup Condition=" '$(ILLinkWarningLevel)' == '' ">
+      <ILLinkWarningLevel Condition=" '$(EffectiveAnalysisLevel)' != '' And
                                        $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '5.0')) ">5</ILLinkWarningLevel>
       <ILLinkWarningLevel Condition=" '$(ILLinkWarningLevel)' == '' ">0</ILLinkWarningLevel>
+    </PropertyGroup>
+
+    <PropertyGroup>
       <ILLinkTreatWarningsAsErrors Condition=" '$(ILLinkTreatWarningsAsErrors)' == '' ">$(TreatWarningsAsErrors)</ILLinkTreatWarningsAsErrors>
       <_ExtraTrimmerArgs>--skip-unresolved true $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
       <TrimMode Condition=" '$(TrimMode)' == '' ">copyused</TrimMode>
+      <!-- For .NET < 6, the defaults are the same regardless of whether the assembly has an IsTrimmable attribute. (The attribute didn't exist until .NET 6.) -->
+      <_TrimmerDefaultAction Condition=" $([MSBuild]::VersionLessThan('$(TargetFrameworkVersion)', '6.0')) ">$(TrimMode)</_TrimmerDefaultAction>
+      <!-- For .NET 6+, assemblies without IsTrimmable attribute get the "copy" action. -->
+      <_TrimmerDefaultAction Condition=" '$(_TrimmerDefaultAction)' == '' ">copy</_TrimmerDefaultAction>
     </PropertyGroup>
     
     <!-- Suppress warnings produced by the linker. Any warnings shared with the analyzer should be
@@ -220,15 +227,44 @@ Copyright (c) .NET Foundation. All rights reserved.
       <TrimmerRemoveSymbols Condition=" '$(DebuggerSupport)' != 'false' ">false</TrimmerRemoveSymbols>
     </PropertyGroup>
 
+    <!-- Set IsTrimmable for any assemblies that already have customized TrimMode. -->
     <ItemGroup>
-      <!-- Treat any assemblies that already have customized TrimMode as trimmable. -->
       <ManagedAssemblyToLink Condition=" '%(ManagedAssemblyToLink.TrimMode)' != '' ">
         <IsTrimmable>true</IsTrimmable>
       </ManagedAssemblyToLink>
-      <!-- Root and copy non-trimmable assemblies. -->
+    </ItemGroup>
+
+    <!-- SetIsTrimmable for any assemblies listed in TrimmableAssembly. -->
+    <JoinItems Left="@(ManagedAssemblyToLink)" LeftKey="FileName" LeftMetadata="*"
+               Right="@(TrimmableAssembly)"
+               ItemSpecToUse="Left">
+      <Output TaskParameter="JoinResult" ItemName="_TrimmableManagedAssemblyToLink" />
+    </JoinItems>
+    <ItemGroup>
+      <ManagedAssemblyToLink Remove="@(_TrimmableManagedAssemblyToLink)" />
+      <ManagedAssemblyToLink Include="@(_TrimmableManagedAssemblyToLink)" IsTrimmable="true" />
+    </ItemGroup>
+
+    <!-- Root the main assembly, whether or not it has IsTrimmable set. -->
+    <ItemGroup>
+      <TrimmerRootAssembly Include="@(IntermediateAssembly)" />
+    </ItemGroup>
+
+    <!-- For .NET < 6, root and copy assemblies without IsTrimmable=true MSBuild metadata. -->
+    <ItemGroup Condition=" $([MSBuild]::VersionLessThan('$(TargetFrameworkVersion)', '6.0')) ">
       <TrimmerRootAssembly Include="@(ManagedAssemblyToLink)" Condition=" '%(ManagedAssemblyToLink.IsTrimmable)' != 'true' " />
       <ManagedAssemblyToLink Condition=" '%(ManagedAssemblyToLink.IsTrimmable)' != 'true' ">
         <TrimMode>copy</TrimMode>
+      </ManagedAssemblyToLink>
+    </ItemGroup>
+
+    <!-- In .NET6+, set the action explicitly for any with IsTrimmable MSBuild metadata -->
+    <ItemGroup Condition=" $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '6.0')) ">
+      <ManagedAssemblyToLink Condition=" '%(ManagedAssemblyToLink.IsTrimmable)' == 'true' And '%(ManagedAssemblyToLink.TrimMode)' == '' ">
+        <TrimMode>$(TrimMode)</TrimMode>
+      </ManagedAssemblyToLink>
+      <ManagedAssemblyToLink Condition=" '%(ManagedAssemblyToLink.IsTrimmable)' == 'false' And '%(ManagedAssemblyToLink.TrimMode)' == '' ">
+        <TrimMode>$(_TrimmerDefaultAction)</TrimMode>
       </ManagedAssemblyToLink>
     </ItemGroup>
 
