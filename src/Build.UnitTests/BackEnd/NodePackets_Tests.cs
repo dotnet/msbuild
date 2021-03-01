@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Assert.NotNull(leftTaskParameter);
                     Assert.NotNull(rightTaskParameter);
                     Assert.Equal(leftTaskParameter.Kind, rightTaskParameter.Kind);
-                    Assert.Equal(leftTaskParameter.ItemName, rightTaskParameter.ItemName);
+                    Assert.Equal(leftTaskParameter.ItemType, rightTaskParameter.ItemType);
                     Assert.Equal(leftTaskParameter.Items.Count, rightTaskParameter.Items.Count);
                     Assert.Equal(leftTaskParameter.Message, rightTaskParameter.Message);
                     Assert.Equal(leftTaskParameter.BuildEventContext, rightTaskParameter.BuildEventContext);

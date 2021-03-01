@@ -591,9 +591,9 @@ namespace Microsoft.Build.Framework
     public delegate void TaskFinishedEventHandler(object sender, Microsoft.Build.Framework.TaskFinishedEventArgs e);
     public partial class TaskParameterEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
-        public TaskParameterEventArgs(Microsoft.Build.Framework.TaskParameterMessageKind kind, string itemName, System.Collections.IList items, bool logItemMetadata, System.DateTime eventTimestamp) { }
-        public string ItemName { get { throw null; } }
+        public TaskParameterEventArgs(Microsoft.Build.Framework.TaskParameterMessageKind kind, string itemType, System.Collections.IList items, bool logItemMetadata, System.DateTime eventTimestamp) { }
         public System.Collections.IList Items { get { throw null; } }
+        public string ItemType { get { throw null; } }
         public Microsoft.Build.Framework.TaskParameterMessageKind Kind { get { throw null; } }
         public bool LogItemMetadata { get { throw null; } }
         public override string Message { get { throw null; } }

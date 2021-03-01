@@ -32,7 +32,7 @@ namespace Microsoft.Build.Framework
         public TaskParameterEventArgs
         (
             TaskParameterMessageKind kind,
-            string itemName,
+            string itemType,
             IList items,
             bool logItemMetadata,
             DateTime eventTimestamp
@@ -40,13 +40,13 @@ namespace Microsoft.Build.Framework
             : base(null, null, null, MessageImportance.Low, eventTimestamp)
         {
             Kind = kind;
-            ItemName = itemName;
+            ItemType = itemType;
             Items = items;
             LogItemMetadata = logItemMetadata;
         }
 
         public TaskParameterMessageKind Kind { get; private set; }
-        public string ItemName { get; private set; }
+        public string ItemType { get; private set; }
         public IList Items { get; private set; }
         public bool LogItemMetadata { get; private set; }
 
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Framework
         internal static Func<TaskParameterEventArgs, string> MessageGetter = args =>
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"{args.Kind}: {args.ItemName}");
+            sb.AppendLine($"{args.Kind}: {args.ItemType}");
             foreach (var item in args.Items)
             {
                 sb.AppendLine(item.ToString());
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Framework
             RawTimestamp = reader.ReadTimestamp();
             BuildEventContext = reader.ReadOptionalBuildEventContext();
             Kind = (TaskParameterMessageKind)reader.Read7BitEncodedInt();
-            ItemName = reader.ReadString();
+            ItemType = reader.ReadString();
             Items = ReadItems(reader);
         }
 
@@ -129,7 +129,7 @@ namespace Microsoft.Build.Framework
             writer.WriteTimestamp(RawTimestamp);
             writer.WriteOptionalBuildEventContext(BuildEventContext);
             writer.Write7BitEncodedInt((int)Kind);
-            writer.Write(ItemName);
+            writer.Write(ItemType);
             WriteItems(writer, Items);
         }
 

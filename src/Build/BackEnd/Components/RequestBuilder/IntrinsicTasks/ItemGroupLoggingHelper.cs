@@ -220,25 +220,31 @@ namespace Microsoft.Build.BackEnd
         internal static void LogTaskParameter(
             LoggingContext loggingContext,
             TaskParameterMessageKind messageKind,
-            string itemName,
+            string itemType,
             IList items,
             bool logItemMetadata)
         {
-            var args = CreateTaskParameterEventArgs(loggingContext.BuildEventContext, messageKind, itemName, items, logItemMetadata, DateTime.UtcNow);
+            var args = CreateTaskParameterEventArgs(
+                loggingContext.BuildEventContext,
+                messageKind,
+                itemType,
+                items,
+                logItemMetadata,
+                DateTime.UtcNow);
             loggingContext.LogBuildEvent(args);
         }
 
         internal static TaskParameterEventArgs CreateTaskParameterEventArgs(
             BuildEventContext buildEventContext,
             TaskParameterMessageKind messageKind,
-            string itemName,
+            string itemType,
             IList items,
             bool logItemMetadata,
             DateTime timestamp)
         {
             var args = new TaskParameterEventArgs(
                 messageKind,
-                itemName,
+                itemType,
                 items,
                 logItemMetadata,
                 timestamp);
@@ -247,9 +253,9 @@ namespace Microsoft.Build.BackEnd
         }
 
         internal static string GetTaskParameterText(TaskParameterEventArgs args)
-            => GetTaskParameterText(args.Kind, args.ItemName, args.Items, args.LogItemMetadata);
+            => GetTaskParameterText(args.Kind, args.ItemType, args.Items, args.LogItemMetadata);
 
-        internal static string GetTaskParameterText(TaskParameterMessageKind messageKind, string itemName, IList items, bool logItemMetadata)
+        internal static string GetTaskParameterText(TaskParameterMessageKind messageKind, string itemType, IList items, bool logItemMetadata)
         {
             var resourceText = messageKind switch
             {
@@ -262,7 +268,7 @@ namespace Microsoft.Build.BackEnd
 
             var itemGroupText = GetParameterText(
                 resourceText,
-                itemName,
+                itemType,
                 items,
                 logItemMetadata);
             return itemGroupText;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -521,7 +521,7 @@ namespace Microsoft.Build.Logging
             Write(BinaryLogRecordKind.TaskParameter);
             WriteMessageFields(e, writeMessage: false);
             Write((int)e.Kind);
-            WriteDeduplicatedString(e.ItemName);
+            WriteDeduplicatedString(e.ItemType);
             WriteTaskItemList(e.Items, e.LogItemMetadata);
         }
 

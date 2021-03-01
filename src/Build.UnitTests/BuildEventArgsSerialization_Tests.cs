@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -340,7 +340,7 @@ namespace Microsoft.Build.UnitTests
 
             Roundtrip(args,
                 e => e.Kind.ToString(),
-                e => e.ItemName,
+                e => e.ItemType,
                 e => e.LogItemMetadata.ToString(),
                 e => GetItemsString(e.Items));
         }
