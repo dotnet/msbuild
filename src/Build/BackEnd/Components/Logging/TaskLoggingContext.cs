@@ -5,6 +5,7 @@ using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -143,6 +144,11 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(IsValid, "must be valid");
             LoggingService.LogTaskWarningFromException(BuildEventContext, exception, file, taskName);
+        }
+
+        internal HashSet<string> GetWarningsAsErrors()
+        {
+            return LoggingService.GetWarningsToBeLoggedAsErrorsByProject(BuildEventContext);
         }
     }
 }

@@ -685,7 +685,7 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                return _warningsAsErrors ??= _taskLoggingContext.LoggingService.GetWarningsToBeLoggedAsErrorsByProject(_taskLoggingContext.BuildEventContext);
+                return _warningsAsErrors ??= _taskLoggingContext.GetWarningsAsErrors();
             }
         }
         #endregion
