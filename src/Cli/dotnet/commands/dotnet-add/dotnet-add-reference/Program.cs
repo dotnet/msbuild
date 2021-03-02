@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
                     .Select((r) => MsbuildProject.FromFileOrDirectory(projects, r, interactive))
                     .ToList();
 
-            if (frameworkString == null)
+            if (string.IsNullOrEmpty(frameworkString))
             {
                 foreach (var tfm in msbuildProj.GetTargetFrameworks())
                 {

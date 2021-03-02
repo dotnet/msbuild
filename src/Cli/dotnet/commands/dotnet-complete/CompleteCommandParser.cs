@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option PositionOption = new Option<int>("--position")
         {
-            Argument = new Argument<int>("command")
+            ArgumentHelpName = "command"
         };
 
         public static Command GetCommand()

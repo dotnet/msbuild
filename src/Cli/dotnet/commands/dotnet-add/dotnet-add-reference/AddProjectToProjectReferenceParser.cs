@@ -17,9 +17,9 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option FrameworkOption = new Option<string>(new string[] { "-f", "--framework" }, LocalizableStrings.CmdFrameworkDescription)
         {
-            Argument = new Argument<string>(Tools.Add.PackageReference.LocalizableStrings.CmdFramework)
-                .AddSuggestions(Suggest.TargetFrameworksFromProjectFile())
-        };
+            ArgumentHelpName = Tools.Add.PackageReference.LocalizableStrings.CmdFramework
+                
+        }.AddSuggestions(Suggest.TargetFrameworksFromProjectFile());
 
         public static readonly Option InteractiveOption = CommonOptions.InteractiveOption();
 

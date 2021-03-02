@@ -15,13 +15,14 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option DetailOption = new Option<bool>("--detail", LocalizableStrings.DetailDescription);
 
-        public static readonly Option SkipOption = new Option<string>("--skip", LocalizableStrings.SkipDescription) {
-            Argument = new Argument<string>(LocalizableStrings.SkipArgumentName)
+        public static readonly Option SkipOption = new Option<string>("--skip", LocalizableStrings.SkipDescription)
+        {
+            ArgumentHelpName = LocalizableStrings.SkipArgumentName
         };
 
         public static readonly Option TakeOption = new Option<string>($"--take", LocalizableStrings.TakeDescription)
         {
-            Argument = new Argument<string>(LocalizableStrings.TakeArgumentName)
+            ArgumentHelpName = LocalizableStrings.TakeArgumentName
         };
 
         public static readonly Option PrereleaseOption = new Option<bool>($"--prerelease", LocalizableStrings.PrereleaseDescription);

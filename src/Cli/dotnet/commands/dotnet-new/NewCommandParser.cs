@@ -30,10 +30,7 @@ namespace Microsoft.DotNet.Cli
         
         public static readonly Option ForceOption = new Option<bool>("--force");
         
-        public static readonly Option LanguageOption = new Option<string>(new string[] { "-lang", "--language" })
-        {
-            Argument = new Argument<string>()
-        };
+        public static readonly Option LanguageOption = new Option<string>(new string[] { "-lang", "--language" });
 
         public static readonly Option UpdateCheckOption = new Option<bool>("--update-check");
 

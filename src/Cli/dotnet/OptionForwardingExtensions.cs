@@ -11,16 +11,16 @@ namespace Microsoft.DotNet.Cli
 {
     public static class OptionForwardingExtensions
     {
-        public static Option Forward<T>(this Option<T> option) => new ForwardedOption<T>(option).SetForwardingFunction((o) => new string[] { option.Name });
+        public static ForwardedOption<T> Forward<T>(this ForwardedOption<T> option) => option.SetForwardingFunction((o) => new string[] { option.Name });
 
-        public static Option ForwardAs<T>(this Option<T> option, string value) => new ForwardedOption<T>(option).SetForwardingFunction((o) => new string[] { value });
+        public static ForwardedOption<T> ForwardAs<T>(this ForwardedOption<T> option, string value) => option.SetForwardingFunction((o) => new string[] { value });
 
-        public static Option ForwardAsSingle<T>(this Option<T> option, Func<T, string> format) => new ForwardedOption<T>(option).SetForwardingFunction(format);
+        public static ForwardedOption<T> ForwardAsSingle<T>(this ForwardedOption<T> option, Func<T, string> format) => option.SetForwardingFunction(format);
 
-        public static Option ForwardAsProperty(this Option<string[]> option) => new ForwardedOption<string[]>(option)
+        public static ForwardedOption<string[]> ForwardAsProperty(this ForwardedOption<string[]> option) => option
             .SetForwardingFunction((optionVals) => optionVals.SelectMany(optionVal => new string[] { $"{option.Aliases.FirstOrDefault()}:{optionVal.Replace("roperty:", string.Empty)}" }));
 
-        public static Option ForwardAsMany<T>(this Option<T> option, Func<T, IEnumerable<string>> format) => new ForwardedOption<T>(option).SetForwardingFunction(format);
+        public static Option ForwardAsMany<T>(this ForwardedOption<T> option, Func<T, IEnumerable<string>> format) => option.SetForwardingFunction(format);
 
         public static IEnumerable<string> OptionValuesToBeForwarded(this ParseResult parseResult, Command command) => 
             command.Options
@@ -41,47 +41,43 @@ namespace Microsoft.DotNet.Cli
             option.AllowMultipleArgumentsPerToken = false;
             return option;
         }
+    }
 
-        private interface IForwardedOption
+    public interface IForwardedOption
+    {
+        Func<ParseResult, IEnumerable<string>> GetForwardingFunction();
+    }
+
+    public class ForwardedOption<T> : Option<T>, IForwardedOption
+    {
+        private Func<ParseResult, IEnumerable<string>> ForwardingFunction;
+
+        public ForwardedOption(string[] aliases, string description) : base(aliases, description) { }
+
+        public ForwardedOption(string[] aliases) : base(aliases) { }
+
+        public ForwardedOption(string alias, string description) : base(alias, description) { }
+
+        public ForwardedOption<T> SetForwardingFunction(Func<T, IEnumerable<string>> func)
         {
-            Func<ParseResult, IEnumerable<string>> GetForwardingFunction();
+            ForwardingFunction = GetForwardingFunction(func);
+            return this;
         }
 
-        private class ForwardedOption<T> : Option<T>, IForwardedOption
+        public ForwardedOption<T> SetForwardingFunction(Func<T, string> format)
         {
-            private Func<ParseResult, IEnumerable<string>> ForwardingFunction;
+            ForwardingFunction = GetForwardingFunction((o) => new string[] { format(o) });
+            return this;
+        }
 
-            public ForwardedOption(Option option) : base(option.Aliases.ToArray(), option.Description)
-            {
-                IsRequired = option.IsRequired;
-                IsHidden = option.IsHidden;
-                if (option.Argument != null && !string.IsNullOrEmpty(option.Argument.Name))
-                {
-                    Argument = option.Argument;
-                }
-            }
+        public Func<ParseResult, IEnumerable<string>> GetForwardingFunction(Func<T, IEnumerable<string>> func)
+        {
+            return (ParseResult parseResult) => parseResult.HasOption(Aliases.First()) ? func(parseResult.ValueForOption<T>(Aliases.First())) : Array.Empty<string>();
+        }
 
-            public ForwardedOption<T> SetForwardingFunction(Func<T, IEnumerable<string>> func)
-            {
-                ForwardingFunction = GetForwardingFunction(func);
-                return this;
-            }
-
-            public ForwardedOption<T> SetForwardingFunction(Func<T, string> format)
-            {
-                ForwardingFunction = GetForwardingFunction((o) => new string[] { format(o) });
-                return this;
-            }
-
-            public Func<ParseResult, IEnumerable<string>> GetForwardingFunction(Func<T, IEnumerable<string>> func)
-            {
-                return (ParseResult parseResult) => parseResult.HasOption(Aliases.First()) ? func(parseResult.ValueForOption<T>(Aliases.First())) : Array.Empty<string>();
-            }
-
-            public Func<ParseResult, IEnumerable<string>> GetForwardingFunction()
-            {
-                return ForwardingFunction;
-            }
+        public Func<ParseResult, IEnumerable<string>> GetForwardingFunction()
+        {
+            return ForwardingFunction;
         }
     }
 }

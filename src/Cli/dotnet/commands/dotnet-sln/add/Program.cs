@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
                 throw new GracefulException(LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
             }
 
-            _relativeRootSolutionFolders = relativeRoot?.Split(Path.DirectorySeparatorChar);
+            _relativeRootSolutionFolders = string.IsNullOrEmpty(relativeRoot)? null : relativeRoot.Split(Path.DirectorySeparatorChar);
         }
 
         public override int Execute()

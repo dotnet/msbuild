@@ -17,10 +17,7 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option InRootOption = new Option<bool>("--in-root", LocalizableStrings.InRoot);
 
-        public static readonly Option SolutionFolderOption = new Option<string>(new string[] { "-s", "--solution-folder" }, LocalizableStrings.AddProjectSolutionFolderArgumentDescription)
-        {
-            Argument = new Argument<string>()
-        };
+        public static readonly Option SolutionFolderOption = new Option<string>(new string[] { "-s", "--solution-folder" }, LocalizableStrings.AddProjectSolutionFolderArgumentDescription);
 
         public static Command GetCommand()
         {
