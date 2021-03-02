@@ -216,7 +216,13 @@ namespace Microsoft.NET.Publish.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64)
                 return;
 
-            TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: true, useCrossgen2: true, composite: false);
+            // Incorrect version check in SDK .NET 6 Preview 2 causes lack of support
+            // for perfmap files when compiling with Crossgen2. The bug has already been
+            // fixed in the SDK repo, https://github.com/dotnet/sdk/pull/16029
+            // and will be available from Preview 3 onward.
+            bool emitNativeSymbols = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+            TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: emitNativeSymbols, useCrossgen2: true, composite: false);
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
@@ -225,7 +231,17 @@ namespace Microsoft.NET.Publish.Tests
         void It_can_publish_readytorun_using_crossgen2_composite_mode(string targetFramework)
         {
             // Crossgen2 only supported for Linux/Windows x64 scenarios for now
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64)
+
+            // Incorrect version check in SDK .NET 6 Preview 2 causes lack of support
+            // for perfmap files when compiling with Crossgen2. The bug has already been
+            // fixed in the SDK repo, https://github.com/dotnet/sdk/pull/16029
+            // and will be available from Preview 3 onward.
+
+            // Another SDK bug, https://github.com/dotnet/sdk/issues/16083
+            // forces disabling this test on Linux completely as emitNativeSymbols is
+            // ignored in composite mode.
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || 
+                RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64)
                 return;
 
             TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: false, useCrossgen2: true, composite: true);
