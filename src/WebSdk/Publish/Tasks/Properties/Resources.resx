@@ -1178,4 +1178,23 @@ For more information on this deploy script visit:	https://go.microsoft.com/fwlin
   <data name="EFSCRIPT_GenerationFailed" xml:space="preserve">
     <value>Entity Framework SQL Script generation failed</value>
   </data>
+  <data name="ZIPDEPLOY_Check_DeploymentStatus" xml:space="preserve">
+    <value>Checking the deployment status...</value>
+  </data>
+  <data name="ZIPDEPLOY_DeploymentStatus" xml:space="preserve">
+    <value>Deployment status is {0}.</value>
+    <comment>{0} - Success or failed</comment>
+  </data>
+  <data name="ZIPDEPLOY_DeploymentStatusPolling" xml:space="preserve">
+    <value>Polling for deployment status...</value>
+  </data>
+  <data name="ZIPDEPLOY_Failed" xml:space="preserve">
+    <value>Zip Deployment failed. </value>
+  </data>
+  <data name="ZIPDEPLOY_Succeeded" xml:space="preserve">
+    <value>Zip Deployment succeeded.</value>
+  </data>
+  <data name="ZIPDEPLOY_Uploaded" xml:space="preserve">
+    <value>Uploaded the Zip file to the target.</value>
+  </data>
 </root>

@@ -1906,6 +1906,42 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Checking the deployment status....
+        /// </summary>
+        public static string ZIPDEPLOY_Check_DeploymentStatus {
+            get {
+                return ResourceManager.GetString("ZIPDEPLOY_Check_DeploymentStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deployment status is {0}..
+        /// </summary>
+        public static string ZIPDEPLOY_DeploymentStatus {
+            get {
+                return ResourceManager.GetString("ZIPDEPLOY_DeploymentStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Polling for deployment status....
+        /// </summary>
+        public static string ZIPDEPLOY_DeploymentStatusPolling {
+            get {
+                return ResourceManager.GetString("ZIPDEPLOY_DeploymentStatusPolling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Zip Deployment failed. .
+        /// </summary>
+        public static string ZIPDEPLOY_Failed {
+            get {
+                return ResourceManager.GetString("ZIPDEPLOY_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The attempt to publish the ZIP file through {0} failed with HTTP status code {1}..
         /// </summary>
         public static string ZIPDEPLOY_FailedDeploy {
@@ -1938,6 +1974,24 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         public static string ZIPDEPLOY_PublishingZip {
             get {
                 return ResourceManager.GetString("ZIPDEPLOY_PublishingZip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Zip Deployment succeeded..
+        /// </summary>
+        public static string ZIPDEPLOY_Succeeded {
+            get {
+                return ResourceManager.GetString("ZIPDEPLOY_Succeeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uploaded the Zip file to the target..
+        /// </summary>
+        public static string ZIPDEPLOY_Uploaded {
+            get {
+                return ResourceManager.GetString("ZIPDEPLOY_Uploaded", resourceCulture);
             }
         }
     }
