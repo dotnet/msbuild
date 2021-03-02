@@ -3344,8 +3344,6 @@ namespace Microsoft.Build.Evaluation
                     item.SplitOwnItemElement();
                 }
 
-                itemElement.Parent.RemoveChild(itemElement);
-
                 return true;
             }
 
