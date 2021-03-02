@@ -134,71 +134,33 @@ namespace Microsoft.Build.Logging
 
         private void WriteCore(BuildEventArgs e)
         {
-            // the cases are ordered by most used first for performance
-            if (e is BuildMessageEventArgs buildMessage)
+            switch (e)
             {
-                Write(buildMessage);
-            }
-            else if (e is TaskStartedEventArgs taskStarted)
-            {
-                Write(taskStarted);
-            }
-            else if (e is TaskFinishedEventArgs taskFinished)
-            {
-                Write(taskFinished);
-            }
-            else if (e is TargetStartedEventArgs targetStarted)
-            {
-                Write(targetStarted);
-            }
-            else if (e is TargetFinishedEventArgs targetFinished)
-            {
-                Write(targetFinished);
-            }
-            else if (e is BuildErrorEventArgs buildError)
-            {
-                Write(buildError);
-            }
-            else if (e is BuildWarningEventArgs buildWarning)
-            {
-                Write(buildWarning);
-            }
-            else if (e is ProjectStartedEventArgs projectStarted)
-            {
-                Write(projectStarted);
-            }
-            else if (e is ProjectFinishedEventArgs projectFinished)
-            {
-                Write(projectFinished);
-            }
-            else if (e is BuildStartedEventArgs buildStarted)
-            {
-                Write(buildStarted);
-            }
-            else if (e is BuildFinishedEventArgs buildFinished)
-            {
-                Write(buildFinished);
-            }
-            else if (e is ProjectEvaluationStartedEventArgs projectEvaluationStarted)
-            {
-                Write(projectEvaluationStarted);
-            }
-            else if (e is ProjectEvaluationFinishedEventArgs projectEvaluationFinished)
-            {
-                Write(projectEvaluationFinished);
-            }
-            else
-            {
-                // convert all unrecognized objects to message
-                // and just preserve the message
-                var buildMessageEventArgs = new BuildMessageEventArgs(
-                    e.Message,
-                    e.HelpKeyword,
-                    e.SenderName,
-                    MessageImportance.Normal,
-                    e.Timestamp);
-                buildMessageEventArgs.BuildEventContext = e.BuildEventContext ?? BuildEventContext.Invalid;
-                Write(buildMessageEventArgs);
+                case BuildMessageEventArgs buildMessage: Write(buildMessage); break;
+                case TaskStartedEventArgs taskStarted: Write(taskStarted); break;
+                case TaskFinishedEventArgs taskFinished: Write(taskFinished); break;
+                case TargetStartedEventArgs targetStarted: Write(targetStarted); break;
+                case TargetFinishedEventArgs targetFinished: Write(targetFinished); break;
+                case BuildErrorEventArgs buildError: Write(buildError); break;
+                case BuildWarningEventArgs buildWarning: Write(buildWarning); break;
+                case ProjectStartedEventArgs projectStarted: Write(projectStarted); break;
+                case ProjectFinishedEventArgs projectFinished: Write(projectFinished); break;
+                case BuildStartedEventArgs buildStarted: Write(buildStarted); break;
+                case BuildFinishedEventArgs buildFinished: Write(buildFinished); break;
+                case ProjectEvaluationStartedEventArgs projectEvaluationStarted: Write(projectEvaluationStarted); break;
+                case ProjectEvaluationFinishedEventArgs projectEvaluationFinished: Write(projectEvaluationFinished); break;
+                default:
+                    // convert all unrecognized objects to message
+                    // and just preserve the message
+                    var buildMessageEventArgs = new BuildMessageEventArgs(
+                        e.Message,
+                        e.HelpKeyword,
+                        e.SenderName,
+                        MessageImportance.Normal,
+                        e.Timestamp);
+                    buildMessageEventArgs.BuildEventContext = e.BuildEventContext ?? BuildEventContext.Invalid;
+                    Write(buildMessageEventArgs);
+                    break;
             }
         }
 

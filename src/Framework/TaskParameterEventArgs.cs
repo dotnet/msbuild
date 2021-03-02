@@ -56,8 +56,10 @@ namespace Microsoft.Build.Framework
         /// which is an implementations assembly. This seems like the easiest way to inject the
         /// implementation for realizing the Message.
         /// </summary>
-        /// <remarks>Note that the current implementation never runs and is provided merely
-        /// as a safeguard in case MessageGetter isn't set for some reason.</remarks>
+        /// <remarks>
+        /// Note that the current implementation never runs and is provided merely
+        /// as a safeguard in case MessageGetter isn't set for some reason.
+        /// </remarks>
         internal static Func<TaskParameterEventArgs, string> MessageGetter = args =>
         {
             var sb = new StringBuilder();

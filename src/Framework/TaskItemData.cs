@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// Lightweight specialized implementation of ITaskItem only used for deserializing items.
+    /// Lightweight specialized implementation of <see cref="ITaskItem"/> only used for deserializing items.
     /// The goal is to minimize overhead when representing deserialized items.
     /// Used by node packet translator and binary logger.
     /// </summary>
