@@ -72,7 +72,7 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Provides a way for Microsoft.Build.dll to provide a more efficient dictionary factory
-        /// (using SmallDictionary`2). Since that is an implementation detail, it is not included
+        /// (using ArrayDictionary`2). Since that is an implementation detail, it is not included
         /// in Microsoft.Build.Framework.dll so we need this extensibility point here.
         /// </summary>
         internal static Func<int, IDictionary<string, string>> DictionaryFactory = capacity => new Dictionary<string, string>(capacity);

@@ -41,7 +41,7 @@ namespace Microsoft.Build.BackEnd
         static ItemGroupLoggingHelper()
         {
             TaskParameterEventArgs.MessageGetter = GetTaskParameterText;
-            TaskParameterEventArgs.DictionaryFactory = SmallDictionary<string, string>.Create;
+            TaskParameterEventArgs.DictionaryFactory = ArrayDictionary<string, string>.Create;
         }
 
         /// <summary>

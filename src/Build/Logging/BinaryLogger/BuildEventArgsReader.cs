@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -226,7 +229,7 @@ namespace Microsoft.Build.Logging
                 // We can't cache these as they would hold on to strings.
                 // This reader is designed to not hold onto strings,
                 // so that we can fit in a 32-bit process when reading huge binlogs
-                var dictionary = SmallDictionary<string, string>.Create(list.Length);
+                var dictionary = ArrayDictionary<string, string>.Create(list.Length);
                 for (int i = 0; i < list.Length; i++)
                 {
                     string key = GetStringFromRecord(list[i].keyIndex);

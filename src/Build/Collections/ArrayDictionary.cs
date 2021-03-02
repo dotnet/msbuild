@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,20 +8,21 @@ using System.Collections.Generic;
 namespace Microsoft.Build.Collections
 {
     /// <summary>
-    /// Small, lightweight, read-only IDictionary implementation using two arrays
-    /// and O(n) lookup. Requires specifying capacity at construction and does not
+    /// Lightweight, read-only IDictionary implementation using two arrays
+    /// and O(n) lookup.
+    /// Requires specifying capacity at construction and does not
     /// support reallocation to increase capacity.
     /// </summary>
     /// <typeparam name="TKey">Type of keys</typeparam>
     /// <typeparam name="TValue">Type of values</typeparam>
-    internal class SmallDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary
+    internal class ArrayDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary
     {
         private TKey[] keys;
         private TValue[] values;
 
         private int count;
 
-        public SmallDictionary(int capacity)
+        public ArrayDictionary(int capacity)
         {
             keys = new TKey[capacity];
             values = new TValue[capacity];
@@ -26,7 +30,7 @@ namespace Microsoft.Build.Collections
 
         public static IDictionary<TKey, TValue> Create(int capacity)
         {
-            return new SmallDictionary<TKey, TValue>(capacity);
+            return new ArrayDictionary<TKey, TValue>(capacity);
         }
 
         public TValue this[TKey key]
@@ -91,7 +95,7 @@ namespace Microsoft.Build.Collections
             }
             else
             {
-                throw new InvalidOperationException($"SmallDictionary is at capacity {keys.Length}");
+                throw new InvalidOperationException($"ArrayDictionary is at capacity {keys.Length}");
             }
         }
 
@@ -212,11 +216,11 @@ namespace Microsoft.Build.Collections
 
         private struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IDictionaryEnumerator
         {
-            private readonly SmallDictionary<TKey, TValue> _dictionary;
+            private readonly ArrayDictionary<TKey, TValue> _dictionary;
             private readonly bool _emitDictionaryEntries;
             private int _position;
 
-            public Enumerator(SmallDictionary<TKey, TValue> dictionary, bool emitDictionaryEntries = false)
+            public Enumerator(ArrayDictionary<TKey, TValue> dictionary, bool emitDictionaryEntries = false)
             {
                 this._dictionary = dictionary;
                 this._position = -1;
