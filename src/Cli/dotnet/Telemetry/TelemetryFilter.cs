@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             _hash = hash ?? throw new ArgumentNullException(nameof(hash));
         }
 
-        public IEnumerable<ApplicationInsightsEntryFormat> Filter(object objectToFilter)
+        public IEnumerable<ApplicationInsightsEntryFormat> Filter(object objectToFilter, Dictionary<string, double> measurements = null)
         {
             var result = new List<ApplicationInsightsEntryFormat>();
 
@@ -30,11 +30,11 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 var topLevelCommandName = parseResult[DotnetName]?.AppliedOptions?.FirstOrDefault()?.Name;
                 if (topLevelCommandName != null)
                 {
-                    LogVerbosityForAllTopLevelCommand(result, parseResult, topLevelCommandName);
+                    LogVerbosityForAllTopLevelCommand(result, parseResult, topLevelCommandName, measurements);
 
                     foreach (IParseResultLogRule rule in ParseResultLogRules)
                     {
-                        result.AddRange(rule.AllowList(parseResult));
+                        result.AddRange(rule.AllowList(parseResult, measurements));
                     }
                 }
             }
@@ -44,6 +44,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
                             "toplevelparser/command",
                             new Dictionary<string, string>()
                         {{ "verb", topLevelCommandParserResult.Command}}
+                            ,measurements
                 ));
 
             }
@@ -119,7 +120,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
         private static void LogVerbosityForAllTopLevelCommand(
             ICollection<ApplicationInsightsEntryFormat> result,
             ParseResult parseResult,
-            string topLevelCommandName)
+            string topLevelCommandName,
+            Dictionary<string, double> measurements = null)
         {
             if (parseResult[DotnetName][topLevelCommandName]?.AppliedOptions != null &&
                 parseResult[DotnetName][topLevelCommandName].AppliedOptions.Contains("verbosity"))
@@ -133,7 +135,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
                     {
                         { "verb", topLevelCommandName},
                         {"verbosity", appliedOptions.Arguments.ElementAt(0)}
-                    }));
+                    },
+                    measurements));
             }
         }
 

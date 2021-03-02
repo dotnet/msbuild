@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.DotNet.Cli.CommandLine;
@@ -32,6 +33,7 @@ namespace Microsoft.DotNet.Cli
 
             // Capture the current timestamp to calculate the host overhead.
             DateTime mainTimeStamp = DateTime.Now;
+            TimeSpan StartupTime = mainTimeStamp - Process.GetCurrentProcess().StartTime;
 
             bool perfLogEnabled = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_PERF_LOG", false);
             PerformanceLogStartupInformation startupInfo = null;
@@ -65,7 +67,7 @@ namespace Microsoft.DotNet.Cli
                 {
                     using (PerfTrace.Current.CaptureTiming())
                     {
-                        return ProcessArgs(args);
+                        return ProcessArgs(args, StartupTime);
                     }
                 }
                 catch (HelpException e)
@@ -115,13 +117,19 @@ namespace Microsoft.DotNet.Cli
             }
         }
 
-        internal static int ProcessArgs(string[] args, ITelemetry telemetryClient = null)
+        internal static int ProcessArgs(string[] args, ITelemetry telemetryClient = null )
+        {
+            return ProcessArgs(args, new TimeSpan(0));
+        }
+
+        internal static int ProcessArgs(string[] args, TimeSpan startupTime, ITelemetry telemetryClient = null )
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
-
             var success = true;
             var command = string.Empty;
             var lastArg = 0;
+            TimeSpan firstRunTime = new TimeSpan(0);
+            Dictionary<string, double> performanceData;
             TopLevelCommandParserResult topLevelCommandParserResult = TopLevelCommandParserResult.Empty;
 
             using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
@@ -166,6 +174,7 @@ namespace Microsoft.DotNet.Cli
                     }
                     else
                     {
+                        DateTime FirstRunStart = DateTime.Now;
                         // It's the command, and we're done!
                         command = args[lastArg];
                         if (string.IsNullOrEmpty(command))
@@ -213,7 +222,7 @@ namespace Microsoft.DotNet.Cli
                             environmentProvider);
 
                         PerformanceLogEventSource.Log.FirstTimeConfigurationStop();
-
+                        firstRunTime = DateTime.Now - FirstRunStart;
                         break;
                     }
                 }
@@ -246,20 +255,55 @@ namespace Microsoft.DotNet.Cli
             }
 
             PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStart();
-            TelemetryEventEntry.SendFiltered(topLevelCommandParserResult);
+            if (startupTime.TotalMilliseconds > 0)
+            {
+                performanceData = new Dictionary<string, double>
+                {
+                    {"Startup Time", startupTime.TotalMilliseconds}
+                };
+                if (firstRunTime.TotalMilliseconds > 0 )
+                {
+                    performanceData.Add("First Run Time", firstRunTime.TotalMilliseconds);
+                }
+                TelemetryEventEntry.SendFiltered(topLevelCommandParserResult, performanceData);
+            }
+            else
+            {
+                TelemetryEventEntry.SendFiltered(topLevelCommandParserResult);
+            }
             PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
 
             int exitCode;
             if (BuiltInCommandsCatalog.Commands.TryGetValue(topLevelCommandParserResult.Command, out var builtIn))
             {
                 PerformanceLogEventSource.Log.BuiltInCommandParserStart();
+                DateTime parseStartTime = DateTime.Now;
                 var parseResult = Parser.Instance.ParseFrom($"dotnet {topLevelCommandParserResult.Command}", appArgs.ToArray());
+                TimeSpan parseTime = DateTime.Now - parseStartTime;
                 PerformanceLogEventSource.Log.BuiltInCommandParserStop();
 
                 if (!parseResult.Errors.Any())
                 {
                     PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStart();
-                    TelemetryEventEntry.SendFiltered(parseResult);
+                    if (startupTime.TotalMilliseconds > 0)
+                    {
+
+                        performanceData = new Dictionary<string, double>
+                        {
+                            {"Startup Time", startupTime.TotalMilliseconds},
+                            {"Parse Time", parseTime.TotalMilliseconds}
+                        };
+                        if (firstRunTime.TotalMilliseconds > 0 )
+                        {
+                            performanceData.Add("First Run Time", firstRunTime.TotalMilliseconds);
+                        }
+                        TelemetryEventEntry.SendFiltered(parseResult, performanceData);
+                    }
+                    else
+                    {
+                         TelemetryEventEntry.SendFiltered(parseResult);
+                    }
+
                     PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
                 }
 

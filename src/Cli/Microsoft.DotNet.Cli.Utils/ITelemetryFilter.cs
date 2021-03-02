@@ -7,6 +7,6 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     public interface ITelemetryFilter
     {
-        IEnumerable<ApplicationInsightsEntryFormat> Filter(object o);
+        IEnumerable<ApplicationInsightsEntryFormat> Filter(object o, Dictionary<string, double> measurements = null);
     }
 }
