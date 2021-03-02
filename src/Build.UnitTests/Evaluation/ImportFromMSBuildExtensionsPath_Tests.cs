@@ -2,9 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #if FEATURE_SYSTEM_CONFIGURATION
+// NOTE: This test WOULD work in net5.0 after the System.Configuration.ConfigurationManager change. However, it would
+//       only work if ToolsetDefinitionLocations is set to ConfigurationFile and that ReadApplicationConfiguration in
+//       ToolsetConfigurationReader.cs removes the RunningTests condition since ConfigurationManager.OpenExeConfiguration
+//       would try to get testhost.exe.config instead of the actual configuration file. But those changes seems more 
+//       fitting as a different test rather than making all these changes instead.
 
-using System.Configuration;
-using Microsoft.Win32;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
@@ -15,7 +18,6 @@ using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.UnitTests;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {

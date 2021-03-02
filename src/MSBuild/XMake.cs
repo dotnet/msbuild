@@ -4,9 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
-#endif
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
