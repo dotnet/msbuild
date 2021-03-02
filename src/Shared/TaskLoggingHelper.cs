@@ -1023,19 +1023,17 @@ namespace Microsoft.Build.Utilities
             {
                 LogError
                 (
-                    subcategory,
-                    warningCode,
-                    fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
-                    fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
-                    fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
-                    endLineNumber,
-                    endColumnNumber,
-                    message,
-                    helpKeyword,
-                    TaskName,
-                    helpLink,
-                    DateTime.UtcNow,
-                    messageArgs
+                    subcategory: subcategory,
+                    errorCode: warningCode,
+                    helpKeyword: helpKeyword,
+                    helpLink: helpLink,
+                    file: fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                    lineNumber: fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                    columnNumber: fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                    endLineNumber: endLineNumber,
+                    endColumnNumber: endColumnNumber,
+                    message: message,
+                    messageArgs: messageArgs
                 );
                 return;
             }
