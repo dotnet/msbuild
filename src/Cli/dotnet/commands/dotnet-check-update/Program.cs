@@ -38,6 +38,9 @@ namespace Microsoft.DotNet.Tools.CheckUpdate
             sdkFormatter.PrintSdkInfo();
             _reporter.WriteLine();
             runtimeFormatter.PrintRuntimeInfo();
+            _reporter.WriteLine();
+            _reporter.WriteLine(LocalizableStrings.CommandFooter);
+            _reporter.WriteLine();
 
             return 0;
         }

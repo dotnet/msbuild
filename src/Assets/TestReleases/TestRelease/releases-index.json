@@ -32,7 +32,7 @@
             "latest-sdk": "3.0.103",
             "product": ".NET Core",
             "support-phase": "maintenance",
-            "eol-date": "2020-03-03",
+            "eol-date": "3000-01-01",
             "releases.json": "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/3.0/releases.json"
         },
         {

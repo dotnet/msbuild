@@ -1,8 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Deployment.DotNet.Releases;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.CheckUpdate
 {
@@ -10,12 +12,26 @@ namespace Microsoft.DotNet.Tools.CheckUpdate
     {
         public ProductCollection GetProductCollection()
         {
-            return ProductCollection.GetAsync().Result;
+            try
+            {
+                return ProductCollection.GetAsync().Result;
+            }
+            catch (Exception e)
+            {
+                throw new GracefulException(string.Format(LocalizableStrings.ReleasesLibraryFailed, e.Message));
+            }
         }
 
-        public IEnumerable<ProductRelease> GetProductReleases(Product product)
+        public IEnumerable<ProductRelease> GetProductReleases(Deployment.DotNet.Releases.Product product)
         {
-            return product.GetReleasesAsync().Result;
+            try
+            {
+                return product.GetReleasesAsync().Result;
+            }
+            catch (Exception e)
+            {
+                throw new GracefulException(string.Format(LocalizableStrings.ReleasesLibraryFailed, e.Message));
+            }
         }
     }
 }

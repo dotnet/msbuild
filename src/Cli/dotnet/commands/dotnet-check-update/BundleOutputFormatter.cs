@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tools.CheckUpdate
         {
             return _productCollection
                 .First(product => product.ProductVersion.Equals($"{bundle.Version.Major}.{bundle.Version.Minor}"))
-                .SupportPhase.Equals(SupportPhase.EOL);
+                .IsOutOfSupport();
         }
     }
 }
