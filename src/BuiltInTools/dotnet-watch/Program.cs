@@ -14,10 +14,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Watcher.Internal;
-using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
 using IConsole = Microsoft.Extensions.Tools.Internal.IConsole;
 using IReporter = Microsoft.Extensions.Tools.Internal.IReporter;
+using Resources = Microsoft.DotNet.Watcher.Tools.Resources;
 
 namespace Microsoft.DotNet.Watcher
 {

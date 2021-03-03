@@ -10,7 +10,7 @@ using Microsoft.DotNet.Cli.CommandLineValidation;
 
 namespace Microsoft.DotNet.Cli
 {
-    internal sealed class CommandLineValidationMessages : ValidationMessages
+    internal sealed class CommandLineValidationMessages : Resources
     {
         public override string ExpectsOneArgument(SymbolResult symbolResult) =>
             symbolResult is CommandResult
@@ -61,6 +61,8 @@ namespace Microsoft.DotNet.Cli
 
         public override string ErrorReadingResponseFile(string filePath, IOException e) =>
             string.Format(LocalizableStrings.ErrorReadingResponseFile, filePath, e.Message);
+
+        public override string HelpOptionDescription() => LocalizableStrings.ShowHelpInfo;
     }
 
     internal static class SymbolResultExtensions

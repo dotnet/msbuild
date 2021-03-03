@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 
         public IToolPackage Install(FilePath manifestFile)
         {
-            if (_configFilePath != null && !File.Exists(_configFilePath))
+            if (!string.IsNullOrEmpty(_configFilePath) && !File.Exists(_configFilePath))
             {
                 throw new GracefulException(
                     string.Format(
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             }
 
             FilePath? configFile = null;
-            if (_configFilePath != null)
+            if (!string.IsNullOrEmpty(_configFilePath))
             {
                 configFile = new FilePath(_configFilePath);
             }

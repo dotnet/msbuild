@@ -17,27 +17,27 @@ namespace Microsoft.DotNet.Cli
             Arity = ArgumentArity.ZeroOrMore
         };
 
-        public static readonly Option OuputOption = new Option<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
+        public static readonly Option OuputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
         {
-            Argument = new Argument<string>(LocalizableStrings.OutputOption)
+            ArgumentHelpName = LocalizableStrings.OutputOption
         }.ForwardAsSingle(o => $"-property:PublishDir={CommandDirectoryContext.GetFullPath(o)}");
 
-        public static readonly Option ManifestOption = new Option<IEnumerable<string>>("--manifest", LocalizableStrings.ManifestOptionDescription)
+        public static readonly Option ManifestOption = new ForwardedOption<IEnumerable<string>>("--manifest", LocalizableStrings.ManifestOptionDescription)
         {
-            Argument = new Argument<IEnumerable<string>>(LocalizableStrings.ManifestOption)
+            ArgumentHelpName = LocalizableStrings.ManifestOption
         }.ForwardAsSingle(o => $"-property:TargetManifestFiles={string.Join("%3B", o.Select(CommandDirectoryContext.GetFullPath))}")
         .AllowSingleArgPerToken();
 
-        public static readonly Option NoBuildOption = new Option<bool>("--no-build", LocalizableStrings.NoBuildOptionDescription)
+        public static readonly Option NoBuildOption = new ForwardedOption<bool>("--no-build", LocalizableStrings.NoBuildOptionDescription)
             .ForwardAs("-property:NoBuild=true");
 
-        public static readonly Option SelfContainedOption = new Option<bool>("--self-contained", LocalizableStrings.SelfContainedOptionDescription)
+        public static readonly Option SelfContainedOption = new ForwardedOption<bool>("--self-contained", LocalizableStrings.SelfContainedOptionDescription)
             .ForwardAsSingle(o =>  $"-property:SelfContained={o}");
 
-        public static readonly Option NoSelfContainedOption = new Option<bool>("--no-self-contained", LocalizableStrings.NoSelfContainedOptionDescription)
+        public static readonly Option NoSelfContainedOption = new ForwardedOption<bool>("--no-self-contained", LocalizableStrings.NoSelfContainedOptionDescription)
             .ForwardAs("-property:SelfContained=false");
 
-        public static readonly Option NoLogoOption = new Option<bool>("--nologo", LocalizableStrings.CmdNoLogo)
+        public static readonly Option NoLogoOption = new ForwardedOption<bool>("--nologo", LocalizableStrings.CmdNoLogo)
             .ForwardAs("-nologo");
 
         public static readonly Option NoRestoreOption = CommonOptions.NoRestoreOption();

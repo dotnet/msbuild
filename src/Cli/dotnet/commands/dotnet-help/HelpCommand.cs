@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Tools.Help
 
             result.ShowHelpOrErrorIfAppropriate();
 
-            if (result.ValueForArgument<string>(HelpCommandParser.Argument) != null)
+            if (!string.IsNullOrEmpty(result.ValueForArgument<string>(HelpCommandParser.Argument)))
             {
                 return new HelpCommand(result).Execute();
             }

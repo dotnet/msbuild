@@ -21,16 +21,13 @@ namespace Microsoft.DotNet.Tools.Tool.Common
         public static string ToolPathOptionAlias = "--tool-path";
         public static Option ToolPathOption(string description, string argumentName) => new Option<string>(ToolPathOptionAlias, description)
         {
-            Argument = new Argument<string>(argumentName)
+            ArgumentHelpName = argumentName
         };
 
         public static string ToolManifestOptionAlias = "--tool-manifest";
-        public static Option ToolManifestOption(string description, string argumentName) => new Option<string>(ToolManifestOptionAlias, description)
+        public static Option ToolManifestOption(string description, string argumentName) => new Option<string>(ToolManifestOptionAlias, description, arity: ArgumentArity.ZeroOrOne)
         {
-            Argument = new Argument<string>(argumentName)
-            {
-                Arity = ArgumentArity.ZeroOrOne
-            }
+            ArgumentHelpName = argumentName
         };
 
         internal static void EnsureNoConflictGlobalLocalToolPathOption(

@@ -15,15 +15,9 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option RuntimeOption = CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription);
 
-        public static readonly Option ProjectOption = new Option<string>(new string[] { "-p", "--project" }, LocalizableStrings.CommandOptionProjectDescription)
-        {
-            Argument = new Argument<string>()
-        };
+        public static readonly Option ProjectOption = new Option<string>(new string[] { "-p", "--project" }, LocalizableStrings.CommandOptionProjectDescription);
 
-        public static readonly Option LaunchProfileOption = new Option<string>("--launch-profile", LocalizableStrings.CommandOptionLaunchProfileDescription)
-        {
-            Argument = new Argument<string>()
-        };
+        public static readonly Option LaunchProfileOption = new Option<string>("--launch-profile", LocalizableStrings.CommandOptionLaunchProfileDescription);
 
         public static readonly Option NoLaunchProfileOption = new Option<bool>("--no-launch-profile", LocalizableStrings.CommandOptionNoLaunchProfileDescription);
 

@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Cli
             Arity = ArgumentArity.OneOrMore,
         };
 
-        public static readonly Option InteractiveOption = new Option<bool>("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
+        public static readonly Option InteractiveOption = new ForwardedOption<bool>("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
             .ForwardAs("--interactive");
 
         public static Command GetCommand()

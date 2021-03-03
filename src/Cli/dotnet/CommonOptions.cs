@@ -4,7 +4,6 @@
 using System;
 using Microsoft.DotNet.Tools;
 using System.CommandLine;
-using System.Linq;
 using System.IO;
 using Microsoft.DotNet.Tools.Common;
 
@@ -13,7 +12,7 @@ namespace Microsoft.DotNet.Cli
     internal static class CommonOptions
     {
         public static Option PropertiesOption() =>
-            new Option<string[]>(new string[] { "-property", "/p" })
+            new ForwardedOption<string[]>(new string[] { "-property", "/p" })
             {
                 IsHidden = true
             }.ForwardAsProperty()
@@ -23,50 +22,51 @@ namespace Microsoft.DotNet.Cli
             VerbosityOption(o => $"-verbosity:{o}");
 
         public static Option VerbosityOption(Func<VerbosityOptions, string> format) =>
-            new Option<VerbosityOptions>(
+            new ForwardedOption<VerbosityOptions>(
                 new string[] { "-v", "--verbosity" },
                 description: CommonLocalizableStrings.VerbosityOptionDescription)
             {
-                Argument = new Argument<VerbosityOptions>(CommonLocalizableStrings.LevelArgumentName)
+                ArgumentHelpName = CommonLocalizableStrings.LevelArgumentName
             }.ForwardAsSingle(format);
 
         public static Option FrameworkOption(string description) =>
-            new Option<string>(
+            new ForwardedOption<string>(
                 new string[] { "-f", "--framework" },
                 description)
             {
-                Argument = new Argument<string>(CommonLocalizableStrings.FrameworkArgumentName)
-                    .AddSuggestions(Suggest.TargetFrameworksFromProjectFile())
-            }.ForwardAsSingle(o => $"-property:TargetFramework={o}");
+                ArgumentHelpName = CommonLocalizableStrings.FrameworkArgumentName
+                    
+            }.ForwardAsSingle(o => $"-property:TargetFramework={o}")
+            .AddSuggestions(Suggest.TargetFrameworksFromProjectFile());
 
         public static Option RuntimeOption(string description, bool withShortOption = true) =>
-            new Option<string>(
+            new ForwardedOption<string>(
                 withShortOption ? new string[] { "-r", "--runtime" } : new string[] { "--runtime" },
                 description)
             {
-                Argument = new Argument<string>(CommonLocalizableStrings.RuntimeIdentifierArgumentName)
-                    .AddSuggestions(Suggest.RunTimesFromProjectFile())
-            }.ForwardAsSingle(o => $"-property:RuntimeIdentifier={o}");
+                ArgumentHelpName = CommonLocalizableStrings.RuntimeIdentifierArgumentName
+            }.ForwardAsSingle(o => $"-property:RuntimeIdentifier={o}")
+            .AddSuggestions(Suggest.RunTimesFromProjectFile());
 
         public static Option CurrentRuntimeOption(string description) =>
-            new Option<bool>("--use-current-runtime", description)
+            new ForwardedOption<bool>("--use-current-runtime", description)
                 .ForwardAs("-property:UseCurrentRuntimeIdentifier=True");
 
         public static Option ConfigurationOption(string description) =>
-            new Option<string>(
+            new ForwardedOption<string>(
                 new string[] { "-c", "--configuration" },
                 description)
             {
-                Argument = new Argument<string>(CommonLocalizableStrings.ConfigurationArgumentName)
-                    .AddSuggestions(Suggest.ConfigurationsFromProjectFileOrDefaults())
-            }.ForwardAsSingle(o => $"-property:Configuration={o}");
+                ArgumentHelpName = CommonLocalizableStrings.ConfigurationArgumentName
+            }.ForwardAsSingle(o => $"-property:Configuration={o}")
+            .AddSuggestions(Suggest.ConfigurationsFromProjectFileOrDefaults());
 
         public static Option VersionSuffixOption() =>
-            new Option<string>(
+            new ForwardedOption<string>(
                 "--version-suffix",
                 CommonLocalizableStrings.CmdVersionSuffixDescription)
             {
-                Argument = new Argument<string>(CommonLocalizableStrings.VersionSuffixArgumentName)
+                ArgumentHelpName = CommonLocalizableStrings.VersionSuffixArgumentName
             }.ForwardAsSingle(o => $"-property:VersionSuffix={o}");
 
         public static Argument DefaultToCurrentDirectory(this Argument arg)
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Cli
                 CommonLocalizableStrings.NoRestoreDescription);
 
         public static Option InteractiveMsBuildForwardOption() =>
-            new Option<bool>(
+            new ForwardedOption<bool>(
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription)
             .ForwardAs(Utils.Constants.MsBuildInteractiveOption);

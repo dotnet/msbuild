@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                     }
 
                     JsonElement profileObject;
-                    if (profileName == null)
+                    if (string.IsNullOrEmpty(profileName))
                     {
                         profileObject = profilesObject
                             .EnumerateObject()

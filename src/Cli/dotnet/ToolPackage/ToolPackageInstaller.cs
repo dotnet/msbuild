@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.ToolPackage
                         var tempProject = CreateTempProject(
                             packageId: packageId,
                             versionRange: versionRange,
-                            targetFramework: targetFramework ?? BundledTargetFramework.GetTargetFrameworkMoniker(),
+                            targetFramework: string.IsNullOrEmpty(targetFramework) ? BundledTargetFramework.GetTargetFrameworkMoniker() :  targetFramework,
                             restoreDirectory: stageDirectory,
                             assetJsonOutputDirectory: stageDirectory,
                             rootConfigDirectory: packageLocation.RootConfigDirectory,
@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.ToolPackage
             var tempProject = CreateTempProject(
                 packageId: packageId,
                 versionRange: versionRange,
-                targetFramework: targetFramework ?? BundledTargetFramework.GetTargetFrameworkMoniker(),
+                targetFramework: string.IsNullOrEmpty(targetFramework) ? BundledTargetFramework.GetTargetFrameworkMoniker() : targetFramework,
                 assetJsonOutputDirectory: tempDirectoryForAssetJson,
                 restoreDirectory: null,
                 rootConfigDirectory: packageLocation.RootConfigDirectory,
