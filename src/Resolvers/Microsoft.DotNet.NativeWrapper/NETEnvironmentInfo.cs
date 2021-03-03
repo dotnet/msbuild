@@ -58,7 +58,11 @@ namespace Microsoft.DotNet.NativeWrapper
             SdkInfo = sdkInfo;
         }
 
-        public NetEnvironmentInfo() { }
+        public NetEnvironmentInfo()
+        {
+            RuntimeInfo = new List<NetRuntimeInfo>();
+            SdkInfo = new List<NetSdkInfo>();
+        }
 
         internal void InitializeWindows(IntPtr info, IntPtr resultContext)
         {
