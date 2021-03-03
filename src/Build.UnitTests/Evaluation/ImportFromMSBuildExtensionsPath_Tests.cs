@@ -1,13 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#if FEATURE_SYSTEM_CONFIGURATION
-// NOTE: This test WOULD work in net5.0 after the System.Configuration.ConfigurationManager change. However, it would
-//       only work if ToolsetDefinitionLocations is set to ConfigurationFile and that ReadApplicationConfiguration in
-//       ToolsetConfigurationReader.cs removes the RunningTests condition since ConfigurationManager.OpenExeConfiguration
-//       would try to get testhost.exe.config instead of the actual configuration file. But those changes seems more 
-//       fitting as a different test rather than making all these changes instead.
-
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
@@ -54,7 +47,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("foo", "extn.proj"), GetExtensionTargetsFileContent1());
                 mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", GetMainTargetFileContent());
 
+#if FEATURE_SYSTEM_CONFIGURATION
                 var projColln = new ProjectCollection();
+#else
+                var projColln = new ProjectCollection(ToolsetDefinitionLocations.ConfigurationFile);
+#endif
                 projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader("MSBuildExtensionsPath", extnDir1, Path.Combine("tmp", "nonexistent")));
                 var logger = new MockLogger();
                 projColln.RegisterLogger(logger);
@@ -299,7 +296,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("foo", "extn.proj"), extnTargetsFileContent);
                 mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", GetMainTargetFileContent());
 
+#if FEATURE_SYSTEM_CONFIGURATION
                 var projColln = new ProjectCollection();
+#else
+                var projColln = new ProjectCollection(ToolsetDefinitionLocations.ConfigurationFile);
+#endif
                 projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader("MSBuildExtensionsPath", extnDir1,
                                                                                 Path.Combine("tmp", "nonexistent")));
                 var logger = new MockLogger();
@@ -398,7 +399,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             // MSBuildExtensionsPath* property value has highest priority for the lookups
             try {
+#if FEATURE_SYSTEM_CONFIGURATION
                 var projColln = new ProjectCollection();
+#else
+                var projColln = new ProjectCollection(ToolsetDefinitionLocations.ConfigurationFile);
+#endif
                 projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader("MSBuildExtensionsPath", Path.Combine("tmp", "non-existent"), extnDir1));
                 var logger = new MockLogger();
                 projColln.RegisterLogger(logger);
@@ -487,7 +492,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(String.Format(configFileContents, extnDir1, extnDir2, extnDir3));
                 var reader = GetStandardConfigurationReader();
 
+#if FEATURE_SYSTEM_CONFIGURATION
                 var projColln = new ProjectCollection();
+#else
+                var projColln = new ProjectCollection(ToolsetDefinitionLocations.ConfigurationFile);
+#endif
+
                 projColln.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
                 projColln.RegisterLogger(logger);
@@ -561,7 +571,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
                 var reader = GetStandardConfigurationReader();
 
-                var projectCollection = new ProjectCollection(new Dictionary<string, string> {["FallbackExpandDir1"] = extnDir1});
+#if FEATURE_SYSTEM_CONFIGURATION
+                var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+#else
+                var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 }, null, ToolsetDefinitionLocations.ConfigurationFile);
+#endif
 
                 projectCollection.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
@@ -622,7 +636,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
                 var reader = GetStandardConfigurationReader();
 
+#if FEATURE_SYSTEM_CONFIGURATION
                 var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+#else
+                var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 }, null, ToolsetDefinitionLocations.ConfigurationFile);
+#endif
 
                 projectCollection.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
@@ -692,7 +710,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
                 var reader = GetStandardConfigurationReader();
 
+#if FEATURE_SYSTEM_CONFIGURATION
                 var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+#else
+                var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 }, null, ToolsetDefinitionLocations.ConfigurationFile);
+#endif
 
                 projectCollection.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
@@ -757,7 +779,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
                 var reader = GetStandardConfigurationReader();
 
+#if FEATURE_SYSTEM_CONFIGURATION
                 var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+#else
+                var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 }, null, ToolsetDefinitionLocations.ConfigurationFile);
+#endif
 
                 projectCollection.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
@@ -816,7 +842,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
                 var reader = GetStandardConfigurationReader();
 
+#if FEATURE_SYSTEM_CONFIGURATION
                 var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+#else
+                var projectCollection = new ProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 }, null, ToolsetDefinitionLocations.ConfigurationFile);
+#endif
 
                 projectCollection.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
@@ -867,7 +897,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Action<Project, MockLogger> action)
         {
             try {
+#if FEATURE_SYSTEM_CONFIGURATION
                 var projColln = new ProjectCollection();
+#else
+                var projColln = new ProjectCollection(ToolsetDefinitionLocations.ConfigurationFile);
+#endif
                 projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader(extnPathPropertyName, extnDirs));
                 var logger = new MockLogger();
                 projColln.RegisterLogger(logger);
@@ -979,4 +1013,3 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
     }
 }
-#endif

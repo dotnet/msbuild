@@ -253,7 +253,9 @@ namespace Microsoft.Build.Evaluation
         {
             // When running from the command-line or from VS, use the msbuild.exe.config file.
             if (BuildEnvironmentHelper.Instance.Mode != BuildEnvironmentMode.None &&
+#if FEATURE_SYSTEM_CONFIGURATION
                 !BuildEnvironmentHelper.Instance.RunningTests &&
+#endif
                 FileSystems.Default.FileExists(BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile))
             {
                 var configFile = new ExeConfigurationFileMap { ExeConfigFilename = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile };
