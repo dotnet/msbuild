@@ -6,11 +6,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.NativeWrapper;
 using System.Collections.Generic;
 using System.Linq;
-using System.CommandLine.Rendering;
-using System.CommandLine.Rendering.Views;
-using System.CommandLine;
-using System.CommandLine.IO;
-using System;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Tools.CheckUpdate
 {
@@ -31,43 +27,36 @@ namespace Microsoft.DotNet.Tools.CheckUpdate
         {
             _reporter.WriteLine(LocalizableStrings.SdkSectionHeader);
 
-            var sdks = _sdkInfo.OrderBy(sdk => sdk.Version);
+            var table = new PrintableTable<NetSdkInfo>();
+            table.AddColumn(LocalizableStrings.VersionColumnHeader, sdk => sdk.Version.ToString());
+            table.AddColumn(LocalizableStrings.StatusColumnHeader, sdk => GetSdkStatusMessage(sdk));
 
-            var grid = new GridView();
-            grid.SetColumns(Enumerable.Repeat(ColumnDefinition.SizeToContent(), 3).ToArray());
-            grid.SetRows(Enumerable.Repeat(RowDefinition.SizeToContent(), Math.Max(sdks.Count(), 1)).ToArray());
-            for (int i = 0; i < sdks.Count(); i++)
-            {
-                var sdk = sdks.ElementAt(i);
-                grid.SetChild(new ContentView(string.Empty), 0, i);
-                grid.SetChild(new ContentView(sdk.Version.ToString()), 1, i);
-
-                string sdkMessage;
-                if (BundleIsEndOfLife(sdk))
-                {
-                    sdkMessage = string.Format(LocalizableStrings.OutOfSupportMessage, $"{sdk.Version.Major}.{sdk.Version.Minor}");
-                }
-                else if (BundleIsMaintenance(sdk))
-                {
-                    sdkMessage = string.Format(LocalizableStrings.MaintenanceMessage, $"{sdk.Version.Major}.{sdk.Version.Minor}");
-                }
-                else if (NewerSdkPatchExists(sdk))
-                {
-                    sdkMessage = string.Format(LocalizableStrings.NewPatchAvaliableMessage, NewestSdkPatchVersion(sdk));
-                }
-                else
-                {
-                    sdkMessage = LocalizableStrings.BundleUpToDateMessage;
-                }
-                grid.SetChild(new ContentView(sdkMessage), 2, i);
-            }
-            grid.Render(new ConsoleRenderer(new ReportingConsole(_reporter)), new Region(0, 0, int.MaxValue, int.MaxValue));
-            _reporter.WriteLine();
+            table.PrintRows(_sdkInfo.OrderBy(sdk => sdk.Version), l => _reporter.WriteLine(l));
 
             if (NewFeatureBandAvaliable())
             {
                 _reporter.WriteLine();
                 _reporter.WriteLine(string.Format(LocalizableStrings.NewFeatureBandMessage, NewestFeatureBandAvaliable()));
+            }
+        }
+
+        private string GetSdkStatusMessage(NetSdkInfo sdk)
+        {
+            if (BundleIsEndOfLife(sdk))
+            {
+                return string.Format(LocalizableStrings.OutOfSupportMessage, $"{sdk.Version.Major}.{sdk.Version.Minor}");
+            }
+            else if (BundleIsMaintenance(sdk))
+            {
+                return string.Format(LocalizableStrings.MaintenanceMessage, $"{sdk.Version.Major}.{sdk.Version.Minor}");
+            }
+            else if (NewerSdkPatchExists(sdk))
+            {
+                return string.Format(LocalizableStrings.NewPatchAvaliableMessage, NewestSdkPatchVersion(sdk));
+            }
+            else
+            {
+                return LocalizableStrings.BundleUpToDateMessage;
             }
         }
 

@@ -127,7 +127,7 @@
     <value>.NET SDKs:</value>
   </data>
   <data name="RuntimeSectionHeader" xml:space="preserve">
-    <value>.NET runtimes:</value>
+    <value>.NET Runtimes:</value>
   </data>
   <data name="BundleUpToDateMessage" xml:space="preserve">
     <value>Up to date.</value>
@@ -149,5 +149,14 @@
   </data>
   <data name="ReleasesLibraryFailed" xml:space="preserve">
     <value>Unable to get releases information: {0}</value>
+  </data>
+  <data name="NameColumnHeader" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="VersionColumnHeader" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="StatusColumnHeader" xml:space="preserve">
+    <value>Status</value>
   </data>
 </root>

@@ -19,7 +19,7 @@
       <Aliases>sdkResolver</Aliases>
     </ProjectReference>
 
-    <!-- Microsoft.DotNet.SdkResolver compiles source of Microsoft.DotNet.NativeWrapper to reduce dll load. There are duplicated types-->
+    <!-- Microsoft.DotNet.MSBuildSdkResolver compiles source of Microsoft.DotNet.NativeWrapper to reduce dll load. There are duplicated types-->
     <ProjectReference Include="..\..\Resolvers\Microsoft.DotNet.NativeWrapper\Microsoft.DotNet.NativeWrapper.csproj">
       <Aliases>nativeWrapper</Aliases>
     </ProjectReference>

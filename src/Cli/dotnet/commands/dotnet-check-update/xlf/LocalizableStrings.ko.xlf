@@ -27,6 +27,11 @@
         <target state="new">.NET {0} is going out of support soon.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NameColumnHeader">
+        <source>Name</source>
+        <target state="new">Name</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NewFeatureBandMessage">
         <source>Try out the newest .NET SDK features with .NET {0}.</source>
         <target state="new">Try out the newest .NET SDK features with .NET {0}.</target>
@@ -48,13 +53,23 @@
         <note />
       </trans-unit>
       <trans-unit id="RuntimeSectionHeader">
-        <source>.NET runtimes:</source>
-        <target state="new">.NET runtimes:</target>
+        <source>.NET Runtimes:</source>
+        <target state="new">.NET Runtimes:</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkSectionHeader">
         <source>.NET SDKs:</source>
         <target state="new">.NET SDKs:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StatusColumnHeader">
+        <source>Status</source>
+        <target state="new">Status</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionColumnHeader">
+        <source>Version</source>
+        <target state="new">Version</target>
         <note />
       </trans-unit>
     </body>
