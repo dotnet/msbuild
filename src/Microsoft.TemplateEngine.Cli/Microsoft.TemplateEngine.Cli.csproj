@@ -4,7 +4,6 @@
         <Description>Template creation for the dotnet CLI</Description>
         <IsPackable>true</IsPackable>
         <IsShippingPackage>false</IsShippingPackage>
-        <EnableAnalyzers>true</EnableAnalyzers>
     </PropertyGroup>
 
     <ItemGroup>

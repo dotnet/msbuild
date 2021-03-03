@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>$(NETCoreTargetFramework)</TargetFramework>
-        <EnableAnalyzers>true</EnableAnalyzers>
         <PackageType>Template</PackageType>
         <PackageId>Microsoft.TemplateEngine.TestTemplates</PackageId>
         <Authors>Microsoft</Authors>
