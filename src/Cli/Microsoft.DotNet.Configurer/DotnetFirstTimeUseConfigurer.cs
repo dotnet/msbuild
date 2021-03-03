@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
@@ -20,6 +21,7 @@ namespace Microsoft.DotNet.Configurer
         private IFileSentinel _toolPathSentinel;
         private string _cliFallbackFolderPath;
         private readonly IEnvironmentPath _pathAdder;
+        private Dictionary<string, double> _performanceMeasurements;
 
         public DotnetFirstTimeUseConfigurer(
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
@@ -29,7 +31,8 @@ namespace Microsoft.DotNet.Configurer
             DotnetFirstRunConfiguration dotnetFirstRunConfiguration,
             IReporter reporter,
             string cliFallbackFolderPath,
-            IEnvironmentPath pathAdder)
+            IEnvironmentPath pathAdder,
+            Dictionary<string, double> performanceMeasurements = null)
         {
             _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
             _aspNetCertificateSentinel = aspNetCertificateSentinel;
@@ -39,17 +42,21 @@ namespace Microsoft.DotNet.Configurer
             _reporter = reporter;
             _cliFallbackFolderPath = cliFallbackFolderPath;
             _pathAdder = pathAdder ?? throw new ArgumentNullException(nameof(pathAdder));
+            _performanceMeasurements ??= performanceMeasurements;
         }
 
         public void Configure()
         {
             if (ShouldAddPackageExecutablePath())
             {
+                DateTime beforeAddPackageExecutablePath = DateTime.Now;
                 AddPackageExecutablePath();
+                _performanceMeasurements?.Add("AddPackageExecutablePath Time", (DateTime.Now - beforeAddPackageExecutablePath).TotalMilliseconds);
             }
 
             if (ShouldPrintFirstTimeUseNotice())
             {
+                DateTime beforeFirstTimeUseNotice = DateTime.Now;
                 if (!_dotnetFirstRunConfiguration.NoLogo)
                 {
                     PrintFirstTimeMessageWelcome();
@@ -62,11 +69,14 @@ namespace Microsoft.DotNet.Configurer
                 }
 
                 _firstTimeUseNoticeSentinel.CreateIfNotExists();
+                _performanceMeasurements?.Add("FirstTimeUseNotice Time", (DateTime.Now - beforeFirstTimeUseNotice).TotalMilliseconds);
             }
 
             if (ShouldGenerateAspNetCertificate())
             {
+                DateTime beforeGenerateAspNetCertificate = DateTime.Now;
                 GenerateAspNetCertificate();
+                _performanceMeasurements?.Add("GenerateAspNetCertificate Time", (DateTime.Now - beforeGenerateAspNetCertificate).TotalMilliseconds);
             }
         }
 

@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.Cli
             var success = true;
             var command = string.Empty;
             var lastArg = 0;
-            TimeSpan firstRunTime = new TimeSpan(0);
+            Dictionary<string, double> performanceData = new Dictionary<string, double>();
             TopLevelCommandParserResult topLevelCommandParserResult = TopLevelCommandParserResult.Empty;
 
             using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
@@ -173,7 +173,6 @@ namespace Microsoft.DotNet.Cli
                     }
                     else
                     {
-                        DateTime FirstRunStart = DateTime.Now;
                         // It's the command, and we're done!
                         command = args[lastArg];
                         if (string.IsNullOrEmpty(command))
@@ -218,10 +217,10 @@ namespace Microsoft.DotNet.Cli
                             toolPathSentinel,
                             isDotnetBeingInvokedFromNativeInstaller,
                             dotnetFirstRunConfiguration,
-                            environmentProvider);
+                            environmentProvider,
+                            performanceData);
 
                         PerformanceLogEventSource.Log.FirstTimeConfigurationStop();
-                        firstRunTime = DateTime.Now - FirstRunStart;
                         break;
                     }
                 }
@@ -254,11 +253,7 @@ namespace Microsoft.DotNet.Cli
             }
 
             PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStart();
-            Dictionary<string, double> performanceData = new Dictionary<string, double>
-            {
-                {"Startup Time", startupTime.TotalMilliseconds},
-                {"First Run Time", firstRunTime.TotalMilliseconds}
-            };
+            performanceData.Add("Startup Time", startupTime.TotalMilliseconds);
             TelemetryEventEntry.SendFiltered(Tuple.Create(topLevelCommandParserResult, performanceData));
             PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
 
@@ -274,12 +269,7 @@ namespace Microsoft.DotNet.Cli
                 if (!parseResult.Errors.Any())
                 {
                     PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStart();
-                    performanceData = new Dictionary<string, double>
-                    {
-                        {"Startup Time", startupTime.TotalMilliseconds},
-                        {"Parse Time", parseTime.TotalMilliseconds},
-                        {"First Run Time", firstRunTime.TotalMilliseconds}
-                    };
+                    performanceData.Add("Parse Time", parseTime.TotalMilliseconds);
                     TelemetryEventEntry.SendFiltered(Tuple.Create(parseResult, performanceData));
                     PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
                 }
@@ -341,7 +331,8 @@ namespace Microsoft.DotNet.Cli
             IFileSentinel toolPathSentinel,
             bool isDotnetBeingInvokedFromNativeInstaller,
             DotnetFirstRunConfiguration dotnetFirstRunConfiguration,
-            IEnvironmentProvider environmentProvider)
+            IEnvironmentProvider environmentProvider,
+            Dictionary<string,double> performanceMeasurements)
         {
             using (PerfTrace.Current.CaptureTiming())
             {
@@ -356,10 +347,10 @@ namespace Microsoft.DotNet.Cli
                     dotnetFirstRunConfiguration,
                     Reporter.Output,
                     CliFolderPathCalculator.CliFallbackFolderPath,
-                    environmentPath);
+                    environmentPath,
+                    performanceMeasurements);
 
                 dotnetConfigurer.Configure();
-
                 if (isDotnetBeingInvokedFromNativeInstaller && OperatingSystem.IsWindows())
                 {
                     DotDefaultPathCorrector.Correct();
