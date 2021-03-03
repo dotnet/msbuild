@@ -227,6 +227,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <TrimmerRemoveSymbols Condition=" '$(DebuggerSupport)' != 'false' ">false</TrimmerRemoveSymbols>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(_TrimmerUnreachableBodies)' == '' And
+                              '$(PublishTrimmed)' == 'true' And
+                              $([MSBuild]::VersionLessThan($(_TargetFrameworkVersionWithoutV), '6.0'))">
+      <_TrimmerUnreachableBodies>false</_TrimmerUnreachableBodies>
+    </PropertyGroup>
+
     <!-- Set IsTrimmable for any assemblies that already have customized TrimMode. -->
     <ItemGroup>
       <ManagedAssemblyToLink Condition=" '%(ManagedAssemblyToLink.TrimMode)' != '' ">
