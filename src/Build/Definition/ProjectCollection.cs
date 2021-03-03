@@ -2032,9 +2032,9 @@ namespace Microsoft.Build.Evaluation
 
                 _includeTaskInputs = true;
             }
-#endregion
+            #endregion
 
-#region ILogger Members
+            #region ILogger Members
 
             /// <summary>
             /// The logger verbosity
