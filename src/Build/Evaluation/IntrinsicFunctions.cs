@@ -266,7 +266,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static object GetRegistryValue(string keyName, string valueName)
         {
-            return null; // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors	
+            return null; // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
         }
 
         /// <summary>
