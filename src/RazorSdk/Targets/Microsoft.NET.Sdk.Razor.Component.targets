@@ -22,7 +22,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <_RazorGenerateComponentDeclarationDesignTimeDependsOn>ResolveRazorConfiguration;ResolveRazorComponentInputs;AssignRazorComponentTargetPaths;RazorGenerateComponentDeclaration</_RazorGenerateComponentDeclarationDesignTimeDependsOn>
-    <_RazorGenerateComponentDesignTimeDependsOn>ResolveRazorComponentInputs;AssignRazorComponentTargetPaths</_RazorGenerateComponentDesignTimeDependsOn>
   </PropertyGroup>
 
   <PropertyGroup>

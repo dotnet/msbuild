@@ -50,10 +50,6 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>2215b42f58d35ec8d06976037c58d21e5cf3e9d0</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="6.0.0-beta.21081.1">
-      <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>f6ed3308865528c56ed26b85004121fce56bf4f4</Sha>
-    </Dependency>
     <Dependency Name="Microsoft.NET.HostModel" Version="6.0.0-preview.3.21152.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>2215b42f58d35ec8d06976037c58d21e5cf3e9d0</Sha>
@@ -165,10 +161,6 @@
     <Dependency Name="dotnet-user-secrets" Version="6.0.0-preview.3.21152.6">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>262369301aa24bb7626e41b88cce915daeb7827a</Sha>
-    </Dependency>
-    <Dependency Name="dotnet-watch" Version="6.0.0-preview.2.21108.6">
-      <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>0d981a053fd45a73f52f93da2855d986c4cc7b62</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.Analyzers" Version="6.0.0-preview.3.21152.6">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
