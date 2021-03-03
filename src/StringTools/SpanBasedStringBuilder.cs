@@ -189,6 +189,19 @@ namespace Microsoft.NET.StringTools
         }
 
         /// <summary>
+        /// Appends a character span represented by <see cref="ReadOnlyMemory{T}" />.
+        /// </summary>
+        /// <param name="span">The character span to append.</param>
+        public void Append(ReadOnlyMemory<char> span)
+        {
+            if (!span.IsEmpty)
+            {
+                _spans.Add(span);
+                Length += span.Length;
+            }
+        }
+
+        /// <summary>
         /// Removes leading white-space characters from the string.
         /// </summary>
         public void TrimStart()
