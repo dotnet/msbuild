@@ -1699,6 +1699,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="ProjectImportSkippedMissingFile" xml:space="preserve">
     <value>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</value>
   </data>
+  <data name="ProjectImportSkippedExpressionEvaluatedToEmpty" xml:space="preserve">
+    <value>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</value>
+  </data>
   <data name="ProjectImported" xml:space="preserve">
     <value>Importing project "{0}" into project "{1}" at ({2},{3}).</value>
   </data>

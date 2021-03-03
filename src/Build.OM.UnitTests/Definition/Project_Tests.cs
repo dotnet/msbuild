@@ -4082,6 +4082,46 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void ProjectImportedEventInvalidFileWhenExpressionEvaluatesToEmpty()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+
+                ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
+
+                var import = pre.AddImport("$(SomethingThatEvaluatesToEmpty)");
+
+                pre.Save();
+                pre.Reload();
+
+                using (ProjectCollection collection = new ProjectCollection())
+                {
+                    MockLogger logger = new MockLogger();
+                    collection.RegisterLogger(logger);
+
+                    Project unused = new Project(pre, null, null, collection, ProjectLoadSettings.IgnoreInvalidImports);
+
+                    ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
+
+                    Assert.NotNull(eventArgs);
+                    Assert.True(eventArgs.ImportIgnored);
+
+                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+
+                    Assert.Equal(string.Empty, eventArgs.ImportedProjectFile);
+
+                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+
+                    Assert.Equal(3, eventArgs.LineNumber);
+                    Assert.Equal(3, eventArgs.ColumnNumber);
+
+                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the expression evaluating to an empty string.");
+                }
+            }
+        }
+
+        [Fact]
         public void ProjectImportedEventMissingFile()
         {
             using (var env = TestEnvironment.Create(_output))
