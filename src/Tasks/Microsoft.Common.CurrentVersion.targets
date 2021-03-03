@@ -346,6 +346,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <DevEnvDir Condition="'$(DevEnvDir)'==''">*Undefined*</DevEnvDir>
     <SolutionName Condition="'$(SolutionName)'==''">*Undefined*</SolutionName>
+    <SolutionFilterName Condition="'$(SolutionFilterName)'==''">*Undefined*</SolutionFilterName>
     <!-- Example, MySolution -->
     <SolutionFileName Condition="'$(SolutionFileName)'==''">*Undefined*</SolutionFileName>
     <!-- Example, MySolution.sln -->

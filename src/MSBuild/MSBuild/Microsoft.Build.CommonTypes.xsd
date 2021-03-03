@@ -1796,6 +1796,7 @@ elementFormDefault="qualified">
     <xs:element name="SolutionExt" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="SolutionFileName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="SolutionName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="SolutionFilterName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="SolutionPath" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="StartAction" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="StartArguments" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>

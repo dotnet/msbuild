@@ -94,6 +94,7 @@ namespace Microsoft.Build.Construction
             new Tuple<string, string>("SolutionExt", null),
             new Tuple<string, string>("SolutionFileName", null),
             new Tuple<string, string>("SolutionName", null),
+            new Tuple<string, string>("SolutionFilterName", null),
             new Tuple<string, string>(SolutionPathPropertyName, null)
         };
 
@@ -499,7 +500,7 @@ namespace Microsoft.Build.Construction
 
             string additionalProperties = string.Format(
                 CultureInfo.InvariantCulture,
-                "Configuration={0}; Platform={1}; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)",
+                "Configuration={0}; Platform={1}; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionFilterName=$(SolutionFilterName); SolutionPath=$(SolutionPath)",
                 EscapingUtilities.Escape(configurationName),
                 EscapingUtilities.Escape(platformName)
             );
@@ -2291,6 +2292,7 @@ namespace Microsoft.Build.Construction
             globalProperties.AddProperty("SolutionExt", EscapingUtilities.Escape(Path.GetExtension(_solutionFile.FullPath)));
             globalProperties.AddProperty("SolutionFileName", EscapingUtilities.Escape(Path.GetFileName(_solutionFile.FullPath)));
             globalProperties.AddProperty("SolutionName", EscapingUtilities.Escape(Path.GetFileNameWithoutExtension(_solutionFile.FullPath)));
+            globalProperties.AddProperty("SolutionFilterName", EscapingUtilities.Escape(Path.GetFileNameWithoutExtension(_solutionFile.SolutionFilterFilePath ?? string.Empty)));
 
             globalProperties.AddProperty(SolutionPathPropertyName, EscapingUtilities.Escape(Path.Combine(_solutionFile.SolutionFileDirectory, Path.GetFileName(_solutionFile.FullPath))));
 
