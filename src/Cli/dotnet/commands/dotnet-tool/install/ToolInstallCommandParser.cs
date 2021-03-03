@@ -17,22 +17,22 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option VersionOption = new Option<string>("--version", LocalizableStrings.VersionOptionDescription)
         {
-            Argument = new Argument<string>(LocalizableStrings.VersionOptionName)
+            ArgumentHelpName = LocalizableStrings.VersionOptionName
         };
 
         public static readonly Option ConfigOption = new Option<string>("--configfile", LocalizableStrings.ConfigFileOptionDescription)
         {
-            Argument = new Argument<string>(LocalizableStrings.ConfigFileOptionName)
+            ArgumentHelpName = LocalizableStrings.ConfigFileOptionName
         };
 
-        public static readonly Option AddSourceOption = new Option<IEnumerable<string>>("--add-source", LocalizableStrings.AddSourceOptionDescription)
+        public static readonly Option AddSourceOption = new Option<string[]>("--add-source", LocalizableStrings.AddSourceOptionDescription)
         {
-            Argument = new Argument<IEnumerable<string>>(LocalizableStrings.AddSourceOptionName)
+            ArgumentHelpName = LocalizableStrings.AddSourceOptionName
         }.AllowSingleArgPerToken();
 
         public static readonly Option FrameworkOption = new Option<string>("--framework", LocalizableStrings.FrameworkOptionDescription)
         {
-            Argument = new Argument<string>(LocalizableStrings.FrameworkOptionName)
+            ArgumentHelpName = LocalizableStrings.FrameworkOptionName
         };
 
         public static readonly Option VerbosityOption = CommonOptions.VerbosityOption();

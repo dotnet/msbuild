@@ -160,39 +160,44 @@ namespace Microsoft.NET.Build.Tasks
                     compositeR2RImageRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, "r2r" + Path.GetExtension(compositeR2RImageRelativePath));
                     var compositeR2RImage = Path.Combine(OutputPath, compositeR2RImageRelativePath);
 
-                    string compositePDBImage = null;
-                    string compositePDBRelativePath = null;
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && hasValidDiaSymReaderLib)
-                    {
-                        compositePDBImage = Path.ChangeExtension(compositeR2RImage, ".ni.pdb");
-                        compositePDBRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, ".ni.pdb");
-                    }
-                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                    {
-                        compositePDBImage = Path.ChangeExtension(compositeR2RImage, ".ni.{composite}.map");
-                        compositePDBRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, ".ni.{composite}.map");
-                    }
-
                     TaskItem r2rCompilationEntry = new TaskItem(file);
                     r2rCompilationEntry.SetMetadata(MetadataKeys.OutputR2RImage, compositeR2RImage);
-                    if (compositePDBImage != null && ReadyToRunUseCrossgen2 && !_crossgen2IsVersion5)
-                    {
-                        r2rCompilationEntry.SetMetadata(MetadataKeys.EmitSymbols, "true");
-                        r2rCompilationEntry.SetMetadata(MetadataKeys.OutputPDBImage, Path.GetDirectoryName(compositePDBImage));
+                    r2rCompilationEntry.RemoveMetadata(MetadataKeys.OriginalItemSpec);
 
-                        // Publish composite PDB file
-                        TaskItem r2rSymbolsFileToPublish = new TaskItem(file);
-                        r2rSymbolsFileToPublish.ItemSpec = compositePDBImage;
-                        r2rSymbolsFileToPublish.SetMetadata(MetadataKeys.RelativePath, compositePDBRelativePath);
-                        r2rSymbolsFileToPublish.RemoveMetadata(MetadataKeys.OriginalItemSpec);
-                        if (!IncludeSymbolsInSingleFile)
+                    if (EmitSymbols)
+                    {
+                        string compositePDBImage = null;
+                        string compositePDBRelativePath = null;
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && hasValidDiaSymReaderLib)
                         {
-                            r2rSymbolsFileToPublish.SetMetadata(MetadataKeys.ExcludeFromSingleFile, "true");
+                            compositePDBImage = Path.ChangeExtension(compositeR2RImage, ".ni.pdb");
+                            compositePDBRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, ".ni.pdb");
+                        }
+                        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                        {
+                            compositePDBImage = Path.ChangeExtension(compositeR2RImage, ".ni.{composite}.map");
+                            compositePDBRelativePath = Path.ChangeExtension(compositeR2RImageRelativePath, ".ni.{composite}.map");
                         }
     
-                        r2rFilesPublishList.Add(r2rSymbolsFileToPublish);
+                        if (compositePDBImage != null && ReadyToRunUseCrossgen2 && !_crossgen2IsVersion5)
+                        {
+                            r2rCompilationEntry.SetMetadata(MetadataKeys.EmitSymbols, "true");
+                            r2rCompilationEntry.SetMetadata(MetadataKeys.OutputPDBImage, Path.GetDirectoryName(compositePDBImage));
+    
+                            // Publish composite PDB file
+                            TaskItem r2rSymbolsFileToPublish = new TaskItem(file);
+                            r2rSymbolsFileToPublish.ItemSpec = compositePDBImage;
+                            r2rSymbolsFileToPublish.SetMetadata(MetadataKeys.RelativePath, compositePDBRelativePath);
+                            r2rSymbolsFileToPublish.RemoveMetadata(MetadataKeys.OriginalItemSpec);
+                            if (!IncludeSymbolsInSingleFile)
+                            {
+                                r2rSymbolsFileToPublish.SetMetadata(MetadataKeys.ExcludeFromSingleFile, "true");
+                            }
+        
+                            r2rFilesPublishList.Add(r2rSymbolsFileToPublish);
+                        }
                     }
-                    r2rCompilationEntry.RemoveMetadata(MetadataKeys.OriginalItemSpec);
+
                     imageCompilationList.Add(r2rCompilationEntry);
 
                     // Publish it

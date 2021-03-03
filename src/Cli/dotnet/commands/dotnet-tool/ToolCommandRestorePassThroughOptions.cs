@@ -11,22 +11,22 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ToolCommandRestorePassThroughOptions
     {
-        public static Option DisableParallelOption = new Option<bool>(
+        public static Option DisableParallelOption = new ForwardedOption<bool>(
                 "--disable-parallel",
                 LocalizableStrings.CmdDisableParallelOptionDescription)
                 .ForwardAs("--disable-parallel");
 
-        public static Option NoCacheOption = new Option<bool>(
+        public static Option NoCacheOption = new ForwardedOption<bool>(
                 "--no-cache",
                 LocalizableStrings.CmdNoCacheOptionDescription)
                 .ForwardAs("--no-cache");
 
-        public static Option IgnoreFailedSourcesOption = new Option<bool>(
+        public static Option IgnoreFailedSourcesOption = new ForwardedOption<bool>(
                 "--ignore-failed-sources",
                 LocalizableStrings.CmdIgnoreFailedSourcesOptionDescription)
                 .ForwardAs("--ignore-failed-sources");
 
-        public static Option InteractiveRestoreOption = new Option<bool>(
+        public static Option InteractiveRestoreOption = new ForwardedOption<bool>(
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription)
                 .ForwardAs(Constants.RestoreInteractiveOption);

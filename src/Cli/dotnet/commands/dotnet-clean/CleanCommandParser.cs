@@ -16,12 +16,12 @@ namespace Microsoft.DotNet.Cli
             Arity = ArgumentArity.ZeroOrMore
         };
 
-        public static readonly Option OutputOption = new Option<string>(new string[] { "-o", "--output" }, LocalizableStrings.CmdOutputDirDescription)
+        public static readonly Option OutputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.CmdOutputDirDescription)
         {
-            Argument = new Argument<string>(LocalizableStrings.CmdOutputDir)
+            ArgumentHelpName = LocalizableStrings.CmdOutputDir
         }.ForwardAsSingle(o => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(o)}");
 
-        public static readonly Option NoLogoOption = new Option<bool>("--nologo", LocalizableStrings.CmdNoLogo)
+        public static readonly Option NoLogoOption = new ForwardedOption<bool>("--nologo", LocalizableStrings.CmdNoLogo)
             .ForwardAs("-nologo");
 
         public static Command GetCommand()

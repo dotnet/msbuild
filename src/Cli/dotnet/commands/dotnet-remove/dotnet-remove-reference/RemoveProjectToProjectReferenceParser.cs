@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option FrameworkOption = new Option<string>(new string[] { "-f", "--framework" }, LocalizableStrings.CmdFrameworkDescription)
         {
-            Argument = new Argument<string>(CommonLocalizableStrings.CmdFramework)
+            ArgumentHelpName = CommonLocalizableStrings.CmdFramework
         };
 
         public static Command GetCommand()

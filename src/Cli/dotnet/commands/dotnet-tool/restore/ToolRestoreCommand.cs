@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             FilePath? customManifestFileLocation = GetCustomManifestFileLocation();
 
             FilePath? configFile = null;
-            if (_configFilePath != null)
+            if (!string.IsNullOrEmpty(_configFilePath))
             {
                 configFile = new FilePath(_configFilePath);
             }
@@ -246,7 +246,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
         {
             string customFile = _parseResult.ValueForOption<string>(ToolRestoreCommandParser.ToolManifestOption);
             FilePath? customManifestFileLocation;
-            if (customFile != null)
+            if (!string.IsNullOrEmpty(customFile))
             {
                 customManifestFileLocation = new FilePath(customFile);
             }

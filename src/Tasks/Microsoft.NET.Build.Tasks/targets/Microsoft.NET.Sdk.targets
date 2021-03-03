@@ -426,6 +426,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Value="$(HttpActivityPropagationSupport)"
                                     Trim="true" />
 
+    <RuntimeHostConfigurationOption Include="System.Net.Http.UseNativeHttpHandler"
+                                    Condition="'$(UseNativeHttpHandler)' != ''"
+                                    Value="$(UseNativeHttpHandler)"
+                                    Trim="true" />
+
     <RuntimeHostConfigurationOption Include="System.Resources.ResourceManager.AllowCustomResourceTypes"
                                     Condition="'$(CustomResourceTypesSupport)' != ''"
                                     Value="$(CustomResourceTypesSupport)"

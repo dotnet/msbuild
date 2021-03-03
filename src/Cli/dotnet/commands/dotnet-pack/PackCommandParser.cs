@@ -16,24 +16,24 @@ namespace Microsoft.DotNet.Cli
             Arity = ArgumentArity.ZeroOrMore
         };
 
-        public static readonly Option OutputOption = new Option<string>(new string[] { "-o", "--output" }, LocalizableStrings.CmdOutputDirDescription)
+        public static readonly Option OutputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.CmdOutputDirDescription)
         {
-            Argument = new Argument<string>(LocalizableStrings.CmdOutputDir)
+            ArgumentHelpName = LocalizableStrings.CmdOutputDir
         }.ForwardAsSingle(o => $"-property:PackageOutputPath={CommandDirectoryContext.GetFullPath(o)}");
 
-        public static readonly Option NoBuildOption = new Option<bool>("--no-build", LocalizableStrings.CmdNoBuildOptionDescription)
+        public static readonly Option NoBuildOption = new ForwardedOption<bool>("--no-build", LocalizableStrings.CmdNoBuildOptionDescription)
             .ForwardAs("-property:NoBuild=true");
 
-        public static readonly Option IncludeSymbolsOption = new Option<bool>("--include-symbols", LocalizableStrings.CmdIncludeSymbolsDescription)
+        public static readonly Option IncludeSymbolsOption = new ForwardedOption<bool>("--include-symbols", LocalizableStrings.CmdIncludeSymbolsDescription)
             .ForwardAs("-property:IncludeSymbols=true");
 
-        public static readonly Option IncludeSourceOption = new Option<bool>("--include-source", LocalizableStrings.CmdIncludeSourceDescription)
+        public static readonly Option IncludeSourceOption = new ForwardedOption<bool>("--include-source", LocalizableStrings.CmdIncludeSourceDescription)
             .ForwardAs("-property:IncludeSource=true");
 
-        public static readonly Option ServiceableOption = new Option<bool>(new string[] { "-s", "--serviceable" }, LocalizableStrings.CmdServiceableDescription)
+        public static readonly Option ServiceableOption = new ForwardedOption<bool>(new string[] { "-s", "--serviceable" }, LocalizableStrings.CmdServiceableDescription)
             .ForwardAs("-property:Serviceable=true");
 
-        public static readonly Option NoLogoOption = new Option<bool>("--nologo", LocalizableStrings.CmdNoLogo)
+        public static readonly Option NoLogoOption = new ForwardedOption<bool>("--nologo", LocalizableStrings.CmdNoLogo)
             .ForwardAs("-nologo");
 
         public static readonly Option NoRestoreOption = CommonOptions.NoRestoreOption();

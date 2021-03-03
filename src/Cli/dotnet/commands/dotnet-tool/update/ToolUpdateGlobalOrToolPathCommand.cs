@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             ValidateArguments();
 
             DirectoryPath? toolPath = null;
-            if (_toolPath != null)
+            if (!string.IsNullOrEmpty(_toolPath))
             {
                 toolPath = new DirectoryPath(_toolPath);
             }
@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
 
         private void ValidateArguments()
         {
-            if (_configFilePath != null && !File.Exists(_configFilePath))
+            if (!string.IsNullOrEmpty(_configFilePath) && !File.Exists(_configFilePath))
             {
                 throw new GracefulException(
                     string.Format(
@@ -214,7 +214,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
         private FilePath? GetConfigFile()
         {
             FilePath? configFile = null;
-            if (_configFilePath != null)
+            if (!string.IsNullOrEmpty(_configFilePath))
             {
                 configFile = new FilePath(_configFilePath);
             }
