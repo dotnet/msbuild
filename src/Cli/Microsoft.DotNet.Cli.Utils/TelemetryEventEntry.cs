@@ -18,14 +18,14 @@ namespace Microsoft.DotNet.Cli.Utils
                 new InstrumentationEventArgs(eventName, properties, measurements));
         }
 
-        public static void SendFiltered(object o = null, Dictionary<string, double> measurements = null)
+        public static void SendFiltered(object o = null)
         {
             if (o == null)
             {
                 return;
             }
 
-            foreach (ApplicationInsightsEntryFormat entry in TelemetryFilter.Filter(o, measurements))
+            foreach (ApplicationInsightsEntryFormat entry in TelemetryFilter.Filter(o))
             {
                 TrackEvent(entry.EventName, entry.Properties, entry.Measurements);
             }
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
     public class BlockFilter : ITelemetryFilter
     {
-        public IEnumerable<ApplicationInsightsEntryFormat> Filter(object o, Dictionary<string, double> measurements = null)
+        public IEnumerable<ApplicationInsightsEntryFormat> Filter(object o)
         {
             return new List<ApplicationInsightsEntryFormat>();
         }

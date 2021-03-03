@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Cli
 
             // Capture the current timestamp to calculate the host overhead.
             DateTime mainTimeStamp = DateTime.Now;
-            TimeSpan StartupTime = mainTimeStamp - Process.GetCurrentProcess().StartTime;
+            TimeSpan startupTime = mainTimeStamp - Process.GetCurrentProcess().StartTime;
 
             bool perfLogEnabled = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_PERF_LOG", false);
             PerformanceLogStartupInformation startupInfo = null;
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Cli
                 {
                     using (PerfTrace.Current.CaptureTiming())
                     {
-                        return ProcessArgs(args, StartupTime);
+                        return ProcessArgs(args, startupTime);
                     }
                 }
                 catch (HelpException e)
@@ -129,7 +129,6 @@ namespace Microsoft.DotNet.Cli
             var command = string.Empty;
             var lastArg = 0;
             TimeSpan firstRunTime = new TimeSpan(0);
-            Dictionary<string, double> performanceData;
             TopLevelCommandParserResult topLevelCommandParserResult = TopLevelCommandParserResult.Empty;
 
             using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
@@ -255,22 +254,12 @@ namespace Microsoft.DotNet.Cli
             }
 
             PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStart();
-            if (startupTime.TotalMilliseconds > 0)
+            Dictionary<string, double> performanceData = new Dictionary<string, double>
             {
-                performanceData = new Dictionary<string, double>
-                {
-                    {"Startup Time", startupTime.TotalMilliseconds}
-                };
-                if (firstRunTime.TotalMilliseconds > 0 )
-                {
-                    performanceData.Add("First Run Time", firstRunTime.TotalMilliseconds);
-                }
-                TelemetryEventEntry.SendFiltered(topLevelCommandParserResult, performanceData);
-            }
-            else
-            {
-                TelemetryEventEntry.SendFiltered(topLevelCommandParserResult);
-            }
+                {"Startup Time", startupTime.TotalMilliseconds},
+                {"First Run Time", firstRunTime.TotalMilliseconds}
+            };
+            TelemetryEventEntry.SendFiltered(Tuple.Create(topLevelCommandParserResult, performanceData));
             PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
 
             int exitCode;
@@ -285,25 +274,13 @@ namespace Microsoft.DotNet.Cli
                 if (!parseResult.Errors.Any())
                 {
                     PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStart();
-                    if (startupTime.TotalMilliseconds > 0)
+                    performanceData = new Dictionary<string, double>
                     {
-
-                        performanceData = new Dictionary<string, double>
-                        {
-                            {"Startup Time", startupTime.TotalMilliseconds},
-                            {"Parse Time", parseTime.TotalMilliseconds}
-                        };
-                        if (firstRunTime.TotalMilliseconds > 0 )
-                        {
-                            performanceData.Add("First Run Time", firstRunTime.TotalMilliseconds);
-                        }
-                        TelemetryEventEntry.SendFiltered(parseResult, performanceData);
-                    }
-                    else
-                    {
-                         TelemetryEventEntry.SendFiltered(parseResult);
-                    }
-
+                        {"Startup Time", startupTime.TotalMilliseconds},
+                        {"Parse Time", parseTime.TotalMilliseconds},
+                        {"First Run Time", firstRunTime.TotalMilliseconds}
+                    };
+                    TelemetryEventEntry.SendFiltered(Tuple.Create(parseResult, performanceData));
                     PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
                 }
 

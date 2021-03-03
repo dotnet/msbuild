@@ -21,9 +21,22 @@ namespace Microsoft.DotNet.Cli.Telemetry
             _hash = hash ?? throw new ArgumentNullException(nameof(hash));
         }
 
-        public IEnumerable<ApplicationInsightsEntryFormat> Filter(object objectToFilter, Dictionary<string, double> measurements = null)
+        public IEnumerable<ApplicationInsightsEntryFormat> Filter(object objectToFilter)
         {
             var result = new List<ApplicationInsightsEntryFormat>();
+            Dictionary<string,double> measurements = null;
+            if (objectToFilter is Tuple<TopLevelCommandParserResult, Dictionary<string,double>> topLevelCommandWithMeasurements)
+            {
+                objectToFilter = topLevelCommandWithMeasurements.Item1;
+                measurements = topLevelCommandWithMeasurements.Item2;
+                RemoveZeroTimes(measurements);
+            }
+            else if (objectToFilter is Tuple<ParseResult, Dictionary<string,double>> parseResultWithMeasurements)
+            {
+                objectToFilter = parseResultWithMeasurements.Item1;
+                measurements = parseResultWithMeasurements.Item2;
+                RemoveZeroTimes(measurements);
+            }
 
             if (objectToFilter is ParseResult parseResult)
             {
@@ -190,6 +203,20 @@ namespace Microsoft.DotNet.Cli.Telemetry
             }
 
             return s;
+        }
+
+        private void RemoveZeroTimes(Dictionary<string,double> measurements)
+        {
+            if (measurements != null)
+            {
+                foreach (var measurement in measurements)
+                {
+                    if (measurement.Value == 0)
+                    {
+                        measurements.Remove(measurement.Key);
+                    }
+                }
+            }
         }
     }
 }
