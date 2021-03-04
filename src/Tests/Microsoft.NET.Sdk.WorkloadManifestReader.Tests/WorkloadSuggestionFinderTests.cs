@@ -24,7 +24,7 @@ namespace ManifestReaderTests
         public void CanSuggestSimpleWorkload()
         {
             var manifestProvider = new FakeManifestProvider(Path.Combine("Manifests", "Sample.json"));
-            var resolver = WorkloadResolver.CreateForTests(manifestProvider, fakeRootPath, ManifestTests.TEST_RUNTIME_IDENTIFIER_CHAIN);
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { fakeRootPath });
 
             FakeFileSystemChecksSoThesePackagesAppearInstalled(resolver, "Xamarin.Android.Sdk", "Xamarin.Android.BuildTools");
 
@@ -37,7 +37,7 @@ namespace ManifestReaderTests
         public void CanSuggestTwoWorkloadsToFulfilTwoRequirements()
         {
             var manifestProvider = new FakeManifestProvider(Path.Combine("Manifests", "Sample.json"));
-            var resolver = WorkloadResolver.CreateForTests(manifestProvider, fakeRootPath, ManifestTests.TEST_RUNTIME_IDENTIFIER_CHAIN);
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { fakeRootPath });
 
             FakeFileSystemChecksSoThesePackagesAppearInstalled(resolver,
                 //xamarin-android-build is fully installed
@@ -57,7 +57,7 @@ namespace ManifestReaderTests
         public void CanSuggestWorkloadThatFulfillsTwoRequirements()
         {
             var manifestProvider = new FakeManifestProvider(Path.Combine("Manifests", "Sample.json"));
-            var resolver = WorkloadResolver.CreateForTests(manifestProvider, fakeRootPath, ManifestTests.TEST_RUNTIME_IDENTIFIER_CHAIN);
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { fakeRootPath });
 
             FakeFileSystemChecksSoThesePackagesAppearInstalled(resolver,
                 //xamarin-android-build is fully installed

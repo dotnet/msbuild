@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -24,8 +25,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        //  Enabling all of these tests on full framework is tracked by https://github.com/dotnet/sdk/issues/13849
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_should_build_with_workload()
         {
             var testProject = new TestProject()
@@ -44,7 +44,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_should_fail_without_workload()
         {
             var testProject = new TestProject()
@@ -65,7 +65,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1147");
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_should_fail_without_workload_when_multitargeted()
         {
             var testProject = new TestProject()
@@ -86,7 +86,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1147");
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_should_fail_when_multitargeted_to_unknown_platforms()
         {
             var testProject = new TestProject()
@@ -108,7 +108,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_should_fail_without_resolver_enabled()
         {
             var testProject = new TestProject()
@@ -129,7 +129,7 @@ namespace Microsoft.NET.Build.Tests
                 .HaveStdOutContaining("NETSDK1139");
         }
 
-        [CoreMSBuildOnlyFact]
+        [Fact]
         public void It_should_import_AutoImports_for_installed_workloads()
         {
             var testProject = new TestProject()
@@ -140,7 +140,39 @@ namespace Microsoft.NET.Build.Tests
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
-            var getValuesCommand = new GetValuesCommand(testAsset, "TestWorkloadAutoImportPropsImported");
+            var expectedProperty = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "WinTestWorkloadAutoImportPropsImported" : "UnixTestWorkloadAutoImportPropsImported";
+
+            var getValuesCommand = new GetValuesCommand(testAsset, expectedProperty);
+
+            getValuesCommand
+                .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "true")
+                .Execute()
+                .Should()
+                .Pass();
+
+            getValuesCommand
+                .GetValues()
+                .Should()
+                .BeEquivalentTo("true");
+        }
+
+        [Fact]
+        public void It_should_import_aliased_pack()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "WorkloadTest",
+                TargetFrameworks = "net5.0-workloadtestplatform"
+            };
+
+            var testAsset = _testAssetsManager
+                .CreateTestProject(testProject);
+
+            var expectedProperty = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
+                "UsingWinTestWorkloadPack" :
+                "UsingUnixTestWorkloadPack";
+
+            var getValuesCommand = new GetValuesCommand(testAsset, expectedProperty);
 
             getValuesCommand
                 .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "true")

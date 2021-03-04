@@ -23,12 +23,14 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [FullMSBuildOnlyTheory(Skip = "Disabled for now")]
+        [FullMSBuildOnlyTheory]
         [InlineData(false)]
         [InlineData(true)]
         public void It_publishes_with_a_publish_profile(bool? publishSingleFile)
         {
             var tfm = "netcoreapp3.1";
+            var rid = EnvironmentInfo.GetCompatibleRid(tfm);
+
             var testProject = new TestProject()
             {
                 Name = "ConsoleWithPublishProfile",
@@ -61,6 +63,7 @@ namespace Microsoft.NET.Publish.Tests
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <SelfContained>false</SelfContained>
     {(publishSingleFile.HasValue ? $"<PublishSingleFile>{publishSingleFile}</PublishSingleFile>" : "")}
+    {(publishSingleFile ?? false ? $"<RuntimeIdentifier>{rid}</RuntimeIdentifier>" : "")}
   </PropertyGroup>
 </Project>
 ");
@@ -71,7 +74,16 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var output = command.GetOutputDirectory(targetFramework: tfm);
+            DirectoryInfo output = null;
+            if (publishSingleFile ?? false)
+            {
+                output = command.GetOutputDirectory(targetFramework: tfm, runtimeIdentifier: rid);
+            }
+            else
+            {
+                output = command.GetOutputDirectory(targetFramework: tfm);
+            }
+            output = output.Parent;
 
             output.Should().HaveFiles(new[] {
                 $"app.Publish\\setup.exe",
@@ -79,15 +91,16 @@ namespace Microsoft.NET.Publish.Tests
                 $"app.Publish\\application files\\{testProject.Name}_1_2_3_4\\launcher{Constants.ExeSuffix}",
             });
 
-            if (publishSingleFile ?? true)
+            if (publishSingleFile ?? false)
             {
                 output.Should().HaveFiles(new[] {
                     $"app.Publish\\application files\\{testProject.Name}_1_2_3_4\\{testProject.Name}{Constants.ExeSuffix}",
-                    $"app.Publish\\application files\\{testProject.Name}_1_2_3_4\\{testProject.Name}{Constants.ExeSuffix}.manifest",
+                    $"app.Publish\\application files\\{testProject.Name}_1_2_3_4\\{testProject.Name}.dll.manifest",
                 });
                 output.Should().NotHaveFiles(new[] {
                     $"app.Publish\\application files\\{testProject.Name}_1_2_3_4\\{testProject.Name}.dll",
-                    $"app.Publish\\application files\\{testProject.Name}_1_2_3_4\\{testProject.Name}.dll.manifest",
+                    $"app.Publish\\application files\\{testProject.Name}_1_2_3_4\\Newtonsoft.Json.dll",
+                    $"app.Publish\\application files\\{testProject.Name}_1_2_3_4\\{testProject.Name}.deps.json",
                 });
             }
             else
