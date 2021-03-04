@@ -89,7 +89,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ItemGroup>
     <RazorExtension Include="MVC-3.0">
       <AssemblyName>Microsoft.AspNetCore.Mvc.Razor.Extensions</AssemblyName>
-      <AssemblyFilePath>$(RazorSdkDirectoryRoot)extensions\mvc-3-0\Microsoft.AspNetCore.Mvc.Razor.Extensions.dll</AssemblyFilePath>
+      <AssemblyFilePath>$(RazorSdkDirectoryRoot)tools\Microsoft.AspNetCore.Mvc.Razor.Extensions.dll</AssemblyFilePath>
     </RazorExtension>
   </ItemGroup>
 
