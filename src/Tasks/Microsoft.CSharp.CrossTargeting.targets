@@ -17,6 +17,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
      <CSharpDesignTimeTargetsPath Condition="'$(CSharpDesignTimeTargetsPath)'==''">$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed\Microsoft.CSharp.DesignTime.targets</CSharpDesignTimeTargetsPath>
   </PropertyGroup>
+
   <Import Project="$(CSharpDesignTimeTargetsPath)" Condition="'$(CSharpDesignTimeTargetsPath)' != '' and Exists('$(CSharpDesignTimeTargetsPath)')" />
 
   <Import Project="Microsoft.Common.CrossTargeting.targets" />

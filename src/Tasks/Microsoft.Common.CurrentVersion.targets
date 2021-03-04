@@ -30,7 +30,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')"/>
 
-
   <!-- VS10 without SP1 and without VS11 will not have VisualStudioVersion set, so do that here -->
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -163,7 +162,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-
     <!-- Determine OutputType property from the legacy TargetType property -->
     <OutputType Condition=" '$(TargetType)' != ''">$(TargetType)</OutputType>
     <OutputType Condition=" '$(TargetType)' == 'Container' or '$(TargetType)' == 'DocumentContainer' ">library</OutputType>
@@ -221,7 +219,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
-
     <!-- Required for enabling Team Build for packaging app package-generating projects -->
     <OutDirWasSpecified Condition=" '$(OutDir)'!='' and '$(OutDirWasSpecified)'=='' ">true</OutDirWasSpecified>
 
@@ -363,10 +360,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- It would be a breaking change to automatically turn on binding redirects for existing projects, so turn them on only when opting into a new framework. -->
     <AutoGenerateBindingRedirects Condition="'$(AutoGenerateBindingRedirects)' == '' and '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(TargetFrameworkVersion.TrimStart(vV))' >= '4.7.2'">true</AutoGenerateBindingRedirects>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(AutoUnifyAssemblyReferences)' == ''">
     <AutoUnifyAssemblyReferences>true</AutoUnifyAssemblyReferences>
     <AutoUnifyAssemblyReferences Condition="'$(GenerateBindingRedirectsOutputType)' == 'true' and '$(AutoGenerateBindingRedirects)' != 'true'">false</AutoUnifyAssemblyReferences>
   </PropertyGroup>
+
   <PropertyGroup>
     <CleanFile Condition="'$(CleanFile)'==''">$(MSBuildProjectFile).FileListAbsolute.txt</CleanFile>
     <!-- During DesignTime Builds, skip project reference build as Design time is only queueing information.-->
@@ -383,6 +382,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <_GenerateBindingRedirectsIntermediateAppConfig>$(IntermediateOutputPath)$(TargetFileName).config</_GenerateBindingRedirectsIntermediateAppConfig>
   </PropertyGroup>
+
   <ItemGroup>
     <IntermediateAssembly Include="$(IntermediateOutputPath)$(TargetName)$(TargetExt)"/>
     <FinalDocFile Include="@(DocFileItem->'$(OutDir)%(Filename)%(Extension)')"/>
@@ -522,7 +522,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch Condition="'$(ProcessorArchitecture)'==''">None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
     <ProcessorArchitecture Condition="'$(ProcessorArchitecture)'==''">$(PROCESSOR_ARCHITECTURE)</ProcessorArchitecture>
   </PropertyGroup>
-
 
   <!-- Sensible defaults for the most-commonly-desired MSBuildRuntime and MSBuildArchitecture values. The Core and Mono runtimes do not currently support specifying task architecture or runtime.
        If support for out-of-proc task execution is added on other runtimes, make sure each task's logic is checked against the current state of support. -->
@@ -925,6 +924,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       PostBuildEvent
     </CoreBuildDependsOn>
   </PropertyGroup>
+
   <Target
       Name="CoreBuild"
       DependsOnTargets="$(CoreBuildDependsOn)">
@@ -942,7 +942,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-
     <_ProjectDefaultTargets Condition="'$(MSBuildProjectDefaultTargets)' != ''">$(MSBuildProjectDefaultTargets)</_ProjectDefaultTargets>
     <_ProjectDefaultTargets Condition="'$(MSBuildProjectDefaultTargets)' == ''">Build</_ProjectDefaultTargets>
 
@@ -1087,6 +1086,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <RunDependsOn></RunDependsOn>
   </PropertyGroup>
+
   <Target
       Name="Run"
       DependsOnTargets="$(RunDependsOn)">
@@ -1096,9 +1096,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Exec Command="$(TargetPath) $(StartArguments)" WorkingDirectory="$(StartWorkingDirectory)" Condition=" '$(StartWorkingDirectory)' != '' "/>
 
   </Target>
-
-
-
 
   <!--
     ***********************************************************************************************
@@ -1118,15 +1115,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <BuildingProject>false</BuildingProject>
   </PropertyGroup>
+
   <Target
       Name="BuildOnlySettings">
     <PropertyGroup>
       <BuildingProject>true</BuildingProject>
     </PropertyGroup>
   </Target>
-
-
-
 
   <!--
     ***********************************************************************************************
@@ -1146,6 +1141,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <PrepareForBuildDependsOn>$(PrepareForBuildDependsOn);GetFrameworkPaths;GetReferenceAssemblyPaths;AssignLinkMetadata</PrepareForBuildDependsOn>
   </PropertyGroup>
+
   <Target
       Name="PrepareForBuild"
       DependsOnTargets="$(PrepareForBuildDependsOn)">
@@ -1254,6 +1250,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup Condition="'$(_TargetFrameworkDirectories)' == ''">
       <TargetFrameworkProfile/>
     </PropertyGroup>
+
   </Target>
 
    <!-- Returns target framework moniker. E.g. ".NETFramework,Version=v4.0.1" -->
@@ -1281,6 +1278,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <Target Name="AssignLinkMetadata" Condition=" '$(SynthesizeLinkMetadata)' == 'true' ">
+
     <!-- NONE ITEMS -->
     <AssignLinkMetadata Items="@(None)"
                         Condition="'@(None)' != '' and '%(None.DefiningProjectFullPath)' != '$(MSBuildProjectFullPath)'">
@@ -1305,7 +1303,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_Temp Remove="@(_Temp)" />
     </ItemGroup>
 
-
     <!-- PAGE ITEMS -->
     <AssignLinkMetadata Items="@(Page)"
                         Condition="'@(Page)' != '' and '%(Page.DefiningProjectFullPath)' != '$(MSBuildProjectFullPath)'">
@@ -1317,7 +1314,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Page Include="@(_Temp)" />
       <_Temp Remove="@(_Temp)" />
     </ItemGroup>
-
 
     <!-- APPLICATIONDEFINITION ITEMS -->
     <AssignLinkMetadata Items="@(ApplicationDefinition)"
@@ -1342,6 +1338,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <EmbeddedResource Include="@(_Temp)" />
       <_Temp Remove="@(_Temp)" />
     </ItemGroup>
+
   </Target>
 
   <!--
@@ -1362,6 +1359,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <PreBuildEventDependsOn></PreBuildEventDependsOn>
   </PropertyGroup>
+
   <Target
       Name="PreBuildEvent"
       Condition="'$(PreBuildEvent)'!=''"
@@ -1370,9 +1368,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Exec WorkingDirectory="$(OutDir)" Command="$(PreBuildEvent)" />
 
   </Target>
-
-
-
 
   <!--
     ***********************************************************************************************
@@ -1393,6 +1388,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <UnmanagedUnregistrationDependsOn></UnmanagedUnregistrationDependsOn>
   </PropertyGroup>
+
   <Target
       Name="UnmanagedUnregistration"
       Condition="(('$(_AssemblyTimestampBeforeCompile)' != '$(_AssemblyTimestampAfterCompile)' or '$(RegisterForComInterop)' != 'true' or '$(OutputType)' != 'library') or
@@ -1417,15 +1413,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <UnregisterAssemblyMSBuildRuntime Condition="'$(UnregisterAssemblyMSBuildRuntime)' == ''">CurrentRuntime</UnregisterAssemblyMSBuildRuntime>
     </PropertyGroup>
 
-
     <UnregisterAssembly AssemblyListFile="@(_UnmanagedRegistrationCache)"
                         MSBuildArchitecture="$(UnregisterAssemblyMSBuildArchitecture)"
                         MSBuildRuntime="$(UnregisterAssemblyMSBuildRuntime)" />
 
   </Target>
-
-
-
 
   <!--
     ***********************************************************************************************
@@ -1558,6 +1550,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <ReferenceOutputAssembly Condition="'%(ProjectReferenceWithConfiguration.ReferenceOutputAssembly)' == ''">true</ReferenceOutputAssembly>
       </ProjectReferenceWithConfiguration>
     </ItemGroup>
+
   </Target>
 
   <!--
@@ -1785,21 +1778,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="Result"
         PropertyName="_AdditionalPropertiesFromProject"/>
     </CombineXmlElements>
-    
+
     <ItemGroup>
       <_ThisProjectBuildMetadata Include="$(MSBuildProjectFullPath)">
         <TargetFrameworks>@(_TargetFrameworkInfo)</TargetFrameworks>
         <TargetFrameworkMonikers>@(_TargetFrameworkInfo->'%(TargetFrameworkMonikers)')</TargetFrameworkMonikers>
         <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
         <AdditionalPropertiesFromProject>$(_AdditionalPropertiesFromProject)</AdditionalPropertiesFromProject>
-
         <HasSingleTargetFramework>true</HasSingleTargetFramework>
-
         <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
         <IsRidAgnostic>false</IsRidAgnostic>
         <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
+
   </Target>
 
   <Target Name="GetTargetFrameworksWithPlatformForSingleTargetFramework"
@@ -1867,6 +1859,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       _GetProjectReferenceTargetFrameworkProperties
     </PrepareProjectReferencesDependsOn>
   </PropertyGroup>
+
   <Target Name="PrepareProjectReferences" DependsOnTargets="$(PrepareProjectReferencesDependsOn)" />
 
   <!--
@@ -2147,6 +2140,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       ExpandSDKReferences;
     </ResolveAssemblyReferencesDependsOn>
   </PropertyGroup>
+
   <Target
       Name="ResolveAssemblyReferences"
       Returns="@(ReferencePath)"
@@ -2260,6 +2254,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="DependsOnNETStandard" PropertyName="_DependsOnNETStandard"/>
       <Output TaskParameter="UnresolvedAssemblyConflicts" ItemName="ResolveAssemblyReferenceUnresolvedAssemblyConflicts"/>
     </ResolveAssemblyReference>
+
   </Target>
 
   <!--
@@ -2324,9 +2319,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       OutputAppConfigFile="$(_GenerateBindingRedirectsIntermediateAppConfig)"
       SuggestedRedirects="@(SuggestedBindingRedirects)"
       >
-
       <Output TaskParameter="OutputAppConfigFile" ItemName="FileWrites" />
-
     </GenerateBindingRedirects>
 
   </Target>
@@ -2346,6 +2339,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
       <AppConfig>$(_GenerateBindingRedirectsIntermediateAppConfig)</AppConfig>
     </PropertyGroup>
+
     <ItemGroup>
       <AppConfigWithTargetPath Remove="@(AppConfigWithTargetPath)" />
       <AppConfigWithTargetPath Include="$(AppConfig)">
@@ -2470,7 +2464,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="ResolveSDKReferences"
       Returns="@(ResolvedSDKReference)"
       DependsOnTargets="$(ResolveSDKReferencesDependsOn)">
-
     <ResolveSDKReference
            SDKReferences="@(SDKReference)"
            RuntimeReferenceOnlySDKDependencies="@(RuntimeReferenceOnlySDKDependencies)"
@@ -2545,7 +2538,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       BuildInParallel="$(BuildInParallel)"
       ContinueOnError="!$(BuildingProject)"
       RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
-
       <Output TaskParameter="TargetOutputs" ItemName="TargetPathWithTargetPlatformMoniker" />
     </MSBuild>
   </Target>
@@ -2618,7 +2610,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Inputs="@(IntermediateAssembly);@(DocFileItem);@(_DebugSymbolsIntermediatePath);@(ReferencePathWithRefAssemblies);$(MSBuildAllProjects)"
           Outputs="$(_IntermediateWindowsMetadataPath);$(WinMDExpOutputPdb);$(WinMDOutputDocumentationFile)"
   >
-
       <PropertyGroup>
         <!-- Will be copied by the "copy WinMD artifacts" step instead -->
         <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
@@ -2651,6 +2642,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          <WinMDExpArtifacts Include="$(WinMDExpOutputPdb)"/>
          <FileWrites Include="$(WinMDOutputDocumentationFile);$(WinMDExpOutputPdb)"/>
     </ItemGroup>
+
   </Target>
 
   <Target
@@ -2662,6 +2654,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_ReferencesFromRAR Include="@(ReferencePath->WithMetadataValue('ReferenceSourceTarget', 'ResolveAssemblyReference'))"/>
     </ItemGroup>
+
   </Target>
 
   <PropertyGroup>
@@ -2687,7 +2680,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
         [IN]
         @(DesignTimeReference) - List of assembly references as simple/fusion names.
-
 
         [OUT]
         @(ReferencePath) - Paths to resolved primary files.
@@ -2779,6 +2771,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="ResolvedFiles" ItemName="DesignTimeReferencePath"/>
       <Output TaskParameter="FilesWritten" ItemName="FileWrites"/>
     </ResolveAssemblyReference>
+
   </Target>
 
   <!--
@@ -2898,6 +2891,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       CompileLicxFiles
     </PrepareResourcesDependsOn>
   </PropertyGroup>
+
   <Target
       Name="PrepareResources"
       DependsOnTargets="$(PrepareResourcesDependsOn)"/>
@@ -2917,6 +2911,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       CreateCustomManifestResourceNames
     </PrepareResourceNamesDependsOn>
   </PropertyGroup>
+
   <Target
       Name="PrepareResourceNames"
       DependsOnTargets="$(PrepareResourceNamesDependsOn)"/>
@@ -2932,6 +2927,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <AssignTargetPathsDependsOn></AssignTargetPathsDependsOn>
   </PropertyGroup>
+
   <Target
       Name="AssignTargetPaths"
       DependsOnTargets="$(AssignTargetPathsDependsOn)">
@@ -2944,7 +2940,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <AssignTargetPath Files="@(EmbeddedResource)" RootFolder="$(MSBuildProjectDirectory)">
       <Output TaskParameter="AssignedFiles" ItemName="_Temporary" />
     </AssignTargetPath>
-
 
     <ItemGroup>
       <!-- Replace items in EmbeddedResource with the items emitted by the AssignTargetPath task that have the TargetPath metadata -->
@@ -3076,6 +3071,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <CreateCustomManifestResourceNamesDependsOn></CreateCustomManifestResourceNamesDependsOn>
   </PropertyGroup>
+
   <Target
       Name="CreateCustomManifestResourceNames"
       DependsOnTargets="$(CreateCustomManifestResourceNamesDependsOn)"/>
@@ -3094,6 +3090,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <UseSourcePath Condition="'$(UseSourcePath)'==''">true</UseSourcePath>
     <ResGenExecuteAsTool Condition="'$(ResGenExecuteAsTool)'==''">false</ResGenExecuteAsTool>
   </PropertyGroup>
+
   <Target
       Name="ResGen"
       DependsOnTargets="$(ResGenDependsOn)"/>
@@ -3256,6 +3253,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <CompileLicxFilesDependsOn></CompileLicxFilesDependsOn>
   </PropertyGroup>
+
   <Target
       Name="CompileLicxFiles"
       Condition="'@(_LicxFile)'!=''"
@@ -3287,9 +3285,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </LC>
 
   </Target>
-
-
-
 
   <!--
     ***********************************************************************************************
@@ -3367,6 +3362,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AfterCompile;
     </CompileDependsOn>
   </PropertyGroup>
+
   <Target
       Name="Compile"
       DependsOnTargets="$(CompileDependsOn)"/>
@@ -3445,8 +3441,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Compile Include="$(TargetFrameworkMonikerAssemblyAttributesPath)"/>
       <!-- Do not put in FileWrites: this is a file shared between projects in %temp%, and cleaning it would create a race between projects during rebuild -->
     </ItemGroup>
-  </Target>
 
+  </Target>
 
   <!--
     ============================================================
@@ -3474,7 +3470,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           AssemblyAttributes="@(AssemblyAttributes)"
           OutputFile="$(AssemblyAttributesPath)"
           Language="$(Language)">
-
       <Output TaskParameter="OutputFile" ItemName="Compile"/>
       <Output TaskParameter="OutputFile" ItemName="FileWrites"/>
     </WriteCodeFragment>
@@ -3596,9 +3591,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   </Target>
 
-
-
-
   <!--
     ***********************************************************************************************
     ***********************************************************************************************
@@ -3690,6 +3682,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       GenerateSatelliteAssemblies
     </CreateSatelliteAssembliesDependsOn>
   </PropertyGroup>
+
   <Target
       Name="CreateSatelliteAssemblies"
       DependsOnTargets="$(CreateSatelliteAssembliesDependsOn)" />
@@ -3722,6 +3715,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_SatelliteAssemblyResourceInputs>
 
     </ItemGroup>
+
   </Target>
 
   <!--
@@ -3792,6 +3786,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       CreateManifestResourceNames
     </ComputeIntermediateSatelliteAssembliesDependsOn>
   </PropertyGroup>
+
   <Target
       Name="ComputeIntermediateSatelliteAssemblies"
       Condition="@(EmbeddedResource->'%(WithCulture)') != ''"
@@ -3804,6 +3799,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPath>%(EmbeddedResource.Culture)\$(TargetName).resources.dll</TargetPath>
       </IntermediateSatelliteAssembliesWithTargetPath>
     </ItemGroup>
+
   </Target>
 
   <!--
@@ -3870,9 +3866,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   </Target>
 
-
-
-
   <!--
     ***********************************************************************************************
     ***********************************************************************************************
@@ -3906,6 +3899,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <Target
       Name="_GenerateResolvedDeploymentManifestEntryPoint">
+
     <ItemGroup>
       <_DeploymentPublishFileOfTypeManifestEntryPoint Include="@(PublishFile)" Condition="'%(FileType)'=='ManifestEntryPoint'"/>
     </ItemGroup>
@@ -3916,10 +3910,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         SigningManifests="$(SignManifests)"
         DeploymentManifestEntryPoint="@(ApplicationManifest)"
         PublishFiles="@(_DeploymentPublishFileOfTypeManifestEntryPoint)">
-
       <Output TaskParameter="OutputDeploymentManifestEntryPoint" ItemName="_DeploymentResolvedDeploymentManifestEntryPoint"/>
-
     </ResolveManifestFiles>
+
   </Target>
 
   <Target
@@ -4125,6 +4118,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_DeploymentManifestEntryPoint Remove="@(_DeploymentManifestEntryPoint)"/>
       <_DeploymentManifestEntryPoint Include="@(_DeploymentManifestLauncherEntryPoint)"/>
     </ItemGroup>
+
   </Target>
 
   <!--
@@ -4209,16 +4203,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Include the following files in clickonce manifest only if single file publish is false -->
     <ItemGroup Condition="'$(PublishSingleFile)' != 'true'">
-      <!-- 
-      _ClickOnceRuntimeCopyLocalItems group contains any runtimes folder assets of Nuget packages that are not included in 
-      _DeploymentReferencePaths (e.g. pdbs). They are populated from the RuntimeTargetsCopyLocalItems and NativeCopyLocalItems 
-      group that contain the RID-specific assets that go in runtimes folder on publish. They are output groups of the 
+      <!--
+      _ClickOnceRuntimeCopyLocalItems group contains any runtimes folder assets of Nuget packages that are not included in
+      _DeploymentReferencePaths (e.g. pdbs). They are populated from the RuntimeTargetsCopyLocalItems and NativeCopyLocalItems
+      group that contain the RID-specific assets that go in runtimes folder on publish. They are output groups of the
       ResolvePackageAssets target in dotnet/sdk
       -->
       <_ClickOnceRuntimeCopyLocalItems Include="@(RuntimeTargetsCopyLocalItems)"
                                       Condition="'%(RuntimeTargetsCopyLocalItems.CopyLocal)' == 'true'" />
 
-      <_ClickOnceRuntimeCopyLocalItems Include="@(NativeCopyLocalItems)" 
+      <_ClickOnceRuntimeCopyLocalItems Include="@(NativeCopyLocalItems)"
                                       Condition="'%(NativeCopyLocalItems.CopyLocal)' == 'true'" />
       <_ClickOnceRuntimeCopyLocalItems Remove="@(_DeploymentReferencePaths)" />
       <_ClickOnceFiles Include="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath);@(NetCoreRuntimeJsonFilesForClickOnce);@(_ClickOnceRuntimeCopyLocalItems)"/>
@@ -4405,9 +4399,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   </Target>
 
-
-
-
   <!--
     ***********************************************************************************************
     ***********************************************************************************************
@@ -4433,6 +4424,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       CopyFilesToOutputDirectory
     </PrepareForRunDependsOn>
   </PropertyGroup>
+
   <Target
       Name="PrepareForRun"
       DependsOnTargets="$(PrepareForRunDependsOn)"/>
@@ -4692,8 +4684,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             GetCopyToOutputDirectoryItems;
             _CopyOutOfDateSourceItemsToOutputDirectory;
             _CopyOutOfDateSourceItemsToOutputDirectoryAlways"/>
-
-
   <!--
     ============================================================
                                         GetCopyToOutputDirectoryItems
@@ -4920,6 +4910,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CopyToPublishDirectory>%(CopyToOutputDirectory)</CopyToPublishDirectory>
       </AllPublishItemsFullPathWithTargetPath>
     </ItemGroup>
+
   </Target>
 
   <!--
@@ -5104,6 +5095,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <FileWrites Include="@(_DebugSymbolsIntermediatePath)" Condition="'$(_DebugSymbolsProduced)'=='true'"/>
     </ItemGroup>
+
   </Target>
 
   <!--
@@ -5130,9 +5122,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   </Target>
 
-
-
-
   <!--
     ***********************************************************************************************
     ***********************************************************************************************
@@ -5151,6 +5140,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <UnmanagedRegistrationDependsOn></UnmanagedRegistrationDependsOn>
   </PropertyGroup>
+
   <Target
       Name="UnmanagedRegistration"
       Condition="'$(RegisterForComInterop)'=='true' and '$(OutputType)'=='library'"
@@ -5186,11 +5176,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <FileWrites Include="@(_OutputPathItem->'%(FullPath)$(TargetName).tlb')"/>
     </ItemGroup>
+
   </Target>
-
-
-
-
 
   <!--
     ***********************************************************************************************
@@ -5418,6 +5405,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <CoreCleanDependsOn></CoreCleanDependsOn>
   </PropertyGroup>
+
   <Target
       Name="CoreClean"
       DependsOnTargets="$(CoreCleanDependsOn)">
@@ -5516,9 +5504,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   </Target>
 
-
-
-
   <!--
     ***********************************************************************************************
     ***********************************************************************************************
@@ -5549,6 +5534,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <PostBuildEventDependsOn></PostBuildEventDependsOn>
   </PropertyGroup>
+
   <Target
       Name="PostBuildEvent"
       Condition="'$(PostBuildEvent)' != '' and ('$(RunPostBuildEvent)' != 'OnOutputUpdated' or '$(_AssemblyTimestampBeforeCompile)' != '$(_AssemblyTimestampAfterCompile)')"
@@ -5557,9 +5543,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Exec WorkingDirectory="$(OutDir)" Command="$(PostBuildEvent)" />
 
   </Target>
-
-
-
 
   <!--
     ***********************************************************************************************
@@ -5586,6 +5569,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       _DeploymentUnpublishable
     </PublishDependsOn>
   </PropertyGroup>
+
   <Target
       Name="Publish"
       DependsOnTargets="$(PublishDependsOn)"/>
@@ -5645,6 +5629,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AfterPublish
     </PublishOnlyDependsOn>
   </PropertyGroup>
+
   <Target
       Name="PublishOnly"
       DependsOnTargets="$(PublishOnlyDependsOn)"/>
@@ -5685,6 +5670,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       CreateSatelliteAssemblies;
     </PublishBuildDependsOn>
   </PropertyGroup>
+
   <Target
       Name="PublishBuild"
       DependsOnTargets="$(PublishBuildDependsOn)"/>
@@ -5862,8 +5848,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         TimestampUrl="$(ManifestTimestampUrl)"
         SigningTarget="$(PublishDir)\setup.exe"
         Condition="'$(BootstrapperEnabled)'=='true' and '$(_DeploymentSignClickOnceManifests)'=='true'" />
-  </Target>
 
+  </Target>
 
   <!--
     ***********************************************************************************************
@@ -5932,6 +5918,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <BuiltProjectOutputGroupDependsOn>PrepareForBuild</BuiltProjectOutputGroupDependsOn>
     <AddAppConfigToBuildOutputs Condition="('$(AddAppConfigToBuildOutputs)'=='') and ('$(OutputType)'!='library' and '$(OutputType)'!='winmdobj')">true</AddAppConfigToBuildOutputs>
   </PropertyGroup>
+
   <Target
       Name="BuiltProjectOutputGroup"
       Returns="@(BuiltProjectOutputGroupOutput)"
@@ -5985,12 +5972,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <DebugSymbolsProjectOutputGroupDependsOn></DebugSymbolsProjectOutputGroupDependsOn>
   </PropertyGroup>
+
   <ItemGroup Condition="'$(_DebugSymbolsProduced)' != 'false' and '$(OutputType)' != 'winmdobj'">
     <DebugSymbolsProjectOutputGroupOutput Include="@(_DebugSymbolsIntermediatePath->'%(FullPath)')">
       <FinalOutputPath>@(_DebugSymbolsOutputPath->'%(FullPath)')</FinalOutputPath>
       <TargetPath>@(_DebugSymbolsIntermediatePath->'%(Filename)%(Extension)')</TargetPath>
     </DebugSymbolsProjectOutputGroupOutput>
   </ItemGroup>
+
   <ItemGroup Condition="'$(_DebugSymbolsProduced)' != 'false' and '$(OutputType)' == 'winmdobj'">
     <WinMDExpOutputPdbItem Include="$(WinMDExpOutputPdb)" Condition="'$(WinMDExpOutputPdb)' != ''" />
     <WinMDExpFinalOutputPdbItem Include="$(_WinMDDebugSymbolsOutputPath)" Condition="'$(_WinMDDebugSymbolsOutputPath)' != ''" />
@@ -5999,6 +5988,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <TargetPath>@(WinMDExpOutputPdbItem->'%(Filename)%(Extension)')</TargetPath>
     </DebugSymbolsProjectOutputGroupOutput>
   </ItemGroup>
+
   <Target
       Name="DebugSymbolsProjectOutputGroup"
       Returns="@(DebugSymbolsProjectOutputGroupOutput)"
@@ -6014,6 +6004,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <DocumentationProjectOutputGroupDependsOn></DocumentationProjectOutputGroupDependsOn>
   </PropertyGroup>
+
   <ItemGroup Condition="'$(DocumentationFile)'!='' and '$(OutputType)' != 'winmdobj'">
     <DocumentationProjectOutputGroupOutput Include="@(DocFileItem->'%(FullPath)')">
       <FinalOutputPath>@(FinalDocFile->'%(FullPath)')</FinalOutputPath>
@@ -6021,6 +6012,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <TargetPath>@(DocFileItem->'%(Filename)%(Extension)')</TargetPath>
     </DocumentationProjectOutputGroupOutput>
   </ItemGroup>
+
   <ItemGroup Condition="'$(DocumentationFile)' != '' and '$(OutputType)' == 'winmdobj'">
     <WinMDOutputDocumentationFileItem Include="$(WinMDOutputDocumentationFile)" Condition="'$(WinMDOutputDocumentationFile)' != ''" />
     <WinMDExpFinalOutputDocItem Include="$(_WinMDDocFileOutputPath)" Condition="'$(_WinMDDocFileOutputPath)' != ''" />
@@ -6029,6 +6021,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <TargetPath>@(WinMDOutputDocumentationFileItem->'%(Filename)%(Extension)')</TargetPath>
     </DocumentationProjectOutputGroupOutput>
   </ItemGroup>
+
   <Target
       Name="DocumentationProjectOutputGroup"
       Returns="@(DocumentationProjectOutputGroupOutput)"
@@ -6044,6 +6037,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <SatelliteDllsProjectOutputGroupDependsOn>PrepareForBuild;PrepareResourceNames</SatelliteDllsProjectOutputGroupDependsOn>
   </PropertyGroup>
+
   <Target
       Name="SatelliteDllsProjectOutputGroup"
       Returns="@(SatelliteDllsProjectOutputGroupOutput)"
@@ -6079,6 +6073,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <SourceFilesProjectOutputGroupDependsOn>PrepareForBuild;AssignTargetPaths</SourceFilesProjectOutputGroupDependsOn>
   </PropertyGroup>
+
   <Target
       Name="SourceFilesProjectOutputGroup"
       Returns="@(SourceFilesProjectOutputGroupOutput)"
@@ -6116,6 +6111,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <ContentFilesProjectOutputGroupDependsOn>PrepareForBuild;AssignTargetPaths</ContentFilesProjectOutputGroupDependsOn>
   </PropertyGroup>
+
   <Target
       Name="ContentFilesProjectOutputGroup"
       Returns="@(ContentFilesProjectOutputGroupOutput)"
@@ -6139,6 +6135,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <SGenFilesOutputGroupDependsOn></SGenFilesOutputGroupDependsOn>
   </PropertyGroup>
+
   <ItemGroup
       Condition="'$(_SGenGenerateSerializationAssembliesConfig)' == 'On' or ('@(WebReferenceUrl)'!='' and '$(_SGenGenerateSerializationAssembliesConfig)' == 'Auto')">
     <SGenFilesOutputGroupOutput Include="@(_OutputPathItem->'%(FullPath)$(_SGenDllName)')">
@@ -6146,6 +6143,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <TargetPath>$(_SGenDllName)</TargetPath>
     </SGenFilesOutputGroupOutput>
   </ItemGroup>
+
   <Target
       Name="SGenFilesOutputGroup"
       Returns="@(SGenFilesOutputGroupOutput)"
