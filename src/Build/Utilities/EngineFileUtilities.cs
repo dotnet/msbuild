@@ -141,11 +141,6 @@ namespace Microsoft.Build.Internal
         {
             ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, nameof(filespecEscaped));
 
-            if (excludeSpecsEscaped == null)
-            {
-                excludeSpecsEscaped = Enumerable.Empty<string>();
-            }
-
             string[] fileList;
 
             if (!FilespecHasWildcards(filespecEscaped) ||
@@ -164,7 +159,7 @@ namespace Microsoft.Build.Internal
                 // Unescape before handing it to the filesystem.
                 var directoryUnescaped = EscapingUtilities.UnescapeAll(directoryEscaped);
                 var filespecUnescaped = EscapingUtilities.UnescapeAll(filespecEscaped);
-                var excludeSpecsUnescaped = excludeSpecsEscaped.Where(IsValidExclude).Select(i => EscapingUtilities.UnescapeAll(i)).ToList();
+                var excludeSpecsUnescaped = excludeSpecsEscaped?.Where(IsValidExclude).Select(i => EscapingUtilities.UnescapeAll(i)).ToList();
 
                 // Get the list of actual files which match the filespec.  Put
                 // the list into a string array.  If the filespec started out
