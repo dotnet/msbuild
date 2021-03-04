@@ -620,15 +620,10 @@ namespace Microsoft.Build.Tasks
 
                     // cmd needs parens to be escaped when executing files with the /C flag.
                     // consider the case where the user has a parenthesis in ther username (which is uncommon, but valid)
-                    if (batchFileForCommandLine.Contains("(") && !batchFileForCommandLine.Contains("^("))
+                    if ((batchFileForCommandLine.Contains("(") && !batchFileForCommandLine.Contains("^(")) || (batchFileForCommandLine.Contains(")") && !batchFileForCommandLine.Contains("^)")))
                     {
                         batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
                         batchFileForCommandLine = batchFileForCommandLine.Replace("(", "^(");
-                    }
-
-                    if (batchFileForCommandLine.Contains(")") && !batchFileForCommandLine.Contains("^)"))
-                    {
-                        batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
                         batchFileForCommandLine = batchFileForCommandLine.Replace(")", "^)");
                     }
                 }
