@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
@@ -44,6 +45,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskStartedEventArgs taskStarted = new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName");
             TaskFinishedEventArgs taskFinished = new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true);
             TaskCommandLineEventArgs commandLine = new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low);
+            TaskParameterEventArgs taskParameter = CreateTaskParameter();
             BuildWarningEventArgs warning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
             BuildErrorEventArgs error = new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
             TargetStartedEventArgs targetStarted = new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile");
@@ -58,6 +60,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(taskStarted, LoggingEventType.TaskStartedEvent);
             VerifyLoggingPacket(taskFinished, LoggingEventType.TaskFinishedEvent);
             VerifyLoggingPacket(commandLine, LoggingEventType.TaskCommandLineEvent);
+            VerifyLoggingPacket(taskParameter, LoggingEventType.TaskParameterEvent);
             VerifyLoggingPacket(warning, LoggingEventType.BuildWarningEvent);
             VerifyLoggingPacket(error, LoggingEventType.BuildErrorEvent);
             VerifyLoggingPacket(targetStarted, LoggingEventType.TargetStartedEvent);
@@ -67,12 +70,41 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(externalStartedEvent, LoggingEventType.CustomEvent);
         }
 
+        private static TaskParameterEventArgs CreateTaskParameter()
+        {
+            var items = new TaskItemData[]
+            {
+                new TaskItemData("ItemSpec1", null),
+                new TaskItemData("ItemSpec2", Enumerable.Range(1,3).ToDictionary(i => i.ToString(), i => i.ToString() + "value"))
+            };
+            var result = new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskInput,
+                "ItemName",
+                items,
+                logItemMetadata: true,
+                DateTime.MinValue);
+
+            // normalize line endings as we can't rely on the line endings of NodePackets_Tests.cs
+            Assert.Equal(@"Task Parameter:
+    ItemName=
+        ItemSpec1
+        ItemSpec2
+                1=1value
+                2=2value
+                3=3value".Replace("\r\n", "\n"), result.Message);
+
+            return result;
+        }
+
         /// <summary>
         /// Tests serialization of LogMessagePacket with each kind of event type.
         /// </summary>
         [Fact]
         public void TestTranslation()
         {
+            // need to touch the type so that the static constructor runs
+            _ = ItemGroupLoggingHelper.OutputItemParameterMessagePrefix;
+
             TaskItem item = new TaskItem("Hello", "my.proj");
             List<TaskItem> targetOutputs = new List<TaskItem>();
             targetOutputs.Add(item);
@@ -88,6 +120,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName"),
                     new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true),
                     new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low),
+                    CreateTaskParameter(),
                     new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender"),
                     new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender"),
                     new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile"),
@@ -279,6 +312,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Assert.Equal(leftCommand.CommandLine, rightCommand.CommandLine);
                     Assert.Equal(leftCommand.Importance, rightCommand.Importance);
                     Assert.Equal(leftCommand.TaskName, rightCommand.TaskName);
+                    break;
+
+                case LoggingEventType.TaskParameterEvent:
+                    var leftTaskParameter = left.NodeBuildEvent.Value.Value as TaskParameterEventArgs;
+                    var rightTaskParameter = right.NodeBuildEvent.Value.Value as TaskParameterEventArgs;
+                    Assert.NotNull(leftTaskParameter);
+                    Assert.NotNull(rightTaskParameter);
+                    Assert.Equal(leftTaskParameter.Kind, rightTaskParameter.Kind);
+                    Assert.Equal(leftTaskParameter.ItemType, rightTaskParameter.ItemType);
+                    Assert.Equal(leftTaskParameter.Items.Count, rightTaskParameter.Items.Count);
+                    Assert.Equal(leftTaskParameter.Message, rightTaskParameter.Message);
+                    Assert.Equal(leftTaskParameter.BuildEventContext, rightTaskParameter.BuildEventContext);
+                    Assert.Equal(leftTaskParameter.Timestamp, rightTaskParameter.Timestamp);
                     break;
 
                 case LoggingEventType.TaskFinishedEvent:

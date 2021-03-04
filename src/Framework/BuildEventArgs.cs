@@ -112,6 +112,17 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        /// Exposes the private <see cref="timestamp"/> field to derived types.
+        /// Used for serialization. Avoids the side effects of calling the
+        /// <see cref="Timestamp"/> getter.
+        /// </summary>
+        protected DateTime RawTimestamp
+        {
+            get => timestamp;
+            set => timestamp = value;
+        }
+
+        /// <summary>
         /// The thread that raised event.  
         /// </summary>
         public int ThreadId => threadId;
@@ -155,24 +166,8 @@ namespace Microsoft.Build.Framework
             writer.WriteOptionalString(helpKeyword);
             writer.WriteOptionalString(senderName);
             writer.WriteTimestamp(timestamp);
-
-            writer.Write((Int32)threadId);
-
-            if (buildEventContext == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write((Int32)buildEventContext.NodeId);
-                writer.Write((Int32)buildEventContext.ProjectContextId);
-                writer.Write((Int32)buildEventContext.TargetId);
-                writer.Write((Int32)buildEventContext.TaskId);
-                writer.Write((Int32)buildEventContext.SubmissionId);
-                writer.Write((Int32)buildEventContext.ProjectInstanceId);
-                writer.Write((Int32)buildEventContext.EvaluationId);
-            }
+            writer.Write(threadId);
+            writer.WriteOptionalBuildEventContext(buildEventContext);
         }
 
         /// <summary>
@@ -182,9 +177,9 @@ namespace Microsoft.Build.Framework
         /// <param name="version">The version of the runtime the message packet was created from</param>
         internal virtual void CreateFromStream(BinaryReader reader, int version)
         {
-            message = reader.ReadByte() == 0 ? null : reader.ReadString();
-            helpKeyword = reader.ReadByte() == 0 ? null : reader.ReadString();
-            senderName = reader.ReadByte() == 0 ? null : reader.ReadString();
+            message = reader.ReadOptionalString();
+            helpKeyword = reader.ReadOptionalString();
+            senderName = reader.ReadOptionalString();
 
             long timestampTicks = reader.ReadInt64();
 

@@ -285,6 +285,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 CreateLoggingEventQueue();
             }
 
+            // Ensure the static constructor of ItemGroupLoggingHelper runs.
+            // It is important to ensure the Message delegate on TaskParameterEventArgs is set.
+            _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
+
             _serviceState = LoggingServiceState.Instantiated;
         }
 
