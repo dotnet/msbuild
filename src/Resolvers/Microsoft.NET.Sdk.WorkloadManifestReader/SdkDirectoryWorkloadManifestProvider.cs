@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
@@ -11,9 +12,15 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     {
         private readonly string _sdkRootPath;
         private readonly string _sdkVersionBand;
-        private readonly string _manifestDirectory;
+        private readonly string [] _manifestDirectories;
 
         public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion)
+            : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable)
+        {
+
+        }
+
+        internal SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, Func<string, string?> getEnvironmentVariable)
         {
             if (string.IsNullOrWhiteSpace(sdkVersion))
             {
@@ -42,14 +49,16 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _sdkRootPath = sdkRootPath;
             _sdkVersionBand = sdkVersionBand;
 
-            var manifestDirectoryEnvironmentVariable = Environment.GetEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOT");
-            if (!string.IsNullOrEmpty(manifestDirectoryEnvironmentVariable))
+            var manifestDirectory = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
+
+            var manifestDirectoryEnvironmentVariable = getEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS");
+            if (manifestDirectoryEnvironmentVariable != null)
             {
-                _manifestDirectory = manifestDirectoryEnvironmentVariable;
+                _manifestDirectories = manifestDirectoryEnvironmentVariable.Split(Path.PathSeparator).Append(manifestDirectory).ToArray();
             }
             else
             {
-                _manifestDirectory = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
+                _manifestDirectories = new[] { manifestDirectory };
             }
         }
 
@@ -64,9 +73,33 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public IEnumerable<string> GetManifestDirectories()
         {
-            if (Directory.Exists(_manifestDirectory))
+            if (_manifestDirectories.Length == 1)
             {
-                foreach (var workloadManifestDirectory in Directory.EnumerateDirectories(_manifestDirectory))
+                //  Optimization for common case where test hook to add additional directories isn't being used
+                if (Directory.Exists(_manifestDirectories[0]))
+                {
+                    foreach (var workloadManifestDirectory in Directory.EnumerateDirectories(_manifestDirectories[0]))
+                    {
+                        yield return workloadManifestDirectory;
+                    }
+                }
+            }
+            else
+            {
+                //  If the same folder name is in multiple of the workload manifest directories, take the first one
+                Dictionary<string, string> directoriesWithManifests = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var manifestDirectory in _manifestDirectories.Reverse())
+                {
+                    if (Directory.Exists(manifestDirectory))
+                    {
+                        foreach (var workloadManifestDirectory in Directory.EnumerateDirectories(manifestDirectory))
+                        {
+                            directoriesWithManifests[Path.GetFileName(workloadManifestDirectory)] = workloadManifestDirectory;
+                        }
+                    }
+                }
+
+                foreach (var workloadManifestDirectory in directoriesWithManifests.Values)
                 {
                     yield return workloadManifestDirectory;
                 }
