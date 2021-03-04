@@ -92,26 +92,16 @@ namespace Microsoft.Build.Internal
 
         internal static bool FilespecHasWildcards(string filespecEscaped)
         {
-            bool containsEscapedWildcards = EscapingUtilities.ContainsEscapedWildcards(filespecEscaped);
-            bool containsRealWildcards = FileMatcher.HasWildcards(filespecEscaped);
-
-            if (containsEscapedWildcards && containsRealWildcards)
-            {
-                // Umm, this makes no sense.  The item's Include has both escaped wildcards and 
-                // real wildcards.  What does he want us to do?  Go to the file system and find
-                // files that literally have '*' in their filename?  Well, that's not going to 
-                // happen because '*' is an illegal character to have in a filename.
-
-                return false;
-            }
-            else if (!containsEscapedWildcards && containsRealWildcards)
-            {
-                return true;
-            }
-            else
+            if (!FileMatcher.HasWildcards(filespecEscaped))
             {
                 return false;
             }
+
+            // If the item's Include has both escaped wildcards and real wildcards, then it's
+            // not clear what they are asking us to do.  Go to the file system and find
+            // files that literally have '*' in their filename?  Well, that's not going to
+            // happen because '*' is an illegal character to have in a filename.
+            return !EscapingUtilities.ContainsEscapedWildcards(filespecEscaped);
         }
 
         /// <summary>
