@@ -612,7 +612,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="stateFiles">List of locations of caches on disk.</param>
         /// <param name="log">How to log</param>
         /// <param name="fileExists">Whether a file exists</param>
-        /// <returns></returns>
+        /// <returns>A cache representing key aspects of file states.</returns>
         internal static SystemState DeserializePrecomputedCachesByTranslator(ITaskItem[] stateFiles, TaskLoggingHelper log, FileExists fileExists)
         {
             SystemState retVal = new SystemState();
@@ -657,21 +657,20 @@ namespace Microsoft.Build.Tasks
             // Save a copy of instanceLocalFileStateCache so we can restore it later. SerializeCacheByTranslator serializes
             // instanceLocalFileStateCache by default, so change that to the relativized form, then change it back.
             Dictionary<string, FileState> oldFileStateCache = instanceLocalFileStateCache;
-            Dictionary<string, FileState> newInstanceLocalFileStateCache = new Dictionary<string, FileState>(instanceLocalFileStateCache.Count);
-            foreach (KeyValuePair<string, FileState> kvp in instanceLocalFileStateCache)
-            {
-                string relativePath = FileUtilities.MakeRelative(Path.GetDirectoryName(stateFile), kvp.Key);
-                newInstanceLocalFileStateCache[relativePath] = kvp.Value;
-            }
-            instanceLocalFileStateCache = newInstanceLocalFileStateCache;
+            instanceLocalFileStateCache = instanceLocalFileStateCache.ToDictionary(kvp => FileUtilities.MakeRelative(Path.GetDirectoryName(stateFile), kvp.Key), kvp => kvp.Value);
 
-            if (FileUtilities.FileExistsNoThrow(stateFile))
+            try
             {
-                log.LogWarningWithCodeFromResources("General.StateFileAlreadyPresent", stateFile);
+                if (FileUtilities.FileExistsNoThrow(stateFile))
+                {
+                    log.LogWarningWithCodeFromResources("General.StateFileAlreadyPresent", stateFile);
+                }
+                SerializeCacheByTranslator(stateFile, log);
             }
-            SerializeCacheByTranslator(stateFile, log);
-
-            instanceLocalFileStateCache = oldFileStateCache;
+            finally
+            {
+                instanceLocalFileStateCache = oldFileStateCache;
+            }
         }
 
         /// <summary>
