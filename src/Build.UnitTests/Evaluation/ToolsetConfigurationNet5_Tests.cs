@@ -37,8 +37,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Assert.True(toolsetProperties.ContainsKey("MSBuildSDKsPath"));
             Assert.True(toolsetProperties.ContainsKey("RoslynTargetsPath"));
-            Assert.Contains("net5.0", toolsetProperties["MSBuildSDKsPath"]);
-            Assert.Contains("net5.0", toolsetProperties["RoslynTargetsPath"]);
+            Assert.NotEqual(string.Empty, toolsetProperties["MSBuildSDKsPath"]);
+            Assert.NotEqual(string.Empty, toolsetProperties["RoslynTargetsPath"]);
+
             Assert.False(toolsetProperties.ContainsKey("VCTargetsPath"));
             Assert.False(toolsetProperties.ContainsKey("MSBuildToolsRoot"));
             Assert.False(toolsetProperties.ContainsKey("MSBuildExtensionsPath"));
@@ -63,14 +64,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Assert.True(toolsetProperties.ContainsKey("MSBuildSDKsPath"));
             Assert.True(toolsetProperties.ContainsKey("RoslynTargetsPath"));
-            Assert.Contains("net5.0", toolsetProperties["MSBuildSDKsPath"]);
-            Assert.Contains("net5.0", toolsetProperties["RoslynTargetsPath"]);
+            Assert.NotEqual(string.Empty, toolsetProperties["MSBuildSDKsPath"]);
+            Assert.NotEqual(string.Empty, toolsetProperties["RoslynTargetsPath"]);
 
             Assert.True(toolsetProperties.ContainsKey("VCTargetsPath"));
             Assert.True(toolsetProperties.ContainsKey("MSBuildToolsRoot"));
             Assert.True(toolsetProperties.ContainsKey("MSBuildExtensionsPath"));
-            Assert.Contains("net5.0", toolsetProperties["VCTargetsPath"]);
-            Assert.Contains("net5.0", toolsetProperties["MSBuildExtensionsPath"]);
+            Assert.NotEqual(string.Empty, toolsetProperties["VCTargetsPath"]);
+            Assert.NotEqual(string.Empty, toolsetProperties["MSBuildToolsRoot"]);
+            Assert.NotEqual(string.Empty, toolsetProperties["MSBuildExtensionsPath"]);
         }
     }
 }
