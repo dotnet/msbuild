@@ -26,7 +26,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
             var context = TagHelperDescriptorProviderContext.Create(results);
             context.SetCompilation(Compilation);
-            context.Items.SetTargetMetadataReference(TargetReference);
+            context.Items.SetTargetAssembly(TargetAssembly);
 
             for (var i = 0; i < _providers.Length; i++)
             {
@@ -38,7 +38,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
         public Compilation Compilation { get; set; }
 
-        public MetadataReference TargetReference { get; set; }
+        public IAssemblySymbol TargetAssembly { get; set; }
 
         protected override void OnInitialized()
         {
