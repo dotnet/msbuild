@@ -226,28 +226,30 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="escapedString"></param>
         /// <returns></returns>
-        internal static bool ContainsEscapedWildcards
-            (
-            string escapedString
-            )
+        internal static bool ContainsEscapedWildcards(string escapedString)
         {
-            if (-1 != escapedString.IndexOf('%'))
+            if (escapedString.Length < 3)
             {
-                // It has a '%' sign.  We have promise.
-                if (
-                        (-1 != escapedString.IndexOf("%2", StringComparison.Ordinal)) ||
-                        (-1 != escapedString.IndexOf("%3", StringComparison.Ordinal))
-                    )
+                return false;
+            }
+            // Look for the first %. We know that it has to be followed by at least two more characters so we subtract 2
+            // from the length to search.
+            int index = escapedString.IndexOf('%', 0, escapedString.Length - 2);
+            while (index != -1)
+            {
+                if (escapedString[index + 1] == '2' && (escapedString[index + 2] == 'a' || escapedString[index + 2] == 'A'))
                 {
-                    // It has either a '%2' or a '%3'.  This is looking very promising.
-                    return
-
-                            (-1 != escapedString.IndexOf("%2a", StringComparison.Ordinal)) ||
-                            (-1 != escapedString.IndexOf("%2A", StringComparison.Ordinal)) ||
-                            (-1 != escapedString.IndexOf("%3f", StringComparison.Ordinal)) ||
-                            (-1 != escapedString.IndexOf("%3F", StringComparison.Ordinal))
-                        ;
+                    // %2a or %2A
+                    return true;
                 }
+                if (escapedString[index + 1] == '3' && (escapedString[index + 2] == 'f' || escapedString[index + 2] == 'F'))
+                {
+                    // %3f or %3F
+                    return true;
+                }
+                // Continue searching for % starting at (index + 1). We know that it has to be followed by at least two
+                // more characters so we subtract 2 from the length of the substring to search.
+                index = escapedString.IndexOf('%', index + 1, escapedString.Length - (index + 1) - 2);
             }
             return false;
         }
