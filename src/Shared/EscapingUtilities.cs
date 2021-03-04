@@ -26,11 +26,25 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static Dictionary<string, string> s_unescapedToEscapedStrings = new Dictionary<string, string>(StringComparer.Ordinal);
 
-        private static bool IsHexDigit(char character)
+        private static bool TryDecodeHexDigit(char character, out int value)
         {
-            return ((character >= '0') && (character <= '9'))
-                || ((character >= 'A') && (character <= 'F'))
-                || ((character >= 'a') && (character <= 'f'));
+            if (character >= '0' && character <= '9')
+            {
+                value = character - '0';
+                return true;
+            }
+            if (character >= 'A' && character <= 'F')
+            {
+                value = character - 'A' + 10;
+                return true;
+            }
+            if (character >= 'a' && character <= 'f')
+            {
+                value = character - 'a' + 10;
+                return true;
+            }
+            value = default;
+            return false;
         }
 
         /// <summary>
@@ -85,8 +99,8 @@ namespace Microsoft.Build.Shared
                 // for us to even consider doing anything with this.
                 if (
                         (indexOfPercent <= (escapedStringLength - 3)) &&
-                        IsHexDigit(escapedString[indexOfPercent + 1]) &&
-                        IsHexDigit(escapedString[indexOfPercent + 2])
+                        TryDecodeHexDigit(escapedString[indexOfPercent + 1], out int digit1) &&
+                        TryDecodeHexDigit(escapedString[indexOfPercent + 2], out int digit2)
                     )
                 {
                     // First copy all the characters up to the current percent sign into
@@ -94,9 +108,7 @@ namespace Microsoft.Build.Shared
                     unescapedString.Append(escapedString, currentPosition, indexOfPercent - currentPosition);
 
                     // Convert the %XX to an actual real character.
-                    string hexString = escapedString.Substring(indexOfPercent + 1, 2);
-                    char unescapedCharacter = (char)int.Parse(hexString, System.Globalization.NumberStyles.HexNumber,
-                        CultureInfo.InvariantCulture);
+                    char unescapedCharacter = (char)((digit1 << 4) + digit2);
 
                     // if the unescaped character is not on the exception list, append it
                     unescapedString.Append(unescapedCharacter);
