@@ -66,7 +66,37 @@ namespace Microsoft.DotNet.Tests
                               e.Properties.ContainsKey("verb") &&
                               e.Properties["verb"] == Sha256Hasher.Hash("HELP") &&
                               e.Measurement.ContainsKey("Startup Time") &&
-                              e.Measurement["Startup Time"] == 12345);
+                              e.Measurement["Startup Time"] == 1.2345 &&
+                              e.Measurement.ContainsKey("Parse Time") &&
+                              e.Measurement["Parse Time"] > 0);
+        }
+
+        [Fact]
+        public void TopLevelCommandNameShouldBeSentToTelemetryWithZeroStartupTime()
+        {
+            string[] args = { "help" };
+            Cli.Program.ProcessArgs(args);
+
+            _fakeTelemetry.LogEntries.Should().Contain(e => e.EventName == "toplevelparser/command" &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("HELP") &&
+                              !e.Measurement.ContainsKey("Startup Time") &&
+                              e.Measurement.ContainsKey("Parse Time") &&
+                              e.Measurement["Parse Time"] > 0);
+        }
+
+        [Fact]
+        public void TopLevelCommandNameShouldBeSentToTelemetryWithOutStartupTime()
+        {
+            string[] args = { "help" };
+            Cli.Program.ProcessArgs(args, new TimeSpan(0));
+
+            _fakeTelemetry.LogEntries.Should().Contain(e => e.EventName == "toplevelparser/command" &&
+                              e.Properties.ContainsKey("verb") &&
+                              e.Properties["verb"] == Sha256Hasher.Hash("HELP") &&
+                              !e.Measurement.ContainsKey("Startup Time") &&
+                              e.Measurement.ContainsKey("Parse Time") &&
+                              e.Measurement["Parse Time"] > 0);
         }
 
         [Fact]
@@ -98,7 +128,9 @@ namespace Microsoft.DotNet.Tests
                               e.Properties.ContainsKey("verb") &&
                               e.Properties["verb"] == Sha256Hasher.Hash("NEW") &&
                               e.Measurement.ContainsKey("Startup Time") &&
-                              e.Measurement["Startup Time"] == 23456);
+                              e.Measurement["Startup Time"] == 2.3456 &&
+                              e.Measurement.ContainsKey("Parse Time") &&
+                              e.Measurement["Parse Time"] > 0);
         }
 
         [Fact]
@@ -253,7 +285,9 @@ namespace Microsoft.DotNet.Tests
                               e.Properties.ContainsKey("verb") &&
                               e.Properties["verb"] == Sha256Hasher.Hash("RESTORE") &&
                               e.Measurement.ContainsKey("Startup Time") &&
-                              e.Measurement["Startup Time"] == 34567);
+                              e.Measurement["Startup Time"] == 3.4567 &&
+                              e.Measurement.ContainsKey("Parse Time") &&
+                              e.Measurement["Parse Time"] > 0);
         }
 
         [Fact]

@@ -29,13 +29,13 @@ namespace Microsoft.DotNet.Cli.Telemetry
             {
                 objectToFilter = topLevelCommandWithMeasurements.Item1;
                 measurements = topLevelCommandWithMeasurements.Item2;
-                RemoveZeroTimes(measurements);
+                measurements = RemoveZeroTimes(measurements);
             }
             else if (objectToFilter is Tuple<ParseResult, Dictionary<string,double>> parseResultWithMeasurements)
             {
                 objectToFilter = parseResultWithMeasurements.Item1;
                 measurements = parseResultWithMeasurements.Item2;
-                RemoveZeroTimes(measurements);
+                measurements = RemoveZeroTimes(measurements);
             }
 
             if (objectToFilter is ParseResult parseResult)
@@ -205,7 +205,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
             return s;
         }
 
-        private void RemoveZeroTimes(Dictionary<string,double> measurements)
+        private Dictionary<string,double> RemoveZeroTimes(Dictionary<string,double> measurements)
         {
             if (measurements != null)
             {
@@ -216,7 +216,12 @@ namespace Microsoft.DotNet.Cli.Telemetry
                         measurements.Remove(measurement.Key);
                     }
                 }
+                if (measurements.Count == 0)
+                {
+                    measurements = null;
+                }
             }
+            return measurements;
         }
     }
 }
