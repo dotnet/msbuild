@@ -53,17 +53,15 @@ namespace Microsoft.Build.Internal
         /// </summary>
         /// <param name="directoryEscaped">The directory to evaluate, escaped.</param>
         /// <param name="filespecEscaped">The filespec to evaluate, escaped.</param>
-        /// <param name="forceEvaluate">Whether to force file glob expansion when eager expansion is turned off</param>
         /// <returns>Array of file paths, unescaped.</returns>
         internal string[] GetFileListUnescaped
             (
             string directoryEscaped,
-            string filespecEscaped,
-            bool forceEvaluate = false
+            string filespecEscaped
             )
 
         {
-            return GetFileList(directoryEscaped, filespecEscaped, false /* returnEscaped */, forceEvaluate);
+            return GetFileList(directoryEscaped, filespecEscaped, returnEscaped: false, forceEvaluateWildCards: false);
         }
 
         /// <summary>
@@ -89,7 +87,7 @@ namespace Microsoft.Build.Internal
             bool forceEvaluate = false
             )
         {
-            return GetFileList(directoryEscaped, filespecEscaped, true /* returnEscaped */, forceEvaluate, excludeSpecsEscaped);
+            return GetFileList(directoryEscaped, filespecEscaped, returnEscaped: true, forceEvaluate, excludeSpecsEscaped);
         }
 
         internal static bool FilespecHasWildcards(string filespecEscaped)
