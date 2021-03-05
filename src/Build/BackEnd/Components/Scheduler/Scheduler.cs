@@ -1327,7 +1327,7 @@ namespace Microsoft.Build.BackEnd
 
         private int GetAvailableCoresForExplicitRequests()
         {
-            return Math.Max(0, _coreLimit - (_schedulingData.ExecutingRequestsCount + _schedulingData.ExplicitlyRequestedCores));
+            return Math.Max(0, _coreLimit - (/*_schedulingData.ExecutingRequestsCount +*/ _schedulingData.ExplicitlyRequestedCores));
         }
 
         /// <summary>
