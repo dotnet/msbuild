@@ -1929,14 +1929,12 @@ namespace Microsoft.Build.Evaluation
         {
             imports = new List<ProjectRootElement>();
 
-            bool ignoreInvalidImports = _loadSettings.HasFlag(ProjectLoadSettings.IgnoreInvalidImports);
-
             string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
             ElementLocation importLocationInProject = importElement.Location;
 
             if (String.IsNullOrWhiteSpace(importExpressionEscaped))
             {
-                if (ignoreInvalidImports)
+                if ((_loadSettings & ProjectLoadSettings.IgnoreInvalidImports) != 0)
                 {
                     // Log message for import skipped
                     ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
