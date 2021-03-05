@@ -3736,8 +3736,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Condition="'@(_SatelliteAssemblyResourceInputs)' != '' and '$(GenerateSatelliteAssembliesForCore)' != 'true'">
 
     <PropertyGroup>
-      <ALExeToolPath>$(TargetFrameworkSDKToolsDirectory)</ALExeToolPath>
-      <ALExeToolPath Condition="'$(PlatformTarget)' == 'x64'">$(TargetFrameworkSDKToolsDirectory)$(PlatformTarget)\</ALExeToolPath>
+      <_ALExeToolPath>$(TargetFrameworkSDKToolsDirectory)</_ALExeToolPath>
+      <_ALExeToolPath Condition="'$(PlatformTarget)' == 'x64'">$(TargetFrameworkSDKToolsDirectory)$(PlatformTarget)\</_ALExeToolPath>
     </PropertyGroup>
 
     <MakeDir
