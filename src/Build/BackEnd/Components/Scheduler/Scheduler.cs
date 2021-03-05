@@ -193,6 +193,9 @@ namespace Microsoft.Build.BackEnd
             {
                 _coreLimit = NativeMethodsShared.GetLogicalCoreCount();
             }
+            // Tasks are factoring in the "implicit core" so let's make the maximum return value from
+            // RequestCore exactly the number of cores.
+            _coreLimit = Math.Max(0, _coreLimit - 1);
 
             if (String.IsNullOrEmpty(_debugDumpPath))
             {
