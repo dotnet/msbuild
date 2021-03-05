@@ -19,9 +19,10 @@ namespace Microsoft.Build.Shared
         /// Caller must delete when finished.
         /// </summary>
         /// <param name="createDirectory"></param>
-        internal static string GetTemporaryDirectory(bool createDirectory = true)
+        /// <param name="subfolder"></param>
+        internal static string GetTemporaryDirectory(bool createDirectory = true, string subfolder = null)
         {
-            string temporaryDirectory = Path.Combine(Path.GetTempPath(), "Temporary" + Guid.NewGuid().ToString("N"));
+            string temporaryDirectory = Path.Combine(Path.GetTempPath(), "Temporary" + Guid.NewGuid().ToString("N"), subfolder ?? string.Empty);
 
             if (createDirectory)
             {

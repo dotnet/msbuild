@@ -48,6 +48,38 @@ namespace Microsoft.Build.UnitTests
             return exec;
         }
 
+        [Fact]
+        public void EscapeParenthesesInPathToGeneratedBatchFile()
+        {
+            using (var testEnvironment = TestEnvironment.Create())
+            {
+                // This test counts files in TEMP. If it uses the system TEMP, some
+                // other process may interfere. Use a private TEMP instead.
+                var newTempPath = testEnvironment.CreateNewTempPathWithSubfolder("hello()wo(rld)").TempPath;
+
+                string tempPath = Path.GetTempPath();
+                Assert.StartsWith(newTempPath, tempPath);
+
+                // Get a count of how many temp files there are right now.
+                string[] tempFiles = Directory.GetFiles(tempPath);
+
+                Assert.Empty(tempFiles);
+
+                // Now run the Exec task on a simple command.
+                Exec exec = PrepareExec("echo Hello World!");
+                bool result = exec.Execute();
+
+                // Get the new count of temp files.
+                tempFiles = Directory.GetFiles(tempPath);
+
+                // Ensure that Exec succeeded.
+                Assert.True(result);
+
+                // Ensure that no files linger in TEMP.
+                Assert.Empty(tempFiles);
+            }
+        }
+
         /// <summary>
         /// Ensures that calling the Exec task does not leave any extra TEMP files
         /// lying around.

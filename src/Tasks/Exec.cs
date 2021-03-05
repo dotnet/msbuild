@@ -611,21 +611,22 @@ namespace Microsoft.Build.Tasks
 
                     // If for some crazy reason the path has a & character and a space in it
                     // then get the short path of the temp path, which should not have spaces in it
-                    // and then escape the &
                     if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
                     {
                         batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
-                        batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
                     }
 
-                    // cmd needs parens to be escaped when executing files with the /C flag.
-                    // consider the case where the user has a parenthesis in ther username (which is uncommon, but valid)
-                    if ((batchFileForCommandLine.Contains("(") && !batchFileForCommandLine.Contains("^(")) || (batchFileForCommandLine.Contains(")") && !batchFileForCommandLine.Contains("^)")))
+                    StringBuilder fileName = StringBuilderCache.Acquire(batchFileForCommandLine.Length).Append(batchFileForCommandLine);
+
+                    // Escape any '(', ')', or '&'
+                    for(int i = 1; i < fileName.Length; i++)
                     {
-                        batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
-                        batchFileForCommandLine = batchFileForCommandLine.Replace("(", "^(");
-                        batchFileForCommandLine = batchFileForCommandLine.Replace(")", "^)");
+                        if((fileName[i] == '(' || fileName[i] == ')' || fileName[i] == '&') && fileName[i-1] != '^')
+                        {
+                            fileName.Insert(i++, '^');
+                        }
                     }
+                    batchFileForCommandLine = StringBuilderCache.GetStringAndRelease(fileName);
                 }
 
                 commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
