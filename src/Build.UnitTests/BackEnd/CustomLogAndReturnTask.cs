@@ -16,6 +16,9 @@ namespace Microsoft.Build.UnitTests
         [Required]
         public bool Return { get; set; }
 
+        // Unused for now, created for task batching.
+        public ITaskItem[] Sources { get; set; }
+
         /// <summary>
         /// This task returns and logs what you want based on the running test.
         /// </summary>
