@@ -72,7 +72,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// True if the contents have changed.
         /// </summary>
-        internal bool isDirty;
+        private bool isDirty;
 
         /// <summary>
         /// Delegate used internally.
