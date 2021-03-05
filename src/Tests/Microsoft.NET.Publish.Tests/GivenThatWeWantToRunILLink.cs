@@ -455,16 +455,14 @@ namespace Microsoft.NET.Publish.Tests
 
             // Please keep list below sorted and de-duplicated
             List<string> expectedOutput = new List<string> () {
-                    "ILLink : Trim analysis warning IL2026: System.ComponentModel.Design.DesigntimeLicenseContextSerializer.Deserialize(Stream,String,RuntimeLicenseContext",
-                    "ILLink : Trim analysis warning IL2067: System.ComponentModel.LicenseManager.CreateWithContext(Type,LicenseContext,Object[]",
-                    "ILLink : Trim analysis warning IL2072: System.ComponentModel.LicenseManager.ValidateInternalRecursive(LicenseContext,Type,Object,Boolean,License&,String&",
-                    "ILLink : Trim analysis warning IL2057: System.ComponentModel.LicenseProviderAttribute.LicenseProvider.get: Unrecognized value passed to the parameter 'typeName' of method 'System.Type.GetType(String",
-                    "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(",
-                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.NullableTypeInfo.NullableTypeInfo(Type,List<Type>",
-                    "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.NullableTypeInfo.WriteData(PropertyValue",
-                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.TypeAnalysis.TypeAnalysis(Type,EventDataAttribute,List<Type>",
-                    "ILLink : Trim analysis warning IL2026: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
-                    "ILLink : Trim analysis warning IL2026: System.StartupHookProvider.ProcessStartupHooks(",
+                "ILLink : Trim analysis warning IL2026: System.ComponentModel.Design.DesigntimeLicenseContextSerializer.Deserialize(Stream,String,RuntimeLicenseContext",
+                "ILLink : Trim analysis warning IL2067: System.ComponentModel.LicenseManager.CreateWithContext(Type,LicenseContext,Object[]",
+                "ILLink : Trim analysis warning IL2072: System.ComponentModel.LicenseManager.ValidateInternalRecursive(LicenseContext,Type,Object,Boolean,License&,String&",
+                "ILLink : Trim analysis warning IL2057: System.ComponentModel.LicenseProviderAttribute.LicenseProvider.get: Unrecognized value passed to the parameter 'typeName' of method 'System.Type.GetType(String",
+                "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(",
+                "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.TypeAnalysis.TypeAnalysis(Type,EventDataAttribute,List<Type>",
+                "ILLink : Trim analysis warning IL2026: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
+                "ILLink : Trim analysis warning IL2026: System.StartupHookProvider.ProcessStartupHooks(",
             };
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
@@ -485,13 +483,11 @@ namespace Microsoft.NET.Publish.Tests
 
             // Please keep list below sorted and de-duplicated
             List<string> expectedOutput = new List<string>() {
-                    "ILLink : Trim analysis warning IL2026: System.ComponentModel.Design.DesigntimeLicenseContextSerializer.Deserialize(Stream,String,RuntimeLicenseContext",
-                    "ILLink : Trim analysis warning IL2067: System.ComponentModel.LicenseManager.CreateWithContext(Type,LicenseContext,Object[]",
-                    "ILLink : Trim analysis warning IL2072: System.ComponentModel.LicenseManager.ValidateInternalRecursive(LicenseContext,Type,Object,Boolean,License&,String&",
-                    "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(",
-                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.NullableTypeInfo.NullableTypeInfo(Type,List<Type>",
-                    "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.NullableTypeInfo.WriteData(PropertyValue",
-                    "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.TypeAnalysis.TypeAnalysis(Type,EventDataAttribute,List<Type>"
+                "ILLink : Trim analysis warning IL2026: System.ComponentModel.Design.DesigntimeLicenseContextSerializer.Deserialize(Stream,String,RuntimeLicenseContext",
+                "ILLink : Trim analysis warning IL2067: System.ComponentModel.LicenseManager.CreateWithContext(Type,LicenseContext,Object[]",
+                "ILLink : Trim analysis warning IL2072: System.ComponentModel.LicenseManager.ValidateInternalRecursive(LicenseContext,Type,Object,Boolean,License&,String&",
+                "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(",
+                "ILLink : Trim analysis warning IL2070: System.Diagnostics.Tracing.TypeAnalysis.TypeAnalysis(Type,EventDataAttribute,List<Type>"
             };
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
@@ -505,12 +501,7 @@ namespace Microsoft.NET.Publish.Tests
 
         private void ValidateWarningsOnHelloWorldApp (PublishCommand publishCommand, CommandResult result, List<string> expectedOutput, string targetFramework, string rid)
         {
-            //This function doesn't use an XML file like the runtime
-            //to silence warnings since will make the test to fail only
-            //with new warnings, we want the test to fail if any 
-            //missing warnings also. It doesn't use BeEquivalentTo
-            //function that warns for any new or missing warnings
-            //since the error experience is not good for a developer
+            // This checks that there are no unexpected warnings, but does not cause failures for missing expected warnings.
             var warnings = result.StdOut.Split('\n', '\r', ')').Where(line => line.StartsWith("ILLink :"));
             var extraWarnings = warnings.Except(expectedOutput);
 
@@ -519,8 +510,8 @@ namespace Microsoft.NET.Publish.Tests
             if (extraWarnings.Any())
             {
                 // Print additional information to recognize which framework assemblies are being used.
-                errorMessage.Append($"Target framework from test: {targetFramework}{Environment.NewLine}");
-                errorMessage.Append($"Runtime identifier: {rid}{Environment.NewLine}");
+                errorMessage.AppendLine($"Target framework from test: {targetFramework}");
+                errorMessage.AppendLine($"Runtime identifier: {rid}");
 
                 // Get the array of runtime assemblies inside the publish folder.
                 string[] runtimeAssemblies = Directory.GetFiles(publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName, "*.dll");
@@ -531,16 +522,12 @@ namespace Microsoft.NET.Publish.Tests
                 {
                     Assembly assembly = mlc.LoadFromAssemblyPath(Path.Combine(publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName, "System.Private.CoreLib.dll"));
                     string assemblyVersionInfo = (string)assembly.CustomAttributes.Where(ca => ca.AttributeType.Name == "AssemblyInformationalVersionAttribute").Select(ca => ca.ConstructorArguments[0].Value).FirstOrDefault();
-                    errorMessage.Append($"Runtime Assembly Informational Version: {assemblyVersionInfo}{Environment.NewLine}");
+                    errorMessage.AppendLine($"Runtime Assembly Informational Version: {assemblyVersionInfo}");
                 }
-                errorMessage.Append($"The execution of a hello world app generated a diff in the number of warnings the app produces{Environment.NewLine}{Environment.NewLine}");
-            }
-            // Intentionally do not fail for missing warnings. That's an improvement.
-            if (extraWarnings.Any())
-            {
-                errorMessage.Append($"This is a list of extra linker warnings generated with your change using a console app:{Environment.NewLine}");
+                errorMessage.AppendLine($"The execution of a hello world app generated a diff in the number of warnings the app produces{Environment.NewLine}");
+                errorMessage.AppendLine("Test output contained the following extra linker warnings:");
                 foreach (var extraWarning in extraWarnings)
-                    errorMessage.Append("+  " + extraWarning + Environment.NewLine);
+                    errorMessage.AppendLine($"+ {extraWarning}");
             }
             Assert.True(!extraWarnings.Any(), errorMessage.ToString());
         }
