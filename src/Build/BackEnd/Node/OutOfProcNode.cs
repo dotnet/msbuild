@@ -716,6 +716,7 @@ namespace Microsoft.Build.Execution
             {
                 _loggingService.IncludeEvaluationMetaprojects = true;
             }
+
             if (configuration.LoggingNodeConfiguration.IncludeEvaluationProfiles)
             {
                 _loggingService.IncludeEvaluationProfile = true;
@@ -724,6 +725,11 @@ namespace Microsoft.Build.Execution
             if (configuration.LoggingNodeConfiguration.IncludeTaskInputs)
             {
                 _loggingService.IncludeTaskInputs = true;
+            }
+
+            if (configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItems)
+            {
+                _loggingService.IncludeEvaluationPropertiesAndItems = true;
             }
 
             try

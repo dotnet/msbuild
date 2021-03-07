@@ -175,6 +175,32 @@ namespace Microsoft.Build.Utilities
             }
         }
 
+        private bool? _logPropertiesAndItemsAfterEvaluation;
+        private bool _logPropertiesAndItemsAfterEvaluationInitialized = false;
+        public bool? LogPropertiesAndItemsAfterEvaluation
+        {
+            get
+            {
+                if (!_logPropertiesAndItemsAfterEvaluationInitialized)
+                {
+                    _logPropertiesAndItemsAfterEvaluationInitialized = true;
+                    var variable = Environment.GetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION");
+                    if (!string.IsNullOrEmpty(variable))
+                    {
+                        _logPropertiesAndItemsAfterEvaluation = variable == "1" || string.Equals(variable, "true", StringComparison.OrdinalIgnoreCase);
+                    }
+                }
+
+                return _logPropertiesAndItemsAfterEvaluation;
+            }
+
+            set
+            {
+                _logPropertiesAndItemsAfterEvaluationInitialized = true;
+                _logPropertiesAndItemsAfterEvaluation = value;
+            }
+        }
+
         /// <summary>
         /// Read information only once per file per ResolveAssemblyReference invocation.
         /// </summary>

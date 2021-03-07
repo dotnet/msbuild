@@ -131,6 +131,12 @@ namespace Microsoft.Build.Utilities
         public bool IncludeTaskInputs { get; set; }
 
         /// <summary>
+        /// Should properties and items be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
+        /// instead of <see cref="ProjectStartedEventArgs"/>?
+        /// </summary>
+        public bool IncludeEvaluationPropertiesAndItems { get; set; }
+
+        /// <summary>
         /// Initialize the logger.
         /// </summary>
         public void Initialize(IEventSource eventSource) => Initialize(eventSource, 1);
@@ -159,6 +165,7 @@ namespace Microsoft.Build.Utilities
                 {
                     eventSource3.IncludeEvaluationMetaprojects();
                 }
+
                 if (IncludeEvaluationProfiles)
                 {
                     eventSource3.IncludeEvaluationProfiles();
@@ -167,6 +174,14 @@ namespace Microsoft.Build.Utilities
                 if (IncludeTaskInputs)
                 {
                     eventSource3.IncludeTaskInputs();
+                }
+            }
+
+            if (_eventSourceForBuild is IEventSource4 eventSource4)
+            {
+                if (IncludeEvaluationPropertiesAndItems)
+                {
+                    eventSource4.IncludeEvaluationPropertiesAndItems();
                 }
             }
         }

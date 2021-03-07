@@ -18,7 +18,7 @@ namespace Microsoft.Build.BackEnd.Logging
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IEventSource3, IBuildEventSink
+        IEventSource4, IBuildEventSink
     {
         #region Events
 
@@ -138,7 +138,6 @@ namespace Microsoft.Build.BackEnd.Logging
             private set;
         }
 
-
         /// <summary>
         /// Should evaluation events include profiling information?
         /// </summary>
@@ -152,6 +151,16 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Should task events include task inputs?
         /// </summary>
         public bool IncludeTaskInputs
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Determines whether properties and items should be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
+        /// instead of <see cref="ProjectStartedEventArgs"/>
+        /// </summary>
+        public bool IncludeEvaluationPropertiesAndItems
         {
             get;
             private set;
@@ -176,6 +185,15 @@ namespace Microsoft.Build.BackEnd.Logging
         void IEventSource3.IncludeTaskInputs()
         {
             IncludeTaskInputs = true;
+        }
+
+        #endregion
+
+        #region IEventSource4 Methods
+
+        void IEventSource4.IncludeEvaluationPropertiesAndItems()
+        {
+            IncludeEvaluationPropertiesAndItems = true;
         }
 
         #endregion

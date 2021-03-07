@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
 
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
@@ -182,6 +183,16 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Should evaluation events include profiling information?
         /// </summary>
         bool IncludeEvaluationProfile
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Should properties and items be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
+        /// instead of <see cref="ProjectStartedEventArgs"/>?
+        /// </summary>
+        bool IncludeEvaluationPropertiesAndItems
         {
             get;
             set;
@@ -421,8 +432,18 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="projectEvaluationEventContext">Event context for the project.</param>
         /// <param name="projectFile">Project file being built</param>
+        /// <param name="globalProperties">Global properties used for the evaluation.</param>
+        /// <param name="properties">Properties produced by the evaluation.</param>
+        /// <param name="items">Items produced by the evaluation.</param>
+        /// <param name="profilerResult">Profiler results if evaluation profiling was enabled.</param>
         /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
-        void LogProjectEvaluationFinished(BuildEventContext projectEvaluationEventContext, string projectFile);
+        void LogProjectEvaluationFinished(
+            BuildEventContext projectEvaluationEventContext,
+            string projectFile,
+            IEnumerable globalProperties,
+            IEnumerable properties,
+            IEnumerable items,
+            ProfilerResult? profilerResult);
 
         /// <summary>
         /// Log that a project has started

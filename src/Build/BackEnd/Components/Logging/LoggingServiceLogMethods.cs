@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -513,8 +514,18 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="projectEvaluationEventContext">Event context for the project.</param>
         /// <param name="projectFile">Project file being built</param>
+        /// <param name="globalProperties">Global properties used for the evaluation.</param>
+        /// <param name="properties">Properties produced by the evaluation.</param>
+        /// <param name="items">Items produced by the evaluation.</param>
+        /// <param name="profilerResult">Profiler results if evaluation profiling was enabled.</param>
         /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
-        public void LogProjectEvaluationFinished(BuildEventContext projectEvaluationEventContext, string projectFile)
+        public void LogProjectEvaluationFinished(
+            BuildEventContext projectEvaluationEventContext,
+            string projectFile,
+            IEnumerable globalProperties,
+            IEnumerable properties,
+            IEnumerable items,
+            ProfilerResult? profilerResult)
         {
             lock (_lockObject)
             {
@@ -524,7 +535,11 @@ namespace Microsoft.Build.BackEnd.Logging
                     new ProjectEvaluationFinishedEventArgs(ResourceUtilities.GetResourceString("EvaluationFinished"), projectFile)
                     {
                         BuildEventContext = projectEvaluationEventContext,
-                        ProjectFile = projectFile
+                        ProjectFile = projectFile,
+                        ProfilerResult = profilerResult,
+                        GlobalProperties = globalProperties,
+                        Properties = properties,
+                        Items = items
                     };
                 ProcessLoggingEvent(buildEvent);
             }
@@ -579,17 +594,24 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(projectInstanceId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
                 var buildRequestConfiguration = _configCache.Value[projectInstanceId];
-                ProjectStartedEventArgs buildEvent = new ProjectStartedEventArgs
+
+                IDictionary<string, string> globalProperties = null;
+                if (!IncludeEvaluationPropertiesAndItems)
+                {
+                    globalProperties = buildRequestConfiguration.GlobalProperties.ToDictionary();
+                }
+
+                var buildEvent = new ProjectStartedEventArgs
                     (
                         projectInstanceId,
                         message,
-                        null,       // no help keyword
+                        helpKeyword: null,
                         projectFile,
                         targetNames,
                         properties,
                         items,
                         parentBuildEventContext,
-                        buildRequestConfiguration.GlobalProperties.ToDictionary(),
+                        globalProperties,
                         buildRequestConfiguration.ToolsVersion
                     );
                 buildEvent.BuildEventContext = projectBuildEventContext;
