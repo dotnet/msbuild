@@ -81,7 +81,8 @@ namespace Microsoft.NET.Build.Tasks
                     catch (Exception ex) when (ex is IOException ||
                                                ex is UnauthorizedAccessException ||
                                                // Note: replace this when https://github.com/dotnet/core-setup/issues/7516 is fixed
-                                               ex.GetType().Name == "HResultException")
+                                               ex.GetType().Name == "HResultException" ||
+                                               (ex is AggregateException && (ex.InnerException is IOException || ex.InnerException is UnauthorizedAccessException)))
                     {
                         if (Retries < 0 || attempts == Retries) {
                             throw;
@@ -89,11 +90,17 @@ namespace Microsoft.NET.Build.Tasks
 
                         ++attempts;
 
+                        string message = ex.Message;
+                        if(ex is AggregateException)
+                        {
+                            message = ex.InnerException.Message;
+                        }
+
                         Log.LogWarning(
                             string.Format(Strings.AppHostCreationFailedWithRetry,
                                 attempts,
                                 Retries + 1,
-                                ex.Message));
+                                message));
 
                         if (RetryDelayMilliseconds > 0) {
                             Thread.Sleep(RetryDelayMilliseconds);
