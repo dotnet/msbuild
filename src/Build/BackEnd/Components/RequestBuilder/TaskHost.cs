@@ -678,10 +678,12 @@ namespace Microsoft.Build.BackEnd
 
         #region IBuildEngine8 Members
         private HashSet<string> _warningsAsErrors;
+
         /// <summary>
         /// Contains all warnings that should be logged as errors.
+        /// Non-null empty set when all warnings should be treated as errors.
         /// </summary>
-        public HashSet<string> WarningsAsErrors
+        private HashSet<string> WarningsAsErrors
         {
             get
             {
@@ -693,6 +695,16 @@ namespace Microsoft.Build.BackEnd
 
                 return _warningsAsErrors ??= _taskLoggingContext.GetWarningsAsErrors();
             }
+        }
+
+        public bool ShouldTreatWarningAsError(string warningCode)
+        {
+            if (_taskLoggingContext == null || WarningsAsErrors == null)
+            {
+                return false;
+            }
+
+            return WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode);
         }
         #endregion
 

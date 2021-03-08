@@ -268,10 +268,17 @@ namespace Microsoft.Build.CommandLine
         #endregion
 
         #region IBuildEngine8 Implementation
+
         /// <summary>
         /// Contains all warnings that should be logged as errors.
+        /// Non-null empty set when all warnings should be treated as errors.
         /// </summary>
-        public HashSet<string> WarningsAsErrors { get; private set; }
+        private HashSet<string> WarningsAsErrors { get; set; }
+
+        public bool ShouldTreatWarningAsError(string warningCode)
+        {
+            return WarningsAsErrors != null && (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode));
+        }
         #endregion
 
         #region IBuildEngine Implementation (Methods)

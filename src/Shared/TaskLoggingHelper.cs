@@ -1019,7 +1019,7 @@ namespace Microsoft.Build.Utilities
             // This warning will be converted to an error if:
             // 1. Its code exists within WarningsAsErrors
             // 2. If WarningsAsErrors is a non-null empty set (treat all warnings as errors)
-            if (BuildEngine is IBuildEngine8 be8 && be8.WarningsAsErrors != null && (be8.WarningsAsErrors.Contains(warningCode) || be8.WarningsAsErrors.Count == 0))
+            if (BuildEngine is IBuildEngine8 be8 && be8.ShouldTreatWarningAsError(warningCode))
             {
                 LogError
                 (

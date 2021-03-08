@@ -6,11 +6,17 @@ using System.Collections.Generic;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// This interface extends <see cref="IBuildEngine7" /> to allow tasks know if a warning
-    /// they logged was turned into an error.
+    /// This interface extends <see cref="IBuildEngine7" /> to let tasks know if a warning
+    /// they are about to log will be converted into an error.
     /// </summary>
     public interface IBuildEngine8 : IBuildEngine7
     {
-        public HashSet<string> WarningsAsErrors { get; }
+        /// <summary>
+        /// Determines whether the logging service will convert the specified
+        /// warning code into an error.
+        /// </summary>
+        /// <param name="warningCode">The warning code to check.</param>
+        /// <returns>A boolean to determine whether the warning should be treated as an error.</returns>
+        public bool ShouldTreatWarningAsError(string warningCode);
     }
 }
