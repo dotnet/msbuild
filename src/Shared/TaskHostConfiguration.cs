@@ -123,7 +123,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="taskLocation">Location of the assembly the task is to be loaded from.</param>
         /// <param name="taskParameters">Parameters to apply to the task.</param>
         /// <param name="globalParameters">global properties for the current project.</param>
-        /// <param name="warningsAsErrors">Warning codes to be thrown as errors for the current project.</param>
+        /// <param name="warningsAsErrors">Warning codes to be logged as errors for the current project.</param>
 #endif
         public TaskHostConfiguration
             (
