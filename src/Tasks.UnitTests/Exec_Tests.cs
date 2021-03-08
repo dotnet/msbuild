@@ -60,23 +60,10 @@ namespace Microsoft.Build.UnitTests
                 string tempPath = Path.GetTempPath();
                 Assert.StartsWith(newTempPath, tempPath);
 
-                // Get a count of how many temp files there are right now.
-                string[] tempFiles = Directory.GetFiles(tempPath);
-
-                Assert.Empty(tempFiles);
-
                 // Now run the Exec task on a simple command.
                 Exec exec = PrepareExec("echo Hello World!");
-                bool result = exec.Execute();
+                exec.Execute().ShouldBeTrue();
 
-                // Get the new count of temp files.
-                tempFiles = Directory.GetFiles(tempPath);
-
-                // Ensure that Exec succeeded.
-                Assert.True(result);
-
-                // Ensure that no files linger in TEMP.
-                Assert.Empty(tempFiles);
             }
         }
 
