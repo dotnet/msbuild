@@ -526,16 +526,16 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <returns>A Hashset containing warning codes that should be treated as errors.</returns>
         public HashSet<string> GetWarningsToBeLoggedAsErrorsByProject(BuildEventContext context)
         {
-            if(_warningsAsErrorsByProject == null)
+            if (_warningsAsErrorsByProject == null)
             {
                 return null;
             }
 
             int key = GetWarningsAsErrorOrMessageKey(context);
 
-            HashSet<string> warningsAsErrorsExcludingMessages = new HashSet<string>(_warningsAsErrorsByProject?[key]);
+            HashSet<string> warningsAsErrorsExcludingMessages = new HashSet<string>(_warningsAsErrorsByProject[key]);
 
-            if(_warningsAsMessagesByProject != null)
+            if (_warningsAsMessagesByProject != null)
             {
                 warningsAsErrorsExcludingMessages.ExceptWith(_warningsAsMessagesByProject[key]);
 
