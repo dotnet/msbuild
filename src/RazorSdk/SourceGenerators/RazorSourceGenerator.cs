@@ -149,10 +149,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             });
 
             var files = razorContext.RazorFiles;
-            var results = ArrayPool<SyntaxTree>.Shared.Rent(files.Count);
-
             var parseOptions = (CSharpParseOptions)GeneratorExecutionContext.ParseOptions;
 
+            var results = ArrayPool<SyntaxTree>.Shared.Rent(files.Count);
             Parallel.For(0, files.Count, GetParallelOptions(GeneratorExecutionContext), i =>
             {
                 var file = files[i];
@@ -162,14 +161,15 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 results[i] = CSharpSyntaxTree.ParseText(
                     generatedCode,
                     options: parseOptions);
-
             });
 
-            tagHelperFeature.Compilation = GeneratorExecutionContext.Compilation.AddSyntaxTrees(results.Take(files.Count));
+            // Add declaration codegen to the compilation so we can perform discovery on it.
+            var compilationWithDeclarationCodeGen = GeneratorExecutionContext.Compilation.AddSyntaxTrees(results.Take(files.Count));
             ArrayPool<SyntaxTree>.Shared.Return(results);
+                
+            tagHelperFeature.Compilation = compilationWithDeclarationCodeGen;
 
-            var currentMetadataReference = GeneratorExecutionContext.Compilation.ToMetadataReference();
-            tagHelperFeature.TargetReference = currentMetadataReference;
+            tagHelperFeature.TargetAssembly = compilationWithDeclarationCodeGen.Assembly;
             var assemblyTagHelpers = tagHelperFeature.GetDescriptors();
 
             var refTagHelpers = GetTagHelperDescriptorsFromReferences(GeneratorExecutionContext.Compilation, tagHelperFeature);
@@ -187,32 +187,35 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
             foreach (var reference in compilation.References)
             {
-                var guid = reference.GetModuleVersionId(compilation);
-                IReadOnlyList<TagHelperDescriptor> descriptors = default;
-
-                if (guid is Guid _guid)
+                if (compilation.GetAssemblyOrModuleSymbol(reference) is IAssemblySymbol assembly)
                 {
-                    if (!_tagHelperCache.TryGetValue(_guid, out descriptors))
+                    var guid = reference.GetModuleVersionId(compilation);
+                    IReadOnlyList<TagHelperDescriptor> descriptors = default;
+
+                    if (guid is Guid _guid)
                     {
-                        tagHelperFeature.TargetReference = reference;
-                        descriptors = tagHelperFeature.GetDescriptors();
-                        // Clear out the cache if it is growing too large. A 
-                        // simple compilation can include around ~300 references
-                        // so give a little bit of buffer beyond this.
-                        if (_tagHelperCache.Count > 400)
+                        if (!_tagHelperCache.TryGetValue(_guid, out descriptors))
                         {
-                            _tagHelperCache.Clear();
+                            tagHelperFeature.TargetAssembly = assembly;
+                            descriptors = tagHelperFeature.GetDescriptors();
+                            // Clear out the cache if it is growing too large. A 
+                            // simple compilation can include around ~300 references
+                            // so give a little bit of buffer beyond this.
+                            if (_tagHelperCache.Count > 400)
+                            {
+                                _tagHelperCache.Clear();
+                            }
+                            _tagHelperCache[_guid] = descriptors;
                         }
-                        _tagHelperCache[_guid] = descriptors;
                     }
-                }
-                else
-                {
-                    tagHelperFeature.TargetReference = reference;
-                    descriptors = tagHelperFeature.GetDescriptors();
-                }
+                    else
+                    {
+                        tagHelperFeature.TargetAssembly = assembly;
+                        descriptors = tagHelperFeature.GetDescriptors();
+                    }
 
-                tagHelperDescriptors.AddRange(descriptors);
+                    tagHelperDescriptors.AddRange(descriptors);
+                }
             }
 
             return tagHelperDescriptors;

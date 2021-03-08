@@ -18,7 +18,7 @@
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <CopyLocalLockFileAssemblies Condition="'$(TargetFramework)'!='net472'">false</CopyLocalLockFileAssemblies>
     <!-- MSBuild Task DLLs need to be versioned with every build -->
     <AutoGenerateAssemblyVersion>true</AutoGenerateAssemblyVersion>
 
@@ -38,20 +38,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkPackageVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="System.Reflection.Metadata"  Version="$(SystemReflectionMetadataVersion)" Condition="'$(TargetFramework)'=='net472'" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.Extensions"
-      Version="$(MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion)"
-      Condition="'$(TargetFramework)'!='net472'" 
-      ReferenceOutputAssembly="false"
-      SkipGetTargetFrameworkProperties="true"
-      UndefineProperties="TargetFramework;TargetFrameworks" />
+    <PackageReference Include="System.Reflection.Metadata"
+      Version="$(SystemReflectionMetadataVersion)"
+      Condition="'$(TargetFramework)'=='net472'" />
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalContent Include="$(RazorSdkRoot)Targets\**\*.*">
-      <Pack>true</Pack>
-      <PackagePath>targets</PackagePath>
-    </AdditionalContent>
     <AdditionalContent Include="$(RazorSdkRoot)Targets\**\*.*">
       <Pack>true</Pack>
       <PackagePath>build\netstandard2.0</PackagePath>

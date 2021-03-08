@@ -17,4 +17,8 @@
     <Message Text="Watch: %(Watch.FileName)%(Watch.Extension)" Importance="High" />
   </Target>
 
+  <Target Name="_IntrospectRazorGenerateComponentDesignTime" DependsOnTargets="RazorGenerateComponentDesignTime">
+    <Message Text="RazorComponentWithTargetPath: %(RazorComponentWithTargetPath.FileName) %(RazorComponentWithTargetPath.TargetPath)" Importance="High" />
+  </Target>
+
 </Project>

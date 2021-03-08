@@ -70,7 +70,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </When>
   </Choose>
 
-  
+
   <PropertyGroup>
     <!--
       In 3.0, we expect RazorLangVersion to either be specified in the template or inferred via TFM. In 2.x, RazorLangVersion is
@@ -201,6 +201,10 @@ Copyright (c) .NET Foundation. All rights reserved.
       $(GetCopyToOutputDirectoryItemsDependsOn)
     </GetCopyToOutputDirectoryItemsDependsOn>
 
+    <_RazorGenerateComponentDesignTimeDependsOn>
+      ResolveRazorComponentInputs;
+      AssignRazorComponentTargetPaths
+    </_RazorGenerateComponentDesignTimeDependsOn>
   </PropertyGroup>
 
   <!--

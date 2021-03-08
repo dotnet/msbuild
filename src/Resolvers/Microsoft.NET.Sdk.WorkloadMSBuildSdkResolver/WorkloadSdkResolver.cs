@@ -96,7 +96,8 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                         autoImportSdkPaths.Add(sdkPackSdkFolder);
                     }
                 }
-                return factory.IndicateSuccess(autoImportSdkPaths, sdkReference.Version);
+                //  Call Distinct() here because with aliased packs, there may be duplicates of the same path
+                return factory.IndicateSuccess(autoImportSdkPaths.Distinct(), sdkReference.Version);
             }
             else if (sdkReference.Name.Equals("Microsoft.NET.SDK.WorkloadManifestTargetsLocator", StringComparison.OrdinalIgnoreCase))
             {

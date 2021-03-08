@@ -21,6 +21,10 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Razor" Version="$(MicrosoftCodeAnalysisRazorVersion)" />
     <PackageReference Include="Microsoft.Css.Parser" Version="$(MicrosoftCssParserVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.Extensions"
+      Version="$(MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion)"
+      ReferenceOutputAssembly="false"
+      SkipGetTargetFrameworkProperties="true"/>
   </ItemGroup>
 
   <!-- This makes it so that the runtimeconfig.json is included as part of the build output of the project that references this project. -->

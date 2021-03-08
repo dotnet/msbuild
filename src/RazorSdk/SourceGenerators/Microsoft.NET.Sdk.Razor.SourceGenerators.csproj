@@ -10,9 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" GeneratePathProperty="true"/>
-    <PackageReference Include="Microsoft.AspNetCore.Razor.Language" Version="$(MicrosoftAspNetCoreRazorLanguageVersion)" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Razor" Version="$(MicrosoftCodeAnalysisRazorVersion)" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Language" Version="$(MicrosoftAspNetCoreRazorLanguageVersion)" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.Razor" Version="$(MicrosoftCodeAnalysisRazorVersion)" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.Extensions" Version="$(MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion)" GeneratePathProperty="true" />
   </ItemGroup>
 
@@ -23,9 +23,6 @@
 
   <Target Name="GetDependencyTargetPaths">
     <ItemGroup>
-      <TargetPathWithTargetPlatformMoniker Include="$(PkgMicrosoft_AspNetCore_Razor_Language)\lib\netstandard2.0\Microsoft.AspNetCore.Razor.Language.dll" IncludeRuntimeDependency="false" />
-      <TargetPathWithTargetPlatformMoniker Include="$(PkgMicrosoft_CodeAnalysis_Razor)\lib\netstandard2.0\Microsoft.CodeAnalysis.Razor.dll" IncludeRuntimeDependency="false" />
-      <TargetPathWithTargetPlatformMoniker Include="$(PkgMicrosoft_CodeAnalysis_CSharp)\lib\netstandard2.0\Microsoft.CodeAnalysis.CSharp.dll" IncludeRuntimeDependency="false" />
       <TargetPathWithTargetPlatformMoniker Include="$(PkgMicrosoft_AspNetCore_Mvc_Razor_Extensions)\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.Razor.Extensions.dll" IncludeRuntimeDependency="false" />
     </ItemGroup>
   </Target>

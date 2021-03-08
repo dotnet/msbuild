@@ -16,13 +16,14 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup>
       <_RazorSdkSourceGeneratorDirectoryRoot>$(RazorSdkDirectoryRoot)\source-generators\</_RazorSdkSourceGeneratorDirectoryRoot>
+      <_RazorSdkToolsDirectoryRoot>$(RazorSdkDirectoryRoot)\tools\</_RazorSdkToolsDirectoryRoot>
     </PropertyGroup>
 
     <!-- Configure analyzers -->
     <ItemGroup>
-      <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.AspNetCore.Mvc.Razor.Extensions.dll" />
-      <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.AspNetCore.Razor.Language.dll" />
-      <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.CodeAnalysis.Razor.dll" />
+      <_RazorAnalyzer Include="$(_RazorSdkToolsDirectoryRoot)Microsoft.AspNetCore.Mvc.Razor.Extensions.dll" />
+      <_RazorAnalyzer Include="$(_RazorSdkToolsDirectoryRoot)Microsoft.AspNetCore.Razor.Language.dll" />
+      <_RazorAnalyzer Include="$(_RazorSdkToolsDirectoryRoot)Microsoft.CodeAnalysis.Razor.dll" />
       <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.NET.Sdk.Razor.SourceGenerators.dll" />
 
       <Analyzer Include="@(_RazorAnalyzer)" />
