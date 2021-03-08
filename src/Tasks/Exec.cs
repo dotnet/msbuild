@@ -623,7 +623,7 @@ namespace Microsoft.Build.Tasks
                     {
                         char c = batchFileForCommandLine[i];
 
-                        if ((c == '(' || c == ')' || c == '&') && (i > 0 && batchFileForCommandLine[i - 1] != '^'))
+                        if ((c == '(' || c == ')' || c == '&') && (i == 0 || batchFileForCommandLine[i - 1] != '^'))
                         {
                             fileName.Append('^');
                         }
