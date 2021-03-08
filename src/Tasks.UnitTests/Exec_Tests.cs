@@ -66,7 +66,6 @@ namespace Microsoft.Build.UnitTests
                 // Now run the Exec task on a simple command.
                 Exec exec = PrepareExec("echo Hello World!");
                 exec.Execute().ShouldBeTrue();
-
             }
         }
 

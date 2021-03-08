@@ -616,16 +616,20 @@ namespace Microsoft.Build.Tasks
                         batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
                     }
 
-                    StringBuilder fileName = StringBuilderCache.Acquire(batchFileForCommandLine.Length).Append(batchFileForCommandLine);
+                    StringBuilder fileName = StringBuilderCache.Acquire(batchFileForCommandLine.Length);
 
                     // Escape any '(', ')', or '&'
-                    for(int i = 1; i < fileName.Length; i++)
+                    for (int i = 0; i < batchFileForCommandLine.Length; i++)
                     {
-                        if((fileName[i] == '(' || fileName[i] == ')' || fileName[i] == '&') && fileName[i-1] != '^')
+                        char c = batchFileForCommandLine[i];
+
+                        if ((c == '(' || c == ')' || c == '&') && (i > 0 && batchFileForCommandLine[i - 1] != '^'))
                         {
-                            fileName.Insert(i++, '^');
+                            fileName.Append('^');
                         }
+                        fileName.Append(c);
                     }
+
                     batchFileForCommandLine = StringBuilderCache.GetStringAndRelease(fileName);
                 }
 
