@@ -54,6 +54,35 @@ namespace Microsoft.DotNet.NativeWrapper
             global_json_path = 1,
         }
 
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        internal struct hostfxr_dotnet_environment_info
+        {
+            public int size;
+            public string hostfxr_version;
+            public string hostfxr_commit_hash;
+            public int sdk_count;
+            public IntPtr sdks;
+            public int framework_count;
+            public IntPtr frameworks;
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        internal struct hostfxr_dotnet_environment_framework_info
+        {
+            public int size;
+            public string name;
+            public string version;
+            public string path;
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        internal struct hostfxr_dotnet_environment_sdk_info
+        {
+            public int size;
+            public string version;
+            public string path;
+        }
+
         public static class Windows
         {
             private const CharSet UTF16 = CharSet.Unicode;
@@ -92,35 +121,6 @@ namespace Microsoft.DotNet.NativeWrapper
                 IntPtr reserved,
                 hostfxr_get_dotnet_environment_info_result_fn result,
                 IntPtr result_context);
-
-            [StructLayout(LayoutKind.Sequential, CharSet = UTF16)]
-            internal struct hostfxr_dotnet_environment_info
-            {
-                public int size;
-                public string hostfxr_version;
-                public string hostfxr_commit_hash;
-                public int sdk_count;
-                public IntPtr sdks;
-                public int framework_count;
-                public IntPtr frameworks;
-            }
-
-            [StructLayout(LayoutKind.Sequential, CharSet = UTF16)]
-            internal struct hostfxr_dotnet_environment_framework_info
-            {
-                public int size;
-                public string name;
-                public string version;
-                public string path;
-            }
-
-            [StructLayout(LayoutKind.Sequential, CharSet = UTF16)]
-            internal struct hostfxr_dotnet_environment_sdk_info
-            {
-                public int size;
-                public string version;
-                public string path;
-            }
         }
 
         public static class Unix
@@ -176,35 +176,6 @@ namespace Microsoft.DotNet.NativeWrapper
                 var result = PtrToStringUTF8(ptr);
                 free(ptr);
                 return result;
-            }
-
-            [StructLayout(LayoutKind.Sequential, CharSet = UTF8)]
-            internal struct hostfxr_dotnet_environment_info
-            {
-                public int size;
-                public string hostfxr_version;
-                public string hostfxr_commit_hash;
-                public int sdk_count;
-                public IntPtr sdks;
-                public int framework_count;
-                public IntPtr frameworks;
-            }
-
-            [StructLayout(LayoutKind.Sequential, CharSet = UTF8)]
-            internal struct hostfxr_dotnet_environment_framework_info
-            {
-                public int size;
-                public string name;
-                public string version;
-                public string path;
-            }
-
-            [StructLayout(LayoutKind.Sequential, CharSet = UTF8)]
-            internal struct hostfxr_dotnet_environment_sdk_info
-            {
-                public int size;
-                public string version;
-                public string path;
             }
         }
     }

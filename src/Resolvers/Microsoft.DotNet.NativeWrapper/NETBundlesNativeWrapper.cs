@@ -10,12 +10,12 @@ namespace Microsoft.DotNet.NativeWrapper
         public NetEnvironmentInfo GetDotnetEnvironmentInfo(string dotnetExeDirectory)
         {
             var info = new NetEnvironmentInfo();
-            IntPtr reserved = new IntPtr();
-            IntPtr resultContext = new IntPtr();
+            IntPtr reserved = IntPtr.Zero;
+            IntPtr resultContext = IntPtr.Zero;
 
             int errorCode = Interop.RunningOnWindows
-                ? Interop.Windows.hostfxr_get_dotnet_environment_info(dotnetExeDirectory, reserved, info.InitializeWindows, resultContext)
-                : Interop.Unix.hostfxr_get_dotnet_environment_info(dotnetExeDirectory, reserved, info.InitializeUnix, resultContext);
+                ? Interop.Windows.hostfxr_get_dotnet_environment_info(dotnetExeDirectory, reserved, info.Initialize, resultContext)
+                : Interop.Unix.hostfxr_get_dotnet_environment_info(dotnetExeDirectory, reserved, info.Initialize, resultContext);
 
             return info;
         }

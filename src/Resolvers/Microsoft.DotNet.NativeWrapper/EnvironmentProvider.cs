@@ -80,13 +80,13 @@ namespace Microsoft.DotNet.NativeWrapper
             return Path.GetDirectoryName(dotnetExe);
         }
 
-        public static string GetDotnetExeDirectory(Func<string, string> _getEnvironmentVariable = null)
+        public static string GetDotnetExeDirectory(Func<string, string> getEnvironmentVariable = null)
         {
-            if (_getEnvironmentVariable == null)
+            if (getEnvironmentVariable == null)
             {
-                _getEnvironmentVariable = Environment.GetEnvironmentVariable;
+                getEnvironmentVariable = Environment.GetEnvironmentVariable;
             }
-            var environmentProvider = new EnvironmentProvider(_getEnvironmentVariable);
+            var environmentProvider = new EnvironmentProvider(getEnvironmentVariable);
             return environmentProvider.GetDotnetExeDirectory();
         }
     }
