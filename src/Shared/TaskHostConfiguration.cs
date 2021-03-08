@@ -85,7 +85,7 @@ namespace Microsoft.Build.BackEnd
 
         private Dictionary<string, string> _globalParameters;
 
-        private HashSet<string> _warningsAsErrors;
+        private ICollection<string> _warningsAsErrors;
 
 #if FEATURE_APPDOMAIN
         /// <summary>
@@ -143,7 +143,7 @@ namespace Microsoft.Build.BackEnd
                 string taskLocation,
                 IDictionary<string, object> taskParameters,
                 Dictionary<string, string> globalParameters,
-                HashSet<string> warningsAsErrors
+                ICollection<string> warningsAsErrors
             )
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
@@ -348,7 +348,7 @@ namespace Microsoft.Build.BackEnd
             { return NodePacketType.TaskHostConfiguration; }
         }
 
-        public HashSet<string> WarningsAsErrors
+        public ICollection<string> WarningsAsErrors
         {
             [DebuggerStepThrough]
             get
@@ -379,7 +379,7 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
             translator.Translate(ref _continueOnError);
             translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
-            translator.Translate(ref _warningsAsErrors);
+            translator.Translate(ref _warningsAsErrors, count => new HashSet<string>(count));
         }
 
         /// <summary>

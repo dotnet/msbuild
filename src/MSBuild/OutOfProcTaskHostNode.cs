@@ -273,7 +273,7 @@ namespace Microsoft.Build.CommandLine
         /// Contains all warnings that should be logged as errors.
         /// Non-null empty set when all warnings should be treated as errors.
         /// </summary>
-        private HashSet<string> WarningsAsErrors { get; set; }
+        private ICollection<string> WarningsAsErrors { get; set; }
 
         public bool ShouldTreatWarningAsError(string warningCode)
         {
