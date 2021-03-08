@@ -22,7 +22,7 @@ namespace Microsoft.Build.Shared
         /// <param name="subfolder"></param>
         internal static string GetTemporaryDirectory(bool createDirectory = true, string subfolder = null)
         {
-            string temporaryDirectory = Path.Combine(Path.GetTempPath(), "Temporary" + Guid.NewGuid().ToString("N"), subfolder ?? string.Empty);
+            string temporaryDirectory = Path.Combine(Path.GetTempPath(), "MSBuild" + Guid.NewGuid().ToString("N"), subfolder ?? string.Empty);
 
             if (createDirectory)
             {
