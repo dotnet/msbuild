@@ -10,6 +10,7 @@ using Microsoft.Build.Execution;
 
 using Xunit;
 using System.Collections.Generic;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -35,14 +36,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 }
             }
 
-            Assert.True(toolsetProperties.ContainsKey("MSBuildSDKsPath"));
-            Assert.True(toolsetProperties.ContainsKey("RoslynTargetsPath"));
-            Assert.NotEqual(string.Empty, toolsetProperties["MSBuildSDKsPath"]);
-            Assert.NotEqual(string.Empty, toolsetProperties["RoslynTargetsPath"]);
+            toolsetProperties.ShouldContainKey("MSBuildSDKsPath");
+            toolsetProperties.ShouldContainKey("RoslynTargetsPath");
+            toolsetProperties["MSBuildSDKsPath"].ShouldNotBeNullOrEmpty();
+            toolsetProperties["RoslynTargetsPath"].ShouldNotBeNullOrEmpty();
 
-            Assert.False(toolsetProperties.ContainsKey("VCTargetsPath"));
-            Assert.False(toolsetProperties.ContainsKey("MSBuildToolsRoot"));
-            Assert.False(toolsetProperties.ContainsKey("MSBuildExtensionsPath"));
+            toolsetProperties.ShouldNotContainKey("VCTargetsPath");
+            toolsetProperties.ShouldNotContainKey("MSBuildToolsRoot");
+            toolsetProperties.ShouldNotContainKey("MSBuildExtensionsPath");
         }
 
         [Fact]
@@ -62,17 +63,17 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 }
             }
 
-            Assert.True(toolsetProperties.ContainsKey("MSBuildSDKsPath"));
-            Assert.True(toolsetProperties.ContainsKey("RoslynTargetsPath"));
-            Assert.NotEqual(string.Empty, toolsetProperties["MSBuildSDKsPath"]);
-            Assert.NotEqual(string.Empty, toolsetProperties["RoslynTargetsPath"]);
+            toolsetProperties.ShouldContainKey("MSBuildSDKsPath");
+            toolsetProperties.ShouldContainKey("RoslynTargetsPath");
+            toolsetProperties["MSBuildSDKsPath"].ShouldNotBeNullOrEmpty();
+            toolsetProperties["RoslynTargetsPath"].ShouldNotBeNullOrEmpty();
 
-            Assert.True(toolsetProperties.ContainsKey("VCTargetsPath"));
-            Assert.True(toolsetProperties.ContainsKey("MSBuildToolsRoot"));
-            Assert.True(toolsetProperties.ContainsKey("MSBuildExtensionsPath"));
-            Assert.NotEqual(string.Empty, toolsetProperties["VCTargetsPath"]);
-            Assert.NotEqual(string.Empty, toolsetProperties["MSBuildToolsRoot"]);
-            Assert.NotEqual(string.Empty, toolsetProperties["MSBuildExtensionsPath"]);
+            toolsetProperties.ShouldContainKey("VCTargetsPath");
+            toolsetProperties.ShouldContainKey("MSBuildToolsRoot");
+            toolsetProperties.ShouldContainKey("MSBuildExtensionsPath");
+            toolsetProperties["VCTargetsPath"].ShouldNotBeNullOrEmpty();
+            toolsetProperties["MSBuildToolsRoot"].ShouldNotBeNullOrEmpty();
+            toolsetProperties["MSBuildExtensionsPath"].ShouldNotBeNullOrEmpty();
         }
     }
 }
