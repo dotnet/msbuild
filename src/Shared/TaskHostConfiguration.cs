@@ -379,7 +379,13 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
             translator.Translate(ref _continueOnError);
             translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
-            translator.Translate(ref _warningsAsErrors, count => new HashSet<string>(count));
+            translator.Translate(collection: ref _warningsAsErrors,
+                                 objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
+#if CLR2COMPATIBILITY
+                                 collectionFactory: count => new HashSet<string>());
+#else
+                                 collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
+#endif
         }
 
         /// <summary>

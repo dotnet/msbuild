@@ -294,12 +294,14 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Translates a collection of strings to the specified type using an <see cref="NodePacketCollectionCreator{T}"/>
+            /// Translates a collection of T into the specified type using an <see cref="ObjectTranslator{T}"/> and <see cref="NodePacketCollectionCreator{L}"/>
             /// </summary>
             /// <param name="collection">The collection to be translated.</param>
-            /// <param name="collectionFactory">factory to create the IList.</param>
-            /// <typeparam name="T">The type of collection to be created.</typeparam>
-            public void Translate<T>(ref ICollection<string> collection, NodePacketCollectionCreator<T> collectionFactory) where T : ICollection<string>
+            /// <param name="objectTranslator">The translator to use for the values in the collection.</param>
+            /// <param name="collectionFactory">The factory to create the ICollection.</param>
+            /// <typeparam name="T">The type contained in the collection.</typeparam>
+            /// <typeparam name="L">The type of collection to be created.</typeparam>
+            public void Translate<T, L>(ref ICollection<T> collection, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : ICollection<T>
             {
                 if (!TranslateNullable(collection))
                 {
@@ -311,7 +313,9 @@ namespace Microsoft.Build.BackEnd
 
                 for (int i = 0; i < count; i++)
                 {
-                    collection.Add(_reader.ReadString());
+                    T value = default(T);
+                    objectTranslator(this, ref value);
+                    collection.Add(value);
                 }
             }
 
@@ -906,12 +910,14 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Translates a collection of strings to the specified type using an <see cref="NodePacketCollectionCreator{T}"/>
+            /// Translates a collection of T into the specified type using an <see cref="ObjectTranslator{T}"/> and <see cref="NodePacketCollectionCreator{L}"/>
             /// </summary>
             /// <param name="collection">The collection to be translated.</param>
-            /// <param name="collectionFactory">factory to create the IList.</param>
-            /// <typeparam name="T">The type of collection to be created.</typeparam>
-            public void Translate<T>(ref ICollection<string> collection, NodePacketCollectionCreator<T> collectionFactory) where T : ICollection<string>
+            /// <param name="objectTranslator">The translator to use for the values in the collection.</param>
+            /// <param name="collectionFactory">The factory to create the ICollection.</param>
+            /// <typeparam name="T">The type contained in the collection.</typeparam>
+            /// <typeparam name="L">The type of collection to be created.</typeparam>
+            public void Translate<T, L>(ref ICollection<T> collection, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : ICollection<T>
             {
                 if (!TranslateNullable(collection))
                 {
@@ -920,9 +926,10 @@ namespace Microsoft.Build.BackEnd
 
                 _writer.Write(collection.Count);
 
-                foreach(string item in collection)
+                foreach (T item in collection)
                 {
-                    _writer.Write(item);
+                    T value = item;
+                    objectTranslator(this, ref value);
                 }
             }
 
