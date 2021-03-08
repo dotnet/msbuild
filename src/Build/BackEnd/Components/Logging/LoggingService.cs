@@ -528,7 +528,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// A set containing warning codes to be logged as errors.
         /// Null if no warnings should be treated as errors.
         /// </returns>
-        public HashSet<string> GetWarningsToBeLoggedAsErrorsByProject(BuildEventContext context)
+        public ICollection<string> GetWarningsToBeLoggedAsErrorsByProject(BuildEventContext context)
         {
             if (_warningsAsErrorsByProject == null)
             {

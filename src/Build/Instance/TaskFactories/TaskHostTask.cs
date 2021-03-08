@@ -272,7 +272,7 @@ namespace Microsoft.Build.BackEnd
                         AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
                         _setParameters,
                         new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),
-                        _taskLoggingContext.LoggingService.GetWarningsToBeLoggedAsErrorsByProject(_taskLoggingContext.BuildEventContext)
+                        _taskLoggingContext.LoggingService.GetWarningsToBeLoggedAsErrorsByProject(_taskLoggingContext.BuildEventContext) as HashSet<string>
                         
                     );
 

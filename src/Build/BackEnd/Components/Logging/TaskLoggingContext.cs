@@ -146,7 +146,7 @@ namespace Microsoft.Build.BackEnd.Logging
             LoggingService.LogTaskWarningFromException(BuildEventContext, exception, file, taskName);
         }
 
-        internal HashSet<string> GetWarningsAsErrors()
+        internal ICollection<string> GetWarningsAsErrors()
         {
             return LoggingService.GetWarningsToBeLoggedAsErrorsByProject(BuildEventContext);
         }

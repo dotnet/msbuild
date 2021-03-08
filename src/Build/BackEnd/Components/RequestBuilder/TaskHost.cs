@@ -677,13 +677,13 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         #region IBuildEngine8 Members
-        private HashSet<string> _warningsAsErrors;
+        private ICollection<string> _warningsAsErrors;
 
         /// <summary>
         /// Contains all warnings that should be logged as errors.
         /// Non-null empty set when all warnings should be treated as errors.
         /// </summary>
-        private HashSet<string> WarningsAsErrors
+        private ICollection<string> WarningsAsErrors
         {
             get
             {
