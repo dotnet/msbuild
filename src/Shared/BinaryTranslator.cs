@@ -911,16 +911,16 @@ namespace Microsoft.Build.BackEnd
             /// <param name="collection">The collection to be translated.</param>
             /// <param name="collectionFactory">factory to create the IList.</param>
             /// <typeparam name="T">The type of collection to be created.</typeparam>
-            public void Translate<T>(ref ICollection<string> list, NodePacketCollectionCreator<T> collectionFactory) where T : ICollection<string>
+            public void Translate<T>(ref ICollection<string> collection, NodePacketCollectionCreator<T> collectionFactory) where T : ICollection<string>
             {
-                if (!TranslateNullable(list))
+                if (!TranslateNullable(collection))
                 {
                     return;
                 }
 
-                _writer.Write(list.Count);
+                _writer.Write(collection.Count);
 
-                foreach(string item in list)
+                foreach(string item in collection)
                 {
                     _writer.Write(item);
                 }
