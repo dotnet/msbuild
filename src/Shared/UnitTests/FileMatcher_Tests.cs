@@ -5,6 +5,7 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -77,9 +78,9 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllBytes(fullPath, new byte[1]);
             }
 
-            void Verify(string include, string[] excludes, bool shouldHaveNoMatches = false, string customMessage = null)
+            void VerifyImpl(FileMatcher fileMatcher, string include, string[] excludes, bool shouldHaveNoMatches = false, string customMessage = null)
             {
-                string[] matchedFiles = FileMatcher.Default.GetFiles(testFolder.Path, include, excludes?.ToList());
+                string[] matchedFiles = fileMatcher.GetFiles(testFolder.Path, include, excludes?.ToList());
 
                 if (shouldHaveNoMatches)
                 {
@@ -97,6 +98,18 @@ namespace Microsoft.Build.UnitTests
                         .ToArray()
                         .ShouldBe(info.ExpectedMatches.OrderBy(i => i), caseSensitivity: Case.Insensitive, customMessage: customMessage);
                 }
+            }
+
+            var fileMatcherWithCache = new FileMatcher(FileSystems.Default, new ConcurrentDictionary<string, IReadOnlyList<string>>());
+
+            void Verify(string include, string[] excludes, bool shouldHaveNoMatches = false, string customMessage = null)
+            {
+                // Verify using the default non-caching FileMatcher.
+                VerifyImpl(FileMatcher.Default, include, excludes, shouldHaveNoMatches, customMessage);
+
+                // Verify using a caching FileMatcher and do it twice to exercise the cache.
+                VerifyImpl(fileMatcherWithCache, include, excludes, shouldHaveNoMatches, customMessage);
+                VerifyImpl(fileMatcherWithCache, include, excludes, shouldHaveNoMatches, customMessage);
             }
 
             // Normal matching
@@ -153,7 +166,7 @@ namespace Microsoft.Build.UnitTests
                 @"subdirectory\subdirectory.cs",
                 @"build\baz\foo.cs",
                 @"readme.txt",
-                @"licence.md"
+                @"licence"
             };
 
             /// <summary>
@@ -355,7 +368,7 @@ namespace Microsoft.Build.UnitTests
                         ExpectedMatches = new[]
                         {
                             @"readme.txt",
-                            @"licence.md"
+                            @"licence"
                         }
                     }
                 };
