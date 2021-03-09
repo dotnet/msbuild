@@ -15,11 +15,9 @@ namespace Microsoft.DotNet.Tools.Build
     {
         public BuildCommand(
             IEnumerable<string> msbuildArgs,
-            IEnumerable<string> userDefinedArguments,
-            IEnumerable<string> trailingArguments,
             bool noRestore,
             string msbuildPath = null)
-            : base(msbuildArgs, userDefinedArguments, trailingArguments, noRestore, msbuildPath)
+            : base(msbuildArgs, noRestore, msbuildPath)
         {
         }
 
@@ -51,8 +49,6 @@ namespace Microsoft.DotNet.Tools.Build
 
             BuildCommand command = new BuildCommand(
                 msbuildArgs,
-                parseResult.OptionValuesToBeForwarded(BuildCommandParser.GetCommand()),
-                arguments,
                 noRestore,
                 msbuildPath);
 

@@ -15,11 +15,9 @@ namespace Microsoft.DotNet.Tools.Publish
     {
         private PublishCommand(
             IEnumerable<string> msbuildArgs,
-            IEnumerable<string> userDefinedArguments,
-            IEnumerable<string> trailingArguments,
             bool noRestore,
             string msbuildPath = null)
-            : base(msbuildArgs, userDefinedArguments, trailingArguments, noRestore, msbuildPath)
+            : base(msbuildArgs, noRestore, msbuildPath)
         {
         }
 
@@ -52,8 +50,6 @@ namespace Microsoft.DotNet.Tools.Publish
 
             return new PublishCommand(
                 msbuildArgs,
-                parseResult.OptionValuesToBeForwarded(PublishCommandParser.GetCommand()),
-                parseResult.ValueForArgument<IEnumerable<string>>(PublishCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>(),
                 noRestore,
                 msbuildPath);
         }
