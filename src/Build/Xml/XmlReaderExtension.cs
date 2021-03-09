@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Shared;
@@ -71,6 +73,23 @@ namespace Microsoft.Build.Internal
             _stream?.Dispose();
         }
 
+        private static volatile PropertyInfo _normalizationPropertyInfo;
+
+        private static PropertyInfo GetNormalizationPropertyInfo(Type xmlReaderType)
+        {
+            BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.SetProperty | BindingFlags.Instance;
+            if (_normalizationPropertyInfo == null)
+            {
+                _normalizationPropertyInfo = xmlReaderType.GetProperty("Normalization", bindingFlags);
+            }
+            else if (xmlReaderType != _normalizationPropertyInfo.ReflectedType)
+            {
+                Debug.Fail("GetNormalizationPropertyInfo can only take one type");
+                return xmlReaderType.GetProperty("Normalization", bindingFlags);
+            }
+            return _normalizationPropertyInfo;
+        }
+
         private static XmlReader GetXmlReader(string file, StreamReader input, bool loadAsReadOnly, out Encoding encoding)
         {
             string uri = new UriBuilder(Uri.UriSchemeFile, string.Empty) { Path = file }.ToString();
@@ -78,15 +97,14 @@ namespace Microsoft.Build.Internal
             XmlReader reader;
             if (loadAsReadOnly)
             {
-                XmlReaderSettings xrs = new XmlReaderSettings
+                 XmlReaderSettings xrs = new XmlReaderSettings
                 {
                     DtdProcessing = DtdProcessing.Ignore,
                     IgnoreComments = true,
-                    // Setting IgnoreWhitespace results in whitespace changes of attribute text, specifically newline removal.
-                    // https://github.com/Microsoft/msbuild/issues/4210
-                    // IgnoreWhitespace = true,
+                    IgnoreWhitespace = true,
                 };
                 reader = XmlReader.Create(input, xrs, uri);
+                GetNormalizationPropertyInfo(reader.GetType()).SetValue(reader, false);
             }
             else
             {
