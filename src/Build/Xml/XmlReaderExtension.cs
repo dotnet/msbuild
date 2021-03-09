@@ -75,11 +75,23 @@ namespace Microsoft.Build.Internal
         {
             string uri = new UriBuilder(Uri.UriSchemeFile, string.Empty) { Path = file }.ToString();
 
-            
-            // Ignore loadAsReadOnly for now; using XmlReader.Create results in whitespace changes
-            // of attribute text, specifically newline removal.
-            // https://github.com/Microsoft/msbuild/issues/4210
-            XmlReader reader = new XmlTextReader(uri, input) { DtdProcessing = DtdProcessing.Ignore };
+            XmlReader reader;
+            if (loadAsReadOnly)
+            {
+                XmlReaderSettings xrs = new XmlReaderSettings
+                {
+                    DtdProcessing = DtdProcessing.Ignore,
+                    IgnoreComments = true,
+                    // Setting IgnoreWhitespace results in whitespace changes of attribute text, specifically newline removal.
+                    // https://github.com/Microsoft/msbuild/issues/4210
+                    // IgnoreWhitespace = true,
+                };
+                reader = XmlReader.Create(input, xrs, uri);
+            }
+            else
+            {
+                reader = new XmlTextReader(uri, input) { DtdProcessing = DtdProcessing.Ignore };
+            }
 
             reader.Read();
             encoding = input.CurrentEncoding;
