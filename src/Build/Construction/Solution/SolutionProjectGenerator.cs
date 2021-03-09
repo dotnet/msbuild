@@ -52,7 +52,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// The set of properties all projects in the solution should be built with
         /// </summary>
-        private const string SolutionProperties = "BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)";
+        private const string SolutionProperties = "BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionFilterName=$(SolutionFilterName); SolutionPath=$(SolutionPath)";
 
         /// <summary>
         /// The set of properties which identify the configuration and platform to build a project with
