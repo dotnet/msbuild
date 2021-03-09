@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
@@ -49,14 +50,14 @@ namespace Microsoft.DotNet.Configurer
         {
             if (ShouldAddPackageExecutablePath())
             {
-                DateTime beforeAddPackageExecutablePath = DateTime.Now;
+                Stopwatch beforeAddPackageExecutablePath = Stopwatch.StartNew();
                 AddPackageExecutablePath();
-                _performanceMeasurements?.Add("AddPackageExecutablePath Time", (DateTime.Now - beforeAddPackageExecutablePath).TotalMilliseconds);
+                _performanceMeasurements?.Add("AddPackageExecutablePath Time", beforeAddPackageExecutablePath.Elapsed.TotalMilliseconds);
             }
 
             if (ShouldPrintFirstTimeUseNotice())
             {
-                DateTime beforeFirstTimeUseNotice = DateTime.Now;
+                Stopwatch beforeFirstTimeUseNotice = Stopwatch.StartNew();
                 if (!_dotnetFirstRunConfiguration.NoLogo)
                 {
                     PrintFirstTimeMessageWelcome();
@@ -69,14 +70,14 @@ namespace Microsoft.DotNet.Configurer
                 }
 
                 _firstTimeUseNoticeSentinel.CreateIfNotExists();
-                _performanceMeasurements?.Add("FirstTimeUseNotice Time", (DateTime.Now - beforeFirstTimeUseNotice).TotalMilliseconds);
+                _performanceMeasurements?.Add("FirstTimeUseNotice Time", beforeFirstTimeUseNotice.Elapsed.TotalMilliseconds);
             }
 
             if (ShouldGenerateAspNetCertificate())
             {
-                DateTime beforeGenerateAspNetCertificate = DateTime.Now;
+                Stopwatch beforeGenerateAspNetCertificate = Stopwatch.StartNew();
                 GenerateAspNetCertificate();
-                _performanceMeasurements?.Add("GenerateAspNetCertificate Time", (DateTime.Now - beforeGenerateAspNetCertificate).TotalMilliseconds);
+                _performanceMeasurements?.Add("GenerateAspNetCertificate Time", beforeGenerateAspNetCertificate.Elapsed.TotalMilliseconds);
             }
         }
 

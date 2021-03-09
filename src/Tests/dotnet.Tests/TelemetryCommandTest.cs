@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void TopLevelCommandNameShouldBeSentToTelemetryWithZeroStartupTime()
+        public void TopLevelCommandNameShouldBeSentToTelemetryWithoutStartupTime()
         {
             string[] args = { "help" };
             Cli.Program.ProcessArgs(args);
@@ -80,13 +80,11 @@ namespace Microsoft.DotNet.Tests
             _fakeTelemetry.LogEntries.Should().Contain(e => e.EventName == "toplevelparser/command" &&
                               e.Properties.ContainsKey("verb") &&
                               e.Properties["verb"] == Sha256Hasher.Hash("HELP") &&
-                              !e.Measurement.ContainsKey("Startup Time") &&
-                              e.Measurement.ContainsKey("Parse Time") &&
-                              e.Measurement["Parse Time"] > 0);
+                              e.Measurement == null);
         }
 
         [Fact]
-        public void TopLevelCommandNameShouldBeSentToTelemetryWithOutStartupTime()
+        public void TopLevelCommandNameShouldBeSentToTelemetryZeroStartupTime()
         {
             string[] args = { "help" };
             Cli.Program.ProcessArgs(args, new TimeSpan(0));
@@ -94,9 +92,7 @@ namespace Microsoft.DotNet.Tests
             _fakeTelemetry.LogEntries.Should().Contain(e => e.EventName == "toplevelparser/command" &&
                               e.Properties.ContainsKey("verb") &&
                               e.Properties["verb"] == Sha256Hasher.Hash("HELP") &&
-                              !e.Measurement.ContainsKey("Startup Time") &&
-                              e.Measurement.ContainsKey("Parse Time") &&
-                              e.Measurement["Parse Time"] > 0);
+                              e.Measurement == null);
         }
 
         [Fact]

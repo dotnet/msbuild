@@ -261,9 +261,9 @@ namespace Microsoft.DotNet.Cli
             if (BuiltInCommandsCatalog.Commands.TryGetValue(topLevelCommandParserResult.Command, out var builtIn))
             {
                 PerformanceLogEventSource.Log.BuiltInCommandParserStart();
-                DateTime parseStartTime = DateTime.Now;
+                Stopwatch parseStartTime = Stopwatch.StartNew() ;
                 var parseResult = Parser.Instance.ParseFrom($"dotnet {topLevelCommandParserResult.Command}", appArgs.ToArray());
-                TimeSpan parseTime = DateTime.Now - parseStartTime;
+                TimeSpan parseTime = parseStartTime.Elapsed;
                 PerformanceLogEventSource.Log.BuiltInCommandParserStop();
 
                 if (!parseResult.Errors.Any())
