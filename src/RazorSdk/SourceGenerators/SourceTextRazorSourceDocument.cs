@@ -22,7 +22,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
         public override char this[int position] => _sourceText[position];
 
-        public override Encoding Encoding => _sourceText.Encoding;
+        public override Encoding? Encoding => _sourceText.Encoding;
 
         public override string FilePath { get; }
 

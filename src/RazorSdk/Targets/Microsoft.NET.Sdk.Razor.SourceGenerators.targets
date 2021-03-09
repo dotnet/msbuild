@@ -38,7 +38,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- Additional metadata and properties that we want the compiler to pass to   the compiler we want to pass additional MSBuild properties \ metadata -->
       <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="TargetPath" />
       <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="GeneratedOutputFullPath" />
-      <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="GeneratedDeclarationFullPath" />
       <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="CssScope" />
       <CompilerVisibleProperty Include="RazorLangVersion" />
       <CompilerVisibleProperty Include="RootNamespace" />

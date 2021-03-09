@@ -16,13 +16,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             if (symbol is IAssemblySymbol assemblySymbol)
             {
                 var module = assemblySymbol.Modules.SingleOrDefault();
-                if (module is null)
-                {
-                    return null;
-                }
                 try
                 {
-                    return module.GetMetadata().GetModuleVersionId();
+                    return module?.GetMetadata()?.GetModuleVersionId();
                 }
                 catch (Exception)
                 {
@@ -35,7 +31,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 var metadata = moduleSymbol.GetMetadata();
                 try
                 {
-                    return metadata.GetModuleVersionId();
+                    return metadata?.GetModuleVersionId();
                 }
                 catch (Exception)
                 {
