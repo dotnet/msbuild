@@ -54,6 +54,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
         [Theory]
         [InlineData(new string[] { "-f", "tfm" }, "-target:Restore", "-property:TargetFramework=tfm")]
+        [InlineData(new string[] { "-p:TargetFramework=tfm" }, "-target:Restore", "-property:TargetFramework=tfm")]
+        [InlineData(new string[] { "-t:Run", "-f", "tfm" }, "-target:Restore", "-property:TargetFramework=tfm -t:Run")]
         [InlineData(new string[] { "-o", "myoutput", "-f", "tfm", "-v", "diag", "/ArbitrarySwitchForMSBuild" },
                                   "-target:Restore -verbosity:diag -property:OutputPath=<cwd>myoutput /ArbitrarySwitchForMSBuild",
                                   "-property:TargetFramework=tfm -verbosity:diag -property:OutputPath=<cwd>myoutput /ArbitrarySwitchForMSBuild")]

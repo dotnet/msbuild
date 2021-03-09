@@ -56,7 +56,8 @@ namespace Microsoft.DotNet.Tools
             IEnumerable<string> restoreArguments = new string[] { "-target:Restore" };
             if (parsedArguments != null)
             {
-                restoreArguments = restoreArguments.Concat(parsedArguments.Where(a => !IsExcludedFromRestore(a)));
+                restoreArguments = restoreArguments.Concat(parsedArguments.Where(
+                    a => !IsExcludedFromRestore(a) && !IsExcludedFromSeparateRestore(a)));
             }
             if (trailingArguments != null)
             {
@@ -74,6 +75,12 @@ namespace Microsoft.DotNet.Tools
 
         private static bool IsExcludedFromRestore(string argument) 
             => argument.StartsWith("-property:TargetFramework=", StringComparison.Ordinal);
+
+        //  These arguments don't by themselves require that restore be run in a separate process,
+        //  but if there is a separate restore process they shouldn't be passed to it
+        private static bool IsExcludedFromSeparateRestore(string argument)
+            => argument.StartsWith("-t:", StringComparison.Ordinal) ||
+               argument.StartsWith("-target:", StringComparison.Ordinal);
 
         public override int Execute()
         {
