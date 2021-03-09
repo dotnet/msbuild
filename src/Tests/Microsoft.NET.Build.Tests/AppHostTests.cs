@@ -253,7 +253,7 @@ namespace Microsoft.NET.Build.Tests
 
         }
 
-        [Fact]
+        [WindowsOnlyFact] // https://github.com/dotnet/sdk/issues/16252
         public void It_retries_on_failure_to_create_apphost()
         {
             const string TFM = "net5.0";
