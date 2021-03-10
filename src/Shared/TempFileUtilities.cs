@@ -76,7 +76,7 @@ namespace Microsoft.Build.Shared
         /// Caller must delete it when finished.
         /// May throw IOException.
         /// </summary>
-        internal static string GetTemporaryFile(string directory, string extension, bool createFile = true)
+        internal static string GetTemporaryFile(string directory, string extension, bool createFile = true, string subFolder = null)
         {
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(directory, nameof(directory));
             ErrorUtilities.VerifyThrowArgumentLength(extension, nameof(extension));
@@ -88,7 +88,7 @@ namespace Microsoft.Build.Shared
 
             try
             {
-                directory ??= GetTemporaryDirectory(false, null);
+                directory ??= GetTemporaryDirectory(false, subFolder);
 
                 Directory.CreateDirectory(directory);
 
