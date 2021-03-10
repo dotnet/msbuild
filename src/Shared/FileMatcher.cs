@@ -131,7 +131,7 @@ namespace Microsoft.Build.Shared
                                     "*",
                                     directory,
                                     false));
-                        IEnumerable<string> filteredEntriesForPath = (pattern != null && pattern != "*")
+                        IEnumerable<string> filteredEntriesForPath = (pattern != null && pattern != "*" && pattern != "*.*")
                             ? allEntriesForPath.Where(o => IsMatch(Path.GetFileName(o), pattern))
                             : allEntriesForPath;
                         return stripProjectDirectory
