@@ -9,31 +9,38 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadInstallCommandParser
     {
-        public static readonly Argument WorkloadIdArgument = new Argument<string>(LocalizableStrings.WorkloadIdArgumentName)
-        {
-            Arity = ArgumentArity.OneOrMore,
-            Description = LocalizableStrings.WorkloadIdArgumentDescription
-        };
+        public static readonly Argument WorkloadIdArgument =
+            new Argument<string>(LocalizableStrings.WorkloadIdArgumentName)
+            {
+                Arity = ArgumentArity.OneOrMore, Description = LocalizableStrings.WorkloadIdArgumentDescription
+            };
 
-        public static readonly Option VersionOption = new Option<string>("--version", LocalizableStrings.VersionOptionDescription)
-        {
-            ArgumentHelpName = LocalizableStrings.VersionOptionName
-        };
+        public static readonly Option VersionOption =
+            new Option<string>("--sdk-version", LocalizableStrings.VersionOptionDescription)
+            {
+                ArgumentHelpName = LocalizableStrings.VersionOptionName
+            };
 
-        public static readonly Option ConfigOption = new Option<string>("--configfile", LocalizableStrings.ConfigFileOptionDescription)
-        {
-            ArgumentHelpName = LocalizableStrings.ConfigFileOptionName
-        };
+        public static readonly Option ConfigOption =
+            new Option<string>("--configfile", LocalizableStrings.ConfigFileOptionDescription)
+            {
+                ArgumentHelpName = LocalizableStrings.ConfigFileOptionName
+            };
 
-        public static readonly Option AddSourceOption = new Option<string[]>("--add-source", LocalizableStrings.AddSourceOptionDescription)
-        {
-            ArgumentHelpName = LocalizableStrings.AddSourceOptionName
-        }.AllowSingleArgPerToken();
+        public static readonly Option AddSourceOption =
+            new Option<string[]>("--add-source", LocalizableStrings.AddSourceOptionDescription)
+            {
+                ArgumentHelpName = LocalizableStrings.AddSourceOptionName
+            }.AllowSingleArgPerToken();
 
-        public static readonly Option FrameworkOption = new Option<string>("--framework", LocalizableStrings.FrameworkOptionDescription)
-        {
-            ArgumentHelpName = LocalizableStrings.FrameworkOptionName
-        };
+        public static readonly Option PrintDownloadLinkOnlyOption =
+            new Option<bool>("--print-download-link-only", LocalizableStrings.PrintDownloadLinkOnlyDescription)
+            {
+                IsHidden = true
+            };
+
+        public static readonly Option FromCacheOption =
+            new Option<string>("--from-cache", LocalizableStrings.FromCacheOptionDescription) { };
 
         public static readonly Option VerbosityOption = CommonOptions.VerbosityOption();
 
@@ -45,7 +52,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(VersionOption);
             command.AddOption(ConfigOption);
             command.AddOption(AddSourceOption);
-            command.AddOption(FrameworkOption);
+            command.AddOption(PrintDownloadLinkOnlyOption);
+            command.AddOption(FromCacheOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.DisableParallelOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.NoCacheOption);

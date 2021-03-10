@@ -57,11 +57,6 @@
         <target state="translated">Kullanılacak NuGet yapılandırma dosyası.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FrameworkOptionDescription">
-        <source>The target framework to update the workload for.</source>
-        <target state="translated">Aracın güncelleştirileceği hedef çerçeve.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file '{0}' does not exist.</source>
         <target state="translated">NuGet yapılandırma dosyası '{0}' yok.</target>
@@ -100,11 +95,6 @@
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
         <target state="translated">FILE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkOptionName">
-        <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionName">
