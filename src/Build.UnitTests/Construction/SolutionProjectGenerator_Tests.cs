@@ -2492,44 +2492,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.31025.194
 MinimumVisualStudioVersion = 10.0.40219.1
 Project(""{{E24C65DC-7377-472B-9ABA-BC803B73C61A}}"") = ""WebSite1"", ""{relativePath}"", ""{{{{96E0707C-2E9C-4704-946F-FA583147737F}}}}""
-	ProjectSection(WebsiteProperties) = preProject
-		UseIISExpress = ""true""
-		TargetFrameworkMoniker = "".NETFramework,Version%3Dv4.0""
-		Debug.AspNetCompiler.VirtualPath = ""/localhost_8080""
-		Debug.AspNetCompiler.PhysicalPath = ""C:\Users\UserA\Documents\My Web Sites\WebSite1\""
-		Debug.AspNetCompiler.TargetPath = ""PrecompiledWeb\localhost_8080\""
-		Debug.AspNetCompiler.Updateable = ""true""
-		Debug.AspNetCompiler.ForceOverwrite = ""true""
-		Debug.AspNetCompiler.FixedNames = ""false""
-		Debug.AspNetCompiler.Debug = ""True""
-		Release.AspNetCompiler.VirtualPath = ""/localhost_8080""
-		Release.AspNetCompiler.PhysicalPath = ""C:\Users\UserA\Documents\My Web Sites\WebSite1\""
-		Release.AspNetCompiler.TargetPath = ""PrecompiledWeb\localhost_8080\""
-		Release.AspNetCompiler.Updateable = ""true""
-		Release.AspNetCompiler.ForceOverwrite = ""true""
-		Release.AspNetCompiler.FixedNames = ""false""
-		Release.AspNetCompiler.Debug = ""False""
-		SlnRelativePath = ""C:\Users\UserA\Documents\My Web Sites\WebSite1\""
-	EndProjectSection
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{{{{96E0707C-2E9C-4704-946F-FA583147737F}}}}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{{{{96E0707C-2E9C-4704-946F-FA583147737F}}}}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{{{{96E0707C-2E9C-4704-946F-FA583147737F}}}}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{{{{96E0707C-2E9C-4704-946F-FA583147737F}}}}.Release|Any CPU.Build.0 = Debug|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {{{{87CFA95B-DF37-4C4B-B629-44656ED585AB}}}}
-	EndGlobalSection
-EndGlobal";
+EndProject";
 
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
