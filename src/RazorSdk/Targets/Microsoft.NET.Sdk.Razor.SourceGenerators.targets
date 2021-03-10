@@ -42,7 +42,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <CompilerVisibleProperty Include="RazorLangVersion" />
       <CompilerVisibleProperty Include="RootNamespace" />
       <CompilerVisibleProperty Include="MSBuildProjectDirectory" />
-      <CompilerVisibleProperty Include="DesignTimeBuild" />
       <CompilerVisibleProperty Include="_RazorSourceGeneratorDebug" />
       <CompilerVisibleProperty Include="_RazorSourceGeneratorLog" />
     </ItemGroup>

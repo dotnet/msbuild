@@ -111,12 +111,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AdditionalFiles Include="@(%(AdditionalFileItems.Identity))" />
     </ItemGroup>
 
-    <!-- Remove after https://github.com/dotnet/aspnetcore/issues/29862 is resolved -->
-    <ItemGroup>
-      <AdditionalFiles Remove="@(_RazorAdditionalFile)" />
-      <Analyzer Remove="@(_RazorAnalyzer)" />
-    </ItemGroup>
-
     <PropertyGroup Condition="'$(UseSharedCompilation)' == ''">
       <UseSharedCompilation>true</UseSharedCompilation>
     </PropertyGroup>
@@ -197,5 +191,193 @@ Copyright (c) .NET Foundation. All rights reserved.
       <FileWrites Include="@(_RazorDebugSymbolsIntermediatePath)" Condition="Exists('@(_RazorDebugSymbolsIntermediatePath)')" />
     </ItemGroup>
   </Target>
+
+  <!--
+    Called as part of GetCopyToOutputDirectoryItems - this target populates the list of items that get
+    copied to the output directory when building as a project reference.
+  -->
+  <Target
+    Name="_RazorGetCopyToOutputDirectoryItems"
+    DependsOnTargets="ResolveRazorGenerateInputs"
+    Condition="'$(ResolvedRazorCompileToolset)'=='RazorSdk' and '$(RazorCompileOnBuild)'=='true'">
+
+    <!--
+      This condition needs to be inside the target because it the itemgroup will be populated after the target's
+      condition is evaluated.
+    -->
+    <ItemGroup Condition="'@(RazorGenerate)'!=''">
+      <AllItemsFullPathWithTargetPath Include="@(RazorIntermediateAssembly->'%(FullPath)')">
+        <TargetPath>%(Filename)%(Extension)</TargetPath>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </AllItemsFullPathWithTargetPath>
+      <AllItemsFullPathWithTargetPath Include="@(_RazorDebugSymbolsIntermediatePath->'%(FullPath)')">
+        <TargetPath>%(Filename)%(Extension)</TargetPath>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </AllItemsFullPathWithTargetPath>
+    </ItemGroup>
+
+  </Target>
+
+    <!--
+    Called as part of CopyFilesToOutputDirectory - this target is called when building the project to copy
+    files to the output directory.
+  -->
+  <Target
+    Name="_RazorCopyFilesToOutputDirectory"
+    DependsOnTargets="_ResolveRazorTargetPath;RazorCompile"
+    AfterTargets="CopyFilesToOutputDirectory"
+    Condition="'$(ResolvedRazorCompileToolset)'=='RazorSdk' and '$(RazorCompileOnBuild)'=='true'">
+
+    <!-- Copy the Razor dll  -->
+    <Copy
+      SourceFiles="@(RazorIntermediateAssembly)"
+      DestinationFiles="$(RazorTargetPath)"
+      SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+      Retries="$(CopyRetryCount)"
+      RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+      UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+      UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+      Condition="Exists('@(RazorIntermediateAssembly)') and '$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)' != 'true'">
+
+      <Output TaskParameter="DestinationFiles" ItemName="_RazorAssembly"/>
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
+
+    <Message
+      Importance="High"
+      Text="$(MSBuildProjectName) -&gt; @(_RazorAssembly->'%(FullPath)')"
+      Condition="Exists('@(RazorIntermediateAssembly)') and '$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)'!='true'" />
+
+    <!-- Copy the Razor debug information file (.pdb), if any -->
+    <Copy
+      SourceFiles="@(_RazorDebugSymbolsIntermediatePath)"
+      DestinationFolder="$(RazorOutputPath)"
+      SkipUnchangedFiles="$(SkipCopyUnchangedFiles)"
+      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+      Retries="$(CopyRetryCount)"
+      RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+      UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
+      UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
+      Condition="Exists('@(_RazorDebugSymbolsIntermediatePath)') and '$(SkipCopyingSymbolsToOutputDirectory)' != 'true' and '$(CopyOutputSymbolsToOutputDirectory)'=='true'">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+    </Copy>
+
+    <!--
+    FastUpToDate check in VS does not consider the Views dll when determining if referencing projects need to be rebuilt.
+    We'll touch a marker file that is used during as input for up to date check. Based on
+    https://github.com/Microsoft/msbuild/blob/637f06e31ef46892faeb40044899a62a15b77f79/src/Tasks/Microsoft.Common.CurrentVersion.targets#L4364-L4368
+    -->
+    <Touch Files="@(CopyUpToDateMarker)" AlwaysCreate="true" Condition="'@(_RazorAssembly)' != ''">
+      <Output TaskParameter="TouchedFiles" ItemName="FileWrites" />
+    </Touch>
+
+  </Target>
+
+    <!--
+    Called after ComputeResolvedFilesToPublishList but before CopyFilesToPublishDirectory - this target is called when
+    publishing the project to get a list of files to the output directory.
+  -->
+  <Target
+    Name="_RazorComputeFilesToPublish"
+    AfterTargets="ComputeResolvedFilesToPublishList"
+    Condition="'$(ResolvedRazorCompileToolset)'=='RazorSdk' and '$(RazorCompileOnPublish)'=='true' and '@(RazorGenerate)'!=''">
+
+    <!-- If we generated an assembly/pdb then include those -->
+    <ItemGroup>
+      <ResolvedFileToPublish Include="@(RazorIntermediateAssembly)" Condition="'$(CopyBuildOutputToPublishDirectory)'=='true'">
+        <RelativePath>@(RazorIntermediateAssembly->'%(Filename)%(Extension)')</RelativePath>
+        <!-- Pass assembly to linker and crossgen -->
+        <PostprocessAssembly>true</PostprocessAssembly>
+      </ResolvedFileToPublish>
+      <ResolvedFileToPublish Include="@(_RazorDebugSymbolsIntermediatePath)" Condition="'$(CopyOutputSymbolsToPublishDirectory)'=='true'">
+        <RelativePath>@(_RazorDebugSymbolsIntermediatePath->'%(Filename)%(Extension)')</RelativePath>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+
+    <!--
+      RazorGenerate items are usually populated from the '.cshtml' files in @(Content). These are published by default
+      so all we need to do is exclude them.
+    -->
+    <ItemGroup Condition="'$(CopyRazorGenerateFilesToPublishDirectory)'=='false'">
+      <ResolvedFileToPublish Remove="%(RazorGenerate.FullPath)"/>
+    </ItemGroup>
+  </Target>
+
+  <!--
+    This target adds the Razor assembly to the BuiltProjectOutputGroupOutput - which is used as input to the Pack target.
+  -->
+  <Target
+    Name="_RazorAddBuiltProjectOutputGroupOutput"
+    DependsOnTargets="_ResolveRazorTargetPath;ResolveRazorGenerateInputs"
+    Condition="'$(ResolvedRazorCompileToolset)'=='RazorSdk' and '$(RazorCompileOnBuild)'=='true'">
+
+    <ItemGroup Condition="'@(RazorGenerate)'!= ''">
+      <BuiltProjectOutputGroupOutput Include="%(RazorIntermediateAssembly.FullPath)" FinalOutputPath="$(RazorTargetPath)" />
+    </ItemGroup>
+
+  </Target>
+
+    <!--
+    Called as part of GetCopyToPublishDirectoryItems - this target populates the list of items that get
+    copied to the publish directory when publishing as a project reference.
+
+    The dependency on RazorCompile is needed because this will be called during publish on each P2P
+    reference without calling RazorCompile for the P2P references.
+  -->
+  <Target
+    Name="_RazorGetCopyToPublishDirectoryItems"
+    BeforeTargets="GetCopyToPublishDirectoryItems"
+    DependsOnTargets="ResolveRazorGenerateInputs"
+    Condition="'$(ResolvedRazorCompileToolset)'=='RazorSdk' and '$(RazorCompileOnPublish)'=='true'">
+
+    <!--
+      This condition needs to be inside the target because it the itemgroup will be populated after the target's
+      condition is evaluated.
+    -->
+    <ItemGroup Condition="'@(RazorGenerate)'!=''">
+      <AllPublishItemsFullPathWithTargetPath Include="@(RazorIntermediateAssembly->'%(FullPath)')">
+        <TargetPath>%(Filename)%(Extension)</TargetPath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <!-- .Views.dll and .Views.pdb were part of the single file bundle in 3.1 apps. Lets keep this unchanged. -->
+        <ExcludeFromSingleFile Condition="'$(_TargetingNET50OrLater)' == 'true'">true</ExcludeFromSingleFile>
+      </AllPublishItemsFullPathWithTargetPath>
+      <AllPublishItemsFullPathWithTargetPath Include="@(_RazorDebugSymbolsIntermediatePath->'%(FullPath)')">
+        <TargetPath>%(Filename)%(Extension)</TargetPath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <ExcludeFromSingleFile Condition="'$(_TargetingNET50OrLater)' == 'true'">true</ExcludeFromSingleFile>
+      </AllPublishItemsFullPathWithTargetPath>
+    </ItemGroup>
+
+  </Target>
+
+  <PropertyGroup>
+    <GetCopyToOutputDirectoryItemsDependsOn>
+      _RazorGetCopyToOutputDirectoryItems;
+      $(GetCopyToOutputDirectoryItemsDependsOn)
+    </GetCopyToOutputDirectoryItemsDependsOn>
+
+    <BuiltProjectOutputGroupDependsOn>
+      $(BuiltProjectOutputGroupDependsOn);
+      _RazorAddBuiltProjectOutputGroupOutput
+    </BuiltProjectOutputGroupDependsOn>
+
+    <RazorCompileDependsOn>
+      PrepareForRazorCompile;
+      RazorCoreCompile
+    </RazorCompileDependsOn>
+
+    <CoreCompileDependsOn Condition="'$(DesignTimeBuild)'!='true'">
+      RazorComponentGenerate;
+      $(CoreCompileDependsOn)
+    </CoreCompileDependsOn>
+
+    <CoreCompileDependsOn Condition="'$(DesignTimeBuild)'=='true'">
+      RazorGenerateComponentDeclarationDesignTime;
+      $(CoreCompileDependsOn)
+    </CoreCompileDependsOn>
+
+  </PropertyGroup>
 
 </Project>

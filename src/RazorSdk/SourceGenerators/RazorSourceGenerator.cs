@@ -71,6 +71,16 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         {
             var files = razorContext.CshtmlFiles;
 
+            if (files.Count == 0)
+            {
+                return;
+            }
+
+            var arraypool = ArrayPool<(string, SourceText)>.Shared;
+            var outputs = arraypool.Rent(files.Count);
+
+            PopulateAssemblyInfo(context);
+
             Parallel.For(0, files.Count, GetParallelOptions(context), i =>
             {
                 var file = files[i];
@@ -84,15 +94,18 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                     context.ReportDiagnostic(csharpDiagnostic);
                 }
 
-                if (file.GeneratedOutputPath is null)
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(RazorDiagnostics.SkippingGeneratedFileWriteDescriptor, Location.None, file.RelativePath));
-                    return;
-                }
-
-                Directory.CreateDirectory(Path.GetDirectoryName(file.GeneratedOutputPath));
-                File.WriteAllText(file.GeneratedOutputPath, csharpDocument.GeneratedCode);
+                var generatedCode = csharpDocument.GeneratedCode;
+                var hint = GetIdentifierFromPath(file.GeneratedOutputPath ?? file.NormalizedPath);
+                outputs[i] = (hint, SourceText.From(generatedCode, Encoding.UTF8));
             });
+
+            for (var i = 0; i < files.Count; i++)
+            {
+                var (hint, sourceText) = outputs[i];
+                context.AddSource(hint, sourceText);
+            }
+
+            arraypool.Return(outputs);
         }
 
         private static void CodeGenerateRazorComponents(GeneratorExecutionContext context, RazorSourceGenerationContext razorContext, RazorProjectEngine projectEngine)
@@ -237,6 +250,13 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             }
 
             return tagHelperDescriptors;
+        }
+
+        private static void PopulateAssemblyInfo(GeneratorExecutionContext context)
+        {
+            var typeInfo = "typeof(global::Microsoft.AspNetCore.Mvc.ApplicationParts.ConsolidatedAssemblyApplicationPartFactory)";
+            var assemblyInfo = $@"[assembly: global::Microsoft.AspNetCore.Mvc.ApplicationParts.ProvideApplicationPartFactoryAttribute(""{typeInfo}"")]";
+            context.AddSource($"{context.Compilation.AssemblyName}.UnifiedAssembly.Info", SourceText.From(assemblyInfo, Encoding.UTF8));
         }
 
         private static string GetIdentifierFromPath(string filePath)

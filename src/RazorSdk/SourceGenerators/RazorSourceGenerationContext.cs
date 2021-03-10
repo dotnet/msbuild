@@ -23,7 +23,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
         public RazorConfiguration Configuration { get; private set; }
 
-        public bool DesignTimeBuild { get; private set; }
 
         /// <summary>
         /// Gets a flag that determines if the source generator waits for the debugger to attach.
@@ -52,8 +51,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 rootNamespace = "ASP";
             }
 
-            globalOptions.TryGetValue("build_property.DesignTimeBuild", out var designTimeBuild);
-
             var razorLanguageVersion = RazorLanguageVersion.Latest;
             if (!globalOptions.TryGetValue("build_property.RazorLangVersion", out var razorLanguageVersionString) ||
                 !RazorLanguageVersion.TryParse(razorLanguageVersionString, out razorLanguageVersion))
@@ -81,7 +78,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             FileSystem = fileSystem;
             RazorFiles = razorFiles;
             CshtmlFiles = cshtmlFiles;
-            DesignTimeBuild = designTimeBuild == "true";
             WaitForDebugger = waitForDebugger == "true";
             EnableLogging = enableLogging == "true";
         }
