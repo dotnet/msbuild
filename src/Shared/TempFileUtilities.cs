@@ -130,16 +130,9 @@ namespace Microsoft.Build.Shared
         {
             public string Path { get; }
 
-            public TempWorkingDirectory(string sourcePath, [CallerMemberName] string name = null)
+            public TempWorkingDirectory(string sourcePath)
             {
-                Path = name == null
-                    ? GetTemporaryDirectory()
-                    : System.IO.Path.Combine(System.IO.Path.GetTempPath(), name);
-
-                if (FileSystems.Default.DirectoryExists(Path))
-                {
-                    Directory.Delete(Path, true);
-                }
+                Path = GetTemporaryDirectory(false);
 
                 CopyDirectory(sourcePath, Path);
             }
