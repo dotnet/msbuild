@@ -5,6 +5,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using System.Collections.Generic;
 using Xunit;
 
@@ -21,15 +22,10 @@ namespace Microsoft.Build.UnitTests
                           { new TaskItem(NativeMethodsShared.IsWindows ? @"c:\bin2\abc.efg" : "/bin2/abc.efg") };
             t.RootFolder = NativeMethodsShared.IsWindows ? @"c:\bin" : "/bin";
 
-            bool success = t.Execute();
-
-            Assert.True(success);
-
-            Assert.Single(t.AssignedFiles);
-            Assert.Equal(
-                NativeMethodsShared.IsWindows ? @"c:\bin2\abc.efg" : "/bin2/abc.efg",
-                t.AssignedFiles[0].ItemSpec);
-            Assert.Equal(@"abc.efg", t.AssignedFiles[0].GetMetadata("TargetPath"));
+            t.Execute().ShouldBeTrue();
+            t.AssignedFiles.Length.ShouldBe(1);
+            t.AssignedFiles[0].ItemSpec.ShouldBe(NativeMethodsShared.IsWindows ? @"c:\bin2\abc.efg" : "/bin2/abc.efg");
+            t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe("abc.efg");
         }
 
         [Fact]
@@ -41,12 +37,9 @@ namespace Microsoft.Build.UnitTests
                           { new TaskItem(NativeMethodsShared.IsWindows ? @"c:\f1\f2\file.txt" : "/f1/f2/file.txt") };
             t.RootFolder = NativeMethodsShared.IsWindows ? @"c:\f1\f2" : "/f1/f2";
 
-            bool success = t.Execute();
-
-            Assert.True(success);
-
-            Assert.Single(t.AssignedFiles);
-            Assert.Equal(@"file.txt", t.AssignedFiles[0].GetMetadata("TargetPath"));
+            t.Execute().ShouldBeTrue();
+            t.AssignedFiles.Length.ShouldBe(1);
+            t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe("file.txt");
         }
 
         [Fact]
@@ -65,12 +58,9 @@ namespace Microsoft.Build.UnitTests
             // /f1 to /x1
             t.RootFolder = NativeMethodsShared.IsWindows ? @"c:\f1" : "/x1";
 
-            bool success = t.Execute();
-
-            Assert.True(success);
-
-            Assert.Single(t.AssignedFiles);
-            Assert.Equal("file.txt", t.AssignedFiles[0].GetMetadata("TargetPath"));
+            t.Execute().ShouldBeTrue();
+            t.AssignedFiles.Length.ShouldBe(1);
+            t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe("file.txt");
         }
 
         [Fact]
@@ -85,14 +75,9 @@ namespace Microsoft.Build.UnitTests
                           };
             t.RootFolder = NativeMethodsShared.IsWindows ? @"c:\f1\f2" : "/f1/f2";
 
-            bool success = t.Execute();
-
-            Assert.True(success);
-
-            Assert.Single(t.AssignedFiles);
-            Assert.Equal(
-                NativeMethodsShared.IsWindows ? @"f3\f4\file.txt" : "f3/f4/file.txt",
-                t.AssignedFiles[0].GetMetadata("TargetPath"));
+            t.Execute().ShouldBeTrue();
+            t.AssignedFiles.Length.ShouldBe(1);
+            t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe(NativeMethodsShared.IsWindows ? @"f3\f4\file.txt" : "f3/f4/file.txt");
         }
 
         [Theory]
@@ -114,12 +99,9 @@ namespace Microsoft.Build.UnitTests
                           };
             t.RootFolder = NativeMethodsShared.IsWindows ? @"c:\f1\f2" : "/f1/f2";
 
-            bool success = t.Execute();
-
-            Assert.True(success);
-
-            Assert.Single(t.AssignedFiles);
-            Assert.Equal(targetPath, t.AssignedFiles[0].GetMetadata("TargetPath"));
+            t.Execute().ShouldBeTrue();
+            t.AssignedFiles.Length.ShouldBe(1);
+            targetPath.ShouldBe(t.AssignedFiles[0].GetMetadata("TargetPath"));
         }
     }
 }
