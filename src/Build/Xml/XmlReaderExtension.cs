@@ -97,13 +97,14 @@ namespace Microsoft.Build.Internal
             XmlReader reader;
             if (loadAsReadOnly)
             {
-                 XmlReaderSettings xrs = new XmlReaderSettings
+                XmlReaderSettings xrs = new XmlReaderSettings
                 {
                     DtdProcessing = DtdProcessing.Ignore,
                     IgnoreComments = true,
                     IgnoreWhitespace = true,
                 };
                 reader = XmlReader.Create(input, xrs, uri);
+                // HACK: Set Normalization to false to behave the same as XmlTextReader.
                 GetNormalizationPropertyInfo(reader.GetType()).SetValue(reader, false);
             }
             else
