@@ -697,13 +697,19 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        /// <summary>
+        /// Determines if the given warning should be treated as an error.
+        /// </summary>
+        /// <param name="warningCode"></param>
+        /// <returns>True if WarningsAsErrors is an empty set or contains the given warning code.</returns>
         public bool ShouldTreatWarningAsError(string warningCode)
         {
-            if (_taskLoggingContext == null || WarningsAsErrors == null)
+            if (WarningsAsErrors == null)
             {
                 return false;
             }
 
+            // An empty set means all warnings are errors.
             return WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode);
         }
         #endregion
