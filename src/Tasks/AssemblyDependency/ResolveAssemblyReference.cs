@@ -1569,7 +1569,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else if (itemError is BadImageReferenceException)
                 {
-                    message = Log.FormatResourceString("ResolveAssemblyReference.FailedWithException", itemError.Message);
+                    message = Log.FormatResourceString("ResolveAssemblyReference.FailedWithException", itemError.InnerException?.ToString() ?? itemError.ToString());
                     helpKeyword = "MSBuild.ResolveAssemblyReference.FailedWithException";
                     dependencyProblem = false;
                 }
@@ -1578,8 +1578,7 @@ namespace Microsoft.Build.Tasks
                     Debug.Assert(false, "Unexpected exception type.");
                 }
 
-                string messageOnly;
-                string warningCode = Log.ExtractMessageCode(message, out messageOnly);
+                string warningCode = Log.ExtractMessageCode(message, out string messageOnly);
 
                 // Treat as warning if this is primary and the problem wasn't with a dependency, otherwise, make it a comment.
                 if (reference.IsPrimary && !dependencyProblem)
