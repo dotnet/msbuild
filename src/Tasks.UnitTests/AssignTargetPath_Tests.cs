@@ -5,6 +5,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -92,6 +93,33 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(
                 NativeMethodsShared.IsWindows ? @"f3\f4\file.txt" : "f3/f4/file.txt",
                 t.AssignedFiles[0].GetMetadata("TargetPath"));
+        }
+
+        [Theory]
+        [InlineData("test/output/file.txt")]
+        [InlineData(@"some\dir\to\file.txt")]
+        [InlineData("file.txt")]
+        [InlineData("file")]
+        public void TargetPathAlreadySet(string targetPath)
+        {
+            AssignTargetPath t = new AssignTargetPath();
+            t.BuildEngine = new MockEngine();
+            Dictionary<string, string> metaData = new Dictionary<string, string>();
+            metaData.Add("TargetPath", targetPath);
+            t.Files = new ITaskItem[]
+                          {
+                              new TaskItem(
+                                  itemSpec: NativeMethodsShared.IsWindows ? @"c:\f1\f2\file.txt" : "/f1/f2/file.txt",
+                                  itemMetadata: metaData)
+                          };
+            t.RootFolder = NativeMethodsShared.IsWindows ? @"c:\f1\f2" : "/f1/f2";
+
+            bool success = t.Execute();
+
+            Assert.True(success);
+
+            Assert.Single(t.AssignedFiles);
+            Assert.Equal(targetPath, t.AssignedFiles[0].GetMetadata("TargetPath"));
         }
     }
 }
