@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
         private HashSet<string> _optionsToLog { get; }
         private const string DotnetName = "dotnet";
 
-        public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult)
+        public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult, Dictionary<string, double> measurements = null)
         {
             var topLevelCommandName = parseResult[DotnetName]?.AppliedOptions?.FirstOrDefault()?.Name;
             var result = new List<ApplicationInsightsEntryFormat>();
@@ -41,7 +41,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
                         {
                             { "verb", topLevelCommandName},
                             {option, appliedOptions.Arguments.ElementAt(0)}
-                        }));
+                        },
+                        measurements));
                 }
             }
             return result;
