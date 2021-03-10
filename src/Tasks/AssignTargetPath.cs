@@ -71,13 +71,20 @@ namespace Microsoft.Build.Tasks
 
                 for (int i = 0; i < Files.Length; ++i)
                 {
-                    string link = Files[i].GetMetadata(ItemMetadataNames.link);
                     AssignedFiles[i] = new TaskItem(Files[i]);
+                    string targetPath = Files[i].GetMetadata(ItemMetadataNames.targetPath);
 
-                    // If file has a link, use that.
-                    string targetPath = link;
+                    // If TargetPath is already set, copy it over.
+                    // https://github.com/dotnet/msbuild/issues/2795
+                    if (!string.IsNullOrEmpty(targetPath))
+                    {
+                        AssignedFiles[i].SetMetadata(ItemMetadataNames.targetPath, EscapingUtilities.Escape(targetPath));
+                        continue;
+                    }
 
-                    if (string.IsNullOrEmpty(link))
+                    targetPath = Files[i].GetMetadata(ItemMetadataNames.link);
+
+                    if (string.IsNullOrEmpty(targetPath))
                     {
                         if (// if the file path is relative
                             !Path.IsPathRooted(Files[i].ItemSpec) &&
