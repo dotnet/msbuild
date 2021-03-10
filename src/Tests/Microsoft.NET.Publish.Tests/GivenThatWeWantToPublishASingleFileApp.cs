@@ -505,6 +505,7 @@ namespace Microsoft.NET.Publish.Tests
         {
             var projectName = "ILLinkAnalyzerWarningsApp";
             var testProject = CreateTestProjectWithAnalyzerWarnings(targetFramework, projectName, true);
+            testProject.AdditionalProperties["PublishSingleFile"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
@@ -523,6 +524,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = CreateTestProjectWithAnalyzerWarnings(targetFramework, projectName, true);
             // Inactive linker settings should have no effect on the linker analyzer,
             // unless PublishTrimmed is also set.
+            testProject.AdditionalProperties["PublishSingleFile"] = "true";
             testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -531,6 +533,23 @@ namespace Microsoft.NET.Publish.Tests
                 .Execute(RuntimeIdentifier)
                 .Should().Pass()
                 .And.NotHaveStdOutContaining("IL2026");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net6.0")]
+        public void ILLink_analyzer_warnings_are_produced_using_EnableSingleFileAnalyzer(string targetFramework)
+        {
+            var projectName = "ILLinkAnalyzerWarningsApp";
+            var testProject = CreateTestProjectWithAnalyzerWarnings(targetFramework, projectName, true);
+            testProject.AdditionalProperties["EnableSingleFileAnalyzer"] = "true";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+            publishCommand
+                .Execute(RuntimeIdentifier)
+                .Should().Pass()
+                .And.HaveStdOutContaining("(9,13): warning IL3000")
+                .And.HaveStdOutContaining("(10,13): warning IL3001");
         }
 
         private TestProject CreateTestProjectWithAnalyzerWarnings(string targetFramework, string projectName, bool isExecutable)
@@ -561,7 +580,6 @@ class C
     }
 }";
 
-            testProject.AdditionalProperties["PublishSingleFile"] = "true";
             return testProject;
         }
 

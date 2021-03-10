@@ -413,6 +413,24 @@ namespace Microsoft.NET.Publish.Tests
 
         [RequiresMSBuildVersionTheory("16.8.0")]
         [InlineData("net5.0")]
+        public void ILLink_accepts_option_to_enable_analysis_warnings_without_PublishTrimmed(string targetFramework)
+        {
+            var projectName = "AnalysisWarnings";
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+
+            var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
+            testProject.AdditionalProperties["EnableTrimAnalyzer"] = "true";
+            testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(testAsset);
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true")
+                .Should().Pass()
+                .And.HaveStdOutMatching("warning IL2026.*Program.IL_2026.*Testing analysis warning IL2026");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net5.0")]
         public void ILLink_errors_fail_the_build(string targetFramework)
         {
             var projectName = "AnalysisWarnings";
