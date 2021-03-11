@@ -51,6 +51,14 @@
     <EmbeddedResource Update="**\dotnet-tool\common\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Common" />
     <EmbeddedResource Update="**\dotnet-tool\restore\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Restore" />
     <EmbeddedResource Update="**\dotnet-tool\run\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Run" />
+    <EmbeddedResource Update="**\dotnet-workload\*.resx" Namespace="Microsoft.DotNet.Workloads.Workload" />
+    <EmbeddedResource Update="**\dotnet-workload\list\*.resx" Namespace="Microsoft.DotNet.Workloads.Workload.List" />
+    <EmbeddedResource Update="**\dotnet-workload\search\*.resx" Namespace="Microsoft.DotNet.Workloads.Workload.Search" />
+    <EmbeddedResource Update="**\dotnet-workload\uninstall\*.resx" Namespace="Microsoft.DotNet.Workloads.Workload.Uninstall" />
+    <EmbeddedResource Update="**\dotnet-workload\install\*.resx" Namespace="Microsoft.DotNet.Workloads.Workload.Install" />
+    <EmbeddedResource Update="**\dotnet-workload\update\*.resx" Namespace="Microsoft.DotNet.Workloads.Workload.Update" />
+    <EmbeddedResource Update="**\dotnet-workload\common\*.resx" Namespace="Microsoft.DotNet.Workloads.Workload.Common" />
+    <EmbeddedResource Update="**\dotnet-workload\restore\*.resx" Namespace="Microsoft.DotNet.Workloads.Workload.Restore" />
     <EmbeddedResource Update="ToolManifest\*.resx" Namespace="Microsoft.DotNet.ToolManifest" />
     <EmbeddedResource Update="NugetSearch\*.resx" Namespace="Microsoft.DotNet.NugetSearch" />
   </ItemGroup>

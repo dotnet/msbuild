@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="it" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' is not a valid NuGet version range.</source>
+        <target state="translated">La versione specificata '{0}' non è un intervallo di versioni NuGet valido.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>The NuGet Package Id of the workload to update.</source>
+        <target state="translated">ID pacchetto NuGet dello strumento da aggiornare.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Specify one workload Package Id to update.</source>
+        <target state="translated">Specificare un ID pacchetto dello strumento da aggiornare.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateLocaWorkloadSucceededVersionNoChange">
+        <source>Workload '{0}' is up to date.</source>
+        <target state="new">Workload '{0}' is up to date.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateLocaWorkloadToLowerVersion">
+        <source>The requested version {0} is lower than existing version {1}.</source>
+        <target state="new">The requested version {0} is lower than existing version {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateLocalWorkloadSucceeded">
+        <source>Workload '{0}' was successfully updated from version '{1}' to version '{2}'.</source>
+        <target state="new">Workload '{0}' was successfully updated from version '{1}' to version '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToLowerVersion">
+        <source>The requested version {0} is lower than existing version {1}.</source>
+        <target state="translated">La versione richiesta {0} è inferiore a quella esistente {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>The version range of the workload package to update to.</source>
+        <target state="translated">Intervallo di versioni a cui aggiornare il pacchetto dello strumento.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Update a workload.</source>
+        <target state="needs-review-translation">Aggiorna uno strumento globale.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">File di configurazione NuGet da usare.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to update the workload for.</source>
+        <target state="translated">Framework di destinazione per cui aggiornare lo strumento.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetConfigurationFileDoesNotExist">
+        <source>NuGet configuration file '{0}' does not exist.</source>
+        <target state="translated">Il file di configurazione NuGet '{0}' non esiste.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceeded">
+        <source>Workload '{0}' was successfully updated from version '{1}' to version '{2}'.</source>
+        <target state="translated">Lo strumento '{0}' è stato aggiornato dalla versione '{1}' alla versione '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateFullCommandNameLocalized">
+        <source>.NET update Command</source>
+        <target state="translated">Comando Aggiorna .NET</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededVersionNoChange">
+        <source>Workload '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="translated">Lo strumento '{0}' è stato reinstallato con l'ultima versione stabile (versione '{1}').</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateWorkloadFailed">
+        <source>Workload '{0}' failed to update due to the following:</source>
+        <target state="translated">L'aggiornamento dello strumento '{0}' non è riuscito. Motivi:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Add an additional NuGet package source to use during the update.</source>
+        <target state="translated">Aggiunge un'altra origine pacchetto NuGet da usare durante l'aggiornamento.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="translated">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionName">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionName">
+        <source>VERSION</source>
+        <target state="translated">VERSION</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

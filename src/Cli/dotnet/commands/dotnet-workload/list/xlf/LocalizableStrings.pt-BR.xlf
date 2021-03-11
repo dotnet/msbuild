@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>List workloads available.</source>
+        <target state="needs-review-translation">Ferramentas de lista instaladas de forma global ou local.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionColumn">
+        <source>Version</source>
+        <target state="translated">Versão</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandsColumn">
+        <source>Commands</source>
+        <target state="translated">Comandos</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdColumn">
+        <source>Package Id</source>
+        <target state="translated">ID do Pacote</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPathOptionName">
+        <source>PATH</source>
+        <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

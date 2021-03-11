@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>The NuGet Package Id of the workload to uninstall.</source>
+        <target state="translated">要卸载的工具的 NuGet 包 ID。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Uninstall a workload.</source>
+        <target state="needs-review-translation">卸载全局工具或本地工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Specify one workload Package Id to uninstall.</source>
+        <target state="translated">请指定一个要卸载的工具包 ID。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallLocalWorkloadSucceeded">
+        <source>Workload '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
+        <target state="translated">工具“{0}”已成功卸载并从清单文件 {1} 中移除。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallSucceeded">
+        <source>Workload '{0}' (version '{1}') was successfully uninstalled.</source>
+        <target state="translated">已成功卸载工具“{0}”（版本“{1}”）。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadNotInstalled">
+        <source>A workload with the package Id '{0}' could not be found.</source>
+        <target state="needs-review-translation">找不到具有包 ID“{0}”的工具。
+
+工具是使用其包 ID 卸载的，该 ID 可能
+与调用工具时使用的工具名称不同。可使用 "dotnet workload list" 命令查找
+已安装工具的工具名称和
+对应的包 ID。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToUninstallWorkload">
+        <source>Failed to uninstall workload '{0}': {1}</source>
+        <target state="translated">无法卸载工具“{0}”: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidWorkloadPathOption">
+        <source>Workload path '{0}' does not exist.</source>
+        <target state="translated">工具路径“{0}”不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPathOptionDescription">
+        <source>The directory containing the workload to uninstall.</source>
+        <target state="translated">包含要卸载的工具的目录。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

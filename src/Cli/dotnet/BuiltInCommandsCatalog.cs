@@ -22,6 +22,7 @@ using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.VSTest;
 using System.Collections.Generic;
 using Microsoft.DotNet.Tools.Tool;
+using Microsoft.DotNet.Workloads.Workload;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -158,7 +159,11 @@ namespace Microsoft.DotNet.Cli
             ["internal-reportinstallsuccess"] = new BuiltInCommandMetadata
             {
                 Command = InternalReportinstallsuccess.Run
-            }
+            },
+            ["workload"] = new BuiltInCommandMetadata
+            {
+                Command = WorkloadCommand.Run
+            },
         };
     }
 }

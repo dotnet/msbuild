@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>The NuGet Package Id of the workload to uninstall.</source>
+        <target state="translated">要解除安裝之工具的 NuGet 套件識別碼。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Uninstall a workload.</source>
+        <target state="needs-review-translation">解除安裝全域工具或本機工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Specify one workload Package Id to uninstall.</source>
+        <target state="translated">請指定一個要解除安裝的工具套件識別碼。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallLocalWorkloadSucceeded">
+        <source>Workload '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
+        <target state="translated">已成功解除安裝工具 '{0}'，且已將其從資訊清單檔 {1} 中移除。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallSucceeded">
+        <source>Workload '{0}' (version '{1}') was successfully uninstalled.</source>
+        <target state="translated">已成功解除安裝工具 '{0}' ('{1}' 版)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadNotInstalled">
+        <source>A workload with the package Id '{0}' could not be found.</source>
+        <target state="needs-review-translation">找不到套件識別碼為 '{0}' 的工具。
+
+必須使用工具的套件識別碼才能將其解除安裝，
+而該識別碼可能與您在呼叫工具時的工具名稱不同。您可以使用命令
+'dotnet workload list' 來針對已安裝工具尋找工具名稱
+和對應的套件識別碼。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToUninstallWorkload">
+        <source>Failed to uninstall workload '{0}': {1}</source>
+        <target state="translated">無法將工具 '{0}' 解除安裝: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidWorkloadPathOption">
+        <source>Workload path '{0}' does not exist.</source>
+        <target state="translated">工具路徑 {0} 不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPathOptionDescription">
+        <source>The directory containing the workload to uninstall.</source>
+        <target state="translated">包含要解除安裝之工具的目錄。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
