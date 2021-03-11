@@ -253,7 +253,11 @@ namespace Microsoft.Build.Evaluation
         {
             // When running from the command-line or from VS, use the msbuild.exe.config file.
             if (BuildEnvironmentHelper.Instance.Mode != BuildEnvironmentMode.None &&
+ // This FEATURE_SYSTEM_CONFIGURATION is needed as OpenExeConfiguration for net5.0 works differently, without this condition unit tests won't pass.
+ // ConfigurationManager.OpenExeConfiguration in net5.0 will find testhost.exe instead which does not contain any configuration and therefore fail.
+#if FEATURE_SYSTEM_CONFIGURATION
                 !BuildEnvironmentHelper.Instance.RunningTests &&
+#endif
                 FileSystems.Default.FileExists(BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile))
             {
                 var configFile = new ExeConfigurationFileMap { ExeConfigFilename = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile };

@@ -3,10 +3,6 @@
 #if FEATURE_WIN32_REGISTRY
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Security;
 
 using Microsoft.Build.Shared;
 using Microsoft.Win32;

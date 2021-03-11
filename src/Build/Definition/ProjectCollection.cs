@@ -1729,7 +1729,6 @@ namespace Microsoft.Build.Evaluation
             _loggingService.OnlyLogCriticalEvents = onlyLogCriticalEvents;
         }
 
-#if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Reset the toolsets using the provided toolset reader, used by unit tests
         /// </summary>
@@ -1737,7 +1736,6 @@ namespace Microsoft.Build.Evaluation
         {
             InitializeToolsetCollection(configReader:configurationReaderForTestsOnly);
         }
-#endif
 
 #if FEATURE_WIN32_REGISTRY
         /// <summary>
@@ -1757,9 +1755,7 @@ namespace Microsoft.Build.Evaluation
 #if FEATURE_WIN32_REGISTRY
                 ToolsetRegistryReader registryReader = null,
 #endif
-#if FEATURE_SYSTEM_CONFIGURATION
                 ToolsetConfigurationReader configReader = null
-#endif
                 )
         {
             _toolsets = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
@@ -1769,9 +1765,7 @@ namespace Microsoft.Build.Evaluation
 #if FEATURE_WIN32_REGISTRY
                     registryReader,
 #endif
-#if FEATURE_SYSTEM_CONFIGURATION
                     configReader,
-#endif
                     EnvironmentProperties, _globalProperties, ToolsetLocations);
 
             _toolsetsVersion++;
