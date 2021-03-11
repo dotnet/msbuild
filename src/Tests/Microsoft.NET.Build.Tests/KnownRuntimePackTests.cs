@@ -133,20 +133,5 @@ namespace Microsoft.NET.Build.Tests
                 itemGroup.Add(item);
             });
         }
-
-       [WindowsOnlyFact]
-        public void ItCantPublishArm64Wpf()
-        {
-            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
-
-            var newCommand = new DotnetCommand(Log, "new", "wpf", "--no-restore");
-            newCommand.WorkingDirectory = testDirectory;
-            newCommand.Execute().Should().Pass();
-
-            new PublishCommand(Log, testDirectory)
-                .Execute("/p:RuntimeIdentifier=win-arm64")
-                .Should()
-                .Fail();
-        }
     }
 }
