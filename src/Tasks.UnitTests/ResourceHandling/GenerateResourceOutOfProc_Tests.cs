@@ -1942,7 +1942,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.Execute();
 
                 // "cannot read state file (opening for read/write)"
-                Utilities.AssertLogContains(t, "MSB3088");
+                Utilities.AssertLogContains(t, "Could not read state file");
                 // "cannot write state file (opening for read/write)"
                 Utilities.AssertLogContains(t, "MSB3101");
             }
